@@ -255,6 +255,12 @@ public abstract class Utils {
                 .collect(toMap(key -> key, key -> decay(map.get(key), gamma)));
     }
 
+    public static <T> T getArg(Object args, String name, T defaultValue) {
+        if (args instanceof JSONObject) return getArg((JSONObject) args, name, defaultValue);
+        else if (args instanceof String[]) return getArg((String[]) args, name, defaultValue);
+        else throw new IllegalArgumentException("Unknown args type " + args.getClass());
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
@@ -277,6 +283,27 @@ public abstract class Utils {
                 return (T) Boolean.valueOf(rawString);
             } else if (defaultValue instanceof String) {
                 return (T) rawString;
+            } else {
+                throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
+            }
+        }
+        return defaultValue;
+    }
+
+    public static <T> T getArg(JSONObject args, String name, T defaultValue) {
+        if (args.containsKey(name)) {
+            Object rawObject = args.get(name);
+            if (defaultValue instanceof Enum) {
+                T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
+                for (T o : constants) {
+                    if (o.toString().equals(rawObject))
+                        return o;
+                }
+            } else if (defaultValue instanceof Integer) {
+                Integer number = (int)(long) rawObject;
+                return (T) number;
+            } else if (defaultValue instanceof Double || defaultValue instanceof Boolean || defaultValue instanceof String) {
+                return (T) rawObject;
             } else {
                 throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
             }
@@ -310,6 +337,7 @@ public abstract class Utils {
             allData.add(data.clone());
             return;
         }
+        if (allData.size() > 1000) return; // don't let the list get too big (1 million combinations is a lot!)
 
         for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
             data[index] = arr[i];

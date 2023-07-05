@@ -1,28 +1,28 @@
 package games.stratego.components;
 
+import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.components.GridBoard;
 import core.components.Token;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
 import games.stratego.actions.AttackMove;
-import games.stratego.actions.Move;
 import games.stratego.actions.NormalMove;
-import utilities.Distance;
+import utilities.Vector2D;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Piece extends Token {
 
-    protected int[] position;
+    protected Vector2D position;
     protected final PieceType pieceType;
     protected final Alliance alliance;
     private boolean pieceKnown;
 
-    private final static int[] MOVE_VECTOR = {-1, 1};
-
-    public Piece(PieceType pieceType, Alliance alliance, int[] position) {
+    public Piece(PieceType pieceType, Alliance alliance, Vector2D position) {
         super(pieceType.name());
         this.pieceType = pieceType;
         this.alliance = alliance;
@@ -30,7 +30,7 @@ public class Piece extends Token {
         this.pieceKnown = false;
     }
 
-    protected Piece(PieceType pieceType, Alliance alliance, int[] position, boolean known, int ID) {
+    protected Piece(PieceType pieceType, Alliance alliance, Vector2D position, boolean known, int ID) {
         super(pieceType.name(), ID);
         this.pieceType = pieceType;
         this.alliance = alliance;
@@ -38,12 +38,12 @@ public class Piece extends Token {
         this.pieceKnown = known;
     }
 
-    public int[] getPiecePosition(){
-        return new int[] {position[0], position[1]};
+    public Vector2D getPiecePosition(){
+        return position;
     }
 
-    public void setPiecePosition(int[] coordinate){
-        this.position = coordinate.clone();
+    public void setPiecePosition(Vector2D coordinate){
+        this.position = coordinate.copy();
     }
 
     public int getPieceRank(){
@@ -66,76 +66,73 @@ public class Piece extends Token {
         this.pieceKnown = bool;
     }
 
-    public Collection<Move> calculateMoves(StrategoGameState gs) {
+    public List<AbstractAction> calculateMoves(StrategoGameState gs, ActionSpace actionSpace) {
 
         GridBoard<Piece> board = gs.getGridBoard();
         StrategoParams params = (StrategoParams) gs.getGameParameters();
 
-        List<Move> moves = new ArrayList<>();
+        List<AbstractAction> moves = new ArrayList<>();
 
         if (!getPieceType().isMovable()){
             return moves;
         }
 
-        if (pieceType == PieceType.SCOUT){
-            for (int move : MOVE_VECTOR){  // positive or negative
-                for (int i =0; i<2; i++){  // horizontal and vertical
-                    int[] newPos = position.clone();
+        int maxTravel = params.moveSpeed;
+        if (pieceType == PieceType.SCOUT) maxTravel = params.gridSize;
 
-                    while(true){
-                        newPos[i] += move;
-
-                        if (params.isTileValid(newPos[0],newPos[1])){
-                            if (addMove(board, params, moves, newPos)) {
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
-        } else {
-            for(int move : MOVE_VECTOR){  // positive or negative
-                for (int i=0; i<2; i++){  // horizontal or vertical
-                    for (int j = 1; j <= params.moveSpeed; j++) {  // according to movement speed
-                        int[] newPos = position.clone();
-                        newPos[i] += move * j;
-
-                        if (params.isTileValid(newPos[0], newPos[1])) {
-                            if (addMove(board, params, moves, newPos)) break;
-                        }
-                    }
+        for (Vector2D.Direction dir: Vector2D.Direction.values4()) {
+            for (int j = 1; j <= maxTravel; j++) {
+                Vector2D dirCustom = dir.vector2D.mult(j);
+                Vector2D newPos = position.copy();
+                newPos = newPos.add(dirCustom);
+                Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
+                if (params.isTileValid(newPos.getX(), newPos.getY())  // Must be walkable tile
+                        && (pieceAtTile == null // Ok if empty tile, we can move there
+                        || pieceAtTile.getPieceAlliance() != alliance)) {  // Ok if enemy piece at tile, we attack
+                    addMove(board, moves, newPos, dirCustom, actionSpace);
+                } else {
+                    // No more valid moves in this direction
+                    break;
                 }
             }
         }
+
         return moves;
     }
 
-    private boolean addMove(GridBoard<Piece> board, StrategoParams params, List<Move> moves, int[] newPos) {
-        Piece pieceAtTile = board.getElement(newPos[0], newPos[1]);
+    private void addMove(GridBoard<Piece> board, List<AbstractAction> moves, Vector2D newPos,
+                            Vector2D dir, ActionSpace actionSpace) {
+        Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
         if (pieceAtTile == null) {
-            moves.add(new NormalMove(getComponentID(), newPos));
+            // Just move
+            if (actionSpace.context == ActionSpace.Context.Dependent) {
+                // Dependent
+                moves.add(new NormalMove(position, dir));
+            } else {
+                // Independent, default
+                moves.add(new NormalMove(getComponentID(), newPos));
+            }
         } else {
-            if (Distance.manhattan_distance(position, newPos) <= params.attackRange &&
-                    alliance != pieceAtTile.getPieceAlliance()) {
+            // Attack
+            if (actionSpace.context == ActionSpace.Context.Dependent) {
+                // Dependent
+                moves.add(new AttackMove(position, newPos));
+            } else {
+                // Independent, default
                 moves.add(new AttackMove(getComponentID(), pieceAtTile.getComponentID()));
             }
-            // Reached another piece and cannot occupy same square or jump over, finish
-            return true;
         }
-        return false;
     }
 
     @Override
     public Piece copy() {
-        Piece copy = new Piece(pieceType, alliance, position.clone(), pieceKnown, componentID);
+        Piece copy = new Piece(pieceType, alliance, position.copy(), pieceKnown, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
     public Piece partialCopy(PieceType hiddenPieceType){
-        Piece copy = new Piece(hiddenPieceType, alliance, position.clone(), false, componentID);
+        Piece copy = new Piece(hiddenPieceType, alliance, position.copy(), false, componentID);
         copyComponentTo(copy);
         return copy;
     }
@@ -143,17 +140,15 @@ public class Piece extends Token {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Piece)) return false;
         if (!super.equals(o)) return false;
         Piece piece = (Piece) o;
-        return pieceKnown == piece.pieceKnown && Arrays.equals(position, piece.position) && pieceType == piece.pieceType && alliance == piece.alliance;
+        return pieceKnown == piece.pieceKnown && Objects.equals(position, piece.position) && pieceType == piece.pieceType && alliance == piece.alliance;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), pieceType, alliance, pieceKnown);
-        result = 31 * result + Arrays.hashCode(position);
-        return result;
+        return Objects.hash(super.hashCode(), position, pieceType, alliance, pieceKnown);
     }
 
     @Override

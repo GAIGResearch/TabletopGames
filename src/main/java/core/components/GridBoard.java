@@ -140,6 +140,10 @@ public class GridBoard<T extends Component> extends Component implements ICompon
             return false;
     }
 
+    public boolean setElement(Vector2D pos, T value){
+        return setElement(pos.getX(), pos.getY(), value);
+    }
+
     /**
      * Retrieves the element at position (x, y).
      *
@@ -151,6 +155,10 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         if (x >= 0 && x < width && y >= 0 && y < height)
             return (T)grid[y][x];
         return null;
+    }
+
+    public T getElement(Vector2D pos) {
+        return getElement(pos.getX(), pos.getY());
     }
 
     /**

@@ -36,9 +36,9 @@ public class TableSawDataProcessor implements IDataProcessor {
         System.out.println(dts.data);
     }
 
-    private HashMap<String, List<String>> getSummarisedData(DataTableSaw dts)
+    private Map<String, List<Table>> getSummarisedData(DataTableSaw dts)
     {
-        HashMap<String, List<String>> summarisedData;
+        Map<String, List<Table>> summarisedData;
         if (dts.metric.getGamesCompleted() < dts.data.column(0).size()) {
             summarisedData = summariseDataProgression(dts.metric, dts.data);
         } else {
@@ -51,19 +51,20 @@ public class TableSawDataProcessor implements IDataProcessor {
     @Override
     public void processSummaryToConsole(IDataLogger logger) {
         DataTableSaw dts = (DataTableSaw) logger;
-        HashMap<String, List<String>> summarisedData = getSummarisedData(dts);
+        Map<String, List<Table>> summarisedData = getSummarisedData(dts);
 
-        for (String columnSummary : summarisedData.keySet()) {
+        for (Map.Entry<String, List<Table>> e: summarisedData.entrySet()) {
             System.out.println();
-            for(String summaryLines : summarisedData.get(columnSummary))
-                System.out.println(summaryLines);
+            for (Table t: e.getValue()) {
+                System.out.println(t + "\n");
+            }
         }
     }
 
     @Override
     public void processSummaryToFile(IDataLogger logger, String folderName) {
         DataTableSaw dts = (DataTableSaw) logger;
-        HashMap<String, List<String>> summarisedData = getSummarisedData(dts);
+        Map<String, List<Table>> summarisedData = getSummarisedData(dts);
 
         File summaryFolder = new File(folderName + "/summaries");
         boolean success = true;
@@ -75,17 +76,14 @@ public class TableSawDataProcessor implements IDataProcessor {
             success = summaryFolderMetric.mkdir();
         }
 
-        if (success) for (String columnSummary : summarisedData.keySet()) {
-            try {
-                FileWriter fw = new FileWriter(summaryFolderMetric + "/"  + columnSummary + ".txt");
-                for(String summaryLines : summarisedData.get(columnSummary))
-                    fw.write(summaryLines + "\n");
-                fw.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        if (success) {
+            for (String columnSummary : summarisedData.keySet()) {
+                List<Table> tables = summarisedData.get(columnSummary);
+                for (Table t: tables) {
+                    t.write().csv(summaryFolderMetric + "/" + t.name() + ".csv");
+                }
             }
         }
-
     }
 
     @Override
@@ -123,19 +121,22 @@ public class TableSawDataProcessor implements IDataProcessor {
      * @return a mapping from column name to list of strings, each summarising a column of data,
      * or other customized summary.
      */
-    protected HashMap<String, List<String>> summariseData(AbstractMetric metric, Table rawData) {
-        HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
+    protected Map<String, List<Table>> summariseData(AbstractMetric metric, Table rawData) {
+        Map<String, List<Table>>  allDataSummaries = new HashMap<>();
         for (Column<?> c : rawData.columns()) {
             Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
             Column<?> column = filteredData.column(c.name());
             if (metric.getColumnNames().contains(column.name())) {
-                List<String> summary = new ArrayList<>();
+                Table summary;
                 if (column instanceof StringColumn) {
-                    summary.add(filteredData.name() + ": " + ((StringColumn) column).countByCategory() + "\n");
+//                    summary.add(filteredData.name() + ": " + ((StringColumn) column).countByCategory() + "\n");
+                    summary = ((StringColumn) column).countByCategory();
                 } else {
-                    summary.add(filteredData.name() + ": " + column.summary() + "\n");
+//                    summary.add(filteredData.name() + ": " + column.summary() + "\n");
+                    summary = column.summary();
                 }
-                allDataSummaries.put(column.name(), summary);
+                summary.setName(filteredData.name() + "_" + column.name());
+                allDataSummaries.put(column.name(), Collections.singletonList(summary));
             }
         }
         return allDataSummaries;
@@ -149,19 +150,21 @@ public class TableSawDataProcessor implements IDataProcessor {
      *  - one showing statistics overall for each categorical value (mean, std, min, max etc.)
      * @return - a list of strings, each summarising a column of data, or other customized summary.
      */
-    protected HashMap<String, List<String>> summariseDataProgression(AbstractMetric metric, Table rawData) {
+    protected Map<String, List<Table>> summariseDataProgression(AbstractMetric metric, Table rawData) {
         int nGames;
-        HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
+        Map<String, List<Table>> allDataSummaries = new HashMap<>();
 
         for (Column<?> c : rawData.columns()) {
             if (metric.getColumnNames().contains(c.name())) {
 
                 Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
                 Column<?> column = filteredData.column(c.name());
+                if (column.isEmpty()) continue;
+
                 Object[] gameIds = filteredData.column("GameID").unique().asObjectArray();
                 nGames = gameIds.length;
 
-                List<String> summary = new ArrayList<>();
+                List<Table> summary = new ArrayList<>();
                 if (column instanceof StringColumn) {
                     // Create counts of each category per game
                     Table[] tablesPerGame = new Table[nGames];
@@ -199,11 +202,16 @@ public class TableSawDataProcessor implements IDataProcessor {
                         }
                     }
 
+                    if (summaryTable.isEmpty()) {
+//                        System.out.println("Empty summary table for " + column.name());
+                        continue;
+                    }
+
                     // Make a print table with detail counts per game, transposed for more compact printing
                     Table printTable = summaryTable.transpose(true,false);
                     printTable.column(0).setName(column.name() + " \\ Game #");
                     // Add table to the summary to print
-                    summary.add(printTable + "\n");
+                    summary.add(printTable);
 
                     // Make a print table with summary stats over all game
                     // Taking the summary of the first category as start table. All have 2 columns, measure and value.
@@ -219,10 +227,12 @@ public class TableSawDataProcessor implements IDataProcessor {
                         statsTable.addColumns(dc);
                     }
                     // Add table to the summary to print
-                    summary.add(statsTable.transpose(true, true).sortDescendingOn("Mean") + "\n");
+                    summary.add(statsTable.transpose(true, true).sortDescendingOn("Mean"));
                 } else {
                     // This is the same as summariseData for numerical data
-                    summary.add(filteredData.name() + ": " + column.summary() + "\n");
+                    Table sum = column.summary();
+                    sum.setName(filteredData.name() + "_" + column.name());
+                    summary.add(sum);
                 }
 
                 allDataSummaries.put(column.name(), summary);
@@ -325,8 +335,8 @@ public class TableSawDataProcessor implements IDataProcessor {
                     // Create box plots from the counts
                     Layout layout = Layout.builder().title(data.name())
                             .height(600).width(800)
-                            .yAxis(Axis.builder().title("Count").build())
-                            .xAxis(Axis.builder().title(column.name()).build())
+                            .yAxis(Axis.builder().title("Count").range(0, 30).build())  //  TODO hard-coded range
+                            .xAxis(Axis.builder().title(column.name()).categoryOrder(Axis.CategoryOrder.CATEGORY_ASCENDING).build())
                             .build();
                     BoxTrace trace = BoxTrace.builder(countsPerGame.categoricalColumn("Category"), countsPerGame.nCol("Count"))
                             .build();
@@ -372,7 +382,11 @@ public class TableSawDataProcessor implements IDataProcessor {
                     // Make a bar plot from the categorical count
                     Table t2 = ((StringColumn)column).countByCategory();
 //                    t2 = t2.sortDescendingOn(t2.column(1).name()); //todo this sorts the table, but not the plot when we build it.
-                    Layout layout = Layout.builder().title(filteredData.name()).yAxis(Axis.builder().title(column.name()).build()).build();
+                    Layout layout = Layout.builder()
+                            .title(filteredData.name())
+                            .yAxis(Axis.builder().title(column.name()).build())
+                            .xAxis(Axis.builder().categoryOrder(Axis.CategoryOrder.TRACE).build())
+                            .build();
                     BarTrace trace = BarTrace.builder(t2.categoricalColumn(0), t2.numberColumn(1))
                             .build();
                     figures.put(column.name(), new Figure(layout, trace));

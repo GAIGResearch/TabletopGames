@@ -88,7 +88,7 @@ public class FileStatsLogger implements IStatisticLogger {
             } else {
                 data.keySet().forEach(s -> {
                             if (!allKeys.contains(s)) {
-                                System.out.println("Unknown key in FileStatsLogger : " + s);
+//                                System.out.println("Unknown key in FileStatsLogger : " + s);
                             }
                         }
                 );
