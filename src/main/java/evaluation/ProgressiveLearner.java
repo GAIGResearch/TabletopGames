@@ -226,7 +226,7 @@ public class ProgressiveLearner {
         List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
 
         RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, SELF_PLAY, matchups,
-                matchups, System.currentTimeMillis(), params);
+                matchups, System.currentTimeMillis(), params, "", "");
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
@@ -236,7 +236,7 @@ public class ProgressiveLearner {
         dataFilesByIteration[iter] = fileName;
         listener.setLogger(new FileStatsLogger(fileName, "\t", false));
         tournament.setListeners(Collections.singletonList(listener));
-        tournament.runTournament();
+        tournament.run();
 
         if (verbose) {
             for (int i = 0; i < agentsToPlay.size(); i++) {
