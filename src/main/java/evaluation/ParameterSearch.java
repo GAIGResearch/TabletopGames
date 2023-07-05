@@ -262,9 +262,9 @@ public class ParameterSearch {
             for (int i = 0; i < players.size(); i++) {
                 players.get(i).setName(Arrays.toString(winnerSettings.get(i)));
             }
-            RandomRRTournament tournament = new RandomRRTournament(players, game, nPlayers, NO_SELF_PLAY, tournamentGames, 0, seed, gameParams);
+            RandomRRTournament tournament = new RandomRRTournament(players, game, nPlayers, NO_SELF_PLAY, tournamentGames, 0, seed, gameParams, "", "");
             tournament.verbose = false;
-            tournament.runTournament();
+            tournament.run();
             // create a new list of results in descending order of score
             IntToDoubleFunction cmp = evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
             List<Integer> agentsInOrder = IntStream.range(0, players.size())

@@ -10,6 +10,7 @@ import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
+import games.loveletter.actions.deep.PlayCardDeep;
 import games.loveletter.cards.LoveLetterCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -278,11 +279,13 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 
                 int k = 0;
                 for (AbstractAction action : actions) {
-                    PlayCard pc = (PlayCard) action;
-                    if (pc.getCardType() == hCard.cardType  && (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx)) {
-                        actionButtons[k].setVisible(true);
-                        actionButtons[k].setButtonAction(action, action.toString());
-                        k++;
+                    if (action instanceof PlayCard) {
+                        PlayCard pc = (PlayCard) action;
+                        if (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx) {
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k].setButtonAction(action, action.toString());
+                            k++;
+                        }
                     }
                 }
                 for (int i = k; i < actionButtons.length; i++) {

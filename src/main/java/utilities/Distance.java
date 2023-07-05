@@ -60,6 +60,9 @@ public class Distance {
         }
         return ret;
     }
+    public static double manhattan_distance(Vector2D x, Vector2D y) {
+        return Math.abs(x.getX()-y.getX()) + Math.abs(x.getY()-y.getY());
+    }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff

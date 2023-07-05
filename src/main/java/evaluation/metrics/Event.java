@@ -1,10 +1,16 @@
 package evaluation.metrics;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.LogEvent;
+import core.interfaces.IGameEvent;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Event
 {
-    public enum GameEvent {
+    public enum GameEvent implements IGameEvent {
         ABOUT_TO_START(true), GAME_OVER(true),
         ROUND_OVER(false), TURN_OVER(false),
         ACTION_CHOSEN(false),
@@ -23,16 +29,21 @@ public class Event
         public boolean isOncePerGame() {
             return oncePerGame;
         }
+
+        @Override
+        public Set<IGameEvent> getValues() {
+            return new HashSet<>(Arrays.asList(GameEvent.values()));
+        }
     }
 
     private Event() {}
 
-    public GameEvent type;
+    public IGameEvent type;
     public AbstractGameState state;
     public AbstractAction action;
     public int playerID;
 
-    public static Event createEvent(GameEvent type,
+    public static Event createEvent(IGameEvent type,
                                     AbstractGameState gameState,
                                     AbstractAction action,
                                     int playerID)
@@ -45,22 +56,22 @@ public class Event
         return e;
     }
 
-    public static Event createEvent(GameEvent type)
+    public static Event createEvent(IGameEvent type)
     {
         return Event.createEvent(type, null, null, -1);
     }
 
-    public static Event createEvent(GameEvent type, AbstractGameState state)
+    public static Event createEvent(IGameEvent type, AbstractGameState state)
     {
         return Event.createEvent(type, state, null, -1);
     }
 
-    public static Event createEvent(GameEvent type, AbstractGameState state, AbstractAction action)
+    public static Event createEvent(IGameEvent type, AbstractGameState state, LogEvent action)
     {
         return Event.createEvent(type, state, action, -1);
     }
 
-    public static Event createEvent(GameEvent type, AbstractGameState state, int playerID)
+    public static Event createEvent(IGameEvent type, AbstractGameState state, int playerID)
     {
         return Event.createEvent(type, state, null, playerID);
     }

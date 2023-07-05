@@ -171,7 +171,7 @@ public class CoreGameLoopTests {
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state).stream()
                     .filter(a -> !(a instanceof PlaceMonk) || ((PlaceMonk) a).destination != MEADOW).collect(toList());
-            fm.next(state, rnd._getAction(state, available));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         assertEquals(0, state.monksIn(MEADOW, -1).size());
@@ -189,13 +189,13 @@ public class CoreGameLoopTests {
         fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have one monk at least in the CHAPEL, so that we can stop before Housekeeping
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
-            fm.next(state, rnd._getAction(state, available));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, -1).size() > 1);
         // This should leave us with one monk left in the Dormitory
 
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
-            fm.next(state, rnd._getAction(state, available));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (!state.monksIn(LIBRARY, -1).isEmpty()  || !state.monksIn(GATEHOUSE, -1).isEmpty());
         // This should leave us with just the CHAPEL to process, and that has no mechanism to gain Resources
         // so we can now track what resources we have at the end of Spring
@@ -209,7 +209,7 @@ public class CoreGameLoopTests {
         // Now advance into Autumn (no Summer in year 1)
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
-            fm.next(state, rnd._getAction(state, available));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.getSeason() != AUTUMN);
 
         List<Map<Resource, Integer>> summerResources = new ArrayList<>();

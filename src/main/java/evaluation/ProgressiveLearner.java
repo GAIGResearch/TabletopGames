@@ -165,10 +165,10 @@ public class ProgressiveLearner {
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
-                finalMatchups, System.currentTimeMillis(), params);
+                finalMatchups, System.currentTimeMillis(), params, "", "");
 
         tournament.setListeners(new ArrayList<>());
-        tournament.runTournament();
+        tournament.run();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
             // if the basePlayer won, then meh!
@@ -215,7 +215,7 @@ public class ProgressiveLearner {
     private void runGamesWithAgents() {
         // Run!
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  SELF_PLAY, matchups,
-                matchups, System.currentTimeMillis(), params);
+                matchups, System.currentTimeMillis(), params, "", "");
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
@@ -225,7 +225,7 @@ public class ProgressiveLearner {
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
         tournament.setListeners(Collections.singletonList(dataTracker));
-        tournament.runTournament();
+        tournament.run();
     }
 
     private void learnFromNewData() {

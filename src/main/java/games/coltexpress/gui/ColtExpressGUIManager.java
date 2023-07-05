@@ -133,7 +133,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);

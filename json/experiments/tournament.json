@@ -1,0 +1,13 @@
+{
+  "class" : "evaluation.tournaments.RoundRobinTournament",
+  "args" : [
+    [
+      "game=LoveLetter",
+      "selfPlay=false",
+      "players=data/experiments/actionspaces/all",
+      "nPlayers=2",
+      "matchups=1000",
+      "listener=data/metrics/loveletter.json"
+    ]
+  ]
+}

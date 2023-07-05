@@ -130,7 +130,7 @@ public class PuertoRicoGUI extends AbstractGUIManager {
         // Bottom panel: actions
         wrapper.add(top);
         wrapper.add(middle);
-        wrapper.add(createActionPanel(highlights.toArray(new IScreenHighlight[0]), width, 50, false, false, null));
+        wrapper.add(createActionPanel(highlights.toArray(new IScreenHighlight[0]), width, 50, false, false, null, null, null));
 
         // Action buttons / instructions styling
         for (ActionButton ab: actionButtons) {
