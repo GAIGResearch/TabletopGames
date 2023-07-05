@@ -2,7 +2,6 @@ package players.rl;
 
 import java.util.Arrays;
 
-import core.AbstractParameters;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import players.PlayerParameters;
@@ -58,7 +57,7 @@ public class RLParams extends PlayerParameters {
     }
 
     @Override
-    protected AbstractParameters _copy() {
+    protected RLParams _copy() {
         RLParams retValue = new RLParams(features, type, System.currentTimeMillis());
         retValue.epsilon = epsilon;
         return retValue;
