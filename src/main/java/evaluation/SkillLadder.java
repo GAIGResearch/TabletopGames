@@ -138,7 +138,7 @@ public class SkillLadder {
 
             long startTime = System.currentTimeMillis();
             RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
-            RRT.runTournament();
+            RRT.run();
             long endTime = System.currentTimeMillis();
             System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
                     (gamesPerIteration / nPlayers) * nPlayers, (endTime - startTime) / 60000,

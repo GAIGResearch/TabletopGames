@@ -20,12 +20,10 @@ public class RoundRobinTournament extends AbstractTournament {
     private final int gamesPerMatchUp;
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
-    double[] pointsPerPlayer;
-    double[] winsPerPlayer;
+    double[] pointsPerPlayer, winsPerPlayer;
     double[][] winsPerPlayerPerOpponent;
-    int[] nGamesPlayed;
+    int[] nGamesPlayed, gamesPerPlayer;
     int[][] nGamesPlayedPerOpponent;
-    protected final String destDir, finalDir;
     double[] pointsPerPlayerSquared;
     double[] rankPerPlayer;
     double[] rankPerPlayerSquared;
@@ -35,6 +33,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private int matchUpsRun;
     protected boolean randomGameParams;
     public final String name;
+    private int playersPerGame;
 
     protected long randomSeed = System.currentTimeMillis();
     private int[] gameSeeds;
@@ -207,10 +206,9 @@ public class RoundRobinTournament extends AbstractTournament {
 
 
         // Run the game N = gamesPerMatchUp times with these players
-        long currentSeed = game.getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < nGames; i++) {
             // Use the same seeds for all games in each matchup (if gameSeeds specified)
-            long currentSeed = gameSeeds == null ? games.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
+            long currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
             game.reset(matchUpPlayers, currentSeed);
 
             if (!listenersInitialized) {
