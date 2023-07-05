@@ -17,12 +17,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class StrategoGUIManager extends AbstractGUIManager implements IScreenHighlight {
 
     StrategoBoardView view;
 
-    public StrategoGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public StrategoGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
 
         if (game == null) return;
@@ -77,10 +78,10 @@ public class StrategoGUIManager extends AbstractGUIManager implements IScreenHig
                 int i = 1;
                 for (AbstractAction abstractAction : actions) {
                     Move action = (Move) abstractAction;
-                    if (action.from(gs)[0] == r1.x/defaultItemSize && action.from(gs)[1] == r1.y/defaultItemSize &&
-                        action.to(gs)[0] == r2.x/defaultItemSize && action.to(gs)[1] == r2.y/defaultItemSize ||
-                        action.from(gs)[0] == r2.x/defaultItemSize && action.from(gs)[1] == r2.y/defaultItemSize &&
-                        action.to(gs)[0] == r1.x/defaultItemSize && action.to(gs)[1] == r1.y/defaultItemSize) {
+                    if (action.from(gs).getX() == r1.x/defaultItemSize && action.from(gs).getY() == r1.y/defaultItemSize &&
+                        action.to(gs).getX() == r2.x/defaultItemSize && action.to(gs).getY() == r2.y/defaultItemSize ||
+                        action.from(gs).getX() == r2.x/defaultItemSize && action.from(gs).getY() == r2.y/defaultItemSize &&
+                        action.to(gs).getX() == r1.x/defaultItemSize && action.to(gs).getY() == r1.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
                         actionButtons[0].setButtonAction(action, action.getPOString(gs));
                         activated = true;

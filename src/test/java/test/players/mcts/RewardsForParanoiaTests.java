@@ -57,14 +57,11 @@ public class RewardsForParanoiaTests {
         AbstractGameState state = game.getGameState();
         AbstractForwardModel forwardModel = game.getForwardModel();
         do {
-            IStatisticLogger logger = new SummaryLogger();
-            mctsPlayer.setStatsLogger(logger);
 
             AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
                     ._getAction(state, forwardModel.computeAvailableActions(state));
 
             if (state.getCurrentPlayer() == 0) {
-                logger.processDataAndFinish();
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
                 List<SingleTreeNode> allNodes = mctsPlayer.getRoot(0).allNodesInTree();
                 List<SingleTreeNode> problemNodes = allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());

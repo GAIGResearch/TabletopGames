@@ -2,12 +2,15 @@ package evaluation.metrics;
 
 import core.Game;
 
+import java.util.Set;
+
 public interface IDataLogger
 {
     enum ReportType {
         RawData,
         Summary,
-        Plot
+        Plot,
+        RawDataPerEvent  // for grouping all metrics of the same event together in one table
     }
 
     enum ReportDestination {
@@ -26,7 +29,8 @@ public interface IDataLogger
      * Initialise the data logger with the metric and game. This method is called once before the game starts.
      * @param game Game that is being played
      */
-    void init(Game game);
+    void init(Game game, int nPlayersPerGame, Set<String> playerNames);
+
 
     /**
      * Add a piece of data to a specific column.
@@ -41,4 +45,7 @@ public interface IDataLogger
      */
     IDataProcessor getDefaultProcessor();
 
+    IDataLogger copy();
+    IDataLogger emptyCopy();
+    IDataLogger create();
 }

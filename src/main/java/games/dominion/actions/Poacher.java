@@ -47,7 +47,7 @@ public class Poacher extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (action instanceof DiscardCard && ((DiscardCard) action).player == player) {
             cardsDiscarded++;
         }

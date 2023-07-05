@@ -50,8 +50,9 @@ public class ReplaceComponents<T extends Component> extends DrawComponents {
     @Override
     public String getString(AbstractGameState gameState) {
         return "ReplaceComponents{" +
-                "playedCard=" + getCard(gameState).getComponentName() +
-                "drawFrom=" + gameState.getComponentById(deckDraw).getComponentName() +
+                "deckDraw=" + gameState.getComponentById(deckDraw).getComponentName() +
+                "deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
+                "drawFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
                 '}';
     }
 

@@ -3,7 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -97,6 +96,7 @@ public class SingleTreeNode {
                 retValue.opponentModels[p] = player.rolloutStrategy;
             else
                 retValue.opponentModels[p] = player.getOpponentModel(p);
+            retValue.opponentModels[p].getParameters().actionSpace = player.params.actionSpace;  // TODO makes sense?
         }
         // only root node maintains MAST statistics
         retValue.MASTStatistics = new ArrayList<>();
@@ -179,7 +179,9 @@ public class SingleTreeNode {
         // so check the MCTSParams as well
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer) {
-            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
+            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
+            //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
+//                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
@@ -205,7 +207,7 @@ public class SingleTreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    public void mctsSearch(IStatisticLogger statsLogger) {
+    public void mctsSearch() {
 
         // Variables for tracking time budget
         double avgTimeTaken;
@@ -265,10 +267,6 @@ public class SingleTreeNode {
                 stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
             }
         }
-
-        if (statsLogger != null) {
-            logTreeStatistics(statsLogger, numIters, elapsedTimer.elapsedMillis());
-        }
     }
 
     /**
@@ -316,38 +314,6 @@ public class SingleTreeNode {
             }
             root.MASTBackup(MASTActions, value);
         }
-    }
-
-    protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
-        Map<String, Object> stats = new LinkedHashMap<>();
-        TreeStatistics treeStats = new TreeStatistics(root);
-        stats.put("round", round);
-        stats.put("turn", turn);
-        stats.put("turnOwner", turnOwner);
-        stats.put("actingPlayer", decisionPlayer);
-        double[] visitProportions = Arrays.stream(actionVisits()).asDoubleStream().map(d -> d / nVisits).toArray();
-        stats.put("visitEntropy", entropyOf(visitProportions));
-        stats.put("iterations", numIters);
-        stats.put("fmCalls", fmCallsCount);
-        stats.put("copyCalls", copyCount);
-        stats.put("time", timeTaken);
-        stats.put("totalNodes", treeStats.totalNodes);
-        stats.put("leafNodes", treeStats.totalLeaves);
-        stats.put("terminalNodes", treeStats.totalTerminalNodes);
-        stats.put("maxDepth", treeStats.depthReached);
-        stats.put("nActionsRoot", children.size());
-        stats.put("nActionsTree", treeStats.meanActionsAtNode);
-        stats.put("maxActionsAtNode", treeStats.maxActionsAtNode);
-        OptionalInt maxVisits = Arrays.stream(actionVisits()).max();
-        stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
-        AbstractAction bestAction = bestAction();
-        stats.put("bestAction", bestAction);
-        stats.put("bestValue", this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction));
-        stats.put("normalisedBestValue", Utils.normalise(this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction), lowReward, highReward));
-        stats.put("lowReward", this.lowReward);
-        stats.put("highReward", this.highReward);
-        stats.put("rolloutActions", this.rolloutActionsTaken / numIters);
-        statsLogger.record(stats);
     }
 
     /**
@@ -557,13 +523,14 @@ public class SingleTreeNode {
      */
     protected void advanceToTurnOfPlayer(AbstractGameState gs, int id, boolean inRollout) {
         // For the moment we only have one opponent model - that of a random player
+        AbstractAction action = null;
         while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id) && !(inRollout && finishRollout(gs))) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
-            List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs);
+            List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpace);
             if (availableActions.isEmpty())
-                throw new AssertionError("Should always have at least one action possible...");
-            AbstractAction action = oppModel.getAction(gs, availableActions);
+                throw new AssertionError("Should always have at least one action possible..." + (action != null? " Last action: " + action : ""));
+            action = oppModel.getAction(gs, availableActions);
             if (inRollout) {
                 rolloutDepth++;
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
@@ -792,7 +759,9 @@ public class SingleTreeNode {
         }
         if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
             // in this case we exponentiate the regret to get the probability of taking this action
-            return Math.exp(regret / params.hedgeBoltzmann);
+            double v = Math.exp(regret / params.hedgeBoltzmann);
+            if (Double.isNaN(v))
+                throw new AssertionError("We have a non-number in Hedge somewhere");
         }
         return Math.max(0.0, regret);
     }
@@ -814,23 +783,7 @@ public class SingleTreeNode {
         }
 
         Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
-
-        // then we normalise to a pdf
-        actionToValueMap = Utils.normaliseMap(actionToValueMap);
-        // we then add on the exploration bonus
-        double exploreBonus = explore / actionToValueMap.size();
-        Map<AbstractAction, Double> probabilityOfSelection = actionToValueMap.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - explore) + exploreBonus));
-
-        // then we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
-        double cdfSample = rnd.nextDouble();
-        double cdf = 0.0;
-        for (AbstractAction action : probabilityOfSelection.keySet()) {
-            cdf += probabilityOfSelection.get(action);
-            if (cdf >= cdfSample)
-                return action;
-        }
-        throw new AssertionError("If we reach here, then something has gone wrong in the above code");
+        return Utils.sampleFrom(actionToValueMap, params.exploreEpsilon, rnd);
     }
 
     /**
@@ -856,11 +809,13 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
+            AbstractAction next = null;
             while (!finishRollout(rolloutState)) {
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
-                if (availableActions.isEmpty())
-                    throw new AssertionError("No actions available in rollout!");
-                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState, params.actionSpace);
+                if (availableActions.isEmpty()) {
+                    throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next.toString() : ""));
+                }
+                next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
@@ -1028,7 +983,7 @@ public class SingleTreeNode {
 
         if (bestAction == null) {
             if (nVisits == 1) {
-                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
+//                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
                 bestAction = children.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else
                 throw new AssertionError("Unexpected - no selection made.");

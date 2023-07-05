@@ -34,7 +34,7 @@ public class RandomTestPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions ) {
+    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         // Iterate through all actions available to gather statistics
         HashSet<AbstractGameState> states = new HashSet<>();
         states.add(gs.copy());

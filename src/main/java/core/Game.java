@@ -12,11 +12,12 @@ import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import games.dotsboxes.DBStateFeaturesReduced;
-import gui.*;
-import io.humble.video.*;
-import io.humble.video.awt.MediaPictureConverter;
-import io.humble.video.awt.MediaPictureConverterFactory;
-import players.human.*;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
+import players.human.ActionController;
+import players.human.HumanConsolePlayer;
+import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
@@ -25,16 +26,13 @@ import players.rl.resources.featureVectors.*;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static utilities.Utils.componentToImage;
 
 public class Game {
 
@@ -54,7 +52,8 @@ public class Game {
     private JFrame frame;
     // Timers for various function calls
     private double nextTime, copyTime, agentTime, actionComputeTime;
-    // Keeps track of action spaces for each game tick, pairs of (player ID, #actions)
+    // Keeps track of action spaces for each game tick, pairs of (player ID,
+    // #actions)
     private ArrayList<Pair<Integer, Integer>> actionSpaceSize;
     // Number of times an agent is asked for decisions
     private int nDecisions;
@@ -64,11 +63,6 @@ public class Game {
     private boolean debug = false;
     // Video recording
     private Rectangle areaBounds;
-    private MediaPictureConverter converter = null;
-    private MediaPacket packet;
-    private MediaPicture picture;
-    private Encoder encoder;
-    private Muxer muxer;
     private boolean recordingVideo = false;
     String fileName = "output.mp4";
     String formatName = "mp4";
@@ -77,14 +71,18 @@ public class Game {
     private int turnPause;
 
     /**
-     * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
-     * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
+     * Game constructor. Receives a list of players, a forward model and a game
+     * state. Sets unique and final
+     * IDs to all players in the game, and performs initialisation of the game state
+     * and forward model objects.
      *
      * @param players   - players taking part in this game.
      * @param realModel - forward model used to apply game rules.
-     * @param gameState - object used to track the state of the game in a moment in time.
+     * @param gameState - object used to track the state of the game in a moment in
+     *                  time.
      */
-    public Game(GameType type, List<AbstractPlayer> players, AbstractForwardModel realModel, AbstractGameState gameState) {
+    public Game(GameType type, List<AbstractPlayer> players, AbstractForwardModel realModel,
+            AbstractGameState gameState) {
         this.gameType = type;
         this.gameState = gameState;
         this.forwardModel = realModel;
@@ -96,7 +94,8 @@ public class Game {
      * Performs initialisation of the game state and forward model objects.
      *
      * @param model     - forward model used to apply game rules.
-     * @param gameState - object used to track the state of the game in a moment in time.
+     * @param gameState - object used to track the state of the game in a moment in
+     *                  time.
      */
     public Game(GameType type, AbstractForwardModel model, AbstractGameState gameState) {
         this.gameType = type;
@@ -111,17 +110,19 @@ public class Game {
      * @param gameToPlay          - game to play
      * @param players             - list of players for the game
      * @param seed                - random seed for the game
-     * @param randomizeParameters - if true, parameters are randomized for each run of each game (if possible).
+     * @param randomizeParameters - if true, parameters are randomized for each run
+     *                            of each game (if possible).
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
+            boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
             AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
-        } else game = gameToPlay.createGameInstance(players.size(), seed);
+        } else
+            game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             if (listeners != null)
                 listeners.forEach(game::addListener);
@@ -153,10 +154,10 @@ public class Game {
                 // Video recording setup
                 if (game.recordingVideo) {
                     game.areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
-                    game.setupVideoRecording(game.fileName, game.formatName, game.codecName, game.snapsPerSecond);
                 }
 
-                Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
+                Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS,
+                        event -> game.updateGUI(gui, frame));
                 guiUpdater.start();
 
                 game.run();
@@ -182,13 +183,16 @@ public class Game {
      * @param gamesToPlay         - list of games to play.
      * @param players             - list of players for the game.
      * @param nRepetitions        - number of repetitions of each game.
-     * @param seed                - random seed for all games. If null, a new random seed is used for each game.
-     * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
-     * @param detailedStatistics  - if true, detailed statistics are printed, otherwise just average of wins
+     * @param seed                - random seed for all games. If null, a new random
+     *                            seed is used for each game.
+     * @param randomizeParameters - if true, game parameters are randomized for each
+     *                            run of each game (if possible).
+     * @param detailedStatistics  - if true, detailed statistics are printed,
+     *                            otherwise just average of wins
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
-                               int nRepetitions, boolean randomizeParameters,
-                               boolean detailedStatistics, List<IGameListener> listeners, int turnPause) {
+            int nRepetitions, boolean randomizeParameters,
+            boolean detailedStatistics, List<IGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -207,7 +211,8 @@ public class Game {
             // Save win rate statistics over all repetitions of this game
             TAGNumericStatSummary[] statSummaries = new TAGNumericStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new TAGNumericStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
+                statSummaries[i] = new TAGNumericStatSummary(
+                        "{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -215,7 +220,8 @@ public class Game {
             int offset = 0;
             for (int i = 0; i < nRepetitions; i++) {
                 Long s = seed;
-                if (s == null) s = System.currentTimeMillis();
+                if (s == null)
+                    s = System.currentTimeMillis();
                 s += offset;
                 game = runOne(gt, null, players, s, randomizeParameters, listeners, null, turnPause);
                 if (game != null) {
@@ -234,7 +240,8 @@ public class Game {
                     if (detailedStatistics) {
                         System.out.println(statSummaries[i].toString());
                     } else {
-                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean() + " (n=" + statSummaries[i].n() + ")");
+                        System.out.println(statSummaries[i].name + ": " + statSummaries[i].mean() + " (n="
+                                + statSummaries[i].n() + ")");
                     }
 
                     // Record in overall statistics
@@ -256,17 +263,22 @@ public class Game {
     }
 
     /**
-     * Runs several games with a set of random seeds, one for each repetition of a game.
+     * Runs several games with a set of random seeds, one for each repetition of a
+     * game.
      *
      * @param gamesToPlay         - list of games to play.
      * @param players             - list of players for the game.
      * @param nRepetitions        - number of repetitions of each game.
-     * @param seeds               - random seeds array, one for each repetition of a game.
-     * @param ac                  - action controller for GUI interactions, null if playing without visuals.
-     * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
+     * @param seeds               - random seeds array, one for each repetition of a
+     *                            game.
+     * @param ac                  - action controller for GUI interactions, null if
+     *                            playing without visuals.
+     * @param randomizeParameters - if true, game parameters are randomized for each
+     *                            run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners, int turnPause) {
+            long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners,
+            int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -310,7 +322,8 @@ public class Game {
     }
 
     /**
-     * Records statistics of given game into the given StatSummary objects. Only WIN, LOSE or DRAW are valid results
+     * Records statistics of given game into the given StatSummary objects. Only
+     * WIN, LOSE or DRAW are valid results
      * recorded.
      *
      * @param statSummaries - object recording statistics
@@ -320,7 +333,8 @@ public class Game {
         int nPlayers = statSummaries.length;
         CoreConstants.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
-            if (results[p] == CoreConstants.GameResult.WIN_GAME || results[p] == CoreConstants.GameResult.LOSE_GAME || results[p] == CoreConstants.GameResult.DRAW_GAME) {
+            if (results[p] == CoreConstants.GameResult.WIN_GAME || results[p] == CoreConstants.GameResult.LOSE_GAME
+                    || results[p] == CoreConstants.GameResult.DRAW_GAME) {
                 statSummaries[p].add(results[p].value);
             }
         }
@@ -343,7 +357,6 @@ public class Game {
         if (gui != null) {
             gui.update(player, gameState, isHumanToMove());
             frame.repaint();
-            videoRecordFrame(frame);
         }
     }
 
@@ -352,11 +365,13 @@ public class Game {
     }
 
     /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
+     * Resets the game. Sets up the game state to the initial state as described by
+     * game rules, assigns players
      * and their IDs, and initialises all players.
      *
      * @param players       - new players for the game
-     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
+     * @param newRandomSeed - random seed is updated in the game parameters object
+     *                      and used throughout the game.
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
         gameState.reset(newRandomSeed);
@@ -366,7 +381,8 @@ public class Game {
         } else if (players.isEmpty()) {
             // keep existing players
         } else
-            throw new IllegalArgumentException("PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
+            throw new IllegalArgumentException(
+                    "PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
         int id = 0;
         if (this.players != null)
             for (AbstractPlayer player : this.players) {
@@ -425,28 +441,36 @@ public class Game {
                     // Meh.
                 }
                 int activePlayer = gameState.getCurrentPlayer();
-                if (debug) System.out.printf("Entered synchronized block in Game for player %s%n", activePlayer);
+                if (debug)
+                    System.out.printf("Entered synchronized block in Game for player %s%n", activePlayer);
 
                 AbstractPlayer currentPlayer = players.get(activePlayer);
 
-                // we check via a volatile boolean, otherwise GUI button presses do not trigger this
-                // as the JVM hoists pause and isHumanToMove() ouside the while loop on the basis that
+                // we check via a volatile boolean, otherwise GUI button presses do not trigger
+                // this
+                // as the JVM hoists pause and isHumanToMove() ouside the while loop on the
+                // basis that
                 // they cannot be changed in this thread....
-
 
                 /*
                  * The Game is responsible for tracking the players and the current game state
-                 * It is important that the Game never passes the main AbstractGameState to the individual players,
+                 * It is important that the Game never passes the main AbstractGameState to the
+                 * individual players,
                  * but instead always uses copy(playerId) to both:
                  * i) shuffle any hidden data they cannot see
-                 * ii) ensure that any changes the player makes to the game state do not affect the genuine game state
+                 * ii) ensure that any changes the player makes to the game state do not affect
+                 * the genuine game state
                  *
-                 * Players should never have access to the Game, or the main AbstractGameState, or to each other!
+                 * Players should never have access to the Game, or the main AbstractGameState,
+                 * or to each other!
                  */
 
-                // Get player to ask for actions next (This horrendous line is for backwards compatibility).
-                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder() instanceof ReactiveTurnOrder
-                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder()).getReactivePlayers().size() > 0);
+                // Get player to ask for actions next (This horrendous line is for backwards
+                // compatibility).
+                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder
+                        && ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder())
+                                .getReactivePlayers().size() > 0);
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
@@ -461,7 +485,8 @@ public class Game {
 
                 if (gameState.isNotTerminal()) {
 
-                    if (debug) System.out.printf("Invoking oneAction from Game for player %d%n", activePlayer);
+                    if (debug)
+                        System.out.printf("Invoking oneAction from Game for player %d%n", activePlayer);
                     oneAction();
 
                 } else {
@@ -474,7 +499,8 @@ public class Game {
                     }
                 }
 
-                if (debug) System.out.println("Exiting synchronized block in Game");
+                if (debug)
+                    System.out.println("Exiting synchronized block in Game");
             }
         }
         if (firstEnd) {
@@ -492,7 +518,8 @@ public class Game {
 
     public final AbstractAction oneAction() {
 
-        // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
+        // we pause before each action is taken if running with a delay (e.g. for video
+        // recording with random players)
         if (turnPause > 0)
             synchronized (this) {
                 try {
@@ -507,26 +534,42 @@ public class Game {
         if (!gameState.isNotTerminalForPlayer(activePlayer))
             throw new AssertionError("Player " + activePlayer + " is not allowed to move");
         AbstractPlayer currentPlayer = players.get(activePlayer);
-        if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
+        if (debug)
+            System.out.printf("Starting oneAction for player %s%n", activePlayer);
 
         // Get player observation, and time how long it takes
         double s = System.nanoTime();
-        // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
+        // copying the gamestate also copies the game parameters and resets the random
+        // seed (so agents cannot use this
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
         copyTime = (System.nanoTime() - s);
-  //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
+        // System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n",
+        // copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
         s = System.nanoTime();
-        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation,
+                currentPlayer.getParameters().actionSpace);
         if (observedActions.size() == 0) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
-            IExtendedSequence topOfStack = actionsInProgress.peek();
+            IExtendedSequence topOfStack = null;
+            AbstractAction lastAction = null;
+            if (actionsInProgress.size() > 0) {
+                topOfStack = actionsInProgress.peek();
+            }
+            if (gameState.getHistory().size() > 1) {
+                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
+            }
             throw new AssertionError("No actions available for player " + activePlayer
-                    + ". Last action: " + gameState.getHistory().get(gameState.getHistory().size() - 1)
+                    + (lastAction != null
+                            ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")"
+                            : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")");
+                    + (topOfStack != null
+                            ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")"
+                            : ""));
+
         }
         actionComputeTime = (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
@@ -542,28 +585,36 @@ public class Game {
         // Start the timer for this decision
         gameState.playerTimer[activePlayer].resume();
 
-        // Either ask player which action to use or, in case no actions are available, report the updated observation
+        // Either ask player which action to use or, in case no actions are available,
+        // report the updated observation
         AbstractAction action = null;
         if (observedActions.size() > 0) {
-            if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer || currentPlayer instanceof HumanConsolePlayer) || observedActions.get(0) instanceof DoNothing)) {
+            if (observedActions.size() == 1
+                    && (!(currentPlayer instanceof HumanGUIPlayer || currentPlayer instanceof HumanConsolePlayer)
+                            || observedActions.get(0) instanceof DoNothing)) {
                 // Can only do 1 action, so do it.
                 action = observedActions.get(0);
                 currentPlayer.registerUpdatedObservation(observation);
             } else {
                 // Get action from player, and time it
                 s = System.nanoTime();
-                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
+                if (debug)
+                    System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
-                agentTime = (System.nanoTime() - s);
+
+                agentTime += (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
-                System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                System.out.printf("Action played that was not in the list of available actions: %s%n",
+                        action.getString(gameState));
                 action = null;
             }
-            // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
+            // We publish an ACTION_CHOSEN message before we implement the action, so that
+            // observers can record the state that led to the decision
             AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction)));
+            listeners.forEach(l -> l
+                    .onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, activePlayer)));
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -590,12 +641,15 @@ public class Game {
 
         lastPlayer = activePlayer;
 
-        // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
+        // We publish an ACTION_TAKEN message once the action is taken so that observers
+        // can record the result of the action
         // (such as the next player)
         AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy())));
+        listeners.forEach(l -> l.onEvent(
+                Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy(), activePlayer)));
 
-        if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
+        if (debug)
+            System.out.printf("Finishing oneAction for player %s%n", activePlayer);
         return action;
     }
 
@@ -608,14 +662,15 @@ public class Game {
             ((IPrintable) gameState).printToConsole();
         }
 
-        // Timers should average
-        terminateTimers();
-
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
         if (gameState.coreGameParameters.recordEventHistory) {
             gameState.recordHistory(Event.GameEvent.GAME_OVER.name());
+            for (int i = 0; i < gameState.getNPlayers(); i++) {
+                gameState.recordHistory(String.format("Player %d finishes at position %d with score: %.0f", i,
+                        gameState.getOrdinalPosition(i), gameState.getGameScore(i)));
+            }
         }
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
@@ -625,26 +680,6 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-
-        // Close video recording writer
-        terminateVideoRecording();
-
-        // Inform listeners of game end
-//        for (GameListener gameTracker : listeners) {
-//            gameTracker.allGamesFinished();
-//        }
-    }
-
-    /**
-     * Timers average at the end of the game.
-     */
-    private void terminateTimers() {
-//        nextTime /= gameState.getGameTick();
-//        copyTime /= gameState.getGameTick();
-//        actionComputeTime /= gameState.getGameTick();
-//        agentTime /= nDecisions;
-//        if (nActionsPerTurnCount > 0)
-//            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**
@@ -666,7 +701,8 @@ public class Game {
     }
 
     /**
-     * Retrieves agent timer value, i.e. how long the AI players took to make decisions in this game.
+     * Retrieves agent timer value, i.e. how long the AI players took to make
+     * decisions in this game.
      *
      * @return - agent time
      */
@@ -675,17 +711,20 @@ public class Game {
     }
 
     /**
-     * Retrieves the copy timer value, i.e. how long the game state took to produce player observations in this game.
+     * Retrieves the copy timer value, i.e. how long the game state took to produce
+     * player observations in this game.
      *
      * @return - copy time
      */
     public double getCopyTime() {
-      //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
+        // System.out.printf("Average copy time was %.3f microseconsds%n", copyTime /
+        // 1e3);
         return copyTime;
     }
 
     /**
-     * Retrieves the next timer value, i.e. how long the forward model took to advance the game state with an action.
+     * Retrieves the next timer value, i.e. how long the forward model took to
+     * advance the game state with an action.
      *
      * @return - next time
      */
@@ -694,7 +733,8 @@ public class Game {
     }
 
     /**
-     * Retrieves the action compute timer value, i.e. how long the forward model took to compute the available actions
+     * Retrieves the action compute timer value, i.e. how long the forward model
+     * took to compute the available actions
      * in a game state.
      *
      * @return - action compute time
@@ -731,7 +771,8 @@ public class Game {
     }
 
     /**
-     * Retrieves a list with one entry per game tick, each a pair (player ID, # actions)
+     * Retrieves a list with one entry per game tick, each a pair (player ID, #
+     * actions)
      *
      * @return - list of action space sizes
      */
@@ -755,6 +796,7 @@ public class Game {
             listener.setGame(this);
         }
     }
+
     public List<IGameListener> getListeners() {
         return listeners;
     }
@@ -806,121 +848,9 @@ public class Game {
         return gameType.toString();
     }
 
-    public void setupVideoRecording(String filename, String formatname,
-                                    String codecname, int snapsPerSecond) {
-        if (recordingVideo) {
-            try {
-                final Rational framerate = Rational.make(1, snapsPerSecond);
-
-                // First we create a muxer using the passed in filename and formatname if given.
-                muxer = Muxer.make(filename, null, formatname);
-
-                /* Now, we need to decide what type of codec to use to encode video. Muxers
-                 * have limited sets of codecs they can use. We're going to pick the first one that
-                 * works, or if the user supplied a codec name, we're going to force-fit that
-                 * in instead.
-                 */
-                final MuxerFormat format = muxer.getFormat();
-                final Codec codec;
-                if (codecname != null) {
-                    codec = Codec.findEncodingCodecByName(codecname);
-                } else {
-                    codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
-                }
-
-                // Now that we know what codec, we need to create an encoder
-                encoder = Encoder.make(codec);
-
-                /*
-                 * Video encoders need to know at a minimum:
-                 *   width
-                 *   height
-                 *   pixel format
-                 * Some also need to know frame-rate (older codecs that had a fixed rate at which video files could
-                 * be written needed this). There are many other options you can set on an encoder, but we're
-                 * going to keep it simpler here.
-                 */
-                encoder.setWidth(areaBounds.width);
-                encoder.setHeight(areaBounds.height);
-                // We are going to use 420P as the format because that's what most video formats these days use
-                final PixelFormat.Type pixelformat = PixelFormat.Type.PIX_FMT_YUV420P;
-                encoder.setPixelFormat(pixelformat);
-                encoder.setTimeBase(framerate);
-
-                /* An annoynace of some formats is that they need global (rather than per-stream) headers,
-                 * and in that case you have to tell the encoder. And since Encoders are decoupled from
-                 * Muxers, there is no easy way to know this beyond
-                 */
-                if (format.getFlag(MuxerFormat.Flag.GLOBAL_HEADER))
-                    encoder.setFlag(Encoder.Flag.FLAG_GLOBAL_HEADER, true);
-
-                // Open the encoder.
-                encoder.open(null, null);
-                // Add this stream to the muxer.
-                muxer.addNewStream(encoder);
-                // And open the muxer for business.
-                muxer.open(null, null);
-
-                /* Next, we need to make sure we have the right MediaPicture format objects
-                 * to encode data with. Java (and most on-screen graphics programs) use some
-                 * variant of Red-Green-Blue image encoding (a.k.a. RGB or BGR). Most video
-                 * codecs use some variant of YCrCb formatting. So we're going to have to
-                 * convert. To do that, we'll introduce a MediaPictureConverter object later. object.
-                 */
-                picture = MediaPicture.make(
-                        encoder.getWidth(),
-                        encoder.getHeight(),
-                        pixelformat);
-                picture.setTimeBase(framerate);
-
-                /* Now begin our main loop of taking screen snaps.
-                 * We're going to encode and then write out any resulting packets. */
-                packet = MediaPacket.make();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void videoRecordFrame(JFrame gui) {
-        if (recordingVideo) {
-            // Make the screen capture && convert image to TYPE_3BYTE_BGR
-            final BufferedImage screen = componentToImage(gui, BufferedImage.TYPE_3BYTE_BGR);
-
-            // This is LIKELY not in YUV420P format, so we're going to convert it using some handy utilities.
-            if (converter == null)
-                converter = MediaPictureConverterFactory.createConverter(screen, picture);
-            converter.toPicture(picture, screen, gameState.getGameTick());
-
-            do {
-                encoder.encode(packet, picture);
-                if (packet.isComplete())
-                    muxer.write(packet, false);
-            } while (packet.isComplete());
-        }
-    }
-
-    private void terminateVideoRecording() {
-        if (recordingVideo) {
-            /* Encoders, like decoders, sometimes cache pictures so it can do the right key-frame optimizations.
-             * So, they need to be flushed as well. As with the decoders, the convention is to pass in a null
-             * input until the output is not complete.
-             */
-            do {
-                encoder.encode(packet, null);
-                if (packet.isComplete())
-                    muxer.write(packet, false);
-            } while (packet.isComplete());
-
-            // Finally, let's clean up after ourselves.
-            muxer.close();
-        }
-    }
-
-
-
     /**
-     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * The recommended way to run a game is via evaluations.Frontend, however that
+     * may not work on
      * some games for some screen sizes due to the vagaries of Java Swing...
      * <p>
      * Test class used to run a specific game. The user must specify:
@@ -954,27 +884,36 @@ public class Game {
         // "/Users/qmul/Documents/msc-project/TabletopGames/src/main/java/players/rl/resources/qWeights/DotsAndBoxes/Tabular/DABReduced_n=10000.json"));
         // players.add(new HumanGUIPlayer(ac));
         // players.add(new RLPlayer(p1, "2023-07-03_23-41-07_n=100000.json"));
-//        players.add(new MCTSPlayer());
-//        MCTSParams params1 = new MCTSParams();
-//        players.add(new MCTSPlayer(params1));
-//        players.add(new OSLAPlayer());
-// players.add(new RMHCPlayer());
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
+        // players.add(new MCTSPlayer());
 
-        /* Game parameter configuration. Set to null to ignore and use default parameters */
+        // MCTSParams params = new MCTSParams();
+        // players.add(new MCTSPlayer(params));
+
+        // players.add(new OSLAPlayer());
+        // players.add(new RMHCPlayer());
+        // players.add(new HumanGUIPlayer(ac));
+        // players.add(new HumanConsolePlayer());
+        // players.add(new FirstActionPlayer());
+
+        /*
+         * Game parameter configuration. Set to null to ignore and use default
+         * parameters
+         */
         String gameParams = null;
 
         /* Run! */
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+        // ArrayList<GameType> games = new
+        // ArrayList<>(Arrays.asList(GameType.values()));
+        // games.add(GameType.Stratego);
+        // games.remove(LoveLetter);
+        // games.remove(Pandemic);
+        // games.remove(TicTacToe);
+        // runMany(games, players, 100L, 100, false, true, null, turnPause);
+        // runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false,
+        // false, null, turnPause);
     }
 
 }

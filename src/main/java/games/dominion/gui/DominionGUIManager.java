@@ -10,6 +10,7 @@ import players.human.ActionController;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import java.util.Set;
 
 public class DominionGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -30,9 +31,8 @@ public class DominionGUIManager extends AbstractGUIManager {
     DominionDeckView trashPile;
     DominionMarketView marketView;
 
-    public DominionGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public DominionGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
-        this.humanId = humanID;
         // Now we set up the GUI
 
         if (game != null && game.getGameState() != null) {
@@ -97,7 +97,7 @@ public class DominionGUIManager extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dominion", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
 
             // Add all views to frame
             parent.setLayout(new BorderLayout());

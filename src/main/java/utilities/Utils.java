@@ -173,6 +173,41 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
+    /**
+     *        we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
+     *        exploreEpsilon is the percentage chance of taking a random action
+     * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
+     * @param rnd
+     * @return
+     * @param <T>
+     */
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, Random rnd) {
+        Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
+        // we then add on the exploration bonus
+        if (exploreEpsilon > 0.0) {
+            double exploreBonus = exploreEpsilon / normalisedMap.size();
+            normalisedMap = normalisedMap.entrySet().stream().collect(
+                    toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - exploreEpsilon) + exploreBonus));
+        }
+        double cdfSample = rnd.nextDouble();
+        double cdf = 0.0;
+        for (T item : normalisedMap.keySet()) {
+            cdf += normalisedMap.get(item);
+            if (cdf >= cdfSample)
+                return item;
+        }
+        throw new AssertionError("Should never get here!");
+    }
+
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, Random rnd) {
+        double temp = Math.max(temperature, 0.001);
+        // first we find the largest value, and subtract that from all values
+        double maxValue = itemsAndValues.values().stream().mapToDouble(d -> d).max().orElse(0.0);
+        Map<T, Double> tempModified = itemsAndValues.entrySet().stream().collect(
+                toMap(Map.Entry::getKey, e -> Math.exp((e.getValue() - maxValue) / temp)));
+        return sampleFrom(tempModified, exploreEpsilon, rnd);
+    }
+
     public static double entropyOf(double... data) {
         double sum = Arrays.stream(data).sum();
         double[] normalised = Arrays.stream(data).map(d -> d / sum).toArray();
@@ -181,7 +216,8 @@ public abstract class Utils {
 
     public static <T> Map<T, Double> normaliseMap(Map<T, ? extends Number> input) {
         int lessThanZero = (int) input.values().stream().filter(n -> n.doubleValue() < 0.0).count();
-        if (lessThanZero > 0) throw new AssertionError("Probability has negative values!");
+        if (lessThanZero > 0)
+            throw new AssertionError("Probability has negative values!");
         double sum = input.values().stream().mapToDouble(Number::doubleValue).sum();
         if (sum == 0.0) {
             // the sum is zero, with no negative values. Hence all values are zero, and we return a uniform distribution.
@@ -219,6 +255,12 @@ public abstract class Utils {
                 .collect(toMap(key -> key, key -> decay(map.get(key), gamma)));
     }
 
+    public static <T> T getArg(Object args, String name, T defaultValue) {
+        if (args instanceof JSONObject) return getArg((JSONObject) args, name, defaultValue);
+        else if (args instanceof String[]) return getArg((String[]) args, name, defaultValue);
+        else throw new IllegalArgumentException("Unknown args type " + args.getClass());
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
@@ -241,6 +283,27 @@ public abstract class Utils {
                 return (T) Boolean.valueOf(rawString);
             } else if (defaultValue instanceof String) {
                 return (T) rawString;
+            } else {
+                throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
+            }
+        }
+        return defaultValue;
+    }
+
+    public static <T> T getArg(JSONObject args, String name, T defaultValue) {
+        if (args.containsKey(name)) {
+            Object rawObject = args.get(name);
+            if (defaultValue instanceof Enum) {
+                T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
+                for (T o : constants) {
+                    if (o.toString().equals(rawObject))
+                        return o;
+                }
+            } else if (defaultValue instanceof Integer) {
+                Integer number = (int)(long) rawObject;
+                return (T) number;
+            } else if (defaultValue instanceof Double || defaultValue instanceof Boolean || defaultValue instanceof String) {
+                return (T) rawObject;
             } else {
                 throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
             }
@@ -274,6 +337,7 @@ public abstract class Utils {
             allData.add(data.clone());
             return;
         }
+        if (allData.size() > 1000) return; // don't let the list get too big (1 million combinations is a lot!)
 
         for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
             data[index] = arr[i];
@@ -602,6 +666,18 @@ public abstract class Utils {
             r.append(w).append(" ");
         }
         return r.toString().trim();
+    }
+
+    public static String getNumberSuffix(final int n) {
+        if (n >= 11 && n <= 13) {
+            return "th";
+        }
+        switch (n % 10) {
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
+            default: return "th";
+        }
     }
 
 }

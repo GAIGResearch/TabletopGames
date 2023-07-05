@@ -10,6 +10,7 @@ import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
+import games.loveletter.actions.deep.PlayCardDeep;
 import games.loveletter.cards.LoveLetterCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -25,6 +26,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.Set;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -53,7 +55,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     LoveLetterGameState llgs;
     LoveLetterForwardModel fm;
 
-    public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -277,11 +279,13 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 
                 int k = 0;
                 for (AbstractAction action : actions) {
-                    PlayCard pc = (PlayCard) action;
-                    if (pc.getCardType() == hCard.cardType  && (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx)) {
-                        actionButtons[k].setVisible(true);
-                        actionButtons[k].setButtonAction(action, action.toString());
-                        k++;
+                    if (action instanceof PlayCard) {
+                        PlayCard pc = (PlayCard) action;
+                        if (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx) {
+                            actionButtons[k].setVisible(true);
+                            actionButtons[k].setButtonAction(action, action.toString());
+                            k++;
+                        }
                     }
                 }
                 for (int i = k; i < actionButtons.length; i++) {
@@ -315,7 +319,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanPlayerId
+                        || humanPlayerId.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(llgs, front);
 

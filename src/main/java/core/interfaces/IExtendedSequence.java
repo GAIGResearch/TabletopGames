@@ -2,6 +2,7 @@ package core.interfaces;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public interface IExtendedSequence {
      * @return the list of possible actions for the currentPlayer
      */
     List<AbstractAction> _computeAvailableActions(AbstractGameState state);
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
+        return _computeAvailableActions(state);
+    }
 
     /**
      * TurnOrder delegates to this from getCurrentPlayer() if this Extended Sequence is currently active.
@@ -49,7 +53,7 @@ public interface IExtendedSequence {
      * @param state The current game state
      * @param action The action about to be taken (so the game state has not yet been updated with it)
      */
-    void registerActionTaken(AbstractGameState state, AbstractAction action);
+    void _afterAction(AbstractGameState state, AbstractAction action);
 
     /**
      * Return true if this extended sequence has now completed and there is nothing left to do.

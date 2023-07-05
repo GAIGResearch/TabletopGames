@@ -169,24 +169,6 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>GameReport</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.GameReport</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>GameReport</finalName>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <id>ParameterSearch</id>
                         <configuration>
                             <descriptorRefs>

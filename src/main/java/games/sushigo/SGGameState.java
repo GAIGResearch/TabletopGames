@@ -3,9 +3,12 @@ package games.sushigo;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import org.json.simple.JSONObject;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -190,7 +193,7 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    public double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId, int tier) {
         // Tie-break is number of puddings
         return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
     }
@@ -274,4 +277,5 @@ public class SGGameState extends AbstractGameState {
                 Arrays.hashCode(playedCardTypesAllGame) + "|" +
                 super.hashCode() + "|";
     }
+
 }

@@ -4,16 +4,19 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
+import core.interfaces.ITreeActionSpace;
+import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends StandardForwardModel {
+public class TicTacToeForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -23,21 +26,30 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(TicTacToeConstants.emptyCell));
     }
 
+
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
+
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
 
-        if (gameState.isNotTerminal())
+        if (gameState.isNotTerminal()){
+            // Normal action space
             for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
                 for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell))
+                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
                         actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                    }
                 }
             }
+        }
+
         return actions;
-    }
+        }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
@@ -145,5 +157,34 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         int winningPlayer = TicTacToeConstants.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, winningPlayer);
         gameState.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1 - winningPlayer);
+    }
+
+    public ActionTreeNode initActionTree(AbstractGameState gameState){
+        int gridSize = ((TicTacToeGameState) gameState).gridBoard.getWidth();
+        ActionTreeNode root = new ActionTreeNode(0, "root");
+        for (int x = 0; x < gridSize; x++) {
+            ActionTreeNode xNode = root.addChild(0, "X" + x);
+            for (int y = 0; y < gridSize; y++) {
+                xNode.addChild(0, "Y" + y);
+            }
+        }
+        return root;
+    }
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState){
+        root.resetTree();
+
+        TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
+        int player = tttgs.getCurrentPlayer();
+        for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+            ActionTreeNode xNode = root.findChildrenByName("X" + x);
+            for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
+                ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
+                if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
+                    xNode.setValue(1); // make sure that we set parent available
+                    yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                }
+            }
+        }
+        return root;
     }
 }
