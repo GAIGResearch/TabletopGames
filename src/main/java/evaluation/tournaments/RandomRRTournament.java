@@ -25,8 +25,8 @@ public class RandomRRTournament extends RoundRobinTournament {
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                               TournamentMode tournamentMode, int totalMatchUps, int reportPeriod, long seed,
-                              AbstractParameters gameParams, String finalDir, String destDir) {
-        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams, finalDir, destDir);
+                              AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
@@ -48,16 +48,7 @@ public class RandomRRTournament extends RoundRobinTournament {
             evaluateMatchUp(matchup);
             if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1) {
                 reportResults();
-
-                StringBuilder timeDir = new StringBuilder("interim_" + game.getGameType().name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
-                for (IGameListener listener : listeners) {
-                    listener.setOutputDirectory(destDir, timeDir.toString());
-                    listener.report();
-                }
             }
-        }
-        for (IGameListener listener : listeners) {
-            listener.setOutputDirectory(destDir, finalDir);
         }
     }
 

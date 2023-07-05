@@ -195,9 +195,9 @@ public class RunGames implements IGameRunner {
                 AbstractParameters params = config.get(gameParams).equals("") ? null : AbstractParameters.createFromFile(gameType, (String) config.get(gameParams));
 
                 RoundRobinTournament tournament = config.get(mode).equals("exhaustive") || tournamentMode == ONE_VS_ALL ?
-                        new RoundRobinTournament(agents, gameType, playerCount, (int)config.get(matchups), tournamentMode, params, (String) config.get(destDir), timeDir) :
+                        new RoundRobinTournament(agents, gameType, playerCount, (int)config.get(matchups), tournamentMode, params) :
                         new RandomRRTournament(agents, gameType, playerCount, tournamentMode, (int)config.get(matchups), (int)config.get(reportPeriod),
-                                System.currentTimeMillis(), params, (String) config.get(destDir), timeDir);
+                                System.currentTimeMillis(), params);
 
                 // Add listeners
                 //noinspection unchecked

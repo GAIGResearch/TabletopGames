@@ -165,7 +165,7 @@ public class ProgressiveLearner {
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
-                finalMatchups, System.currentTimeMillis(), params, "", "");
+                finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
         tournament.run();
@@ -215,7 +215,7 @@ public class ProgressiveLearner {
     private void runGamesWithAgents() {
         // Run!
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  SELF_PLAY, matchups,
-                matchups, System.currentTimeMillis(), params, "", "");
+                matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
