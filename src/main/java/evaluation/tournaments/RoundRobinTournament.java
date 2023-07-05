@@ -33,7 +33,6 @@ public class RoundRobinTournament extends AbstractTournament {
     private int matchUpsRun;
     protected boolean randomGameParams;
     public final String name;
-    private int playersPerGame;
 
     protected long randomSeed = System.currentTimeMillis();
     private int[] gameSeeds;
@@ -50,7 +49,7 @@ public class RoundRobinTournament extends AbstractTournament {
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, TournamentMode mode, AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, gameParams);
+        super(mode, agents, gameToPlay, playersPerGame, gameParams);
         if (mode == NO_SELF_PLAY && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or allow self-play.");
@@ -120,7 +119,6 @@ public class RoundRobinTournament extends AbstractTournament {
         if (tournamentMode == ONE_VS_ALL) {
             // In this case agents.get(0) must always play
             Random rnd = new Random(System.currentTimeMillis());
-            int nPlayers = playersPerGame;
             List<Integer> randomAgentOrder = new ArrayList<>(this.agentIDs);
             randomAgentOrder.remove(Integer.valueOf(0));
             for (int p = 0; p < nPlayers; p++) {
@@ -156,7 +154,7 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         } else {
             // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
-            if (matchUp.size() == playersPerGame) {
+            if (matchUp.size() == nPlayers) {
                 evaluateMatchUp(matchUp);
             } else {
                 for (Integer agentID : this.agentIDs) {
