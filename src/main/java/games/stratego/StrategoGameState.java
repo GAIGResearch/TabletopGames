@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.stratego.components.Piece;
 
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoGameState extends AbstractGameState {
+public class StrategoGameState extends AbstractGameState{
     GridBoard<Piece> gridBoard;
 
     /**
@@ -59,9 +60,9 @@ public class StrategoGameState extends AbstractGameState {
                     int typeIdx = random.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));
                 } else{
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.copy());
                 }
             }
         }
@@ -119,4 +120,6 @@ public class StrategoGameState extends AbstractGameState {
     public void printToConsole() {
         System.out.println(gridBoard.toString());
     }
+
+
 }

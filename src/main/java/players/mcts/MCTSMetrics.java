@@ -1,7 +1,7 @@
 package players.mcts;
 
 import core.AbstractPlayer;
-import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
@@ -50,12 +50,12 @@ public class MCTSMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Collections.singletonList(Event.GameEvent.ACTION_CHOSEN));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> cols = new HashMap<>();
             cols.put("PlayerType", String.class);
             cols.put("Iterations", Integer.class);
@@ -106,12 +106,12 @@ public class MCTSMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Collections.singletonList(Event.GameEvent.ACTION_CHOSEN));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> cols = new HashMap<>();
             cols.put("PlayerType", String.class);
             cols.put("MaxDepth", Double.class);

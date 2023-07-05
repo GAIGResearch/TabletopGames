@@ -9,22 +9,24 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
-import gui.*;
-import players.human.*;
-import players.mcts.MCTSPlayer;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
+import players.human.ActionController;
+import players.human.HumanConsolePlayer;
+import players.human.HumanGUIPlayer;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static utilities.Utils.componentToImage;
 
 public class Game {
 
@@ -502,14 +504,21 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
-        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.size() == 0) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
-            IExtendedSequence topOfStack = actionsInProgress.peek();
+            IExtendedSequence topOfStack = null;
+            AbstractAction lastAction = null;
+            if (actionsInProgress.size() > 0) {
+                topOfStack = actionsInProgress.peek();
+            }
+            if (gameState.getHistory().size() > 1) {
+                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
+            }
             throw new AssertionError("No actions available for player " + activePlayer
-                    + ". Last action: " + gameState.getHistory().get(gameState.getHistory().size() - 1)
+                    + (lastAction != null? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")");
+                    + (topOfStack != null? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
 
         }
         actionComputeTime = (System.nanoTime() - s);
@@ -538,7 +547,8 @@ public class Game {
                 s = System.nanoTime();
                 if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
-                agentTime = (System.nanoTime() - s);
+
+                agentTime += (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -547,7 +557,7 @@ public class Game {
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction)));
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, activePlayer)));
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -577,7 +587,7 @@ public class Game {
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
         AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy())));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy(), activePlayer)));
 
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
         return action;
@@ -591,9 +601,6 @@ public class Game {
         if (gameState instanceof IPrintable && gameState.coreGameParameters.verbose) {
             ((IPrintable) gameState).printToConsole();
         }
-
-        // Timers should average
-        terminateTimers();
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
@@ -612,22 +619,6 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-        // Inform listeners of game end
-//        for (GameListener gameTracker : listeners) {
-//            gameTracker.allGamesFinished();
-//        }
-    }
-
-    /**
-     * Timers average at the end of the game.
-     */
-    private void terminateTimers() {
-//        nextTime /= gameState.getGameTick();
-//        copyTime /= gameState.getGameTick();
-//        actionComputeTime /= gameState.getGameTick();
-//        agentTime /= nDecisions;
-//        if (nActionsPerTurnCount > 0)
-//            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**
@@ -802,7 +793,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Sirius");
+        String gameType = Utils.getArg(args, "game", "Stratego");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -810,16 +801,13 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
 
 //        MCTSParams params = new MCTSParams();
-//        params.heuristic = new VioletHeuristics();
 //        players.add(new MCTSPlayer(params));
 
-        players.add(new MCTSPlayer());
-
-//        MCTSParams params1 = new MCTSParams();
-//        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
@@ -834,10 +822,11 @@ public class Game {
 
         /* Run multiple games */
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.add(GameType.Stratego);
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, false, null, turnPause);
+//        runMany(games, players, 100L, 100, false, true, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 

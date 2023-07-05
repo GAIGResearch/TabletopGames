@@ -1,6 +1,6 @@
 package games.dicemonastery.stats;
 
-import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
@@ -11,10 +11,7 @@ import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiFunction;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
@@ -23,12 +20,12 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 public class DiceMonasteryMetrics implements IMetricsCollection {
 
     public static class Timing extends AbstractMetric {
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Season", String.class);
                 put("Year", Integer.class);
@@ -54,12 +51,12 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return true;
         }
         
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Piety", Integer.class);
             }};
@@ -76,11 +73,11 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             else records.put("Location", s.getCurrentArea().name());
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Location", String.class);
             }};
@@ -100,11 +97,11 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             else records.put("Thing", "");
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Thing", String.class);
             }};
@@ -126,11 +123,11 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             else records.put("Value", 0);
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Value", Integer.class);
             }};
@@ -144,11 +141,11 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             records.put("ActionPointsLeft", s.getActionPointsLeft());
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("ActionPointsLeft", Integer.class);
             }};
@@ -162,12 +159,12 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             records.put("DM Turn", (s.getYear() - 1) * 4 + s.getSeason().ordinal() + 1);
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("DM Turn", Integer.class);
             }};
@@ -188,15 +185,15 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             }
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             HashMap<String, Class<?>> columns = new HashMap<>();
             for (DiceMonasteryConstants.ActionArea a : DiceMonasteryConstants.ActionArea.values()) {
-                for (int i = 0; i < game.getPlayers().size(); i++) {
+                for (int i = 0; i < nPlayersPerGame; i++) {
                     columns.put(a.name() + " - # Monks (Player " + i + ")", Integer.class);
                     columns.put(a.name() + " - # AP (Player " + i + ")", Double.class);
                     for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values())
@@ -232,14 +229,14 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return true;
         }
 
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
-            for (int i = 0; i < game.getPlayers().size(); i++) {
+            for (int i = 0; i < nPlayersPerGame; i++) {
                 for (String categ: allCategories.keySet()) {
                     columns.put(categ + " - Player " + i, Integer.class);
                 }

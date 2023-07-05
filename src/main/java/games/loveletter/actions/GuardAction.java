@@ -1,14 +1,9 @@
 package games.loveletter.actions;
 
-import core.AbstractGameState;
-import core.CoreConstants;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
@@ -16,12 +11,14 @@ import java.util.List;
  */
 public class GuardAction extends PlayCard implements IPrintable {
 
-    public GuardAction(int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect) {
-        super(LoveLetterCard.CardType.Guard, playerID, opponentID, cardtype, null, canExecuteEffect);
+    public GuardAction(int cardIdx, int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Guard, cardIdx, playerID, opponentID, cardtype, null, canExecuteEffect, discard);
     }
 
     @Override
     protected boolean _execute(LoveLetterGameState llgs) {
+        if (targetCardType == null) return false;
+
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
 
         // guess the opponent's card and remove the opponent from play if the guess was correct
@@ -36,37 +33,8 @@ public class GuardAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String _toString(){
-        return "Guard (" + playerID + " guess " + targetPlayer + " holds card " + targetCardType.name() + ")";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
-    }
-
-    @Override
     public boolean equals(Object o) {
         return o instanceof GuardAction && super.equals(o);
-    }
-
-    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
-        List<PlayCard> cardActions = new ArrayList<>();
-        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
-                continue;
-            for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
-                if (type != LoveLetterCard.CardType.Guard) {
-                    cardActions.add(new GuardAction(playerID, targetPlayer, type, true));
-                }
-        }
-        if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false));
-        return cardActions;
     }
 
     @Override

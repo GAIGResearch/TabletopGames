@@ -154,7 +154,7 @@ public class NTBEA {
             RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, gameParams);
             tournament.verbose = false;
             createListeners().forEach(tournament::addListener);
-            tournament.runTournament();
+            tournament.run();
             // create a new list of results in descending order of score
             IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
             List<Integer> agentsInOrder = IntStream.range(0, players.size())

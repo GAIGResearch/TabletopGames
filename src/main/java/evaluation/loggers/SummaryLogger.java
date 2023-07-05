@@ -189,7 +189,7 @@ public class SummaryLogger implements IStatisticLogger {
             String group = "Other";
             if (split.length == expectedColonChunks)
                 group = split[expectedColonChunks-1];
-            else 
+            else
                 group = split[split.length-1];
             if (!groupedData.containsKey(group))
                 groupedData.put(group, new HashMap<>());
@@ -200,7 +200,7 @@ public class SummaryLogger implements IStatisticLogger {
             String[] split2 = split[0].split("\\(");
             String metricName = split2[0];
             if(split.length > 2)
-                 metricName += ":" + split[1];
+                metricName += ":" + split[1];
 
             String params = "";
             if (split2.length == 2)

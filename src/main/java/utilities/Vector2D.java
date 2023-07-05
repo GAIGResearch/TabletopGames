@@ -63,4 +63,46 @@ public class Vector2D {
     public Vector2D add(Vector2D b) {
         return new Vector2D(x + b.x, y + b.y);
     }
+
+    public Vector2D mult(int j) {
+        return new Vector2D(x*j, y*j);
+    }
+
+    public Vector2D divide(int j) {
+        return new Vector2D(x/j, y/j);
+    }
+
+    public enum Direction {
+        NONE(new Vector2D()),
+        UP(new Vector2D(0, -1)),
+        DOWN(new Vector2D(0, 1)),
+        LEFT(new Vector2D(-1, 0)),
+        RIGHT(new Vector2D(1, 0)),
+        UPLEFT(new Vector2D(-1, -1)),
+        UPRIGHT(new Vector2D(1, -1)),
+        DOWNLEFT(new Vector2D(-1, 1)),
+        DOWNRIGHT(new Vector2D(1, 1));
+        public final Vector2D vector2D;
+        Direction(Vector2D vector2D) {
+            this.vector2D = vector2D;
+        }
+        public static Direction[] values4() {
+            return new Direction[]{UP, DOWN, LEFT, RIGHT};
+        }
+        public static Direction vecToDir(Vector2D vec) {
+            for (Direction d: values()) {
+                if (d.vector2D.equals(vec)) return d;
+            }
+            return null;
+        }
+        public static Pair<Direction, Integer> approxVecToDir(Vector2D vec) {
+            int mult = Math.max(Math.abs(vec.x), Math.abs(vec.y));
+            if (mult == 0) {
+                return new Pair<>(NONE, 0);
+            }
+            Direction d = vecToDir(vec.divide(mult));
+            if (d != null) return new Pair<>(d, mult);
+            return null;
+        }
+    }
 }

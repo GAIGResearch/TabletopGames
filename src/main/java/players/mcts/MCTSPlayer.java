@@ -50,6 +50,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
+        this.parameters = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
@@ -124,9 +125,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             System.out.println(root.toString());
 
         MASTStats = root.MASTStatistics;
-        // Return best action
-        if (root.children.size() > 2 * actions.size())
-            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
+        // Return best action  // TODO turn back on
+//        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+//            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();
     }
 

@@ -168,7 +168,7 @@ public class ProgressiveLearner {
                 finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
-        tournament.runTournament();
+        tournament.run();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
             // if the basePlayer won, then meh!
@@ -225,7 +225,7 @@ public class ProgressiveLearner {
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
         tournament.setListeners(Collections.singletonList(dataTracker));
-        tournament.runTournament();
+        tournament.run();
     }
 
     private void learnFromNewData() {

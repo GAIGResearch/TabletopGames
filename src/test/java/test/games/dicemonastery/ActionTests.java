@@ -46,7 +46,7 @@ public class ActionTests {
             do {
                 int player = state.getCurrentPlayer();
                 List<AbstractAction> availableActions = fm.computeAvailableActions(state);
-                AbstractAction chosen = rnd._getAction(state, availableActions);
+                AbstractAction chosen = rnd._getAction(state, fm.computeAvailableActions(state));
                 if (overrides.containsKey(player) && availableActions.contains(new PlaceMonk(player, overrides.get(player)))) {
                     chosen = new PlaceMonk(player, overrides.get(player));
                 }
@@ -1014,7 +1014,7 @@ public class ActionTests {
                 assertTrue(availableActions.stream().noneMatch(a -> a instanceof TakeToken));
             }
             // and take action at random
-            fm.next(state, rnd._getAction(state, availableActions));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         }
     }
 

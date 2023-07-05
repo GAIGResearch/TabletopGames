@@ -1,6 +1,7 @@
 package evaluation.metrics;
 
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 
 import java.util.*;
@@ -8,10 +9,10 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractMetric {
     // Data logger, wrapper around a library that logs data into a table
-    private IDataLogger dataLogger;
+    protected IDataLogger dataLogger;
 
     // Set of event types this metric listens to, to record data when they occur
-    private final Set<Event.GameEvent> eventTypes;
+    private final Set<IGameEvent> eventTypes;
 
     // Arguments for the metric, if any
     protected final String[] args;
@@ -58,7 +59,7 @@ public abstract class AbstractMetric {
     /**
      * @return set of game events this metric should record information for.
      */
-    public abstract Set<Event.GameEvent> getDefaultEventTypes();
+    public abstract Set<IGameEvent> getDefaultEventTypes();
 
     public void reset() {
         this.gamesCompleted = 0;
@@ -71,8 +72,8 @@ public abstract class AbstractMetric {
      *
      * @param game - game to initialize columns for
      */
-    public void init(Game game) {
-        dataLogger.init(game);
+    public void init(Game game, int nPlayers, Set<String> playerNames) {
+        dataLogger.init(game, nPlayers, playerNames);
     }
 
     /**
@@ -105,16 +106,16 @@ public abstract class AbstractMetric {
         }
     }
 
-
     /**
      * Return a list of columns that will be recorded for this metric. The string is the name of the column and
      * the class<?> is the type of data that will be recorded in that column.
      * !! If you want categorical data, make it a string column and use the string value, even if number
      *
-     * @param game - game to initialize columns for
+     * @param nPlayersPerGame
+     * @param playerNames
      * @return map of column names and types
      */
-    public abstract Map<String, Class<?>> getColumns(Game game);
+    public abstract Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames);
 
     /**
      * Returns a map of default column names and types. This will be included in all metrics unless overwritten by the metric subclass.
@@ -157,7 +158,7 @@ public abstract class AbstractMetric {
      *
      * @return set of events
      */
-    public Set<Event.GameEvent> getEventTypes() {
+    public Set<IGameEvent> getEventTypes() {
         return eventTypes;
     }
 
@@ -171,7 +172,8 @@ public abstract class AbstractMetric {
     /**
      * @return true if this metric listens to the given game event type, false otherwise.
      */
-    public final boolean listens(Event.GameEvent eventType) {
+    public final boolean listens(IGameEvent eventType)
+    {
         //by default, we listen to all types of events.
         if (eventTypes == null) return true;
         return eventTypes.contains(eventType);
@@ -193,7 +195,8 @@ public abstract class AbstractMetric {
      * @param reportTypes        - list of report types to produce
      * @param reportDestinations - list of report destinations to produce
      */
-    public void processFinishedGames(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations) {
+    public void report(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
+    {
         //DataProcessor with compatibility assertion:
         IDataProcessor dataProcessor = getDataProcessor();
         assert dataProcessor.getClass().isAssignableFrom(dataLogger.getDefaultProcessor().getClass()) :

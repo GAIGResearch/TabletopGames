@@ -1,7 +1,7 @@
 package players.rhea;
 
 import core.AbstractPlayer;
-import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
@@ -37,12 +37,12 @@ public class RHEAMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Collections.singletonList(Event.GameEvent.ACTION_CHOSEN));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> stats = new LinkedHashMap<>();
             stats.put("iterations", Integer.class);
             stats.put("fmCalls", Integer.class);
