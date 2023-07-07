@@ -52,7 +52,7 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
         // Do nothing here, we init specially
     }
 
-    public void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {
+    public void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup, boolean orderMatters) {
         // Create a data logger for this matchup
         // TODO this counts same matchup if same type of players are in, regardless of order
         // If order matters (E.G. to see first player advantage), then this should be adjusted
@@ -90,7 +90,7 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
                         " the Data Processor must extend the Data Logger's default processor.";
 
         for (Map.Entry<Set<AbstractPlayer>, IDataLogger> e: dataLoggers.entrySet()) {
-            String folder = folderName + "/" + e.getKey().toString();
+            String folder = folderName + File.separator + e.getKey().toString();
             // Make folder if it doesn't exist
             File f = new File(folder);
             boolean success = true;

@@ -86,7 +86,7 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println("Playing " + game.getGameType().name());
         LinkedList<Integer> matchUp = new LinkedList<>();
         createAndRunMatchUp(matchUp);
-        reportResults();
+       reportResults();
 
         for (IGameListener listener : listeners)
             listener.report();
@@ -194,6 +194,7 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(sb);
         }
 
+        // TODO : This needs to be done before all matchups
         Set<String> agentNames = new HashSet<>();
         for (AbstractPlayer agent : agents)
             agentNames.add(agent.toString());
@@ -201,7 +202,6 @@ public class RoundRobinTournament extends AbstractTournament {
             game.addListener(listener);
             listener.tournamentInit(game, nPlayers, agentNames, new HashSet<>(matchUpPlayers));
         }
-
 
         // Run the game N = gamesPerMatchUp times with these players
         for (int i = 0; i < nGames; i++) {

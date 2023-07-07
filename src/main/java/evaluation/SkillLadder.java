@@ -128,7 +128,7 @@ public class SkillLadder {
             agents.add(baseAgent);
             // for each iteration we run a round robin tournament
 
-            RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration / nPlayers,
+            RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration,
                     ONE_VS_ALL, params);
             RRT.verbose = false;
             for (String listenerClass : listenerClasses) {
@@ -144,7 +144,7 @@ public class SkillLadder {
             RRT.run();
             long endTime = System.currentTimeMillis();
             System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
-                    (gamesPerIteration / nPlayers) * nPlayers, (endTime - startTime) / 60000,
+                    gamesPerIteration, (endTime - startTime) / 60000,
                     newBudget,
                     RRT.getWinRate(0) * 100, RRT.getWinStdErr(0) * 100 * 2,
                     RRT.getOrdinalRank(0), RRT.getOrdinalStdErr(0) * 2,
