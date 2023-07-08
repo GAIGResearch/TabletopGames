@@ -15,6 +15,7 @@ import utilities.Pair;
 import java.io.File;
 import java.util.*;
 
+import static evaluation.RunArg.parseConfig;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
 import static utilities.Utils.getArg;
 
@@ -161,7 +162,7 @@ public class SkillLadder {
         int NTBEARunsBetweenRungs = 4;
         double NTBEABudgetOnTournament = 0.50; // the complement will be spent on NTBEA runs
 
-        NTBEAParameters ntbeaParameters = new NTBEAParameters(args, s -> s.replaceAll("-999", Integer.toString(agentBudget)));
+        NTBEAParameters ntbeaParameters = new NTBEAParameters(parseConfig(args, RunArg.Usage.ParameterSearch), s -> s.replaceAll("-999", Integer.toString(agentBudget)));
 
         ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + agentBudget + File.separator + "NTBEA";
         ntbeaParameters.repeats = NTBEARunsBetweenRungs;

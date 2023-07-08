@@ -1,6 +1,7 @@
 package evaluation.optimisation;
 
 import core.interfaces.ITunableParameters;
+import evaluation.RunArg;
 import org.json.simple.JSONObject;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -28,9 +30,9 @@ public class NTBEAParameters {
     public int tournamentGames;
     public int neighbourhoodSize;
     public String opponentDescriptor;
+    public long seed;
     public String evalMethod;
     public boolean useThreeTuples;
-    public long seed;
     public boolean verbose;
     public Mode mode;
     public String logFile;
@@ -39,31 +41,35 @@ public class NTBEAParameters {
     public ITPSearchSpace searchSpace;
 
 
-    public NTBEAParameters(String[] args) {
+    public NTBEAParameters(Map<RunArg, Object> args) {
         this(args, Function.identity());
     }
-    public NTBEAParameters(String[] args, Function<String, String> preprocessor) {
-        tuningGame = getArg(args, "tuneGame", false);
-        iterationsPerRun = getArg(args, "nGames", 1000);
-        repeats = getArg(args, "repeats", 10);
-        evalGames = getArg(args, "evalGame", iterationsPerRun / 5);
-        kExplore = getArg(args, "kExplore", 1.0);
-        tournamentGames = getArg(args, "tournamentGames", 0);
-        neighbourhoodSize = getArg(args, "neighbourhoodSize", 50);
-        opponentDescriptor = getArg(args, "opponent", "");
-        evalMethod = getArg(args, "evalMethod", "Win");
-        useThreeTuples = getArg(args, "useThreeTuples", false);
-        seed = getArg(args, "seed", System.currentTimeMillis());
-        verbose = getArg(args, "verbose", false);
-        mode = getArg(args, "mode", Mode.NTBEA);
-        logFile = getArg(args, "logFile", "NTBEA.log");
-        listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "").split("\\|")));
-        destDir = getArg(args, "destDir", "NTBEA");
+
+    public NTBEAParameters(Map<RunArg, Object> args, Function<String, String> preprocessor) {
+        tuningGame = (boolean) args.get(RunArg.tuneGame);
+        iterationsPerRun = (int) args.get(RunArg.iterations);
+        repeats = (int) args.get(RunArg.repeats);
+        evalGames = (int) args.get(RunArg.evalGames);
+        if (evalGames == 0) evalGames = iterationsPerRun / 5;
+        kExplore = (double) args.get(RunArg.kExplore);
+        tournamentGames = (int) args.get(RunArg.matchups);
+        neighbourhoodSize = (int) args.get(RunArg.neighbourhood);
+        opponentDescriptor = (String) args.get(RunArg.opponent);
+        evalMethod = (String) args.get(RunArg.evalMethod);
+        useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
+        verbose = (boolean) args.get(RunArg.verbose);
+        seed = (int) args.get(RunArg.seed);
+        mode = Mode.valueOf((String) args.get(RunArg.NTBEAmode));
+        logFile = (String) args.get(RunArg.output);
+        if (logFile.isEmpty()) logFile = "NTBEA.log";
+        listenerClasses = (List<String>) args.get(RunArg.listener);
+        destDir = (String) args.get(RunArg.destDir);
+        if (destDir.isEmpty()) destDir = "NTBEA";
         if (tuningGame && opponentDescriptor.equals("")) {
             throw new IllegalArgumentException("Must specify opponent descriptor when tuning a game");
         }
 
-        String searchSpaceFile = getArg(args, "searchSpace", "");
+        String searchSpaceFile =  (String) args.get(RunArg.searchSpace);
         boolean fileExists = (new File(searchSpaceFile)).exists();
         JSONObject json = null;
         try {
@@ -86,7 +92,7 @@ public class NTBEAParameters {
             searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "\nError loading ITunableParameters class in " + args[0]);
+            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "\nError loading ITunableParameters class in " + searchSpaceFile);
         }
     }
 

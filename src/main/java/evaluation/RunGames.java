@@ -154,7 +154,10 @@ public class RunGames implements IGameRunner {
 
     private void initialiseGamesAndPlayerCount() {
         String gameArg = config.get(RunArg.game).toString();
-        String nPlayersArg = config.get(RunArg.nPlayers).toString();
+        String playerRange = config.get(RunArg.playerRange).toString();
+        int np = (int) config.get(RunArg.nPlayers);
+        if (np > 0)
+            playerRange = String.valueOf(np);
         List<String> tempGames = new ArrayList<>(Arrays.asList(gameArg.split("\\|")));
         List<String> games = tempGames;
         if (tempGames.get(0).equals("all")) {
@@ -163,7 +166,7 @@ public class RunGames implements IGameRunner {
         }
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
-        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(nPlayersArg.split("\\|"))
+        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(playerRange.split("\\|"))
                 .map(str -> {
                     if (str.contains("-")) {
                         int hyphenIndex = str.indexOf("-");

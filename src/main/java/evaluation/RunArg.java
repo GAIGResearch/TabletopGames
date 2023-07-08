@@ -1,6 +1,7 @@
 package evaluation;
 
 import org.json.simple.JSONObject;
+import scala.concurrent.impl.FutureConvertersImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +15,9 @@ import static utilities.Utils.getArg;
 public enum RunArg {
 
 
+    NTBEAmode("Defaults to NTBEA. The other options are MultiNTBEA and CoopNTBEA. This last uses the same agent for all players.",
+            "NTBEA",
+            new Usage[]{Usage.ParameterSearch}),
     addTimeStamp("(Optional) If true (default is false), then the results will be written to a subdirectory of destDir.\n" +
             "\t This may be useful if you want to use the same destDir for multiple experiments.",
             false,
@@ -26,7 +30,16 @@ public enum RunArg {
             "\t If (and only if) this is being run for multiple games/player counts, then a subdirectory\n" +
             "\t will be created for each game, and then within that for  each player count combination.",
             "metrics/out",
-            new Usage[]{Usage.RunGames}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
+            0,
+            new Usage[]{Usage.ParameterSearch}),
+    evalMethod("Score|Ordinal|Heuristic|Win specifies what we are optimising (if not tuneGame). Defaults to Win.\n" +
+            "\tIf tuneGame, then instead the name of a IGameHeuristic class in the evaluation.heuristics package\n" +
+            "\tmust be provided, or the a json-format file that provides the requisite details. \n" +
+            "\tThe json-format file is needed if non-default settings for the IGameHeuristic are used.",
+            "Win",
+            new Usage[]{Usage.ParameterSearch}),
     focusPlayer("(Optional) A JSON file that defines the 'focus' of the tournament.\n" +
             "\t The 'focus' player will be present in every single game.\n" +
             "\t In this case 'matchups' defines the number of games to be run with the focusPlayer\n" +
@@ -38,21 +51,29 @@ public enum RunArg {
             "\t The default is 'all' to indicate that all games should be analysed.\n" +
             "\t Specifying all|-name1|-name2... will run all games except for name1, name2...",
             "all",
-            new Usage[]{Usage.RunGames}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     gameParams("(Optional) A JSON file from which the game parameters will be initialised.",
             "",
             new Usage[]{Usage.RunGames}),
+    iterations("The number of iterations of NTBEA to run (default is 1000)",
+            1000,
+            new Usage[]{Usage.ParameterSearch}),
+    kExplore("The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
+            "\tFor scores with larger ranges, we recommend scaling kExplore appropriately.",
+            1.0,
+            new Usage[]{Usage.ParameterSearch}),
     listener("The full class name of an IGameListener implementation. Or the location\n" +
             "\t of a json file from which a listener can be instantiated.\n" +
             "\t Defaults to evaluation.metrics.MetricsGameListener. \n" +
             "\t A pipe-delimited string can be provided to gather many types of statistics \n" +
             "\t from the same set of games.",
             "evaluation.listeners.MetricsGameListener",
-            new Usage[]{Usage.RunGames}),
-    matchups("The total number of matchups to run if mode=random...\n" +
-            "\t ...or the number of matchups to run per combination of players if mode=exhaustive",
+            new Usage[]{Usage.RunGames,Usage.ParameterSearch}),
+    matchups("The total number of matchups to run in a tournament if mode=random...\n" +
+            "\t...or the number of matchups to run per combination of players if mode=exhaustive\n" +
+            "\tfor NTBEA this will be used as a final tournament between the recommended agents from each run.",
             1,
-            new Usage[]{Usage.RunGames}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     metrics("(Optional) The full class name of an IMetricsCollection implementation. " +
             "\t The recommended usage is to include these in the JSON file that defines the listener,\n" +
             "\t but this option is here for quick and dirty tests.",
@@ -67,22 +88,35 @@ public enum RunArg {
             "\t If a focusPlayer is provided, then this is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
-    nPlayers("The total number of players in each game (the default is 'all') \n " +
+    nPlayers("The number of players in each game. Overrides playerRange.",
+            -1,
+            new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
+    neighbourhood("The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) ",
+            50,
+            new Usage[]{Usage.ParameterSearch}),
+    opponent("The json specification of the opponent to be used. \n" +
+            "\t If not specified, then a random player will be used.",
+            "random",
+            new Usage[]{Usage.ParameterSearch}),
+    output("(Optional) If specified, the summary results will be written to a file with this name.",
+            "",
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    playerDirectory("The directory containing agent JSON files for the competing Players\n" +
+            "\t If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.",
+            "",
+            new Usage[]{Usage.RunGames}),
+    playerRange("The total number of players in each game (the default is 'all') \n " +
             "\t A range can also be specified, for example 3-5. \n " +
             "\t Different player counts can be specified for each game in pipe-delimited format.\n" +
             "\t If 'all' is specified, then every possible playerCount for the game will be analysed.",
             "all",
             new Usage[]{Usage.RunGames}),
-    output("(Optional) If specified, the summary results will be written to a file with this name.",
-            "",
-            new Usage[]{Usage.RunGames}),
-    playerDirectory("The directory containing agent JSON files for the competing Players\n" +
-            "\t If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.",
-            "",
-            new Usage[]{Usage.RunGames}),
     randomGameParams("(Optional) If specified, parameters for the game will be randomized for each game, and printed before the run.",
             false,
             new Usage[]{Usage.RunGames}),
+    repeats("The number of times the whole process should be re-run, to find a single best recommendation ",
+            1,
+            new Usage[]{Usage.ParameterSearch}),
     reportPeriod("(Optional) For random mode execution only, after how many games played results are reported.\n" +
             "\t Defaults to the end of the tournament (-1)",
             -1,
@@ -90,13 +124,23 @@ public enum RunArg {
     searchSpace("The json-format file of the search space to use. No default.",
             "",
             new Usage[]{Usage.ParameterSearch}),
+    seed("(Optional) Random seed to use for process",
+            System.currentTimeMillis(),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     selfPlay("(Optional) If true, then multiple copies of the same agent can be in one game.\n" +
             "\t Defaults to false",
             false,
             new Usage[]{Usage.RunGames}),
+    tuneGame("If true, then we will tune the game instead of tuning the agent.\n" +
+            "\tIn this case the searchSpace file must be relevant for the game.",
+            false,
+            new Usage[]{Usage.ParameterSearch}),
+    useThreeTuples("If true then we use 3-tuples as well as 1-, 2- and N-tuples",
+            false,
+            new Usage[]{Usage.ParameterSearch}),
     verbose("If true, then the result of each game is reported. Default is false.",
             false,
-            new Usage[]{Usage.RunGames});
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch});
 
     public final String helpText;
     public final Object defaultValue;

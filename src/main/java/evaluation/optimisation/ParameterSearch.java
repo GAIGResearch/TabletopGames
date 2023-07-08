@@ -19,19 +19,16 @@ public class ParameterSearch {
 
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
-        if (argsList.isEmpty() || argsList.contains("--help") || argsList.contains("-h")) {
-            System.out.println("There are a number of possible arguments:");
-            for (RunArg arg : RunArg.values()) {
-                System.out.println("\t" + arg.name() + "= " + arg.helpText + "\n");
-            }
+        if (argsList.contains("--help") || argsList.contains("-h")) {
+            RunArg.printHelp(RunArg.Usage.ParameterSearch);
             return;
         }
 
         // Config
-        Map<RunArg, Object> config;
+        Map<RunArg, Object> config = parseConfig(args, RunArg.Usage.ParameterSearch);
 
 
-        String setupFile = getArg(args, "config", "");
+        String setupFile = config.getOrDefault(RunArg.config, "").toString();
         if (!setupFile.equals("")) {
             // Read from file instead
             try {
@@ -40,14 +37,12 @@ public class ParameterSearch {
                 JSONObject json = (JSONObject) parser.parse(reader);
                 config = parseConfig(json, RunArg.Usage.ParameterSearch);
             } catch (FileNotFoundException ignored) {
-                throw new IllegalArgumentException("Could not find file: " + setupFile);
+                throw new AssertionError("Config file not found : " + setupFile);
+                //    parseConfig(runGames, args);
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            config = parseConfig(args, RunArg.Usage.ParameterSearch);
         }
-
         if (config.get(RunArg.game).equals("all")) {
             System.out.println("No game provided. Please provide a game.");
             return;
@@ -68,7 +63,7 @@ public class ParameterSearch {
             return;
         }
 
-        NTBEAParameters params = new NTBEAParameters(args);
+        NTBEAParameters params = new NTBEAParameters(config);
         params.printSearchSpaceDetails();
 
         if (params.mode == NTBEAParameters.Mode.MultiNTBEA) {
