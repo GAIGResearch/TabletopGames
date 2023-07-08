@@ -7,7 +7,6 @@ import core.actions.LogEvent;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.AbstractTournamentMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;

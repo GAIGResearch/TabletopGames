@@ -3,7 +3,7 @@ package evaluation.listeners;
 import core.AbstractPlayer;
 import core.Game;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.AbstractTournamentMetric;
+import evaluation.metrics.TournamentMetric;
 import evaluation.metrics.IDataLogger;
 
 import java.util.Arrays;
@@ -27,12 +27,12 @@ public class TournamentMetricsGameListener extends MetricsGameListener {
     }
 
     public TournamentMetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {
-        super(logTo, dataTypes, Arrays.stream(metrics).map(AbstractTournamentMetric::new).toArray(AbstractMetric[]::new));
+        super(logTo, dataTypes, Arrays.stream(metrics).map(TournamentMetric::new).toArray(AbstractMetric[]::new));
     }
 
     public void tournamentInit(Game game, int nPlayersPerGame, Set<String> playerNames, Set<AbstractPlayer> matchup) {
         for (AbstractMetric metric : metrics.values()) {
-            AbstractTournamentMetric tournamentMetric = (AbstractTournamentMetric) metric;
+            TournamentMetric tournamentMetric = (TournamentMetric) metric;
             tournamentMetric.tournamentInit(game, nPlayersPerGame, playerNames, matchup);
         }
     }

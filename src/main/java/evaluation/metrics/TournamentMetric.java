@@ -12,13 +12,13 @@ import java.util.*;
  * Records all data per player combination.
  * This is a wrapper around any AbstractMetric
  */
-public class AbstractTournamentMetric extends AbstractMetric {
+public class TournamentMetric extends AbstractMetric {
     // Data logger, wrapper around a library that logs data into a table
     private final Map<Set<AbstractPlayer>, IDataLogger> dataLoggers = new HashMap<>();
 
     AbstractMetric wrappedMetric;
 
-    public AbstractTournamentMetric(AbstractMetric metric) {
+    public TournamentMetric(AbstractMetric metric) {
         super(metric.getEventTypes());
         this.wrappedMetric = metric;
     }
@@ -100,7 +100,7 @@ public class AbstractTournamentMetric extends AbstractMetric {
                         " the Data Processor must extend the Data Logger's default processor.";
 
         for (Map.Entry<Set<AbstractPlayer>, IDataLogger> e : dataLoggers.entrySet()) {
-            String folder = folderName + File.separator + e.getKey().toString();
+            String folder = folderName + e.getKey().toString();
             // Make folder if it doesn't exist
             File f = new File(folder);
             boolean success = true;
