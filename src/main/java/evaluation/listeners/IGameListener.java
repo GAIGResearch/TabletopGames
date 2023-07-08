@@ -125,5 +125,4 @@ public interface IGameListener {
 
     default void init(Game game, int nPlayersPerGame, Set<String> playerNames) {}
 
-    default void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {}
 }

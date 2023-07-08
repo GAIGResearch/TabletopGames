@@ -202,7 +202,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class WinCause extends AbstractTournamentMetric
+    public static class WinCause extends AbstractMetric
     {
         int killer = -1;
         int victim = -1;
@@ -278,7 +278,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class RoundLength extends AbstractTournamentMetric
+    public static class RoundLength extends AbstractMetric
     {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -305,7 +305,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class EliminatingCards extends AbstractTournamentMetric {
+    public static class EliminatingCards extends AbstractMetric {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {

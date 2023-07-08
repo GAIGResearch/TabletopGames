@@ -29,7 +29,7 @@ public class StrategoMetrics implements IMetricsCollection {
         }
     }
 
-    public static class GameEndReason extends AbstractTournamentMetric {
+    public static class GameEndReason extends AbstractMetric {
         // How many times did games end with flag capture vs player running out of options vs max number of game ticks?
 
         @Override

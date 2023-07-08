@@ -10,17 +10,17 @@ import java.util.*;
 
 /**
  * Records all data per player combination.
+ * This is a wrapper around any AbstractMetric
  */
-public abstract class AbstractTournamentMetric extends  AbstractMetric
-{
+public class AbstractTournamentMetric extends AbstractMetric {
     // Data logger, wrapper around a library that logs data into a table
-    private final Map<Set<AbstractPlayer>,IDataLogger> dataLoggers = new HashMap<>();
+    private final Map<Set<AbstractPlayer>, IDataLogger> dataLoggers = new HashMap<>();
 
-    public AbstractTournamentMetric() {
-        super();
-    }
-    public AbstractTournamentMetric(Event.GameEvent... args) {
-        super(args);
+    AbstractMetric wrappedMetric;
+
+    public AbstractTournamentMetric(AbstractMetric metric) {
+        super(metric.getEventTypes());
+        this.wrappedMetric = metric;
     }
 
     /**
@@ -30,12 +30,16 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
      * @return - true if the data saved in records should be recorded indeed, false otherwise. The metric
      * might want to listen to events for internal saving of information, but not actually record it in the data table.
      */
-    protected abstract boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records);
+    protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        return wrappedMetric._run(listener, e, records);
+    }
 
     /**
      * @return set of game events this metric should record information for.
      */
-    public abstract Set<IGameEvent> getDefaultEventTypes();
+    public Set<IGameEvent> getDefaultEventTypes() {
+        return wrappedMetric.getDefaultEventTypes();
+    }
 
     public void reset() {
         super.reset();
@@ -46,13 +50,19 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
 
     /**
      * Initialize columns separately when we have access to the game.
+     *
      * @param game - game to initialize columns for
      */
     public void init(Game game, int nPlayers, Set<String> playerNames) {
         // Do nothing here, we init specially
     }
 
-    public void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup, boolean orderMatters) {
+    @Override
+    public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+        return wrappedMetric.getColumns(nPlayersPerGame, playerNames);
+    }
+
+    public void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {
         // Create a data logger for this matchup
         // TODO this counts same matchup if same type of players are in, regardless of order
         // If order matters (E.G. to see first player advantage), then this should be adjusted
@@ -76,12 +86,12 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
 
     /**
      * Produces reports of data for this metric.
-     * @param folderName - name of the folder to save the reports in
-     * @param reportTypes - list of report types to produce
+     *
+     * @param folderName         - name of the folder to save the reports in
+     * @param reportTypes        - list of report types to produce
      * @param reportDestinations - list of report destinations to produce
      */
-    public void report(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
-    {
+    public void report(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations) {
         //DataProcessor with compatibility assertion:
         IDataProcessor dataProcessor = getDataProcessor();
         assert dataProcessor.getClass().isAssignableFrom(dataLogger.getDefaultProcessor().getClass()) :
@@ -89,7 +99,7 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
                         + dataLogger.getClass().getSimpleName() + ". Data Processor and Data Logger must be using the same library, and " +
                         " the Data Processor must extend the Data Logger's default processor.";
 
-        for (Map.Entry<Set<AbstractPlayer>, IDataLogger> e: dataLoggers.entrySet()) {
+        for (Map.Entry<Set<AbstractPlayer>, IDataLogger> e : dataLoggers.entrySet()) {
             String folder = folderName + File.separator + e.getKey().toString();
             // Make folder if it doesn't exist
             File f = new File(folder);

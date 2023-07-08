@@ -120,6 +120,7 @@ public class NTBEA {
 
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
+     *
      * @return
      */
     public Pair<Object, int[]> run() {
@@ -151,8 +152,9 @@ public class NTBEA {
             //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
             long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nPlayers);
             int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
-            System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
-                    gamesPerMatchup, params.tournamentGames, permutationsOfPlayers);
+            if (params.verbose)
+                System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
+                        gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
 
             RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, gameParams);
             tournament.verbose = false;

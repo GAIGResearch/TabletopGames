@@ -184,12 +184,4 @@ public class MetricsGameListener implements IGameListener {
         }
     }
 
-    @Override
-    public void tournamentInit(Game game, int nPlayersPerGame, Set<String> playerNames, Set<AbstractPlayer> matchup) {
-        for (AbstractMetric metric : metrics.values()) {
-            if (metric instanceof AbstractTournamentMetric) {
-                ((AbstractTournamentMetric) metric).tournamentInit(game, nPlayersPerGame, playerNames, matchup);
-            }
-        }
-    }
 }

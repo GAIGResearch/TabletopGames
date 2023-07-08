@@ -3,6 +3,7 @@ package evaluation.tournaments;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import evaluation.listeners.IGameListener;
+import evaluation.listeners.TournamentMetricsGameListener;
 import games.GameType;
 import utilities.Pair;
 
@@ -36,7 +37,6 @@ public class RoundRobinTournament extends AbstractTournament {
 
     protected long randomSeed = System.currentTimeMillis();
     private int[] gameSeeds;
-    private boolean listenersInitialized = false;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -84,9 +84,15 @@ public class RoundRobinTournament extends AbstractTournament {
     public void run() {
         if (verbose)
             System.out.println("Playing " + game.getGameType().name());
+
+        Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());
+        for (IGameListener gameTracker : listeners) {
+            gameTracker.init(game, nPlayers, agentNames);
+            game.addListener(gameTracker);
+        }
         LinkedList<Integer> matchUp = new LinkedList<>();
         createAndRunMatchUp(matchUp);
-       reportResults();
+        reportResults();
 
         for (IGameListener listener : listeners)
             listener.report();
@@ -194,13 +200,12 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(sb);
         }
 
-        // TODO : This needs to be done before all matchups
-        Set<String> agentNames = new HashSet<>();
-        for (AbstractPlayer agent : agents)
-            agentNames.add(agent.toString());
+        // TODO : Not sure this is the ideal place for this...ask Raluca
+        Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());
         for (IGameListener listener : listeners) {
-            game.addListener(listener);
-            listener.tournamentInit(game, nPlayers, agentNames, new HashSet<>(matchUpPlayers));
+            if (listener instanceof TournamentMetricsGameListener) {
+                ((TournamentMetricsGameListener) listener).tournamentInit(game, nPlayers, agentNames, new HashSet<>(matchUpPlayers));
+            }
         }
 
         // Run the game N = gamesPerMatchUp times with these players
@@ -208,13 +213,6 @@ public class RoundRobinTournament extends AbstractTournament {
             // Use the same seeds for all games in each matchup (if gameSeeds specified)
             long currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
             game.reset(matchUpPlayers, currentSeed);
-
-            if (!listenersInitialized) {
-                for (IGameListener gameTracker : listeners) {
-                    gameTracker.init(game, nPlayers, agentNames);
-                }
-                listenersInitialized = true;
-            }
 
             // Randomize parameters
             if (randomGameParams) {
@@ -270,7 +268,6 @@ public class RoundRobinTournament extends AbstractTournament {
             }
 
         }
-        game.clearListeners();
         matchUpsRun++;
     }
 
