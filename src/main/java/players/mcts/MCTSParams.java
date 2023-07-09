@@ -295,7 +295,7 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     public MCTSPlayer instantiate() {
-        return new MCTSPlayer(this);
+        return new MCTSPlayer((MCTSParams) this.copy());
     }
 
 }

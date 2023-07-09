@@ -55,6 +55,7 @@ public class SingleTreeNode {
     int decisionPlayer;
     int round, turn, turnOwner;
     boolean terminalNode;
+    double timeTaken;
     double highReward = Double.NEGATIVE_INFINITY;
     double lowReward = Double.POSITIVE_INFINITY;
     // Root node of tree
@@ -211,7 +212,7 @@ public class SingleTreeNode {
 
         // Variables for tracking time budget
         double avgTimeTaken;
-        double acumTimeTaken = 0;
+        timeTaken = 0.0;
         long remaining;
         int remainingLimit = params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
@@ -251,8 +252,8 @@ public class SingleTreeNode {
             PlayerConstants budgetType = params.budgetType;
             if (budgetType == BUDGET_TIME) {
                 // Time budget
-                acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
-                avgTimeTaken = acumTimeTaken / numIters;
+                timeTaken += (elapsedTimerIteration.elapsedMillis());
+                avgTimeTaken = timeTaken / numIters;
                 remaining = elapsedTimer.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {

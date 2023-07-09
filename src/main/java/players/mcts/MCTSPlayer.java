@@ -9,6 +9,7 @@ import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import players.IAnyTimePlayer;
+import players.heuristics.CoarseTunableHeuristic;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -125,9 +126,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             System.out.println(root.toString());
 
         MASTStats = root.MASTStatistics;
-        // Return best action  // TODO turn back on
-//        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-//            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
+
+        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();
     }
 
@@ -199,5 +200,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public int getBudget() {
         return params.budget;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " " + (heuristic instanceof CoarseTunableHeuristic ? heuristic.toString() : "");
     }
 }

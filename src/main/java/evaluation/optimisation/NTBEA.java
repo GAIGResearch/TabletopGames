@@ -227,26 +227,14 @@ public class NTBEA {
     private List<IGameListener> createListeners() {
         List<IGameListener> retValue = params.listenerClasses.stream().map(IGameListener::createListener).collect(Collectors.toList());
         List<String> directories = Arrays.asList(params.destDir.split(Pattern.quote(File.separator)));
-        if (params.evalGames > 0) {
-            // We only need multiple directories if we are running evaluation games after each iteration
-            if (currentIteration < params.repeats)
-                directories.add(String.format("%3d", currentIteration + 1));
-            else
-                directories.add("Final");
-        }
         retValue.forEach(l -> l.setOutputDirectory(directories.toArray(new String[0])));
         return retValue;
     }
 
     protected Pair<Double, Double> evaluateWinner(int[] winnerSettings) {
 
-        // Add listeners
-        createListeners().forEach(evaluator::addListener);
-
         double[] results = IntStream.range(0, params.evalGames)
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
-
-        evaluator.clearListeners();
 
         double avg = Arrays.stream(results).average().orElse(0.0);
         double stdErr = Math.sqrt(Arrays.stream(results)

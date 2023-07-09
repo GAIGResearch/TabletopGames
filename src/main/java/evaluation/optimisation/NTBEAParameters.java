@@ -58,7 +58,7 @@ public class NTBEAParameters {
         evalMethod = (String) args.get(RunArg.evalMethod);
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
-        seed = (int) args.get(RunArg.seed);
+        seed = (long) args.get(RunArg.seed);
         mode = Mode.valueOf((String) args.get(RunArg.NTBEAmode));
         logFile = (String) args.get(RunArg.output);
         if (logFile.isEmpty()) logFile = "NTBEA.log";

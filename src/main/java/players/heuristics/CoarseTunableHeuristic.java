@@ -20,7 +20,6 @@ import evaluation.optimisation.TunableParameters;
 public class CoarseTunableHeuristic extends TunableParameters implements IStateHeuristic {
 
     HeuristicType heuristicType;
-
     public enum HeuristicType {
         WIN_ONLY(new WinOnlyHeuristic()),
         WIN_PLUS (new WinPlusHeuristic(1000.0)),
@@ -29,11 +28,11 @@ public class CoarseTunableHeuristic extends TunableParameters implements IStateH
         SCORE_PLUS (new ScoreHeuristic()),
         LEADER (new LeaderHeuristic());
 
-        private HeuristicType(IStateHeuristic heuristic) {
+        HeuristicType(IStateHeuristic heuristic) {
             this.heuristic = heuristic;
         }
 
-        IStateHeuristic heuristic;
+        final IStateHeuristic heuristic;
     }
 
     public CoarseTunableHeuristic() {
@@ -64,6 +63,11 @@ public class CoarseTunableHeuristic extends TunableParameters implements IStateH
     protected boolean _equals(Object o) {
         return o instanceof CoarseTunableHeuristic &&
                 ((CoarseTunableHeuristic) o).heuristicType == heuristicType;
+    }
+
+    @Override
+    public String toString() {
+        return "CoarseTunableHeuristic of type " + heuristicType.toString();
     }
 
 }

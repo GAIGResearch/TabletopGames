@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
 import games.GameType;
+import players.mcts.MCTSPlayer;
 import utilities.Pair;
 
 import java.io.FileWriter;
@@ -85,7 +86,11 @@ public class RoundRobinTournament extends AbstractTournament {
         if (verbose)
             System.out.println("Playing " + game.getGameType().name());
 
-        Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());
+
+        Set<String> agentNames = agents.stream()
+     //           .peek(a -> System.out.println(a.toString()))
+                .map(AbstractPlayer::toString).collect(Collectors.toSet());
+
         for (IGameListener gameTracker : listeners) {
             gameTracker.init(game, nPlayers, agentNames);
             game.addListener(gameTracker);
@@ -124,34 +129,34 @@ public class RoundRobinTournament extends AbstractTournament {
         gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
         if (tournamentMode == ONE_VS_ALL) {
             // In this case agents.get(0) must always play
-            Random rnd = new Random(System.currentTimeMillis());
-            List<Integer> randomAgentOrder = new ArrayList<>(this.agentIDs);
-            randomAgentOrder.remove(Integer.valueOf(0));
+            List<Integer> agentOrder = new ArrayList<>(this.agentIDs);
+            agentOrder.remove(Integer.valueOf(0));
             for (int p = 0; p < nPlayers; p++) {
                 // we put the focus player at each position (p) in turn
-                if (randomAgentOrder.size() == 1) {
+                if (agentOrder.size() == 1) {
                     // to reduce variance in this case we can use the same set of seeds for each case
                     List<Integer> matchup = new ArrayList<>(nPlayers);
                     for (int j = 0; j < nPlayers; j++) {
                         if (j == p)
                             matchup.add(0); // focus player
                         else {
-                            matchup.add(randomAgentOrder.get(0));
+                            matchup.add(agentOrder.get(0));
                         }
                     }
                     // We split the total budget equally across the possible positions the focus player can be in
                     // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
                     evaluateMatchUp(matchup, gamesPerMatchUp / nPlayers);
                 } else {
+                    Random rnd = new Random(System.currentTimeMillis());
                     gameSeeds = null;
                     for (int m = 0; m < this.gamesPerMatchUp; m++) {
-                        Collections.shuffle(randomAgentOrder, rnd);
+                        Collections.shuffle(agentOrder, rnd);
                         List<Integer> matchup = new ArrayList<>(nPlayers);
                         for (int j = 0; j < nPlayers; j++) {
                             if (j == p)
                                 matchup.add(0); // focus player
                             else {
-                                matchup.add(randomAgentOrder.get(j % randomAgentOrder.size()));
+                                matchup.add(agentOrder.get(j % agentOrder.size()));
                             }
                         }
                         evaluateMatchUp(matchup, 1);

@@ -44,6 +44,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("ActionsAtRoot", root.children.size());
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
+                records.put("time", mctsPlayer.root.timeTaken);
                 return true;
             }
             return false;
@@ -70,6 +71,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("ActionsAtRoot", Integer.class);
             cols.put("fmCalls", Integer.class);
             cols.put("copyCalls", Integer.class);
+            cols.put("time", Double.class);
             return cols;
         }
     }
