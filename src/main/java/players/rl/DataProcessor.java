@@ -22,6 +22,8 @@ class DataProcessor {
 
     // An entry for the database. Content defined in DataProcessor::formatData
     static enum Field {
+        // The name of the game
+        Game,
         // The seed used
         Seed,
         // The type of reinforcement learning done
@@ -59,17 +61,14 @@ class DataProcessor {
 
     private QWeightsDataStructure qwds;
 
-    private final String gameName;
-
     private String dateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
     private File outfile = null;
     private ObjectNode metadata = null;
 
     private int nGamesPlayedFromInfile;
 
-    DataProcessor(QWeightsDataStructure qwds, String gameName) {
+    DataProcessor(QWeightsDataStructure qwds) {
         this.qwds = qwds;
-        this.gameName = gameName;
         createMissingFoldersAndFiles();
         initMetadata();
     }
@@ -77,12 +76,15 @@ class DataProcessor {
     private void updateSegmentOutfile(int nGames) {
         int totalNGames = nGamesPlayedFromInfile + nGames;
         String outfilePrefix = qwds.trainingParams.outfilePrefix != null ? qwds.trainingParams.outfilePrefix : dateTime;
-        Path outfilePath = Paths.get(qwds.getFolderPath(gameName), outfilePrefix + "_n=" + totalNGames + ".json");
+        Path outfilePath = Paths.get(DataProcessor.getGameFolderPath(qwds.trainingParams.gameName).toString(),
+                qwds.playerParams.getType().name() + "/" + outfilePrefix + "_n=" + totalNGames + ".json");
         outfile = outfilePath.toFile();
     }
 
     private void initMetadata() {
-        ObjectNode existingMetadata = readFileMetadata(qwds.getInfilePathName());
+        ObjectNode existingMetadata = qwds.playerParams.infileNameOrPath == null ? null
+                : (ObjectNode) readInputFile(qwds.trainingParams.gameName, qwds.playerParams.infileNameOrPath)
+                        .get("Metadata");
         nGamesPlayedFromInfile = existingMetadata == null ? 0 : existingMetadata.get(Field.NGamesTotal.name()).asInt();
 
         ObjectMapper om = new ObjectMapper();
@@ -99,8 +101,9 @@ class DataProcessor {
         om.setNodeFactory(new DoubleJsonNodeFactory());
 
         metadata = om.createObjectNode()
+                .put(Field.Game.name(), qwds.trainingParams.gameName)
                 .put(Field.Seed.name(), qwds.playerParams.getRandomSeed())
-                .put(Field.Type.name(), qwds.playerParams.type.name())
+                .put(Field.Type.name(), qwds.playerParams.getType().name())
                 .put(Field.Alpha.name(), qwds.trainingParams.alpha)
                 .put(Field.Gamma.name(), qwds.trainingParams.gamma)
                 .put(Field.Epsilon.name(), qwds.playerParams.epsilon)
@@ -158,7 +161,7 @@ class DataProcessor {
     }
 
     private void createMissingFoldersAndFiles() {
-        new File(qwds.getFolderPath(gameName)).mkdirs();
+        DataProcessor.getGameFolderPath(qwds.trainingParams.gameName).toFile().mkdirs();
     }
 
     private void addGames(int nGamesToAdd) {
@@ -190,4 +193,36 @@ class DataProcessor {
             System.exit(1);
         }
     }
+
+    // region Reading input file
+    public static JsonNode readInputFile(String gameName, String infileNameOrPath) {
+        Path gameFolderPath = getGameFolderPath(gameName);
+        Path[] pathsInOrderOfCheck = {
+                Paths.get(gameFolderPath.toString(), infileNameOrPath), // Just filename
+                Paths.get(RLPlayer.resourcesPathName, infileNameOrPath), // Path relative to resources folder
+                Paths.get(infileNameOrPath), // Absolute path or relative to root folder
+        };
+        Path infilePath = Arrays.stream(pathsInOrderOfCheck).filter(p -> p.toFile().exists()).findFirst().orElse(null);
+        if (infilePath == null)
+            throw new IllegalArgumentException(
+                    "No matching file found for input " + infileNameOrPath
+                            + "Please provide a legal pathname, either as"
+                            + "\n - An absolute path"
+                            + "\n - A relative path to " + Paths.get("").toAbsolutePath()
+                            + "\n - A relative path to " + Paths.get(RLPlayer.resourcesPathName).toAbsolutePath()
+                            + "\n - A relative path to " + gameFolderPath.toAbsolutePath());
+        try {
+            File file = new File(infilePath.toString());
+            return new ObjectMapper().readTree(file);
+        } catch (IOException | IllegalArgumentException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return null;
+        }
+    }
+
+    static Path getGameFolderPath(String gameName) {
+        return Paths.get(RLPlayer.resourcesPathName, QWeightsDataStructure.qWeightsFolderName, gameName);
+    }
+    // endregion
 }

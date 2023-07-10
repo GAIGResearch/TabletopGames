@@ -1,10 +1,14 @@
 package players.rl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import players.PlayerParameters;
+import players.rl.DataProcessor.Field;
 import players.rl.RLPlayer.RLType;
 import players.rl.utils.ApplyActionStateFeatureVector;
 
@@ -12,37 +16,79 @@ public class RLParams extends PlayerParameters {
 
     class TabularParams {
         public double unknownStateQValue = 0.5;
+
+        void copyFrom(TabularParams that) {
+            this.unknownStateQValue = that.unknownStateQValue;
+        }
     }
 
-    // Mandatory and automatic params
-    public final IActionFeatureVector features;
-    public RLType type;
-    public final TabularParams tabular;
+    private boolean initialized = false;
 
-    // Only used for instance() method
-    public String inFileNameOrAbsPath = null;
+    // Mandatory and automatic params
+    private TabularParams tabularParams;
+    private RLType type;
+    private IActionFeatureVector features;
+
+    final String infileNameOrPath;
 
     // Tunable parameters
     public double epsilon = 0.25f;
 
-    public RLParams(IActionFeatureVector features, RLType type) {
-        this(features, type, System.currentTimeMillis());
+    public RLParams(String infileNameOrPath) {
+        this(infileNameOrPath, System.currentTimeMillis());
     }
 
-    public RLParams(IActionFeatureVector features, RLType type, long seed) {
+    public RLParams(String infileNameOrPath, long seed) {
         super(seed);
+        if (infileNameOrPath == null)
+            throw new IllegalArgumentException("The input file name or path cannot be null");
+        this.infileNameOrPath = infileNameOrPath;
+        addTunableParameters();
+
+    }
+
+    RLParams(IStateFeatureVector features, RLType type, long seed) {
+        this(new ApplyActionStateFeatureVector(features), type, seed);
+    }
+
+    RLParams(IActionFeatureVector features, RLType type, long seed) {
+        super(seed);
+        this.infileNameOrPath = null;
         this.features = features;
         this.type = type;
-        tabular = this.type == RLType.Tabular ? new TabularParams() : null;
-        addTunableParameters();
+        tabularParams = this.type == RLType.Tabular ? new TabularParams() : null;
     }
 
-    public RLParams(IStateFeatureVector features, RLType type) {
-        this(features, type, System.currentTimeMillis());
-    }
+    void initializeFromInfile(String gameName) {
+        if (initialized == true)
+            return;
 
-    public RLParams(IStateFeatureVector features, RLType type, long seed) {
-        this(new ApplyActionStateFeatureVector(features), type, seed);
+        JsonNode metadata = DataProcessor.readInputFile(gameName, infileNameOrPath).get("Metadata");
+
+        // Assign type from the input metadata
+        type = RLType.valueOf(metadata.get(Field.Type.name()).asText());
+
+        // Assign featureVector (long code since 2 possible data types)
+        String featureVectorClassName = metadata.get(Field.FeatureVector.name()).asText();
+        Object featureVectorInstance;
+        try {
+            featureVectorInstance = Class.forName(featureVectorClassName)
+                    .getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return;
+        }
+        if (IActionFeatureVector.class.isAssignableFrom(featureVectorInstance.getClass()))
+            features = (IActionFeatureVector) featureVectorInstance;
+        else if (IStateFeatureVector.class.isAssignableFrom(featureVectorInstance.getClass()))
+            features = new ApplyActionStateFeatureVector((IStateFeatureVector) featureVectorInstance);
+        else
+            throw new IllegalArgumentException(
+                    "Feature Vector " + featureVectorClassName + " could not be initialized");
+
+        initialized = true;
     }
 
     private void addTunableParameters() {
@@ -51,16 +97,30 @@ public class RLParams extends PlayerParameters {
 
     @Override
     public RLPlayer instantiate() {
-        if (inFileNameOrAbsPath == null)
-            throw new IllegalArgumentException("The variable inFileNameOrAbsPath must be set for instantiation");
-        return new RLPlayer(this, inFileNameOrAbsPath);
+        return new RLPlayer(this);
     }
 
     @Override
     protected RLParams _copy() {
-        RLParams retValue = new RLParams(features, type, System.currentTimeMillis());
+        RLParams retValue = infileNameOrPath == null
+                ? new RLParams(features, type, System.currentTimeMillis())
+                : new RLParams(infileNameOrPath, System.currentTimeMillis());
+        if (type == RLType.Tabular)
+            retValue.getTabularParams().copyFrom(tabularParams);
         retValue.epsilon = epsilon;
         return retValue;
+    }
+
+    public RLType getType() {
+        return type;
+    }
+
+    public IActionFeatureVector getFeatures() {
+        return features;
+    }
+
+    public TabularParams getTabularParams() {
+        return tabularParams;
     }
 
     // This should be used instead of this.features.getClass().getCanonicalName(),

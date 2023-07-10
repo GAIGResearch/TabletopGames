@@ -1,4 +1,4 @@
-package players.rl.resources.featureVectors;
+package players.rl.featureVectors;
 
 public class TicTacToeDim2StateVector extends TicTacToeDimXStateVector {
 

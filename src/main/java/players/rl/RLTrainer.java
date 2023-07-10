@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.interfaces.IStateFeatureVector;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.dominion.stats.DomStateFeaturesReduced;
@@ -17,38 +20,38 @@ import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
 import players.rl.RLTrainingParams.Solver;
 import players.rl.RLTrainingParams.WriteSegmentType;
+import players.rl.utils.TurnSAR;
+import players.rl.DataProcessor.Field;
 
 class RLTrainer {
 
-    public final RLTrainingParams params;
+    public final RLTrainingParams trainingParams;
     final RLParams playerParams;
     private Map<Integer, List<TurnSAR>> playerTurns;
 
     private QWeightsDataStructure qwds;
     private DataProcessor dp = null;
 
-    private RLTrainer(RLTrainingParams params, RLParams playerParams, String infileNameOrAbsPath) {
-        this.params = params;
+    private RLTrainer(RLTrainingParams params, RLParams playerParams) {
+        this.trainingParams = params;
         this.playerParams = playerParams;
-        this.qwds = playerParams.type == RLType.Tabular ? new QWDSTabular(infileNameOrAbsPath)
-                : playerParams.type == RLType.LinearApprox ? new QWDSLinearApprox(infileNameOrAbsPath) : null;
+        RLType type = getRLType();
+        this.qwds = type == RLType.Tabular ? new QWDSTabular()
+                : type == RLType.LinearApprox ? new QWDSLinearApprox() : null;
         resetTrainer();
-        prematurelySetupQWDS();
     }
 
-    void prematurelySetupQWDS() {
-        // Note: This is done because these functions are usually called from RLPlayer
-        // inside RLPlayer::initializePlayer. However, when training this information is
-        // needed before that call, and we therefore call these functions manually here.
-        qwds.setPlayerParams(playerParams);
-        qwds.setTrainingParams(params);
-        qwds.initialize(params.gameName);
+    private RLType getRLType() {
+        if (playerParams.getType() != null)
+            return playerParams.getType();
+        JsonNode data = DataProcessor.readInputFile(trainingParams.gameName, playerParams.infileNameOrPath);
+        return (RLType.valueOf(data.get("Metadata").get(Field.Type.name()).asText()));
     }
 
     void addTurn(RLPlayer player, AbstractGameState state, AbstractAction action,
             List<AbstractAction> possibleActions) {
         int playerId = player.getPlayerID();
-        double reward = params.heuristic.evaluateState(state, playerId);
+        double reward = trainingParams.heuristic.evaluateState(state, playerId);
 
         // Add the turn to playerTurns
         TurnSAR turn = new TurnSAR(state.copy(playerId), action, possibleActions, reward);
@@ -74,19 +77,24 @@ class RLTrainer {
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        for (int i = 0; i < params.nPlayers; i++)
-            players.add(new RLPlayer(playerParams, qwds, this));
+        for (int i = 0; i < trainingParams.nPlayers; i++) {
+            RLPlayer p = new RLPlayer(playerParams, qwds, this);
+            p.initializePlayer(trainingParams.gameName);
+            players.add(p);
+        }
 
-        this.dp = new DataProcessor(qwds, params.gameName);
-        dp.initNextSegmentFile(getNextSegmentThreshold(0));
-        dp.updateAndWriteFile(0);
+        if (dp == null) {
+            dp = new DataProcessor(qwds);
+            dp.initNextSegmentFile(getNextSegmentThreshold(0));
+            dp.updateAndWriteFile(0);
+        }
 
         System.out.println("Starting Training!");
 
         int gamesPlayedSinceLastWrite = 0;
         int progress = -1;
-        for (int i = 0; i < params.nGames; i++) {
-            runGame(GameType.valueOf(params.gameName), gameParams, players, System.currentTimeMillis(), false,
+        for (int i = 0; i < trainingParams.nGames; i++) {
+            runGame(GameType.valueOf(trainingParams.gameName), gameParams, players, System.currentTimeMillis(), false,
                     null,
                     useGUI ? new ActionController() : null, turnPause);
             if (shouldWriteSegment(i)) {
@@ -101,7 +109,7 @@ class RLTrainer {
             gamesPlayedSinceLastWrite++;
             // Print progress
             int _progress = progress;
-            progress = (100 * (i + 1)) / params.nGames;
+            progress = (100 * (i + 1)) / trainingParams.nGames;
             if (progress != _progress)
                 System.out.print("\r" + progress + "%");
         }
@@ -111,31 +119,31 @@ class RLTrainer {
     }
 
     private int getNextSegmentThreshold(int n) {
-        WriteSegmentType type = params.writeSegmentType;
-        if (type == WriteSegmentType.NONE || params.writeSegmentFactor <= 0)
-            return params.nGames;
+        WriteSegmentType type = trainingParams.writeSegmentType;
+        if (type == WriteSegmentType.NONE || trainingParams.writeSegmentFactor <= 0)
+            return trainingParams.nGames;
 
-        int nextSegmentNIterations = Math.max(type.n0, params.writeSegmentMinIterations);
+        int nextSegmentNIterations = Math.max(type.n0, trainingParams.writeSegmentMinIterations);
         while (nextSegmentNIterations <= n)
-            nextSegmentNIterations = type.operator.operate(nextSegmentNIterations, params.writeSegmentFactor);
+            nextSegmentNIterations = type.operator.operate(nextSegmentNIterations, trainingParams.writeSegmentFactor);
 
-        return Math.min(nextSegmentNIterations, params.nGames);
+        return Math.min(nextSegmentNIterations, trainingParams.nGames);
     }
 
     private boolean shouldUpdate(int iterations) {
         if (iterations == 0)
             return false;
-        return iterations % params.updateXIterations == 0;
+        return iterations % trainingParams.updateXIterations == 0;
             }
 
             private boolean shouldWriteSegment(int iterations) {
-                if (iterations < params.writeSegmentMinIterations)
+                if (iterations < trainingParams.writeSegmentMinIterations)
                     return false;
-                switch (params.writeSegmentType) {
+                switch (trainingParams.writeSegmentType) {
                     case LINEAR:
-                        return iterations % params.writeSegmentFactor == 0;
+                        return iterations % trainingParams.writeSegmentFactor == 0;
                     case LOGARITHMIC:
-                        double log = Math.log(iterations) / Math.log(params.writeSegmentFactor);
+                        double log = Math.log(iterations) / Math.log(trainingParams.writeSegmentFactor);
                         return Math.abs(log - Math.round(log)) < 1e-10;
                     case NONE:
                     default:
@@ -150,28 +158,33 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("Dominion", 4, 10000);
+        RLTrainingParams params = new RLTrainingParams("Dominion", 4, 10000 - 3450);
         params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
         params.writeSegmentFactor = 10;
-        params.writeSegmentMinIterations = 100;
-        params.updateXIterations = 1000;
+        params.writeSegmentMinIterations = 10000;
+        params.updateXIterations = 250;
         params.alpha = 0.001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-        params.outfilePrefix = "Dominion";
+        params.outfilePrefix = "Sominion";
 
-        long seed = System.currentTimeMillis();
-        // long seed = 1688424067512l;
+        // long seed = System.currentTimeMillis();
+        long seed = 1688997020795l;
 
-        RLParams playerParams = new RLParams(new DomStateFeaturesReduced(), RLType.LinearApprox, seed);
+        // String infilePath = null;
+        String infilePath = "LinearApprox/Sominion_n=10000.json";
+
+        IStateFeatureVector featureVector = new DomStateFeaturesReduced();
+        // IActionFeatureVector featureVector = null;
+        RLType type = RLType.LinearApprox;
+
+        RLParams playerParams = infilePath == null
+                ? new RLParams(featureVector, type, seed)
+                : new RLParams(infilePath, seed);
         playerParams.epsilon = 0.375f;
 
-        String infilePath = null;
-        // String infilePath =
-        // "/Users/qmul/Documents/msc-project/TabletopGames/src/main/java/players/rl/resources/qWeights/TicTacToe/LinearApprox/2023-07-04_00-23-30_n=8388608.;
-
-        RLTrainer trainer = new RLTrainer(params, playerParams, infilePath);
+        RLTrainer trainer = new RLTrainer(params, playerParams);
         trainer.runTraining();
     }
 

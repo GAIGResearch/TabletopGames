@@ -1,6 +1,7 @@
 {
   "Metadata" : {
-    "Seed" : 1688554326489,
+    "Game" : "Dominion",
+    "Seed" : 1688997020795,
     "Type" : "LinearApprox",
     "Alpha" : 0.0010000000474974513,
     "Gamma" : 0.875,
@@ -13,16 +14,16 @@
     "ContinuedFrom" : null
   },
   "Weights" : {
-    "victoryPoints" : -0.003777997056571343,
-    "treasureValue" : -0.01677453607667648,
+    "victoryPoints" : -0.0033720404759933725,
+    "treasureValue" : -0.015218826397432175,
     "actionCards" : 0.0,
-    "treasureInHand" : -0.017089265791692475,
+    "treasureInHand" : -0.016703888293054758,
     "actionsLeft" : 0.0,
-    "buysLeft" : -0.010343589903048468,
+    "buysLeft" : -0.007749514429238572,
     "actionCardsInHand" : 0.0,
-    "provinceCount" : 0.002163174046924662,
-    "duchyCount" : -0.002551362629474278,
-    "estateCount" : -0.036808265197886034,
-    "totalCards" : -0.06294771884907509
+    "provinceCount" : 0.0017666996060238184,
+    "duchyCount" : -0.0026812999666426035,
+    "estateCount" : -0.03065663503615992,
+    "totalCards" : -0.060322937055541245
   }
 }

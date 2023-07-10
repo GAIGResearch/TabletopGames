@@ -13,7 +13,7 @@ import players.rl.utils.ApplyActionStateFeatureVector;
 
 public class RLPlayer extends AbstractPlayer {
 
-    public static final String resourcesPath = "src/main/java/players/rl/resources/";
+    public static final String resourcesPathName = "src/main/java/players/rl/resources/";
 
     public enum RLType {
         Tabular(QWDSTabular.class),
@@ -29,46 +29,52 @@ public class RLPlayer extends AbstractPlayer {
     private Random rng;
 
     final public RLParams params;
-    private QWeightsDataStructure qWeights;
+    private QWeightsDataStructure qwds;
 
     private RLTrainer trainer;
 
-    public RLPlayer(RLParams params, String inFileNameOrAbsPath) {
-        if (inFileNameOrAbsPath == null)
-            throw new IllegalArgumentException("Must provide file name or absolute path for input file");
+    public RLPlayer(RLParams params) {
         this.params = params;
-        this.qWeights = instantiateQWeights(inFileNameOrAbsPath);
-        this.qWeights.setPlayerParams(params);
     }
 
-    // Not public since only RLTrainer should be allowed (and need) to call this.
-    // All non-training instances should use other constructor
+    // Not public since only RLTrainer should be allowed (and need) to call this
     RLPlayer(RLParams params, QWeightsDataStructure qwds, RLTrainer trainer) {
-        this.params = params;
-        this.params.type = qwds.getType();
-        this.qWeights = qwds;
-        this.qWeights.setPlayerParams(params);
+        this(params);
+        if (params.infileNameOrPath != null)
+            this.params.initializeFromInfile(trainer.trainingParams.gameName);
+        this.qwds = qwds;
+        qwds.initialize(trainer.trainingParams, params);
         this.trainer = trainer;
-        this.qWeights.setTrainingParams(trainer.params);
     }
 
-    private QWeightsDataStructure instantiateQWeights(String inFileNameOrAbsPath) {
+    private QWeightsDataStructure instantiateQWeights() {
+        QWeightsDataStructure qwds = null;
         try {
-            return params.type.qWeightClass.getDeclaredConstructor(String.class).newInstance(inFileNameOrAbsPath);
+            qwds = params.getType().qWeightClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
             System.exit(1);
-            return null;
         }
+        return qwds;
     }
 
     @Override
     public void initializePlayer(AbstractGameState gameState) {
+        initializePlayer(gameState.getGameType().name());
+    }
+
+    void initializePlayer(String gameName) {
         this.rng = new Random(params.getRandomSeed());
-        if (params.features instanceof ApplyActionStateFeatureVector)
-            ((ApplyActionStateFeatureVector) this.params.features).linkPlayer(this);
-        this.qWeights.initialize(gameState.getGameType().name());
+
+        if (params.infileNameOrPath != null)
+            params.initializeFromInfile(gameName);
+        if (params.getFeatures() instanceof ApplyActionStateFeatureVector)
+            ((ApplyActionStateFeatureVector) params.getFeatures()).linkPlayer(this);
+
+        if (qwds == null)
+            qwds = instantiateQWeights();
+        qwds.initialize(gameName, params);
     }
 
     @Override
@@ -84,7 +90,6 @@ public class RLPlayer extends AbstractPlayer {
                 ? randArgmaxEvaluation(gameState, possibleActions)
                 : possibleActions.get(rng.nextInt(possibleActions.size()));
 
-        // TODO implement better methods for reward (score, etc.?)
         if (trainer != null)
             trainer.addTurn(this, gameState, chosenAction, possibleActions);
         return chosenAction;
@@ -96,7 +101,7 @@ public class RLPlayer extends AbstractPlayer {
         double qMax = Double.NEGATIVE_INFINITY;
         for (AbstractAction a : possibleActions) {
             // Apply the action to the state
-            double q = qWeights.evaluateQ(this, gameState, a);
+            double q = qwds.evaluateQ(this, gameState, a);
             // Keep all actions that maximize Q
             if (q > qMax) {
                 maximizingActions.clear();

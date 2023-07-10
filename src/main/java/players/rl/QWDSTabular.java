@@ -14,12 +14,8 @@ public class QWDSTabular extends QWeightsDataStructure {
 
     private Map<String, Double> qWeights;
 
-    public QWDSTabular(String infileNameOrAbsPath) {
-        super(infileNameOrAbsPath);
-    }
-
     @Override
-    protected void initQWeightsEmpty() {
+    protected void initializeEmpty() {
         qWeights = new StateMap();
     }
 
@@ -31,7 +27,8 @@ public class QWDSTabular extends QWeightsDataStructure {
 
     @Override
     protected double evaluateQ(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        return qWeights.getOrDefault(getStateId(player, state, action), playerParams.tabular.unknownStateQValue);
+        return qWeights.getOrDefault(getStateId(player, state, action),
+                playerParams.getTabularParams().unknownStateQValue);
     }
 
     @Override
@@ -54,7 +51,7 @@ public class QWDSTabular extends QWeightsDataStructure {
     }
 
     private String getStateId(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        double[] featureVector = playerParams.features.featureVector(action, state, player.getPlayerID());
+        double[] featureVector = playerParams.getFeatures().featureVector(action, state, player.getPlayerID());
         return Arrays.toString(featureVector).replaceAll(" ", "");
     }
 

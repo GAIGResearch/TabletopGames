@@ -2,7 +2,6 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.interfaces.IActionFeatureVector;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.interfaces.IStateFeatureVector;
@@ -22,7 +21,6 @@ import players.mcts.MCTSPlayer;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
 import players.rl.RLPlayer.RLType;
-import players.rl.resources.featureVectors.*;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -862,7 +860,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "DotsAndBoxes");
+        String gameType = Utils.getArg(args, "game", "Dominion");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -871,9 +869,8 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        IStateFeatureVector features = new DBStateFeaturesReduced();
-        RLParams p1 = new RLParams(features, RLType.LinearApprox);
-        players.add(new RLPlayer(p1, "DABReduced_n=10000.json"));
+        RLParams p1 = new RLParams("LinearApprox/Sominion_n=10000.json");
+        players.add(new RLPlayer(p1));
         // RLParams p2 = new RLParams(features, RLType.Tabular);
         // players.add(new RLPlayer(p2, "DABReduced_n=10000.json"));
         players.add(new MCTSPlayer());

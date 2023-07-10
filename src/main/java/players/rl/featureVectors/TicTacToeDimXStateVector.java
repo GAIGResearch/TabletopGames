@@ -1,4 +1,4 @@
-package players.rl.resources.featureVectors;
+package players.rl.featureVectors;
 
 import core.AbstractGameState;
 import core.components.Token;
