@@ -11,7 +11,6 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
-import static scala.Console.print;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
@@ -71,12 +70,15 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                 if (state.actionsLeft > 0){
                     List<AbstractAction> availableActions = new ArrayList<>();
                     if(state.playerHands[playerID].stream()
-                            .filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate())
+                            .filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isActionCard))
                             .count() > 0)
                         availableActions.add(new PlayActionCard(playerID));
+
                     availableActions.add(new AddToBoard(playerID));
+
                     if(state.canModifyBoard(playerID))
                         availableActions.add(new ModifyBoard(playerID));
+
                     availableActions.add(new EndPhase());
                     return availableActions;
                 }
@@ -91,11 +93,6 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
-        //List<AbstractAction> actions = new ArrayList<>();
-        // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-
-        //actions.add(new MonopolyDealAction());
-        //return actions;
     }
 
     // Draw cards at start of turn

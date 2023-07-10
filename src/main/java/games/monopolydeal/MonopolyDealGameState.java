@@ -41,10 +41,14 @@ public class MonopolyDealGameState extends AbstractGameState {
     Deck<MonopolyDealCard> drawPile;
     Deck<MonopolyDealCard> discardPile;
 
-
     // Player turn status members
     int actionsLeft = 3;
     boolean turnStart = true;
+    // Decision making placeholders for extended action sequence
+    // int target = 99;
+    // SlyDeal and ForcedDeal
+    // MonopolyDealCard give,take;
+
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
@@ -234,6 +238,22 @@ public class MonopolyDealGameState extends AbstractGameState {
             }
         }
         return setIndx;
+    }
+    public boolean checkForSlyDeal(int playerID){
+        for(int i=0;i<getNPlayers();i++){
+            if(i!=playerID && checkForFreeProperty(i))
+                return true;
+        }
+        return false;
+    }
+    // Returns true if there is a free property( i.e. property which can be stolen/ traded )
+    public boolean checkForFreeProperty(int playerID){
+        for (PropertySet pSet: playerPropertySets[playerID]) {
+            if(!pSet.isComplete){
+                return true;
+            }
+        }
+        return false;
     }
     public void useAction(int actionCost) {
         actionsLeft = actionsLeft-actionCost;

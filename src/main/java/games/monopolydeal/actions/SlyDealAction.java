@@ -6,11 +6,9 @@ import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
-import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -22,13 +20,19 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class ModifyBoard extends AbstractAction implements IExtendedSequence {
+public class SlyDealAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    boolean executed;
-
-    public ModifyBoard(int playerID) { this.playerID = playerID; }
+    int target;
+    MonopolyDealCard take;
+    ActionState actionState;
+    boolean executed = false;
+    public SlyDealAction(int playerID) {
+        this.playerID = playerID;
+        target = playerID;
+        actionState = ActionState.Target;
+    }
 
     /**
      * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
@@ -42,31 +46,27 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-        // move card from to
-        // Iterate through sets
-        //   find wilds
-        //      get alternate
-        //      MoveFromTo
         List<AbstractAction> availableActions = new ArrayList<>();
-        for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-            if(pSet.hasWild){
-                for (int i=0;i<pSet.getSize();i++) {
-                    MonopolyDealCard card = pSet.get(i);
-                    if(card.isPropertyWildCard()){
-                        SetType sType = card.getAlternateSetType(card);
-                        if(sType==SetType.UNDEFINED){
-                            for (PropertySet propSet:MDGS.getPropertySets(playerID)) {
-                                if(propSet.getSetType() != card.getUseAs()){
-                                    availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()));
-                                }
-                            }
-                        }
-                        else{
-                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
+
+        switch (actionState){
+            case Target:
+                for(int i=0;i<MDGS.getNPlayers();i++){
+                    if(playerID!=1)
+                        if(MDGS.checkForFreeProperty(i))
+                            availableActions.add(new TargetPlayer(i));
+                }
+                break;
+            case TakeCard:
+                // Iterate through player property sets
+                // Iterate through properties
+                // Add action
+                for (PropertySet pSet: MDGS.getPropertySets(target)) {
+                    if(!pSet.isComplete){
+                        for(int i=0;i<pSet.getSize();i++){
+                            availableActions.add(new TakeCard(pSet.get(i)));
                         }
                     }
                 }
-            }
         }
         return availableActions;
     }
@@ -97,7 +97,13 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        executed = true;
+        if(action instanceof TargetPlayer){
+            target = ((TargetPlayer) action).target;
+            actionState = ActionState.TakeCard;
+        } else if (action instanceof TakeCard) {
+            take = ((TakeCard) action).take;
+            actionState = ActionState.Execute;
+        }
     }
 
     /**
@@ -123,6 +129,10 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        if(actionState == ActionState.Execute){
+
+            executed = true;
+        }
         gs.setActionInProgress(this);
         return true;
     }
@@ -134,27 +144,27 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ModifyBoard copy() {
+    public SlyDealAction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ModifyBoard that = (ModifyBoard) o;
-        return playerID == that.playerID && executed == that.executed;
+    public boolean equals(Object obj) {
+        // TODO: compare all other variables in the class
+        return obj instanceof MonopolyDealAction;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, executed);
+        // TODO: return the hash of all other variables in the class
+        return 0;
     }
 
     @Override
     public String toString() {
-        return "Modify Board";
+        // TODO: Replace with appropriate string, including any action parameters
+        return "SlyDeal action";
     }
 
     /**

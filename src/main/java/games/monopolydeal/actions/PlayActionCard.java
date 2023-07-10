@@ -2,10 +2,16 @@ package games.monopolydeal.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
+import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -21,6 +27,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+    boolean executed;
 
     public PlayActionCard(int playerID) {
         this.playerID = playerID;
@@ -37,7 +44,24 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
-        return new ArrayList<>();
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        Deck<MonopolyDealCard> currentPlayerHand = MDGS.getPlayerHand(playerID);
+        List<AbstractAction> availableActions = new ArrayList<>();
+        // Iterate through player hand and add actions
+        for (int i = 0; i <currentPlayerHand.getSize(); i++) {
+            CardType type = currentPlayerHand.get(i).cardType();
+            switch (type){
+                case SlyDeal:
+                    if(MDGS.checkForSlyDeal(playerID))
+                        availableActions.add(new SlyDealAction(playerID));
+                default:
+                    throw new AssertionError(type.toString() + " not yet Implemented");
+            }
+        }
+
+        // Slydeal Action
+
+        return availableActions;
     }
 
     /**
@@ -66,6 +90,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
+        executed = true;
     }
 
     /**
@@ -75,7 +100,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return true;
+        return executed;
     }
 
     /**
@@ -108,15 +133,16 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof MonopolyDealAction;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlayActionCard that = (PlayActionCard) o;
+        return playerID == that.playerID && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(playerID, executed);
     }
 
     @Override
