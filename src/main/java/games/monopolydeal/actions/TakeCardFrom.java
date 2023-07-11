@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
 
@@ -27,9 +28,9 @@ import java.util.Objects;
 public class TakeCardFrom extends AbstractAction {
 
     MonopolyDealCard take;
-    PropertySet from;
+    SetType from;
 
-    public TakeCardFrom(MonopolyDealCard take,PropertySet from){
+    public TakeCardFrom(MonopolyDealCard take,SetType from){
         this.take = take;
         this.from = from;
     }
@@ -61,13 +62,13 @@ public class TakeCardFrom extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TakeCardFrom takeCardFrom = (TakeCardFrom) o;
-        return Objects.equals(take, takeCardFrom.take);
+        TakeCardFrom that = (TakeCardFrom) o;
+        return Objects.equals(take, that.take) && Objects.equals(from, that.from);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(take);
+        return Objects.hash(take, from);
     }
 
     @Override

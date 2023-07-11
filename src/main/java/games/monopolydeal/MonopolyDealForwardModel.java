@@ -69,9 +69,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
             case "Play":
                 if (state.actionsLeft > 0){
                     List<AbstractAction> availableActions = new ArrayList<>();
-                    if(state.playerHands[playerID].stream()
-                            .filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isActionCard))
-                            .count() > 0)
+                    if(state.checkForActionCards(playerID))
                         availableActions.add(new PlayActionCard(playerID));
 
                     availableActions.add(new AddToBoard(playerID));

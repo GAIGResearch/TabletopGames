@@ -11,6 +11,7 @@ import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
+import org.apache.poi.ss.formula.atp.Switch;
 import scala.sys.Prop;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
@@ -255,6 +256,24 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return false;
     }
+    public boolean checkActionCard(int playerID, CardType cardType){
+        switch (cardType){
+            case JustSayNo:
+                return false;
+            case SlyDeal:
+                return checkForSlyDeal(playerID);
+            default:
+                return false;
+        }
+    }
+    public boolean checkForActionCards(int playerID) {
+        boolean check = false;
+        for(int i=0;i<playerHands[playerID].getSize();i++){
+            check = checkActionCard(playerID,playerHands[playerID].get(i).cardType());
+            if(check) return true;
+        }
+        return check;
+    }
     public void useAction(int actionCost) {
         actionsLeft = actionsLeft-actionCost;
     }
@@ -315,6 +334,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerPropertySets);
         return result;
     }
+
     public enum MonopolyDealGamePhase implements IGamePhase {
         Play,
         Discard

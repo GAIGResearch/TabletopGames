@@ -64,20 +64,20 @@ public class MonopolyDealParameters extends TunableParameters {
         cardsIncludedInGame.put(CardType.Money5,2);
 
         //Action Cards
-        cardsIncludedInGame.put(CardType.PassGo,10);
-        cardsIncludedInGame.put(CardType.DoubleTheRent,2);
-
-        cardsIncludedInGame.put(CardType.ForcedDeal,4);
-        cardsIncludedInGame.put(CardType.SlyDeal,3);
-
-        cardsIncludedInGame.put(CardType.DebtCollector,3);
-        cardsIncludedInGame.put(CardType.ItsMyBirthday,3);
-
-        cardsIncludedInGame.put(CardType.House,3);
-        cardsIncludedInGame.put(CardType.Hotel,3);
-
-        cardsIncludedInGame.put(CardType.DealBreaker,2);
-        cardsIncludedInGame.put(CardType.JustSayNo,3);
+//        cardsIncludedInGame.put(CardType.PassGo,10);
+//        cardsIncludedInGame.put(CardType.DoubleTheRent,2);
+//
+//        cardsIncludedInGame.put(CardType.ForcedDeal,4);
+        cardsIncludedInGame.put(CardType.SlyDeal,13);
+//
+//        cardsIncludedInGame.put(CardType.DebtCollector,3);
+//        cardsIncludedInGame.put(CardType.ItsMyBirthday,3);
+//
+//        cardsIncludedInGame.put(CardType.House,3);
+//        cardsIncludedInGame.put(CardType.Hotel,3);
+//
+//        cardsIncludedInGame.put(CardType.DealBreaker,2);
+        cardsIncludedInGame.put(CardType.JustSayNo,13);
 
         //Property Cards
         cardsIncludedInGame.put(CardType.BrownProperty,2);
@@ -102,12 +102,12 @@ public class MonopolyDealParameters extends TunableParameters {
         cardsIncludedInGame.put(CardType.RailRoadLightBlueWild,1);
 
         //Rent Cards
-        cardsIncludedInGame.put(CardType.MulticolorRent,3);
-        cardsIncludedInGame.put(CardType.GreenBlueRent,2);
-        cardsIncludedInGame.put(CardType.BrownLightBlueRent,2);
-        cardsIncludedInGame.put(CardType.PinkOrangeRent,2);
-        cardsIncludedInGame.put(CardType.RedYellowRent,2);
-        cardsIncludedInGame.put(CardType.RailRoadUtilityRent,2);
+//        cardsIncludedInGame.put(CardType.MulticolorRent,3);
+//        cardsIncludedInGame.put(CardType.GreenBlueRent,2);
+//        cardsIncludedInGame.put(CardType.BrownLightBlueRent,2);
+//        cardsIncludedInGame.put(CardType.PinkOrangeRent,2);
+//        cardsIncludedInGame.put(CardType.RedYellowRent,2);
+//        cardsIncludedInGame.put(CardType.RailRoadUtilityRent,2);
     }
 
     @Override

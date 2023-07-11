@@ -49,13 +49,18 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
         List<AbstractAction> availableActions = new ArrayList<>();
         // Iterate through player hand and add actions
         for (int i = 0; i <currentPlayerHand.getSize(); i++) {
-            CardType type = currentPlayerHand.get(i).cardType();
-            switch (type){
-                case SlyDeal:
-                    if(MDGS.checkForSlyDeal(playerID))
-                        availableActions.add(new SlyDealAction(playerID));
-                default:
-                    throw new AssertionError(type.toString() + " not yet Implemented");
+            if(currentPlayerHand.get(i).isActionCard()) {
+                CardType type = currentPlayerHand.get(i).cardType();
+                switch (type) {
+                    case SlyDeal:
+                        if (MDGS.checkForSlyDeal(playerID))
+                            availableActions.add(new SlyDealAction(playerID));
+                        break;
+                    case JustSayNo:
+                        break;
+                    default:
+                        throw new AssertionError(type.toString() + " not yet Implemented");
+                }
             }
         }
 

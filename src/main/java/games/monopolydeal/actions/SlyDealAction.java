@@ -6,6 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     final int playerID;
     int target;
     MonopolyDealCard take;
-    PropertySet from;
+    SetType from;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
@@ -54,7 +55,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
         switch (actionState){
             case Target:
                 for(int i=0;i<MDGS.getNPlayers();i++){
-                    if(playerID!=1)
+                    if(playerID!=i)
                         if(MDGS.checkForFreeProperty(i))
                             availableActions.add(new TargetPlayer(i));
                 }
@@ -66,7 +67,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(!pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new TakeCardFrom(pSet.get(i),pSet));
+                            availableActions.add(new TakeCardFrom(pSet.get(i),pSet.getSetType()));
                         }
                     }
                 }
@@ -113,8 +114,8 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
             actionState = ActionState.GetReaction;
         } else if (action instanceof GetReaction) {
             reaction = ((GetReaction) action).sayNo;
+            actionState = ActionState.Execute;
         }
-
     }
 
     /**
@@ -124,6 +125,15 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
+        if(actionState == ActionState.Execute){
+            if(!reaction) {
+                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+                MDGS.removePropertyFrom(target, take, from);
+                MDGS.addProperty(playerID, take);
+                MDGS.useAction(1);
+            }
+            executed = true;
+        }
         return executed;
     }
 
@@ -140,15 +150,6 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        if(actionState == ActionState.Execute){
-            if(!reaction) {
-                MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-                MDGS.removePropertyFrom(target, take, from.getSetType());
-                MDGS.addProperty(playerID, take);
-                MDGS.useAction(1);
-            }
-            executed = true;
-        }
         gs.setActionInProgress(this);
         return true;
     }
