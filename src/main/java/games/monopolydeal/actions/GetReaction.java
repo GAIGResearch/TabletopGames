@@ -2,10 +2,12 @@ package games.monopolydeal.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
-import games.monopolydeal.cards.PropertySet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +23,15 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class SlyDealAction extends AbstractAction implements IExtendedSequence {
+public class GetReaction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    int target;
-    MonopolyDealCard take;
-    PropertySet from;
-    ActionState actionState;
-    boolean reaction = false;
-    boolean executed = false;
-    public SlyDealAction(int playerID) {
+    boolean sayNo;
+    boolean executed;
+
+    public GetReaction(int playerID) {
         this.playerID = playerID;
-        target = playerID;
-        actionState = ActionState.Target;
     }
 
     /**
@@ -50,30 +47,17 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         List<AbstractAction> availableActions = new ArrayList<>();
-
-        switch (actionState){
-            case Target:
-                for(int i=0;i<MDGS.getNPlayers();i++){
-                    if(playerID!=1)
-                        if(MDGS.checkForFreeProperty(i))
-                            availableActions.add(new TargetPlayer(i));
-                }
+        availableActions.add(new DoNothing());
+        boolean hasJustSayNo = false;
+        Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(playerID);
+        for(int i=0;i< playerHand.getSize();i++){
+            if(playerHand.get(i).cardType() == CardType.JustSayNo){
+                hasJustSayNo = true;
                 break;
-            case TakeCard:
-                // Iterate through player property sets
-                // Iterate through properties
-                // Add action
-                for (PropertySet pSet: MDGS.getPropertySets(target)) {
-                    if(!pSet.isComplete){
-                        for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new TakeCardFrom(pSet.get(i),pSet));
-                        }
-                    }
-                }
-                break;
-            case GetReaction:
-                availableActions.add(new GetReaction(target));
-                break;
+            }
+        }
+        if(hasJustSayNo){
+            availableActions.add(new JustSayNoAction());
         }
         return availableActions;
     }
@@ -104,17 +88,10 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        if(action instanceof TargetPlayer){
-            target = ((TargetPlayer) action).target;
-            actionState = ActionState.TakeCard;
-        } else if (action instanceof TakeCardFrom) {
-            take = ((TakeCardFrom) action).take;
-            from = ((TakeCardFrom) action).from;
-            actionState = ActionState.GetReaction;
-        } else if (action instanceof GetReaction) {
-            reaction = ((GetReaction) action).sayNo;
+        if(action instanceof JustSayNoAction){
+            sayNo = true;
         }
-
+        executed = true;
     }
 
     /**
@@ -140,15 +117,6 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        if(actionState == ActionState.Execute){
-            if(!reaction) {
-                MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-                MDGS.removePropertyFrom(target, take, from.getSetType());
-                MDGS.addProperty(playerID, take);
-                MDGS.useAction(1);
-            }
-            executed = true;
-        }
         gs.setActionInProgress(this);
         return true;
     }
@@ -160,7 +128,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public SlyDealAction copy() {
+    public GetReaction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -169,19 +137,19 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SlyDealAction that = (SlyDealAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(from, that.from) && actionState == that.actionState;
+        GetReaction that = (GetReaction) o;
+        return playerID == that.playerID && sayNo == that.sayNo && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, take, from, actionState, reaction, executed);
+        return Objects.hash(playerID, sayNo, executed);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "SlyDeal action";
+        return "Get reaction";
     }
 
     /**

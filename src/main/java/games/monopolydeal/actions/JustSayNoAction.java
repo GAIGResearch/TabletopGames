@@ -3,9 +3,9 @@ package games.monopolydeal.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
-
-import java.util.Objects;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -23,11 +23,8 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class TakeCard extends AbstractAction {
+public class JustSayNoAction extends AbstractAction {
 
-    MonopolyDealCard take;
-
-    public TakeCard(MonopolyDealCard take){this.take = take;}
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the {@link AbstractGameState#getComponentById(int)} method.
@@ -37,6 +34,8 @@ public class TakeCard extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(CardType.JustSayNo),MDGS.getCurrentPlayer());
         return true;
     }
 
@@ -47,28 +46,27 @@ public class TakeCard extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public TakeCard copy() {
+    public JustSayNoAction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TakeCard takeCard = (TakeCard) o;
-        return Objects.equals(take, takeCard.take);
+    public boolean equals(Object obj) {
+        // TODO: compare all other variables in the class
+        return obj instanceof JustSayNoAction;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(take);
+        // TODO: return the hash of all other variables in the class
+        return 123;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Take card: " + take.toString();
+        return "JustSayNo Action";
     }
 
     /**

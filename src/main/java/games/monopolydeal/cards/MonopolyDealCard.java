@@ -120,9 +120,7 @@ public class MonopolyDealCard extends Card{
     public int cardMoneyValue(){ return type.moneyValue; }
     public SetType getUseAs() { return useAs; }
     public void setUseAs(SetType sType) {  useAs = sType;}
-
     public CardType cardType() { return type; }
-
     @Override
     public MonopolyDealCard copy() {
         // Currently all cardTypes are immutable - so we can save resources when copying
