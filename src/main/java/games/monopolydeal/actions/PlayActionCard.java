@@ -56,7 +56,11 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                         if (MDGS.checkForSlyDeal(playerID))
                             availableActions.add(new SlyDealAction(playerID));
                         break;
+                    case PassGo:
+                        availableActions.add(new PassGoAction());
+                        break;
                     case JustSayNo:
+                    case DoubleTheRent:
                         break;
                     default:
                         throw new AssertionError(type.toString() + " not yet Implemented");

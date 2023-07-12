@@ -196,12 +196,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerHands[playerID].remove(card);
         discardPile.add(card);
     }
-    public void payMoney(int fromPlayer, int toPlayer, List<MonopolyDealCard> money){
-        for (MonopolyDealCard card:money) {
-            playerBanks[fromPlayer].remove(card);
-            playerBanks[toPlayer].add(card);
-        }
-    }
     public void addMoney(int playerID, MonopolyDealCard money){
         playerBanks[playerID].add(money);
         playerHands[playerID].remove(money);
@@ -258,10 +252,13 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public boolean checkActionCard(int playerID, CardType cardType){
         switch (cardType){
-            case JustSayNo:
-                return false;
+
+            case PassGo:
+                return true;
             case SlyDeal:
                 return checkForSlyDeal(playerID);
+            case JustSayNo:
+            case DoubleTheRent:
             default:
                 return false;
         }
