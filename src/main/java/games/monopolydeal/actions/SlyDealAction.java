@@ -126,12 +126,12 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
         if(actionState == ActionState.Execute){
+            MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
             if(!reaction) {
-                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
                 MDGS.removePropertyFrom(target, take, from);
                 MDGS.addProperty(playerID, take);
-                MDGS.useAction(1);
             }
+            MDGS.useAction(1);
             executed = true;
         }
         return executed;
