@@ -177,6 +177,7 @@ public class MCTSParams extends PlayerParameters {
             useMAST = true;
         }
 
+        // TODO: TunableHeuristics should be dealt with more automatically? Reduce code duplication.
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         if (advantageFunction instanceof TunableParameters) {
             TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;

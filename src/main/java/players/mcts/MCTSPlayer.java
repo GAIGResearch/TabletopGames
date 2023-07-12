@@ -204,6 +204,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     @Override
     public String toString() {
-        return super.toString() + " " + (heuristic instanceof CoarseTunableHeuristic ? heuristic.toString() : "");
+        return super.toString();
     }
 }

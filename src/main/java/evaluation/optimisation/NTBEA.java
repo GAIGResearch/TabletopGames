@@ -183,6 +183,19 @@ public class NTBEA {
             bestResult = params.evalMethod.equals("Ordinal") ?
                     new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
                     new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
+
+            // We then want to check the win rate against the elite agent (if one was provided)
+            // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
+            if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
+                // The elite agent is always the last one (and if the elite won fair and square, then we skip this
+                double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
+                double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
+                   if (params.verbose)
+                        System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
+                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
+                }
+            }
         }
         if (params.verbose) {
             System.out.println("\nFinal Recommendation: ");
