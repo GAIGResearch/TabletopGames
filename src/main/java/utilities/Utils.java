@@ -286,6 +286,8 @@ public abstract class Utils {
                     return (T) Boolean.valueOf(rawString);
                 } else if (defaultValue instanceof String) {
                     return (T) rawString;
+                } else if (defaultValue instanceof Long) {
+                    return (T) Long.valueOf(rawString);
                 } else {
                     throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
                 }
@@ -306,7 +308,7 @@ public abstract class Utils {
                         return o;
                 }
             } else if (defaultValue instanceof Integer) {
-                Integer number = (int)(long) rawObject;
+                Integer number = (int) (long) rawObject;
                 return (T) number;
             } else if (defaultValue instanceof Double || defaultValue instanceof Boolean || defaultValue instanceof String) {
                 return (T) rawObject;
@@ -318,6 +320,7 @@ public abstract class Utils {
     }
 
     public static final JSONParser parser = new JSONParser();
+
     public static JSONObject loadJSONFile(String fileName) {
         try {
             FileReader reader = new FileReader(fileName);

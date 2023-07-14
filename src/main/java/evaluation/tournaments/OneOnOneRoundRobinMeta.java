@@ -51,7 +51,7 @@ public class OneOnOneRoundRobinMeta {
                     tournament.addListener(gameTracker);
                     List<String> directories = new ArrayList<>();
                     directories.add((String) config.get(destDir));
-                    String subDir = agents.get(0).toString() + " vs " + agents.get(1).toString();
+                    String subDir = agents.get(agentOneIndex).toString() + " vs " + agents.get(agentTwoIndex).toString();
                     directories.add(subDir);
                     gameTracker.setOutputDirectory(directories.toArray(new String[0]));
                 }

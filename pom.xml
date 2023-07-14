@@ -164,6 +164,24 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>RunGames</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.RunGames</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>RunGames</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>ParameterSearch</id>
                         <configuration>
                             <descriptorRefs>
@@ -175,24 +193,6 @@
                                 </manifest>
                             </archive>
                             <finalName>ParameterSearch</finalName>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>Tournament</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.tournaments.RoundRobinTournament</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>Tournament</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

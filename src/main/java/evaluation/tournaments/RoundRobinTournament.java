@@ -31,7 +31,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected LinkedHashMap<Integer, Pair<Double, Double>> finalWinRanking; // contains index of agent in agents
     protected LinkedHashMap<Integer, Pair<Double, Double>> finalOrdinalRanking; // contains index of agent in agents
     LinkedList<Integer> agentIDs;
-    private int matchUpsRun;
+    private int matchUpsRun, totalGamesRun;
     protected boolean randomGameParams;
     public final String name;
 
@@ -273,6 +273,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         }
         matchUpsRun++;
+        totalGamesRun += nGames;
     }
 
 
@@ -301,21 +302,20 @@ public class RoundRobinTournament extends AbstractTournament {
 
     protected void reportResults() {
         calculateFinalResults();
-        int gameCounter = (gamesPerMatchUp * matchUpsRun);
         boolean toFile = resultsFile != null && !resultsFile.equals("");
         ArrayList<String> dataDump = new ArrayList<>();
         dataDump.add(name + "\n");
 
         // To console
         if (verbose)
-            System.out.printf("============= %s - %d games played ============= \n", game.getGameType().name(), gameCounter);
+            System.out.printf("============= %s - %d games played ============= \n", game.getGameType().name(), totalGamesRun);
         for (int i = 0; i < this.agents.size(); i++) {
             String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games of the tournament. ",
-                    agents.get(i), 100.0 * winsPerPlayer[i] / gameCounter, gameCounter);
+                    agents.get(i), 100.0 * winsPerPlayer[i] / totalGamesRun, totalGamesRun);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
