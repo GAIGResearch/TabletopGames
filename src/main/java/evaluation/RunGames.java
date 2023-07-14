@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.interfaces.IGameRunner;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.AbstractTournament;
+import evaluation.tournaments.OneOnOneRoundRobinMeta;
 import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
@@ -94,6 +95,7 @@ public class RunGames implements IGameRunner {
 
         runGames.focus = null;
         if (!runGames.config.get(focusPlayer).equals("")) {
+            runGames.config.put(mode, "exhaustive"); // this is irrelevant in this case
             runGames.focus = PlayerFactory.createPlayer((String) runGames.config.get(focusPlayer));
             agents.add(0, runGames.focus);  // convention is that they go first in the list of agents
         }
@@ -105,7 +107,12 @@ public class RunGames implements IGameRunner {
         runGames.timeDir = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
         // 3. Run!
-        runGames.run();
+        if (runGames.config.get(mode).equals("sequential")) {
+            OneOnOneRoundRobinMeta main = new OneOnOneRoundRobinMeta(agents, runGames.config);
+            main.run();
+        } else {
+            runGames.run();
+        }
     }
 
 
@@ -144,6 +151,7 @@ public class RunGames implements IGameRunner {
                 }
 
                 // run tournament
+                tournament.setRandomSeed((Integer) config.get(RunArg.seed));
                 tournament.setVerbose((boolean) config.get(verbose));
                 tournament.setResultsFile((String) config.get(output));
                 tournament.setRandomGameParams((boolean) config.get(randomGameParams));

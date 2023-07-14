@@ -79,14 +79,15 @@ public enum RunArg {
             "\t but this option is here for quick and dirty tests.",
             "evaluation.metrics.GameMetrics",
             new Usage[]{Usage.RunGames}),
-    mode("exhaustive|random - defaults to exhaustive.\n" +
+    mode("exhaustive|random|sequential - defaults to exhaustive.\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
             "\t every possible player in every possible position, and run a number of games equal to 'matchups'\n" +
             "\t for each. This can be excessive for a large number of players." +
             "\t 'random' will have a random matchup, while ensuring no duplicates, and that all players get the\n" +
             "\t the same number of games in total.\n" +
+            "\t 'sequential' will run tournament on a ONE_VS_ALL basis between each pair of agents.\n" +
             "\t If a focusPlayer is provided, then this is ignored.",
-            "random",
+            "exhaustive",
             new Usage[]{Usage.RunGames}),
     nPlayers("The number of players in each game. Overrides playerRange.",
             -1,

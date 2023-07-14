@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
 import games.GameType;
-import players.mcts.MCTSPlayer;
 import utilities.Pair;
 
 import java.io.FileWriter;
@@ -395,6 +394,9 @@ public class RoundRobinTournament extends AbstractTournament {
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
+    }
+    public void setRandomSeed(long randomSeed) {
+        this.randomSeed = randomSeed;
     }
 
     public void setRandomGameParams(boolean randomGameParams) {
