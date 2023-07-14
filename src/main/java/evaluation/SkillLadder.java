@@ -54,7 +54,9 @@ public class SkillLadder {
                             "\t               from the same set of games.\n" +
                             "\tNTBEABudget=   The budget of games to use for NTBEA tuning at each budget count. Defaults to 0.\n" +
                             "\t               If specified, then player is a searchSpace definition, and we use random as the lowest budget.\n" +
-                            "\t               The default is to spend 50% on tuning, and 50% on the final tournament to pick the best.\n"
+                            "\t               The default is to spend 50% on tuning, and 50% on the final tournament to pick the best.\n"+
+                            "\tstartSettings= (Optional). A sequence of numbers that defines the starting agent. This is \n" +
+                            "\t               primarily useful if you need to re-start the ladder from a pre-calculated rung.\n"
 
             );
             return;
@@ -84,18 +86,28 @@ public class SkillLadder {
         int nPlayers = getArg(args, "nPlayers", gameType.getMinPlayers());
         AbstractParameters params = AbstractParameters.createFromFile(gameType, gameParams);
 
+        String startSettings = getArg(args, "startSettings", "");
         AbstractPlayer baseAgent, newAgent;
         int[] currentBestSettings = new int[0];
+
+
         if (NTBEABudget > 0) {
-            // first we tune the minimum budget against a random player
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, startingTimeBudget, NTBEABudget);
             ntbeaParameters.repeats = Math.max(nPlayers, ntbeaParameters.repeats);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
             ntbeaParameters.printSearchSpaceDetails();
-            Pair<Object, int[]> results = ntbea.run();
-            baseAgent = (AbstractPlayer) results.a;
-            currentBestSettings = results.b;
+            if (startSettings.isEmpty()) {
+                // first we tune the minimum budget against the default starting agent
+                Pair<Object, int[]> results = ntbea.run();
+                baseAgent = (AbstractPlayer) results.a;
+                currentBestSettings = results.b;
+            } else {
+                // or we use the specified starting settings
+                currentBestSettings = Arrays.stream(startSettings.split("")).mapToInt(Integer::parseInt).toArray();
+                baseAgent = (AbstractPlayer) ntbeaParameters.searchSpace.getAgent(currentBestSettings);
+            }
         } else {
+            // We are not tuning between rungs, and just update the budget in the player definition
             baseAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", Integer.toString(startingTimeBudget)));
         }
         baseAgent.setName("Budget " + startingTimeBudget);
