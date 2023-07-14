@@ -68,7 +68,7 @@ public enum RunArg {
             "\t A pipe-delimited string can be provided to gather many types of statistics \n" +
             "\t from the same set of games.",
             "evaluation.listeners.MetricsGameListener",
-            new Usage[]{Usage.RunGames,Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     matchups("The total number of matchups to run in a tournament if mode=random...\n" +
             "\t...or the number of matchups to run per combination of players if mode=exhaustive\n" +
             "\tfor NTBEA this will be used as a final tournament between the recommended agents from each run.",
@@ -183,7 +183,12 @@ public enum RunArg {
     }
 
     public static Map<RunArg, Object> parseConfig(String[] args, Usage usage) {
-        checkUnknownArgs(args, usage);
+        return RunArg.parseConfig(args, usage, true);
+    }
+
+    public static Map<RunArg, Object> parseConfig(String[] args, Usage usage, boolean checkUnknownArgs) {
+        if (checkUnknownArgs)
+            checkUnknownArgs(args, usage);
         return Arrays.stream(RunArg.values())
                 .filter(arg -> arg.isUsedIn(usage))
                 .collect(toMap(arg -> arg, arg -> arg.parse(args)));
