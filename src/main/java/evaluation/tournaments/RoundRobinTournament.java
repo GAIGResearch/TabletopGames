@@ -395,8 +395,8 @@ public class RoundRobinTournament extends AbstractTournament {
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
     }
-    public void setRandomSeed(long randomSeed) {
-        this.randomSeed = randomSeed;
+    public void setRandomSeed(Number randomSeed) {
+        this.randomSeed = randomSeed.longValue();
     }
 
     public void setRandomGameParams(boolean randomGameParams) {

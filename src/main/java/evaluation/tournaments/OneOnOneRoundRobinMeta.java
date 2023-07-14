@@ -31,8 +31,8 @@ public class OneOnOneRoundRobinMeta {
 
         // We iterate through each pair of agents
         for (int agentOneIndex = 0; agentOneIndex < agents.size(); agentOneIndex++) {
-            for (int agentTwoIndex = agentOneIndex + 1; agentTwoIndex < agents.size(); agentTwoIndex++) {
-
+            for (int agentTwoIndex = 0; agentTwoIndex < agents.size(); agentTwoIndex++) {
+                if (agentOneIndex == agentTwoIndex) continue;
                 GameType gameType = GameType.valueOf((String) config.get(game));
                 AbstractParameters params = config.get(gameParams).equals("") ? null : AbstractParameters.createFromFile(gameType, (String) config.get(gameParams));
 
@@ -57,7 +57,7 @@ public class OneOnOneRoundRobinMeta {
                 }
 
                 // run tournament
-                tournament.setRandomSeed( (long) config.get(RunArg.seed));
+                tournament.setRandomSeed((Number) config.get(seed));
                 tournament.setVerbose((boolean) config.get(verbose));
                 tournament.setResultsFile((String) config.get(output));
                 tournament.setRandomGameParams((boolean) config.get(randomGameParams));
