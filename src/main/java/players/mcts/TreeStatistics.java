@@ -74,7 +74,7 @@ public class TreeStatistics {
         totalTerminalNodes = Arrays.stream(gameTerminalNodesAtDepth).sum();
         nodeDistribution = Arrays.stream(nodesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalNodes).toArray();
         leafDistribution = Arrays.stream(leavesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalLeaves).toArray();
-        meanLeafDepth = IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum();
+        meanLeafDepth = IntStream.range(0, Math.min(depthReached + 1, maxDepth)).mapToDouble(i -> i * leafDistribution[i]).sum();
     }
 
 
