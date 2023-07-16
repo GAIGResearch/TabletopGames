@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.cards.MonopolyDealCard;
-import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
@@ -25,12 +24,12 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class TakeCardFrom extends AbstractAction {
+public class ChooseCardFrom extends AbstractAction {
 
     MonopolyDealCard take;
     SetType from;
 
-    public TakeCardFrom(MonopolyDealCard take,SetType from){
+    public ChooseCardFrom(MonopolyDealCard take, SetType from){
         this.take = take;
         this.from = from;
     }
@@ -53,7 +52,7 @@ public class TakeCardFrom extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public TakeCardFrom copy() {
+    public ChooseCardFrom copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -62,7 +61,7 @@ public class TakeCardFrom extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TakeCardFrom that = (TakeCardFrom) o;
+        ChooseCardFrom that = (ChooseCardFrom) o;
         return Objects.equals(take, that.take) && Objects.equals(from, that.from);
     }
 

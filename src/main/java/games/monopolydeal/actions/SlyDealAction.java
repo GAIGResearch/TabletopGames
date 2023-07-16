@@ -70,7 +70,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(!pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new TakeCardFrom(pSet.get(i),pSet.getSetType()));
+                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType()));
                         }
                     }
                 }
@@ -124,8 +124,8 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
             target = ((TargetPlayer) action).target;
             actionState = ActionState.TakeCard;
         } else if (actionState == ActionState.TakeCard) {
-            take = ((TakeCardFrom) action).take;
-            from = ((TakeCardFrom) action).from;
+            take = ((ChooseCardFrom) action).take;
+            from = ((ChooseCardFrom) action).from;
             actionState = ActionState.GetReaction;
         } else if (actionState == ActionState.GetReaction) {
             MonopolyDealGameState MDGS = (MonopolyDealGameState) state;

@@ -234,6 +234,18 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return setIndx;
     }
+    public boolean checkForForcedDeal(int playerID){
+        boolean target;
+        target = checkForSlyDeal(playerID);
+        if(target) {
+            for (PropertySet pSet: playerPropertySets[playerID]) {
+                if((!pSet.hasHouse || !pSet.hasHotel) && pSet.getSize() > 0){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     public boolean checkForSlyDeal(int playerID){
         for(int i=0;i<getNPlayers();i++){
             if(i!=playerID && checkForFreeProperty(i))
@@ -250,13 +262,28 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return false;
     }
+    public boolean checkForDealBreaker(int playerID){
+        for(int i = 0;i <getNPlayers();i++){
+            if(i!=playerID && playerDealBreaker(i)) return true;
+        }
+        return false;
+    }
+    public boolean playerDealBreaker(int playerID){
+        for (PropertySet pSet: playerPropertySets[playerID]) {
+            if(pSet.isComplete) return true;
+        }
+        return false;
+    }
     public boolean checkActionCard(int playerID, CardType cardType){
         switch (cardType){
-
-            case PassGo:
-                return true;
+            case ForcedDeal:
+                return checkForForcedDeal(playerID);
             case SlyDeal:
                 return checkForSlyDeal(playerID);
+            case DealBreaker:
+                return checkForDealBreaker(playerID);
+            case PassGo:
+                return true;
             case JustSayNo:
             case DoubleTheRent:
             default:

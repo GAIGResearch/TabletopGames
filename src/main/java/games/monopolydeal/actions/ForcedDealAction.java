@@ -2,16 +2,18 @@ package games.monopolydeal.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -23,14 +25,20 @@ import java.util.function.Predicate;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class PlayActionCard extends AbstractAction implements IExtendedSequence {
+public class ForcedDealAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    boolean executed;
-
-    public PlayActionCard(int playerID) {
+    int target;
+    MonopolyDealCard take,give;
+    SetType tFrom,gFrom;
+    ActionState actionState;
+    boolean reaction = false;
+    boolean executed = false;
+    public ForcedDealAction(int playerID) {
         this.playerID = playerID;
+        target = playerID;
+        actionState = ActionState.Target;
     }
 
     /**
@@ -45,35 +53,52 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-        Deck<MonopolyDealCard> currentPlayerHand = MDGS.getPlayerHand(playerID);
         List<AbstractAction> availableActions = new ArrayList<>();
-        // Iterate through player hand and add actions
-        for (int i = 0; i <currentPlayerHand.getSize(); i++) {
-            if(currentPlayerHand.get(i).isActionCard()) {
-                CardType type = currentPlayerHand.get(i).cardType();
-                switch (type) {
-                    case SlyDeal:
-                        if (MDGS.checkForSlyDeal(playerID))
-                            availableActions.add(new SlyDealAction(playerID));
-                        break;
-                    case ForcedDeal:
-                        if(MDGS.checkForForcedDeal(playerID))
-                            availableActions.add(new ForcedDealAction(playerID));
-                        break;
-                    case PassGo:
-                        availableActions.add(new PassGoAction());
-                        break;
-                    case JustSayNo:
-                    case DoubleTheRent:
-                        break;
-                    default:
-                        throw new AssertionError(type.toString() + " not yet Implemented");
+
+        switch (actionState){
+            case Target:
+                for(int i=0;i<MDGS.getNPlayers();i++){
+                    if(playerID!=i)
+                        if(MDGS.checkForFreeProperty(i))
+                            availableActions.add(new TargetPlayer(i));
                 }
-            }
+                break;
+            case TakeCard:
+                // Iterate through player property sets
+                // Iterate through properties
+                // Add action
+                for (PropertySet pSet: MDGS.getPropertySets(target)) {
+                    if(!pSet.isComplete){
+                        for(int i=0;i<pSet.getSize();i++){
+                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType()));
+                        }
+                    }
+                }
+                break;
+            case GiveCard:
+                for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
+                    if(!pSet.isComplete){
+                        for(int i=0;i<pSet.getSize();i++){
+                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType()));
+                        }
+                    }
+                }
+                break;
+            case GetReaction:
+                availableActions.add(new DoNothing());
+                boolean hasJustSayNo = false;
+                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(playerID);
+                for(int i=0;i< playerHand.getSize();i++){
+                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
+                        hasJustSayNo = true;
+                        break;
+                    }
+                }
+                if(hasJustSayNo){
+                    availableActions.add(new JustSayNoAction());
+                }
+                break;
         }
-
-        // Slydeal Action
-
         return availableActions;
     }
 
@@ -86,7 +111,8 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
      */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return playerID;
+        if(actionState == ActionState.GetReaction) return target;
+        else return playerID;
     }
 
     /**
@@ -103,9 +129,30 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        executed = true;
+        if(actionState == ActionState.Target){
+            target = ((TargetPlayer) action).target;
+            actionState = ActionState.TakeCard;
+        } else if (actionState == ActionState.TakeCard) {
+            take = ((ChooseCardFrom) action).take;
+            tFrom = ((ChooseCardFrom) action).from;
+            actionState = ActionState.GiveCard;
+        } else if (actionState == ActionState.GiveCard){
+            give = ((ChooseCardFrom) action).take;
+            gFrom = ((ChooseCardFrom) action).from;
+            actionState = ActionState.GetReaction;
+        } else if (actionState == ActionState.GetReaction) {
+            MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+            if(!(action instanceof JustSayNoAction)) {
+                MDGS.removePropertyFrom(target, take, tFrom);
+                MDGS.removePropertyFrom(playerID,give,gFrom);
+                MDGS.addProperty(playerID, take);
+                MDGS.addProperty(target,give);
+            }
+            MDGS.discardCard(MonopolyDealCard.create(CardType.ForcedDeal),playerID);
+            MDGS.useAction(1);
+            executed = true;
+        }
     }
-
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
@@ -140,7 +187,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public PlayActionCard copy() {
+    public ForcedDealAction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -149,19 +196,19 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PlayActionCard that = (PlayActionCard) o;
-        return playerID == that.playerID && executed == that.executed;
+        ForcedDealAction that = (ForcedDealAction) o;
+        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(give, that.give) && tFrom == that.tFrom && gFrom == that.gFrom && actionState == that.actionState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, executed);
+        return Objects.hash(playerID, target, take, give, tFrom, gFrom, actionState, reaction, executed);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Play Action Card";
+        return "ForcedDeal action";
     }
 
     /**
