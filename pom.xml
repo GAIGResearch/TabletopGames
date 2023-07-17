@@ -225,7 +225,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.SkillLadder</mainClass>
+                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>SkillLadder</finalName>

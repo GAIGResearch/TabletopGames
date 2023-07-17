@@ -1,7 +1,8 @@
-package evaluation;
+package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
@@ -54,7 +55,8 @@ public class SkillLadder {
                             "\t               from the same set of games.\n" +
                             "\tNTBEABudget=   The budget of games to use for NTBEA tuning at each budget count. Defaults to 0.\n" +
                             "\t               If specified, then player is a searchSpace definition, and we use random as the lowest budget.\n" +
-                            "\t               The default is to spend 50% on tuning, and 50% on the final tournament to pick the best.\n"+
+                            "\t               The default is to spend 50% on tuning, and 50% on the final tournament to pick the best.\n" +
+                            "\tgrid=          Default false. If true, then we run against all previous agents too.\n" +
                             "\tstartSettings= (Optional). A sequence of numbers that defines the starting agent. This is \n" +
                             "\t               primarily useful if you need to re-start the ladder from a pre-calculated rung.\n"
 
@@ -87,10 +89,12 @@ public class SkillLadder {
         AbstractParameters params = AbstractParameters.createFromFile(gameType, gameParams);
 
         String startSettings = getArg(args, "startSettings", "");
-        AbstractPlayer baseAgent, newAgent;
         int[] currentBestSettings = new int[0];
 
+        boolean runAgainstAllAgents = getArg(args, "grid", false);
 
+        List<AbstractPlayer> allAgents = new ArrayList<>(iterations);
+        AbstractPlayer firstAgent;
         if (NTBEABudget > 0) {
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, startingTimeBudget, NTBEABudget);
             ntbeaParameters.repeats = Math.max(nPlayers, ntbeaParameters.repeats);
@@ -99,74 +103,79 @@ public class SkillLadder {
             if (startSettings.isEmpty()) {
                 // first we tune the minimum budget against the default starting agent
                 Pair<Object, int[]> results = ntbea.run();
-                baseAgent = (AbstractPlayer) results.a;
+                firstAgent = (AbstractPlayer) results.a;
                 currentBestSettings = results.b;
             } else {
                 // or we use the specified starting settings
                 currentBestSettings = Arrays.stream(startSettings.split("")).mapToInt(Integer::parseInt).toArray();
-                baseAgent = (AbstractPlayer) ntbeaParameters.searchSpace.getAgent(currentBestSettings);
+                firstAgent = (AbstractPlayer) ntbeaParameters.searchSpace.getAgent(currentBestSettings);
             }
         } else {
             // We are not tuning between rungs, and just update the budget in the player definition
-            baseAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", Integer.toString(startingTimeBudget)));
+            firstAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", Integer.toString(startingTimeBudget)));
         }
-        baseAgent.setName("Budget " + startingTimeBudget);
+        firstAgent.setName("Budget " + startingTimeBudget);
+        allAgents.add(firstAgent);
 
-        int oldBudget = startingTimeBudget;
         for (int i = 0; i < iterations; i++) {
-            List<AbstractPlayer> agents = new ArrayList<>(2);
-            int newBudget = oldBudget * timeBudgetMultiplier;
+            int newBudget = (int) (Math.pow(timeBudgetMultiplier, i + 1) * startingTimeBudget);
             if (NTBEABudget > 0) {
                 NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, newBudget, NTBEABudget);
                 // ensure we have one repeat for each player position (to make the tournament easier)
                 // we will have one from the elite set, so we need nPlayers-1 more
-                ntbeaParameters.repeats = Math.max(nPlayers-1, ntbeaParameters.repeats);
+                ntbeaParameters.repeats = Math.max(nPlayers - 1, ntbeaParameters.repeats);
                 NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
-                AbstractPlayer benchmark = baseAgent;
+                AbstractPlayer benchmark = allAgents.get(i).copy();
                 if (benchmark instanceof IAnyTimePlayer) {
-                    benchmark = baseAgent.copy();
                     ((IAnyTimePlayer) benchmark).setBudget(newBudget);
                 }
                 ntbea.setOpponents(Collections.singletonList(benchmark));
                 ntbea.addElite(currentBestSettings);
 
                 Pair<Object, int[]> results = ntbea.run();
-                newAgent = (AbstractPlayer) results.a;
+                allAgents.add((AbstractPlayer) results.a);
                 currentBestSettings = results.b;
             } else {
-                newAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", String.valueOf(newBudget)));
+                allAgents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", String.valueOf(newBudget))));
             }
-            newAgent.setName("Budget " + newBudget);
-            agents.add(newAgent);
-            agents.add(baseAgent);
-            // for each iteration we run a round robin tournament
+            allAgents.get(i + 1).setName("Budget " + newBudget);
 
-            RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration,
-                    ONE_VS_ALL, params);
-            RRT.verbose = false;
-            for (String listenerClass : listenerClasses) {
-                if (listenerClass.isEmpty()) continue;
-                IGameListener gameTracker = IGameListener.createListener(listenerClass, null);
-                RRT.getListeners().add(gameTracker);
-                String[] nestedDirectories = new String[]{destDir, "Budget_" + newBudget};
-                gameTracker.setOutputDirectory(nestedDirectories);
+            // for each iteration we run a round robin tournament; either against just the previous agent (with the previous budget), or
+            // if we have grid set to true, then against all previous agents, one after the other
+            int startAgent = runAgainstAllAgents ? 0 : i;
+            for (int agentIndex = startAgent; agentIndex <= i; agentIndex++) {
+                int otherBudget = (int) (Math.pow(timeBudgetMultiplier, agentIndex) * startingTimeBudget);
+                List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1), allAgents.get(agentIndex));
+                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration,
+                        ONE_VS_ALL, params);
+                RRT.verbose = false;
+                for (String listenerClass : listenerClasses) {
+                    if (listenerClass.isEmpty()) continue;
+                    IGameListener gameTracker = IGameListener.createListener(listenerClass, null);
+                    RRT.getListeners().add(gameTracker);
+                    if (runAgainstAllAgents) {
+                        String[] nestedDirectories = new String[]{destDir, "Budget_" + newBudget + " vs Budget_" + otherBudget};
+                        gameTracker.setOutputDirectory(nestedDirectories);
+                    } else {
+                        String[] nestedDirectories = new String[]{destDir, "Budget_" + newBudget};
+                        gameTracker.setOutputDirectory(nestedDirectories);
+                    }
+                }
+
+                long startTime = System.currentTimeMillis();
+                RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
+                RRT.run();
+                long endTime = System.currentTimeMillis();
+                System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
+                        gamesPerIteration, (endTime - startTime) / 60000,
+                        newBudget,
+                        RRT.getWinRate(0) * 100, RRT.getWinStdErr(0) * 100 * 2,
+                        RRT.getOrdinalRank(0), RRT.getOrdinalStdErr(0) * 2,
+                        otherBudget,
+                        RRT.getWinRate(1) * 100, RRT.getWinStdErr(1) * 100 * 2,
+                        RRT.getOrdinalRank(1), RRT.getOrdinalStdErr(1) * 2
+                );
             }
-
-            long startTime = System.currentTimeMillis();
-            RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
-            RRT.run();
-            long endTime = System.currentTimeMillis();
-            System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
-                    gamesPerIteration, (endTime - startTime) / 60000,
-                    newBudget,
-                    RRT.getWinRate(0) * 100, RRT.getWinStdErr(0) * 100 * 2,
-                    RRT.getOrdinalRank(0), RRT.getOrdinalStdErr(0) * 2,
-                    newBudget / timeBudgetMultiplier,
-                    RRT.getWinRate(1) * 100, RRT.getWinStdErr(1) * 100 * 2,
-                    RRT.getOrdinalRank(1), RRT.getOrdinalStdErr(1) * 2
-            );
-            oldBudget = newBudget;
-            baseAgent = newAgent;
         }
     }
 

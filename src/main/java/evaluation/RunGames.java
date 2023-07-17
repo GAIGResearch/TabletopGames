@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.interfaces.IGameRunner;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.AbstractTournament;
-import evaluation.tournaments.OneOnOneRoundRobinMeta;
+import evaluation.tournaments.SkillGrid;
 import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
@@ -108,7 +108,7 @@ public class RunGames implements IGameRunner {
 
         // 3. Run!
         if (runGames.config.get(mode).equals("sequential")) {
-            OneOnOneRoundRobinMeta main = new OneOnOneRoundRobinMeta(agents, runGames.config);
+            SkillGrid main = new SkillGrid(agents, runGames.config);
             main.run();
         } else {
             runGames.run();

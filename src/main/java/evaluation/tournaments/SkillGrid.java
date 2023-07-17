@@ -14,12 +14,12 @@ import static evaluation.RunArg.*;
  * This is a wrapper to run one RoundRobin tournament on a ONE_VS_ALL basis between each pair
  * of agents in the given list of agents.
  */
-public class OneOnOneRoundRobinMeta {
+public class SkillGrid {
 
     List<AbstractPlayer> agents;
     Map<RunArg, Object> config;
 
-    public OneOnOneRoundRobinMeta(List<AbstractPlayer> agents, Map<RunArg, Object> config) {
+    public SkillGrid(List<AbstractPlayer> agents, Map<RunArg, Object> config) {
         this.agents = agents;
         this.config = config;
     }
@@ -51,7 +51,7 @@ public class OneOnOneRoundRobinMeta {
                     tournament.addListener(gameTracker);
                     List<String> directories = new ArrayList<>();
                     directories.add((String) config.get(destDir));
-                    String subDir = agents.get(agentOneIndex).toString() + " vs " + agents.get(agentTwoIndex).toString();
+                    String subDir = agents.get(agentTwoIndex).toString() + " vs " + agents.get(agentOneIndex).toString();
                     directories.add(subDir);
                     gameTracker.setOutputDirectory(directories.toArray(new String[0]));
                 }
