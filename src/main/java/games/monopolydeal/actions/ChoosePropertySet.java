@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
@@ -24,16 +25,15 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class ChooseCardFrom extends AbstractAction {
+public class ChoosePropertySet extends AbstractAction {
 
-    MonopolyDealCard take;
-    SetType from;
+    int setSize;
+    SetType setType;
     int actionType;
 
-    public ChooseCardFrom(MonopolyDealCard take, SetType from, int actionType){
-        this.take = take;
-        this.from = from;
-        this.actionType = actionType;
+    public ChoosePropertySet(PropertySet pSet){
+        this.setType = pSet.getSetType();
+        this.setSize = pSet.getSize();
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -54,7 +54,7 @@ public class ChooseCardFrom extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ChooseCardFrom copy() {
+    public ChoosePropertySet copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -63,21 +63,19 @@ public class ChooseCardFrom extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ChooseCardFrom that = (ChooseCardFrom) o;
-        return Objects.equals(take, that.take) && Objects.equals(from, that.from);
+        ChoosePropertySet that = (ChoosePropertySet) o;
+        return setSize == that.setSize && actionType == that.actionType && setType == that.setType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(take, from);
+        return Objects.hash(setSize, setType, actionType);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        if(actionType == 0)
-            return "Take card: " + take.toString();
-        else return "Give card: " + take.toString();
+        return "Steal set : " + setType.toString() + " of size " + setSize;
     }
 
     /**

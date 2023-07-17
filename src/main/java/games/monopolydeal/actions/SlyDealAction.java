@@ -70,7 +70,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(!pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType()));
+                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
                         }
                     }
                 }

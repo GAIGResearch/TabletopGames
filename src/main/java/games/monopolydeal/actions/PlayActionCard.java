@@ -60,6 +60,10 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                         if(MDGS.checkForForcedDeal(playerID))
                             availableActions.add(new ForcedDealAction(playerID));
                         break;
+                    case DealBreaker:
+                        if(MDGS.checkForDealBreaker(playerID))
+                            availableActions.add(new DealBreakerAction(playerID));
+                        break;
                     case PassGo:
                         availableActions.add(new PassGoAction());
                         break;

@@ -25,17 +25,16 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class ForcedDealAction extends AbstractAction implements IExtendedSequence {
+public class DealBreakerAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    int target;
-    MonopolyDealCard take,give;
-    SetType tFrom,gFrom;
+    int target,setSize;
+    SetType setType;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
-    public ForcedDealAction(int playerID) {
+    public DealBreakerAction(int playerID) {
         this.playerID = playerID;
         target = playerID;
         actionState = ActionState.Target;
@@ -59,27 +58,18 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
             case Target:
                 for(int i=0;i<MDGS.getNPlayers();i++){
                     if(playerID!=i)
-                        if(MDGS.checkForFreeProperty(i))
+                        if(MDGS.playerDealBreaker(i))
                             availableActions.add(new TargetPlayer(i));
                 }
                 break;
-            case TakeCard:
+            case ChoosePropertySet:
                 // Iterate through player property sets
                 // Iterate through properties
                 // Add action
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
-                    if(!pSet.isComplete){
+                    if(pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
-                        }
-                    }
-                }
-                break;
-            case GiveCard:
-                for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-                    if(!pSet.isComplete){
-                        for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1));
+                            availableActions.add(new ChoosePropertySet(pSet));
                         }
                     }
                 }
@@ -131,28 +121,25 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
         // TODO: Process the action that was taken.
         if(actionState == ActionState.Target){
             target = ((TargetPlayer) action).target;
-            actionState = ActionState.TakeCard;
-        } else if (actionState == ActionState.TakeCard) {
-            take = ((ChooseCardFrom) action).take;
-            tFrom = ((ChooseCardFrom) action).from;
-            actionState = ActionState.GiveCard;
-        } else if (actionState == ActionState.GiveCard){
-            give = ((ChooseCardFrom) action).take;
-            gFrom = ((ChooseCardFrom) action).from;
+            actionState = ActionState.ChoosePropertySet;
+        } else if (actionState == ActionState.ChoosePropertySet) {
+            setType = ((ChoosePropertySet) action).setType;
+            setSize = ((ChoosePropertySet) action).setSize;
             actionState = ActionState.GetReaction;
         } else if (actionState == ActionState.GetReaction) {
             MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
             if(!(action instanceof JustSayNoAction)) {
-                MDGS.removePropertyFrom(target, take, tFrom);
-                MDGS.removePropertyFrom(playerID,give,gFrom);
-                MDGS.addProperty(playerID, take);
-                MDGS.addProperty(target,give);
+                MDGS.movePropertySetFromTo(setType,setSize,target,playerID);
             }
-            MDGS.discardCard(MonopolyDealCard.create(CardType.ForcedDeal),playerID);
+            MDGS.discardCard(MonopolyDealCard.create(CardType.SlyDeal),playerID);
             MDGS.useAction(1);
             executed = true;
         }
     }
+//    @Override
+//    public void _afterAction(AbstractGameState gameState, AbstractAction action){
+//
+//    }
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
@@ -187,7 +174,7 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ForcedDealAction copy() {
+    public DealBreakerAction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -196,19 +183,19 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ForcedDealAction that = (ForcedDealAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(give, that.give) && tFrom == that.tFrom && gFrom == that.gFrom && actionState == that.actionState;
+        DealBreakerAction that = (DealBreakerAction) o;
+        return playerID == that.playerID && target == that.target && setSize == that.setSize && reaction == that.reaction && executed == that.executed && setType == that.setType && actionState == that.actionState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, take, give, tFrom, gFrom, actionState, reaction, executed);
+        return Objects.hash(playerID, target, setSize, setType, actionState, reaction, executed);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "ForcedDeal action";
+        return "DealBreaker action";
     }
 
     /**
