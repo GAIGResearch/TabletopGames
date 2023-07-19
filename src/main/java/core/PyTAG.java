@@ -142,8 +142,9 @@ public class PyTAG {
 
     // Gets observations in JSON
     public String getObservationJson() throws Exception {
+        AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
         if (stateJSONiser != null){
-            return stateJSONiser.getObservationJson(gameState, gameState.getCurrentPlayer());
+            return stateJSONiser.getObservationJson(gs, gs.getCurrentPlayer());
         }
         else throw new Exception("JSON feature extractor is not implemented");
     }
@@ -161,7 +162,7 @@ public class PyTAG {
     public double[] getObservationVector() throws Exception {
         AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
         if (stateVectoriser != null){
-            return stateVectoriser.featureVector(gameState, gameState.getCurrentPlayer());
+            return stateVectoriser.featureVector(gs, gs.getCurrentPlayer());
         }
         else throw new Exception("Observation vectoriser function is not implemented");
     }
@@ -184,18 +185,14 @@ public class PyTAG {
                 .toArray();
     }
 
-    public String getActionMaskJson() throws Exception {
-        if (forwardModel.root != null) {
-            return forwardModel.root.toJsonString();
-        }
-        else throw new Exception("Game does not implement action trees");
+    // gets the whole action tree as an array (tree can be reconstructed using the getTreeShape() function)
+    public int[] getActionTree() {
+        return root.getActionMask();
     }
 
-    public List<ActionTreeNode> getFlattenedTree() throws Exception {
-        if (forwardModel.root != null) {
-            return forwardModel.root.flattenTree();
-        }
-        else throw new Exception("Game does not implement action trees");
+    // gets the action tree shape as a list of arrays
+    public List getTreeShape(){
+        return this.root.getTreeShape();
     }
 
     // Plays an action given an actionID
@@ -349,10 +346,6 @@ public class PyTAG {
         return this.lastSeed;
     }
 
-    public List getTreeShape(){
-        return this.root.getTreeShape();
-    }
-
     public CoreConstants.GameResult[] getPlayerResults(){
         return this.gameState.getPlayerResults();
     }
@@ -389,7 +382,7 @@ public class PyTAG {
 
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("SushiGo"), null, players, 343, true);
+            PyTAG env = new PyTAG(GameType.valueOf("TicTacToe"), null, players, 343, true);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
