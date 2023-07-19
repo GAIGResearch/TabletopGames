@@ -14,6 +14,7 @@ import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
 import games.tictactoe.TicTacToeStateVector;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
@@ -100,6 +101,19 @@ public class PyTAG {
 //            System.out.println(fe);
         }
         return supportedGames;
+    }
+
+    public static String getSupportedGamesJSON(){
+        /* returns the supported games with the corresponding feature extractors */
+        JSONObject json = new JSONObject();
+        String supportedGames = "";
+        for (FeatureExtractors fe : FeatureExtractors.values()) {
+            JSONObject features = new JSONObject();
+            features.put("vector", fe.stateFeatureVector != null);
+            features.put("json", fe.stateFeatureJSON != null);
+            json.put(fe.name(), features);
+        }
+        return json.toJSONString();
     }
 
 
@@ -363,6 +377,7 @@ public class PyTAG {
         long seed = 2466;
         Random rnd = new Random(seed);
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+        String availableGames = PyTAG.getSupportedGamesJSON();
 
         // set up players
 //        players.add(new MCTSPlayer());
