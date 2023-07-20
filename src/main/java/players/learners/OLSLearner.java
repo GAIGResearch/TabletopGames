@@ -15,6 +15,10 @@ public class OLSLearner extends ApacheLearner {
 
     double[] coefficients;
 
+    public OLSLearner(double gamma, Target target) {
+        super(gamma, target);
+    }
+
     @Override
     void learnFromApacheData() {
 
@@ -47,7 +51,8 @@ public class OLSLearner extends ApacheLearner {
     }
 
     @Override
-    public void writeToFile(String file) {
+    public void writeToFile(String prefix) {
+        String file = prefix + ".txt";
         try (FileWriter writer = new FileWriter(file, false)) {
             writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
             writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));

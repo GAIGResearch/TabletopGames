@@ -113,6 +113,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
             return retValue;
         }
+        if (defaultValue == null) {
+            throw new AssertionError("No default value provided for " + name + " to check JSON validity");
+        }
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
@@ -322,6 +325,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                 List<Object> values = possibleValues.get(name);
                 if (clazz.isEnum())
                     values = values.stream().map(Object::toString).collect(toList());
+                // TODO: Possibly something here to allow for JSONObjects to be passed in as well
                 retValue.put(name, values);
             } else {
                 // we have a single value, or a missing

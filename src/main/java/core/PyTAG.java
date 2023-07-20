@@ -14,6 +14,7 @@ import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
 import games.tictactoe.TicTacToeStateVector;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
@@ -102,6 +103,19 @@ public class PyTAG {
         return supportedGames;
     }
 
+    public static String getSupportedGamesJSON(){
+        /* returns the supported games with the corresponding feature extractors */
+        JSONObject json = new JSONObject();
+        String supportedGames = "";
+        for (FeatureExtractors fe : FeatureExtractors.values()) {
+            JSONObject features = new JSONObject();
+            features.put("vector", fe.stateFeatureVector != null);
+            features.put("json", fe.stateFeatureJSON != null);
+            json.put(fe.name(), features);
+        }
+        return json.toJSONString();
+    }
+
 
     public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
 
@@ -142,8 +156,9 @@ public class PyTAG {
 
     // Gets observations in JSON
     public String getObservationJson() throws Exception {
+        AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
         if (stateJSONiser != null){
-            return stateJSONiser.getObservationJson(gameState, gameState.getCurrentPlayer());
+            return stateJSONiser.getObservationJson(gs, gs.getCurrentPlayer());
         }
         else throw new Exception("JSON feature extractor is not implemented");
     }
@@ -161,7 +176,7 @@ public class PyTAG {
     public double[] getObservationVector() throws Exception {
         AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
         if (stateVectoriser != null){
-            return stateVectoriser.featureVector(gameState, gameState.getCurrentPlayer());
+            return stateVectoriser.featureVector(gs, gs.getCurrentPlayer());
         }
         else throw new Exception("Observation vectoriser function is not implemented");
     }
@@ -184,18 +199,14 @@ public class PyTAG {
                 .toArray();
     }
 
-    public String getActionMaskJson() throws Exception {
-        if (forwardModel.root != null) {
-            return forwardModel.root.toJsonString();
-        }
-        else throw new Exception("Game does not implement action trees");
+    // gets the whole action tree as an array (tree can be reconstructed using the getTreeShape() function)
+    public int[] getActionTree() {
+        return root.getActionMask();
     }
 
-    public List<ActionTreeNode> getFlattenedTree() throws Exception {
-        if (forwardModel.root != null) {
-            return forwardModel.root.flattenTree();
-        }
-        else throw new Exception("Game does not implement action trees");
+    // gets the action tree shape as a list of arrays
+    public List getTreeShape(){
+        return this.root.getTreeShape();
     }
 
     // Plays an action given an actionID
@@ -349,10 +360,6 @@ public class PyTAG {
         return this.lastSeed;
     }
 
-    public List getTreeShape(){
-        return this.root.getTreeShape();
-    }
-
     public CoreConstants.GameResult[] getPlayerResults(){
         return this.gameState.getPlayerResults();
     }
@@ -370,6 +377,7 @@ public class PyTAG {
         long seed = 2466;
         Random rnd = new Random(seed);
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+        String availableGames = PyTAG.getSupportedGamesJSON();
 
         // set up players
 //        players.add(new MCTSPlayer());
@@ -389,7 +397,7 @@ public class PyTAG {
 
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("SushiGo"), null, players, 343, true);
+            PyTAG env = new PyTAG(GameType.valueOf("TicTacToe"), null, players, 343, true);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
