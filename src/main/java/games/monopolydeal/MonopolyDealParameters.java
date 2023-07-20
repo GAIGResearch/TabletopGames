@@ -76,7 +76,7 @@ public class MonopolyDealParameters extends TunableParameters {
 //        cardsIncludedInGame.put(CardType.House,3);
 //        cardsIncludedInGame.put(CardType.Hotel,3);
 //
-//        cardsIncludedInGame.put(CardType.DealBreaker,2);
+        cardsIncludedInGame.put(CardType.DealBreaker,2);
         cardsIncludedInGame.put(CardType.JustSayNo,13);
 
         //Property Cards

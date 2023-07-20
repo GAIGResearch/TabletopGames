@@ -25,17 +25,15 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class SlyDealAction extends AbstractAction implements IExtendedSequence {
+public class DebtCollectorAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     int target;
-    MonopolyDealCard take;
-    SetType from;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
-    public SlyDealAction(int playerID) {
+    public DebtCollectorAction(int playerID) {
         this.playerID = playerID;
         actionState = ActionState.Target;
     }
@@ -62,18 +60,6 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
                             availableActions.add(new TargetPlayer(i));
                 }
                 break;
-            case TakeCard:
-                // Iterate through player property sets
-                // Iterate through properties
-                // Add action
-                for (PropertySet pSet: MDGS.getPropertySets(target)) {
-                    if(!pSet.isComplete){
-                        for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
-                        }
-                    }
-                }
-                break;
             case GetReaction:
                 availableActions.add(new DoNothing());
                 boolean hasJustSayNo = false;
@@ -88,6 +74,8 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
                     availableActions.add(new JustSayNoAction());
                 }
                 break;
+            case CollectRent:
+                availableActions.add(new PayRent(target,playerID,5));
         }
         return availableActions;
     }
@@ -121,19 +109,14 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
         // TODO: Process the action that was taken.
         if(actionState == ActionState.Target){
             target = ((TargetPlayer) action).target;
-            actionState = ActionState.TakeCard;
-        } else if (actionState == ActionState.TakeCard) {
-            take = ((ChooseCardFrom) action).take;
-            from = ((ChooseCardFrom) action).from;
             actionState = ActionState.GetReaction;
         } else if (actionState == ActionState.GetReaction) {
+            if(action instanceof JustSayNoAction) executed = true;
+            else actionState = ActionState.CollectRent;
             MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-            if(!(action instanceof JustSayNoAction)) {
-                MDGS.removePropertyFrom(target, take, from);
-                MDGS.addProperty(playerID, take);
-            }
-            MDGS.discardCard(MonopolyDealCard.create(CardType.SlyDeal),playerID);
+            MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
             MDGS.useAction(1);
+        } else if (actionState == ActionState.CollectRent) {
             executed = true;
         }
     }
@@ -175,7 +158,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public SlyDealAction copy() {
+    public DebtCollectorAction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -184,19 +167,19 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SlyDealAction that = (SlyDealAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(from, that.from) && actionState == that.actionState;
+        DebtCollectorAction that = (DebtCollectorAction) o;
+        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && actionState == that.actionState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, take, from, actionState, reaction, executed);
+        return Objects.hash(playerID, target, actionState, reaction, executed);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "SlyDeal action";
+        return "DebtCollector action";
     }
 
     /**
