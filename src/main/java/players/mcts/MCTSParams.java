@@ -7,7 +7,7 @@ import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
-import utilities.Utils;
+import utilities.JSONUtils;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -278,7 +278,7 @@ public class MCTSParams extends PlayerParameters {
                 return new MASTPlayer(new Random(getRandomSeed()));
             case CLASS:
                 // we have a bespoke Class to instantiate
-                return Utils.loadClassFromString(details);
+                return JSONUtils.loadClassFromString(details);
             case PARAMS:
                 throw new AssertionError("PolicyParameters have not been set");
             default:

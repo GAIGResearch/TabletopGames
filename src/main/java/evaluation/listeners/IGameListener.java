@@ -1,13 +1,12 @@
 package evaluation.listeners;
 
-import core.AbstractPlayer;
 import core.Game;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameMetrics;
 import evaluation.metrics.IMetricsCollection;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
-import utilities.Utils;
+import utilities.JSONUtils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -59,7 +58,7 @@ public interface IGameListener {
         File listenerDetails = new File(listenerClass);
         if (listenerDetails.exists()) {
             // in this case we construct from file
-            listener = Utils.loadClassFromFile(listenerClass);
+            listener = JSONUtils.loadClassFromFile(listenerClass);
         } else {
             // In this case we first check if we have a Metrics class
             // And if we do, we extract all the metrics from the class

@@ -3,7 +3,6 @@ package players;
 import core.AbstractPlayer;
 import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.mcts.BasicMCTSPlayer;
 import players.rhea.RHEAParams;
@@ -12,12 +11,10 @@ import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
+import utilities.JSONUtils;
 import utilities.Utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -109,7 +106,7 @@ public class PlayerFactory {
 
         File f = new File(data);
         if (f.exists()) {
-            String json = Utils.readJSONFile(data, preprocessor);
+            String json = JSONUtils.readJSONFile(data, preprocessor);
             AbstractPlayer retValue = fromJSONString(json);
             retValue.setName(data.substring(0, data.indexOf(".")));
             return retValue;

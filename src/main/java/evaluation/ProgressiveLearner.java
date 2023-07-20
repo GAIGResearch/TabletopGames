@@ -13,7 +13,7 @@ import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
 import players.learners.AbstractLearner;
-import utilities.Utils;
+import utilities.JSONUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class ProgressiveLearner {
         String learnerClass = getArg(args, "learner", "");
         if (learnerClass.equals(""))
             throw new IllegalArgumentException("Must specify a learner class");
-        learner = Utils.loadClassFromString(learnerClass);
+        learner = JSONUtils.loadClassFromString(learnerClass);
         if (learner instanceof AbstractLearner) {
             ((AbstractLearner) learner).setGamma(getArg(args, "gamma", 1.0));
             ((AbstractLearner) learner).setTarget(getArg(args, "target", AbstractLearner.Target.WIN));
@@ -81,7 +81,7 @@ public class ProgressiveLearner {
         phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))
             throw new IllegalArgumentException("Must specify a state feature vector");
-        phi = Utils.loadClassFromString(phiClass);
+        phi = JSONUtils.loadClassFromString(phiClass);
         prefix = getArg(args, "fileName", String.format("%tF-%s", System.currentTimeMillis(), phi.getClass().getSimpleName()));
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
         heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");

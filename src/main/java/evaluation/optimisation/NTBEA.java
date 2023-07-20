@@ -15,6 +15,7 @@ import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
 import players.heuristics.WinOnlyHeuristic;
+import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.StatSummary;
 import utilities.Utils;
@@ -66,7 +67,7 @@ public class NTBEA {
         if (params.tuningGame) {
             if (new File(params.evalMethod).exists()) {
                 // load from file
-                gameHeuristic = Utils.loadClassFromFile(params.evalMethod);
+                gameHeuristic = JSONUtils.loadClassFromFile(params.evalMethod);
             } else {
                 if (params.evalMethod.contains(".json"))
                     throw new AssertionError("File not found : " + params.evalMethod);

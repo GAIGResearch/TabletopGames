@@ -4,7 +4,7 @@ import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import utilities.Utils;
+import utilities.JSONUtils;
 
 import java.io.FileReader;
 import java.util.*;
@@ -105,7 +105,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
         if (finalData instanceof JSONObject) {
             JSONObject subJson = (JSONObject) finalData;
-            T retValue = Utils.loadClassFromJSON(subJson);
+            T retValue = JSONUtils.loadClassFromJSON(subJson);
             if (retValue instanceof TunableParameters) {
                 TunableParameters subParams = (TunableParameters) retValue;
                 TunableParameters.loadFromJSON(subParams, subJson);
@@ -388,7 +388,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             int periodIndex = nameSpace.lastIndexOf(".");
             if (periodIndex > -1)
                 nameSpace = nameSpace.substring(periodIndex + 1);
-            Object child = Utils.loadClassFromJSON(json);
+            Object child = JSONUtils.loadClassFromJSON(json);
             if (child instanceof TunableParameters) {
                 TunableParameters tunableChild = (TunableParameters) child;
                 TunableParameters.loadFromJSON(tunableChild, json);

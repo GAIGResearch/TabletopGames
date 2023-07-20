@@ -3,11 +3,10 @@ package evaluation.optimisation;
 import core.interfaces.ITunableParameters;
 import evaluation.RunArg;
 import org.json.simple.JSONObject;
+import utilities.JSONUtils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -77,7 +76,7 @@ public class NTBEAParameters {
             Constructor<ITunableParameters> constructor;
             if (fileExists) {
                 // We import the file as a JSONObject
-                String rawJSON = readJSONFile(searchSpaceFile, preprocessor);
+                String rawJSON = JSONUtils.readJSONFile(searchSpaceFile, preprocessor);
                 json = (JSONObject) parser.parse(rawJSON);
                 className = (String) json.get("class");
                 if (className == null) {
