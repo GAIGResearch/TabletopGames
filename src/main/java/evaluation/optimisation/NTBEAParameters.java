@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
+import static utilities.JSONUtils.parser;
 import static utilities.Utils.*;
 
 public class NTBEAParameters {

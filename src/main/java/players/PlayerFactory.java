@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static utilities.JSONUtils.parser;
+
 /**
  * Factory class for creating AbstractPlayers from JSON configuration file.
  * All three methods return an AbstractPlayer, with the configuration defined in a JSON file, a JSONObject
@@ -44,7 +46,7 @@ public class PlayerFactory {
 
     public static AbstractPlayer fromJSONString(String json) {
         try {
-            return fromJSONObject((JSONObject) Utils.parser.parse(json));
+            return fromJSONObject((JSONObject) parser.parse(json));
         } catch (ParseException e) {
             throw new AssertionError("Error processing JSON string " + e.getMessage());
         }

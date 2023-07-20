@@ -9,7 +9,12 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 public class JSONUtils {
 
@@ -205,5 +210,162 @@ public class JSONUtils {
             e.printStackTrace();
             throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
         }
+    }
+
+    public static Map<String, Object> loadMapFromJSON(JSONObject json) {
+        Map<String, Object> map = new HashMap<>();
+        for (Object key : json.keySet()) {
+            Object value = json.get(key);
+            if (value instanceof JSONObject) {
+                // in this case we flatten this, adding a dot between the key parts
+                Map<String, Object> subMap = loadMapFromJSON((JSONObject) value);
+                for (String subKey : subMap.keySet()) {
+                    map.put(key + "." + subKey, subMap.get(subKey));
+                }
+            } else {
+                map.put((String) key, value);
+            }
+        }
+        return map;
+    }
+
+    public static Map<String, JSONObject> loadJSONObjectsFromDirectory(String directory, boolean recursive, String keyPrefix) {
+        // ww look for all JSON files in the directory, and then load them
+        File dir = new File(directory);
+        if (!dir.exists()) throw new AssertionError("Directory " + directory + " does not exist");
+        if (!dir.isDirectory()) throw new AssertionError("Directory " + directory + " is not a directory");
+        Map<String, JSONObject> map = new HashMap<>();
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory() && recursive) {
+                    // to avoid name-space clashes, we need to add the directory name to the key
+                    String newKeyPrefix = keyPrefix.isEmpty() ? file.getName() : keyPrefix + "." + file.getName();
+                    map.putAll(loadJSONObjectsFromDirectory(file.getAbsolutePath(), recursive, newKeyPrefix));
+                } else if (file.getName().endsWith(".json")) {
+                    JSONObject json = loadJSONFile(file.getAbsolutePath());
+                    String filename = file.getName();
+                    // then remove the '.json' from the end
+                    map.put(keyPrefix + filename.substring(0, filename.length() - 6), json);
+                }
+            }
+        }
+        return map;
+    }
+
+    public static void writeSummaryOfJSONFiles(Map<String, JSONObject> data, String filename) {
+        // first we convert the data to a map of maps
+        Map<String, Map<String, Object>> map = new HashMap<>();
+        for (String key : data.keySet()) {
+            JSONObject json = data.get(key);
+            Map<String, Object> subMap = loadMapFromJSON(json);
+            map.put(key, subMap);
+        }
+        // then we write this to a file with a header row, and one entry per map
+        try {
+            FileWriter writer = new FileWriter(filename);
+            // we need to get the header row
+            List<String> headers = new ArrayList<>();
+            headers.add("Name");
+            headers.addAll(map.keySet().stream()
+                    .flatMap(k -> map.get(k)
+                            .keySet().stream())
+                    .distinct()
+                    .sorted(String.CASE_INSENSITIVE_ORDER)
+                    .collect(toList()));
+
+            writer.write(String.join("\t", headers) + "\n");
+            for (String key : map.keySet()) {
+                Map<String, Object> subMap = map.get(key);
+                subMap.put("Name", key);
+                String row = headers.stream().map(k -> subMap.getOrDefault(k, "")).map(Object::toString).collect(Collectors.joining("\t"));
+                writer.write(row + "\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem writing to file " + filename);
+        }
+    }
+
+    public static void writeJSONFilesFromSummary(String filename, String directory) {
+        // first we read the summary file
+        // then we write the JSON files
+        try {
+            FileReader reader = new FileReader(filename);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+            String header = bufferedReader.readLine();
+            // we sort the headers in alphabetical order to pick up nested sub objects
+            String[] headersInFileOrder = header.split("\t");
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] partsInFileOrder = line.split("\t");
+                Map<String, String> map = new LinkedHashMap<>();
+                for (int i = 0; i < partsInFileOrder.length; ++i) {
+                    map.put(headersInFileOrder[i], partsInFileOrder[i]);
+                }
+                // Now we break up the map into the top-level and sub-objects
+
+                JSONObject json = createJSONFromMap(map);
+                // As we go through the entries, we add them to the JSON object
+                // But any keys with a '.' in them are treated as sub-objects
+
+                FileWriter writer = new FileWriter(directory + "/" + map.get("Name") + ".json");
+                String jsonStr = json.toJSONString();
+                jsonStr = jsonStr.replaceAll(Pattern.quote("{"), "{\n");
+                jsonStr = jsonStr.replaceAll(Pattern.quote("}"), "\n}");
+                jsonStr = jsonStr.replaceAll(Pattern.quote(","), ",\n");
+                writer.write(jsonStr);
+                writer.close();
+            }
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem reading from file " + filename);
+        }
+    }
+
+    public static JSONObject createJSONFromMap(Map<String, String> stuff) {
+        // first of all we partition the keys by the contents of the key before the first '.'
+        Map<String, List<String>> partitioned = stuff.keySet().stream()
+                .collect(groupingBy(k -> k.contains(".") ? k.substring(0, k.indexOf(".")) : k,
+                        mapping(k -> k.contains(".") ? k.substring(k.indexOf(".") + 1) : k, toList())));
+        // we then recursively call this method on the sub-maps
+        JSONObject json = new JSONObject();
+        for (String key : partitioned.keySet()) {
+            Map<String, String> subMap = partitioned.get(key).stream().map(k -> new AbstractMap.SimpleEntry<>(k, stuff.get(key.equals(k) ? k : key + "." + k)))
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+            if (subMap.size() == 0)
+                throw new AssertionError("Empty subMap for key " + key);
+            if (subMap.size() == 1) {
+                // this is a single entry, so we just add it as a String
+                String value = subMap.get(key);
+                try {
+                    int i = Integer.parseInt(value);
+                    json.put(key, i);
+                    continue;
+                } catch (NumberFormatException e) {
+                    // do nothing
+                }
+                try {
+                    double d = Double.parseDouble(value);
+                    json.put(key, d);
+                    continue;
+                } catch (NumberFormatException e) {
+                    // do nothing
+                }
+                if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                    json.put(key, Boolean.parseBoolean(value));
+                    continue;
+                }
+                // else it is a String
+                json.put(key, stuff.get(key));
+            } else {
+                // this is a sub-object, so we recursively call this method
+                JSONObject subJSON = createJSONFromMap(subMap);
+                json.put(key, subJSON);
+            }
+        }
+        return json;
     }
 }
