@@ -406,4 +406,8 @@ public class RoundRobinTournament extends AbstractTournament {
     public void setResultsFile(String resultsFile) {
         this.resultsFile = resultsFile;
     }
+
+    public int getNumberOfAgents() {
+        return agents.size();
+    }
 }

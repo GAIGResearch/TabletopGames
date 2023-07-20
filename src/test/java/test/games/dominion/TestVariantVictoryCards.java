@@ -3,6 +3,7 @@ package test.games.dominion;
 import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
+import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
@@ -26,7 +27,7 @@ public class TestVariantVictoryCards {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(System.currentTimeMillis()), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test

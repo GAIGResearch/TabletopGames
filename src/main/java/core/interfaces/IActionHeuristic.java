@@ -3,6 +3,8 @@ package core.interfaces;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
+import java.util.List;
+
 public interface IActionHeuristic {
     IActionHeuristic nullReturn = (action, state) -> 0;
 
@@ -14,4 +16,12 @@ public interface IActionHeuristic {
      * @return - value of given action.
      */
     double evaluateAction(AbstractAction action, AbstractGameState state);
+
+    default double[] evaluateAllActions(List<AbstractAction> actions, AbstractGameState state) {
+        double[] scores = new double[actions.size()];
+        for (int i = 0; i < actions.size(); i++) {
+            scores[i] = evaluateAction(actions.get(i), state);
+        }
+        return scores;
+    }
 }

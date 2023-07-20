@@ -63,22 +63,6 @@ public class DominionParameters extends TunableParameters {
         }
     }
 
-    public static DominionParameters firstGame(long seed) {
-        DominionParameters retValue = new DominionParameters(seed);
-        retValue.cardsUsed.add(CardType.CELLAR);
-        retValue.cardsUsed.add(CardType.MARKET);
-        retValue.cardsUsed.add(CardType.MERCHANT);
-        retValue.cardsUsed.add(CardType.MILITIA);
-        retValue.cardsUsed.add(CardType.MINE);
-        retValue.cardsUsed.add(CardType.MOAT);
-        retValue.cardsUsed.add(CardType.REMODEL);
-        retValue.cardsUsed.add(CardType.SMITHY);
-        retValue.cardsUsed.add(CardType.VILLAGE);
-        retValue.cardsUsed.add(CardType.WORKSHOP);
-        // Note that the three Victory cards and three Treasure cards are always included
-        return retValue;
-    }
-
     public static DominionParameters sizeDistortion(long seed) {
         DominionParameters retValue = new DominionParameters(seed);
         retValue.cardsUsed.add(CardType.ARTISAN);

@@ -7,6 +7,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
 import games.dominion.DominionConstants.DeckType;
+import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
@@ -34,7 +35,7 @@ public class TestPartialObservabilityCopy {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(System.currentTimeMillis()), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
     DominionGameState state = (DominionGameState) game.getGameState();
     DominionForwardModel fm = new DominionForwardModel();
 

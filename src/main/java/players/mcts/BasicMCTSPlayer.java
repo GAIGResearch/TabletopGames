@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -64,6 +65,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         // Return best action
         return root.bestAction();
     }
+
 
     public void setStateHeuristic(IStateHeuristic heuristic) {
         this.params.heuristic = heuristic;

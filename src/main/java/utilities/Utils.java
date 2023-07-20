@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public abstract class Utils {
@@ -355,7 +356,6 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
-
     public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
@@ -518,5 +518,26 @@ public abstract class Utils {
                 return "th";
         }
     }
+
+
+    public static double[] enumToOneHot(Enum<?> e) {
+        return enumToOneHot(e, 1.0);
+    }
+
+    public static double[] enumToOneHot(Enum<?> e, double value) {
+        double[] retValue = new double[e.getClass().getEnumConstants().length];
+        retValue[e.ordinal()] = value;
+        return retValue;
+    }
+
+    public static List<String> enumNames(Class<? extends Enum<?>> e) {
+        return Arrays.stream(e.getEnumConstants()).map(Enum::name).collect(toList());
+    }
+
+    public static List<String> enumNames(Enum<?> e) {
+        return enumNames((Class<? extends Enum<?>>) e.getClass());
+    }
+
+
 
 }
