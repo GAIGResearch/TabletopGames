@@ -13,6 +13,7 @@ import games.uno.actions.PlayCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -32,7 +33,6 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     int amtToPay;
     boolean boardEmpty;
     MonopolyDealCard cardToPay;
-    SetType setType;
     BoardType boardType;
 
 
@@ -56,7 +56,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         Deck<MonopolyDealCard> payerBank = MDGS.getPlayerBank(payer);
         List<PropertySet> payerPropertySets = MDGS.getPropertySets(payer);
-        if(payerBank.getSize() == 0 && payerPropertySets.size() == 0) boardEmpty = true;
+        if(MDGS.isBoardEmpty(payer)) boardEmpty = true;
 
         List<AbstractAction> availableActions = new ArrayList<>();
 
@@ -108,9 +108,14 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
             boardType = ((PayCardFrom) action).type;
             switch (boardType){
                 case Bank:
-                    MDGS.removeMoneyFrom()
+                    MDGS.removeMoneyFrom(payer,cardToPay);
+                    MDGS.addMoney(payee,cardToPay);
                 case PropertySet:
+                    MDGS.removePropertyFrom(payer,cardToPay,((PayCardFrom) action).from);
+                    MDGS.addProperty(payee,cardToPay);
             }
+            amtToPay = amtToPay - cardToPay.cardMoneyValue();
+            if(MDGS.isBoardEmpty(payer)) boardEmpty = true;
         }
 
     }
@@ -156,15 +161,16 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof MonopolyDealAction;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PayRent payRent = (PayRent) o;
+        return payer == payRent.payer && payee == payRent.payee && amtToPay == payRent.amtToPay && boardEmpty == payRent.boardEmpty && Objects.equals(cardToPay, payRent.cardToPay) && boardType == payRent.boardType;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(payer, payee, amtToPay, boardEmpty, cardToPay, boardType);
     }
 
     @Override

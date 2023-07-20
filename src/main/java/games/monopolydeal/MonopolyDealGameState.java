@@ -200,6 +200,13 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerBanks[playerID].add(money);
         playerHands[playerID].remove(money);
     }
+    public void removeMoneyFrom(int playerID, MonopolyDealCard money) {
+        playerBanks[playerID].add(money);
+    }
+    public boolean isBoardEmpty(int playerID){
+        if(playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0) return true;
+        else return false;
+    }
     // add property
     public void addProperty(int playerID, MonopolyDealCard card){
         SetType SType = card.getUseAs();
@@ -366,7 +373,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerPropertySets);
         return result;
     }
-
     public enum MonopolyDealGamePhase implements IGamePhase {
         Play,
         Discard
