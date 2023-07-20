@@ -160,24 +160,24 @@ public class MCTSParams extends PlayerParameters {
 
         // TODO: TunableHeuristics should be dealt with more automatically? Reduce code duplication.
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
-        if (advantageFunction instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("advantageFunction." + name));
-            }
-        }
+//        if (advantageFunction instanceof TunableParameters) {
+//            TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;
+//            for (String name : tunableHeuristic.getParameterNames()) {
+//                tunableHeuristic.setParameterValue(name, this.getParameterValue("advantageFunction." + name));
+//            }
+//        }
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        if (heuristic instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
-            }
-        }
+//        if (heuristic instanceof TunableParameters) {
+//            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+//            for (String name : tunableHeuristic.getParameterNames()) {
+//                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+//            }
+//        }
 
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
-        if (rolloutPolicyParams != null)
-            for (String name : rolloutPolicyParams.getParameterNames())
-                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name));
+//        if (rolloutPolicyParams != null)
+//            for (String name : rolloutPolicyParams.getParameterNames())
+//                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name));
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 
     }

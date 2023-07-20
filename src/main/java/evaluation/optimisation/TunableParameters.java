@@ -270,7 +270,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                 finalValue = ((Long) value).intValue();
             currentValues.put(parameterName, finalValue);
         }
- //       _reset();
+        // this sets the value within ITunableParameters; but this may need to be transposed to the local field
+        _reset();
     }
 
     /**
