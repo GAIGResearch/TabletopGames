@@ -56,14 +56,13 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
             case Target:
                 for(int i=0;i<MDGS.getNPlayers();i++){
                     if(playerID!=i)
-                        if(MDGS.checkForFreeProperty(i))
-                            availableActions.add(new TargetPlayer(i));
+                        availableActions.add(new TargetPlayer(i));
                 }
                 break;
             case GetReaction:
                 availableActions.add(new DoNothing());
                 boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(playerID);
+                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
                 for(int i=0;i< playerHand.getSize();i++){
                     if(playerHand.get(i).cardType() == CardType.JustSayNo){
                         hasJustSayNo = true;

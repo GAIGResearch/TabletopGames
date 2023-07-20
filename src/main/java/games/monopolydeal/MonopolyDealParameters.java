@@ -67,10 +67,10 @@ public class MonopolyDealParameters extends TunableParameters {
         cardsIncludedInGame.put(CardType.PassGo,10);
 //        cardsIncludedInGame.put(CardType.DoubleTheRent,2);
 //
-        cardsIncludedInGame.put(CardType.ForcedDeal,14);
-        cardsIncludedInGame.put(CardType.SlyDeal,13);
+        cardsIncludedInGame.put(CardType.ForcedDeal,4);
+        cardsIncludedInGame.put(CardType.SlyDeal,3);
 //
-//        cardsIncludedInGame.put(CardType.DebtCollector,3);
+        cardsIncludedInGame.put(CardType.DebtCollector,13);
 //        cardsIncludedInGame.put(CardType.ItsMyBirthday,3);
 //
 //        cardsIncludedInGame.put(CardType.House,3);

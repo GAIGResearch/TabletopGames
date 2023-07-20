@@ -297,6 +297,7 @@ public class MonopolyDealGameState extends AbstractGameState {
             case DealBreaker:
                 return checkForDealBreaker(playerID);
             case PassGo:
+            case DebtCollector:
                 return true;
             case JustSayNo:
             case DoubleTheRent:

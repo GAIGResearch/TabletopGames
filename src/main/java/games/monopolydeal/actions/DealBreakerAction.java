@@ -77,7 +77,7 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
             case GetReaction:
                 availableActions.add(new DoNothing());
                 boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(playerID);
+                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
                 for(int i=0;i< playerHand.getSize();i++){
                     if(playerHand.get(i).cardType() == CardType.JustSayNo){
                         hasJustSayNo = true;

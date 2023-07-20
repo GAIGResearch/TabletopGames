@@ -67,6 +67,9 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                     case PassGo:
                         availableActions.add(new PassGoAction());
                         break;
+                    case DebtCollector:
+                        availableActions.add(new DebtCollectorAction(playerID));
+                        break;
                     case JustSayNo:
                     case DoubleTheRent:
                         break;
