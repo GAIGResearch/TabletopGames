@@ -6,14 +6,13 @@ import core.actions.DoNothing;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
-import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
+import games.uno.actions.PlayCard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -25,19 +24,22 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class DealBreakerAction extends AbstractAction implements IExtendedSequence {
+public class PayRent extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
-    final int playerID;
-    int target,setSize;
+    final int payer; // current player
+    final int payee; // pays to
+    int amtToPay;
+    boolean boardEmpty;
+    MonopolyDealCard cardToPay;
     SetType setType;
-    ActionState actionState;
-    boolean reaction = false;
-    boolean executed = false;
-    public DealBreakerAction(int playerID) {
-        this.playerID = playerID;
-        target = playerID;
-        actionState = ActionState.Target;
+    BoardType boardType;
+
+
+    public PayRent(int payer, int payee, int amtToPay) {
+        this.payer = payer;
+        this.payee = payee;
+        this.amtToPay = amtToPay;
     }
 
     /**
@@ -52,43 +54,25 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        Deck<MonopolyDealCard> payerBank = MDGS.getPlayerBank(payer);
+        List<PropertySet> payerPropertySets = MDGS.getPropertySets(payer);
+        if(payerBank.getSize() == 0 && payerPropertySets.size() == 0) boardEmpty = true;
+
         List<AbstractAction> availableActions = new ArrayList<>();
 
-        switch (actionState){
-            case Target:
-                for(int i=0;i<MDGS.getNPlayers();i++){
-                    if(playerID!=i)
-                        if(MDGS.playerDealBreaker(i))
-                            availableActions.add(new TargetPlayer(i));
-                }
-                break;
-            case ChoosePropertySet:
-                // Iterate through player property sets
-                // Iterate through properties
-                // Add action
-                for (PropertySet pSet: MDGS.getPropertySets(target)) {
-                    if(pSet.isComplete){
-                        for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChoosePropertySet(pSet));
-                        }
-                    }
-                }
-                break;
-            case GetReaction:
-                availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(playerID);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
-                break;
+        if(boardEmpty || amtToPay <= 0) availableActions.add(new DoNothing());
+        else {
+            // iterate through bank and add action
+            // iterate through properties and add action
+            for(int i=0;i<payerBank.getSize();i++){
+                availableActions.add(new PayCardFrom(payerBank.get(i)));
+            }
+            for (PropertySet pSet: payerPropertySets) {
+                for(int i=0;i<pSet.getSize();i++)
+                    availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
+            }
         }
+
         return availableActions;
     }
 
@@ -101,8 +85,7 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
      */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        if(actionState == ActionState.GetReaction) return target;
-        else return playerID;
+        return payer;
     }
 
     /**
@@ -119,27 +102,19 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        if(actionState == ActionState.Target){
-            target = ((TargetPlayer) action).target;
-            actionState = ActionState.ChoosePropertySet;
-        } else if (actionState == ActionState.ChoosePropertySet) {
-            setType = ((ChoosePropertySet) action).setType;
-            setSize = ((ChoosePropertySet) action).setSize;
-            actionState = ActionState.GetReaction;
-        } else if (actionState == ActionState.GetReaction) {
+        if(!(action instanceof DoNothing)){
             MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-            if(!(action instanceof JustSayNoAction)) {
-                MDGS.movePropertySetFromTo(setType,target,playerID);
+            cardToPay = ((PayCardFrom) action).card;
+            boardType = ((PayCardFrom) action).type;
+            switch (boardType){
+                case Bank:
+                    MDGS.removeMoneyFrom()
+                case PropertySet:
             }
-            MDGS.discardCard(MonopolyDealCard.create(CardType.DealBreaker),playerID);
-            MDGS.useAction(1);
-            executed = true;
         }
+
     }
-//    @Override
-//    public void _afterAction(AbstractGameState gameState, AbstractAction action){
-//
-//    }
+
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
@@ -147,7 +122,8 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return executed;
+        if(amtToPay <= 0 || boardEmpty) return true;
+        else return false;
     }
 
     /**
@@ -174,28 +150,27 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public DealBreakerAction copy() {
+    public PayRent copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DealBreakerAction that = (DealBreakerAction) o;
-        return playerID == that.playerID && target == that.target && setSize == that.setSize && reaction == that.reaction && executed == that.executed && setType == that.setType && actionState == that.actionState;
+    public boolean equals(Object obj) {
+        // TODO: compare all other variables in the class
+        return obj instanceof MonopolyDealAction;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, setSize, setType, actionState, reaction, executed);
+        // TODO: return the hash of all other variables in the class
+        return 0;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "DealBreaker action";
+        return "PayRent action";
     }
 
     /**

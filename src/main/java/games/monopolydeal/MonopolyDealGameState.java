@@ -208,7 +208,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     public void addPropertyToSet(int playerID, MonopolyDealCard card, SetType SType){
         playerHands[playerID].remove(card);
         card.setUseAs(SType);
-        int indx = getSetIndx(playerID,SType,10);
+        int indx = getSetIndx(playerID,SType);
         if(indx != 99){
             playerPropertySets[playerID].get(indx).add(card);
         }
@@ -219,23 +219,23 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
     }
     public void removePropertyFrom(int playerID, MonopolyDealCard card, SetType from){
-        int indx = getSetIndx(playerID,from,10);
+        int indx = getSetIndx(playerID,from);
         playerPropertySets[playerID].get(indx).remove(card);
         if(playerPropertySets[playerID].get(indx).stream().count() == 0){
             playerPropertySets[playerID].remove(indx);
         }
     }
-    public void movePropertySetFromTo(SetType setType, int setSize, int target, int playerID) {
-        int indx = getSetIndx(target,setType,setSize);
+    public void movePropertySetFromTo(SetType setType, int target, int playerID) {
+        int indx = getSetIndx(target,setType);
         PropertySet pSet = playerPropertySets[target].get(indx);
         playerPropertySets[target].remove(indx);
         playerPropertySets[playerID].add(pSet);
     }
     // Using setSize as a verification incase there are multiple versions of same setType
-    public int getSetIndx(int playerID, SetType type, int setSize){
+    public int getSetIndx(int playerID, SetType type){
         int setIndx = 99;
         for (PropertySet set:playerPropertySets[playerID]) {
-            if(set.getSetType() == type && (setSize == set.getSize() || setSize == 10)){
+            if(set.getSetType() == type){
                 setIndx = playerPropertySets[playerID].indexOf(set);
             }
         }
@@ -316,6 +316,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     public List<PropertySet> getPropertySets(int playerID) {
         return playerPropertySets[playerID];
     }
+    public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks[playerId]; }
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
