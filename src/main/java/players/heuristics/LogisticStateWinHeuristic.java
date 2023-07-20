@@ -25,8 +25,10 @@ public class LogisticStateWinHeuristic extends LogisticStateHeuristic {
 
         switch (state.getPlayerResults()[playerId]) {
             case WIN_GAME:
+            case WIN_ROUND:
                 return 1.0;
             case LOSE_GAME:
+            case LOSE_ROUND:
                 return 0.0;
             case DRAW_GAME:
                 return 0.5;

@@ -6,6 +6,7 @@ import core.interfaces.*;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
+import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
 import utilities.Utils;
 
@@ -46,14 +47,6 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
-    public boolean gatherExpertIterationData = false;
-    public String expertIterationFileStem = "ExpertIterationData";
-    public String expertIterationStateFeatures = "";
-    public boolean gatherTreeRecorder = false;
-    public String treeRecorderFolder = "tree_recorder";
-    public IStateFeatureVector EIStateFeatureVector;
-    public String expertIterationActionFeatures = "";
-    public IActionFeatureVector EIActionFeatureVector;
     public IActionHeuristic advantageFunction;
     public int biasVisits = 0;
     public int omaVisits = 0;
@@ -65,7 +58,8 @@ public class MCTSParams extends PlayerParameters {
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
-    public IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
+    public IActionKey MASTActionKey;
+    public double MASTDefaultValue = 0.0;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -98,24 +92,20 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
-        addTunableParameter("expertIteration", false);
-        addTunableParameter("expIterFile", "");
-        addTunableParameter("expertIterationStateFeatures", "");
-        addTunableParameter("expertIterationActionFeatures", "");
-
-        addTunableParameter("gatherTreeRecorder", false);
-        addTunableParameter("treeRecorderFolder", "tree_recorder");
-
+        addTunableParameter("expertIterationSpecification", "");
+        addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
         addTunableParameter("normaliseRewards", true);
-        addTunableParameter("nodesStoreScoreDelta", false);
+        addTunableParameter("nodesStoreScoreDelta", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
         addTunableParameter("paranoid", false);
+        addTunableParameter("MASTActionKey", IActionKey.class);
+        addTunableParameter("MASTDefaultValue", 0.0);
     }
 
     @Override
@@ -147,25 +137,8 @@ public class MCTSParams extends PlayerParameters {
         hedgeBoltzmann = (double) getParameterValue("hedgeBoltzmann");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
-        gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
-        if (gatherExpertIterationData) {
-            maintainMasterState = true; // this is required!
-        }
-        expertIterationFileStem = (String) getParameterValue("expIterFile");
-        expertIterationStateFeatures = (String) getParameterValue("expertIterationStateFeatures");
-        if (!expertIterationStateFeatures.equals(""))
-            try {
-                EIStateFeatureVector = (IStateFeatureVector) Class.forName(expertIterationStateFeatures).getConstructor().newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        expertIterationActionFeatures = (String) getParameterValue("expertIterationActionFeatures");
-        if (!expertIterationActionFeatures.equals(""))
-            try {
-                EIActionFeatureVector = (IActionFeatureVector) Class.forName(expertIterationActionFeatures).getConstructor().newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+        // We will then instantiate the Expert Iteration data once it is needed
         biasVisits = (int) getParameterValue("biasVisits");
         omaVisits = (int) getParameterValue("omaVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
@@ -181,6 +154,8 @@ public class MCTSParams extends PlayerParameters {
                 || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;
         }
+        MASTActionKey = (IActionKey) getParameterValue("MASTActionKey");
+        MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         if (advantageFunction instanceof TunableParameters) {
@@ -196,20 +171,14 @@ public class MCTSParams extends PlayerParameters {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
             }
         }
-        // TODO: opponentHeuristic is not currently used
-        opponentHeuristic = (IStateHeuristic) getParameterValue("opponentHeuristic");
-        if (opponentHeuristic instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) opponentHeuristic;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("opponentHeuristic." + name));
-            }
-        }
+
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         if (rolloutPolicyParams != null)
             for (String name : rolloutPolicyParams.getParameterNames())
                 rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name))
                         ;
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
+
     }
 
     /**
@@ -228,21 +197,9 @@ public class MCTSParams extends PlayerParameters {
                 heuristic = (IStateHeuristic) child;
                 setParameterValue("heuristic", child);
                 break;
-            case "opponentHeuristic":
-                opponentHeuristic = (IStateHeuristic) child;
-                setParameterValue("opponentHeuristic", child);
-                break;
-            case "rolloutPolicyParams":
-                setParameterValue("rolloutPolicyParams", child);
-                break;
-            case "opponentModelParams":
-                setParameterValue("opponentModelParams", child);
-                break;
-            case "advantageFunction":
-                setParameterValue("advantageFunction", child);
-                break;
             default:
-                throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
+                setParameterValue(nameSpace, child);
+             //   throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
         }
         return child;
     }
@@ -274,16 +231,6 @@ public class MCTSParams extends PlayerParameters {
         retValue.opponentModel = opponentModel == null ? null : opponentModel.copy();
         retValue.opponentModelParams = opponentModelParams;
         retValue.exploreEpsilon = exploreEpsilon;
-        retValue.gatherExpertIterationData = gatherExpertIterationData;
-        retValue.expertIterationFileStem = expertIterationFileStem;
-        retValue.expertIterationStateFeatures = expertIterationStateFeatures;
-        retValue.EIStateFeatureVector = EIStateFeatureVector;
-        retValue.expertIterationActionFeatures = expertIterationActionFeatures;
-
-        retValue.gatherTreeRecorder = gatherTreeRecorder;
-        retValue.treeRecorderFolder = treeRecorderFolder;
-
-        retValue.EIActionFeatureVector = EIActionFeatureVector;
         retValue.advantageFunction = advantageFunction;
         retValue.biasVisits = biasVisits;
         retValue.omaVisits = omaVisits;
@@ -294,9 +241,9 @@ public class MCTSParams extends PlayerParameters {
         retValue.maintainMasterState = maintainMasterState;
         retValue.rolloutTermination = rolloutTermination;
         retValue.heuristic = heuristic;
-        retValue.opponentHeuristic = opponentHeuristic;
         retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
         retValue.paranoid = paranoid;
+        retValue.MASTActionKey = MASTActionKey;
         return retValue;
     }
 
@@ -324,7 +271,7 @@ public class MCTSParams extends PlayerParameters {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
             case MAST:
-                return new MASTPlayer(new Random(getRandomSeed()));
+                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, System.currentTimeMillis(), MASTDefaultValue);
             case CLASS:
                 // we have a bespoke Class to instantiate
                 return Utils.loadClassFromString(details);
@@ -337,10 +284,6 @@ public class MCTSParams extends PlayerParameters {
 
     public IStateHeuristic getHeuristic() {
         return heuristic;
-    }
-
-    public IStateHeuristic getOpponentHeuristic() {
-        return opponentHeuristic;
     }
 
     @Override

@@ -3,13 +3,13 @@ package players.simple;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import utilities.Utils;
 import core.interfaces.IActionHeuristic;
+import utilities.Utils;
 
-import java.util.*;
-import java.util.function.Function;
-
-import static java.util.stream.Collectors.toMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * This implementation of AbstractPlayer uses a Boltzmann distribution to select actions.
@@ -27,7 +27,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
     final double epsilon;
     final Random rnd;
 
-    final IActionHeuristic actionHeuristic;
+    protected IActionHeuristic actionHeuristic;
 
     /**
      *
@@ -53,8 +53,11 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        Function<AbstractAction, Double> valueFn = action -> actionHeuristic.evaluateAction(action, gameState);
-        Map<AbstractAction, Double> actionToValueMap = possibleActions.stream().collect(toMap(Function.identity(), valueFn));
+        double[] actionValues = actionHeuristic.evaluateAllActions(possibleActions, gameState);
+        Map<AbstractAction, Double> actionToValueMap = new HashMap<>();
+        for (int i = 0; i < possibleActions.size(); i++) {
+            actionToValueMap.put(possibleActions.get(i), actionValues[i]);
+        }
         return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd);
     }
 

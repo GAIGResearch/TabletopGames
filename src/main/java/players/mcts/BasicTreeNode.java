@@ -49,6 +49,7 @@ class BasicTreeNode {
             depth = 0;
         }
         this.rnd = rnd;
+        randomPlayer.setForwardModel(player.getForwardModel());
     }
 
     /**

@@ -4,6 +4,7 @@ import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
+import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
@@ -44,7 +45,7 @@ public class MCTSNodesAndVisitsTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(244)));
-        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(330245), players.size()));
+        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(330245), players.size()));
     }
 
     @Test
