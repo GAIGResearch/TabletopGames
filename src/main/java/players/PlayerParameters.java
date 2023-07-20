@@ -13,7 +13,10 @@ public class PlayerParameters extends TunableParameters {
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;
     public int budget = 4000;
-    public int breakMS = 10;
+    // breakMS is the number of milliseconds prior to the end of the turn that the player will stop searching
+    // this is intended mainly for competition situations, in which overrunning the time limit leads to disqualification.
+    // setting breakMS to some number greater than zero then adds a safety margin
+    public int breakMS = 0;
 
     // Heuristic
     public IStateHeuristic gameHeuristic;

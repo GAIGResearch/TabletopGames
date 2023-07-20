@@ -246,7 +246,7 @@ public class JSONUtils {
                     JSONObject json = loadJSONFile(file.getAbsolutePath());
                     String filename = file.getName();
                     // then remove the '.json' from the end
-                    map.put(keyPrefix + filename.substring(0, filename.length() - 6), json);
+                    map.put(keyPrefix + filename.substring(0, filename.length() - 5), json);
                 }
             }
         }
@@ -278,7 +278,9 @@ public class JSONUtils {
             for (String key : map.keySet()) {
                 Map<String, Object> subMap = map.get(key);
                 subMap.put("Name", key);
-                String row = headers.stream().map(k -> subMap.getOrDefault(k, "")).map(Object::toString).collect(Collectors.joining("\t"));
+                String row = headers.stream().map(k -> subMap.getOrDefault(k, ""))
+                        .map(Object::toString)
+                        .collect(Collectors.joining("\t"));
                 writer.write(row + "\n");
             }
             writer.close();

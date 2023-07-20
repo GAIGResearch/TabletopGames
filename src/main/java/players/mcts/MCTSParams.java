@@ -17,16 +17,17 @@ import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
-    public int rolloutLength = 10;
-    public int maxTreeDepth = 10;
+    public int rolloutLength = 10; // assuming we have a good heuristic
+    public int maxTreeDepth = 1000; // effectively no limit
     public double epsilon = 1e-6;
-    public MCTSEnums.Information information = Open_Loop;
+    public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
@@ -34,7 +35,7 @@ public class MCTSParams extends PlayerParameters {
     public double exp3Boltzmann = 0.1;
     public double hedgeBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
-    public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
+    public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
     public boolean paranoid = false;
