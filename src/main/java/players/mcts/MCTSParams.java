@@ -177,8 +177,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         if (rolloutPolicyParams != null)
             for (String name : rolloutPolicyParams.getParameterNames())
-                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name))
-                        ;
+                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name));
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 
     }

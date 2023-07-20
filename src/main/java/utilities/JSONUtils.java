@@ -71,6 +71,7 @@ public class JSONUtils {
                 } else if (arg instanceof Long) {
                     argClasses[i] = int.class;
                     args[i] = ((Long) arg).intValue();
+                    arg = args[i];
                 } else if (arg instanceof Double) {
                     argClasses[i] = double.class;
                 } else if (arg instanceof Boolean) {
@@ -92,7 +93,7 @@ public class JSONUtils {
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
                         args[i] = ((Long) first).intValue();
-                        arg = ((JSONArray) arg).toArray(new Long[0]);
+                        arg = args[i];
                     } else if (first instanceof Double) {
                         argClasses[i] = double[].class;
                         arg = ((JSONArray) arg).toArray(new Double[0]);
@@ -102,7 +103,6 @@ public class JSONUtils {
                     } else if (first instanceof String) {
                         argClasses[i] = String[].class;
                         arg = ((JSONArray) arg).toArray(new String[0]);
-                        int a = 0;
                     }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());

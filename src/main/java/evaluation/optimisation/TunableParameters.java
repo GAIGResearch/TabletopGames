@@ -166,9 +166,10 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             if (value instanceof TunableParameters) {
                 // then we have to recurse
                 TunableParameters subParams = (TunableParameters) value;
-                tunable.setParameterValue(name, subParams.copy());
+                TunableParameters subParamsCopy = subParams.copy();
+                tunable.setParameterValue(name, subParamsCopy);
             } else {
-                tunable.setParameterValue(name, getParameterValue(name));
+                tunable.setParameterValue(name, value);
             }
         }
         tunable._reset();
@@ -269,7 +270,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                 finalValue = ((Long) value).intValue();
             currentValues.put(parameterName, finalValue);
         }
-        _reset();
+ //       _reset();
     }
 
     /**
