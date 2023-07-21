@@ -65,13 +65,13 @@ public class MonopolyDealParameters extends TunableParameters {
 
         //Action Cards
         cardsIncludedInGame.put(CardType.PassGo,10);
-//        cardsIncludedInGame.put(CardType.DoubleTheRent,2);
+        cardsIncludedInGame.put(CardType.DoubleTheRent,2);
 //
-        cardsIncludedInGame.put(CardType.ForcedDeal,4);
-        cardsIncludedInGame.put(CardType.SlyDeal,3);
+//        cardsIncludedInGame.put(CardType.ForcedDeal,4);
+//        cardsIncludedInGame.put(CardType.SlyDeal,3);
 //
-        cardsIncludedInGame.put(CardType.DebtCollector,13);
-//        cardsIncludedInGame.put(CardType.ItsMyBirthday,3);
+        cardsIncludedInGame.put(CardType.DebtCollector,3);
+        cardsIncludedInGame.put(CardType.ItsMyBirthday,13);
 //
 //        cardsIncludedInGame.put(CardType.House,3);
 //        cardsIncludedInGame.put(CardType.Hotel,3);
@@ -102,7 +102,7 @@ public class MonopolyDealParameters extends TunableParameters {
         cardsIncludedInGame.put(CardType.RailRoadLightBlueWild,1);
 
         //Rent Cards
-//        cardsIncludedInGame.put(CardType.MulticolorRent,3);
+        cardsIncludedInGame.put(CardType.MulticolorRent,3);
 //        cardsIncludedInGame.put(CardType.GreenBlueRent,2);
 //        cardsIncludedInGame.put(CardType.BrownLightBlueRent,2);
 //        cardsIncludedInGame.put(CardType.PinkOrangeRent,2);

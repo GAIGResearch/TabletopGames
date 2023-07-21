@@ -11,8 +11,6 @@ import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
-import org.apache.poi.ss.formula.atp.Switch;
-import scala.sys.Prop;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
@@ -45,10 +43,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     // Player turn status members
     int actionsLeft = 3;
     boolean turnStart = true;
-    // Decision making placeholders for extended action sequence
-    // int target = 99;
-    // SlyDeal and ForcedDeal
-    // MonopolyDealCard give,take;
 
     /**
      * @param gameParameters - game parameters.
@@ -201,11 +195,10 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerHands[playerID].remove(money);
     }
     public void removeMoneyFrom(int playerID, MonopolyDealCard money) {
-        playerBanks[playerID].add(money);
+        playerBanks[playerID].remove(money);
     }
     public boolean isBoardEmpty(int playerID){
-        if(playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0) return true;
-        else return false;
+        return playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0;
     }
     // add property
     public void addProperty(int playerID, MonopolyDealCard card){
@@ -308,6 +301,7 @@ public class MonopolyDealGameState extends AbstractGameState {
                 return checkForMulticolorRent(playerID);
             case PassGo:
             case DebtCollector:
+            case ItsMyBirthday:
                 return true;
             case JustSayNo:
             case DoubleTheRent:
@@ -316,12 +310,10 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
     }
     public boolean checkForActionCards(int playerID) {
-        boolean check = false;
         for(int i=0;i<playerHands[playerID].getSize();i++){
-            check = checkActionCard(playerID,playerHands[playerID].get(i).cardType());
-            if(check) return true;
+            if(checkActionCard(playerID,playerHands[playerID].get(i).cardType())) return true;
         }
-        return check;
+        return false;
     }
     public void useAction(int actionCost) {
         actionsLeft = actionsLeft-actionCost;
