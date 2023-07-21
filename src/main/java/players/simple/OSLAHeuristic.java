@@ -27,23 +27,6 @@ public class OSLAHeuristic extends TunableParameters {
         return retValue;
     }
 
-    /**
-     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
-     * If it is, then we set this as the heuristic after the parent code in TunableParameters
-     * has done the work to merge the search spaces together.
-     *
-     * @param json The raw JSON
-     * @return The instantiated object
-     */
-    @Override
-    public Object registerChild(String nameSpace, JSONObject json) {
-        Object child = super.registerChild(nameSpace, json);
-        if (child instanceof IStateHeuristic) {
-            heuristic = (IStateHeuristic) child;
-        }
-        return child;
-    }
-
     @Override
     public void _reset() {
         if (heuristic instanceof TunableParameters) {

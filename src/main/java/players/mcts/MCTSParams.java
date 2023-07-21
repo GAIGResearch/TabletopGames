@@ -158,51 +158,11 @@ public class MCTSParams extends PlayerParameters {
         MASTActionKey = (IActionKey) getParameterValue("MASTActionKey");
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
-        // TODO: TunableHeuristics should be dealt with more automatically? Reduce code duplication.
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
-//        if (advantageFunction instanceof TunableParameters) {
-//            TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;
-//            for (String name : tunableHeuristic.getParameterNames()) {
-//                tunableHeuristic.setParameterValue(name, this.getParameterValue("advantageFunction." + name));
-//            }
-//        }
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
-//        if (heuristic instanceof TunableParameters) {
-//            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
-//            for (String name : tunableHeuristic.getParameterNames()) {
-//                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
-//            }
-//        }
-
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
-//        if (rolloutPolicyParams != null)
-//            for (String name : rolloutPolicyParams.getParameterNames())
-//                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name));
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 
-    }
-
-    /**
-     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
-     * If it is, then we set this as the heuristic after the parent code in TunableParameters
-     * has done the work to merge the search spaces together.
-     *
-     * @param json The raw JSON
-     * @return The instantiated object
-     */
-    @Override
-    public Object registerChild(String nameSpace, JSONObject json) {
-        Object child = super.registerChild(nameSpace, json);
-        switch (nameSpace) {
-            case "heuristic":
-                heuristic = (IStateHeuristic) child;
-                setParameterValue("heuristic", child);
-                break;
-            default:
-                setParameterValue(nameSpace, child);
-             //   throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
-        }
-        return child;
     }
 
     @Override
@@ -212,7 +172,6 @@ public class MCTSParams extends PlayerParameters {
         // unless they have been 'registered' with setParameterValue("name", value)
         return new MCTSParams(System.currentTimeMillis());
     }
-
 
     public AbstractPlayer getOpponentModel() {
         if (opponentModel != null)

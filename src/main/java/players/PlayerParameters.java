@@ -60,7 +60,6 @@ public class PlayerParameters extends TunableParameters {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlayerParameters)) return false;
-        if (!super.equals(o)) return false;
         PlayerParameters that = (PlayerParameters) o;
         return Double.compare(that.exploreEpsilon, exploreEpsilon) == 0 && budget == that.budget && breakMS == that.breakMS && budgetType == that.budgetType && Objects.equals(gameHeuristic, that.gameHeuristic) && Objects.equals(actionSpace, that.actionSpace);
     }

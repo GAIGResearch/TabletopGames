@@ -92,27 +92,6 @@ public class RHEAParams extends PlayerParameters
         return new RHEAPlayer(this);
     }
 
-
-    /**
-     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
-     * If it is, then we set this as the heuristic after the parent code in TunableParameters
-     * has done the work to merge the search spaces together.
-     *
-     * @param json The raw JSON
-     * @return The instantiated object
-     */
-    @Override
-    public Object registerChild(String nameSpace, JSONObject json) {
-        Object child = super.registerChild(nameSpace, json);
-        if ("heuristic".equals(nameSpace)) {
-            heuristic = (IStateHeuristic) child;
-            setParameterValue("heuristic", child);
-        } else {
-            throw new AssertionError("Unknown nameSpace : " + nameSpace);
-        }
-        return child;
-    }
-
     public IStateHeuristic getHeuristic() {
         return heuristic;
     }

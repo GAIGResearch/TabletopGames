@@ -5,6 +5,7 @@ import evodef.AgentSearchSpace;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.io.FileReader;
@@ -70,6 +71,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         initialiseITP(tunableParameters);
     }
 
+    @SuppressWarnings("unchecked")
     private static List<Pair<String, Class<?>>> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters itp) {
         List<Pair<String, Class<?>>> retValue = new ArrayList<>();
         for (Object baseKey : json.keySet()) {
@@ -82,11 +84,13 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         // we use key as the nameSpace
                         try {
                             JSONObject subJSON = (JSONObject) data;
+                            subJSON.get("class");
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
-                            Object subitp = itp.registerChild(key, subJSON);
-                            if (subitp instanceof ITunableParameters)
-                                retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) subitp));
+                            Object child = registerChild(key, subJSON);
+                            itp.setParameterValue(key, child);
+                            if (child instanceof ITunableParameters)
+                                retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
@@ -116,6 +120,23 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         }
         return retValue;
     }
+
+    public static Object registerChild(String nameSpace, JSONObject json) {
+        try {
+            if (debug)
+                System.out.println("Registering " + nameSpace);
+            Object child = JSONUtils.loadClassFromJSON(json);
+            if (child instanceof TunableParameters) {
+                TunableParameters tunableChild = (TunableParameters) child;
+                TunableParameters.loadFromJSON(tunableChild, json);
+            }
+            return child;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError(e.getMessage() + " when trying to a nested TunableParameters : " + json.get("class"));
+        }
+    }
+
 
     private static Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json, ITunableParameters itp) {
         return extractRecursiveParameters("", json, itp).stream()
@@ -157,6 +178,12 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         itp = tunableParameters;
         tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
                 .collect(toMap(i -> i, i -> getSearchKeys().get(i)));
+    }
+
+    public int getIndexOf(String parameter) {
+        if (!getSearchKeys().contains(parameter))
+            return -1;
+        return getSearchKeys().indexOf(parameter);
     }
 
     public Object getAgent(int[] settings) {

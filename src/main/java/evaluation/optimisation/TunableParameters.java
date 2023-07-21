@@ -8,6 +8,7 @@ import utilities.JSONUtils;
 
 import java.io.FileReader;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -109,7 +110,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             if (retValue instanceof TunableParameters) {
                 TunableParameters subParams = (TunableParameters) retValue;
                 TunableParameters.loadFromJSON(subParams, subJson);
-                params.registerChild(name, subJson);
+                params.setParameterValue(name, subParams);
+            //    params.registerChild(name, subJson);
             }
             return retValue;
         }
@@ -257,6 +259,13 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      */
     @Override
     public void setParameterValue(String parameterName, Object value) {
+        if (parameterName.split(Pattern.quote(".")).length > 1) {
+            // in this case we pass on to the subParam (as well as updating here)
+            String[] split = parameterName.split(Pattern.quote("."));
+            String subParamName = split[0];
+            String subParam = parameterName.substring(subParamName.length() + 1);
+            ((ITunableParameters)getParameterValue(subParamName)).setParameterValue(subParam, value);
+        }
         if (parameterTypes.get(parameterName).isEnum() && value instanceof String) {
             Object[] values = parameterTypes.get(parameterName).getEnumConstants();
             Optional<Object> found = Arrays.stream(values).filter(v -> v.toString().equals(value)).findFirst();
@@ -270,6 +279,23 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                 finalValue = ((Long) value).intValue();
             currentValues.put(parameterName, finalValue);
         }
+        // Then, if value is TunableParameter itself, we 'lift' its attributes up to the top level
+        // and remove any previous ones
+        if (value instanceof TunableParameters) {
+            TunableParameters subParams = (TunableParameters) value;
+            List<String> oldParamNames = parameterNames.stream().filter(n -> n.startsWith(parameterName + ".")).collect(toList());
+            // we now remove these
+            oldParamNames.forEach(parameterNames::remove);
+            oldParamNames.forEach(possibleValues::remove);
+            oldParamNames.forEach(defaultValues::remove);
+            oldParamNames.forEach(currentValues::remove);
+            for (String name : subParams.getParameterNames()) {
+                String liftedName = parameterName + "." + name;
+                addTunableParameter(liftedName, subParams.getDefaultParameterValue(name), subParams.getPossibleValues(name));
+                setParameterValue(liftedName, subParams.getParameterValue(name));
+            }
+        }
+
         // this sets the value within ITunableParameters; but this may need to be transposed to the local field
         _reset();
     }
@@ -387,45 +413,20 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     @Override
-    public Object registerChild(String nameSpace, JSONObject json) {
-        try {
-            if (debug)
-                System.out.println("Registering " + nameSpace);
-            int periodIndex = nameSpace.lastIndexOf(".");
-            if (periodIndex > -1)
-                nameSpace = nameSpace.substring(periodIndex + 1);
-            Object child = JSONUtils.loadClassFromJSON(json);
-            if (child instanceof TunableParameters) {
-                TunableParameters tunableChild = (TunableParameters) child;
-                TunableParameters.loadFromJSON(tunableChild, json);
-                // we then need to 'pull up' the parameters in the sub-component into our list of parameters
-                // this is so that we have a single tunable set
-                for (String name : tunableChild.getParameterNames()) {
-                    addTunableParameter(nameSpace + "." + name, tunableChild.getDefaultParameterValue(name));
-                    // and then set the value
-                    tunableChild.setParameterValue(name, tunableChild.getDefaultParameterValue(name));
-                }
-            }
-            return child;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getMessage() + " when trying to a nested TunableParameters : " + json.get("class"));
-        }
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TunableParameters)) return false;
         TunableParameters that = (TunableParameters) o;
-        return getRandomSeed() == that.getRandomSeed() && _equals(o)
+        // getRandomSeed() == that.getRandomSeed() && removed, so that equals (and hashcode) covers parameters only
+        return  _equals(o)
                 && that.parameterNames.equals(parameterNames)
                 && that.possibleValues.equals(possibleValues)
+                && that.currentValues.equals(currentValues)
                 && that.defaultValues.equals(defaultValues);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), parameterNames, possibleValues, defaultValues);
+        return Objects.hash(super.hashCode(), parameterNames, possibleValues, defaultValues, currentValues);
     }
 }

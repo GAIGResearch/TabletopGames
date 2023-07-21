@@ -39,6 +39,10 @@ public class CoarseTunableHeuristic extends TunableParameters implements IStateH
         addTunableParameter("heuristicType", HeuristicType.WIN_ONLY);
     }
 
+    public HeuristicType getHeuristicType() {
+        return heuristicType;
+    }
+
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         return heuristicType.heuristic.evaluateState(gs, playerId);
