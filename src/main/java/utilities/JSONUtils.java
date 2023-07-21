@@ -306,13 +306,15 @@ public class JSONUtils {
                 for (int i = 0; i < partsInFileOrder.length; ++i) {
                     map.put(headersInFileOrder[i], partsInFileOrder[i]);
                 }
+                String name = map.get("Name");
+                map.remove("Name");
                 // Now we break up the map into the top-level and sub-objects
 
                 JSONObject json = createJSONFromMap(map);
                 // As we go through the entries, we add them to the JSON object
                 // But any keys with a '.' in them are treated as sub-objects
 
-                FileWriter writer = new FileWriter(directory + "/" + map.get("Name") + ".json");
+                FileWriter writer = new FileWriter(directory + "/" + name + ".json");
                 String jsonStr = json.toJSONString();
                 jsonStr = jsonStr.replaceAll(Pattern.quote("{"), "{\n");
                 jsonStr = jsonStr.replaceAll(Pattern.quote("}"), "\n}");
@@ -342,26 +344,28 @@ public class JSONUtils {
             if (subMap.size() == 1) {
                 // this is a single entry, so we just add it as a String
                 String value = subMap.get(key);
-                try {
-                    int i = Integer.parseInt(value);
-                    json.put(key, i);
-                    continue;
-                } catch (NumberFormatException e) {
-                    // do nothing
+                if (!value.isEmpty()) {
+                    try {
+                        int i = Integer.parseInt(value);
+                        json.put(key, i);
+                        continue;
+                    } catch (NumberFormatException e) {
+                        // do nothing
+                    }
+                    try {
+                        double d = Double.parseDouble(value);
+                        json.put(key, d);
+                        continue;
+                    } catch (NumberFormatException e) {
+                        // do nothing
+                    }
+                    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                        json.put(key, Boolean.parseBoolean(value));
+                        continue;
+                    }
+                    // else it is a String
+                    json.put(key, stuff.get(key));
                 }
-                try {
-                    double d = Double.parseDouble(value);
-                    json.put(key, d);
-                    continue;
-                } catch (NumberFormatException e) {
-                    // do nothing
-                }
-                if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
-                    json.put(key, Boolean.parseBoolean(value));
-                    continue;
-                }
-                // else it is a String
-                json.put(key, stuff.get(key));
             } else {
                 // this is a sub-object, so we recursively call this method
                 JSONObject subJSON = createJSONFromMap(subMap);

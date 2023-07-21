@@ -120,6 +120,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         }
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
+        if (data.getClass() == Integer.class && defaultValue.getClass() == Double.class)
+            return (T) Double.valueOf((Integer) data);
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
             Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {
