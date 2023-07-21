@@ -276,6 +276,14 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return false;
     }
+    public boolean checkForMulticolorRent(int playerID){
+        for (PropertySet pSet: playerPropertySets[playerID]) {
+            if(pSet.getSetType() != SetType.UNDEFINED){
+                return true;
+            }
+        }
+        return false;
+    }
     public boolean checkForDealBreaker(int playerID){
         for(int i = 0;i <getNPlayers();i++){
             if(i!=playerID && playerDealBreaker(i)) return true;
@@ -296,6 +304,8 @@ public class MonopolyDealGameState extends AbstractGameState {
                 return checkForSlyDeal(playerID);
             case DealBreaker:
                 return checkForDealBreaker(playerID);
+            case MulticolorRent:
+                return checkForMulticolorRent(playerID);
             case PassGo:
             case DebtCollector:
                 return true;
