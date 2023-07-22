@@ -315,10 +315,12 @@ public class JSONUtils {
                 // But any keys with a '.' in them are treated as sub-objects
 
                 FileWriter writer = new FileWriter(directory + "/" + name + ".json");
-                String jsonStr = json.toJSONString();
-                jsonStr = jsonStr.replaceAll(Pattern.quote("{"), "{\n");
-                jsonStr = jsonStr.replaceAll(Pattern.quote("}"), "\n}");
-                jsonStr = jsonStr.replaceAll(Pattern.quote(","), ",\n");
+                String jsonStr = json.toJSONString()
+                        .replaceAll(Pattern.quote("{"), "{\n")
+                        .replaceAll(Pattern.quote("}"), "\n}")
+                        .replaceAll(Pattern.quote(","), ",\n")
+                        .replaceAll(Pattern.quote("\"["), "[")
+                                .replaceAll(Pattern.quote("]\""), "]");
                 writer.write(jsonStr);
                 writer.close();
             }
