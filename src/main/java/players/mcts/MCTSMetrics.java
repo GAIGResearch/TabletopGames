@@ -31,6 +31,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 int visits = root.getVisits();
                 if (visits == 0) visits = 1;
                 records.put("PlayerType", mctsPlayer.toString());
+                records.put("PlayerID", e.state.getCurrentPlayer());
                 records.put("Iterations", root.getVisits());
                 records.put("MaxDepth", treeStats.depthReached);
                 records.put("MeanLeafDepth", treeStats.meanLeafDepth);
@@ -59,6 +60,7 @@ public class MCTSMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> cols = new HashMap<>();
             cols.put("PlayerType", String.class);
+            cols.put("PlayerID", Integer.class);
             cols.put("Iterations", Integer.class);
             cols.put("MaxDepth", Integer.class);
             cols.put("MeanLeafDepth", Double.class);
@@ -96,6 +98,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 }
                 List<TreeStatistics> treeStats = otherRoots.stream().map(TreeStatistics::new).collect(Collectors.toList());
                 records.put("PlayerType", mctsPlayer.toString());
+                records.put("PlayerID", e.state.getCurrentPlayer());
                 records.put("MaxDepth", treeStats.stream().mapToInt(ts -> ts.depthReached).average().orElse(0.0));
                 records.put("MeanLeafDepth", treeStats.stream().mapToDouble(ts -> ts.meanLeafDepth).average().orElse(0.0));
                 records.put("Nodes", treeStats.stream().mapToInt(ts -> ts.totalNodes).average().orElse(0.0));
@@ -116,6 +119,7 @@ public class MCTSMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> cols = new HashMap<>();
             cols.put("PlayerType", String.class);
+            cols.put("PlayerID", Integer.class);
             cols.put("MaxDepth", Double.class);
             cols.put("MeanLeafDepth", Double.class);
             cols.put("Nodes", Double.class);

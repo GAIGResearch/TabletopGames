@@ -430,8 +430,8 @@ public class Game {
                  */
 
                 // Get player to ask for actions next (This horrendous line is for backwards compatibility).
-                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder() instanceof ReactiveTurnOrder
-                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder()).getReactivePlayers().size() > 0);
+                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder()).getReactivePlayers().size() > 0);
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
@@ -500,7 +500,7 @@ public class Game {
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
         copyTime = (System.nanoTime() - s);
-  //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
+        //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
         s = System.nanoTime();
@@ -516,9 +516,9 @@ public class Game {
                 lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
             }
             throw new AssertionError("No actions available for player " + activePlayer
-                    + (lastAction != null? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
+                    + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + (topOfStack != null? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
+                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
 
         }
         actionComputeTime = (System.nanoTime() - s);
@@ -545,8 +545,11 @@ public class Game {
             } else {
                 // Get action from player, and time it
                 s = System.nanoTime();
-                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
+                if (debug)
+                    System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
+                if (debug)
+                    System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;
@@ -654,7 +657,7 @@ public class Game {
      * @return - copy time
      */
     public double getCopyTime() {
-      //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
+        //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
         return copyTime;
     }
 
@@ -729,6 +732,7 @@ public class Game {
             listener.setGame(this);
         }
     }
+
     public List<IGameListener> getListeners() {
         return listeners;
     }
