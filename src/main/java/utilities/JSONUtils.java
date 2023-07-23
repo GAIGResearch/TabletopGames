@@ -320,7 +320,7 @@ public class JSONUtils {
                         .replaceAll(Pattern.quote("}"), "\n}")
                         .replaceAll(Pattern.quote(","), ",\n")
                         .replaceAll(Pattern.quote("\"["), "[")
-                                .replaceAll(Pattern.quote("]\""), "]");
+                        .replaceAll(Pattern.quote("]\""), "]");
                 writer.write(jsonStr);
                 writer.close();
             }

@@ -1083,6 +1083,28 @@ public class BaseActionCardsTest {
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
     }
 
+
+    @Test
+    public void throneRoomWithThroneRoomAndThenNoCard() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertEquals(DominionCard.create(CardType.THRONE_ROOM).getAction(0), nextActions.get(0));
+
+        fm.next(state, nextActions.get(0));
+        // playing the second throne room - with no actions left should give us a single Pass action
+        nextActions = fm.computeAvailableActions(state);
+        assertEquals(1, nextActions.size());
+        assertEquals(new EndPhase(), nextActions.get(0));
+        fm.next(state, nextActions.get(0)); // EndPhase
+        assertFalse(state.isActionInProgress());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
     @Test
     public void bandit() {
         DominionGameState state = (DominionGameState) game.getGameState();
