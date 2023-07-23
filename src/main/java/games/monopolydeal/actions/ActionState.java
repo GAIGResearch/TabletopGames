@@ -6,6 +6,5 @@ public enum ActionState {
     TakeCard,
     CollectRent,
     ChoosePropertySet,
-    GetReaction,
-    Execute
+    GetReaction
 }

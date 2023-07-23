@@ -103,7 +103,7 @@ public class MonopolyDealParameters extends TunableParameters {
 
         //Rent Cards
         cardsIncludedInGame.put(CardType.MulticolorRent,3);
-//        cardsIncludedInGame.put(CardType.GreenBlueRent,2);
+        cardsIncludedInGame.put(CardType.GreenBlueRent,2);
 //        cardsIncludedInGame.put(CardType.BrownLightBlueRent,2);
 //        cardsIncludedInGame.put(CardType.PinkOrangeRent,2);
 //        cardsIncludedInGame.put(CardType.RedYellowRent,2);

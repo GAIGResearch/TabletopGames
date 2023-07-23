@@ -87,7 +87,8 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 }
                 break;
             case CollectRent:
-                availableActions.add(new PayRent(target,playerID,rent));
+                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
+                else availableActions.add(new PayRent(target,playerID,rent));
                 break;
         }
         return availableActions;
@@ -123,19 +124,13 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
         switch (actionState){
             case Target:
                 target = ((TargetPlayer) action).target;
-                actionState = ActionState.GetReaction;
+                actionState = ActionState.ChoosePropertySet;
                 break;
             case ChoosePropertySet:
                 rent = (doubleTheRent)?(((RentOf) action).rent) * 2 : ((RentOf) action).rent;
+                actionState = ActionState.GetReaction;
                 break;
             case GetReaction:
-                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-                MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
-                if(doubleTheRent) {
-                    MDGS.useAction(2);
-                    MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
-                }
-                else MDGS.useAction(1);
                 if(action instanceof JustSayNoAction) executed = true;
                 else actionState = ActionState.CollectRent;
                 break;
@@ -171,6 +166,13 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
+        if(doubleTheRent) {
+            MDGS.useAction(2);
+            MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
+        }
+        else MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;
     }

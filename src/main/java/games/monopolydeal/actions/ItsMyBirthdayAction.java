@@ -68,7 +68,8 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
                 }
                 break;
             case CollectRent:
-                availableActions.add(new PayRent(target,playerID,2));
+                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
+                else availableActions.add(new PayRent(target,playerID,2));
         }
         return availableActions;
     }
@@ -157,6 +158,7 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         MDGS.discardCard(MonopolyDealCard.create(CardType.ItsMyBirthday),playerID);
         MDGS.useAction(1);
         // Set first target
+        getNextTarget();
         gs.setActionInProgress(this);
         return true;
     }

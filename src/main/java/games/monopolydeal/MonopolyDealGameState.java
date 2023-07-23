@@ -162,7 +162,6 @@ public class MonopolyDealGameState extends AbstractGameState {
 
         return retValue;
     }
-
     public boolean canModifyBoard(int playerID){
         for (PropertySet pSet: playerPropertySets[playerID]) {
             if(pSet.hasWild) return true;
@@ -289,6 +288,12 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return false;
     }
+    public boolean playerHasSet(int playerID, SetType setType){
+        for (PropertySet pSet: playerPropertySets[playerID]) {
+            if(pSet.getSetType() == setType) return true;
+        }
+        return false;
+    }
     public boolean checkActionCard(int playerID, CardType cardType){
         switch (cardType){
             case ForcedDeal:
@@ -299,12 +304,24 @@ public class MonopolyDealGameState extends AbstractGameState {
                 return checkForDealBreaker(playerID);
             case MulticolorRent:
                 return checkForMulticolorRent(playerID);
+            case GreenBlueRent:
+                return playerHasSet(playerID, SetType.Green) || playerHasSet(playerID, SetType.Blue);
+            case BrownLightBlueRent:
+                return playerHasSet(playerID, SetType.Brown) || playerHasSet(playerID, SetType.LightBlue);
+            case PinkOrangeRent:
+                return playerHasSet(playerID, SetType.Pink) || playerHasSet(playerID, SetType.Orange);
+            case RedYellowRent:
+                return playerHasSet(playerID, SetType.Red) || playerHasSet(playerID, SetType.Yellow);
+            case RailRoadUtilityRent:
+                return playerHasSet(playerID, SetType.RailRoad) || playerHasSet(playerID, SetType.Utility);
             case PassGo:
             case DebtCollector:
             case ItsMyBirthday:
                 return true;
             case JustSayNo:
             case DoubleTheRent:
+            case House:
+            case Hotel:
             default:
                 return false;
         }
@@ -314,6 +331,12 @@ public class MonopolyDealGameState extends AbstractGameState {
             if(checkActionCard(playerID,playerHands[playerID].get(i).cardType())) return true;
         }
         return false;
+    }
+    public PropertySet getPlayerPropertySet(int playerID, SetType setType) {
+        for (PropertySet pSet: playerPropertySets[playerID]) {
+            if(pSet.getSetType()==setType) return pSet;
+        }
+        throw new AssertionError("Property Set not found");
     }
     public void useAction(int actionCost) {
         actionsLeft = actionsLeft-actionCost;
@@ -342,7 +365,6 @@ public class MonopolyDealGameState extends AbstractGameState {
             return getPlayerResults()[playerId].value;
         }
     }
-
     /**
      * @param playerId - player observing the state.
      * @return the true score for the player, according to the game rules. May be 0 if there is no score in the game.
@@ -367,7 +389,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         MonopolyDealGameState state = (MonopolyDealGameState) o;
         return actionsLeft == state.actionsLeft && turnStart == state.turnStart && Objects.equals(params, state.params) && Objects.equals(rnd, state.rnd) && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
     }
-
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), params, rnd, drawPile, discardPile, actionsLeft, turnStart);
