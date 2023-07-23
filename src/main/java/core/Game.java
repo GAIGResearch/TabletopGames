@@ -577,7 +577,7 @@ public class Game {
 
         // Check player timeout
         if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-            forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
+            action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
         } else {
             // Resolve action and game rules, time it
             s = System.nanoTime();
