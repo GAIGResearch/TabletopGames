@@ -42,7 +42,6 @@ public class NTBEA {
     List<int[]> elites = new ArrayList<>();
     Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
     GameEvaluator evaluator;
-    AbstractParameters gameParams;
     GameType game;
     int nPlayers;
     int currentIteration = 0;
@@ -100,7 +99,7 @@ public class NTBEA {
         evaluator = new GameEvaluator(
                 game,
                 params.searchSpace,
-                gameParams,
+                params.gameParams,
                 nPlayers,
                 opponents,
                 params.seed,
@@ -157,7 +156,7 @@ public class NTBEA {
                 System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
                         gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
 
-            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, gameParams);
+            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams);
             tournament.verbose = false;
             createListeners().forEach(tournament::addListener);
             tournament.run();

@@ -1,5 +1,6 @@
 package evaluation.optimisation;
 
+import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 import evaluation.RunArg;
 import org.json.simple.JSONObject;
@@ -39,7 +40,7 @@ public class NTBEAParameters {
     public List<String> listenerClasses;
     public String destDir;
     public ITPSearchSpace searchSpace;
-
+    public AbstractParameters gameParams;
 
     public NTBEAParameters(Map<RunArg, Object> args) {
         this(args, Function.identity());
@@ -59,6 +60,7 @@ public class NTBEAParameters {
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
         seed = (long) args.get(RunArg.seed);
+        gameParams = (AbstractParameters) args.get(RunArg.gameParams);
         mode = Mode.valueOf((String) args.get(RunArg.NTBEAmode));
         logFile = (String) args.get(RunArg.output);
         if (logFile.isEmpty()) logFile = "NTBEA.log";

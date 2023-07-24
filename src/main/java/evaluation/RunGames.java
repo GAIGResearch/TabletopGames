@@ -20,11 +20,13 @@ import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static evaluation.RunArg.*;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
@@ -139,8 +141,8 @@ public class RunGames implements IGameRunner {
                 for (String listenerClass : ((List<String>) config.get(listener))) {
                     IGameListener gameTracker = IGameListener.createListener(listenerClass, (String) config.get(metrics));
                     tournament.addListener(gameTracker);
-                    List<String> directories = new ArrayList<>();
-                    directories.add((String) config.get(destDir));
+                    String outputDir = (String) config.get(destDir);
+                    List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
                     if (gamesAndPlayerCounts.size() > 1)
                         directories.add(gameName);
                     if (gamesAndPlayerCounts.get(gameType).length > 1)

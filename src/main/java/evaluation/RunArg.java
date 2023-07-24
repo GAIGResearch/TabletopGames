@@ -3,6 +3,7 @@ package evaluation;
 import org.json.simple.JSONObject;
 import scala.concurrent.impl.FutureConvertersImpl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +30,7 @@ public enum RunArg {
     destDir("The directory to which the results will be written. Defaults to 'metrics/out'.\n" +
             "\t If (and only if) this is being run for multiple games/player counts, then a subdirectory\n" +
             "\t will be created for each game, and then within that for  each player count combination.",
-            "metrics/out",
+            "metrics" + File.separator + "out",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
             0,
@@ -54,7 +55,7 @@ public enum RunArg {
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     gameParams("(Optional) A JSON file from which the game parameters will be initialised.",
             "",
-            new Usage[]{Usage.RunGames}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     iterations("The number of iterations of NTBEA to run (default is 1000)",
             1000,
             new Usage[]{Usage.ParameterSearch}),
@@ -72,7 +73,7 @@ public enum RunArg {
     matchups("The total number of matchups to run in a tournament if mode=random...\n" +
             "\t...or the number of matchups to run per combination of players if mode=exhaustive\n" +
             "\tfor NTBEA this will be used as a final tournament between the recommended agents from each run.",
-            1,
+            0,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     metrics("(Optional) The full class name of an IMetricsCollection implementation. " +
             "\t The recommended usage is to include these in the JSON file that defines the listener,\n" +
