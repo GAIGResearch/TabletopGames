@@ -3,12 +3,12 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
-import utilities.Utils;
+import utilities.JSONUtils;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -18,16 +18,17 @@ import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
-    public int rolloutLength = 10;
-    public int maxTreeDepth = 10;
+    public int rolloutLength = 10; // assuming we have a good heuristic
+    public int maxTreeDepth = 1000; // effectively no limit
     public double epsilon = 1e-6;
-    public MCTSEnums.Information information = Open_Loop;
+    public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
@@ -35,7 +36,7 @@ public class MCTSParams extends PlayerParameters {
     public double exp3Boltzmann = 0.1;
     public double hedgeBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
-    public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
+    public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
     public boolean paranoid = false;
@@ -158,95 +159,19 @@ public class MCTSParams extends PlayerParameters {
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
-        if (advantageFunction instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("advantageFunction." + name));
-            }
-        }
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        if (heuristic instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
-            }
-        }
-
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
-        if (rolloutPolicyParams != null)
-            for (String name : rolloutPolicyParams.getParameterNames())
-                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name))
-                        ;
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 
     }
 
-    /**
-     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
-     * If it is, then we set this as the heuristic after the parent code in TunableParameters
-     * has done the work to merge the search spaces together.
-     *
-     * @param json The raw JSON
-     * @return The instantiated object
-     */
-    @Override
-    public Object registerChild(String nameSpace, JSONObject json) {
-        Object child = super.registerChild(nameSpace, json);
-        switch (nameSpace) {
-            case "heuristic":
-                heuristic = (IStateHeuristic) child;
-                setParameterValue("heuristic", child);
-                break;
-            default:
-                setParameterValue(nameSpace, child);
-             //   throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
-        }
-        return child;
-    }
-
     @Override
     protected MCTSParams _copy() {
-        MCTSParams retValue = new MCTSParams(System.currentTimeMillis());
-        retValue.K = K;
-        retValue.rolloutLength = rolloutLength;
-        retValue.maxTreeDepth = maxTreeDepth;
-        retValue.epsilon = epsilon;
-        retValue.information = information;
-        retValue.MAST = MAST;
-        retValue.useMAST = useMAST;
-        retValue.MASTGamma = MASTGamma;
-        retValue.MASTBoltzmann = MASTBoltzmann;
-        retValue.exp3Boltzmann = exp3Boltzmann;
-        retValue.hedgeBoltzmann = hedgeBoltzmann;
-        retValue.expansionPolicy = expansionPolicy;
-        retValue.selectionPolicy = selectionPolicy;
-        retValue.treePolicy = treePolicy;
-        retValue.opponentTreePolicy = opponentTreePolicy;
-        retValue.rolloutType = rolloutType;
-        retValue.oppModelType = oppModelType;
-        retValue.rolloutClass = rolloutClass;
-        retValue.oppModelClass = oppModelClass;
-        retValue.rolloutPolicy = rolloutPolicy == null ? null : rolloutPolicy.copy();
-        retValue.rolloutPolicyParams = rolloutPolicyParams;
-        retValue.opponentModel = opponentModel == null ? null : opponentModel.copy();
-        retValue.opponentModelParams = opponentModelParams;
-        retValue.exploreEpsilon = exploreEpsilon;
-        retValue.advantageFunction = advantageFunction;
-        retValue.biasVisits = biasVisits;
-        retValue.omaVisits = omaVisits;
-        retValue.progressiveWideningConstant = progressiveWideningConstant;
-        retValue.progressiveWideningExponent = progressiveWideningExponent;
-        retValue.normaliseRewards = normaliseRewards;
-        retValue.nodesStoreScoreDelta = nodesStoreScoreDelta;
-        retValue.maintainMasterState = maintainMasterState;
-        retValue.rolloutTermination = rolloutTermination;
-        retValue.heuristic = heuristic;
-        retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
-        retValue.paranoid = paranoid;
-        retValue.MASTActionKey = MASTActionKey;
-        return retValue;
+        // All the copying is done in TunableParameters.copy()
+        // Note that any *local* changes of parameters will not be copied
+        // unless they have been 'registered' with setParameterValue("name", value)
+        return new MCTSParams(System.currentTimeMillis());
     }
-
 
     public AbstractPlayer getOpponentModel() {
         if (opponentModel != null)
@@ -274,7 +199,7 @@ public class MCTSParams extends PlayerParameters {
                 return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, System.currentTimeMillis(), MASTDefaultValue);
             case CLASS:
                 // we have a bespoke Class to instantiate
-                return Utils.loadClassFromString(details);
+                return JSONUtils.loadClassFromString(details);
             case PARAMS:
                 throw new AssertionError("PolicyParameters have not been set");
             default:
@@ -288,7 +213,7 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     public MCTSPlayer instantiate() {
-        return new MCTSPlayer(this);
+        return new MCTSPlayer((MCTSParams) this.copy());
     }
 
 }

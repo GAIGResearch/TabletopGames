@@ -1,7 +1,7 @@
 package core;
 
+import evaluation.optimisation.TunableParameters;
 import core.actions.ActionSpace;
-import evaluation.TunableParameters;
 
 import java.util.Arrays;
 import java.util.Objects;

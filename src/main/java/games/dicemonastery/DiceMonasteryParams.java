@@ -1,6 +1,6 @@
 package games.dicemonastery;
 
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.Arrays;
 import java.util.Objects;

@@ -4,7 +4,6 @@ import core.actions.LogEvent;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.AbstractTournamentMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.stratego.StrategoForwardModel;
@@ -29,7 +28,7 @@ public class StrategoMetrics implements IMetricsCollection {
         }
     }
 
-    public static class GameEndReason extends AbstractTournamentMetric {
+    public static class GameEndReason extends AbstractMetric {
         // How many times did games end with flag capture vs player running out of options vs max number of game ticks?
 
         @Override

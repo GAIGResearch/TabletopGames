@@ -1,7 +1,7 @@
 package core;
 
 import core.interfaces.ITunableParameters;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.*;
@@ -160,6 +160,7 @@ public abstract class AbstractParameters {
                         params.setParameterValue(name, params.getPossibleValues(name).get(randomChoice));
                     }
             );
+            reset();
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not randomizing");
         }

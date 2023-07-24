@@ -2,7 +2,7 @@ package players;
 
 import core.actions.ActionSpace;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.*;
 
@@ -13,7 +13,10 @@ public class PlayerParameters extends TunableParameters {
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;
     public int budget = 4000;
-    public int breakMS = 10;
+    // breakMS is the number of milliseconds prior to the end of the turn that the player will stop searching
+    // this is intended mainly for competition situations, in which overrunning the time limit leads to disqualification.
+    // setting breakMS to some number greater than zero then adds a safety margin
+    public int breakMS = 0;
 
     // Heuristic
     public IStateHeuristic gameHeuristic;
@@ -57,7 +60,6 @@ public class PlayerParameters extends TunableParameters {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlayerParameters)) return false;
-        if (!super.equals(o)) return false;
         PlayerParameters that = (PlayerParameters) o;
         return Double.compare(that.exploreEpsilon, exploreEpsilon) == 0 && budget == that.budget && breakMS == that.breakMS && budgetType == that.budgetType && Objects.equals(gameHeuristic, that.gameHeuristic) && Objects.equals(actionSpace, that.actionSpace);
     }
