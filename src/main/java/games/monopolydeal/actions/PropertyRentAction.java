@@ -208,7 +208,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "It's my Birthday action";
+        return "Collect rent for " + setType;
     }
 
     /**

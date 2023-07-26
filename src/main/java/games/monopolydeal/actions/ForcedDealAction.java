@@ -141,15 +141,13 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
             gFrom = ((ChooseCardFrom) action).from;
             actionState = ActionState.GetReaction;
         } else if (actionState == ActionState.GetReaction) {
-            MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
             if(!(action instanceof JustSayNoAction)) {
+                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
                 MDGS.removePropertyFrom(target, take, tFrom);
                 MDGS.removePropertyFrom(playerID,give,gFrom);
                 MDGS.addProperty(playerID, take);
                 MDGS.addProperty(target,give);
             }
-            MDGS.discardCard(MonopolyDealCard.create(CardType.ForcedDeal),playerID);
-            MDGS.useAction(1);
             executed = true;
         }
     }
@@ -176,6 +174,9 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(CardType.ForcedDeal),playerID);
+        MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;
     }

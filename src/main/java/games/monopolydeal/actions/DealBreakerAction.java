@@ -127,12 +127,10 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
             setSize = ((ChoosePropertySet) action).setSize;
             actionState = ActionState.GetReaction;
         } else if (actionState == ActionState.GetReaction) {
-            MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
             if(!(action instanceof JustSayNoAction)) {
+                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
                 MDGS.movePropertySetFromTo(setType,target,playerID);
             }
-            MDGS.discardCard(MonopolyDealCard.create(CardType.DealBreaker),playerID);
-            MDGS.useAction(1);
             executed = true;
         }
     }
@@ -163,6 +161,9 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(CardType.DealBreaker),playerID);
+        MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;
     }

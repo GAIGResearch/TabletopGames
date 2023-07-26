@@ -113,9 +113,6 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
         } else if (actionState == ActionState.GetReaction) {
             if(action instanceof JustSayNoAction) executed = true;
             else actionState = ActionState.CollectRent;
-            MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-            MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
-            MDGS.useAction(1);
         } else if (actionState == ActionState.CollectRent) {
             executed = true;
         }
@@ -147,6 +144,9 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
+        MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;
     }
