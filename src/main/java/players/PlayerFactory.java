@@ -4,7 +4,7 @@ import core.AbstractPlayer;
 import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
-import players.mcts.BasicMCTSPlayer;
+import players.basicMCTS.BasicMCTSPlayer;
 import players.rhea.RHEAParams;
 import players.rhea.RHEAPlayer;
 import players.rmhc.RMHCParams;
@@ -12,7 +12,6 @@ import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
-import utilities.Utils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;

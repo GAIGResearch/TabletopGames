@@ -1,6 +1,5 @@
-package players.mcts;
+package players.basicMCTS;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -9,10 +8,6 @@ import core.interfaces.IStateHeuristic;
 import java.util.List;
 import java.util.Random;
 
-import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
-import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
-import static players.mcts.MCTSEnums.TreePolicy.UCB;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
 
 /**
  * This is a simple version of MCTS that may be useful for newcomers to TAG and MCTS-like algorithms
@@ -22,14 +17,14 @@ import static players.mcts.MCTSEnums.Strategies.RANDOM;
 public class BasicMCTSPlayer extends AbstractPlayer {
 
     Random rnd;
-    MCTSParams params;
+    BasicMCTSParams params;
 
     public BasicMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
     public BasicMCTSPlayer(long seed) {
-        this.params = new MCTSParams(seed);
+        this.params = new BasicMCTSParams(seed);
         rnd = new Random(seed);
         setName("Basic MCTS");
 
@@ -39,16 +34,9 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         this.params.maxTreeDepth = 5;
         this.params.epsilon = 1e-6;
 
-        // These parameters are ignored by BasicMCTS - if you want to play with these, you'll
-        // need to upgrade to MCTSPlayer
-        this.params.information = MCTSEnums.Information.Closed_Loop;
-        this.params.rolloutType = RANDOM;
-        this.params.selectionPolicy = ROBUST;
-        this.params.opponentTreePolicy = OneTree;
-        this.params.treePolicy = UCB;
     }
 
-    public BasicMCTSPlayer(MCTSParams params) {
+    public BasicMCTSPlayer(BasicMCTSParams params) {
         this.params = params;
         rnd = new Random(params.getRandomSeed());
         setName("Basic MCTS");
