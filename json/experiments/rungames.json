@@ -1,5 +1,4 @@
 {
-  "class" : "evaluation.RunGames",
   "game": "Catan",
   "selfPlay": false,
   "nPlayers": 4,
