@@ -20,6 +20,7 @@ import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
 import players.rl.RLTrainingParams.Solver;
 import players.rl.RLTrainingParams.WriteSegmentType;
+import players.rl.featureVectors.SushiGoFeatureVector;
 import players.rl.utils.TurnSAR;
 import players.rl.DataProcessor.Field;
 
@@ -101,8 +102,9 @@ class RLTrainer {
                 dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
                 dp.initNextSegmentFile(getNextSegmentThreshold(i));
                 gamesPlayedSinceLastWrite = 0;
+                dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
             }
-            if (shouldUpdate(i)) {
+            else if (shouldUpdate(i)) {
                 dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
                 gamesPlayedSinceLastWrite = 0;
             }
@@ -134,21 +136,26 @@ class RLTrainer {
         if (iterations == 0)
             return false;
         return iterations % trainingParams.updateXIterations == 0;
-            }
+    }
 
-            private boolean shouldWriteSegment(int iterations) {
-                if (iterations < trainingParams.writeSegmentMinIterations)
-                    return false;
-                switch (trainingParams.writeSegmentType) {
-                    case LINEAR:
-                        return iterations % trainingParams.writeSegmentFactor == 0;
-                    case LOGARITHMIC:
-                        double log = Math.log(iterations) / Math.log(trainingParams.writeSegmentFactor);
-                        return Math.abs(log - Math.round(log)) < 1e-10;
-                    case NONE:
-                    default:
-                        return false;
+    private boolean shouldWriteSegment(int iterations) {
+        if (iterations < trainingParams.writeSegmentMinIterations)
+            return false;
+        switch (trainingParams.writeSegmentType) {
+            case LINEAR:
+                return (iterations - trainingParams.writeSegmentMinIterations) % trainingParams.writeSegmentFactor == 0;
+            case LOGARITHMIC:
+                int factor = iterations / trainingParams.writeSegmentMinIterations;
+                // Check if 'iterations' is a perfect factor of 'minIterations'
+                if (trainingParams.writeSegmentMinIterations * factor == iterations) {
+                    double log = Math.log(factor) / Math.log(trainingParams.writeSegmentFactor);
+                    return Math.abs(log - Math.round(log)) < 1e-10;
                 }
+                return false;
+            case NONE:
+            default:
+                return false;
+        }
     }
 
     private void runGame(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
@@ -158,34 +165,38 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("Dominion", 4, 10000 - 3450);
+        RLTrainingParams params = new RLTrainingParams("SushiGo", 4, 500000);
         params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
-        params.writeSegmentFactor = 10;
-        params.writeSegmentMinIterations = 10000;
-        params.updateXIterations = 250;
+        params.writeSegmentFactor = 3;
+        params.writeSegmentMinIterations = 1000;
+        params.updateXIterations = 1000;
         params.alpha = 0.001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-        params.outfilePrefix = "Sominion";
+        // params.outfilePrefix = "1";
 
         // long seed = System.currentTimeMillis();
-        long seed = 1688997020795l;
+        // long seed = 1688997020795l;
 
-        // String infilePath = null;
-        String infilePath = "LinearApprox/Sominion_n=10000.json";
+        String infilePath = null;
+        // String infilePath = "LinearApprox/Attempt_01_n=10000.json";
 
-        IStateFeatureVector featureVector = new DomStateFeaturesReduced();
+        IStateFeatureVector featureVector = new SushiGoFeatureVector();
         // IActionFeatureVector featureVector = null;
         RLType type = RLType.LinearApprox;
 
-        RLParams playerParams = infilePath == null
-                ? new RLParams(featureVector, type, seed)
-                : new RLParams(infilePath, seed);
-        playerParams.epsilon = 0.375f;
+        for (int i = 0; i < 5; i++) {
+            long seed = System.currentTimeMillis();
+            params.outfilePrefix = String.format("Attempt_%02d", i + 1);
+            RLParams playerParams = infilePath == null
+                    ? new RLParams(featureVector, type, seed)
+                    : new RLParams(infilePath, seed);
+            playerParams.epsilon = 0.375f;
 
-        RLTrainer trainer = new RLTrainer(params, playerParams);
-        trainer.runTraining();
+            RLTrainer trainer = new RLTrainer(params, playerParams);
+            trainer.runTraining();
+        }
     }
 
 }

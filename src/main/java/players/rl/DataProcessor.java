@@ -44,6 +44,8 @@ class DataProcessor {
         NGamesTotal,
         // The number of games played by this entry with these parameters & settings
         NGamesWithTheseSettings,
+        // Total time taken
+        TimeTaken,
         // All data these weights were trained on previously
         ContinuedFrom;
 
@@ -54,7 +56,7 @@ class DataProcessor {
         }
 
         static Field[] getNonUniqueFields() {
-            return new Field[] { Field.NGamesTotal, Field.NGamesWithTheseSettings,
+            return new Field[] { Field.NGamesTotal, Field.NGamesWithTheseSettings, Field.TimeTaken,
                     Field.ContinuedFrom };
         }
     }
@@ -65,10 +67,12 @@ class DataProcessor {
     private File outfile = null;
     private ObjectNode metadata = null;
 
-    private int nGamesPlayedFromInfile;
+    private int nGamesPlayedFromInfile = 0;
+    private long timeAtLastWrite = System.currentTimeMillis();
 
     DataProcessor(QWeightsDataStructure qwds) {
         this.qwds = qwds;
+        timeAtLastWrite = System.currentTimeMillis();
         createMissingFoldersAndFiles();
         initMetadata();
     }
@@ -85,7 +89,11 @@ class DataProcessor {
         ObjectNode existingMetadata = qwds.playerParams.infileNameOrPath == null ? null
                 : (ObjectNode) readInputFile(qwds.trainingParams.gameName, qwds.playerParams.infileNameOrPath)
                         .get("Metadata");
-        nGamesPlayedFromInfile = existingMetadata == null ? 0 : existingMetadata.get(Field.NGamesTotal.name()).asInt();
+        if (existingMetadata != null) {
+            nGamesPlayedFromInfile = existingMetadata.get(Field.NGamesTotal.name()).asInt();
+            timeAtLastWrite -= !existingMetadata.has(Field.TimeTaken.name()) ? 0
+                    : parseTimeTaken(existingMetadata.get(Field.TimeTaken.name()).asText());
+        }
 
         ObjectMapper om = new ObjectMapper();
 
@@ -111,9 +119,12 @@ class DataProcessor {
                 .put(Field.Heuristic.name(), qwds.trainingParams.heuristic.getClass().getCanonicalName())
                 .put(Field.FeatureVector.name(), qwds.playerParams.getFeatureVectorCanonicalName())
                 .put(Field.NGamesTotal.name(), nGamesPlayedFromInfile)
-                .put(Field.NGamesWithTheseSettings.name(), 0);
-        // TODO make separate function
+                .put(Field.NGamesWithTheseSettings.name(), 0)
+                .put(Field.TimeTaken.name(), formatTimeTaken(System.currentTimeMillis() - timeAtLastWrite));
+
         if (existingMetadata != null) {
+            // Remove time taken as we only want it on top layer
+            existingMetadata.remove(Field.TimeTaken.name());
             // Only keep existing metadata values that are different to current setup
             for (String fn : Arrays.stream(Field.getUniqueFields()).map(f -> f.name()).toList())
                 if (existingMetadata.has(fn) && existingMetadata.get(fn).equals(metadata.get(fn)))
@@ -157,16 +168,23 @@ class DataProcessor {
 
     void updateAndWriteFile(int nGamesToAdd) {
         addGames(nGamesToAdd);
+        updateTimeTaken();
         writeQWeightsToFile();
     }
 
     private void createMissingFoldersAndFiles() {
-        DataProcessor.getGameFolderPath(qwds.trainingParams.gameName).toFile().mkdirs();
+        Path gameFolderPath = DataProcessor.getGameFolderPath(qwds.trainingParams.gameName);
+        Path fileDirectory = Paths.get(gameFolderPath.toString(), qwds.playerParams.getType().name());
+        fileDirectory.toFile().mkdirs();
     }
 
     private void addGames(int nGamesToAdd) {
         for (Field f : Arrays.asList(Field.NGamesTotal, Field.NGamesWithTheseSettings))
             metadata.put(f.name(), metadata.get(f.name()).asInt() + nGamesToAdd);
+    }
+
+    private void updateTimeTaken() {
+        metadata.put(Field.TimeTaken.name(), formatTimeTaken(System.currentTimeMillis() - timeAtLastWrite));
     }
 
     private JsonNode createJsonNode(ObjectMapper objectMapper) {
@@ -219,6 +237,22 @@ class DataProcessor {
             System.exit(1);
             return null;
         }
+    }
+
+    private String formatTimeTaken(long t) {
+        long hours = t / (1000 * 60 * 60);
+        long minutes = (t % (1000 * 60 * 60)) / (1000 * 60);
+        double seconds = (t % (1000 * 60)) / 1000.0;
+        return String.format("%02dh %02dm %04.1fs", hours, minutes, seconds);
+    }
+
+    private long parseTimeTaken(String formattedTime) {
+        long t = 0;
+        String[] parts = formattedTime.split(" ");
+        t += Integer.parseInt(parts[0].replace("h", "")) * 1000 * 60 * 60;
+        t += Integer.parseInt(parts[1].replace("m", "")) * 1000 * 60;
+        t += (long) (Double.parseDouble(parts[2].replace("s", "")) * 1000);
+        return t;
     }
 
     static Path getGameFolderPath(String gameName) {

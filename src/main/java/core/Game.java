@@ -860,17 +860,21 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Dominion");
+        String gameType = Utils.getArg(args, "game", "SushiGo");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
+        int turnPause = Utils.getArg(args, "turnPause", 10);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        RLParams p1 = new RLParams("LinearApprox/Sominion_n=10000.json");
+        RLParams p1 = new RLParams(
+                "src/main/java/players/rl/resources/qWeights/SushiGo/LinearApprox/Attempt_01_n=10000.json");
         players.add(new RLPlayer(p1));
+        RLParams p2 = new RLParams(
+                "src/main/java/players/rl/resources/qWeights/SushiGo/LinearApprox/Attempt_01_n=100.json");
+        players.add(new RLPlayer(p2));
         // RLParams p2 = new RLParams(features, RLType.Tabular);
         // players.add(new RLPlayer(p2, "DABReduced_n=10000.json"));
         players.add(new MCTSPlayer());
