@@ -119,6 +119,8 @@ public class MonopolyDealGameState extends AbstractGameState {
         MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
 
+        retValue._reset();
+
         // Placeholder to know how many cards each player had for redrawing cards
         int[] playerHandSize = new int[getNPlayers()];
         retValue.drawPile = drawPile.copy();
@@ -235,7 +237,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         int setIndx = 99;
         for (PropertySet set:playerPropertySets[playerID]) {
             if(set.getSetType() == type){
-                setIndx = playerPropertySets[playerID].indexOf(set);
+                return playerPropertySets[playerID].indexOf(set);
             }
         }
         return setIndx;

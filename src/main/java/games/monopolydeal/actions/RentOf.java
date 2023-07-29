@@ -33,7 +33,7 @@ public class RentOf extends AbstractAction {
         this.pSet = pSet;
         SetType setType = pSet.getSetType();
         if(pSet.isComplete){
-            rent = setType.rent[setType.setSize];
+            rent = setType.rent[setType.setSize-1];
             if(pSet.hasHouse) rent = rent + 3;
             if(pSet.hasHotel) rent = rent + 4;
         }

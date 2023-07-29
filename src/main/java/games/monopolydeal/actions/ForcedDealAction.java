@@ -144,9 +144,9 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
             if(!(action instanceof JustSayNoAction)) {
                 MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
                 MDGS.removePropertyFrom(target, take, tFrom);
-                MDGS.removePropertyFrom(playerID,give,gFrom);
+                MDGS.removePropertyFrom(playerID, give, gFrom);
                 MDGS.addProperty(playerID, take);
-                MDGS.addProperty(target,give);
+                MDGS.addProperty(target, give);
             }
             executed = true;
         }

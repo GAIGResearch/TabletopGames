@@ -72,6 +72,7 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                         availableActions.add(new RentOf(pSet));
                     }
                 }
+                break;
             case GetReaction:
                 availableActions.add(new DoNothing());
                 boolean hasJustSayNo = false;

@@ -74,8 +74,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
 
                     availableActions.add(new AddToBoard(playerID));
 
-                    if(state.canModifyBoard(playerID))
-                        availableActions.add(new ModifyBoard(playerID));
+//                    if(state.canModifyBoard(playerID))
+//                        availableActions.add(new ModifyBoard(playerID));
 
                     availableActions.add(new EndPhase());
                     return availableActions;
@@ -113,7 +113,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         MonopolyDealGameState state = (MonopolyDealGameState) currentState;
         int playerID = state.getCurrentPlayer();
-        if(state.checkForGameEnd()) endGame(currentState);
+        if(state.checkForGameEnd())
+            endGame(currentState);
         switch (state.getGamePhase().toString()) {
             case "Play":
                 if ((state.actionsLeft < 1 || actionTaken instanceof EndPhase) && !state.isActionInProgress()) {
