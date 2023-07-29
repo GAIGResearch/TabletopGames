@@ -107,9 +107,6 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                 }
             }
         }
-
-        // Slydeal Action
-
         return availableActions;
     }
 

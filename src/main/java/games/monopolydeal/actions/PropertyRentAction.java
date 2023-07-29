@@ -167,7 +167,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         // Calculate rent
         PropertySet pSet = MDGS.getPlayerPropertySet(playerID,setType);
         if(pSet.isComplete){
-            rent = setType.rent[setType.setSize];
+            rent = setType.rent[setType.setSize - 1];
             if(pSet.hasHouse) rent = rent + 3;
             if(pSet.hasHotel) rent = rent + 4;
         }

@@ -350,6 +350,13 @@ public class MonopolyDealGameState extends AbstractGameState {
         return playerPropertySets[playerID];
     }
     public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks[playerId]; }
+
+    public boolean checkForGameEnd() {
+        for(int i=0;i<getNPlayers();i++){
+            if(getGameScore(i)==1.0d) return true;
+        }
+        return false;
+    }
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
