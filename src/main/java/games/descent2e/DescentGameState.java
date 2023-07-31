@@ -48,6 +48,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     DicePool attributeDicePool;
     List<Hero> heroes;
     Figure overlord;
+    Figure heroesSide;
     List<List<Monster>> monsters;
     int overlordPlayer;
     ArrayList<DToken> tokens;

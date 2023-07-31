@@ -46,16 +46,21 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
     public void nextMonster(DescentGameState dgs) {
         int groupSize = dgs.getMonsters().get(monsterGroupActingNext).size();
+        System.out.println("Group size: " + groupSize);
+        System.out.println("Current monster: " + monsterActingNext);
         int next = 0;
         // Only looks for the next monster in the group as long as the group is not empty
         if (groupSize != 0) {
             next = (groupSize + monsterActingNext + 1) % groupSize;
+            System.out.println(next);
         }
         if ((next == 0 && monsterActingNext == groupSize-1) || groupSize == 0) {
             // Next monster group
+            System.out.println("Next monster group");
             nextMonsterGroup(dgs);
         } else {
             monsterActingNext = next;
+            System.out.println("Next monster: " + monsterActingNext);
         }
     }
     public void nextMonsterGroup(DescentGameState dgs) {
@@ -171,14 +176,14 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
     private void overlordStartTurn(DescentGameState dgs)
     {
-        overlordCheckFatigue(dgs);
+        overlordCheckFatigue(dgs, true);
     }
 
     private void overlordEndTurn(DescentGameState dgs)
     {
-        overlordCheckFatigue(dgs);
+        overlordCheckFatigue(dgs, false);
     }
-    private void overlordCheckFatigue(DescentGameState dgs)
+    private void overlordCheckFatigue(DescentGameState dgs, boolean startOfTurn)
     {
         int changeFatigueBy = 0;
 
@@ -188,6 +193,24 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         {
             case "Acolyte of Saradyn":
                 changeFatigueBy = fatigueCheckForAcolyteOfSaradyn(dgs);
+                break;
+
+            case "Rellegar's Rest":
+                // Encounter 1
+                // We only check at the start of the Overlord's turns here
+                if(startOfTurn)
+                    changeFatigueBy = 1;
+                break;
+
+            case "Rellegar's Rest E2":
+                // Encounter 2
+                break;
+
+            case "Siege of Skytower":
+                // We decrease the Heroes' Side Fatigue at the end of the Overlord's turn
+                // But the Overlord's Fatigue increases for every monster that makes it to the Exit
+                if (!startOfTurn)
+                    heroesSideDecreaseFatigue(dgs, 1);
                 break;
 
             default:
@@ -201,7 +224,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         }
         else if (changeFatigueBy < 0)
         {
-            overlordDecreaseFatigue(dgs, changeFatigueBy);
+            overlordDecreaseFatigue(dgs, Math.abs(changeFatigueBy));
         }
     }
 
@@ -217,6 +240,18 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
+    private void heroesSideIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)
+    {
+        dgs.heroesSide.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
+        System.out.println("Heroes' Side Fatigue increased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
+    }
+
+    private void heroesSideDecreaseFatigue (DescentGameState dgs, int decreaseFatigueBy)
+    {
+        dgs.heroesSide.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
+        System.out.println("Heroes' Side Fatigue decreased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
+    }
+
     // TODO This is just the check for the first quest
     // I'm putting it here for now, but once more quests are implemented we should put it into its own contained class
     // To avoid cluttering this class
@@ -225,6 +260,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         boolean changeFatigue = false;
         int changeFatigueBy = 0;
 
+        // Check for within board piece 9A's range
         Vector2D min = new Vector2D(3, 14);
         Vector2D max = new Vector2D(6, 17);
 

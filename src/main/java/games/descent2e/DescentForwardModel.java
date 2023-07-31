@@ -65,6 +65,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Set up first board of first quest
         setupBoard(dgs, _data, firstBoard);
 
+        // Create a Heroes Side figure for tracking stats relevant to everyone in the heroes' party
+        // Some encounters use Fatigue in the Heroes Side pool to act as a turn timer, so we can track it here
+        dgs.heroesSide = new Figure("Heroes Side", -1);
+        dgs.heroesSide.setTokenType("Heroes Side");
+        dgs.heroesSide.setAttribute(Figure.Attribute.Fatigue, new Counter(0, 0, 8, "Heroes Side Fatigue"));
+
         // Overlord setup
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
@@ -1317,7 +1323,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // TODO: this could be adding/removing abilities too
             // Check attribute modifiers
-            // Map from who (all/minion/master) -> list of modifiers in pairs (Atribute, howMuch)
+            // Map from who (all/minion/master) -> list of modifiers in pairs (Attribute, howMuch)
             HashMap<String, ArrayList<Pair<Figure.Attribute, Integer>>> attributeModifiers = new HashMap<>();
             if (mDef.length > 2) {
                 String mod = mDef[2];
@@ -1335,7 +1341,17 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
 
-            // Always 1 master
+            // When playing with only 2 Heroes, some stronger monsters only spawn 1 Minion, with no Master
+            // These are arrayed as [1, 0, 1] in the monster definition
+            // So we check if there are only 2 Heroes (minimum 3 players - 2 Hero players and Overlord player)
+            // If that is the case, we do not spawn a Master
+            // Otherwise, there is always 1 Master
+
+            boolean spawnMaster = true;
+
+            if ((dgs.getNPlayers() <= 3 && monsterSetup[1] == 0)) {
+                spawnMaster = false;
+            }
             Monster master = monsterDef.get(act + "-master").copyNewID();
             master.getNActionsExecuted().setMaximum(nActionsPerFigure);
             master.setProperties(monsterDef.get(act + "-master").getProperties());
@@ -1350,9 +1366,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
                 }
             }
-            placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
-            master.setOwnerId(dgs.overlordPlayer);
-            monsterGroup.add(master);
+
+            // Don't spawn the Master monster if we're only supposed to spawn 1 Minion only
+            if (spawnMaster)
+            {
+                placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
+                master.setOwnerId(dgs.overlordPlayer);
+                monsterGroup.add(master);
+            }
 
             // How many minions?
             int nMinions;
