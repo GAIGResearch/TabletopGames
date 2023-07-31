@@ -120,6 +120,10 @@ public class Figure extends Token {
         attributes.get(a).increment(increment);
     }
 
+    public void decrementAttribute(Attribute a, int decrement) {
+        attributes.get(a).decrement(decrement);
+    }
+
     public void setAttributeToMax(Attribute a) {
         attributes.get(a).setToMax();
     }
@@ -201,6 +205,8 @@ public class Figure extends Token {
     public DicePool getAttackDice() { return attackDice;}
 
     public DicePool getDefenceDice() {return defenceDice;}
+
+    public String getName() { return componentName;}
 
     @Override
     public Figure copy() {

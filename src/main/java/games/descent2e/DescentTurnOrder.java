@@ -5,6 +5,8 @@ import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+import games.descent2e.concepts.Quest;
+import utilities.Vector2D;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -68,6 +70,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             monsterGroupActingNext = 0;
             heroFigureActingNext = 0;
             turnOwner = dgs.heroes.get(heroFigureActingNext).getOwnerId();
+
         } else {
             monsterGroupActingNext = next;
         }
@@ -88,9 +91,18 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         // TODO end-of-turn abilities
 
         turnCounter++;
-        if (turnCounter >= nFigures) endRound(gameState);
+        if (turnCounter >= nFigures)
+        {
+            if (turnOwner == ((DescentGameState)gameState).overlordPlayer)
+            {
+                // End of Overlord's turn
+                overlordEndTurn((DescentGameState)gameState);
+            }
+            endRound(gameState);
+        }
         else {
             turnOwner = nextPlayer(gameState);
+
             int n = 0;
             while (gameState.getPlayerResults()[turnOwner] != GAME_ONGOING) {
                 turnOwner = nextPlayer(gameState);
@@ -115,7 +127,12 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             int nHeroes = ((DescentGameState)gameState).heroes.size();
             int next = (nHeroes + heroFigureActingNext +1)%nHeroes;
             if (next == 0 && heroFigureActingNext == nHeroes-1)
+            {
+                // Start of Overlord's turn
+                overlordStartTurn((DescentGameState)gameState);
                 return ((DescentGameState)gameState).overlordPlayer;
+            }
+
             else {
                 heroFigureActingNext = next;
                 return ((DescentGameState)gameState).heroes.get(next).getOwnerId();
@@ -150,5 +167,92 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         pto.monsterGroupActingNext = monsterGroupActingNext;
         pto.heroFigureActingNext = heroFigureActingNext;
         return pto;
+    }
+
+    private void overlordStartTurn(DescentGameState dgs)
+    {
+        overlordCheckFatigue(dgs);
+    }
+
+    private void overlordEndTurn(DescentGameState dgs)
+    {
+        overlordCheckFatigue(dgs);
+    }
+    private void overlordCheckFatigue(DescentGameState dgs)
+    {
+        int changeFatigueBy = 0;
+
+        String questName = dgs.getCurrentQuest().getName();
+
+        switch(questName)
+        {
+            case "Acolyte of Saradyn":
+                changeFatigueBy = fatigueCheckForAcolyteOfSaradyn(dgs);
+                break;
+
+            default:
+                break;
+        }
+
+        // We only need to change the Overlord's Fatigue if we have met the conditions to increase or decrease
+        if (changeFatigueBy > 0)
+        {
+            overlordIncreaseFatigue(dgs, changeFatigueBy);
+        }
+        else if (changeFatigueBy < 0)
+        {
+            overlordDecreaseFatigue(dgs, changeFatigueBy);
+        }
+    }
+
+    private void overlordIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)
+    {
+        dgs.overlord.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
+        System.out.println("Overlord's Fatigue increased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
+    }
+
+    private void overlordDecreaseFatigue (DescentGameState dgs, int decreaseFatigueBy)
+    {
+        dgs.overlord.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
+        System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
+    }
+
+    // TODO This is just the check for the first quest
+    // I'm putting it here for now, but once more quests are implemented we should put it into its own contained class
+    // To avoid cluttering this class
+    private int fatigueCheckForAcolyteOfSaradyn(DescentGameState dgs)
+    {
+        boolean changeFatigue = false;
+        int changeFatigueBy = 0;
+
+        Vector2D min = new Vector2D(3, 14);
+        Vector2D max = new Vector2D(6, 17);
+
+        List<List<Monster>> monsters = dgs.getMonsters();
+        for (List<Monster> mList: monsters)
+        {
+
+            if(changeFatigue)
+            {
+                break;
+            }
+
+            for (Monster m : mList)
+            {
+                if (m.getName().contains("Goblin Archer"))
+                {
+                    Vector2D position = m.getPosition();
+                    if ((min.getX() <= position.getX() && position.getX() <= max.getX())
+                            && (min.getY() <= position.getY() && position.getY() <= max.getY()))
+                    {
+                        changeFatigue = true;
+                        changeFatigueBy = 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return changeFatigueBy;
     }
 }
