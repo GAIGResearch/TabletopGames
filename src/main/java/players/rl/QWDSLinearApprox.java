@@ -2,6 +2,7 @@ package players.rl;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.sushigo.SGGameState;
 import players.rl.RLPlayer.RLType;
 
 public class QWDSLinearApprox extends QWeightsDataStructure {

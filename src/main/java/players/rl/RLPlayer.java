@@ -8,6 +8,7 @@ import java.util.Random;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import games.sushigo.SGGameState;
 import players.rl.utils.ApplyActionStateFeatureVector;
 
 

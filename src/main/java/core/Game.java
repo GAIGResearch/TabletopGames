@@ -21,6 +21,7 @@ import players.mcts.MCTSPlayer;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
 import players.rl.RLPlayer.RLType;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -870,14 +871,14 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
         RLParams p1 = new RLParams(
-                "src/main/java/players/rl/resources/qWeights/SushiGo/LinearApprox/Attempt_01_n=10000.json");
+                "LinearApprox/Test_01_Agent_01_n=819200.json");
         players.add(new RLPlayer(p1));
-        RLParams p2 = new RLParams(
-                "src/main/java/players/rl/resources/qWeights/SushiGo/LinearApprox/Attempt_01_n=100.json");
-        players.add(new RLPlayer(p2));
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         // RLParams p2 = new RLParams(features, RLType.Tabular);
         // players.add(new RLPlayer(p2, "DABReduced_n=10000.json"));
-        players.add(new MCTSPlayer());
+        // players.add(new MCTSPlayer());
         // players.add(new MCTSPlayer());
         // IStateFeatureVector features2 = new DBStateFeaturesReduced();
         // RLParams p2 = new RLParams(features2, RLType.Tabular);
