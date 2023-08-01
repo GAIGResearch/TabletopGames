@@ -1,6 +1,9 @@
 package games.descent2e;
 
 import core.AbstractGameState;
+import core.components.BoardNode;
+import core.properties.PropertyInt;
+import core.properties.PropertyString;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import games.descent2e.components.Figure;
@@ -8,11 +11,12 @@ import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import utilities.Vector2D;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static core.CoreConstants.GameResult.GAME_END;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.playersHash;
+import static core.CoreConstants.sizeHash;
 
 // Order is all heroes (controlled by their owner ID player), then all monsters by monster group (controlled by overlord)
 public class DescentTurnOrder extends ReactiveTurnOrder {
@@ -46,21 +50,21 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
     public void nextMonster(DescentGameState dgs) {
         int groupSize = dgs.getMonsters().get(monsterGroupActingNext).size();
-        System.out.println("Group size: " + groupSize);
-        System.out.println("Current monster: " + monsterActingNext);
+        //System.out.println("Group size: " + groupSize);
+        //System.out.println("Current monster: " + monsterActingNext);
         int next = 0;
         // Only looks for the next monster in the group as long as the group is not empty
         if (groupSize != 0) {
             next = (groupSize + monsterActingNext + 1) % groupSize;
-            System.out.println(next);
+            //System.out.println(next);
         }
         if ((next == 0 && monsterActingNext == groupSize-1) || groupSize == 0) {
             // Next monster group
-            System.out.println("Next monster group");
+            //System.out.println("Next monster group");
             nextMonsterGroup(dgs);
         } else {
             monsterActingNext = next;
-            System.out.println("Next monster: " + monsterActingNext);
+            //System.out.println("Next monster: " + monsterActingNext);
         }
     }
     public void nextMonsterGroup(DescentGameState dgs) {
@@ -95,7 +99,10 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
         // TODO end-of-turn abilities
 
+
+
         turnCounter++;
+
         if (turnCounter >= nFigures)
         {
             if (turnOwner == ((DescentGameState)gameState).overlordPlayer)
@@ -106,6 +113,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             endRound(gameState);
         }
         else {
+
             turnOwner = nextPlayer(gameState);
 
             int n = 0;
@@ -182,7 +190,179 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
     private void overlordEndTurn(DescentGameState dgs)
     {
         overlordCheckFatigue(dgs, false);
+        checkReinforcements(dgs);
     }
+
+    private void checkReinforcements(DescentGameState dgs)
+    {
+        // TODO
+
+        String questName = dgs.getCurrentQuest().getName();
+        String monsterName = "";
+        List<String> monsters = dgs.getMonsterGroups();
+        List<Integer> maxMonsters = dgs.getMonstersPerGroup();
+        int i = 0;
+
+        boolean canSpawn = false;
+        int noToSpawn = 0;
+
+        // Check for within board piece 9A's range
+        String tile = "";
+
+        switch(questName) {
+            case "Acolyte of Saradyn":
+                monsterName = "Goblin Archer";
+                i = getMonsterGroupIndex(monsters, monsterName);
+                if (i >= 0)
+                {
+                    if (dgs.getMonsters().get(i).size() < maxMonsters.get(i))
+                    {
+                        canSpawn = true;
+                        tile = "4A";
+                        noToSpawn = maxMonsters.get(i) - dgs.getMonsters().get(i).size();
+                        if (noToSpawn > 2)
+                        {
+                            noToSpawn = 2;
+
+                        }
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        if (canSpawn)
+        {
+            System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
+            List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
+            spawnReinforcements(dgs, i, noToSpawn, tileCoords);
+        }
+    }
+    private int getMonsterGroupIndex(List<String> monsters, String monsterName) {
+        int i = 0;
+        for (String monster : monsters) {
+            if (monster.contains(monsterName)) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+    private void spawnReinforcements(DescentGameState dgs, int index, int noToSpawn, List<Vector2D> tileCoords)
+    {
+        boolean masterExists = false;     // Checks if a Master monster originally spawned
+        boolean canSpawnMaster = true;    // Checks if the Master monster is dead
+        boolean minionExists = false;     // Checks if a Minion monster originally spawned
+
+        // Assuming spawning a Master takes priority over spawning a Minion
+        // We assume that we can always spawn a Minion
+        // As we will just return if we do not have enough monsters to spawn otherwise
+
+        Random rnd = new Random(dgs.getGameParameters().getRandomSeed());
+        List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
+        List<Monster> monsters = dgs.getMonsters().get(index);
+        for (Monster monster : monstersOriginal)
+        {
+            // If the original set of monsters contains a Master, we should spawn a Master
+            if (monster.getName().contains("master"))
+            {
+                masterExists = true;
+            }
+            // Likewise, if the original set of monsters contains a Minion, we should spawn a Minion
+            if (monster.getName().contains("minion"))
+            {
+                minionExists = true;
+            }
+
+            // No use checking the rest of the list if we know we can legally spawn both
+            if(masterExists && minionExists)
+                break;
+        }
+        for (Monster monster : monsters)
+        {
+            // If the alive Monsters contain a Master, we cannot spawn a Master
+            if (monster.getName().contains("master"))
+            {
+                canSpawnMaster = false;
+                break;
+            }
+        }
+
+        //System.out.println("Master exists: " + masterExists);
+        //System.out.println("Can spawn master: " + canSpawnMaster);
+        //System.out.println("Minion exists: " + minionExists);
+
+        for (int k = 0; k < noToSpawn; k++)
+        {
+            // If the Master exists, it is always the first Monster on the list
+            // The only time we do not look at the first Monster on the list is
+            // if we can only spawn a Minion when a Master exists
+            Monster originalMonster = monstersOriginal.get(k);
+
+            // If the Master is alive, we cannot spawn a Master
+            // So we spawn a Minion instead
+            if (masterExists && !canSpawnMaster)
+            {
+                originalMonster = monstersOriginal.get(1);
+            }
+
+            // TODO: Figure out why NullPointerException gets thrown for Figure.clearAttributeTests
+
+            Monster monster = originalMonster.copy();
+
+
+            // TODO: copied straight from DescentForwardModel's spawning
+            String size = ((PropertyString)monster.getProperty(sizeHash)).value;
+            int w = Integer.parseInt(size.split("x")[0]);
+            int h = Integer.parseInt(size.split("x")[1]);
+            monster.setSize(w, h);
+
+            while (tileCoords.size() > 0) {
+                Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
+                tileCoords.remove(option);
+                BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
+                if (position.getComponentName().equals("plain") &&
+                        ((PropertyInt)position.getProperty(playersHash)).value == -1) {
+                    // TODO: some monsters want to spawn in lava/water.
+                    // This can be top-left corner, check if the other tiles are valid too
+                    boolean canPlace = true;
+                    for (int i = 0; i < h; i++) {
+                        for (int j = 0; j < w; j++) {
+                            if (i == 0 && j == 0) continue;
+                            Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
+                            BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
+                            if (tile == null || !tile.getComponentName().equals("plain") ||
+                                    !tileCoords.contains(thisTile) ||
+                                    ((PropertyInt)tile.getProperty(playersHash)).value != -1) {
+                                canPlace = false;
+                            }
+                        }
+                    }
+                    if (canPlace) {
+                        monster.setPosition(option.copy());
+                        PropertyInt prop = new PropertyInt("players", monster.getComponentID());
+                        for (int i = 0; i < h; i++) {
+                            for (int j = 0; j < w; j++) {
+                                dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
+                            }
+                        }
+                        if (canSpawnMaster)
+                            canSpawnMaster = false;
+                        dgs.monsters.get(index).add(monster);
+                        System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        System.out.println(dgs.getMonsters());
+
+    }
+
     private void overlordCheckFatigue(DescentGameState dgs, boolean startOfTurn)
     {
         int changeFatigueBy = 0;
@@ -261,8 +441,8 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         int changeFatigueBy = 0;
 
         // Check for within board piece 9A's range
-        Vector2D min = new Vector2D(3, 14);
-        Vector2D max = new Vector2D(6, 17);
+        String tile = "9A";
+        List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
 
         List<List<Monster>> monsters = dgs.getMonsters();
         for (List<Monster> mList: monsters)
@@ -278,8 +458,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 if (m.getName().contains("Goblin Archer"))
                 {
                     Vector2D position = m.getPosition();
-                    if ((min.getX() <= position.getX() && position.getX() <= max.getX())
-                            && (min.getY() <= position.getY() && position.getY() <= max.getY()))
+                    if (tileCoords.contains(position))
                     {
                         changeFatigue = true;
                         changeFatigueBy = 1;

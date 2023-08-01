@@ -1410,8 +1410,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     }
                 }
             }
-
             dgs.monsters.add(monsterGroup);
+            dgs.monstersOriginal.add(monsterGroup);
+            dgs.monstersPerGroup.add(monsterGroup.size());
+            dgs.monsterGroups.add(name);
         }
     }
 

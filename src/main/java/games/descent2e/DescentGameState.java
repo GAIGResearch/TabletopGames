@@ -50,6 +50,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Figure overlord;
     Figure heroesSide;
     List<List<Monster>> monsters;
+    List<List<Monster>> monstersOriginal;
+    List<Integer> monstersPerGroup;
+    List<String> monsterGroups;
     int overlordPlayer;
     ArrayList<DToken> tokens;
     Quest currentQuest;
@@ -70,6 +73,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
+        monstersOriginal = new ArrayList<>();
+        monstersPerGroup = new ArrayList<>();
+        monsterGroups = new ArrayList<>();
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -105,7 +111,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         components.add(searchCards);
         components.addAll(heroes);
         monsters.forEach(components::addAll);
+        monstersOriginal.forEach(components::addAll);
         components.add(overlord);
+        //components.add(heroesSide);   // TODO This breaks it for some reason
         // TODO
         return components;
     }
@@ -116,6 +124,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         copy.tiles = new HashMap<>(tiles);  // TODO: deep copy
         copy.masterBoard = masterBoard.copy();
         copy.overlord = overlord.copy();
+        copy.heroesSide = heroesSide.copy();
         copy.heroes = new ArrayList<>();
         for (Hero f : heroes) {
             copy.heroes.add(f.copy());
@@ -127,6 +136,21 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 maC.add(m.copy());
             }
             copy.monsters.add(maC);
+        }
+        for (List<Monster> ma : monstersOriginal) {
+            List<Monster> maC = new ArrayList<>();
+            for (Monster m : ma) {
+                maC.add(m.copy());
+            }
+            copy.monstersOriginal.add(maC);
+        }
+        copy.monstersPerGroup = new ArrayList<>();
+        for (Integer i : monstersPerGroup) {
+            copy.monstersPerGroup.add(i);
+        }
+        copy.monsterGroups = new ArrayList<>();
+        for (String s : monsterGroups) {
+            copy.monsterGroups.add(s);
         }
         copy.tileReferences = tileReferences.clone();  // TODO deep
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
@@ -213,6 +237,15 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     public List<List<Monster>> getMonsters() {
         return monsters;
+    }
+    public List<List<Monster>> getOriginalMonsters() {
+        return monstersOriginal;
+    }
+    public List<Integer> getMonstersPerGroup() {
+        return monstersPerGroup;
+    }
+    public List<String> getMonsterGroups() {
+        return monsterGroups;
     }
 
     public Deck<Card> getSearchCards() {

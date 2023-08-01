@@ -7,6 +7,8 @@ import games.descent2e.components.Figure;
 
 // TODO REMOVE WHEN NOT DEBUGGING
 import games.descent2e.components.Hero;
+import games.descent2e.components.Monster;
+
 import java.util.Random;
 
 public class EndTurn extends DescentAction{
@@ -36,6 +38,7 @@ public class EndTurn extends DescentAction{
             debug_RandomStatus(f);
         }*/
 
+        System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ")");#
         gs.getTurnOrder().endPlayerTurn(gs);
         return true;
     }
