@@ -38,7 +38,7 @@ public class EndTurn extends DescentAction{
             debug_RandomStatus(f);
         }*/
 
-        System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ")");#
+        System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ")");
         gs.getTurnOrder().endPlayerTurn(gs);
         return true;
     }
