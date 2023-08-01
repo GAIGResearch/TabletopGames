@@ -3,6 +3,7 @@ package evaluation.optimisation;
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 import evaluation.RunArg;
+import games.GameType;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.gameParams;
 import static java.util.stream.Collectors.joining;
 import static utilities.JSONUtils.parser;
 import static utilities.Utils.*;
@@ -60,7 +62,10 @@ public class NTBEAParameters {
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
         seed = (long) args.get(RunArg.seed);
-        gameParams = (AbstractParameters) args.get(RunArg.gameParams);
+        GameType game = GameType.valueOf(args.get(RunArg.game).toString());
+        gameParams = args.get(RunArg.gameParams).equals("") ? null :
+                AbstractParameters.createFromFile(game, (String) args.get(RunArg.gameParams));
+
         mode = Mode.valueOf((String) args.get(RunArg.NTBEAmode));
         logFile = (String) args.get(RunArg.output);
         if (logFile.isEmpty()) logFile = "NTBEA.log";
