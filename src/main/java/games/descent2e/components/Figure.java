@@ -64,7 +64,7 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
-    Set<DescentTypes.DescentCondition> attributeTests;  // TODO Replace once AttributeTest works properly
+    Set<DescentTypes.DescentCondition> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name, int nActionsPossible) {
@@ -235,6 +235,7 @@ public class Figure extends Token {
         copyTo.nActionsExecuted = nActionsExecuted;
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
+        copyTo.attributeTests = new HashSet<>(attributeTests);
         copyTo.abilities = new ArrayList<>();
         if (abilities != null) {
             for (DescentAction ability : abilities) {

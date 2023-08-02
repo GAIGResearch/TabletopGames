@@ -310,7 +310,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
             // TODO: Figure out why NullPointerException gets thrown for Figure.clearAttributeTests
 
-            Monster monster = originalMonster.copy();
+            Monster monster = originalMonster.copyNewID();
 
 
             // TODO: copied straight from DescentForwardModel's spawning
@@ -358,9 +358,6 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             }
 
         }
-
-        System.out.println(dgs.getMonsters());
-
     }
 
     private void overlordCheckFatigue(DescentGameState dgs, boolean startOfTurn)
