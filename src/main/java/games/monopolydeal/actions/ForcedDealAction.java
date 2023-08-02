@@ -86,17 +86,11 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
                 break;
             case GetReaction:
                 availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
         }
         return availableActions;
@@ -129,27 +123,38 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        if(actionState == ActionState.Target){
-            target = ((TargetPlayer) action).target;
-            actionState = ActionState.TakeCard;
-        } else if (actionState == ActionState.TakeCard) {
-            take = ((ChooseCardFrom) action).take;
-            tFrom = ((ChooseCardFrom) action).from;
-            actionState = ActionState.GiveCard;
-        } else if (actionState == ActionState.GiveCard){
-            give = ((ChooseCardFrom) action).take;
-            gFrom = ((ChooseCardFrom) action).from;
-            actionState = ActionState.GetReaction;
-        } else if (actionState == ActionState.GetReaction) {
-            if(!(action instanceof JustSayNoAction)) {
-                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-                MDGS.removePropertyFrom(target, take, tFrom);
-                MDGS.removePropertyFrom(playerID, give, gFrom);
-                MDGS.addProperty(playerID, take);
-                MDGS.addProperty(target, give);
-            }
-            executed = true;
+        switch (actionState){
+            case Target:
+                target = ((TargetPlayer) action).target;
+                actionState = ActionState.TakeCard;
+                break;
+            case TakeCard:
+                take = ((ChooseCardFrom) action).take;
+                tFrom = ((ChooseCardFrom) action).from;
+                actionState = ActionState.GiveCard;
+                break;
+            case GiveCard:
+                give = ((ChooseCardFrom) action).take;
+                gFrom = ((ChooseCardFrom) action).from;
+                actionState = ActionState.GetReaction;
+                break;
+            case GetReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else executeAction(state);
+                break;
+            case  ReactToReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
+                else executed = true;
+                break;
         }
+    }
+    protected void executeAction(AbstractGameState state){
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        MDGS.removePropertyFrom(target, take, tFrom);
+        MDGS.removePropertyFrom(playerID, give, gFrom);
+        MDGS.addProperty(playerID, take);
+        MDGS.addProperty(target, give);
+        executed = true;
     }
     /**
      * @param state The current game state

@@ -76,17 +76,11 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
                 break;
             case GetReaction:
                 availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
         }
         return availableActions;
@@ -119,25 +113,29 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        if(actionState == ActionState.Target){
-            target = ((TargetPlayer) action).target;
-            actionState = ActionState.ChoosePropertySet;
-        } else if (actionState == ActionState.ChoosePropertySet) {
-            setType = ((ChoosePropertySet) action).setType;
-            setSize = ((ChoosePropertySet) action).setSize;
-            actionState = ActionState.GetReaction;
-        } else if (actionState == ActionState.GetReaction) {
-            if(!(action instanceof JustSayNoAction)) {
-                MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-                MDGS.movePropertySetFromTo(setType,target,playerID);
-            }
-            executed = true;
+        switch (actionState){
+            case Target:
+                target = ((TargetPlayer) action).target;
+                actionState = ActionState.ChoosePropertySet;
+            case ChoosePropertySet:
+                setType = ((ChoosePropertySet) action).setType;
+                setSize = ((ChoosePropertySet) action).setSize;
+                actionState = ActionState.GetReaction;
+            case GetReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else executeAction(state);
+                break;
+            case  ReactToReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
+                else executed = true;
+                break;
         }
     }
-//    @Override
-//    public void _afterAction(AbstractGameState gameState, AbstractAction action){
-//
-//    }
+    protected void executeAction(AbstractGameState state){
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        MDGS.movePropertySetFromTo(setType,target,playerID);
+        executed = true;
+    }
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.

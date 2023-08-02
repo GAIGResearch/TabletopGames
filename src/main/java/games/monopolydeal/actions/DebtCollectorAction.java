@@ -51,7 +51,6 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         List<AbstractAction> availableActions = new ArrayList<>();
-
         switch (actionState){
             case Target:
                 for(int i=0;i<MDGS.getNPlayers();i++){
@@ -61,21 +60,16 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
                 break;
             case GetReaction:
                 availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
                 else availableActions.add(new PayRent(target,playerID,5));
+                break;
         }
         return availableActions;
     }
@@ -107,20 +101,25 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        if(actionState == ActionState.Target){
-            target = ((TargetPlayer) action).target;
-            actionState = ActionState.GetReaction;
-        } else if (actionState == ActionState.GetReaction) {
-            if(action instanceof JustSayNoAction) executed = true;
-            else actionState = ActionState.CollectRent;
-        } else if (actionState == ActionState.CollectRent) {
-            executed = true;
+        switch (actionState){
+            case Target:
+                target = ((TargetPlayer) action).target;
+                actionState = ActionState.GetReaction;
+                break;
+            case GetReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else actionState = ActionState.CollectRent;
+                break;
+            case  ReactToReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
+                else executed = true;
+                break;
+            case CollectRent:
+                executed = true;
+                break;
+
         }
     }
-//    @Override
-//    public void _afterAction(AbstractGameState gameState, AbstractAction action){
-//
-//    }
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
