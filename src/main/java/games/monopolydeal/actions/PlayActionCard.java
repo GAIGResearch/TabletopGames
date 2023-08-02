@@ -68,53 +68,53 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                         break;
                     case MulticolorRent:
                         if(MDGS.checkForMulticolorRent(playerID)){
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new MulticolorRentAction(playerID,j));
                         }
                         break;
                     case GreenBlueRent:
                         if(MDGS.playerHasSet(playerID, SetType.Green)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Green,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Blue)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Blue,type,j));
                         }
                     case BrownLightBlueRent:
                         if(MDGS.playerHasSet(playerID, SetType.Brown)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Brown,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.LightBlue)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.LightBlue,type,j));
                         }
                     case PinkOrangeRent:
                         if(MDGS.playerHasSet(playerID, SetType.Pink)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Pink,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Orange)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Orange,type,j));
                         }
                     case RedYellowRent:
                         if(MDGS.playerHasSet(playerID, SetType.Red)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Red,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Yellow)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Yellow,type,j));
                         }
                     case RailRoadUtilityRent:
                         if(MDGS.playerHasSet(playerID, SetType.RailRoad)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.RailRoad,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Utility)) {
-                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                            for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
                                 availableActions.add(new PropertyRentAction(playerID,SetType.Utility,type,j));
                         }
                     case PassGo:

@@ -117,10 +117,12 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
             case Target:
                 target = ((TargetPlayer) action).target;
                 actionState = ActionState.ChoosePropertySet;
+                break;
             case ChoosePropertySet:
                 setType = ((ChoosePropertySet) action).setType;
                 setSize = ((ChoosePropertySet) action).setSize;
                 actionState = ActionState.GetReaction;
+                break;
             case GetReaction:
                 if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
                 else executeAction(state);
