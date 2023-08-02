@@ -3,7 +3,6 @@ package games.monopolydeal.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
@@ -32,16 +31,18 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
     final int playerID;
     final SetType setType;
     final CardType cardType;
+    final int doubleTheRent;
     int target;
     int rent;
     ActionState actionState;
     boolean[] collectedRent;
     boolean reaction;
 
-    public PropertyRentAction(int playerID, SetType setType, CardType cardType) {
+    public PropertyRentAction(int playerID, SetType setType, CardType cardType, int doubleTheRent) {
         this.playerID = playerID;
         this.setType = setType;
         this.cardType = cardType;
+        this.doubleTheRent = doubleTheRent;
         actionState = ActionState.GetReaction;
     }
 
@@ -62,17 +63,11 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         switch (actionState){
             case GetReaction:
                 availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
@@ -110,16 +105,20 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         // TODO: Process the action that was taken.
         switch (actionState){
             case GetReaction:
-                if(action instanceof JustSayNoAction) {
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else actionState = ActionState.CollectRent;
+                break;
+            case ReactToReaction:
+                if(!(action instanceof JustSayNoAction)) {
                     collectedRent[target] = true;
                     getNextTarget();
                 }
-                else actionState = ActionState.CollectRent;
-                break;
+                actionState = ActionState.GetReaction;
             case CollectRent:
                 collectedRent[target] = true;
                 getNextTarget();
                 actionState = ActionState.GetReaction;
+                break;
         }
     }
     public boolean collectedAllRent() {
@@ -163,7 +162,8 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         // Discard card used
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
         MDGS.discardCard(MonopolyDealCard.create(cardType),playerID);
-        MDGS.useAction(1);
+        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
+        MDGS.useAction(1 + doubleTheRent);
         // Calculate rent
         PropertySet pSet = MDGS.getPlayerPropertySet(playerID,setType);
         if(pSet.isComplete){
@@ -172,6 +172,8 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
             if(pSet.hasHotel) rent = rent + 4;
         }
         else rent = setType.rent[pSet.getSize()];
+        // Double the rent
+        rent = (int) (rent * Math.pow(2,doubleTheRent));
         // Set first target
         getNextTarget();
         gs.setActionInProgress(this);
@@ -195,12 +197,12 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PropertyRentAction that = (PropertyRentAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && actionState == that.actionState && Arrays.equals(collectedRent, that.collectedRent);
+        return playerID == that.playerID && doubleTheRent == that.doubleTheRent && target == that.target && rent == that.rent && reaction == that.reaction && setType == that.setType && cardType == that.cardType && actionState == that.actionState && Arrays.equals(collectedRent, that.collectedRent);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(playerID, target, actionState, reaction);
+        int result = Objects.hash(playerID, setType, cardType, doubleTheRent, target, rent, actionState, reaction);
         result = 31 * result + Arrays.hashCode(collectedRent);
         return result;
     }
@@ -208,7 +210,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Collect rent for " + setType;
+        return "Collect rent : " + setType;
     }
 
     /**

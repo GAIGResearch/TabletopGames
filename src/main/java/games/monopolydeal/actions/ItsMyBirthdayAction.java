@@ -55,17 +55,11 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         switch (actionState){
             case GetReaction:
                 availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
@@ -103,16 +97,20 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         // TODO: Process the action that was taken.
         switch (actionState){
             case GetReaction:
-                if(action instanceof JustSayNoAction) {
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else actionState = ActionState.CollectRent;
+                break;
+            case ReactToReaction:
+                if(!(action instanceof JustSayNoAction)) {
                     collectedRent[target] = true;
                     getNextTarget();
                 }
-                else actionState = ActionState.CollectRent;
-                break;
+                actionState = ActionState.GetReaction;
             case CollectRent:
                 collectedRent[target] = true;
                 getNextTarget();
-                actionState = ActionState.CollectRent;
+                actionState = ActionState.GetReaction;
+                break;
         }
     }
     public boolean collectedAllRent() {
