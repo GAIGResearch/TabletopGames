@@ -179,6 +179,8 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
     }
     public void resetDrawPile(){
+        if(discardPile.getSize()==0)
+            throw new AssertionError("Draw pile exhausted");
         drawPile.add(discardPile);
         discardPile.clear();
         drawPile.shuffle(rnd);
@@ -352,6 +354,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         return playerPropertySets[playerID];
     }
     public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks[playerId]; }
+    public boolean CheckForJustSayNo(int playerID) { return playerHands[playerID].getComponents().contains(MonopolyDealCard.create(CardType.JustSayNo)); }
 
     public boolean checkForGameEnd() {
         for(int i=0;i<getNPlayers();i++){

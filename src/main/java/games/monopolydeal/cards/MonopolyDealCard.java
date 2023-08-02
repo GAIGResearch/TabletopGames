@@ -1,17 +1,14 @@
 package games.monopolydeal.cards;
 
-import core.actions.AbstractAction;
 import core.components.Card;
 import games.monopolydeal.MonopolyDealGameState;
-import games.monopolydeal.actions.*;
-import org.apache.poi.ss.formula.atp.Switch;
 
 public class MonopolyDealCard extends Card{
     CardType type;
 
     SetType useAs; // Used by property wild;
 
-    protected MonopolyDealCard(games.monopolydeal.cards.CardType type) {
+    protected MonopolyDealCard(CardType type) {
         super(type.name());
         this.type = type;
         this.useAs = getSetType(type);
@@ -65,7 +62,7 @@ public class MonopolyDealCard extends Card{
         }
         return sType;
     }
-    public static MonopolyDealCard create(games.monopolydeal.cards.CardType type) {
+    public static MonopolyDealCard create(CardType type) {
         switch (type) {
             case Money10:
             case Money1:
@@ -121,6 +118,9 @@ public class MonopolyDealCard extends Card{
     public SetType getUseAs() { return useAs; }
     public void setUseAs(SetType sType) {  useAs = sType;}
     public CardType cardType() { return type; }
+    public boolean isDoubleTheRent(){ return type == CardType.DoubleTheRent; }
+    public boolean isJustSayNo(){ return type == CardType.JustSayNo; }
+
     @Override
     public MonopolyDealCard copy() {
         // Currently all cardTypes are immutable - so we can save resources when copying
@@ -131,7 +131,7 @@ public class MonopolyDealCard extends Card{
     public boolean equals(Object obj) {
         if (obj instanceof MonopolyDealCard) {
             MonopolyDealCard other = (MonopolyDealCard) obj;
-            return other.type == type;
+            return other.type == type && other.useAs == useAs;
         }
         return false;
     }

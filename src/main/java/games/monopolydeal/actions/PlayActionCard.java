@@ -48,7 +48,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         Deck<MonopolyDealCard> currentPlayerHand = MDGS.getPlayerHand(playerID);
 
-        boolean containsDTR = currentPlayerHand.getComponents().contains(MonopolyDealCard.create(CardType.DoubleTheRent));
+        int noDoubleTheRent = (int) currentPlayerHand.stream().filter(MonopolyDealCard::isDoubleTheRent).count();
         List<AbstractAction> availableActions = new ArrayList<>();
         // Iterate through player hand and add actions
         for (int i = 0; i <currentPlayerHand.getSize(); i++) {
@@ -69,8 +69,8 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                         break;
                     case MulticolorRent:
                         if(MDGS.checkForMulticolorRent(playerID)){
-                            availableActions.add(new MulticolorRentAction(playerID,false));
-                            if(containsDTR && MDGS.getActionsLeft()>=2) availableActions.add(new MulticolorRentAction(playerID,true));
+                            for(int j=0; j < MDGS.getActionsLeft() && j < noDoubleTheRent; j++)
+                                availableActions.add(new MulticolorRentAction(playerID,j));
                         }
                         break;
                     case GreenBlueRent:

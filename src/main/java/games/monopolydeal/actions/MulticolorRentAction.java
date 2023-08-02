@@ -29,13 +29,13 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    final boolean doubleTheRent;
+    final int doubleTheRent;
     int target;
     int rent;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
-    public MulticolorRentAction(int playerID, boolean doubleTheRent) {
+    public MulticolorRentAction(int playerID, int doubleTheRent) {
         this.playerID = playerID;
         this.doubleTheRent = doubleTheRent;
         actionState = ActionState.Target;
@@ -75,17 +75,11 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 break;
             case GetReaction:
                 availableActions.add(new DoNothing());
-                boolean hasJustSayNo = false;
-                Deck<MonopolyDealCard> playerHand = MDGS.getPlayerHand(target);
-                for(int i=0;i< playerHand.getSize();i++){
-                    if(playerHand.get(i).cardType() == CardType.JustSayNo){
-                        hasJustSayNo = true;
-                        break;
-                    }
-                }
-                if(hasJustSayNo){
-                    availableActions.add(new JustSayNoAction());
-                }
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
@@ -128,22 +122,22 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 actionState = ActionState.ChoosePropertySet;
                 break;
             case ChoosePropertySet:
-                rent = (doubleTheRent)?(((RentOf) action).rent) * 2 : ((RentOf) action).rent;
+                rent = (int) ((((RentOf) action).rent) * Math.pow(2,doubleTheRent));
                 actionState = ActionState.GetReaction;
                 break;
             case GetReaction:
-                if(action instanceof JustSayNoAction) executed = true;
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
                 else actionState = ActionState.CollectRent;
+                break;
+            case  ReactToReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
+                else executed = true;
                 break;
             case CollectRent:
                 executed = true;
                 break;
         }
     }
-//    @Override
-//    public void _afterAction(AbstractGameState gameState, AbstractAction action){
-//
-//    }
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
@@ -168,12 +162,9 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
-        if(doubleTheRent) {
-            MDGS.useAction(2);
-            MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
-        }
-        else MDGS.useAction(1);
+        MDGS.discardCard(MonopolyDealCard.create(CardType.MulticolorRent),playerID);
+        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
+        MDGS.useAction(1 + doubleTheRent);
         gs.setActionInProgress(this);
         return true;
     }
@@ -206,8 +197,8 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        if(doubleTheRent)
-            return "Multicolor Rent action with Double the rent";
+        if(doubleTheRent > 0)
+            return "Multicolor Rent with " + doubleTheRent + " Double the rent";
         else
             return "Multicolor Rent action";
     }
