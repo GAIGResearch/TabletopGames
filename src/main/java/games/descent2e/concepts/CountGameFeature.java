@@ -5,6 +5,7 @@ import core.components.Component;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import games.descent2e.components.tokens.DToken;
 import org.json.simple.JSONObject;
 import utilities.Utils;
@@ -19,6 +20,12 @@ public class CountGameFeature {
         ArrayList<Figure> figures = new ArrayList<>();
         for (Component c: gs.getAllComponents().getComponents()) {
             if (c instanceof Figure && c.getComponentName().contains(figureNameContains)) {
+                if (c instanceof Monster) {
+                    // We only want to count the Monsters that have been spawned on the map
+                    // Not the ones held in reserve to copy in for reinforcements
+                    if (gs.getOriginalMonsters().stream().flatMap(x -> x.stream()).anyMatch(x -> x == c)
+                            && !gs.getMonsters().stream().flatMap(x -> x.stream()).anyMatch(x -> x == c)) continue;
+                }
                 figures.add((Figure) c);
             }
         }

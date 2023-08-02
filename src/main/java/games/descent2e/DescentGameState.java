@@ -203,7 +203,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 Objects.equals(defenceDicePool, that.defenceDicePool) &&
                 Objects.equals(attributeDicePool, that.attributeDicePool) &&
                 Objects.equals(heroes, that.heroes) && Objects.equals(overlord, that.overlord) &&
-                Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens);
+                Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens) &&
+                Objects.equals(monstersOriginal, that.monstersOriginal) &&
+                Objects.equals(monstersPerGroup, that.monstersPerGroup) &&
+                Objects.equals(monsterGroups, that.monsterGroups);
     }
 
     @Override

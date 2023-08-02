@@ -260,7 +260,8 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         // We assume that we can always spawn a Minion
         // As we will just return if we do not have enough monsters to spawn otherwise
 
-        Random rnd = new Random(dgs.getGameParameters().getRandomSeed());
+        //Random rnd = new Random(dgs.getGameParameters().getRandomSeed());
+        Random rnd = new Random();
         List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
         List<Monster> monsters = dgs.getMonsters().get(index);
         for (Monster monster : monstersOriginal)

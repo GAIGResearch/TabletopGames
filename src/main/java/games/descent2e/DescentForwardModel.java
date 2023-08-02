@@ -764,7 +764,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
-                System.out.println("Victory!");
+                if (condition.getString(dgs).contains("Heroes: WIN_GAME"))
+                    System.out.println("Victory! The Heroes win!");
+                else
+                    System.out.println("Defeat! The Overlord wins!");
                 List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
                 List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
                 List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
@@ -1415,6 +1418,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             dgs.monstersPerGroup.add(monsterGroup.size());
             dgs.monsterGroups.add(name);
         }
+
+        //System.out.println(dgs.monstersOriginal);
+        //System.out.println(dgs.monstersPerGroup);
     }
 
     /**
