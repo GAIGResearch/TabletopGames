@@ -7,6 +7,7 @@ import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
+import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
@@ -202,12 +203,24 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     protected void applyDamage(DescentGameState state) {
-        int damage = state.getAttackDicePool().getDamage() + extraDamage;
-        int defence = state.getDefenceDicePool().getShields() - pierce;
-        if (defence < 0) defence = 0;
-        damage = Math.max(damage - defence, 0);
+
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         defenderName = defender.getComponentName();
+
+        int damage = state.getAttackDicePool().getDamage() + extraDamage;
+        int defence = state.getDefenceDicePool().getShields() - pierce;
+
+        if (defender instanceof Monster) {
+            if (((Monster) defender).hasPassive("NightStalker"))
+            {
+                Figure attacker = (Figure) state.getComponentById(attackingFigure);
+                defence += NightStalker.rollNightStalker(state, attacker, defender);
+            }
+        }
+
+        if (defence < 0) defence = 0;
+        damage = Math.max(damage - defence, 0);
+
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
             // Death
