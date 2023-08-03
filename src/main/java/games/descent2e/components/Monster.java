@@ -1,9 +1,16 @@
 package games.descent2e.components;
 
 import core.components.Counter;
+import core.properties.Property;
 import games.descent2e.DescentTypes.AttackType;
+import games.descent2e.actions.attack.Surge;
+import games.descent2e.actions.attack.SurgeAttackAction;
 import utilities.Pair;
 import utilities.Vector2D;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class Monster extends Figure {
 
@@ -31,6 +38,9 @@ public class Monster extends Figure {
       270 degrees (orientation=3): width <-> height, anchor is bottom-left (0,1)
      */
     Direction orientation = Direction.getDefault();
+
+    protected List<Surge> surges = new ArrayList<>();
+    protected List<String> passives = new ArrayList<>();
 
     public Monster() {
         super("Monster", -1);
@@ -69,6 +79,8 @@ public class Monster extends Figure {
         copy.orientation = orientation;
         copy.attackType = attackType;
         copy.lieutenant = lieutenant;
+        copy.surges = new ArrayList<>(surges);
+        copy.passives = new ArrayList<>(passives);
         super.copyComponentTo(copy);
         return copy;
     }
@@ -78,6 +90,8 @@ public class Monster extends Figure {
         copy.orientation = orientation;
         copy.attackType = attackType;
         copy.lieutenant = lieutenant;
+        copy.surges = new ArrayList<>(surges);
+        copy.passives = new ArrayList<>(passives);
         super.copyComponentTo(copy);
         return copy;
     }
@@ -97,11 +111,127 @@ public class Monster extends Figure {
         }
     }
 
+    public void setLieutenant(boolean lieutenant) {
+        this.lieutenant = lieutenant;
+    }
+
     public boolean isLieutenant() {
         return lieutenant;
     }
 
-    public AttackType getAttackType() {
+    public void setPassivesAndSurges(String[] abilities) {
+        for (String ability : abilities) {
+            if (ability.contains("Surge")) {
+                addSurge(ability);
+            } else {
+                addPassive(ability);
+            }
+        }
+
+    }
+
+    public void addSurge(String ability)
+    {
+        String surge = ability;
+        if (surges == null) {
+            surges = new ArrayList<>();
+        }
+
+        // If there is a number in the Surge (such as a Range increment or Damage increase), we need to extract it
+        String number = surge.replaceAll("[^\\d.]", "");
+        if (number == null)
+            number = "0";
+
+        // For simplicity's sake, we are assuming that number never goes above 3
+        // As no monster has a Surge with a value greater than 3 in the base game
+        // Otherwise we will need to fix the Surges called
+        if (Integer.valueOf(number) > 3)
+            number = "3";
+
+        // Get rid of the unwanted characters in the string
+        surge = surge.replace("Surge: ", "");
+        surge = surge.toUpperCase(Locale.ROOT).replaceAll( "[^A-Z]", "");
+
+        switch (surge)
+        {
+            case "RANGE":
+                surges.add(Surge.valueOf("RANGE_PLUS_" + number));
+                break;
+            case "HEART":
+                surges.add(Surge.valueOf("DAMAGE_PLUS_" + number));
+                break;
+            case "PIERCE":
+                surges.add(Surge.valueOf("PIERCE_"+ number));
+                break;
+            case "MEND":
+                // TODO - Implement MEND for Surges
+                //surges.add(Surge.valueOf("MEND_"+ number));
+                break;
+            case "DISEASE":
+                surges.add(Surge.DISEASE);
+                break;
+            case "POISON":
+                surges.add(Surge.POISON);
+                break;
+            case "IMMOBILIZE":
+                surges.add(Surge.IMMOBILIZE);
+                break;
+            case "STUN":
+                surges.add(Surge.STUN);
+                break;
+            case "FIREBREATH":
+                // TODO - Implement FIREBREATH for Surges, when we get to the Dragons
+                //surges.add(Surge.FIREBREATH);
+                break;
+            default:
+                break;
+        }
+    }
+    public void removeSurge (Surge surge)
+    {
+        if (surges.contains(surge))
+        {
+            surges.remove(surge);
+        }
+    }
+    public void addPassive(String ability)
+    {
+        if (passives == null) {
+            passives = new ArrayList<>();
+        }
+        passives.add(ability);
+    }
+    public void removePassive(String ability)
+    {
+        if (passives.contains(ability)) {
+            passives.remove(ability);
+        }
+    }
+    public List<Surge> getSurges() {
+        return surges;
+    }
+
+    public List<String> getPassives() {
+        return passives;
+    }
+
+    public boolean hasPassive(String ability)
+    {
+        if (passives != null) {
+            return passives.contains(ability);
+        }
+        return false;
+    }
+    public boolean hasSurge (Surge surge)
+    {
+        if (surges != null) {
+            return surges.contains(surge);
+        }
+        return false;
+    }
+
+    public AttackType getAttackType()
+    {
         return attackType;
     }
 }

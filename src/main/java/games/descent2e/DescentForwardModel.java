@@ -10,6 +10,7 @@ import games.descent2e.actions.*;
 import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.attack.RangedAttack;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
@@ -25,6 +26,7 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -1359,6 +1361,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             master.getNActionsExecuted().setMaximum(nActionsPerFigure);
             master.setProperties(monsterDef.get(act + "-master").getProperties());
             master.setComponentName(name + " master");
+            master.setPassivesAndSurges(((PropertyStringArray) master.getProperty("passive")).getValues());
             if (attributeModifiers.containsKey("master")) {
                 for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("master")) {
                     master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
@@ -1369,6 +1372,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
                 }
             }
+
+            for (Surge surge: master.getSurges())
+            {
+                master.addAbility(new SurgeAttackAction(surge, master.getComponentID()));
+            }
+
 
             // Don't spawn the Master monster if we're only supposed to spawn 1 Minion only
             if (spawnMaster)
@@ -1398,6 +1407,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 Monster minion = monsterDef.get(act + "-minion").copyNewID();
                 minion.setProperties(monsterDef.get(act + "-minion").getProperties());
                 minion.setComponentName(name + " minion");
+                minion.setPassivesAndSurges(((PropertyStringArray) minion.getProperty("passive")).getValues());
+
+                for (Surge surge: minion.getSurges())
+                {
+                    minion.addAbility(new SurgeAttackAction(surge, minion.getComponentID()));
+                }
+
                 placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
                 minion.setOwnerId(dgs.overlordPlayer);
                 minion.getNActionsExecuted().setMaximum(nActionsPerFigure);
@@ -1419,6 +1435,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             dgs.monsterGroups.add(name);
         }
 
+        //System.out.println(dgs.monsters.get(0).get(1).getSurges());
         //System.out.println(dgs.monstersOriginal);
         //System.out.println(dgs.monstersPerGroup);
     }

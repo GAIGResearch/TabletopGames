@@ -11,8 +11,14 @@ import java.util.function.BiConsumer;
 public enum Surge {
     // a = attack action, s = state (OBVIOUSLY!)
     RANGE_PLUS_1(1, (a, s) -> a.addRange(1)),
+    RANGE_PLUS_2(1, (a, s) -> a.addRange(2)),
+    RANGE_PLUS_3(1, (a, s) -> a.addRange(3)),
     DAMAGE_PLUS_1(1, (a, s) -> a.addDamage(1)),
+    DAMAGE_PLUS_2(1, (a, s) -> a.addDamage(2)),
+    DAMAGE_PLUS_3(1, (a, s) -> a.addDamage(3)),
+    PIERCE_1(1, (a, s) -> a.addPierce(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
+    PIERCE_3(1, (a, s) -> a.addPierce(3)),
     DISEASE(1, (a, s) -> a.setDiseasing(true)),
     IMMOBILIZE(1, (a, s) -> a.setImmobilizing(true)),
     POISON(1, (a, s) -> a.setPoisoning(true)),
