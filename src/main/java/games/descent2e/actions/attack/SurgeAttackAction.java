@@ -41,29 +41,6 @@ public class SurgeAttackAction extends DescentAction {
         MeleeAttack attack = (MeleeAttack) gs.currentActionInProgress();
         attack.registerSurge(surge);
         surge.apply(attack, gs);
-
-        // TODO Could probably make these neater somewhere else, but they work for now
-        // Applies the Diseased condition
-        if (attack.isDiseasing) {
-            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
-            defender.addCondition(DescentTypes.DescentCondition.Disease);
-        }
-        // Applies the Immobilized condition
-        if (attack.isImmobilizing) {
-            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
-            defender.addCondition(DescentTypes.DescentCondition.Immobilize);
-        }
-        // Applies the Poisoned condition
-        if (attack.isPoisoning) {
-            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
-            defender.addCondition(DescentTypes.DescentCondition.Poison);
-        }
-        // Applies the Stunned condition
-        if (attack.isStunning) {
-            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
-            defender.addCondition(DescentTypes.DescentCondition.Stun);
-        }
-
         return true;
     }
 

@@ -46,6 +46,9 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     final int testingFigure;
     int testingPlayer;
     String testingName;
+    String attributeTestName = "Attribute Test";
+    int testCount = 0;
+    Figure sourceFigure;
     AttributeTest.TestPhase phase = NOT_STARTED;
     int interruptPlayer;
     Figure.Attribute attribute;
@@ -53,6 +56,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     int penaltyToAttribute = 0;
     int penaltyToRoll = 0;
     boolean result = false;
+
+
 
     public AttributeTest(int testingFigure, Figure.Attribute attribute) {
         super(FORCED);
@@ -69,6 +74,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         phase = PRE_TEST_ROLL;
         interruptPlayer = testingPlayer;
         Figure tester = (Figure) state.getComponentById(testingFigure);
+        setTestingName(tester.getName());
         attributeValue = tester.getAttributeValue(attribute);
 
         movePhaseForward(state);
@@ -218,9 +224,13 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         retValue.interruptPlayer = interruptPlayer;
         retValue.attribute = attribute;
         retValue.attributeValue = attributeValue;
+        retValue.attributeTestName = attributeTestName;
         retValue.penaltyToAttribute = penaltyToAttribute;
         retValue.penaltyToRoll = penaltyToRoll;
         retValue.result = result;
+        retValue.testCount = testCount;
+        retValue.testingName = testingName;
+        retValue.sourceFigure = sourceFigure;
         return retValue;
     }
 
@@ -239,9 +249,13 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                     other.interruptPlayer == interruptPlayer &&
                     other.attribute == attribute &&
                     other.attributeValue == attributeValue &&
+                    other.attributeTestName == attributeTestName &&
                     other.penaltyToAttribute == penaltyToAttribute &&
                     other.penaltyToRoll == penaltyToRoll &&
-                    other.result == result;
+                    other.result == result &&
+                    other.testCount == testCount &&
+                    other.testingName == testingName &&
+                    other.sourceFigure == sourceFigure;
         }
         return false;
     }
@@ -249,7 +263,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(testingFigure, testingPlayer, phase.ordinal(), interruptPlayer,
-                attribute, attributeValue, penaltyToAttribute, penaltyToRoll, result);
+                attribute, attributeValue, attributeTestName, penaltyToAttribute, penaltyToRoll,
+                result, testCount, testingName, sourceFigure);
     }
 
     public void setAttribute(Figure.Attribute a)
@@ -280,6 +295,47 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     public boolean getResult()
     {
         return result;
+    }
+
+    public int getTestingFigure()
+    {
+        return testingFigure;
+    }
+
+    public void setTestingName(String name)
+    {
+        testingName = name;
+    }
+
+    public String getTestingName()
+    {
+        return testingName;
+    }
+
+    public void setAttributeTestName(String name)
+    {
+        attributeTestName = name;
+    }
+    public String getAttributeTestName()
+    {
+        return attributeTestName;
+    }
+
+    public void setSourceFigure (Figure source)
+    {
+        sourceFigure = source;
+    }
+    public Figure getSourceFigure()
+    {
+        return sourceFigure;
+    }
+    public void setTestCount(int count)
+    {
+        testCount = count;
+    }
+    public int getTestCount()
+    {
+        return testCount;
     }
 
     public String toString() {

@@ -7,7 +7,7 @@ import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
 
 public class Poisoned extends AttributeTest {
-
+    String attributeTestName = "Poisoned";
     public Poisoned(int testingFigure, Figure.Attribute attribute) {
         super(testingFigure, attribute);
     }
@@ -39,13 +39,13 @@ public class Poisoned extends AttributeTest {
             }
         }
 
-        f.addAttributeTest(DescentTypes.DescentCondition.Poison);
+        f.addAttributeTest(attributeTestName);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         // We can only make one Poisoned attribute test per turn - if we have already taken it, we can't make another attempt
-        return f.hasCondition(DescentTypes.DescentCondition.Poison) && !f.hasAttributeTest(DescentTypes.DescentCondition.Poison) && f.getNActionsExecuted().isMinimum();
+        return f.hasCondition(DescentTypes.DescentCondition.Poison) && !f.hasAttributeTest(attributeTestName) && f.getNActionsExecuted().isMinimum();
     }
 }

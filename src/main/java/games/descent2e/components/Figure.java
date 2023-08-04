@@ -5,6 +5,7 @@ import core.components.Token;
 import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.AttributeTest;
 import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -64,7 +65,7 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
-    Set<DescentTypes.DescentCondition> attributeTests;
+    Set<String> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name, int nActionsPossible) {
@@ -172,11 +173,11 @@ public class Figure extends Token {
         return conditions.contains(condition);
     }
 
-    public void addAttributeTest(DescentTypes.DescentCondition attributeTest) {
+    public void addAttributeTest(String attributeTest) {
         attributeTests.add(attributeTest);
     }
 
-    public void removeAttributeTest(DescentTypes.DescentCondition attributeTest) {
+    public void removeAttributeTest(String attributeTest) {
         attributeTests.remove(attributeTest);
     }
     public void clearAttributeTest() {
@@ -185,7 +186,7 @@ public class Figure extends Token {
         }
     }
 
-    public boolean hasAttributeTest(DescentTypes.DescentCondition attributeTest) {
+    public boolean hasAttributeTest(String attributeTest) {
         if (attributeTests == null) {
             return false;
         }

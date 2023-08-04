@@ -7,6 +7,7 @@ import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
@@ -242,6 +243,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 }
             }
         } else {
+            // Conditions only apply if damage is done
+            if (damage > 0)
+                applyConditions(defender);
             defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
         }
 
@@ -256,6 +260,26 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public boolean attackMissed(DescentGameState state) {
         return state.getAttackDicePool().hasRolled() && (
                 state.getAttackDicePool().getRange() < 0 || state.getAttackDicePool().getDamage() == 0);
+    }
+
+    public void applyConditions(Figure defender)
+    {
+        // Applies the Diseased condition
+        if (isDiseasing) {
+            defender.addCondition(DescentTypes.DescentCondition.Disease);
+        }
+        // Applies the Immobilized condition
+        if (isImmobilizing) {
+            defender.addCondition(DescentTypes.DescentCondition.Immobilize);
+        }
+        // Applies the Poisoned condition
+        if (isPoisoning) {
+            defender.addCondition(DescentTypes.DescentCondition.Poison);
+        }
+        // Applies the Stunned condition
+        if (isStunning) {
+            defender.addCondition(DescentTypes.DescentCondition.Stun);
+        }
     }
 
     @Override

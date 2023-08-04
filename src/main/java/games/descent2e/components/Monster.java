@@ -41,6 +41,7 @@ public class Monster extends Figure {
 
     protected List<Surge> surges = new ArrayList<>();
     protected List<String> passives = new ArrayList<>();
+    protected List<String> actions = new ArrayList<>();
 
     public Monster() {
         super("Monster", -1);
@@ -81,6 +82,7 @@ public class Monster extends Figure {
         copy.lieutenant = lieutenant;
         copy.surges = new ArrayList<>(surges);
         copy.passives = new ArrayList<>(passives);
+        copy.actions = new ArrayList<>(actions);
         super.copyComponentTo(copy);
         return copy;
     }
@@ -92,6 +94,7 @@ public class Monster extends Figure {
         copy.lieutenant = lieutenant;
         copy.surges = new ArrayList<>(surges);
         copy.passives = new ArrayList<>(passives);
+        copy.actions = new ArrayList<>(actions);
         super.copyComponentTo(copy);
         return copy;
     }
@@ -128,6 +131,11 @@ public class Monster extends Figure {
             }
         }
 
+    }
+    public void setActions(String[] abilities) {
+        for (String ability : abilities) {
+            addAction(ability);
+        }
     }
 
     public void addSurge(String ability)
@@ -206,12 +214,27 @@ public class Monster extends Figure {
             passives.remove(ability);
         }
     }
+    public void addAction(String action)
+    {
+        if (actions == null) {
+            actions = new ArrayList<>();
+        }
+        actions.add(action);
+    }
+    public void removeAction(String action)
+    {
+        if (actions.contains(action)) {
+            actions.remove(action);
+        }
+    }
     public List<Surge> getSurges() {
         return surges;
     }
-
     public List<String> getPassives() {
         return passives;
+    }
+    public List<String> getActions() {
+        return actions;
     }
 
     public boolean hasPassive(String ability)
@@ -225,6 +248,13 @@ public class Monster extends Figure {
     {
         if (surges != null) {
             return surges.contains(surge);
+        }
+        return false;
+    }
+    public boolean hasAction(String action)
+    {
+        if (actions != null) {
+            return actions.contains(action);
         }
         return false;
     }

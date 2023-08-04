@@ -15,6 +15,7 @@ import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
+import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -423,6 +424,43 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                             // Check if action can be executed right now
                             if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
                                 actions.add(act);
+                            }
+                        }
+                    }
+
+                    // Get monster abilities
+                    if (actingFigure instanceof Monster)
+                    {
+                        for (String action : ((Monster) actingFigure).getActions()) {
+                            switch (action.toUpperCase(Locale.ROOT)) {
+                                case "HOWL":
+                                    DescentAction howl = new Howl();
+                                    if (howl.canExecute(dgs))
+                                        actions.add(new Howl());
+                                    break;
+                                case "GRAB":
+                                    // TODO
+                                    break;
+                                case "HEAL":
+                                    // TODO
+                                    break;
+                                case "THROW":
+                                    // TODO
+                                    break;
+                                case "AIR":
+                                    // TODO
+                                    break;
+                                case "EARTH":
+                                    // TODO
+                                    break;
+                                case "FIRE":
+                                    // TODO
+                                    break;
+                                case "WATER":
+                                    // TODO
+                                    break;
+                                default:
+                                    break;
                             }
                         }
                     }
@@ -1367,7 +1405,16 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             master.getNActionsExecuted().setMaximum(nActionsPerFigure);
             master.setProperties(monsterDef.get(act + "-master").getProperties());
             master.setComponentName(name + " master");
-            master.setPassivesAndSurges(((PropertyStringArray) master.getProperty("passive")).getValues());
+
+            PropertyStringArray passives = (PropertyStringArray) master.getProperty("passive");
+            if(passives != null)
+                master.setPassivesAndSurges(passives.getValues());
+
+            PropertyStringArray actions = ((PropertyStringArray) master.getProperty("action"));
+            if (actions != null) {
+                master.setActions(actions.getValues());
+            }
+
             if (attributeModifiers.containsKey("master")) {
                 for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("master")) {
                     master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
@@ -1413,7 +1460,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 Monster minion = monsterDef.get(act + "-minion").copyNewID();
                 minion.setProperties(monsterDef.get(act + "-minion").getProperties());
                 minion.setComponentName(name + " minion");
-                minion.setPassivesAndSurges(((PropertyStringArray) minion.getProperty("passive")).getValues());
+
+                passives = (PropertyStringArray) minion.getProperty("passive");
+                if(passives != null)
+                    minion.setPassivesAndSurges(passives.getValues());
+
+                actions = ((PropertyStringArray) minion.getProperty("action"));
+                if (actions != null)
+                    minion.setActions(actions.getValues());
 
                 for (Surge surge: minion.getSurges())
                 {
@@ -1423,17 +1477,17 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
                 minion.setOwnerId(dgs.overlordPlayer);
                 minion.getNActionsExecuted().setMaximum(nActionsPerFigure);
-                monsterGroup.add(minion);
                 if (attributeModifiers.containsKey("minion")) {
                     for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("minion")) {
-                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
                 if (attributeModifiers.containsKey("all")) {
                     for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
-                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
+                monsterGroup.add(minion);
             }
             dgs.monsters.add(monsterGroup);
             dgs.monstersOriginal.add(monsterGroup);
