@@ -164,8 +164,7 @@ public class Monster extends Figure {
                 surges.add(Surge.valueOf("PIERCE_"+ number));
                 break;
             case "MEND":
-                // TODO - Implement MEND for Surges
-                //surges.add(Surge.valueOf("MEND_"+ number));
+                surges.add(Surge.valueOf("MENDING_"+ number));
                 break;
             case "DISEASE":
                 surges.add(Surge.DISEASE);

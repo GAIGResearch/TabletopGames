@@ -479,10 +479,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 if (figureOnLocation.value != -1) {
                     isEmpty = false;
                     Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
-                    // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
-                    if (figureType.equals(neighbourFigure.getTokenType()) ||
-                            (((Monster) figure).hasPassive("Scamper")) && neighbourFigure.getTokenType().equals("Hero")) {
+                    if (figureType.equals(neighbourFigure.getTokenType())) {
                         isFriendly = true;
+                    }
+                    // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
+                    else if (figureType == "Monster")
+                    {
+                        if ((((Monster) figure).hasPassive("Scamper")) && neighbourFigure.getTokenType().equals("Hero"))
+                            isFriendly = true;
                     }
                 }
 

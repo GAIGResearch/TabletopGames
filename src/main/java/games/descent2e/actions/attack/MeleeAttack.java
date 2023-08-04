@@ -60,7 +60,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
     int surgesToSpend;
-    int extraRange, pierce, extraDamage;
+    int extraRange, pierce, extraDamage, mending;
     boolean isDiseasing;
     boolean isImmobilizing;
     boolean isPoisoning;
@@ -246,6 +246,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         }
 
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        if(mending > 0)
+        {
+            attacker.incrementAttribute(Figure.Attribute.Health, mending);
+        }
         attacker.getNActionsExecuted().increment();
     }
 
@@ -264,8 +268,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.surgesToSpend = surgesToSpend;
         retValue.extraRange = extraRange;
         retValue.extraDamage = extraDamage;
+        retValue.mending = mending;
         retValue.surgesUsed = new HashSet<>(surgesUsed);
         retValue.pierce = pierce;
+        retValue.isDiseasing = isDiseasing;
+        retValue.isImmobilizing = isImmobilizing;
+        retValue.isPoisoning = isPoisoning;
         retValue.isStunning = isStunning;
         return retValue;
     }
@@ -280,8 +288,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (obj instanceof MeleeAttack) {
             MeleeAttack other = (MeleeAttack) obj;
             return other.attackingFigure == attackingFigure &&
-                    other.surgesToSpend == surgesToSpend && other.extraDamage == extraRange &&
-                    other.isStunning == isStunning && other.extraRange == extraRange && other.pierce == pierce &&
+                    other.surgesToSpend == surgesToSpend && other.extraDamage == extraDamage &&
+                    other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
+                    other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
+                    other.extraRange == extraRange && other.pierce == pierce && other.mending == mending &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.surgesUsed.equals(surgesUsed) &&
                     other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
@@ -291,9 +301,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure,
-                pierce, extraRange, isStunning, extraDamage, surgesUsed,
-                defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
+        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, pierce,
+                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, mending,
+                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
     }
 
     @Override
@@ -365,6 +375,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void addPierce(int pierceBonus) {
         pierce += pierceBonus;
+    }
+    public void addMending(int mendBonus) {
+        mending += mendBonus;
     }
     public void setDiseasing(boolean disease) {
         isDiseasing = disease;
