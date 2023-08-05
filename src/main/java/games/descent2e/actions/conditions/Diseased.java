@@ -25,7 +25,7 @@ public class Diseased extends AttributeTest {
     }
 
     @Override
-    public void resolveTest(Figure f, boolean result)
+    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
     {
         if (result)
         {

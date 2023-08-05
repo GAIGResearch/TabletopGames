@@ -226,9 +226,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (startingHealth - damage <= 0) {
             // Death
             if (defender instanceof Hero) {
-                ((Hero)defender).setDefeated(true);
-                // Remove from map
-                Move.remove(state, defender);
+                ((Hero)defender).setDefeated(state,true);
                 // Overlord may draw a card TODO
             } else {
                 // A monster

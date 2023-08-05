@@ -3,6 +3,7 @@ package games.descent2e.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.GridBoard;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static utilities.Utils.getNeighbourhood;
 
 public class Move extends AbstractAction {
     final List<Vector2D> positionsTraveled;
@@ -136,6 +139,68 @@ public class Move extends AbstractAction {
                     }
                 }
             }
+        }
+    }
+
+    public static void replace (DescentGameState dgs, Figure f)
+    {
+        Monster.Direction orientation = Monster.Direction.DOWN;
+        if (f instanceof Monster)
+            orientation = ((Monster) f).getOrientation();
+
+        Vector2D position = f.getPosition();
+
+        BoardNode baseSpace = dgs.getMasterBoard().getElement(position.getX(), position.getY());
+        // If the original space is empty, we can just place the figure there
+        if (((PropertyInt) baseSpace.getProperty("players")).value == -1) {
+            place(dgs, f, position, orientation);
+            return;
+        }
+
+        List<Vector2D> possibilities = new ArrayList<>();
+        // Otherwise, we need to find the nearest adjacent space that is empty
+        GridBoard board = dgs.getMasterBoard();
+        List<Vector2D> neighbours = getNeighbourhood(position.getX(), position.getY(), board.getWidth(), board.getHeight(), true);
+        for (Vector2D neighbour : neighbours) {
+            BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
+            if (node != null) {
+                // Check if there are no figures on the space, and that it is walkable
+                if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && ((PropertyInt) node.getProperty("players")).value == -1) {
+                    possibilities.add(neighbour);
+                }
+            }
+        }
+        if (possibilities.isEmpty())
+        {
+            List<Vector2D> neighboursOfNeighbours = new ArrayList<>();
+            for (Vector2D neighbour : neighbours) {
+                List<Vector2D> uniqueNeighbours = getNeighbourhood(neighbour.getX(), neighbour.getY(), board.getWidth(), board.getHeight(), true);
+                uniqueNeighbours.removeIf(neighboursOfNeighbours::contains);
+                neighboursOfNeighbours.addAll(uniqueNeighbours);
+            }
+            neighboursOfNeighbours.removeIf(neighbours::contains);
+            for (Vector2D neighbour : neighboursOfNeighbours)
+            {
+                BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
+                // Check if there are no figures on the space, and that it is walkable
+                if (node != null) {
+                    if (((PropertyInt) node.getProperty("players")).value == -1 && DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName())) {
+                        possibilities.add(neighbour);
+                    }
+                }
+            }
+        }
+
+        // TODO The game should check more than just two spaces away for possibilities, but this is just a proof of concept for now
+        if (possibilities.isEmpty())
+        {
+            throw new AssertionError("No empty spaces found to place figure!");
+        }
+        else
+        {
+            // TODO The player should be allowed to choose which position they place themselves on
+            // But for now, we'll just place them on the first available space
+            place(dgs, f, possibilities.get(0), orientation);
         }
     }
 

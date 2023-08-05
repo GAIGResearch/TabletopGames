@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.DescentGameState;
 import games.descent2e.actions.Move;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
@@ -54,8 +55,6 @@ public class Hero extends Figure {
     @Override
     public void resetRound() {
         super.resetRound();
-        if (rested) attributes.get(Attribute.Fatigue).setValue(0);
-        rested = false;
     }
 
     protected Hero(String name, Counter actions, int ID) {
@@ -134,7 +133,7 @@ public class Hero extends Figure {
         this.rested = rested;
     }
 
-    public void setDefeated(boolean defeated) {
+    public void setDefeated(DescentGameState dgs, boolean defeated) {
         this.defeated = defeated;
 
         if (defeated) {
@@ -144,6 +143,11 @@ public class Hero extends Figure {
             setAttributeToMax(Figure.Attribute.Fatigue);
             // Discard conditions
             getConditions().clear();
+            // Remove from map
+            Move.remove(dgs, this);
+        }
+        else {
+            Move.replace(dgs, this);
         }
     }
 

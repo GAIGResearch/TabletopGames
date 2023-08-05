@@ -30,7 +30,7 @@ public class Revive extends DescentAction{
     @Override
     public boolean execute(DescentGameState gs) {
         Hero hero = (Hero) gs.getComponentById(heroID);
-        hero.setDefeated(false);
+        hero.setDefeated(gs,false);
         // Health recovery: roll 2 red dice
         DicePool.revive.roll(gs.getRandom());
         hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());

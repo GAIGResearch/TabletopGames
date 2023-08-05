@@ -32,6 +32,13 @@ public class EndTurn extends DescentAction{
         // If we are Immobilized, remove that condition now
         if(f.hasCondition(DescentTypes.DescentCondition.Immobilize)) { f.removeCondition(DescentTypes.DescentCondition.Immobilize); }
 
+        // If the Hero has rested, restore their Fatigue
+        if (f instanceof Hero && ((Hero) f).hasRested())
+        {
+            f.getAttribute(Figure.Attribute.Fatigue).setValue(0);
+            ((Hero) f).setRested(false);
+        }
+
         // TODO REMOVE WHEN NOT DEBUGGING
         /*if (f instanceof Hero)
         {

@@ -307,177 +307,198 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // End turn is always possible
         actions.add(new EndTurn());
 
-        // First, we must check if we can make a Poisoned or Diseased attribute test
+        // First, we must check if our Figure is a defeated Hero
+        // Defeated Heroes can only perform the StandUp action
+
+        if (actingFigure instanceof Hero && ((Hero) actingFigure).isDefeated())
+        {
+            StandUp standUp = new StandUp();
+            if (standUp.canExecute(dgs)) {
+                actions.add(standUp);
+            }
+            return actions;
+        }
+
+        // Next, we check if we can make a Poisoned or Diseased attribute test
         // We cannot make any actions before we have taken our attribute tests against these conditions
-
-        boolean noTestsMade = true;
-
         if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease))
         {
             Diseased diseased = new Diseased(actingFigure.getComponentID(), Figure.Attribute.Willpower);
             if (diseased.canExecute(dgs)) {
                 actions.add(diseased);
-                noTestsMade = false;
             }
 
             Poisoned poisoned = new Poisoned(actingFigure.getComponentID(), Figure.Attribute.Might);
             if (poisoned.canExecute(dgs)) {
                 actions.add(poisoned);
-                noTestsMade = false;
             }
+
+            return actions;
+        }
+
+        // If we are stunned, we can only take the 'Stunned' action
+        if (actingFigure.hasCondition(DescentCondition.Stun)) {
+            Stunned stunned = new Stunned();
+            if (stunned.canExecute(dgs)) actions.add(stunned);
+            return actions;
         }
 
         // If we have made all our Attribute Tests, then we can take our other actions
-        if (noTestsMade) {
-
-            // Every other action can only occur if we are not stunned
-            if (!actingFigure.hasCondition(DescentCondition.Stun)) {
-
-                // If we have movement points to spend, and not immobilized, add move actions
-                if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
-                        && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
-                    actions.addAll(moveActions(dgs, actingFigure));
-                }
-
-                // TODO: stamina move, not an "action", but same rules for move apply [DONE - Toby]
-                // If a hero has stamina to spare, add move actions that cost fatigue
-                if (actingFigure instanceof Hero) {
-                    if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-                        GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
-                        if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
-                    }
-                }
-
-                // Add actions that cost action points
-                if (!actingFigure.getNActionsExecuted().isMaximum()) {
-                    // Get movement points action
-                    GetMovementPoints movePoints = new GetMovementPoints();
-                    if (movePoints.canExecute(dgs)) actions.add(movePoints);
-
-                    // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-
-                    AttackType attackType = AttackType.NONE;
-                    if (actingFigure instanceof Hero) {
-                        // Examines the Hero's equipment to see what their weapon's range is
-                        Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
-                        int length = myEquipment.getComponents().size();
-                        for (int i = 0; i < length; i++) {
-                            AttackType temp = myEquipment.get(i).getAttackType();
-
-                            // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
-                            if (temp != AttackType.NONE) {
-                                if (attackType == AttackType.NONE) {
-                                    attackType = temp;
-                                } else if (attackType != temp) {
-                                    attackType = AttackType.BOTH;
-                                }
-                            }
-                        }
-                    }
-
-                    if (actingFigure instanceof Monster) {
-                        // TODO Check if Monster is melee or ranged (current method could do with improving)
-                        attackType = ((Monster) actingFigure).getAttackType();
-                    }
-
-                    if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
-                        actions.addAll(meleeAttackActions(dgs, actingFigure));
-                    }
-                    if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
-                        actions.addAll(rangedAttackActions(dgs, actingFigure));
-                    }
-
-                    // - Rest
-                    if (actingFigure instanceof Hero) {
-                        // Only heroes can rest
-                        Rest act = new Rest();
-                        if (act.canExecute(dgs)) {
-                            actions.add(act);
-                        }
-                    }
-
-                    // - Open/close a door TODO
-                    // - Revive hero TODO
-
-                    // - Search
-                    if (actingFigure instanceof Hero) {
-                        // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of)
-                        Vector2D loc = actingFigure.getPosition();
-                        GridBoard board = dgs.getMasterBoard();
-                        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-                        for (DToken token : dgs.tokens) {
-                            if (token.getDescentTokenType() == DescentToken.Search
-                                    && token.getPosition() != null
-                                    && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
-                                for (DescentAction da : token.getEffects()) {
-                                    actions.add(da.copy());
-                                }
-                            }
-                        }
-                    }
-
-                    // - Stand up TODO
-
-                    // - Special (specified by quest)
-                    if (actingFigure.getAbilities() != null) {
-                        for (DescentAction act : actingFigure.getAbilities()) {
-                            // Check if action can be executed right now
-                            if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
-                                actions.add(act);
-                            }
-                        }
-                    }
-
-                    // Get monster abilities
-                    if (actingFigure instanceof Monster)
-                    {
-                        for (String action : ((Monster) actingFigure).getActions()) {
-                            switch (action.toUpperCase(Locale.ROOT)) {
-                                case "HOWL":
-                                    DescentAction howl = new Howl();
-                                    if (howl.canExecute(dgs))
-                                        actions.add(new Howl());
-                                    break;
-                                case "GRAB":
-                                    // TODO
-                                    break;
-                                case "HEAL":
-                                    // TODO
-                                    break;
-                                case "THROW":
-                                    // TODO
-                                    break;
-                                case "AIR":
-                                    // TODO
-                                    break;
-                                case "EARTH":
-                                    // TODO
-                                    break;
-                                case "FIRE":
-                                    // TODO
-                                    break;
-                                case "WATER":
-                                    // TODO
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
-                }
-
-                // TODO: exhaust a card for an action/modifier/effect "free" action
-
-            }
-
-            // If we are stunned, we can only take the 'Stunned' action
-            else {
-                Stunned stunned = new Stunned();
-                if (stunned.canExecute(dgs)) actions.add(stunned);
-            }
-
+        // If we have movement points to spend, and not immobilized, add move actions
+        if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
+                && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
+            actions.addAll(moveActions(dgs, actingFigure));
         }
 
+        // If a hero has stamina to spare, add move actions that cost fatigue
+        if (actingFigure instanceof Hero) {
+            if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+                GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
+                if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
+            }
+        }
+
+        // Add actions that cost action points
+        if (!actingFigure.getNActionsExecuted().isMaximum()) {
+            // Get movement points action
+            GetMovementPoints movePoints = new GetMovementPoints();
+            if (movePoints.canExecute(dgs)) actions.add(movePoints);
+
+            // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+
+            AttackType attackType = AttackType.NONE;
+            if (actingFigure instanceof Hero) {
+                // Examines the Hero's equipment to see what their weapon's range is
+                Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
+                int length = myEquipment.getComponents().size();
+                for (int i = 0; i < length; i++) {
+                    AttackType temp = myEquipment.get(i).getAttackType();
+
+                    // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
+                    if (temp != AttackType.NONE) {
+                        if (attackType == AttackType.NONE) {
+                            attackType = temp;
+                        } else if (attackType != temp) {
+                            attackType = AttackType.BOTH;
+                        }
+                    }
+                }
+            }
+            if (actingFigure instanceof Monster) {
+                // TODO Check if Monster is melee or ranged (current method could do with improving)
+                attackType = ((Monster) actingFigure).getAttackType();
+            }
+            if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                actions.addAll(meleeAttackActions(dgs, actingFigure));
+            }
+            if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                actions.addAll(rangedAttackActions(dgs, actingFigure));
+            }
+
+            // - Open/close a door TODO
+
+            // Hero Only Actions
+            // Rest
+            // Revive
+            // Search
+            if (actingFigure instanceof Hero) {
+
+                // Rest
+                Rest act = new Rest();
+                if (act.canExecute(dgs)) {
+                    actions.add(act);
+                }
+
+                // Revive
+                Vector2D loc = actingFigure.getPosition();
+                GridBoard board = dgs.getMasterBoard();
+                List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+                for (Hero hero : dgs.heroes) {
+                    if (actingFigure.equals(hero)) continue;
+                    if (hero.isDefeated() && hero.getPosition() != null
+                            && (neighbours.contains(hero.getPosition()) || hero.getPosition().equals(loc))) {
+                        Revive revive = new Revive(hero.getComponentID());
+                        if (revive.canExecute(dgs)) {
+                            actions.add(revive);
+                        }
+                    }
+                }
+
+                // Search for adjacent Search tokens (or ones they're sitting on top of)
+                for (DToken token : dgs.tokens) {
+                    if (token.getDescentTokenType() == DescentToken.Search
+                            && token.getPosition() != null
+                            && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+                        for (DescentAction da : token.getEffects()) {
+                            actions.add(da.copy());
+                        }
+                    }
+                }
+            }
+
+            // - Special (specified by quest)
+            if (actingFigure.getAbilities() != null) {
+                for (DescentAction act : actingFigure.getAbilities()) {
+                    // Check if action can be executed right now
+                    if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
+                        actions.add(act);
+                    }
+                }
+            }
+
+            // Get monster special actions
+            if (actingFigure instanceof Monster)
+            {
+                for (String action : ((Monster) actingFigure).getActions()) {
+                    switch (action.toUpperCase(Locale.ROOT)) {
+                        case "HOWL":
+                            DescentAction howl = new Howl();
+                            if (howl.canExecute(dgs))
+                                actions.add(new Howl());
+                            break;
+                        case "GRAB":
+                                    /*DescentAction grab = new Grab();
+                                    if (grab.canExecute(dgs))
+                                        actions.add(new Grab());
+                                    break;
+                                case "HEAL":
+                                    DescentAction heal = new Heal();
+                                    if (heal.canExecute(dgs))
+                                        actions.add(new Heal());
+                                    break;
+                                case "THROW":
+                                    DescentAction throwAction = new Throw();
+                                    if (throwAction.canExecute(dgs))
+                                        actions.add(new Throw());
+                                    break;
+                                case "AIR":
+                                    DescentAction air = new Air();
+                                    if (air.canExecute(dgs))
+                                        actions.add(new Air());
+                                    break;
+                                case "EARTH":
+                                    DescentAction earth = new Earth();
+                                    if (earth.canExecute(dgs))
+                                        actions.add(new Earth());
+                                    break;
+                                case "FIRE":
+                                    DescentAction fire = new Fire();
+                                    if (fire.canExecute(dgs))
+                                        actions.add(new Fire());
+                                    break;
+                                case "WATER":
+                                    DescentAction water = new Water();
+                                    if (water.canExecute(dgs))
+                                        actions.add(new Water());*/
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+        // TODO: exhaust a card for an action/modifier/effect "free" action
+        }
         return actions;
     }
 

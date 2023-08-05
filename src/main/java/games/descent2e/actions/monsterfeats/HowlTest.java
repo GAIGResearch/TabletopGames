@@ -8,9 +8,10 @@ import games.descent2e.components.Figure;
 
 public class HowlTest extends AttributeTest {
 
-    String attributeTestName = "Howl";
+    String attributeTestName;
     public HowlTest(int testingFigure, Figure.Attribute attribute) {
         super(testingFigure, attribute);
+        this.attributeTestName = "Howl (Willpower) Test";
     }
 
     @Override
@@ -24,7 +25,7 @@ public class HowlTest extends AttributeTest {
     }
 
     @Override
-    public void resolveTest(Figure f, boolean result)
+    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
     {
         if (result)
         {
@@ -41,15 +42,20 @@ public class HowlTest extends AttributeTest {
 
         String source = String.valueOf((this.getSourceFigure().getComponentID()));
         String count = String.valueOf((this.getTestCount()));
-        setAttributeTestName(source + "-" + count);
+        setAttributeTestName();
 
         f.addAttributeTest(attributeTestName);
     }
 
-    @Override
-    public void setAttributeTestName(String name)
+    public void setAttributeTestName()
     {
-        attributeTestName = "Howl (Willpower) Test: " + name;
+        attributeTestName = "Howl (Willpower) Test: " + getSourceFigure().getComponentID() + "-" + getTestCount();
+        System.out.println(attributeTestName);
+    }
+
+    public String getAttributeTestName()
+    {
+        return attributeTestName;
     }
 
     @Override

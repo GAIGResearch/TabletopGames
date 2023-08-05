@@ -21,17 +21,17 @@ public class StandUp extends DescentAction{
 
     @Override
     public String toString() {
-        return "Stand up";
+        return "Stand Up";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
         Hero hero = (Hero) gs.getActingFigure();
-        hero.setDefeated(false);
-        hero.getNActionsExecuted().setToMax();   // Only thing they can do this turn
+        hero.setDefeated(gs,false);
         // Health recovery: roll 2 red dice
         DicePool.revive.roll(gs.getRandom());
         hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
+        hero.getNActionsExecuted().setToMax();   // Only thing they can do this turn
         return true;
     }
 

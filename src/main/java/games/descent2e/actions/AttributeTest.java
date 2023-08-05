@@ -145,7 +145,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 break;
             case POST_TEST_ROLL:
                 // Any rerolls are executed via interrupts
-                resolveTest(state.getActingFigure(), result);
+                resolveTest(state, state.getActingFigure(), result);
                 phase = ALL_DONE;
                 break;
         }
@@ -186,7 +186,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         }
     }
 
-    public void resolveTest(Figure f, boolean result)
+    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
     {
         return;
     }
