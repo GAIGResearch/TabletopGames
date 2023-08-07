@@ -170,7 +170,7 @@ public enum GameType {
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
 
-    Descent2e(2,4,
+    Descent2e(2,5,
             new ArrayList<>(),
             new ArrayList<>(),
                     DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class);
