@@ -26,6 +26,7 @@ public enum Surge {
     IMMOBILIZE(1, (a, s) -> a.setImmobilizing(true)),
     POISON(1, (a, s) -> a.setPoisoning(true)),
     STUN(1, (a, s) -> a.setStunning(true)),
+    RECOVER_1_HEART(1, (a, s) -> a.addMending(1)),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         int fatigue = s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).getValue();
         s.getActingFigure().setAttribute(Figure.Attribute.Fatigue, fatigue + 1);

@@ -6,6 +6,7 @@ import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.*;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
 import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.attack.RangedAttack;
@@ -15,6 +16,8 @@ import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
+import games.descent2e.actions.herofeats.HealAllInRange;
+import games.descent2e.actions.herofeats.StunAllInMonsterGroup;
 import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
@@ -133,9 +136,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     figure.equip(new DescentCard(c));
                 }
             }
-            // after equipping, set up abilities
+            // After equipping, set up abilities
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+
+            // Enable the Heroic Feat
+            figure.setFeatAvailable(true);
 
             // Place hero on the board in random starting position out of those available
             choice = rnd.nextInt(heroStartingPositions.size());
@@ -336,6 +342,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             return actions;
         }
 
+        // Ashrian's Hero Ability
+        // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
+        if (actingFigure instanceof Monster && actingFigure.getNActionsExecuted().isMinimum())
+        {
+            HeroAbilities.ashrian(dgs, actingFigure);
+        }
+
         // If we are stunned, we can only take the 'Stunned' action
         if (actingFigure.hasCondition(DescentCondition.Stun)) {
             Stunned stunned = new Stunned();
@@ -401,6 +414,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // Rest
             // Revive
             // Search
+            // Heroic Abilities and Feats
             if (actingFigure instanceof Hero) {
 
                 // Rest
@@ -432,6 +446,53 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         for (DescentAction da : token.getEffects()) {
                             actions.add(da.copy());
                         }
+                    }
+                }
+
+                // Avric Albright's Hero Ability
+                // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
+                HeroAbilities.avric(dgs, actingFigure);
+
+                // Heroic Feats
+                if (((Hero) actingFigure).isFeatAvailable())
+                {
+                    DescentAction heroicFeat = null;
+                    switch (actingFigure.getName().replace("Hero: ", ""))
+                    {
+                        // Healer
+                        case "Ashrian":
+                            // Ashrian can choose which Monster Group to target
+                            for (List<Monster> monsters : dgs.getMonsters()) {
+                                heroicFeat = new StunAllInMonsterGroup(monsters, 3);
+                                if (heroicFeat.canExecute(dgs))
+                                    actions.add(heroicFeat);
+                            }
+                            break;
+                        case "Avric Albright":
+                            heroicFeat = new HealAllInRange(dgs, 3);
+                            if(heroicFeat.canExecute(dgs))
+                                actions.add(heroicFeat);
+                            break;
+
+                        // Mage
+                        case "Leoric of the Book":
+                            break;
+                        case "Widow Tarha":
+                            break;
+
+                        // Scout
+                        case "Jain Fairwood":
+                            break;
+                        case "Tomble Burrowell":
+                            break;
+
+                        // Warrior
+                        case "Grisban the Thirsty":
+                            break;
+                        case "Syndrael":
+                            break;
+                        default:
+                            break;
                     }
                 }
             }

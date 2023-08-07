@@ -228,6 +228,14 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     public List<Hero> getHeroes() {
         return heroes;
     }
+    public Hero getHeroByName (String name) {
+        for (Hero h : heroes) {
+            if (h.getName().contains(name)) {
+                return h;
+            }
+        }
+        return null;
+    }
 
     public DicePool getAttackDicePool() {
         return attackDicePool;

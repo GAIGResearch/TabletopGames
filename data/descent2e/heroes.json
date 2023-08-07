@@ -42,7 +42,7 @@
     "Awareness": ["Integer", 2],
     "defence": ["String[]", ["grey"]],
     "ability": ["String", "Each hero within 3 spaces of you (including yourself) gains \"Surge: Recover 1 Heart\" on all attack rolls."],
-    "heroicFeat": ["String", "Action: HealAllInRange(figureType=heroes,amount=RollDie(dice={red:2}),range=3)"]
+    "heroicFeat": ["String", "Action: Roll 2 red power dice. Each hero within 3 spaces of you (including yourself) may recover Heart equal to the Heart rolled."]
   },
   {
     "id": "Ashrian",
