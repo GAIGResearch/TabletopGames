@@ -8,6 +8,7 @@ import core.interfaces.IExtendedSequence;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
@@ -205,16 +206,23 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     protected void applyDamage(DescentGameState state) {
 
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         defenderName = defender.getComponentName();
 
         int damage = state.getAttackDicePool().getDamage() + extraDamage;
         int defence = state.getDefenceDicePool().getShields() - pierce;
 
+        // Leoric of the Book's Hero Ability
+        // If a Monster is within 3 spaces of Leoric, its attacks deal -1 Heart (to a minimum of 1)
+        if (attacker instanceof Monster)
+        {
+            damage = HeroAbilities.leoric(state, attacker, damage);
+        }
+
         if (defender instanceof Monster) {
             if (((Monster) defender).hasPassive("NightStalker"))
             {
-                Figure attacker = (Figure) state.getComponentById(attackingFigure);
                 defence += NightStalker.rollNightStalker(state, attacker, defender);
             }
         }
@@ -247,7 +255,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
         }
 
-        Figure attacker = (Figure) state.getComponentById(attackingFigure);
         if(mending > 0)
         {
             attacker.incrementAttribute(Figure.Attribute.Health, mending);
