@@ -57,6 +57,7 @@ public class Move extends AbstractAction {
             moveThrough(dgs, f, positionsTraveled.get(i), place, orientation);
         }
 
+        f.setHasMoved(true);
 
         return true;
     }

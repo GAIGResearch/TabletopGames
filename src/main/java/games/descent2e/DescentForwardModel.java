@@ -239,18 +239,24 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // TODO: may still be able to play cards/skills/free effects - just add more Booleans into the if check when more are added
         // Turn ends for figure if they executed the number of actions available,
         Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum();
+
         // have no more movement points available,
         Boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
+
         // and, for Heroes only, cannot spend any more Fatigue for movement points
+        // We also need to check a special case for Grisban's Hero Ability after resting
         Boolean noMoreFatigueMovement = true;
         if (actingFigure instanceof Hero) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 noMoreFatigueMovement = false;
             }
+
+            if (actingFigure.equals(dgs.getHeroByName("Grisban")))
+                noMoreActions = noMoreActions && !(HeroAbilities.grisbanCanAct(dgs, (Hero) actingFigure));
         }
 
         if (!(action instanceof EndTurn) && noMoreActions && noMoreMovement && noMoreFatigueMovement) {
-            dgs.getTurnOrder().endPlayerTurn(dgs);
+            EndTurn.endOfTurn(dgs, actingFigure);
         }
 
         /*
@@ -327,26 +333,30 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // Next, we check if we can make a Poisoned or Diseased attribute test
         // We cannot make any actions before we have taken our attribute tests against these conditions
-        if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease))
-        {
+        if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease)) {
+            boolean tested = false;
+
             Diseased diseased = new Diseased(actingFigure.getComponentID(), Figure.Attribute.Willpower);
             if (diseased.canExecute(dgs)) {
                 actions.add(diseased);
+                tested = true;
             }
 
             Poisoned poisoned = new Poisoned(actingFigure.getComponentID(), Figure.Attribute.Might);
             if (poisoned.canExecute(dgs)) {
                 actions.add(poisoned);
+                tested = true;
             }
 
-            return actions;
+            if (tested)
+                return actions;
         }
 
         // Ashrian's Hero Ability
         // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
-        if (actingFigure instanceof Monster && actingFigure.getNActionsExecuted().isMinimum())
+        if (actingFigure instanceof Monster)
         {
-            HeroAbilities.ashrian(dgs, actingFigure);
+            HeroAbilities.ashrian(dgs, (Monster) actingFigure);
         }
 
         // If we are stunned, we can only take the 'Stunned' action
@@ -355,6 +365,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (stunned.canExecute(dgs)) actions.add(stunned);
             return actions;
         }
+
+        // Grisban the Thirsty's Hero Ability
+        // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
+        if (actingFigure instanceof Hero && ((Hero) actingFigure).hasRested())
+            actions.addAll(HeroAbilities.grisban(dgs, (Hero) actingFigure));
 
         // If we have made all our Attribute Tests, then we can take our other actions
         // If we have movement points to spend, and not immobilized, add move actions
@@ -451,7 +466,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
                 // Avric Albright's Hero Ability
                 // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
-                HeroAbilities.avric(dgs, actingFigure);
+                HeroAbilities.avric(dgs, (Hero) actingFigure);
+
 
                 // Heroic Feats
                 if (((Hero) actingFigure).isFeatAvailable())

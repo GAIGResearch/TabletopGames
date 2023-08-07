@@ -40,7 +40,7 @@ public class StunAllInMonsterGroup extends DescentAction {
     }
 
     @Override
-    public HealAllInRange copy() {
+    public StunAllInMonsterGroup copy() {
         return null;
     }
 

@@ -65,8 +65,10 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    boolean removedConditionThisTurn = false;
     Set<String> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
+    boolean hasMoved;
 
     public Figure(String name, int nActionsPossible) {
         super(name);
@@ -140,6 +142,12 @@ public class Figure extends Token {
     public void setPosition(Vector2D position) {
         this.position = position;
     }
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
 
     public Counter getNActionsExecuted() {
         return nActionsExecuted;
@@ -166,11 +174,20 @@ public class Figure extends Token {
     }
 
     public void removeCondition(DescentTypes.DescentCondition condition) {
-        conditions.remove(condition);
+        if (conditions.contains(condition))
+            conditions.remove(condition);
     }
 
     public boolean hasCondition(DescentTypes.DescentCondition condition) {
         return conditions.contains(condition);
+    }
+
+    public boolean hasRemovedConditionThisTurn() {
+        return removedConditionThisTurn;
+    }
+
+    public void setRemovedConditionThisTurn(boolean removedConditionThisTurn) {
+        this.removedConditionThisTurn = removedConditionThisTurn;
     }
 
     public void addAttributeTest(String attributeTest) {
