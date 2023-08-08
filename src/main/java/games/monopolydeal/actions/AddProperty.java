@@ -42,7 +42,7 @@ public class AddProperty extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
-        state.addProperty(player,card);
+        state.addProperty(player,card,true);
         state.useAction(1);
         return true;
     }

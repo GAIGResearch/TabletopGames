@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class CoreParameters extends TunableParameters {
-    public boolean verbose = false;
+    public boolean verbose = true;
     public boolean recordEventHistory = true;  // include in history text game events
     public boolean partialObservable = true;
     public boolean competitionMode = false;

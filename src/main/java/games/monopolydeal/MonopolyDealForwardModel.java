@@ -74,8 +74,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
 
                     availableActions.add(new AddToBoard(playerID));
 
-//                    if(state.canModifyBoard(playerID))
-//                        availableActions.add(new ModifyBoard(playerID));
+                    if(state.canModifyBoard(playerID))
+                        availableActions.add(new ModifyBoard(playerID));
 
                     availableActions.add(new EndPhase());
                     return availableActions;
@@ -123,6 +123,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                     }
                     else{
                         state.endTurn();
+                        if(state.getCurrentPlayer() == state.getNPlayers()-1) endRound(state);
                         endPlayerTurn(currentState);
                     }
                 }
@@ -130,6 +131,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
             case "Discard":
                 if(state.playerHands[playerID].getSize()<=state.params.HAND_SIZE){
                     state.endTurn();
+                    if(state.getCurrentPlayer() == state.getNPlayers()-1) endRound(state);
                     state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
                     endPlayerTurn(currentState);
                 }

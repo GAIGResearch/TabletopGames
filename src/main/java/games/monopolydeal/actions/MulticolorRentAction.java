@@ -55,10 +55,6 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         List<AbstractAction> availableActions = new ArrayList<>();
 
-        // Choose target
-        // Choose Property to ask rent from
-        // Get reaction
-        // Pay rent
         switch (actionState){
             case Target:
                 for(int i=0;i<MDGS.getNPlayers();i++){

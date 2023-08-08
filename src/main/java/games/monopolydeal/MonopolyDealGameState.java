@@ -152,12 +152,14 @@ public class MonopolyDealGameState extends AbstractGameState {
             }
         }
         // Completely visible values
-        for(int i=0;i<getNPlayers();i++){
-            retValue.playerBanks[i] = playerBanks[i].copy();
-            for (PropertySet propertySet:playerPropertySets[i]) {
-                retValue.playerPropertySets[i].add(propertySet.copy());
-            }
-        }
+//        for(int i=0;i<getNPlayers();i++){
+//            retValue.playerBanks[i] = playerBanks[i].copy();
+//            for (PropertySet propertySet:playerPropertySets[i]) {
+//                retValue.playerPropertySets[i].add(propertySet.copy());
+//            }
+//        }
+        retValue.playerBanks = playerBanks.clone();
+        retValue.playerPropertySets = playerPropertySets.clone();
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
         retValue.turnStart = turnStart;
@@ -204,12 +206,12 @@ public class MonopolyDealGameState extends AbstractGameState {
         return playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0;
     }
     // add property
-    public void addProperty(int playerID, MonopolyDealCard card){
+    public void addProperty(int playerID, MonopolyDealCard card,boolean fromHand){
         SetType SType = card.getUseAs();
-        addPropertyToSet(playerID,card,SType);
+        addPropertyToSet(playerID,card,SType,fromHand);
     }
-    public void addPropertyToSet(int playerID, MonopolyDealCard card, SetType SType){
-        playerHands[playerID].remove(card);
+    public void addPropertyToSet(int playerID, MonopolyDealCard card, SetType SType, boolean fromHand){
+        if(fromHand) playerHands[playerID].remove(card);
         card.setUseAs(SType);
         int indx = getSetIndx(playerID,SType);
         if(indx != 99){
@@ -224,9 +226,9 @@ public class MonopolyDealGameState extends AbstractGameState {
     public void removePropertyFrom(int playerID, MonopolyDealCard card, SetType from){
         int indx = getSetIndx(playerID,from);
         playerPropertySets[playerID].get(indx).remove(card);
-        if(playerPropertySets[playerID].get(indx).stream().count() == 0){
-            playerPropertySets[playerID].remove(indx);
-        }
+//        if(playerPropertySets[playerID].get(indx).stream().count() == 0){
+//            playerPropertySets[playerID].remove(indx);
+//        }
     }
     public void movePropertySetFromTo(SetType setType, int target, int playerID) {
         int indx = getSetIndx(target,setType);
@@ -350,6 +352,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     public Deck<MonopolyDealCard> getPlayerHand(int playerID){
         return playerHands[playerID];
     }
+    public void removeCardFromHand(int playerID, MonopolyDealCard card){ playerHands[playerID].remove(card); }
     public List<PropertySet> getPropertySets(int playerID) {
         return playerPropertySets[playerID];
     }

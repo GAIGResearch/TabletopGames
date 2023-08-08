@@ -113,7 +113,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
                     break;
                 case PropertySet:
                     MDGS.removePropertyFrom(payer,cardToPay,((PayCardFrom) action).from);
-                    MDGS.addProperty(payee,cardToPay);
+                    MDGS.addProperty(payee,cardToPay, false);
                     break;
             }
             amtToPay = amtToPay - cardToPay.cardMoneyValue();

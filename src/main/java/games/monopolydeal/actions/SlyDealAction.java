@@ -136,7 +136,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     protected void executeAction(AbstractGameState state){
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         MDGS.removePropertyFrom(target, take, from);
-        MDGS.addProperty(playerID, take);
+        MDGS.addProperty(playerID, take, false);
         executed = true;
     }
     /**

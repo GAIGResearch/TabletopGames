@@ -152,8 +152,8 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         MDGS.removePropertyFrom(target, take, tFrom);
         MDGS.removePropertyFrom(playerID, give, gFrom);
-        MDGS.addProperty(playerID, take);
-        MDGS.addProperty(target, give);
+        MDGS.addProperty(playerID, take, false);
+        MDGS.addProperty(target, give, false);
         executed = true;
     }
     /**
