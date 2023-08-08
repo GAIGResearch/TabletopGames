@@ -124,7 +124,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         // Placeholder to know how many cards each player had for redrawing cards
         int[] playerHandSize = new int[getNPlayers()];
         retValue.drawPile = drawPile.copy();
-        retValue.rnd = rnd;
+        retValue.rnd = new Random(gameParameters.getRandomSeed());
 
         // Hidden values
         for (int p = 0; p < getNPlayers(); p++) {
@@ -203,7 +203,15 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerBanks[playerID].remove(money);
     }
     public boolean isBoardEmpty(int playerID){
-        return playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0;
+        if (playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0) return true;
+        else if (playerBanks[playerID].getSize() == 0) {
+            for (PropertySet pSet : playerPropertySets[playerID]) {
+                for (int i=0; i<pSet.getSize(); i++) {
+                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) return true;
+                }
+            }
+        }
+        return false;
     }
     // add property
     public void addProperty(int playerID, MonopolyDealCard card,boolean fromHand){

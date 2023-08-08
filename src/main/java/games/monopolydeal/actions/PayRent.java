@@ -6,6 +6,7 @@ import core.actions.DoNothing;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
@@ -56,8 +57,6 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         Deck<MonopolyDealCard> payerBank = MDGS.getPlayerBank(payer);
         List<PropertySet> payerPropertySets = MDGS.getPropertySets(payer);
-        if(MDGS.isBoardEmpty(payer)) boardEmpty = true;
-
         List<AbstractAction> availableActions = new ArrayList<>();
 
         if(boardEmpty || amtToPay <= 0) availableActions.add(new DoNothing());
@@ -69,7 +68,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
             }
             for (PropertySet pSet: payerPropertySets) {
                 for(int i=0;i<pSet.getSize();i++)
-                    availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
+                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
             }
         }
 
