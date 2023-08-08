@@ -467,50 +467,20 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 // Avric Albright's Hero Ability
                 // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
                 HeroAbilities.avric(dgs, (Hero) actingFigure);
+            }
 
+            // Heroic Feat
+            if (actingFigure instanceof Hero && (((Hero) actingFigure).isFeatAvailable()))
+            {
+                AbstractAction heroicFeat = heroicFeatAction(dgs, (Hero) actingFigure);
+                if(heroicFeat != null)
+                    actions.add(heroicFeat);
+            }
 
-                // Heroic Feats
-                if (((Hero) actingFigure).isFeatAvailable())
-                {
-                    DescentAction heroicFeat = null;
-                    switch (actingFigure.getName().replace("Hero: ", ""))
-                    {
-                        // Healer
-                        case "Ashrian":
-                            // Ashrian can choose which Monster Group to target
-                            for (List<Monster> monsters : dgs.getMonsters()) {
-                                heroicFeat = new StunAllInMonsterGroup(monsters, 3);
-                                if (heroicFeat.canExecute(dgs))
-                                    actions.add(heroicFeat);
-                            }
-                            break;
-                        case "Avric Albright":
-                            heroicFeat = new HealAllInRange(dgs, 3);
-                            if(heroicFeat.canExecute(dgs))
-                                actions.add(heroicFeat);
-                            break;
-
-                        // Mage
-                        case "Leoric of the Book":
-                            break;
-                        case "Widow Tarha":
-                            break;
-
-                        // Scout
-                        case "Jain Fairwood":
-                            break;
-                        case "Tomble Burrowell":
-                            break;
-
-                        // Warrior
-                        case "Grisban the Thirsty":
-                            break;
-                        case "Syndrael":
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            // Get Monster Unique Actions
+            if (actingFigure instanceof Monster)
+            {
+                actions.addAll(monsterActions(dgs, (Monster) actingFigure));
             }
 
             // - Special (specified by quest)
@@ -523,58 +493,109 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
 
-            // Get monster special actions
-            if (actingFigure instanceof Monster)
-            {
-                for (String action : ((Monster) actingFigure).getActions()) {
-                    switch (action.toUpperCase(Locale.ROOT)) {
-                        case "HOWL":
-                            DescentAction howl = new Howl();
-                            if (howl.canExecute(dgs))
-                                actions.add(new Howl());
-                            break;
-                        case "GRAB":
-                                    /*DescentAction grab = new Grab();
-                                    if (grab.canExecute(dgs))
-                                        actions.add(new Grab());
-                                    break;
-                                case "HEAL":
-                                    DescentAction heal = new Heal();
-                                    if (heal.canExecute(dgs))
-                                        actions.add(new Heal());
-                                    break;
-                                case "THROW":
-                                    DescentAction throwAction = new Throw();
-                                    if (throwAction.canExecute(dgs))
-                                        actions.add(new Throw());
-                                    break;
-                                case "AIR":
-                                    DescentAction air = new Air();
-                                    if (air.canExecute(dgs))
-                                        actions.add(new Air());
-                                    break;
-                                case "EARTH":
-                                    DescentAction earth = new Earth();
-                                    if (earth.canExecute(dgs))
-                                        actions.add(new Earth());
-                                    break;
-                                case "FIRE":
-                                    DescentAction fire = new Fire();
-                                    if (fire.canExecute(dgs))
-                                        actions.add(new Fire());
-                                    break;
-                                case "WATER":
-                                    DescentAction water = new Water();
-                                    if (water.canExecute(dgs))
-                                        actions.add(new Water());*/
-                            break;
-                        default:
-                            break;
+        // TODO: exhaust a card for an action/modifier/effect "free" action
+        }
+        return actions;
+    }
+
+    private AbstractAction heroicFeatAction(DescentGameState dgs, Hero actingFigure)
+    {
+        DescentAction heroicFeat = null;
+        switch (actingFigure.getName().replace("Hero: ", ""))
+        {
+            // Healer
+            case "Ashrian":
+                // Ashrian can choose which Monster Group to target
+                for (List<Monster> monsters : dgs.getMonsters()) {
+                    heroicFeat = new StunAllInMonsterGroup(monsters, 3);
+                    if (heroicFeat.canExecute(dgs))
+                        return heroicFeat;
+                }
+                break;
+            case "Avric Albright":
+                Vector2D position = dgs.getActingFigure().getPosition();
+                int range = 3;
+                List<Hero> heroesInRange = new ArrayList<>();
+                for(Hero hero : dgs.getHeroes()) {
+                    if(Math.abs(position.getX() - hero.getPosition().getX()) <= range && Math.abs(position.getY() - hero.getPosition().getY()) <= range) {
+                        heroesInRange.add(hero);
                     }
                 }
-            }
+                heroicFeat = new HealAllInRange(heroesInRange, 3);
+                if(heroicFeat.canExecute(dgs))
+                    return heroicFeat;
+                break;
 
-        // TODO: exhaust a card for an action/modifier/effect "free" action
+            // Mage
+            case "Leoric of the Book":
+                break;
+            case "Widow Tarha":
+                break;
+
+            // Scout
+            case "Jain Fairwood":
+                break;
+            case "Tomble Burrowell":
+                break;
+
+            // Warrior
+            case "Grisban the Thirsty":
+                break;
+            case "Syndrael":
+                break;
+            default:
+                break;
+        }
+        return null;
+    }
+    private ArrayList<AbstractAction> monsterActions(DescentGameState dgs, Monster actingFigure)
+    {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        for (String action : actingFigure.getActions()) {
+            switch (action.toUpperCase(Locale.ROOT)) {
+                case "HOWL":
+                    DescentAction howl = new Howl();
+                    if (howl.canExecute(dgs))
+                        actions.add(new Howl());
+                    break;
+                case "GRAB":
+                    /*DescentAction grab = new Grab();
+                    if (grab.canExecute(dgs))
+                        actions.add(new Grab());
+                    break;
+                case "HEAL":
+                    DescentAction heal = new Heal();
+                    if (heal.canExecute(dgs))
+                        actions.add(new Heal());
+                    break;
+                case "THROW":
+                    DescentAction throwAction = new Throw();
+                    if (throwAction.canExecute(dgs))
+                        actions.add(new Throw());
+                    break;
+                case "AIR":
+                    DescentAction air = new Air();
+                    if (air.canExecute(dgs))
+                        actions.add(new Air());
+                    break;
+                case "EARTH":
+                    DescentAction earth = new Earth();
+                    if (earth.canExecute(dgs))
+                        actions.add(new Earth());
+                    break;
+                case "FIRE":
+                    DescentAction fire = new Fire();
+                    if (fire.canExecute(dgs))
+                        actions.add(new Fire());
+                    break;
+                case "WATER":
+                    DescentAction water = new Water();
+                    if (water.canExecute(dgs))
+                        actions.add(new Water());*/
+                    break;
+                default:
+                    break;
+            }
         }
         return actions;
     }

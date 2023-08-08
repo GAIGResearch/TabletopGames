@@ -1,17 +1,15 @@
 package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-import utilities.Vector2D;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HealAllInRange extends DescentAction {
 
@@ -19,19 +17,10 @@ public class HealAllInRange extends DescentAction {
     String heroName = "Avric Albright";
     List<Hero> heroesInRange;
     int range;
-    public HealAllInRange(DescentGameState gs, int range) {
+    public HealAllInRange(List<Hero> heroesInRange, int range) {
         super(Triggers.ACTION_POINT_SPEND);
         this.range = range;
-
-        this.heroesInRange = new ArrayList<>();
-        Vector2D position = gs.getActingFigure().getPosition();
-
-        // This also includes the acting figure
-        for(Hero hero : gs.getHeroes()) {
-            if(Math.abs(position.getX() - hero.getPosition().getX()) <= range && Math.abs(position.getY() - hero.getPosition().getY()) <= range) {
-                this.heroesInRange.add(hero);
-            }
-        }
+        this.heroesInRange = heroesInRange;
     }
 
     @Override
@@ -52,7 +41,7 @@ public class HealAllInRange extends DescentAction {
 
     @Override
     public HealAllInRange copy() {
-        return null;
+        return new HealAllInRange(heroesInRange, range);
     }
 
     boolean canHealHeroes() {
@@ -75,12 +64,16 @@ public class HealAllInRange extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj instanceof HealAllInRange) {
+            HealAllInRange other = (HealAllInRange) obj;
+            return other.heroesInRange.equals(heroesInRange) && other.range == range;
+        }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(heroesInRange, range);
     }
 
     @Override

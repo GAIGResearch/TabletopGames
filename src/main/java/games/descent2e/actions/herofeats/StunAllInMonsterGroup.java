@@ -13,6 +13,7 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class StunAllInMonsterGroup extends DescentAction {
 
@@ -41,7 +42,9 @@ public class StunAllInMonsterGroup extends DescentAction {
 
     @Override
     public StunAllInMonsterGroup copy() {
-        return null;
+        StunAllInMonsterGroup retVal = new StunAllInMonsterGroup(monsters, range);
+        retVal.monsterName = monsterName;
+        return retVal;
     }
 
     boolean canStunMonsters(DescentGameState dgs) {
@@ -65,12 +68,16 @@ public class StunAllInMonsterGroup extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj instanceof StunAllInMonsterGroup) {
+            StunAllInMonsterGroup other = (StunAllInMonsterGroup) obj;
+            return other.monsters == monsters && other.monsterName == monsterName && other.range == range;
+        }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(monsters, monsterName, range);
     }
 
     @Override
