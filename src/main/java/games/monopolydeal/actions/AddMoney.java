@@ -41,6 +41,7 @@ public class AddMoney extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
+        state.removeCardFromHand(player, card);
         state.addMoney(player,card);
         state.useAction(1);
         return true;

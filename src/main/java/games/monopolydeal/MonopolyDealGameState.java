@@ -118,13 +118,13 @@ public class MonopolyDealGameState extends AbstractGameState {
     protected MonopolyDealGameState _copy(int playerId) {
         MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
-
+        retValue.rnd = new Random(gameParameters.getRandomSeed());
+        retValue.params = (MonopolyDealParameters) params._copy();
         retValue._reset();
 
         // Placeholder to know how many cards each player had for redrawing cards
         int[] playerHandSize = new int[getNPlayers()];
         retValue.drawPile = drawPile.copy();
-        retValue.rnd = new Random(gameParameters.getRandomSeed());
 
         // Hidden values
         for (int p = 0; p < getNPlayers(); p++) {
@@ -152,14 +152,14 @@ public class MonopolyDealGameState extends AbstractGameState {
             }
         }
         // Completely visible values
-//        for(int i=0;i<getNPlayers();i++){
-//            retValue.playerBanks[i] = playerBanks[i].copy();
-//            for (PropertySet propertySet:playerPropertySets[i]) {
-//                retValue.playerPropertySets[i].add(propertySet.copy());
-//            }
-//        }
-        retValue.playerBanks = playerBanks.clone();
-        retValue.playerPropertySets = playerPropertySets.clone();
+        for(int i=0;i<getNPlayers();i++){
+            retValue.playerBanks[i] = playerBanks[i].copy();
+            for (PropertySet propertySet:playerPropertySets[i]) {
+                retValue.playerPropertySets[i].add(propertySet.copy());
+            }
+        }
+//        retValue.playerBanks = playerBanks.clone();
+//        retValue.playerPropertySets = playerPropertySets.clone();
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
         retValue.turnStart = turnStart;
@@ -197,7 +197,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public void addMoney(int playerID, MonopolyDealCard money){
         playerBanks[playerID].add(money);
-        playerHands[playerID].remove(money);
     }
     public void removeMoneyFrom(int playerID, MonopolyDealCard money) {
         playerBanks[playerID].remove(money);
@@ -214,12 +213,11 @@ public class MonopolyDealGameState extends AbstractGameState {
         return false;
     }
     // add property
-    public void addProperty(int playerID, MonopolyDealCard card,boolean fromHand){
+    public void addProperty(int playerID, MonopolyDealCard card){
         SetType SType = card.getUseAs();
-        addPropertyToSet(playerID,card,SType,fromHand);
+        addPropertyToSet(playerID,card,SType);
     }
-    public void addPropertyToSet(int playerID, MonopolyDealCard card, SetType SType, boolean fromHand){
-        if(fromHand) playerHands[playerID].remove(card);
+    public void addPropertyToSet(int playerID, MonopolyDealCard card, SetType SType){
         card.setUseAs(SType);
         int indx = getSetIndx(playerID,SType);
         if(indx != 99){
@@ -233,10 +231,12 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public void removePropertyFrom(int playerID, MonopolyDealCard card, SetType from){
         int indx = getSetIndx(playerID,from);
+        if(indx == 99)
+            throw new AssertionError("This should not be happening");
         playerPropertySets[playerID].get(indx).remove(card);
-//        if(playerPropertySets[playerID].get(indx).stream().count() == 0){
-//            playerPropertySets[playerID].remove(indx);
-//        }
+        if(playerPropertySets[playerID].get(indx).stream().count() == 0){
+            playerPropertySets[playerID].remove(indx);
+        }
     }
     public void movePropertySetFromTo(SetType setType, int target, int playerID) {
         int indx = getSetIndx(target,setType);
@@ -276,7 +276,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     // Returns true if there is a free property( i.e. property which can be stolen/ traded )
     public boolean checkForFreeProperty(int playerID){
         for (PropertySet pSet: playerPropertySets[playerID]) {
-            if(!pSet.isComplete){
+            if(!pSet.isComplete && pSet.getSize()>0){
                 return true;
             }
         }
@@ -284,7 +284,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public boolean checkForMulticolorRent(int playerID){
         for (PropertySet pSet: playerPropertySets[playerID]) {
-            if(pSet.getSetType() != SetType.UNDEFINED){
+            if(pSet.getSetType() != SetType.UNDEFINED && pSet.getSize()>0){
                 return true;
             }
         }
@@ -304,7 +304,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public boolean playerHasSet(int playerID, SetType setType){
         for (PropertySet pSet: playerPropertySets[playerID]) {
-            if(pSet.getSetType() == setType) return true;
+            if(pSet.getSetType() == setType && pSet.getSize()>0) return true;
         }
         return false;
     }

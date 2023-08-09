@@ -51,7 +51,7 @@ public class MoveCardFromTo extends AbstractAction {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
         MDGS.removePropertyFrom(player,card,from);
         card.setUseAs(to);
-        MDGS.addProperty(player,card, false);
+        MDGS.addProperty(player,card);
         return true;
     }
 

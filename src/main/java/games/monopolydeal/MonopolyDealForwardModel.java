@@ -8,7 +8,6 @@ import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 
@@ -108,7 +107,6 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
             state.turnStart = false;
         }
     }
-
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         MonopolyDealGameState state = (MonopolyDealGameState) currentState;

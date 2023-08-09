@@ -61,9 +61,7 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
                                 }
                             }
                         }
-                        else{
-                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
-                        }
+                        availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
                     }
                 }
             }
