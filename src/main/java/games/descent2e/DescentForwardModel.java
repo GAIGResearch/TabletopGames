@@ -8,11 +8,8 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
-import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.attack.*;
 import games.descent2e.actions.Move;
-import games.descent2e.actions.attack.Surge;
-import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
@@ -139,6 +136,18 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // After equipping, set up abilities
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+
+            // Widow Tarha's Hero Ability
+            // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
+            if (figure.getComponentName().contains("Tarha"))
+            {
+                for (int j = 0; j < (figure.getAttackDice().getSize()); j++) {
+                    TarhaAbilityReroll reroll = new TarhaAbilityReroll(figure, j);
+                    if (!figure.getAbilities().contains(reroll)) {
+                        figure.addAbility(reroll);
+                    }
+                }
+            }
 
             // Enable the Heroic Feat
             figure.setFeatAvailable(true);
@@ -495,6 +504,17 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // TODO: exhaust a card for an action/modifier/effect "free" action
         }
+
+        if (actingFigure.getAbilities() != null) {
+            for (DescentAction act : actingFigure.getAbilities()) {
+                // Check if action can be executed right now
+                if (act.getTriggers().contains(Triggers.ROLL_OWN_DICE)) {
+                    if (act.canExecute(dgs))
+                        actions.add(act);
+                }
+            }
+        }
+
         return actions;
     }
 

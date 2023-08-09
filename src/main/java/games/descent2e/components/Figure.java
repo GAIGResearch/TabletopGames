@@ -68,7 +68,7 @@ public class Figure extends Token {
     boolean removedConditionThisTurn = false;
     Set<String> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
-    boolean hasMoved;
+    boolean hasMoved, hasRerolled;
 
     public Figure(String name, int nActionsPossible) {
         super(name);
@@ -147,6 +147,12 @@ public class Figure extends Token {
     }
     public void setHasMoved(boolean hasMoved) {
         this.hasMoved = hasMoved;
+    }
+    public boolean hasRerolled() {
+        return hasRerolled;
+    }
+    public void setRerolled(boolean hasRerolled) {
+        this.hasRerolled = hasRerolled;
     }
 
     public Counter getNActionsExecuted() {

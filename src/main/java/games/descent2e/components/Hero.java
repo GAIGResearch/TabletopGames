@@ -33,7 +33,7 @@ public class Hero extends Figure {
     // TODO: reset fatigue every quest to max fatigue
 
     String heroicFeat;
-    boolean featAvailable, rested, defeated;
+    boolean usedHeroAbility, featAvailable, rested, defeated;
 
     String ability;
 
@@ -133,6 +133,13 @@ public class Hero extends Figure {
         this.rested = rested;
     }
 
+    public boolean hasUsedHeroAbility() {
+        return usedHeroAbility;
+    }
+    public void setUsedHeroAbility(boolean usedHeroAbility) {
+        this.usedHeroAbility = usedHeroAbility;
+    }
+
     public void setDefeated(DescentGameState dgs, boolean defeated) {
         this.defeated = defeated;
 
@@ -216,14 +223,14 @@ public class Hero extends Figure {
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment)
                 && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment)
                 && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) &&
-                Objects.equals(heroicFeat, hero.heroicFeat) &&
+                Objects.equals(heroicFeat, hero.heroicFeat) && Objects.equals(usedHeroAbility, hero.usedHeroAbility) &&
                 Objects.equals(ability, hero.ability);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
-                equipSlotsAvailable, heroicFeat, featAvailable, rested, ability);
+                equipSlotsAvailable, heroicFeat, usedHeroAbility, featAvailable, rested, ability);
         result = 31 * result;
         return result;
     }
@@ -251,6 +258,7 @@ public class Hero extends Figure {
             copy.armor = armor.copy();
         }
         copy.heroicFeat = this.heroicFeat;
+        copy.usedHeroAbility = this.usedHeroAbility;
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
         copy.rested = rested;

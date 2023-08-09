@@ -64,6 +64,9 @@ public class EndTurn extends DescentAction{
             if (f.getName().contains("Syndrael"))
                 HeroAbilities.syndrael(dgs, (Hero) f);
 
+            // Some Heroes can only use their Hero Ability once per turn
+            // If they have used their Hero Ability this turn, refresh it
+            ((Hero) f).setUsedHeroAbility(false);
         }
 
         f.setHasMoved(false);

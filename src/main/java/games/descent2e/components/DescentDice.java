@@ -14,6 +14,7 @@ import java.util.*;
 
 public class DescentDice extends Component {
     private DiceType colour;
+    private int result;
     private int damage;
     private int surge;
     private int range;
@@ -38,10 +39,14 @@ public class DescentDice extends Component {
         return 1;
     }
     public void setFace(int face) {
+        this.result = face;
         this.damage = sides.get(face).get("damage");
         this.surge = sides.get(face).get("surge");
         this.range = sides.get(face).get("range");
         this.shielding = sides.get(face).get("shielding");
+    }
+    public int getFace() {
+        return result;
     }
 
     public static void loadDice(String filename)
@@ -102,6 +107,7 @@ public class DescentDice extends Component {
         copy.colour = this.colour;
         copy.shielding = this.shielding;
         copy.nSides = this.nSides;
+        copy.result = this.result;
         copy.damage = this.damage;
         copy.surge = this.surge;
         copy.range = this.range;

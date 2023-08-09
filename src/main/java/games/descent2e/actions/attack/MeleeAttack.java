@@ -159,6 +159,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case PRE_ATTACK_ROLL:
                 // roll dice
                 damageRoll(state);
+                state.getActingFigure().setRerolled(false);
                 phase = POST_ATTACK_ROLL;
                 break;
             case POST_ATTACK_ROLL:
@@ -379,6 +380,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             });
             if (!retValue.isEmpty())
                 retValue.add(new EndSurgePhase());
+        }
+        if (phase == POST_ATTACK_ROLL) {
+            if (!retValue.isEmpty())
+                retValue.add(new EndRerollPhase());
         }
         return retValue;
     }
