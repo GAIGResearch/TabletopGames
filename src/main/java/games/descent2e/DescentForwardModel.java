@@ -137,18 +137,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
 
-            // Widow Tarha's Hero Ability
-            // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
-            if (figure.getComponentName().contains("Tarha"))
-            {
-                for (int j = 0; j < (figure.getAttackDice().getSize()); j++) {
-                    TarhaAbilityReroll reroll = new TarhaAbilityReroll(figure, j);
-                    if (!figure.getAbilities().contains(reroll)) {
-                        figure.addAbility(reroll);
-                    }
-                }
-            }
-
             // Enable the Heroic Feat
             figure.setFeatAvailable(true);
 
@@ -166,6 +154,37 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Inform game of this hero figure
             dgs.heroes.add(figure);
+        }
+
+        // Widow Tarha's Hero Ability
+        // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
+        if (dgs.getHeroByName("Widow Tarha") != null)
+        {
+            Hero tarha = dgs.getHeroByName("Widow Tarha");
+            for (int i = 0; i < (tarha.getAttackDice().getSize()); i++) {
+                TarhaAbilityReroll reroll = new TarhaAbilityReroll(tarha, i);
+                if (!tarha.getAbilities().contains(reroll)) {
+                    tarha.addAbility(reroll);
+                }
+            }
+        }
+
+        // Tomble Burrowell's Hero Ability
+        // If we are targeted by an attack, and we are adjacent to an ally
+        // We can add their defense pool to our own defense pool before we roll
+        if (dgs.getHeroByName("Tomble Burrowell") != null)
+        {
+            Hero tomble = dgs.getHeroByName("Tomble Burrowell");
+            for (int i = 0; i < dgs.heroes.size(); i++) {
+                // Prevent Tomble to targeting himself
+                if (dgs.heroes.get(i).equals(tomble)) {
+                    continue;
+                }
+                TombleCopyDefence copyDefence = new TombleCopyDefence(tomble, dgs.heroes.get(i));
+                if (!tomble.getAbilities().contains(copyDefence)) {
+                    tomble.addAbility(copyDefence);
+                }
+            }
         }
 
         // Overlord chooses monster groups // TODO, for now randomly selected
@@ -503,16 +522,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
         // TODO: exhaust a card for an action/modifier/effect "free" action
-        }
-
-        if (actingFigure.getAbilities() != null) {
-            for (DescentAction act : actingFigure.getAbilities()) {
-                // Check if action can be executed right now
-                if (act.getTriggers().contains(Triggers.ROLL_OWN_DICE)) {
-                    if (act.canExecute(dgs))
-                        actions.add(act);
-                }
-            }
         }
 
         return actions;

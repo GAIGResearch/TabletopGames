@@ -82,6 +82,10 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public DescentDice getDice(int i) {
         return dice.get(i);
     }
+    public void setDice(List<DescentDice> dice)
+    {
+        this.dice = dice;
+    }
     public boolean hasRolled() {
         return rolled;
     }

@@ -28,9 +28,9 @@ public class HeroAbilities {
                 Vector2D position = actingFigure.getPosition();
                 Vector2D other = ashrian.getPosition();
                 if (Math.abs(position.getX() - other.getX()) <= 1 && Math.abs(position.getY() - other.getY()) <= 1) {
+                    ashrian.setUsedHeroAbility(true);
                     actingFigure.addCondition(DescentTypes.DescentCondition.Stun);
                 }
-                ashrian.setUsedHeroAbility(true);
             }
         }
     }
@@ -45,6 +45,7 @@ public class HeroAbilities {
             SurgeAttackAction surge = new SurgeAttackAction(Surge.RECOVER_1_HEART, actingFigure.getComponentID());
             if (actingFigure.equals(avric) ||
                     (Math.abs(position.getX() - other.getX()) <= 3 && Math.abs(position.getY() - other.getY()) <= 3)) {
+                avric.setUsedHeroAbility(true);
                 if (!actingFigure.getAbilities().contains(surge)) {
                     actingFigure.addAbility(surge);
                 }
@@ -55,7 +56,6 @@ public class HeroAbilities {
                     actingFigure.removeAbility(surge);
                 }
             }
-            avric.setUsedHeroAbility(true);
         }
     }
 
@@ -69,11 +69,11 @@ public class HeroAbilities {
             Vector2D position = actingFigure.getPosition();
             Vector2D other = leoric.getPosition();
             if (Math.abs(position.getX() - other.getX()) <= 3 && Math.abs(position.getY() - other.getY()) <= 3) {
+                leoric.setUsedHeroAbility(true);
                 // Leoric can only reduce damage to a minimum of 1
                 if (damage > 1)
                     return damage - 1;
             }
-            leoric.setUsedHeroAbility(true);
         }
         return damage;
     }
@@ -107,6 +107,25 @@ public class HeroAbilities {
     // Jain Fairwood's Hero Ability
 
     // Tomble Burrowell's Hero Ability
+    // If we are targeted by an attack, and we are adjacent to an ally
+    // We can add their defense pool to our own defense pool before we roll
+    public static DicePool tomble (DescentGameState dgs, Figure actingFigure, Figure other)
+    {
+        Hero tomble = dgs.getHeroByName("Tomble Burrowell");
+        DicePool defensePool = actingFigure.getDefenceDice().copy();
+        if (actingFigure.equals(tomble)) {
+            Vector2D position = actingFigure.getPosition();
+            Vector2D otherPosition = other.getPosition();
+            if (Math.abs(position.getX() - otherPosition.getX()) <= 1 && Math.abs(position.getY() - otherPosition.getY()) <= 1) {
+                tomble.setUsedHeroAbility(true);
+                DicePool allyDefensePool = other.getDefenceDice();
+                List<DescentDice> allDice = new ArrayList<>(defensePool.getComponents());
+                allDice.addAll(allyDefensePool.getComponents());
+                defensePool.setDice(allDice);
+            }
+        }
+        return defensePool;
+    }
 
     // ----- WARRIOR -----
 
@@ -117,10 +136,11 @@ public class HeroAbilities {
         if (grisbanCanAct(dgs, actingFigure)) {
             for (DescentTypes.DescentCondition condition : actingFigure.getConditions()) {
                 RemoveCondition removeCondition = new RemoveCondition(actingFigure, condition);
-                if (removeCondition.canExecute(dgs))
+                if (removeCondition.canExecute(dgs)) {
+                    actingFigure.setUsedHeroAbility(true);
                     removeConditions.add(removeCondition);
+                }
             }
-            actingFigure.setUsedHeroAbility(true);
         }
         return removeConditions;
     }

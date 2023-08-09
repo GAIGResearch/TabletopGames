@@ -72,6 +72,6 @@ public class TarhaAbilityReroll extends DescentAction {
     }
 
     public String toString() {
-        return "REROLL_DICE_" + dice + ":" + " TARHA_ABILITY";
+        return "REROLL_DICE_" + dice + " : " + tarha.getComponentID();
     }
 }
