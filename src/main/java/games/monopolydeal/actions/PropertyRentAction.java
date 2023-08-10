@@ -171,7 +171,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
             if(pSet.hasHouse) rent = rent + 3;
             if(pSet.hasHotel) rent = rent + 4;
         }
-        else rent = setType.rent[pSet.getSize()];
+        else rent = setType.rent[pSet.getSize() - 1];
         // Double the rent
         rent = (int) (rent * Math.pow(2,doubleTheRent));
         // Set first target

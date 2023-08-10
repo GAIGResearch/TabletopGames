@@ -259,7 +259,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         target = checkForSlyDeal(playerID);
         if(target) {
             for (PropertySet pSet: playerPropertySets[playerID]) {
-                if((!pSet.hasHouse || !pSet.hasHotel) && pSet.getSize() > 0){
+                if((!pSet.hasHouse && !pSet.hasHotel) && pSet.getSize() > 0){
                     return true;
                 }
             }
@@ -395,7 +395,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         // TODO: What is this player's score (if any)?
-//        return 0;
         int count = 0;
         for (PropertySet pSet:playerPropertySets[playerId]) {
             if(pSet.isComplete){

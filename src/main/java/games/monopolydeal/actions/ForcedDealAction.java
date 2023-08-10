@@ -77,7 +77,7 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
                 break;
             case GiveCard:
                 for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-                    if(!pSet.isComplete){
+                    if((!pSet.hasHouse && !pSet.hasHotel)){
                         for(int i=0;i<pSet.getSize();i++){
                             availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1));
                         }
@@ -195,7 +195,16 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
     @Override
     public ForcedDealAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        ForcedDealAction action = new ForcedDealAction(playerID);
+        action.target = target;
+        action.reaction = reaction;
+        action.executed = executed;
+        action.take = take;
+        action.give = give;
+        action.tFrom = tFrom;
+        action.gFrom = gFrom;
+        action.actionState = actionState;
+        return action;
     }
 
     @Override

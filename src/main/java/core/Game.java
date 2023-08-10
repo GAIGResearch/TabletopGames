@@ -943,13 +943,13 @@ public class Game {
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */

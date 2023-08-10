@@ -177,7 +177,15 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public DealBreakerAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        DealBreakerAction action = new DealBreakerAction(playerID);
+
+        action.target = target;
+        action.setSize = setSize;
+        action.setType = setType;
+        action.actionState = actionState;
+        action.reaction = reaction;
+        action.executed = executed;
+        return action;
     }
 
     @Override

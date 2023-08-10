@@ -23,12 +23,15 @@ public class PropertySet extends Deck<MonopolyDealCard> {
     // Copy constructor???
     public PropertySet copy(){
         Deck<MonopolyDealCard> cardDeck = super.copy();
-        MonopolyDealCard card = cardDeck.get(0);
-        SetType sType = card.getUseAs();
+        SetType sType = getSetType();
         PropertySet newSet = new PropertySet(sType.toString(),VISIBLE_TO_ALL,sType);
         for (int i=0; i<cardDeck.getSize();i++) {
             newSet.add(cardDeck.get(i));
         }
+        newSet.isComplete = isComplete;
+        newSet.hasWild = hasWild;
+        newSet.hasHouse = hasHouse;
+        newSet.hasHotel = hasHotel;
         return newSet;
     }
     public SetType getSetType(){return type;}
@@ -40,7 +43,8 @@ public class PropertySet extends Deck<MonopolyDealCard> {
     public boolean add(MonopolyDealCard c) {
         if(c.type == CardType.House ) hasHouse = true;
         else if (c.type == CardType.Hotel ) hasHotel = true;
-        else if(getSize()+1 == type.setSize) isComplete = true;
+        else if(getSize() == getSetType().setSize - 1)
+            isComplete = true;
 
         if(c.isPropertyWildCard())hasWild = true;
         return super.add(c);
@@ -49,7 +53,7 @@ public class PropertySet extends Deck<MonopolyDealCard> {
     public boolean remove(MonopolyDealCard c) {
         if(c.type == CardType.House ) hasHouse = false;
         else if (c.type == CardType.Hotel ) hasHotel = false;
-        else if(getSize() < type.setSize) isComplete = false;
+        if(c.isPropertyCard() && getSize() <= getSetType().setSize) isComplete = false;
         if(c.isPropertyWildCard()){
             int wildCount = 0;
             for (MonopolyDealCard dealCard: this.components) {

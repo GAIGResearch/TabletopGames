@@ -174,7 +174,13 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public MulticolorRentAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        MulticolorRentAction action = new MulticolorRentAction(playerID,doubleTheRent);
+        action.target = target;
+        action.rent = rent;
+        action.actionState = actionState;
+        action.reaction = reaction;
+        action.executed = executed;
+        return action;
     }
 
     @Override

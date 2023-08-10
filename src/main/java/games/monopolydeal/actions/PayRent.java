@@ -158,7 +158,11 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     @Override
     public PayRent copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        PayRent action = new PayRent(payer,payee,amtToPay);
+        action.boardEmpty = boardEmpty;
+        action.cardToPay = cardToPay;
+        action.boardType = boardType;
+        return action;
     }
 
     @Override

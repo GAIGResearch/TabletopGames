@@ -110,32 +110,24 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-//        switch (actionState){
-//            case Target:
-//
-//                break;
-//            case TakeCard:
-//
-//                break;
-//            case GetReaction:
-//
-//            case  ReactToReaction:
-//
-//                break;
-//        }
-        if(actionState == ActionState.Target){
-            target = ((TargetPlayer) action).target;
-            actionState = ActionState.TakeCard;
-        } else if (actionState == ActionState.TakeCard) {
-            take = ((ChooseCardFrom) action).take;
-            from = ((ChooseCardFrom) action).from;
-            actionState = ActionState.GetReaction;
-        } else if (actionState == ActionState.GetReaction) {
-            if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
-            else executeAction(state);
-        } else if (actionState == ActionState.ReactToReaction) {
-            if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
-            else executed = true;
+        switch (actionState){
+            case Target:
+                target = ((TargetPlayer) action).target;
+                actionState = ActionState.TakeCard;
+                break;
+            case TakeCard:
+                take = ((ChooseCardFrom) action).take;
+                from = ((ChooseCardFrom) action).from;
+                actionState = ActionState.GetReaction;
+                break;
+            case GetReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else executeAction(state);
+                break;
+            case  ReactToReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
+                else executed = true;
+                break;
         }
     }
     protected void executeAction(AbstractGameState state){
@@ -183,7 +175,14 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public SlyDealAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        SlyDealAction action = new SlyDealAction(playerID);
+        action.target = target;
+        action.take = take;
+        action.from = from;
+        action.actionState = actionState;
+        action.reaction = reaction;
+        action.executed = executed;
+        return action;
     }
 
     @Override

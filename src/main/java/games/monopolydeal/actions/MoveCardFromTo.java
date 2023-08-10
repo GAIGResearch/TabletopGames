@@ -48,10 +48,6 @@ public class MoveCardFromTo extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.removePropertyFrom(player,card,from);
-        card.setUseAs(to);
-        MDGS.addProperty(player,card);
         return true;
     }
 
