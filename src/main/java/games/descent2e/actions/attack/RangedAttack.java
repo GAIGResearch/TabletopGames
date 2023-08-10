@@ -2,9 +2,13 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.abilities.NightStalker;
+import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import utilities.Distance;
-import utilities.Vector2D;
+
+import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
 /**
  *   This works in exactly the same way as a Melee Attack
@@ -17,6 +21,34 @@ public class RangedAttack extends MeleeAttack {
 
     public RangedAttack(int attackingFigure, int defendingFigure) {
         super(attackingFigure, defendingFigure);
+    }
+
+    @Override
+    public boolean execute(DescentGameState state) {
+        state.setActionInProgress(this);
+        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
+        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
+
+        phase = PRE_ATTACK_ROLL;
+        interruptPlayer = attackingPlayer;
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        DicePool attackPool = attacker.getAttackDice();
+        DicePool defencePool = defender.getDefenceDice();
+
+        state.setAttackDicePool(attackPool);
+        state.setDefenceDicePool(defencePool);
+
+        if (defender instanceof Monster) {
+            if (((Monster) defender).hasPassive("NightStalker"))
+            {
+                NightStalker.addNightStalker(state, attacker, defender);
+            }
+        }
+
+        super.movePhaseForward(state);
+
+        return true;
     }
 
     @Override

@@ -2,14 +2,10 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import core.components.Component;
 import core.interfaces.IExtendedSequence;
-import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
-import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
@@ -86,8 +82,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         interruptPlayer = attackingPlayer;
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
-        state.setAttackDicePool(attacker.getAttackDice());
-        state.setDefenceDicePool(defender.getDefenceDice());
+        DicePool attackPool = attacker.getAttackDice();
+        DicePool defencePool = defender.getDefenceDice();
+
+        state.setAttackDicePool(attackPool);
+        state.setDefenceDicePool(defencePool);
 
         movePhaseForward(state);
 
@@ -102,7 +101,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return true;
     }
 
-    private void movePhaseForward(DescentGameState state) {
+    void movePhaseForward(DescentGameState state) {
         // The goal here is to work out which player may have an interrupt for the phase we are in
         // If none do, then we can move forward to the next phase directly.
         // If one (or more) does, then we stop, and go back to the main game loop for this
@@ -219,13 +218,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (attacker instanceof Monster)
         {
             damage = HeroAbilities.leoric(state, attacker, damage);
-        }
-
-        if (defender instanceof Monster) {
-            if (((Monster) defender).hasPassive("NightStalker"))
-            {
-                defence += NightStalker.rollNightStalker(state, attacker, defender);
-            }
         }
 
         if (defence < 0) defence = 0;

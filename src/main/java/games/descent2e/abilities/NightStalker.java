@@ -1,14 +1,12 @@
 package games.descent2e.abilities;
 
 import games.descent2e.DescentGameState;
-import games.descent2e.components.DicePool;
-import games.descent2e.components.DiceType;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Monster;
+import games.descent2e.components.*;
 import utilities.Vector2D;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static games.descent2e.components.DiceType.BROWN;
 
@@ -25,16 +23,16 @@ public class NightStalker {
         return nightStalkerDicePool;
     }
 
-    public static int rollNightStalker(DescentGameState state, Figure attacker, Figure defender) {
+    public static void addNightStalker(DescentGameState state, Figure attacker, Figure defender) {
         Vector2D position = attacker.getPosition();
         Vector2D other = defender.getPosition();
         if (Math.abs(position.getX() - other.getX()) > 1 || Math.abs(position.getY() - other.getY()) > 1) {
-            getNightStalkerDicePool().roll(state.getRandom());
-            System.out.println("Night Stalker is active! Reduced damaged by: " + getNightStalkerDicePool().getShields());
-            return getNightStalkerDicePool().getShields();
-        }
-        else {
-            return 0;
+            List<DescentDice> dice = new ArrayList<>(state.getDefenceDicePool().getComponents());
+            dice.addAll(getNightStalkerDicePool().getComponents());
+            DicePool newPool = state.getDefenceDicePool().copy();
+            newPool.setDice(dice);
+            state.setDefenceDicePool(newPool);
+            System.out.println("Night Stalker is active! Barghest gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
         }
     }
 }
