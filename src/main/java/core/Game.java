@@ -14,9 +14,11 @@ import games.dotsboxes.DBStateFeaturesReduced;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
@@ -863,19 +865,23 @@ public class Game {
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "SushiGo");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 10);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        RLParams p1 = new RLParams(
-                "LinearApprox/Test_01_Agent_01_n=819200.json");
-        players.add(new RLPlayer(p1));
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+        MCTSParams p_mcts = new MCTSParams();
+        p_mcts.budgetType = PlayerConstants.BUDGET_TIME;
+        p_mcts.budget = 16;
+        players.add(new MCTSPlayer(p_mcts));
+
+        players.add(new RLPlayer(
+                new RLParams(String.format("LinearApprox/Test_2P01_Agent_%02d_n=102400.json", 2))));
+        // players.add(new RandomPlayer());
+        // players.add(new RandomPlayer());
+        // players.add(new RandomPlayer());
         // RLParams p2 = new RLParams(features, RLType.Tabular);
         // players.add(new RLPlayer(p2, "DABReduced_n=10000.json"));
         // players.add(new MCTSPlayer());

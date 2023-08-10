@@ -13,17 +13,20 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IStateFeatureVector;
+import core.interfaces.IActionFeatureVector;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RoundRobinTournament;
 import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
+import players.PlayerConstants;
 import players.heuristics.WinOnlyHeuristic;
 import players.human.ActionController;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rl.RLPlayer.RLType;
 import players.rl.RLTrainingParams.Solver;
 import players.rl.RLTrainingParams.WriteSegmentType;
+import players.rl.featureVectors.SushiGo2PlayerFeatureVector;
 import players.rl.featureVectors.SushiGoFeatureVector;
 import players.rl.utils.TurnSAR;
 import players.simple.RandomPlayer;
@@ -91,7 +94,7 @@ class RLTrainer {
 
         if (dp == null) {
             dp = new DataProcessor(qwds);
-            dp.initNextSegmentFile(getNextSegmentThreshold(0));
+            dp.initNextSegmentFile(getNextSegmentThreshold(dp.nGamesPlayedFromInfile));
             dp.updateAndWriteFile(0);
         }
 
@@ -99,7 +102,8 @@ class RLTrainer {
 
         int gamesPlayedSinceLastWrite = 0;
         int progress = -1;
-        for (int i = 0; i < trainingParams.nGames; i++) {
+        for (int _i = 0; _i < trainingParams.nGames; _i++) {
+            int i = _i + dp.nGamesPlayedFromInfile;
             runGame(GameType.valueOf(trainingParams.gameName), gameParams, players, System.currentTimeMillis(), false,
                     null,
                     useGUI ? new ActionController() : null, turnPause);
@@ -116,7 +120,7 @@ class RLTrainer {
             gamesPlayedSinceLastWrite++;
             // Print progress
             int _progress = progress;
-            progress = (100 * (i + 1)) / trainingParams.nGames;
+            progress = (100 * (i - dp.nGamesPlayedFromInfile + 1)) / trainingParams.nGames;
             if (progress != _progress)
                 System.out.print("\r" + progress + "%");
         }
@@ -128,13 +132,13 @@ class RLTrainer {
     private int getNextSegmentThreshold(int n) {
         WriteSegmentType type = trainingParams.writeSegmentType;
         if (type == WriteSegmentType.NONE || trainingParams.writeSegmentFactor <= 0)
-            return trainingParams.nGames;
+            return trainingParams.nGames + dp.nGamesPlayedFromInfile;
 
         int nextSegmentNIterations = Math.max(type.n0, trainingParams.writeSegmentMinIterations);
         while (nextSegmentNIterations <= n)
             nextSegmentNIterations = type.operator.operate(nextSegmentNIterations, trainingParams.writeSegmentFactor);
 
-        return Math.min(nextSegmentNIterations, trainingParams.nGames);
+        return Math.min(nextSegmentNIterations, trainingParams.nGames + dp.nGamesPlayedFromInfile);
     }
 
     private boolean shouldUpdate(int iterations) {
@@ -170,70 +174,83 @@ class RLTrainer {
     }
 
     public static void main_train() {
-        RLTrainingParams params = new RLTrainingParams("SushiGo", 4, 1000000);
+        RLTrainingParams params = new RLTrainingParams("SushiGo", 2, 409600);
         params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
         params.writeSegmentFactor = 2;
         params.writeSegmentMinIterations = 100;
-        params.updateXIterations = 1000;
+        params.updateXIterations = 2500;
         params.alpha = 0.001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-        // params.outfilePrefix = "1";
 
-        // long seed = System.currentTimeMillis();
-        // long seed = 1688997020795l;
-
-        String infilePath = null;
-        // String infilePath = "LinearApprox/Attempt_01_n=10000.json";
-
-        IStateFeatureVector featureVector = new SushiGoFeatureVector();
-        // IActionFeatureVector featureVector = null;
+        // IStateFeatureVector featureVector = new SushiGoFeatureVector();
+        IActionFeatureVector featureVector = new SushiGo2PlayerFeatureVector();
         RLType type = RLType.LinearApprox;
 
-        for (int i = 0; i < 1; i++) {
-            long seed = System.currentTimeMillis();
-            params.outfilePrefix = String.format("Test_01_Agent_%02d", i + 1);
-            RLParams playerParams = infilePath == null
-                    ? new RLParams(featureVector, type, seed)
-                    : new RLParams(infilePath, seed);
-            playerParams.epsilon = 0.375f;
+        int n = 1;
 
-            RLTrainer trainer = new RLTrainer(params, playerParams);
-            trainer.runTraining();
-        }
+        long seed = System.currentTimeMillis();
+        String infilePath = null;
+        // String infilePath = "LinearApprox/Test_2P02_Agent_03_n=819200.json";
+        params.outfilePrefix = String.format("Test_H2P01_Agent_%02d", n);
+
+        RLParams playerParams = infilePath == null
+                ? new RLParams(featureVector, type, seed)
+                : new RLParams(infilePath, seed);
+        playerParams.epsilon = 0.375f;
+
+        RLTrainer trainer = new RLTrainer(params, playerParams);
+        trainer.runTraining();
     }
 
     public static void main_tournament() {
         List<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
         String gameName = "SushiGo";
-        int playersPerGame = 4;
-        int gamesPerMatchup = 8;
+        int playersPerGame = 2;
+        int gamesPerMatchup = 500;
         TournamentMode mode = TournamentMode.NO_SELF_PLAY;
         AbstractParameters gameParams = null;
         String finalDir = null;
         String destDir = null;
 
-        agents.add(new RLPlayer(new RLParams("LinearApprox/Test_01_Agent_01_n=819200.json")));
-        // agents.add(new MCTSPlayer());
-        agents.add(new RandomPlayer());
-        agents.add(new RandomPlayer());
-        agents.add(new RandomPlayer());
-        // for (int i = 0; i < 3; i++) {
+        // agents.add(new RLPlayer(new
+        // RLParams("LinearApprox/Test_01a_Agent_02_n=819200.json")));
+        // agents.add(new RLPlayer(new
+        // RLParams("LinearApprox/Test_01b_Agent_05_n=1638400.json")));
+
+        // for (int i = 1; i <= 4; i++) {
         // RLPlayer p = new RLPlayer(new
-        // RLParams(String.format("LinearApprox/Attempt_%02d_n=500000.json", i + 1)));
-        // p.setName(String.format("RLPlayer_%02d", i + 1));
+        // RLParams(String.format("LinearApprox/Test_2P01_Agent_%02d_n=51200.json",
+        // i)));
+        // p.setName("RL" + i);
         // agents.add(p);
         // }
 
+        // agents.add(new RLPlayer(new
+        // RLParams("LinearApprox/Test_2P01_Agent_01_n=409600.json")));
+
+        MCTSParams p_mcts = new MCTSParams();
+        p_mcts.budgetType = PlayerConstants.BUDGET_TIME;
+        p_mcts.budget = 16;
+        agents.add(new MCTSPlayer(p_mcts));
+
+        for (int n = 1; n <= 1; n++) {
+            RLPlayer p = new RLPlayer(
+                    new RLParams(String.format("LinearApprox/Test_2P03_Agent_%02d_n=2048000.json", n)));
+            p.setName("RL_" + n);
+            agents.add(p);
+        }
+
         RoundRobinTournament rrt = new RoundRobinTournament(agents, GameType.valueOf(gameName), playersPerGame,
                 gamesPerMatchup, mode, gameParams, finalDir, destDir);
+        // rrt.verbose = false;
         rrt.run();
     }
 
     public static void main(String[] args) {
-        // main_train();
-        main_tournament();
+        main_train();
+        // main_tournament();
     }
 
 }

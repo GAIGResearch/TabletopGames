@@ -67,7 +67,7 @@ class DataProcessor {
     private File outfile = null;
     private ObjectNode metadata = null;
 
-    private int nGamesPlayedFromInfile = 0;
+    public int nGamesPlayedFromInfile = 0;
     private long timeAtLastWrite = System.currentTimeMillis();
 
     DataProcessor(QWeightsDataStructure qwds) {
@@ -77,8 +77,7 @@ class DataProcessor {
         initMetadata();
     }
 
-    private void updateSegmentOutfile(int nGames) {
-        int totalNGames = nGamesPlayedFromInfile + nGames;
+    private void updateSegmentOutfile(int totalNGames) {
         String outfilePrefix = qwds.trainingParams.outfilePrefix != null ? qwds.trainingParams.outfilePrefix : dateTime;
         Path outfilePath = Paths.get(DataProcessor.getGameFolderPath(qwds.trainingParams.gameName).toString(),
                 qwds.playerParams.getType().name() + "/" + outfilePrefix + "_n=" + totalNGames + ".json");

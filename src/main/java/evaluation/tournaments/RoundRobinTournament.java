@@ -247,7 +247,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
             }
 
-            if (verbose) {
+            if (verbose && false) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("[");
                 for (int j = 0; j < matchUpPlayers.size(); j++)
