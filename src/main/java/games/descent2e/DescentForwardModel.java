@@ -169,6 +169,19 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
+        // Jain Fairwood's Hero Ability
+        // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
+        if (dgs.getHeroByName("Jain") != null)
+        {
+            Hero jain = dgs.getHeroByName("Jain");
+            for (int i = 0; i < (jain.getAttribute(Figure.Attribute.Fatigue).getMaximum()); i++) {
+                JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(jain, (i + 1));
+                if (!jain.getAbilities().contains(reduce)) {
+                    jain.addAbility(reduce);
+                }
+            }
+        }
+
         // Tomble Burrowell's Hero Ability
         // If we are targeted by an attack, and we are adjacent to an ally
         // We can add their defense pool to our own defense pool before we roll

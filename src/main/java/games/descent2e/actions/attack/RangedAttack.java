@@ -89,6 +89,6 @@ public class RangedAttack extends MeleeAttack {
 
     @Override
     public String toString() {
-        return String.format("Ranged Attack (Wpn: %d on %d", attackingPlayer, attackingFigure);
+        return String.format("Ranged Attack by %d on %d", attackingPlayer, attackingFigure);
     }
 }

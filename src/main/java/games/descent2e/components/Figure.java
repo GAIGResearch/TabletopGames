@@ -7,6 +7,7 @@ import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.attack.MeleeAttack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -68,6 +69,7 @@ public class Figure extends Token {
     boolean removedConditionThisTurn = false;
     Set<String> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
+    MeleeAttack currentAttack;
     boolean hasMoved, hasRerolled;
 
     public Figure(String name, int nActionsPossible) {
@@ -231,6 +233,8 @@ public class Figure extends Token {
     public DicePool getDefenceDice() {return defenceDice;}
 
     public String getName() { return componentName;}
+    public MeleeAttack getCurrentAttack() { return currentAttack;}
+    public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack;}
 
     @Override
     public Figure copy() {
@@ -268,6 +272,7 @@ public class Figure extends Token {
         }
         copyTo.attackDice = getAttackDice().copy();
         copyTo.defenceDice = getDefenceDice().copy();
+        copyTo.currentAttack = currentAttack;
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
@@ -312,11 +317,11 @@ public class Figure extends Token {
         if (!(o instanceof Figure)) return false;
         if (!super.equals(o)) return false;
         Figure figure = (Figure) o;
-        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities);
+        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities);
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities, currentAttack);
     }
 }

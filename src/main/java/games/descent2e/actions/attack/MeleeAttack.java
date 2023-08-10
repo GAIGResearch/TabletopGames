@@ -32,6 +32,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         SURGE_DECISIONS(SURGE_DECISION, ATTACKER),
         PRE_DEFENCE_ROLL(ROLL_OTHER_DICE, DEFENDER),
         POST_DEFENCE_ROLL(ROLL_OWN_DICE, DEFENDER),
+        PRE_DAMAGE(TAKE_DAMAGE, DEFENDER),
         POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
         ALL_DONE;
 
@@ -63,6 +64,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean isImmobilizing;
     boolean isPoisoning;
     boolean isStunning;
+
+    int damage;
+    boolean skip = false;
 
     Set<Surge> surgesUsed = new HashSet<>();
 
@@ -113,6 +117,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
          //       System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
+                skip = false;
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
                 if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
                     // we have completed the loop, and start again with the attacking player
@@ -186,6 +191,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 }
                 break;
             case POST_DEFENCE_ROLL:
+                calculateDamage(state);
+                phase = PRE_DAMAGE;
+                break;
+            case PRE_DAMAGE:
                 phase = POST_DAMAGE;
                 break;
             case POST_DAMAGE:
@@ -204,13 +213,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.getAttackDicePool().roll(state.getRandom());
     }
 
-    protected void applyDamage(DescentGameState state) {
-
+    protected void calculateDamage(DescentGameState state) {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
-        defenderName = defender.getComponentName();
 
-        int damage = state.getAttackDicePool().getDamage() + extraDamage;
+        damage = state.getAttackDicePool().getDamage() + extraDamage;
         int defence = state.getDefenceDicePool().getShields() - pierce;
 
         // Leoric of the Book's Hero Ability
@@ -222,6 +229,15 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         if (defence < 0) defence = 0;
         damage = Math.max(damage - defence, 0);
+
+        attacker.setCurrentAttack(this);
+        defender.setCurrentAttack(this);
+    }
+    protected void applyDamage(DescentGameState state) {
+
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        defenderName = defender.getComponentName();
 
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
@@ -377,6 +393,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             if (!retValue.isEmpty())
                 retValue.add(new EndRerollPhase());
         }
+        if (phase == PRE_DAMAGE) {
+            if (!retValue.isEmpty())
+                retValue.add(new EndCurrentPhase());
+        }
         return retValue;
     }
 
@@ -419,6 +439,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void addDamage(int damageBonus) {
         extraDamage += damageBonus;
+    }
+    public void reduceDamage (int damageReduction) {
+        damage = Math.max(0, damage - damageReduction);
+    }
+    public int getDamage() {
+        return damage;
     }
 
     public int getDefendingFigure()

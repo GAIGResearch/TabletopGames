@@ -102,9 +102,29 @@ public class HeroAbilities {
         }
         return face;
     }
+    
     // ----- SCOUT -----
 
     // Jain Fairwood's Hero Ability
+    // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
+    public static int jain(DescentGameState dgs, Figure actingFigure, int reduce)
+    {
+        if (actingFigure.equals(dgs.getHeroByName("Jain")))
+        {
+            int maxFatigue = actingFigure.getAttributeMax(Figure.Attribute.Fatigue);
+            int currentFatigue = actingFigure.getAttributeValue(Figure.Attribute.Fatigue);
+            if (currentFatigue + reduce <= maxFatigue)
+            {
+                actingFigure.incrementAttribute(Figure.Attribute.Fatigue, reduce);
+            }
+            else
+            {
+                actingFigure.setAttributeToMax(Figure.Attribute.Fatigue);
+                reduce = maxFatigue - currentFatigue;
+            }
+        }
+        return reduce;
+    }
 
     // Tomble Burrowell's Hero Ability
     // If we are targeted by an attack, and we are adjacent to an ally
