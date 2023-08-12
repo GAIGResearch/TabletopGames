@@ -5,13 +5,10 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.DicePool;
-import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 

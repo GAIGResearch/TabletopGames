@@ -5,12 +5,8 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-
-import java.util.List;
-import java.util.Objects;
 
 public class RemoveFromMap extends DescentAction {
 

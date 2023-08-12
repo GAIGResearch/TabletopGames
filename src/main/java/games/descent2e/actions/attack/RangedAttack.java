@@ -8,7 +8,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import utilities.Distance;
 
-import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
+import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
  *   This works in exactly the same way as a Melee Attack
@@ -52,6 +52,11 @@ public class RangedAttack extends MeleeAttack {
     }
 
     @Override
+    void executePhase(DescentGameState state) {
+        super.executePhase(state);
+    }
+
+    @Override
     public boolean attackMissed(DescentGameState state) {
         if (super.attackMissed(state))
             return true; // due to no damage done
@@ -88,7 +93,19 @@ public class RangedAttack extends MeleeAttack {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RangedAttack) {
+            return super.equals(obj);
+        }
+        return false;
+    }
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
     public String toString() {
-        return String.format("Ranged Attack by %d on %d", attackingPlayer, attackingFigure);
+        return String.format("Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }
 }

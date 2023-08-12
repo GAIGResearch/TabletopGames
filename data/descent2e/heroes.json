@@ -12,7 +12,7 @@
     "Awareness": ["Integer", 2],
     "defence": ["String[]", ["grey"]],
     "ability": ["String", "Once per round, after you roll a dice for an attack, you may reroll 1 attack or power die. You must keep the new result."],
-    "heroicFeat": ["String", "Action: Attack(targets=2)"]
+    "heroicFeat": ["String", "Action: Perform an attack. This attack affects 2 different monsters in your line of sight. 1 attack roll is made but each monster rolls defense dice separately. Both monsters are considered targets of your attack."]
   },
   {
     "id": "Leoric of the Book",

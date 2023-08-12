@@ -34,6 +34,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         POST_DEFENCE_ROLL(ROLL_OWN_DICE, DEFENDER),
         PRE_DAMAGE(TAKE_DAMAGE, DEFENDER),
         POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
+        NEXT_TARGET,        // This is only used in MultiAttacks, where we repeat the attack on the next target
         ALL_DONE;
 
         public final Triggers interrupt;
@@ -50,7 +51,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         }
     }
 
-    final int attackingFigure;
+    protected final int attackingFigure;
     int attackingPlayer;
     String attackerName;
     final int defendingFigure;
@@ -152,7 +153,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return !_computeAvailableActions(state).isEmpty();
     }
 
-    private void executePhase(DescentGameState state) {
+    void executePhase(DescentGameState state) {
         // System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:

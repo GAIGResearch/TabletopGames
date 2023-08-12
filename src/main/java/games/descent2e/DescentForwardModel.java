@@ -580,8 +580,62 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Mage
             case "Leoric of the Book":
+                List<Integer> monsters = new ArrayList<>();
+
+                Vector2D loc = actingFigure.getPosition();
+                GridBoard board = dgs.getMasterBoard();
+                List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+
+                // Get all monsters that are adjacent to us and we have line of sight to
+                for (List<Monster> monsterGroup : dgs.getMonsters()) {
+                    for (Monster monster : monsterGroup) {
+                        // We only need to check if all 8 adjacent tiles have a monster on them
+                        // If we already have 8 monsters on the list, we can stop
+                        if (monsters.size() >= neighbours.size())
+                            break;
+                        if (neighbours.contains(monster.getPosition())) {
+                            if (hasLineOfSight(dgs, loc, monster.getPosition()))
+                                monsters.add(monster.getComponentID());
+                        }
+                    }
+                }
+
+                if (!monsters.isEmpty()) {
+                    heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
+                    if (heroicFeat.canExecute(dgs))
+                        heroicFeats.add(heroicFeat);
+                }
                 break;
             case "Widow Tarha":
+
+                Vector2D tarhaPos = actingFigure.getPosition();
+                // Get all monsters we could make Ranged Attacks on
+                monsters = new ArrayList<>();
+                for (List<Monster> monsterGroup : dgs.getMonsters()) {
+                    for (Monster monster : monsterGroup) {
+                        Vector2D monsterPos = monster.getPosition();
+                        if (hasLineOfSight(dgs, tarhaPos, monsterPos)) {
+                            if (Math.abs(tarhaPos.getX() - monsterPos.getX()) <= RangedAttack.MAX_RANGE &&
+                                    Math.abs(tarhaPos.getY() - monsterPos.getY()) <= RangedAttack.MAX_RANGE) {
+                                if(monsters.contains(monster.getComponentID()))
+                                    continue;
+                                monsters.add(monster.getComponentID());
+                            }
+                        }
+                    }
+                }
+                // Get all possible monster pairs available
+                for (int i = 0; i < monsters.size(); i++) {
+                    for (int j = i + 1; j < monsters.size(); j++) {
+                        List<Integer> monsterPair = new ArrayList<>();
+                        monsterPair.add(monsters.get(i));
+                        monsterPair.add(monsters.get(j));
+
+                        heroicFeat = new DoubleAttack(dgs.getActingFigure().getComponentID(), monsterPair);
+                        if (heroicFeat.canExecute(dgs))
+                            heroicFeats.add(heroicFeat);
+                    }
+                }
                 break;
 
             // Scout
