@@ -152,6 +152,7 @@ public class Hero extends Figure {
             getConditions().clear();
             // Remove from map
             Move.remove(dgs, this);
+            setOffMap(true);
         }
         else {
             Move.replace(dgs, this);

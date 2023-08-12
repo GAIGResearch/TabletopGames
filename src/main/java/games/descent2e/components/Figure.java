@@ -15,6 +15,7 @@ import org.json.simple.parser.ParseException;
 import utilities.Pair;
 import utilities.Vector2D;
 
+import javax.management.ObjectName;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -71,6 +72,7 @@ public class Figure extends Token {
     List<DescentAction> abilities;  // TODO track exhausted etc.
     MeleeAttack currentAttack;
     boolean hasMoved, hasRerolled;
+    boolean isOffMap, canIgnoreEnemies = false;
 
     public Figure(String name, int nActionsPossible) {
         super(name);
@@ -155,6 +157,18 @@ public class Figure extends Token {
     }
     public void setRerolled(boolean hasRerolled) {
         this.hasRerolled = hasRerolled;
+    }
+    public boolean isOffMap() {
+        return isOffMap;
+    }
+    public void setOffMap(boolean offMap) {
+        isOffMap = offMap;
+    }
+    public boolean canIgnoreEnemies() {
+        return canIgnoreEnemies;
+    }
+    public void setCanIgnoreEnemies(boolean canIgnoreEnemies) {
+        this.canIgnoreEnemies = canIgnoreEnemies;
     }
 
     public Counter getNActionsExecuted() {
@@ -272,6 +286,10 @@ public class Figure extends Token {
         }
         copyTo.attackDice = getAttackDice().copy();
         copyTo.defenceDice = getDefenceDice().copy();
+        copyTo.hasMoved = hasMoved;
+        copyTo.hasRerolled = hasRerolled;
+        copyTo.isOffMap = isOffMap;
+        copyTo.canIgnoreEnemies = canIgnoreEnemies;
         copyTo.currentAttack = currentAttack;
     }
 
@@ -317,11 +335,11 @@ public class Figure extends Token {
         if (!(o instanceof Figure)) return false;
         if (!super.equals(o)) return false;
         Figure figure = (Figure) o;
-        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack);
+        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(componentName, figure.componentName) && Objects.equals(hasMoved, figure.hasMoved) && Objects.equals(hasRerolled, figure.hasRerolled) && Objects.equals(isOffMap, figure.isOffMap) && Objects.equals(canIgnoreEnemies, figure.canIgnoreEnemies);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities, currentAttack);
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities, currentAttack, componentName, hasMoved, hasRerolled, isOffMap, canIgnoreEnemies);
     }
 }

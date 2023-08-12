@@ -145,6 +145,8 @@ public class Move extends AbstractAction {
 
     public static void replace (DescentGameState dgs, Figure f)
     {
+        f.setOffMap(false);
+
         Monster.Direction orientation = Monster.Direction.DOWN;
         if (f instanceof Monster)
             orientation = ((Monster) f).getOrientation();
@@ -152,8 +154,10 @@ public class Move extends AbstractAction {
         Vector2D position = f.getPosition();
 
         BoardNode baseSpace = dgs.getMasterBoard().getElement(position.getX(), position.getY());
-        // If the original space is empty, we can just place the figure there
-        if (((PropertyInt) baseSpace.getProperty("players")).value == -1) {
+        // If the original space is empty, or is occupied by this figure, we can just place the figure there
+        int player = ((PropertyInt) baseSpace.getProperty("players")).value;
+
+        if (player == -1 || player == f.getComponentID()) {
             place(dgs, f, position, orientation);
             return;
         }

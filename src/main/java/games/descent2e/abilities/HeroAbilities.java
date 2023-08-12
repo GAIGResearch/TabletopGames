@@ -102,7 +102,7 @@ public class HeroAbilities {
         }
         return face;
     }
-    
+
     // ----- SCOUT -----
 
     // Jain Fairwood's Hero Ability

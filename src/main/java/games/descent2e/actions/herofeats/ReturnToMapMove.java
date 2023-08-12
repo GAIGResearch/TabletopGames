@@ -1,0 +1,61 @@
+package games.descent2e.actions.herofeats;
+
+import core.AbstractGameState;
+import games.descent2e.DescentGameState;
+import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Triggers;
+import games.descent2e.components.DicePool;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+
+import java.util.List;
+import java.util.Objects;
+
+public class ReturnToMapMove extends DescentAction {
+
+    // Tomble Burrowell Heroic Feat
+    // Part 2 of 3
+    String heroName = "Tomble Burrowell";
+    int distance;
+    public ReturnToMapMove(int distance) {
+        super(Triggers.ACTION_POINT_SPEND);
+        this.distance = distance;
+    }
+
+    @Override
+    public boolean execute(DescentGameState dgs) {
+        Hero f = (Hero) dgs.getActingFigure();
+        f.setAttribute(Figure.Attribute.MovePoints, distance);
+        f.setCanIgnoreEnemies(true);
+        System.out.println("Tomble is choosing where to reappear!");
+        return true;
+    }
+
+    @Override
+    public ReturnToMapMove copy() {
+        return new ReturnToMapMove(distance);
+    }
+
+    @Override
+    public boolean canExecute(DescentGameState dgs) {
+        Hero f = (Hero) dgs.getActingFigure();
+        return  f.getName().contains(heroName) && f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum() &&
+                f.getAttributeValue(Figure.Attribute.MovePoints) == 0 && !f.hasMoved() && f.isOffMap();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ReturnToMapMove)
+            return ((ReturnToMapMove) obj).distance == distance;
+        return false;
+    }
+
+    public int hashCode() {
+        return Objects.hash(distance);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Heroic Feat: Move up to 4 spaces away before reappearing";
+    }
+}

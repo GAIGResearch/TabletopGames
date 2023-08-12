@@ -13,8 +13,7 @@ import games.descent2e.actions.Move;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
-import games.descent2e.actions.herofeats.HealAllInRange;
-import games.descent2e.actions.herofeats.StunAllInMonsterGroup;
+import games.descent2e.actions.herofeats.*;
 import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
@@ -357,8 +356,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
 
-        // End turn is always possible
-        actions.add(new EndTurn());
+        // End turn is (almost) always possible
+        // Certain scenarios will need to prevent it from being taken
+        // But they will remove it from the list when required, instead of preventing it here
+        EndTurn endTurn = new EndTurn();
+        actions.add(endTurn);
 
         // First, we must check if our Figure is a defeated Hero
         // Defeated Heroes can only perform the StandUp action
@@ -420,7 +422,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // If a hero has stamina to spare, add move actions that cost fatigue
-        if (actingFigure instanceof Hero) {
+        if (actingFigure instanceof Hero && !actingFigure.isOffMap()) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
                 if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
@@ -428,7 +430,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // Add actions that cost action points
-        if (!actingFigure.getNActionsExecuted().isMaximum()) {
+        // These can only be taken if we have not already taken 2 actions
+        // Also, the acting figure must be on the map to take them
+        if (!actingFigure.getNActionsExecuted().isMaximum() && !actingFigure.isOffMap()) {
             // Get movement points action
             GetMovementPoints movePoints = new GetMovementPoints();
             if (movePoints.canExecute(dgs)) actions.add(movePoints);
@@ -510,14 +514,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 HeroAbilities.avric(dgs, (Hero) actingFigure);
             }
 
-            // Heroic Feat
-            if (actingFigure instanceof Hero && (((Hero) actingFigure).isFeatAvailable()))
-            {
-                AbstractAction heroicFeat = heroicFeatAction(dgs, (Hero) actingFigure);
-                if(heroicFeat != null)
-                    actions.add(heroicFeat);
-            }
-
             // Get Monster Unique Actions
             if (actingFigure instanceof Monster)
             {
@@ -537,11 +533,25 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // TODO: exhaust a card for an action/modifier/effect "free" action
         }
 
+        // Heroic Feat
+        if (actingFigure instanceof Hero && (((Hero) actingFigure).isFeatAvailable()))
+        {
+            List<AbstractAction> heroicFeats = heroicFeatAction(dgs, (Hero) actingFigure);
+            if(!heroicFeats.isEmpty())
+                actions.addAll(heroicFeats);
+
+            // Tomble Burrowell's Heroic Feat
+            // Prevents End Turn from being taken, to stop him from being stuck as a Token
+            if(actions.contains(new ReturnToMapMove(4)) || actions.contains(new ReturnToMapPlace()))
+                actions.remove(endTurn);
+        }
+
         return actions;
     }
 
-    private AbstractAction heroicFeatAction(DescentGameState dgs, Hero actingFigure)
+    private List<AbstractAction> heroicFeatAction(DescentGameState dgs, Hero actingFigure)
     {
+        List<AbstractAction> heroicFeats = new ArrayList<>();
         DescentAction heroicFeat = null;
         switch (actingFigure.getName().replace("Hero: ", ""))
         {
@@ -551,7 +561,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 for (List<Monster> monsters : dgs.getMonsters()) {
                     heroicFeat = new StunAllInMonsterGroup(monsters, 3);
                     if (heroicFeat.canExecute(dgs))
-                        return heroicFeat;
+                        heroicFeats.add(heroicFeat);
                 }
                 break;
             case "Avric Albright":
@@ -564,8 +574,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     }
                 }
                 heroicFeat = new HealAllInRange(heroesInRange, 3);
-                if(heroicFeat.canExecute(dgs))
-                    return heroicFeat;
+                if (heroicFeat.canExecute(dgs))
+                    heroicFeats.add(heroicFeat);
                 break;
 
             // Mage
@@ -578,6 +588,20 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             case "Jain Fairwood":
                 break;
             case "Tomble Burrowell":
+                // Tomble's Heroic Feat comes in three parts
+                // Remove from Map
+                heroicFeat = new RemoveFromMap();
+                if (heroicFeat.canExecute(dgs))
+                    heroicFeats.add(heroicFeat);
+                // Choose where to return to Map (by up to 4 spaces away)
+                heroicFeat = new ReturnToMapMove(4);
+                if (heroicFeat.canExecute(dgs))
+                    heroicFeats.add(heroicFeat);
+
+                // Return to Map
+                heroicFeat = new ReturnToMapPlace();
+                if (heroicFeat.canExecute(dgs))
+                    heroicFeats.add(heroicFeat);
                 break;
 
             // Warrior
@@ -588,7 +612,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             default:
                 break;
         }
-        return null;
+        return heroicFeats;
     }
     private ArrayList<AbstractAction> monsterActions(DescentGameState dgs, Monster actingFigure)
     {
@@ -686,6 +710,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     {
                         if ((((Monster) figure).hasPassive("Scamper")) && neighbourFigure.getTokenType().equals("Hero"))
                             isFriendly = true;
+                    }
+                    // If, for whatever reason, our Heroes are allowed to ignore enemies entirely when moving
+                    // We can move through all other figures as if they were friendly
+                    if (figure.canIgnoreEnemies())
+                    {
+                        isFriendly = true;
                     }
                 }
 
