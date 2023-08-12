@@ -18,6 +18,7 @@ import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RoundRobinTournament;
 import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
+import games.sushigo.SGHeuristic;
 import players.PlayerConstants;
 import players.heuristics.WinOnlyHeuristic;
 import players.human.ActionController;
@@ -182,13 +183,13 @@ class RLTrainer {
         params.alpha = 0.001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
-        params.heuristic = new WinOnlyHeuristic();
+        params.heuristic = new SGHeuristic();
 
         // IStateFeatureVector featureVector = new SushiGoFeatureVector();
         IActionFeatureVector featureVector = new SushiGo2PlayerFeatureVector();
         RLType type = RLType.LinearApprox;
 
-        int n = 1;
+        int n = 8;
 
         long seed = System.currentTimeMillis();
         String infilePath = null;
@@ -208,8 +209,8 @@ class RLTrainer {
         List<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
         String gameName = "SushiGo";
         int playersPerGame = 2;
-        int gamesPerMatchup = 500;
-        TournamentMode mode = TournamentMode.NO_SELF_PLAY;
+        int gamesPerMatchup = 8000;
+        TournamentMode mode = TournamentMode.ONE_VS_ALL;
         AbstractParameters gameParams = null;
         String finalDir = null;
         String destDir = null;
@@ -233,11 +234,21 @@ class RLTrainer {
         MCTSParams p_mcts = new MCTSParams();
         p_mcts.budgetType = PlayerConstants.BUDGET_TIME;
         p_mcts.budget = 16;
-        agents.add(new MCTSPlayer(p_mcts));
+        // agents.add(new MCTSPlayer(p_mcts));
 
-        for (int n = 1; n <= 1; n++) {
+        for (int n = 1; n <= 8; n++) {
+            if (n != 4)
+                continue;
             RLPlayer p = new RLPlayer(
-                    new RLParams(String.format("LinearApprox/Test_2P03_Agent_%02d_n=2048000.json", n)));
+                    new RLParams(String.format("LinearApprox/Test_H2P01_Agent_%02d_n=409600.json",
+                            n)));
+            p.setName("RL_H_" + n);
+            agents.add(p);
+        }
+
+        for (int n = 1; n <= 8; n++) {
+            RLPlayer p = new RLPlayer(
+                    new RLParams(String.format("LinearApprox/Test_2P01_Agent_%02d_n=409600.json", n)));
             p.setName("RL_" + n);
             agents.add(p);
         }
@@ -249,8 +260,8 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        main_train();
-        // main_tournament();
+        // main_train();
+        main_tournament();
     }
 
 }
