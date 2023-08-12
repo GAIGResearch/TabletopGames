@@ -41,8 +41,10 @@ public class MonopolyDealGameState extends AbstractGameState {
     Deck<MonopolyDealCard> discardPile;
 
     // Player turn status members
-    int actionsLeft = 3;
+    int actionsLeft;
+    int boardModificationsLeft;
     boolean turnStart = true;
+    boolean deckEmpty = false;
 
     /**
      * @param gameParameters - game parameters.
@@ -54,6 +56,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         rnd = new Random(gameParameters.getRandomSeed());
         params = (MonopolyDealParameters) gameParameters;
         actionsLeft = params.ACTIONS_PER_TURN;
+        boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
         turnStart = true;
         this._reset();
     }
@@ -167,8 +170,10 @@ public class MonopolyDealGameState extends AbstractGameState {
         return retValue;
     }
     public boolean canModifyBoard(int playerID){
-        for (PropertySet pSet: playerPropertySets[playerID]) {
-            if(pSet.hasWild) return true;
+        if(boardModificationsLeft>0) {
+            for (PropertySet pSet : playerPropertySets[playerID]) {
+                if (pSet.hasWild) return true;
+            }
         }
         return false;
     }
@@ -177,18 +182,23 @@ public class MonopolyDealGameState extends AbstractGameState {
             if(drawPile.getSize() == 0){
                 resetDrawPile();
             }
-            playerHands[playerID].add(drawPile.draw());
+            if(!deckEmpty)
+                playerHands[playerID].add(drawPile.draw());
         }
     }
     public void resetDrawPile(){
-        if(discardPile.getSize()==0)
-            throw new AssertionError("Draw pile exhausted");
+        if(discardPile.getSize()==0){
+            deckEmpty = true;
+            return;
+//            throw new AssertionError("Draw pile exhausted");
+        }
         drawPile.add(discardPile);
         discardPile.clear();
         drawPile.shuffle(rnd);
     }
     public void endTurn() {
         actionsLeft = params.ACTIONS_PER_TURN;
+        boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
         turnStart = true;
     }
     public void discardCard(MonopolyDealCard card, int playerID) {
@@ -355,6 +365,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     public void useAction(int actionCost) {
         actionsLeft = actionsLeft-actionCost;
     }
+    public void modifyBoard(){ boardModificationsLeft--; }
     public int getActionsLeft(){return actionsLeft;}
     // remove property
     public Deck<MonopolyDealCard> getPlayerHand(int playerID){
@@ -368,6 +379,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     public boolean CheckForJustSayNo(int playerID) { return playerHands[playerID].getComponents().contains(MonopolyDealCard.create(CardType.JustSayNo)); }
 
     public boolean checkForGameEnd() {
+        if(deckEmpty) return true;
         for(int i=0;i<getNPlayers();i++){
             if(getGameScore(i)==1.0d) return true;
         }
@@ -395,6 +407,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         // TODO: What is this player's score (if any)?
+        if(deckEmpty) return 0;
         int count = 0;
         for (PropertySet pSet:playerPropertySets[playerId]) {
             if(pSet.isComplete){

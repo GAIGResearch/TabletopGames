@@ -70,7 +70,8 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(!pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
+                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0)))
+                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
                         }
                     }
                 }
@@ -79,7 +80,8 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
                 for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
                     if((!pSet.hasHouse && !pSet.hasHotel)){
                         for(int i=0;i<pSet.getSize();i++){
-                            availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1));
+                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1)))
+                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1));
                         }
                     }
                 }

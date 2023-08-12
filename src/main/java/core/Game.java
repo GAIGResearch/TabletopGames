@@ -939,7 +939,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new HumanConsolePlayer());
-//        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
@@ -948,7 +948,7 @@ public class Game {
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 

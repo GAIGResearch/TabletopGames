@@ -64,11 +64,13 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
             // iterate through bank and add action
             // iterate through properties and add action
             for(int i=0;i<payerBank.getSize();i++){
+                if(!availableActions.contains(new PayCardFrom(payerBank.get(i))))
                 availableActions.add(new PayCardFrom(payerBank.get(i)));
             }
             for (PropertySet pSet: payerPropertySets) {
                 for(int i=0;i<pSet.getSize();i++)
-                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
+                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild) && !availableActions.contains(new PayCardFrom(pSet.get(i),pSet.getSetType())))
+                        availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
             }
         }
 

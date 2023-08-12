@@ -63,7 +63,8 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
                                 }
                             }
                         }
-                        availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType)))
+                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
                     }
                 }
             }
@@ -103,12 +104,11 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         SetType from = actionTaken.from;
         SetType to = actionTaken.to;
 
-        CheckDoubleExecute++;
-
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         MDGS.removePropertyFrom(playerID,card,from);
         card.setUseAs(to);
         MDGS.addProperty(playerID,card);
+        MDGS.modifyBoard();
         executed = true;
 
     }

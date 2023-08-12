@@ -27,6 +27,7 @@ public class MonopolyDealParameters extends TunableParameters {
 
     public int HAND_SIZE;
     public int DRAWS_WHEN_EMPTY;
+    public int BOARD_MODIFICATIONS_PER_TURN;
     public int INITIAL_DEAL;
     public int ACTIONS_PER_TURN;
     public int DRAWS_PER_TURN;
@@ -36,6 +37,7 @@ public class MonopolyDealParameters extends TunableParameters {
         super(seed);
         addTunableParameter("HAND_SIZE", 7, Arrays.asList(3,5,7,10));
         addTunableParameter("INITIAL_DEAL", 5, Arrays.asList(3,5));
+        addTunableParameter("BOARD_MODIFICATIONS_PER_TURN", 3, Arrays.asList(3,5));
         addTunableParameter("DRAWS_PER_TURN", 2, Arrays.asList(3,5,7,10));
         addTunableParameter("DRAWS_WHEN_EMPTY", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("SETS_TO_WIN", 3, Arrays.asList(3,5,7,10));
@@ -47,6 +49,7 @@ public class MonopolyDealParameters extends TunableParameters {
     public void _reset() {
         HAND_SIZE = (int) getParameterValue("HAND_SIZE");
         INITIAL_DEAL = (int) getParameterValue("INITIAL_DEAL");
+        BOARD_MODIFICATIONS_PER_TURN = (int) getParameterValue("BOARD_MODIFICATIONS_PER_TURN");
         ACTIONS_PER_TURN = (int) getParameterValue("ACTIONS_PER_TURN");
         DRAWS_WHEN_EMPTY = (int) getParameterValue("DRAWS_WHEN_EMPTY");
         DRAWS_PER_TURN = (int) getParameterValue("DRAWS_PER_TURN");
@@ -122,12 +125,12 @@ public class MonopolyDealParameters extends TunableParameters {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         MonopolyDealParameters that = (MonopolyDealParameters) o;
-        return HAND_SIZE == that.HAND_SIZE && DRAWS_WHEN_EMPTY == that.DRAWS_WHEN_EMPTY && INITIAL_DEAL == that.INITIAL_DEAL && ACTIONS_PER_TURN == that.ACTIONS_PER_TURN && DRAWS_PER_TURN == that.DRAWS_PER_TURN && SETS_TO_WIN == that.SETS_TO_WIN && Objects.equals(cardsIncludedInGame, that.cardsIncludedInGame);
+        return HAND_SIZE == that.HAND_SIZE && DRAWS_WHEN_EMPTY == that.DRAWS_WHEN_EMPTY && INITIAL_DEAL == that.INITIAL_DEAL && BOARD_MODIFICATIONS_PER_TURN == that.BOARD_MODIFICATIONS_PER_TURN && ACTIONS_PER_TURN == that.ACTIONS_PER_TURN && DRAWS_PER_TURN == that.DRAWS_PER_TURN && SETS_TO_WIN == that.SETS_TO_WIN && Objects.equals(cardsIncludedInGame, that.cardsIncludedInGame);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), HAND_SIZE, DRAWS_WHEN_EMPTY, INITIAL_DEAL, ACTIONS_PER_TURN, DRAWS_PER_TURN, SETS_TO_WIN, cardsIncludedInGame);
+        return Objects.hash(super.hashCode(), HAND_SIZE, DRAWS_WHEN_EMPTY, INITIAL_DEAL, BOARD_MODIFICATIONS_PER_TURN, ACTIONS_PER_TURN, DRAWS_PER_TURN, SETS_TO_WIN, cardsIncludedInGame);
     }
 
     @Override

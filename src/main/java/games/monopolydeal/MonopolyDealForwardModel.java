@@ -3,6 +3,7 @@ package games.monopolydeal;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import games.monopolydeal.actions.*;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
@@ -82,9 +83,12 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                 return Collections.singletonList(new EndPhase());
             case "Discard":
                 if(state.playerHands[playerID].stream().count()>state.params.HAND_SIZE){
-                    List<AbstractAction> availableActions = state.playerHands[playerID].stream()
-                            .map(card ->new DiscardCard(card.cardType(),playerID))
-                            .collect(toList());
+                    List<AbstractAction> availableActions = new ArrayList<>();
+                    Deck<MonopolyDealCard> playerHand = state.playerHands[playerID];
+                    for (int i=0;i<playerHand.getSize();i++) {
+                        if(!availableActions.contains(new DiscardCard(playerHand.get(i).cardType(),playerID)))
+                            availableActions.add(new DiscardCard(playerHand.get(i).cardType(),playerID));
+                    }
                     return availableActions;
                 }
             default:
@@ -132,7 +136,6 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                     state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
                     if(state.getCurrentPlayer() == state.getNPlayers()-1) endRound(state);
                     else endPlayerTurn(currentState);
-
                 }
                 break;
             default:

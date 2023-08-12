@@ -27,9 +27,9 @@ import java.util.Objects;
  */
 public class ChoosePropertySet extends AbstractAction {
 
-    int setSize;
-    SetType setType;
-    int actionType;
+    final int setSize;
+    final SetType setType;
+
 
     public ChoosePropertySet(PropertySet pSet){
         this.setType = pSet.getSetType();
@@ -64,12 +64,12 @@ public class ChoosePropertySet extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChoosePropertySet that = (ChoosePropertySet) o;
-        return setSize == that.setSize && actionType == that.actionType && setType == that.setType;
+        return setSize == that.setSize && setType == that.setType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(setSize, setType, actionType);
+        return Objects.hash(setSize, setType);
     }
 
     @Override

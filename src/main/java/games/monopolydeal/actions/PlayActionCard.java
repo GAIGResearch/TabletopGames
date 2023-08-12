@@ -56,75 +56,92 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                 switch (type) {
                     case SlyDeal:
                         if (MDGS.checkForSlyDeal(playerID))
-                            availableActions.add(new SlyDealAction(playerID));
+                            if(!availableActions.contains(new SlyDealAction(playerID)))
+                                availableActions.add(new SlyDealAction(playerID));
                         break;
                     case ForcedDeal:
                         if(MDGS.checkForForcedDeal(playerID))
-                            availableActions.add(new ForcedDealAction(playerID));
+                            if(!availableActions.contains(new ForcedDealAction(playerID)))
+                                availableActions.add(new ForcedDealAction(playerID));
                         break;
                     case DealBreaker:
                         if(MDGS.checkForDealBreaker(playerID))
-                            availableActions.add(new DealBreakerAction(playerID));
+                            if(!availableActions.contains(new DealBreakerAction(playerID)))
+                                availableActions.add(new DealBreakerAction(playerID));
                         break;
                     case MulticolorRent:
                         if(MDGS.checkForMulticolorRent(playerID)){
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new MulticolorRentAction(playerID,j));
+                                if(!availableActions.contains(new MulticolorRentAction(playerID,j)))
+                                    availableActions.add(new MulticolorRentAction(playerID,j));
                         }
                         break;
                     case GreenBlueRent:
                         if(MDGS.playerHasSet(playerID, SetType.Green)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Green,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Green,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Green,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Blue)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Blue,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Blue,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Blue,type,j));
                         }
                     case BrownLightBlueRent:
                         if(MDGS.playerHasSet(playerID, SetType.Brown)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Brown,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Brown,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Brown,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.LightBlue)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.LightBlue,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.LightBlue,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.LightBlue,type,j));
                         }
                     case PinkOrangeRent:
                         if(MDGS.playerHasSet(playerID, SetType.Pink)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Pink,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Pink,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Pink,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Orange)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Orange,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Orange,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Orange,type,j));
                         }
                     case RedYellowRent:
                         if(MDGS.playerHasSet(playerID, SetType.Red)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Red,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Red,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Red,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Yellow)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Yellow,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Yellow,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Yellow,type,j));
                         }
                     case RailRoadUtilityRent:
                         if(MDGS.playerHasSet(playerID, SetType.RailRoad)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.RailRoad,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.RailRoad,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.RailRoad,type,j));
                         }
                         if(MDGS.playerHasSet(playerID, SetType.Utility)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                availableActions.add(new PropertyRentAction(playerID,SetType.Utility,type,j));
+                                if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Utility,type,j)))
+                                    availableActions.add(new PropertyRentAction(playerID,SetType.Utility,type,j));
                         }
                     case PassGo:
-                        availableActions.add(new PassGoAction());
+                        if(!availableActions.contains(new PassGoAction()))
+                            availableActions.add(new PassGoAction());
                         break;
                     case DebtCollector:
-                        availableActions.add(new DebtCollectorAction(playerID));
+                        if(!availableActions.contains(new DebtCollectorAction(playerID)))
+                            availableActions.add(new DebtCollectorAction(playerID));
                         break;
                     case ItsMyBirthday:
-                        availableActions.add(new ItsMyBirthdayAction(playerID));
+                        if(!availableActions.contains(new ItsMyBirthdayAction(playerID)))
+                            availableActions.add(new ItsMyBirthdayAction(playerID));
                         break;
                     case JustSayNo:
                     case DoubleTheRent:
