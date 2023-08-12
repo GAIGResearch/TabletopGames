@@ -87,4 +87,8 @@ public class StunAllInMonsterGroup extends DescentAction {
         else
             return "Heroic Feat: Stun " + monsterName;
     }
+    @Override
+    public String toString() {
+        return "Heroic Feat: Ashrian - Group Stun";
+    }
 }

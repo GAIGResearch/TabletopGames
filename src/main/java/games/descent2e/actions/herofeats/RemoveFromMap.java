@@ -57,4 +57,8 @@ public class RemoveFromMap extends DescentAction {
     public String getString(AbstractGameState gameState) {
         return "Heroic Feat: Vanish, ending your turn, then next turn reappear up to 4 spaces away.";
     }
+    @Override
+    public String toString() {
+        return "Heroic Feat: Tomble Burrowell - Vanish (1/3)";
+    }
 }

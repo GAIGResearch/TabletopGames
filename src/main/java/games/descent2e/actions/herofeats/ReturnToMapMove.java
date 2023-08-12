@@ -58,4 +58,8 @@ public class ReturnToMapMove extends DescentAction {
     public String getString(AbstractGameState gameState) {
         return "Heroic Feat: Move up to 4 spaces away before reappearing";
     }
+    @Override
+    public String toString() {
+        return "Heroic Feat: Tomble Burrowell - Move (2/3)";
+    }
 }

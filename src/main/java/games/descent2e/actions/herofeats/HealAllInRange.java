@@ -80,4 +80,9 @@ public class HealAllInRange extends DescentAction {
     public String getString(AbstractGameState gameState) {
         return "Heroic Feat: Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
     }
+
+    @Override
+    public String toString() {
+        return "Heroic Feat: Avric Albright - Group Heal";
+    }
 }

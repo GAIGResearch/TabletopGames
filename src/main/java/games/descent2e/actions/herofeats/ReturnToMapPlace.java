@@ -48,4 +48,9 @@ public class ReturnToMapPlace extends DescentAction {
     public String getString(AbstractGameState gameState) {
         return "Heroic Feat: Reappear";
     }
+
+    @Override
+    public String toString() {
+        return "Heroic Feat: Tomble Burrowell - Reappear";
+    }
 }
