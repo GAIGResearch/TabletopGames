@@ -61,6 +61,8 @@ public class MultiAttack extends RangedAttack {
 
         super.movePhaseForward(state);
 
+        attacker.getNActionsExecuted().increment();
+
         return true;
     }
 

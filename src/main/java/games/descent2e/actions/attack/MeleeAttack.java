@@ -53,10 +53,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     protected final int attackingFigure;
     int attackingPlayer;
-    String attackerName;
-    final int defendingFigure;
+    protected String attackerName;
+    protected int defendingFigure;
     int defendingPlayer;
-    String defenderName;
+    protected String defenderName;
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
     int surgesToSpend;
@@ -94,6 +94,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.setDefenceDicePool(defencePool);
 
         movePhaseForward(state);
+
+        attacker.getNActionsExecuted().increment();
 
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
@@ -182,7 +184,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
                     Figure attacker = (Figure) state.getComponentById(attackingFigure);
-                    attacker.getNActionsExecuted().increment();
                     //System.out.println("Attack missed!");
                     phase = ALL_DONE;
                 }
@@ -269,7 +270,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         {
             attacker.incrementAttribute(Figure.Attribute.Health, mending);
         }
-        attacker.getNActionsExecuted().increment();
     }
 
     public boolean attackMissed(DescentGameState state) {

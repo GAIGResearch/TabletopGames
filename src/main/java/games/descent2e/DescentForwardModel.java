@@ -277,8 +277,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
         // TODO: may still be able to play cards/skills/free effects - just add more Booleans into the if check when more are added
-        // Turn ends for figure if they executed the number of actions available,
-        Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum();
+        // Turn ends for figure if they executed the number of actions available and have no more actions available,
+        List<AbstractAction> actions = _computeAvailableActions(dgs);
+        actions.remove(new EndTurn());
+        Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum() && actions.isEmpty();
 
         // have no more movement points available,
         Boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
@@ -439,28 +441,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
 
-            AttackType attackType = AttackType.NONE;
-            if (actingFigure instanceof Hero) {
-                // Examines the Hero's equipment to see what their weapon's range is
-                Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
-                int length = myEquipment.getComponents().size();
-                for (int i = 0; i < length; i++) {
-                    AttackType temp = myEquipment.get(i).getAttackType();
+            AttackType attackType = getAttackType(actingFigure);
 
-                    // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
-                    if (temp != AttackType.NONE) {
-                        if (attackType == AttackType.NONE) {
-                            attackType = temp;
-                        } else if (attackType != temp) {
-                            attackType = AttackType.BOTH;
-                        }
-                    }
-                }
-            }
-            if (actingFigure instanceof Monster) {
-                // TODO Check if Monster is melee or ranged (current method could do with improving)
-                attackType = ((Monster) actingFigure).getAttackType();
-            }
             if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
                 actions.addAll(meleeAttackActions(dgs, actingFigure));
             }
@@ -546,6 +528,47 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 actions.remove(endTurn);
         }
 
+        // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
+        // This does not cost any action points to take
+        // This action may be used as a free attack, or to Restore 2 Hearts
+        if (dgs.getHeroes().size() == 2) {
+            if (actingFigure instanceof Hero && !actingFigure.hasUsedExtraAction())
+            {
+                Restore restore = new Restore(2);
+                if (restore.canExecute(dgs)) {
+                    actions.add(restore);
+                }
+
+                // TODO: Fix this
+                /*
+
+                // Free Attack
+                AttackType attackType = getAttackType(actingFigure);
+
+                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                    List<Integer> targets = getMeleeTargets(dgs, actingFigure);
+                    for (Integer target : targets) {
+                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
+                        if (freeAttack.canExecute(dgs)) {
+                            actions.add(freeAttack);
+                        }
+                    }
+                }
+
+                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                    List<Integer> targets = getMeleeTargets(dgs, actingFigure);
+                    for (Integer target : targets) {
+                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
+                        if (freeAttack.canExecute(dgs)) {
+                            actions.add(freeAttack);
+                        }
+                    }
+                }
+                */
+
+            }
+        }
+
         return actions;
     }
 
@@ -580,26 +603,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Mage
             case "Leoric of the Book":
-                List<Integer> monsters = new ArrayList<>();
-
-                Vector2D loc = actingFigure.getPosition();
-                GridBoard board = dgs.getMasterBoard();
-                List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-
-                // Get all monsters that are adjacent to us and we have line of sight to
-                for (List<Monster> monsterGroup : dgs.getMonsters()) {
-                    for (Monster monster : monsterGroup) {
-                        // We only need to check if all 8 adjacent tiles have a monster on them
-                        // If we already have 8 monsters on the list, we can stop
-                        if (monsters.size() >= neighbours.size())
-                            break;
-                        if (neighbours.contains(monster.getPosition())) {
-                            if (hasLineOfSight(dgs, loc, monster.getPosition()))
-                                monsters.add(monster.getComponentID());
-                        }
-                    }
-                }
-
+                List<Integer> monsters = getMeleeTargets(dgs, actingFigure);
                 if (!monsters.isEmpty()) {
                     heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
                     if (heroicFeat.canExecute(dgs))
@@ -607,23 +611,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
                 break;
             case "Widow Tarha":
-
-                Vector2D tarhaPos = actingFigure.getPosition();
-                // Get all monsters we could make Ranged Attacks on
-                monsters = new ArrayList<>();
-                for (List<Monster> monsterGroup : dgs.getMonsters()) {
-                    for (Monster monster : monsterGroup) {
-                        Vector2D monsterPos = monster.getPosition();
-                        if (hasLineOfSight(dgs, tarhaPos, monsterPos)) {
-                            if (Math.abs(tarhaPos.getX() - monsterPos.getX()) <= RangedAttack.MAX_RANGE &&
-                                    Math.abs(tarhaPos.getY() - monsterPos.getY()) <= RangedAttack.MAX_RANGE) {
-                                if(monsters.contains(monster.getComponentID()))
-                                    continue;
-                                monsters.add(monster.getComponentID());
-                            }
-                        }
-                    }
-                }
+                monsters = getRangedTargets(dgs, actingFigure);
                 // Get all possible monster pairs available
                 for (int i = 0; i < monsters.size(); i++) {
                     for (int j = i + 1; j < monsters.size(); j++) {
@@ -660,6 +648,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Warrior
             case "Grisban the Thirsty":
+                monsters = getMeleeTargets(dgs, actingFigure);
+                for (int monster : monsters) {
+                    // TODO: Enable check to see if Grisban can used Ranged Attacks (by default he is Melee)
+                    heroicFeat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), monster, true);
+                    if (heroicFeat.canExecute(dgs))
+                        heroicFeats.add(heroicFeat);
+                }
                 break;
             case "Syndrael":
                 break;
@@ -718,6 +713,104 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
         return actions;
+    }
+
+    private AttackType getAttackType(Figure actingFigure)
+    {
+        AttackType attackType = AttackType.NONE;
+        if (actingFigure instanceof Hero) {
+            // Examines the Hero's equipment to see what their weapon's range is
+            Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
+            int length = myEquipment.getComponents().size();
+            for (int i = 0; i < length; i++) {
+                AttackType temp = myEquipment.get(i).getAttackType();
+
+                // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
+                if (temp != AttackType.NONE) {
+                    if (attackType == AttackType.NONE) {
+                        attackType = temp;
+                    } else if (attackType != temp) {
+                        attackType = AttackType.BOTH;
+                    }
+                }
+            }
+        }
+        if (actingFigure instanceof Monster) {
+            // TODO Check if Monster is melee or ranged (current method could do with improving)
+            attackType = ((Monster) actingFigure).getAttackType();
+        }
+        return attackType;
+    }
+
+    private List<Integer> getMeleeTargets(DescentGameState dgs, Figure actingFigure)
+    {
+        List<Integer> targets = new ArrayList<>();
+
+        Vector2D loc = actingFigure.getPosition();
+        GridBoard board = dgs.getMasterBoard();
+        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+
+        if (actingFigure instanceof Hero) {
+            // Get all monsters that are adjacent to us, and we have line of sight to
+            for (List<Monster> monsterGroup : dgs.getMonsters()) {
+                for (Monster monster : monsterGroup) {
+                    // We only need to check if all 8 adjacent tiles have a monster on them
+                    // If we already have 8 monsters on the list, we can stop
+                    if (targets.size() >= neighbours.size())
+                        break;
+                    if (neighbours.contains(monster.getPosition())) {
+                        if (hasLineOfSight(dgs, loc, monster.getPosition()))
+                            targets.add(monster.getComponentID());
+                    }
+                }
+            }
+        }
+        else if (actingFigure instanceof Monster) {
+            // Get all heroes that are adjacent to us, and we have line of sight to
+            for (Hero hero : dgs.getHeroes()) {
+                if (neighbours.contains(hero.getPosition())) {
+                    if (hasLineOfSight(dgs, loc, hero.getPosition()))
+                        targets.add(hero.getComponentID());
+                }
+            }
+        }
+        return targets;
+    }
+
+    private List<Integer> getRangedTargets(DescentGameState dgs, Figure actingFigure) {
+        List<Integer> targets = new ArrayList<>();
+
+        Vector2D loc = actingFigure.getPosition();
+
+        if (actingFigure instanceof Hero) {
+            for (List<Monster> monsterGroup : dgs.getMonsters()) {
+                for (Monster monster : monsterGroup) {
+                    Vector2D monsterPos = monster.getPosition();
+                    if (hasLineOfSight(dgs, loc, monsterPos)) {
+                        if (Math.abs(loc.getX() - monsterPos.getX()) <= RangedAttack.MAX_RANGE &&
+                                Math.abs(loc.getY() - monsterPos.getY()) <= RangedAttack.MAX_RANGE) {
+                            if (targets.contains(monster.getComponentID()))
+                                continue;
+                            targets.add(monster.getComponentID());
+                        }
+                    }
+                }
+            }
+        }
+        else if (actingFigure instanceof Monster) {
+            for (Hero hero : dgs.getHeroes()) {
+                Vector2D heroPos = hero.getPosition();
+                if (hasLineOfSight(dgs, loc, heroPos)) {
+                    if (Math.abs(loc.getX() - heroPos.getX()) <= RangedAttack.MAX_RANGE &&
+                            Math.abs(loc.getY() - heroPos.getY()) <= RangedAttack.MAX_RANGE) {
+                        if (targets.contains(hero.getComponentID()))
+                            continue;
+                        targets.add(hero.getComponentID());
+                    }
+                }
+            }
+        }
+        return targets;
     }
 
     private HashMap<Vector2D, Pair<Double,List<Vector2D>>> getAllAdjacentNodes(DescentGameState dgs, Figure figure){

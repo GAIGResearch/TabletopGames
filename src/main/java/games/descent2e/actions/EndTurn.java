@@ -71,6 +71,7 @@ public class EndTurn extends DescentAction{
 
         f.setHasMoved(false);
         f.setRemovedConditionThisTurn(false);
+        f.setUsedExtraAction(false);
 
         System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ")");
         dgs.getTurnOrder().endPlayerTurn(dgs);
