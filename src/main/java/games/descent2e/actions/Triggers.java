@@ -9,6 +9,7 @@ package games.descent2e.actions;
  */
 public enum Triggers {
     ACTION_POINT_SPEND,
+    HEROIC_FEAT,
     MOVE_INTO_SPACE,
     FATIGUE_INTO_SPACE,
     START_ATTACK,

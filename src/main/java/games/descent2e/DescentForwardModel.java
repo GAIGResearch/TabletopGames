@@ -657,6 +657,19 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
                 break;
             case "Syndrael":
+                List<Hero> heroes = dgs.getHeroes();
+                for (Hero hero : heroes) {
+                    if (hero == actingFigure)
+                        continue;
+                    position = dgs.getActingFigure().getPosition();
+                    range = 3;
+                    if (Math.abs(position.getX() - hero.getPosition().getX()) <= range && Math.abs(position.getY() - hero.getPosition().getY()) <= range) {
+                        heroicFeat = new HeroicFeatExtraMovement(actingFigure, hero);
+                        if (heroicFeat.canExecute(dgs))
+                            heroicFeats.add(heroicFeat);
+                    }
+
+                }
                 break;
             default:
                 break;
@@ -1002,7 +1015,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<Move> actions = new ArrayList<>();
         for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()) {
             if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
-                Move myMoveAction = new Move(allPossibleRotations.get(loc).b, loc.b);
+                Move myMoveAction = new Move(f, allPossibleRotations.get(loc).b, loc.b);
                 myMoveAction.updateDirectionID(dgs);
                 actions.add(myMoveAction);
             }

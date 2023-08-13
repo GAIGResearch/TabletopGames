@@ -27,25 +27,29 @@ public class Move extends AbstractAction {
     final Monster.Direction orientation;
     private Vector2D startPosition;
 
+    private Figure f;
+
     public int directionID;
 
-    public Move(List<Vector2D> whereTo) {
+    public Move(Figure f, List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
         this.orientation = Monster.Direction.DOWN;
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
+        this.f = f;
     }
-    public Move(List<Vector2D> whereTo, Monster.Direction finalOrientation) {
+    public Move(Figure f, List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
+        this.f = f;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
-        Figure f = ((DescentGameState) gs).getActingFigure();
+        //Figure f = ((DescentGameState) gs).getActingFigure();
         startPosition = f.getPosition();
         // Remove from old position
         remove(dgs, f);
@@ -262,7 +266,7 @@ public class Move extends AbstractAction {
         for (Vector2D pos: positionsTraveled) {
             posTraveledCopy.add(pos.copy());
         }
-        return new Move(posTraveledCopy, orientation);
+        return new Move(f, posTraveledCopy, orientation);
     }
 
     @Override
@@ -270,17 +274,17 @@ public class Move extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof Move)) return false;
         Move move = (Move) o;
-        return orientation == move.orientation && Objects.equals(positionsTraveled, move.positionsTraveled);
+        return f == move.f && orientation == move.orientation && Objects.equals(positionsTraveled, move.positionsTraveled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(positionsTraveled, orientation);
+        return Objects.hash(f, positionsTraveled, orientation);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = ((DescentGameState) gameState).getActingFigure();
+        //Figure f = ((DescentGameState) gameState).getActingFigure();
         List<Vector2D> move = positionsTraveled;
 
         if (startPosition.equals(new Vector2D(0,0)))
@@ -371,7 +375,7 @@ public class Move extends AbstractAction {
         // If directionID is unset, update it
         if (directionID == -1)
         {
-            Figure f = ((DescentGameState) gameState).getActingFigure();
+            //Figure f = ((DescentGameState) gameState).getActingFigure();
             List<Vector2D> move = positionsTraveled;
 
             if (startPosition.equals(new Vector2D(0,0)))
