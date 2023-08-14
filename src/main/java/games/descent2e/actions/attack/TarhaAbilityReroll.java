@@ -45,7 +45,7 @@ public class TarhaAbilityReroll extends DescentAction {
             IExtendedSequence action = dgs.currentActionInProgress();
             // Ranged Attacks are instances of Melee Attacks, so both types are covered
             if (action instanceof MeleeAttack) {
-                return !tarha.hasUsedHeroAbility() && !tarha.hasRerolled();
+                return !tarha.hasUsedHeroAbility() && !tarha.hasRerolled() && dgs.getActingFigure().equals(tarha);
             }
         }
         return false;

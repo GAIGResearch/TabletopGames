@@ -3,10 +3,11 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.NightStalker;
-import games.descent2e.actions.Triggers;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+
+import java.util.HashSet;
 
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
@@ -57,7 +58,22 @@ public class FreeAttack extends RangedAttack{
     }
 
     public FreeAttack copy() {
-        return new FreeAttack(attackingFigure, defendingFigure, isMelee);
+        FreeAttack retValue = new FreeAttack(attackingFigure, defendingFigure, isMelee);
+        retValue.attackingPlayer = attackingPlayer;
+        retValue.defendingPlayer = defendingPlayer;
+        retValue.phase = phase;
+        retValue.interruptPlayer = interruptPlayer;
+        retValue.surgesToSpend = surgesToSpend;
+        retValue.extraRange = extraRange;
+        retValue.extraDamage = extraDamage;
+        retValue.mending = mending;
+        retValue.surgesUsed = new HashSet<>(surgesUsed);
+        retValue.pierce = pierce;
+        retValue.isDiseasing = isDiseasing;
+        retValue.isImmobilizing = isImmobilizing;
+        retValue.isPoisoning = isPoisoning;
+        retValue.isStunning = isStunning;
+        return retValue;
     }
 
     @Override

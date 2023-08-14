@@ -76,7 +76,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         List<AbstractAction> moveActions = new ArrayList<>();
         List<RangedAttack> attacks = new ArrayList<>();;
 
-        System.out.println("Jain has attacked yet: " + hero.hasUsedHeroAbility());
+        //System.out.println("Jain has attacked yet: " + hero.hasUsedHeroAbility());
         if (!hero.hasUsedExtraAction())
         {
             List<Integer> targets = DescentHelper.getRangedTargets(dgs, hero);
@@ -146,8 +146,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         do {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
-                // System.out.println("Interrupt for player " + interruptPlayer);
-                System.out.println("Heroic Feat Interrupt: " + phase + " " + phase.interrupters + " " + phase.interrupt + " " + interruptPlayer);
+                // System.out.println("Heroic Feat Interrupt: " + phase + ", Interrupter:" + phase.interrupters + ", Interrupt:" + phase.interrupt + ", Player: " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
@@ -180,7 +179,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     }
 
     private void executePhase(DescentGameState state) {
-        System.out.println("Executing phase " + phase);
+        // System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
