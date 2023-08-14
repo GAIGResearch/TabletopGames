@@ -100,7 +100,13 @@ public class Move extends AbstractAction {
             DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
             if (terrain != null) {
                 for (Map.Entry<Figure.Attribute, Integer> e : terrain.getMoveCosts().entrySet()) {
-                    f.incrementAttribute(e.getKey(), -e.getValue());
+                    // If, for whatever reason, our MovePoints are higher than our max (e.g. Heroic Feat), we simply subtract the cost
+                    // Rather than decrement their value, which instead clamps it between the Min and the Max values
+                    if (f.getAttribute(e.getKey()).getValue() > f.getAttributeMax(e.getKey())) {
+                        f.setAttribute(e.getKey(), f.getAttribute(e.getKey()).getValue() - e.getValue());
+                    }
+                    else
+                        f.decrementAttribute(e.getKey(), e.getValue());
                 }
             }
         }
@@ -255,7 +261,13 @@ public class Move extends AbstractAction {
         // Large monsters pay the minimum cost only, other figures are 1 tile wide, looking at min terrain only
         if (minTerrain != null) {
             for (Map.Entry<Figure.Attribute, Integer> e : minTerrain.getMoveCosts().entrySet()) {
-                f.incrementAttribute(e.getKey(), -e.getValue());
+                // If, for whatever reason, our MovePoints are higher than our max (e.g. Heroic Feat), we simply subtract the cost
+                // Rather than decrement their value, which instead clamps it between the Min and the Max values
+                if (f.getAttribute(e.getKey()).getValue() > f.getAttributeMax(e.getKey())) {
+                    f.setAttribute(e.getKey(), f.getAttribute(e.getKey()).getValue() - e.getValue());
+                }
+                else
+                    f.decrementAttribute(e.getKey(), e.getValue());
             }
         }
     }

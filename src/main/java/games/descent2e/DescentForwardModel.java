@@ -9,7 +9,6 @@ import core.properties.*;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
 import games.descent2e.actions.attack.*;
-import games.descent2e.actions.Move;
 import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
@@ -26,7 +25,6 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +33,7 @@ import games.descent2e.DescentTypes.*;
 
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
+import static games.descent2e.DescentHelper.*;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static utilities.Utils.getNeighbourhood;
 
@@ -540,7 +539,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
 
                 // TODO: Fix this
-                /*
 
                 // Free Attack
                 AttackType attackType = getAttackType(actingFigure);
@@ -556,7 +554,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
 
                 if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
-                    List<Integer> targets = getMeleeTargets(dgs, actingFigure);
+                    List<Integer> targets = getRangedTargets(dgs, actingFigure);
                     for (Integer target : targets) {
                         FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
                         if (freeAttack.canExecute(dgs)) {
@@ -564,7 +562,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         }
                     }
                 }
-                */
 
             }
         }
@@ -588,11 +585,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
                 break;
             case "Avric Albright":
+                // Avric heals all allies within 3 spaces
                 Vector2D position = dgs.getActingFigure().getPosition();
                 int range = 3;
                 List<Hero> heroesInRange = new ArrayList<>();
                 for(Hero hero : dgs.getHeroes()) {
-                    if(Math.abs(position.getX() - hero.getPosition().getX()) <= range && Math.abs(position.getY() - hero.getPosition().getY()) <= range) {
+                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
                         heroesInRange.add(hero);
                     }
                 }
@@ -603,6 +601,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Mage
             case "Leoric of the Book":
+                // Leoric attacks all adjacent monsters with a magic weapon
                 List<Integer> monsters = getMeleeTargets(dgs, actingFigure);
                 if (!monsters.isEmpty()) {
                     heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
@@ -611,6 +610,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
                 break;
             case "Widow Tarha":
+                // Tarha attacks two targets with only one attack roll
                 monsters = getRangedTargets(dgs, actingFigure);
                 // Get all possible monster pairs available
                 for (int i = 0; i < monsters.size(); i++) {
@@ -628,6 +628,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Scout
             case "Jain Fairwood":
+                // Jain can move double her speed and make an attack at any point during that movement (before, during and after)
+                heroicFeat = new DoubleMoveAttack((Hero) dgs.getActingFigure());
+                if (heroicFeat.canExecute(dgs))
+                    heroicFeats.add(heroicFeat);
                 break;
             case "Tomble Burrowell":
                 // Tomble's Heroic Feat comes in three parts
@@ -648,6 +652,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Warrior
             case "Grisban the Thirsty":
+                // Grisban can make a free extra attack
                 monsters = getMeleeTargets(dgs, actingFigure);
                 for (int monster : monsters) {
                     // TODO: Enable check to see if Grisban can used Ranged Attacks (by default he is Melee)
@@ -657,13 +662,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
                 break;
             case "Syndrael":
+                // Syndrael allows her and any ally of her choice within 3 spaces to immediately make a Move action
                 List<Hero> heroes = dgs.getHeroes();
                 for (Hero hero : heroes) {
                     if (hero == actingFigure)
                         continue;
                     position = dgs.getActingFigure().getPosition();
                     range = 3;
-                    if (Math.abs(position.getX() - hero.getPosition().getX()) <= range && Math.abs(position.getY() - hero.getPosition().getY()) <= range) {
+                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
                         heroicFeat = new HeroicFeatExtraMovement(actingFigure, hero);
                         if (heroicFeat.canExecute(dgs))
                             heroicFeats.add(heroicFeat);
@@ -753,281 +759,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             attackType = ((Monster) actingFigure).getAttackType();
         }
         return attackType;
-    }
-
-    private List<Integer> getMeleeTargets(DescentGameState dgs, Figure actingFigure)
-    {
-        List<Integer> targets = new ArrayList<>();
-
-        Vector2D loc = actingFigure.getPosition();
-        GridBoard board = dgs.getMasterBoard();
-        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-
-        if (actingFigure instanceof Hero) {
-            // Get all monsters that are adjacent to us, and we have line of sight to
-            for (List<Monster> monsterGroup : dgs.getMonsters()) {
-                for (Monster monster : monsterGroup) {
-                    // We only need to check if all 8 adjacent tiles have a monster on them
-                    // If we already have 8 monsters on the list, we can stop
-                    if (targets.size() >= neighbours.size())
-                        break;
-                    if (neighbours.contains(monster.getPosition())) {
-                        if (hasLineOfSight(dgs, loc, monster.getPosition()))
-                            targets.add(monster.getComponentID());
-                    }
-                }
-            }
-        }
-        else if (actingFigure instanceof Monster) {
-            // Get all heroes that are adjacent to us, and we have line of sight to
-            for (Hero hero : dgs.getHeroes()) {
-                if (neighbours.contains(hero.getPosition())) {
-                    if (hasLineOfSight(dgs, loc, hero.getPosition()))
-                        targets.add(hero.getComponentID());
-                }
-            }
-        }
-        return targets;
-    }
-
-    private List<Integer> getRangedTargets(DescentGameState dgs, Figure actingFigure) {
-        List<Integer> targets = new ArrayList<>();
-
-        Vector2D loc = actingFigure.getPosition();
-
-        if (actingFigure instanceof Hero) {
-            for (List<Monster> monsterGroup : dgs.getMonsters()) {
-                for (Monster monster : monsterGroup) {
-                    Vector2D monsterPos = monster.getPosition();
-                    if (hasLineOfSight(dgs, loc, monsterPos)) {
-                        if (Math.abs(loc.getX() - monsterPos.getX()) <= RangedAttack.MAX_RANGE &&
-                                Math.abs(loc.getY() - monsterPos.getY()) <= RangedAttack.MAX_RANGE) {
-                            if (targets.contains(monster.getComponentID()))
-                                continue;
-                            targets.add(monster.getComponentID());
-                        }
-                    }
-                }
-            }
-        }
-        else if (actingFigure instanceof Monster) {
-            for (Hero hero : dgs.getHeroes()) {
-                Vector2D heroPos = hero.getPosition();
-                if (hasLineOfSight(dgs, loc, heroPos)) {
-                    if (Math.abs(loc.getX() - heroPos.getX()) <= RangedAttack.MAX_RANGE &&
-                            Math.abs(loc.getY() - heroPos.getY()) <= RangedAttack.MAX_RANGE) {
-                        if (targets.contains(hero.getComponentID()))
-                            continue;
-                        targets.add(hero.getComponentID());
-                    }
-                }
-            }
-        }
-        return targets;
-    }
-
-    private HashMap<Vector2D, Pair<Double,List<Vector2D>>> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
-        Vector2D figureLocation = figure.getPosition();
-        BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
-        String figureType = figure.getTokenType();
-
-        //<Board Node, Cost to get there>
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> expandedBoardNodes = new HashMap<>();
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> nodesToBeExpanded = new HashMap<>();
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = new HashMap<>();
-
-        nodesToBeExpanded.put(figureNode, new Pair<>(0.0, new ArrayList<>()));
-        while (!nodesToBeExpanded.isEmpty()){
-            // Pick a node to expand, and remove it from the map
-            Map.Entry<BoardNode,Pair<Double,List<Vector2D>>> entry = nodesToBeExpanded.entrySet().iterator().next();
-            BoardNode expandingNode = entry.getKey();
-            double expandingNodeCost = entry.getValue().a;
-            List<Vector2D> expandingNodePath = entry.getValue().b;
-            nodesToBeExpanded.remove(expandingNode);
-
-            // Go through all the neighbour nodes
-            HashMap<Integer, Double> neighbours = expandingNode.getNeighbours();
-            for (Integer neighbourID : neighbours.keySet()){
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
-                Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-
-                double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
-                double totalCost = expandingNodeCost + costToMoveToNeighbour;
-                List<Vector2D> totalPath = new ArrayList<>(expandingNodePath);
-                totalPath.add(loc);
-                boolean isFriendly = false;
-                boolean isEmpty = TerrainType.isWalkableTerrain(neighbour.getComponentName());
-
-                PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
-                if (figureOnLocation.value != -1) {
-                    isEmpty = false;
-                    Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
-                    if (figureType.equals(neighbourFigure.getTokenType())) {
-                        isFriendly = true;
-                    }
-                    // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
-                    else if (figureType == "Monster")
-                    {
-                        if ((((Monster) figure).hasPassive("Scamper")) && neighbourFigure.getTokenType().equals("Hero"))
-                            isFriendly = true;
-                    }
-                    // If, for whatever reason, our Heroes are allowed to ignore enemies entirely when moving
-                    // We can move through all other figures as if they were friendly
-                    if (figure.canIgnoreEnemies())
-                    {
-                        isFriendly = true;
-                    }
-                }
-
-                if (isFriendly){
-                    //if the node is friendly and not expanded - add it to the expansion list
-                    if(!expandedBoardNodes.containsKey(neighbour)){
-                        nodesToBeExpanded.put(neighbour, new Pair<>(totalCost, totalPath));
-                    //if the node is friendly and expanded but the cost was higher - add it to the expansion list
-                    } else if (expandedBoardNodes.containsKey(neighbour) && expandedBoardNodes.get(neighbour).a > totalCost){
-                        expandedBoardNodes.remove(neighbour);
-                        nodesToBeExpanded.put(neighbour, new Pair<>(totalCost, totalPath));
-                    }
-                } else if (isEmpty) {
-                    //if the node is empty - add it to adjacentNodeList
-                    if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour).a > totalCost){
-                        allAdjacentNodes.put(neighbour, new Pair<>(totalCost, totalPath));
-                    }
-                }
-                expandedBoardNodes.put(neighbour, new Pair<>(totalCost, totalPath));
-            }
-        }
-
-        //Return list of coordinates
-        HashMap<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentLocations = new HashMap<>();
-        for (BoardNode boardNode : allAdjacentNodes.keySet()){
-            Vector2D loc = ((PropertyVector2D) boardNode.getProperty(coordinateHash)).values;
-            allAdjacentLocations.put(loc, allAdjacentNodes.get(boardNode));
-        }
-
-        return allAdjacentLocations;
-    }
-
-    // Pair<final position, final orientation> -> pair<movement cost to get there, list of positions to travel through to get there>
-    private Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> getPossibleRotationsForMoveActions(Map<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentNodes, DescentGameState dgs, Figure figure){
-
-        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> possibleRotations = new HashMap<>();
-
-        // Go through all adjacent nodes
-        for (Map.Entry<Vector2D, Pair<Double,List<Vector2D>>> e : allAdjacentNodes.entrySet()) {
-            Vector2D nodeLoc = e.getKey();
-
-            if (figure.getSize().a > 1 || figure.getSize().b > 1) {
-                // Only monsters can have a size bigger than 1x1
-                Monster m = (Monster) figure;
-                Pair<Integer, Integer> monsterSize = m.getSize();
-
-                // Check all possible orientations with this position as the anchor if figure is bigger than 1x1
-                // If all spaces occupied are legal, then keep valid options
-                for (Monster.Direction d: Monster.Direction.values()) {
-                    Vector2D topLeftCorner = m.applyAnchorModifier(nodeLoc.copy(), d);
-                    Pair<Integer, Integer> mSize = monsterSize.copy();
-                    if (d.ordinal() % 2 == 1) mSize.swap();
-
-                    boolean legal = true;
-                    for (int j = 0; j < mSize.a; j++) {
-                        for (int i = 0; i < mSize.b; i++) {
-                            BoardNode spaceOccupied = dgs.masterBoard.getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
-                            if (spaceOccupied != null) {
-                                PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
-                                if (!TerrainType.isWalkableTerrain(spaceOccupied.getComponentName()) ||
-                                        figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID()) {
-                                    legal = false;
-                                    break;
-                                }
-                            } else {
-                                legal = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (legal) {
-                        possibleRotations.put(new Pair<>(nodeLoc, d), e.getValue());
-                    }
-                }
-            } else {
-                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.getDefault()), e.getValue());
-            }
-        }
-
-        return possibleRotations;
-    }
-
-    private Map<Vector2D, Pair<Double,List<Vector2D>>> getAllPointOfInterests(DescentGameState dgs, Figure figure){
-
-        ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
-        Map<Vector2D, Pair<Double,List<Vector2D>>> movePointOfInterest = new HashMap<>();
-        if (figure.getTokenType().equals("Monster")) {
-            for (Hero h : dgs.heroes) {
-                pointsOfInterest.add(h.getPosition());
-            }
-
-        } else if (figure.getTokenType().equals("Hero")) {
-            for (List<Monster> monsterGroup : dgs.monsters) {
-                for (Monster m : monsterGroup) {
-                    pointsOfInterest.add(m.getPosition());
-                }
-            }
-
-            for (DToken dToken : dgs.tokens){
-                if (dToken.getPosition() != null){
-                    pointsOfInterest.add(dToken.getPosition());
-                }
-            }
-        }
-
-        //For every point of interest find neighbours that are empty and add then as potential move spots
-        for (Vector2D point : pointsOfInterest){
-            BoardNode figureNode = dgs.masterBoard.getElement(point.getX(), point.getY());
-            Set<Integer> neighbourIDs = figureNode.getNeighbours().keySet();
-            for (Integer neighbourID : neighbourIDs){
-                BoardNode neighbourNode =  (BoardNode) dgs.getComponentById(neighbourID);
-                PropertyInt figureOnLocation = (PropertyInt) neighbourNode.getProperty(playersHash);
-                if (figureOnLocation.value == -1){
-                    Vector2D loc = ((PropertyVector2D) neighbourNode.getProperty(coordinateHash)).values;
-
-                    // TODO: use actual A* instead of 0
-                    //Double movementCost =  a_star_distance(figureNode, neighboutNode)
-                    Double movementCost = 1.0;
-                    List<Vector2D> path = new ArrayList<Vector2D>() {{add(loc);}};  // TODO full path
-                    movePointOfInterest.put(loc, new Pair<>(movementCost, path));
-                }
-            }
-        }
-
-        return movePointOfInterest;
-    }
-
-    private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
-
-        Map<Vector2D, Pair<Double, List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
-        Map<Vector2D, Pair<Double, List<Vector2D>>> allPointOfInterests = getAllPointOfInterests(dgs, f);
-
-//        allAdjacentNodes.putAll(allPointOfInterests);
-
-        // get all potential rotations for the figure
-        Map<Pair<Vector2D, Monster.Direction>, Pair<Double, List<Vector2D>>> allPossibleRotations = getPossibleRotationsForMoveActions(allAdjacentNodes, dgs, f);
-        List<Move> actions = new ArrayList<>();
-        for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()) {
-            if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
-                Move myMoveAction = new Move(f, allPossibleRotations.get(loc).b, loc.b);
-                myMoveAction.updateDirectionID(dgs);
-                actions.add(myMoveAction);
-            }
-        }
-
-        // Sorts the movement actions to always be in the same order (Clockwise NW to W, One Space then Multiple Spaces)
-        Collections.sort(actions, Comparator.comparingInt(Move::getDirectionID));
-
-        List<AbstractAction> sortedActions = new ArrayList<>();
-        sortedActions.addAll(actions);
-
-        return sortedActions;
     }
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {

@@ -118,6 +118,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
          //       System.out.println("Interrupt for player " + interruptPlayer);
+                //System.out.println(phase + " " + phase.interrupters + " " + phase.interrupt + " " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
                 skip = false;
@@ -374,8 +375,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        if (phase.interrupt == null)
+        if (phase.interrupt == null) {
+            System.out.println(phase + " " + phase.interrupters + " " + phase.interrupt + " " + interruptPlayer);
             throw new AssertionError("Should not be reachable");
+        }
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
         // now we filter this for any that have been used

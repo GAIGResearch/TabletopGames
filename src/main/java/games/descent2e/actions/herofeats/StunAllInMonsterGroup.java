@@ -2,6 +2,7 @@ package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
@@ -49,7 +50,7 @@ public class StunAllInMonsterGroup extends DescentAction {
         // If at least one of them is within range, we can stun the whole group
         Vector2D position = dgs.getActingFigure().getPosition();
         for(Monster monster : monsters) {
-            if((Math.abs(position.getX() - monster.getPosition().getX()) <= range && Math.abs(position.getY() - monster.getPosition().getY()) <= range)) {
+            if(DescentHelper.inRange(position, monster.getPosition(), range)) {
                 return true;
             }
         }

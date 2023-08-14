@@ -25,6 +25,7 @@ public class HeroicFeatExtraAttack extends FreeAttack {
         state.setActionInProgress(this);
         Hero f = (Hero) state.getActingFigure();
         boolean hasExtraAction = f.hasUsedExtraAction();
+        f.setUsedExtraAction(false);
         f.setFeatAvailable(false);
         super.execute(state);
 

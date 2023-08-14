@@ -2,6 +2,7 @@ package games.descent2e.abilities;
 
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.attack.SurgeAttackAction;
@@ -27,7 +28,7 @@ public class HeroAbilities {
             if (ashrian != null) {
                 Vector2D position = actingFigure.getPosition();
                 Vector2D other = ashrian.getPosition();
-                if (Math.abs(position.getX() - other.getX()) <= 1 && Math.abs(position.getY() - other.getY()) <= 1) {
+                if (DescentHelper.inRange(position, other, 1)) {
                     ashrian.setUsedHeroAbility(true);
                     actingFigure.addCondition(DescentTypes.DescentCondition.Stun);
                 }
@@ -44,7 +45,7 @@ public class HeroAbilities {
             Vector2D other = avric.getPosition();
             SurgeAttackAction surge = new SurgeAttackAction(Surge.RECOVER_1_HEART, actingFigure.getComponentID());
             if (actingFigure.equals(avric) ||
-                    (Math.abs(position.getX() - other.getX()) <= 3 && Math.abs(position.getY() - other.getY()) <= 3)) {
+                    (DescentHelper.inRange(position, other, 3))) {
                 avric.setUsedHeroAbility(true);
                 if (!actingFigure.getAbilities().contains(surge)) {
                     actingFigure.addAbility(surge);
@@ -68,7 +69,7 @@ public class HeroAbilities {
         if (leoric != null) {
             Vector2D position = actingFigure.getPosition();
             Vector2D other = leoric.getPosition();
-            if (Math.abs(position.getX() - other.getX()) <= 3 && Math.abs(position.getY() - other.getY()) <= 3) {
+            if (DescentHelper.inRange(position, other, 3)) {
                 leoric.setUsedHeroAbility(true);
                 // Leoric can only reduce damage to a minimum of 1
                 if (damage > 1)
@@ -136,7 +137,7 @@ public class HeroAbilities {
         if (actingFigure.equals(tomble)) {
             Vector2D position = actingFigure.getPosition();
             Vector2D otherPosition = other.getPosition();
-            if (Math.abs(position.getX() - otherPosition.getX()) <= 1 && Math.abs(position.getY() - otherPosition.getY()) <= 1) {
+            if (DescentHelper.inRange(position, otherPosition, 1)) {
                 tomble.setUsedHeroAbility(true);
                 DicePool allyDefensePool = other.getDefenceDice();
                 List<DescentDice> allDice = new ArrayList<>(defensePool.getComponents());
