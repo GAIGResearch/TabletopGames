@@ -1,0 +1,24 @@
+{
+  "Metadata" : {
+    "Game" : "DotsAndBoxes",
+    "Seed" : 1692086728881,
+    "Type" : "LinearApprox",
+    "Alpha" : 0.0010000000474974513,
+    "Gamma" : 0.75,
+    "Epsilon" : 0.10000000149011612,
+    "Solver" : "Q_LEARNING",
+    "Heuristic" : "players.heuristics.WinOnlyHeuristic",
+    "FeatureVector" : "games.dotsboxes.DBStateFeaturesReduced",
+    "NGamesTotal" : 800,
+    "NGamesWithTheseSettings" : 800,
+    "TimeTaken" : "00h 01m 28.7s",
+    "ContinuedFrom" : null
+  },
+  "Weights" : {
+    "POINT_ADVANTAGE" : 0.2852458040713868,
+    "POINTS" : 0.07160853475451522,
+    "THREE_BOXES" : 0.0015919646038636687,
+    "TWO_BOXES" : 0.0013471798563765049,
+    "ORDINAL" : -0.0943401093512543
+  }
+}

@@ -27,7 +27,7 @@ public class RLPlayer extends AbstractPlayer {
         }
     }
 
-    private Random rng;
+    private Random rng = null;
 
     final public RLParams params;
     private QWeightsDataStructure qwds;
@@ -62,11 +62,12 @@ public class RLPlayer extends AbstractPlayer {
 
     @Override
     public void initializePlayer(AbstractGameState gameState) {
-        initializePlayer(gameState.getGameType().name());
+        initializePlayer(gameState.getGameType().name(), gameState.getCurrentPlayer());
     }
 
-    void initializePlayer(String gameName) {
-        this.rng = new Random(params.getRandomSeed());
+    void initializePlayer(String gameName, int playerId) {
+        if (this.rng == null)
+            this.rng = new Random(params.getRandomSeed() + playerId);
 
         if (params.infileNameOrPath != null)
             params.initializeFromInfile(gameName);

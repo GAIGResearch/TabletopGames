@@ -1,0 +1,28 @@
+{
+  "Metadata" : {
+    "Game" : "TicTacToe",
+    "Seed" : 1691857199746,
+    "Type" : "LinearApprox",
+    "Alpha" : 0.0010000000474974513,
+    "Gamma" : 0.75,
+    "Epsilon" : 0.10000000149011612,
+    "Solver" : "Q_LEARNING",
+    "Heuristic" : "players.heuristics.WinOnlyHeuristic",
+    "FeatureVector" : "players.rl.featureVectors.TicTacToeDim1StateVector",
+    "NGamesTotal" : 200,
+    "NGamesWithTheseSettings" : 200,
+    "TimeTaken" : "00h 00m 00.6s",
+    "ContinuedFrom" : null
+  },
+  "Weights" : {
+    "0:0" : 0.013840804163602033,
+    "0:1" : 0.10082661192270916,
+    "0:2" : -0.006043090473810989,
+    "1:0" : -0.017345797245402677,
+    "1:1" : -0.0018124842815682662,
+    "1:2" : -0.010505182591596664,
+    "2:0" : 0.019783383659322643,
+    "2:1" : -0.013189256899232905,
+    "2:2" : -0.014271823762338248
+  }
+}

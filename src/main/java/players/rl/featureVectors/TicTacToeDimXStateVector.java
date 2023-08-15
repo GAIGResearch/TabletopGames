@@ -50,22 +50,33 @@ public abstract class TicTacToeDimXStateVector implements IStateFeatureVector {
         List<String> allDims = new LinkedList<>(Arrays.asList(dim1));
         for (int dim = 1; dim < dims; dim++) {
             int allDimsSize = allDims.size();
-            for (String item : dim1)
-                for (int i = 0; i < allDimsSize; i++)
-                    allDims.add(item + "/" + allDims.get(i));
+            for (String item : dim1) {
+                String[] coords1 = item.split(":");
+                int val1 = 3 * Integer.parseInt(coords1[0]) + Integer.parseInt(coords1[1]);
+                for (int i = 0; i < allDimsSize; i++) {
+                    String[] coords2 = allDims.get(i).split("/")[0].split(":");
+                    int val2 = 3 * Integer.parseInt(coords2[0]) + Integer.parseInt(coords2[1]);
+                    if (val1 < val2)
+                        allDims.add(item + "/" + allDims.get(i));
+                }
+            }
         }
         return allDims.toArray(String[]::new);
     }
 
     private Double[] addDimensions(Double[] dim1) {
-        List<Double> allDims = new LinkedList<>(Arrays.asList(dim1));
-        for (int dim = 1; dim < dims; dim++) {
-            int allDimsSize = allDims.size();
-            for (Double item : dim1)
-                for (int i = 0; i < allDimsSize; i++)
-                    allDims.add(item + allDims.get(i));
+        Double[] ret = new Double[names.length];
+        for (int i = 0; i < names.length; i++) {
+            String[] coords = names[i].split("/");
+            double value = 0.0;
+            for (int j = 0; j < coords.length; j++) {
+                String[] coord = coords[j].split(":");
+                int val = 3 * Integer.parseInt(coord[0]) + Integer.parseInt(coord[1]);
+                value += dim1[val];
+            }
+            ret[i] = value;
         }
-        return allDims.toArray(Double[]::new);
+        return ret;
     }
 
     @Override

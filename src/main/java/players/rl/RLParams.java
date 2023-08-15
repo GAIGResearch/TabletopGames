@@ -25,7 +25,7 @@ public class RLParams extends PlayerParameters {
     private boolean initialized = false;
 
     // Mandatory and automatic params
-    private TabularParams tabularParams;
+    private TabularParams tabularParams = new TabularParams();
     private RLType type;
     private IActionFeatureVector features;
 
@@ -56,7 +56,7 @@ public class RLParams extends PlayerParameters {
         this.infileNameOrPath = null;
         this.features = features;
         this.type = type;
-        tabularParams = this.type == RLType.Tabular ? new TabularParams() : null;
+        addTunableParameters();
     }
 
     void initializeFromInfile(String gameName) {

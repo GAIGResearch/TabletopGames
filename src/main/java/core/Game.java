@@ -863,9 +863,9 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "SushiGo");
+        String gameType = Utils.getArg(args, "game", "DotsAndBoxes");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
+        int turnPause = Utils.getArg(args, "turnPause", 1000);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
@@ -876,9 +876,10 @@ public class Game {
         p_mcts.budgetType = PlayerConstants.BUDGET_TIME;
         p_mcts.budget = 16;
         players.add(new MCTSPlayer(p_mcts));
-
-        players.add(new RLPlayer(
-                new RLParams(String.format("LinearApprox/Test_2P01_Agent_%02d_n=102400.json", 2))));
+        players.add(new RandomPlayer());
+        // players.add(new RLPlayer(
+        // new RLParams(String.format("LinearApprox/Test_2P01_Agent_%02d_n=102400.json",
+        // 2))));
         // players.add(new RandomPlayer());
         // players.add(new RandomPlayer());
         // players.add(new RandomPlayer());

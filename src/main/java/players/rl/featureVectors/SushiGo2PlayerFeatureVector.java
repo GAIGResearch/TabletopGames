@@ -96,7 +96,7 @@ public class SushiGo2PlayerFeatureVector implements IActionFeatureVector {
 
     @Override
     public double[] featureVector(AbstractAction action, AbstractGameState state, int playerID) {
-        Random rng = new Random(state.getCoreGameParameters().getRandomSeed());
+        Random rng = new Random(state.getGameParameters().getRandomSeed());
         double[] features = new double[names.length];
         SGGameState sggs = (SGGameState) state.copy(playerID);
 
