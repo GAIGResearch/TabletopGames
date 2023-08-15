@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
@@ -28,7 +29,6 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     boolean executed;
-    int CheckDoubleExecute = 0;
 
     public ModifyBoard(int playerID) { this.playerID = playerID; }
 
@@ -51,14 +51,14 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         //      MoveFromTo
         List<AbstractAction> availableActions = new ArrayList<>();
         for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-            if(pSet.hasWild){
+            if(pSet.hasWild && !pSet.hasHouse){
                 for (int i=0;i<pSet.getSize();i++) {
                     MonopolyDealCard card = pSet.get(i);
                     if(card.isPropertyWildCard()){
                         SetType sType = card.getAlternateSetType(card);
                         if(sType==SetType.UNDEFINED){
                             for (PropertySet propSet:MDGS.getPropertySets(playerID)) {
-                                if(propSet.getSetType() != card.getUseAs()){
+                                if(propSet.getSetType() != card.getUseAs() && !availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()))){
                                     availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()));
                                 }
                             }
@@ -67,6 +67,24 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
                             availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
                     }
                 }
+            } else if (pSet.isComplete && pSet.hasHouse && !pSet.hasHotel) { // Moving House
+                for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
+                    if(propSet!= pSet && propSet.isComplete && !propSet.hasHouse){
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType())))
+                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType()));
+                    }
+                }
+                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED)))
+                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED));
+            }else if (pSet.isComplete && pSet.hasHouse && pSet.hasHotel){ // Moving Hotel
+                for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
+                    if(propSet!= pSet && propSet.isComplete && propSet.hasHouse && !propSet.hasHotel){
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType())))
+                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType()));
+                    }
+                }
+                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED)))
+                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED));
             }
         }
         return availableActions;
@@ -151,7 +169,6 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         // TODO: copy non-final variables appropriately
         ModifyBoard action = new ModifyBoard(playerID);
         action.executed = executed;
-        action.CheckDoubleExecute = CheckDoubleExecute;
         return action;
     }
 
@@ -160,12 +177,12 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ModifyBoard that = (ModifyBoard) o;
-        return playerID == that.playerID && executed == that.executed && CheckDoubleExecute == that.CheckDoubleExecute;
+        return playerID == that.playerID && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, executed, CheckDoubleExecute);
+        return Objects.hash(playerID, executed);
     }
 
     @Override

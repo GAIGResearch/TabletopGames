@@ -43,7 +43,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     // Player turn status members
     int actionsLeft;
     int boardModificationsLeft;
-    boolean turnStart = true;
     boolean deckEmpty = false;
 
     /**
@@ -57,7 +56,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         params = (MonopolyDealParameters) gameParameters;
         actionsLeft = params.ACTIONS_PER_TURN;
         boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
-        turnStart = true;
         this._reset();
     }
 
@@ -165,7 +163,6 @@ public class MonopolyDealGameState extends AbstractGameState {
 //        retValue.playerPropertySets = playerPropertySets.clone();
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
-        retValue.turnStart = turnStart;
 
         return retValue;
     }
@@ -199,7 +196,13 @@ public class MonopolyDealGameState extends AbstractGameState {
     public void endTurn() {
         actionsLeft = params.ACTIONS_PER_TURN;
         boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
-        turnStart = true;
+        int nextPlayer = getCurrentPlayer();
+        if(playerHands[nextPlayer].getSize() == 0){
+            drawCard(nextPlayer,params.DRAWS_WHEN_EMPTY);
+        }
+        else{
+            drawCard(nextPlayer,params.DRAWS_PER_TURN);
+        }
     }
     public void discardCard(MonopolyDealCard card, int playerID) {
         playerHands[playerID].remove(card);
@@ -394,7 +397,9 @@ public class MonopolyDealGameState extends AbstractGameState {
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
             // TODO calculate an approximate value
-            return 0;
+
+
+            return getGameScore(playerId);
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;
@@ -422,11 +427,11 @@ public class MonopolyDealGameState extends AbstractGameState {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         MonopolyDealGameState state = (MonopolyDealGameState) o;
-        return actionsLeft == state.actionsLeft && turnStart == state.turnStart && Objects.equals(params, state.params) && Objects.equals(rnd, state.rnd) && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
+        return actionsLeft == state.actionsLeft && Objects.equals(params, state.params) && Objects.equals(rnd, state.rnd) && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
     }
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), params, rnd, drawPile, discardPile, actionsLeft, turnStart);
+        int result = Objects.hash(super.hashCode(), params, rnd, drawPile, discardPile, actionsLeft);
         result = 31 * result + Arrays.hashCode(playerHands);
         result = 31 * result + Arrays.hashCode(playerBanks);
         result = 31 * result + Arrays.hashCode(playerPropertySets);

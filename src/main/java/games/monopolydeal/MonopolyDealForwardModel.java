@@ -54,6 +54,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
             state.drawCard(i,state.params.INITIAL_DEAL);
         }
         state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
+        // Draw cards at the start of the turn
+        state.drawCard(state.getFirstPlayer(),params.DRAWS_PER_TURN);
     }
 
     /**
@@ -97,49 +99,50 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
     }
 
     // Draw cards at start of turn
-    @Override
-    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
-        MonopolyDealGameState state = (MonopolyDealGameState) currentState;
-        if(state.turnStart){
-            int currentPlayer = state.getCurrentPlayer();
-            if(state.playerHands[currentPlayer].getSize() == 0){
-                state.drawCard(currentPlayer,state.params.DRAWS_WHEN_EMPTY);
-            }
-            else{
-                state.drawCard(currentPlayer,state.params.DRAWS_PER_TURN);
-            }
-            state.turnStart = false;
-        }
-    }
+//    @Override
+//    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
+//        MonopolyDealGameState state = (MonopolyDealGameState) currentState;
+//        if(state.turnStart){
+//            int currentPlayer = state.getCurrentPlayer();
+//            if(state.playerHands[currentPlayer].getSize() == 0){
+//                state.drawCard(currentPlayer,state.params.DRAWS_WHEN_EMPTY);
+//            }
+//            else{
+//                state.drawCard(currentPlayer,state.params.DRAWS_PER_TURN);
+//            }
+//            state.turnStart = false;
+//        }
+//    }
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         MonopolyDealGameState state = (MonopolyDealGameState) currentState;
         int playerID = state.getCurrentPlayer();
         if(state.checkForGameEnd())
             endGame(currentState);
-        switch (state.getGamePhase().toString()) {
-            case "Play":
-                if ((state.actionsLeft < 1 || actionTaken instanceof EndPhase) && !state.isActionInProgress()) {
-                    if(state.playerHands[playerID].getSize()>state.params.HAND_SIZE){
-                        state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Discard);
+        else {
+            switch (state.getGamePhase().toString()) {
+                case "Play":
+                    if ((state.actionsLeft < 1 || actionTaken instanceof EndPhase) && !state.isActionInProgress()) {
+                        if (state.playerHands[playerID].getSize() > state.params.HAND_SIZE) {
+                            state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Discard);
+                        } else {
+                            if (state.getCurrentPlayer() == state.getNPlayers() - 1) endRound(state);
+                            else endPlayerTurn(currentState);
+                            state.endTurn();
+                        }
                     }
-                    else{
-                        state.endTurn();
-                        if(state.getCurrentPlayer() == state.getNPlayers()-1) endRound(state);
+                    break;
+                case "Discard":
+                    if (state.playerHands[playerID].getSize() <= state.params.HAND_SIZE) {
+                        state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
+                        if (state.getCurrentPlayer() == state.getNPlayers() - 1) endRound(state);
                         else endPlayerTurn(currentState);
+                        state.endTurn();
                     }
-                }
-                break;
-            case "Discard":
-                if(state.playerHands[playerID].getSize()<=state.params.HAND_SIZE){
-                    state.endTurn();
-                    state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
-                    if(state.getCurrentPlayer() == state.getNPlayers()-1) endRound(state);
-                    else endPlayerTurn(currentState);
-                }
-                break;
-            default:
-                throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
+                    break;
+                default:
+                    throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
+            }
         }
     }
 }

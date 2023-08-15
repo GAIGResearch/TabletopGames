@@ -9,6 +9,7 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
+import games.monopolydeal.MonopolyDealHeuristic;
 import gui.*;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
@@ -220,7 +221,7 @@ public class Game {
                 } else {
                     break;
                 }
-                // System.out.println("Game " + i + "/" + nRepetitions);
+                 System.out.println("Game " + i + "/" + nRepetitions);
             }
 
             if (game != null) {
@@ -929,7 +930,7 @@ public class Game {
      */
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "MonopolyDeal");
-        boolean useGUI = Utils.getArg(args, "gui", true);
+        boolean useGUI = Utils.getArg(args, "gui", false);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
@@ -956,7 +957,7 @@ public class Game {
         String gameParams = null;
 
         /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+//        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
@@ -964,7 +965,6 @@ public class Game {
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
 //        runMany(games, players, 100L, 100, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+        runMany(new ArrayList<GameType>() {{add(GameType.MonopolyDeal);}}, players, 100L, 10, false, true, null, turnPause);
     }
-
 }

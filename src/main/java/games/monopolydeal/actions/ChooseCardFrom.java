@@ -26,9 +26,9 @@ import java.util.Objects;
  */
 public class ChooseCardFrom extends AbstractAction {
 
-    MonopolyDealCard take;
-    SetType from;
-    int actionType;
+    final MonopolyDealCard take;
+    final SetType from;
+    final int actionType;
 
     public ChooseCardFrom(MonopolyDealCard take, SetType from, int actionType){
         this.take = take;

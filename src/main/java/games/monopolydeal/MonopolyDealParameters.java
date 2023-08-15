@@ -38,7 +38,7 @@ public class MonopolyDealParameters extends TunableParameters {
         addTunableParameter("HAND_SIZE", 7, Arrays.asList(3,5,7,10));
         addTunableParameter("INITIAL_DEAL", 5, Arrays.asList(3,5));
         addTunableParameter("BOARD_MODIFICATIONS_PER_TURN", 3, Arrays.asList(3,5));
-        addTunableParameter("DRAWS_PER_TURN", 2, Arrays.asList(3,5,7,10));
+        addTunableParameter("DRAWS_PER_TURN", 2, Arrays.asList(2,3,5,7,10));
         addTunableParameter("DRAWS_WHEN_EMPTY", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("SETS_TO_WIN", 3, Arrays.asList(3,5,7,10));
         addTunableParameter("ACTIONS_PER_TURN", 3, Arrays.asList(3,5,7,10));
@@ -116,7 +116,15 @@ public class MonopolyDealParameters extends TunableParameters {
     @Override
     protected AbstractParameters _copy() {
         // TODO: deep copy of all variables.
-        return this;
+        MonopolyDealParameters params = new MonopolyDealParameters(super.getRandomSeed());
+        params.HAND_SIZE = HAND_SIZE;
+        params.DRAWS_WHEN_EMPTY = DRAWS_WHEN_EMPTY;
+        params.BOARD_MODIFICATIONS_PER_TURN = BOARD_MODIFICATIONS_PER_TURN;
+        params.INITIAL_DEAL = INITIAL_DEAL;
+        params.ACTIONS_PER_TURN = ACTIONS_PER_TURN;
+        params.DRAWS_PER_TURN = DRAWS_PER_TURN;
+        params.SETS_TO_WIN = SETS_TO_WIN;
+        return params;
     }
 
     @Override
