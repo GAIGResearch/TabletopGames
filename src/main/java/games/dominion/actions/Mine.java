@@ -66,7 +66,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+    public void _afterAction(AbstractGameState gs, AbstractAction action) {
         DominionGameState state = (DominionGameState) gs;
         if (!trashedCard && action instanceof TrashCard && ((TrashCard) action).player == player) {
             trashedCard = true;

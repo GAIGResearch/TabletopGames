@@ -1,7 +1,9 @@
 package evaluation.metrics.tablessaw;
 
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
 import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IDataProcessor;
 import tech.tablesaw.api.*;
@@ -22,6 +24,10 @@ public class DataTableSaw implements IDataLogger {
     public DataTableSaw(AbstractMetric metric) {
         this.metric = metric;
         this.data = Table.create(metric.getName());
+    }
+    private DataTableSaw(AbstractMetric metric, Table data) {
+        this.metric = metric;
+        this.data = data;
     }
 
     /**
@@ -77,7 +83,7 @@ public class DataTableSaw implements IDataLogger {
         this.data = Table.create(metric.getName());
     }
 
-    public void init(Game game) {
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
 
         // Add default columns
         Map<String, Class<?>> defaultColumns = metric.getDefaultColumns();
@@ -85,7 +91,7 @@ public class DataTableSaw implements IDataLogger {
             data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
 
         // Add metric-defined columns
-        Map<String, Class<?>> columns = metric.getColumns(game);
+        Map<String, Class<?>> columns = metric.getColumns(nPlayersPerGame, playerNames);
         for (Map.Entry<String, Class<?>> entry : columns.entrySet())
             data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
 
@@ -114,24 +120,51 @@ public class DataTableSaw implements IDataLogger {
         return new TableSawDataProcessor();
     }
 
+    @Override
+    public IDataLogger copy() {
+        return new DataTableSaw(metric, data.copy());
+    }
+
+    @Override
+    public IDataLogger emptyCopy() {
+        return new DataTableSaw(metric, data.emptyCopy());
+    }
+
+    @Override
+    public IDataLogger create() {
+        return new DataTableSaw(metric);
+    }
+
     /**
      * Puts together several compatible metrics into a single table.
      * @param metricGroup - List of metrics to combine
-     * @param dataTableName - Name of the table to create
+     * @param event - Event to filter by
      * @param indexingColumnName - Name of the column to use for indexing.
      *                           Assumes a single row exists for each unique value in this column per game.
      *                           e.g. ROUND_OVER metrics can be grouped by specifying "Round" as the indexing column.
      */
-    public DataTableSaw(List<AbstractMetric> metricGroup, String dataTableName, String indexingColumnName) {
-        this.data = Table.create(dataTableName);
+    public DataTableSaw(List<AbstractMetric> metricGroup, IGameEvent event, String indexingColumnName) {
+        this.data = Table.create(event.name());
 
         // If this is true, then we don't need to worry about indexing
         boolean indexingColumnIsGameID = indexingColumnName.equals("GameID");
 
+        // Find only the rows which were recorded for the given event
+        // TODO: Apply same filtering for all other data processing, separate table into different events before reporting
+        Map<AbstractMetric, Table> metricTables = new HashMap<>();
+        for (AbstractMetric m : metricGroup) {
+            Table metricData = ((DataTableSaw)m.getDataLogger()).data;
+            if (m.filterByEventTypeWhenReporting()) {
+                metricTables.put(m, metricData.where(metricData.stringColumn("Event").isEqualTo(event.name())));
+            } else {
+                metricTables.put(m, metricData);
+            }
+        }
+
         // Find and sort ascending all unique values in the column to use for indexing in all the metrics
         List<Integer> gameIDs = new ArrayList<>();
-        for (AbstractMetric m : metricGroup) {
-            StringColumn c = ((DataTableSaw)m.getDataLogger()).data.stringColumn("GameID");
+        for (Table metricData: metricTables.values()) {
+            StringColumn c = metricData.stringColumn("GameID");
             for (String s : c.asList()) {
                 int id = Integer.parseInt(s);
                 if (!gameIDs.contains(id)) {
@@ -145,8 +178,9 @@ public class DataTableSaw implements IDataLogger {
         int maxIndex = 0;
         Map<String, Set<String>> columnNames = new HashMap<>();
         Set<String> allColumnNames = new HashSet<>();  // Including only the default at start, the others separate for ordering
-        for (AbstractMetric m : metricGroup) {
-            Table metricData = ((DataTableSaw)m.getDataLogger()).data;
+        for (Map.Entry<AbstractMetric, Table> metricTableEntry : metricTables.entrySet()) {
+            Table metricData = metricTableEntry.getValue();
+            AbstractMetric m = metricTableEntry.getKey();
             columnNames.put(m.getName(), m.getColumnNames());
             allColumnNames.addAll(m.getDefaultColumns().keySet());
 
@@ -190,16 +224,16 @@ public class DataTableSaw implements IDataLogger {
         for (int id: gameIDs) {
             if (!indexingColumnIsGameID) {
                 for (int idx = 0; idx < maxIndex; idx++) {
-                    filterAndRecordData(metricGroup, allColumnNames, id, indexingColumnName, idx);
+                    filterAndRecordData(metricTables, allColumnNames, id, indexingColumnName, idx);
                 }
             } else {
-                filterAndRecordData(metricGroup, allColumnNames, id, null, -1);
+                filterAndRecordData(metricTables, allColumnNames, id, null, -1);
             }
         }
     }
 
     /**
-     * Helper function for {@link #DataTableSaw(List, String, String)}.
+     * Helper function for {@link #DataTableSaw(List, IGameEvent, String)}.
      * Filters the data by game ID and index, then adds the data to the table.
      * @param metricGroup - List of metrics to add data from in the table
      * @param allColumnNames - All column names in the table
@@ -207,7 +241,7 @@ public class DataTableSaw implements IDataLogger {
      * @param indexingColumnName - Name of the column to use for indexing. If null, then we don't filter by this column
      * @param idx - Index to filter by. If -1, then we don't filter by this index
      */
-    private void filterAndRecordData(List<AbstractMetric> metricGroup, Set<String> allColumnNames, int gameID, String indexingColumnName, int idx) {
+    private void filterAndRecordData(Map<AbstractMetric, Table> metricGroup, Set<String> allColumnNames, int gameID, String indexingColumnName, int idx) {
         Map<String, String> rowData = new HashMap<>();
         for (String colName : allColumnNames) {
             rowData.put(colName, null);
@@ -215,8 +249,9 @@ public class DataTableSaw implements IDataLogger {
         boolean record = false;
 
         // Find the row matching game ID and index in all the metric tables. If we don't find it, we add missing for the columns that metric is responsible for
-        for (AbstractMetric m : metricGroup) {
-            Table metricData = ((DataTableSaw) m.getDataLogger()).data;
+        for (Map.Entry<AbstractMetric, Table> metricTableEntry : metricGroup.entrySet()) {
+            AbstractMetric m = metricTableEntry.getKey();
+            Table metricData = metricTableEntry.getValue();
             // Filter the table first by game ID
             Table filteredData = metricData.where(metricData.stringColumn("GameID").isEqualTo(String.valueOf(gameID)));
             // Then find the indexing column, if needed
@@ -229,11 +264,16 @@ public class DataTableSaw implements IDataLogger {
 
                 // Add the data from the row
                 for (Column<?> c : metricData.columns()) {
-                    String dataPoint = filteredData.column(c.name()).get(0).toString();
-                    if (m.getColumnNames().contains(c.name())) {
-                        rowData.put(m.getName() + "(" + c.name() + ")", dataPoint);
+                    Object o = filteredData.column(c.name()).get(0);
+                    if (o != null) {
+                        String dataPoint = o.toString();
+                        if (m.getColumnNames().contains(c.name())) {
+                            rowData.put(m.getName() + "(" + c.name() + ")", dataPoint);
+                        } else {
+                            rowData.put(c.name(), dataPoint);
+                        }
                     } else {
-                        rowData.put(c.name(), dataPoint);
+                        rowData.put(c.name(), null);
                     }
                 }
             }
@@ -242,10 +282,14 @@ public class DataTableSaw implements IDataLogger {
         // Here we should have one complete row, with or without missing values, but same size for all columns in the big table
         if (record) {
             for (Map.Entry<String, String> entry : rowData.entrySet()) {
-                if (entry.getValue() == null) {
-                    data.stringColumn(entry.getKey()).appendMissing();
+                if (data.containsColumn(entry.getKey())) {
+                    if (entry.getValue() == null) {
+                        data.stringColumn(entry.getKey()).appendMissing();
+                    } else {
+                        data.stringColumn(entry.getKey()).append(entry.getValue());
+                    }
                 } else {
-                    data.stringColumn(entry.getKey()).append(entry.getValue());
+                    // TODO fix, final combination of tables
                 }
             }
         }

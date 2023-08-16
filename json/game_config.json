@@ -1,0 +1,19 @@
+{
+  "class": "utilities.StateFeatureListener",
+  "args": [
+    {
+      "class": "utilities.FileStatsLogger",
+      "args": [
+        "DataFile.txt"
+      ]
+    },
+    {
+      "class": "games.connect4.Connect4StateFeatures"
+    },
+    {
+      "enum": "core.CoreConstants$GameEvents",
+      "value": "ACTION_TAKEN"
+    },
+    false
+  ]
+}

@@ -91,10 +91,9 @@ public class ForwardModelTester {
             if (stateHistory.get(i).hashCode() != hashCodes.get(i)) {
                 String error = String.format("Mismatch on action %d after decision %d (%s) - old/new hashcodes are %d/%d",
                         i, decision, actionHistory.get(decision-1), hashCodes.get(i), stateHistory.get(i).hashCode());
-                // throw new AssertionError(error + "\n");
                 System.out.println(error);
                 System.out.printf("\tOld: %s%n\tNew: %s%n", hashNames.get(i), stateHistory.get(i).toString());
-                return false;
+                throw new AssertionError(error + "\n");
             }
         }
         return true;

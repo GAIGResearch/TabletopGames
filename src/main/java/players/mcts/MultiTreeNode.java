@@ -42,7 +42,6 @@ public class MultiTreeNode extends SingleTreeNode {
         this.params = player.params;
         this.forwardModel = player.getForwardModel();
         this.heuristic = player.heuristic;
-        this.opponentHeuristic = player.opponentHeuristic;
         this.rnd = rnd;
         this.opponentModels = new AbstractPlayer[state.getNPlayers()];
         mctsPlayer = player;
@@ -57,7 +56,7 @@ public class MultiTreeNode extends SingleTreeNode {
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
         MASTFunction = (a, s) -> {
-            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
+            Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
             if (MAST.containsKey(a)) {
                 Pair<Integer, Double> stats = MAST.get(a);
                 return stats.b / (stats.a + params.epsilon);
@@ -124,7 +123,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 // note that different players will enter rollout at different times, which is why
                 // we cannot have a simple rollout() method as in SingleTree search
                 AbstractPlayer agent = opponentModels[currentActor];
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState);
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.params.actionSpace);
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
 
@@ -218,7 +217,6 @@ public class MultiTreeNode extends SingleTreeNode {
     }
 
 
-    @Override
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("round", state.getRoundCounter());

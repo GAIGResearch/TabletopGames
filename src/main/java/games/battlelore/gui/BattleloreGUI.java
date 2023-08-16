@@ -10,11 +10,12 @@ import gui.IScreenHighlight;
 import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;
 
-    public BattleloreGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public BattleloreGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
 
         if (game == null) {

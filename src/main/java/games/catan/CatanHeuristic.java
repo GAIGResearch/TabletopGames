@@ -3,16 +3,17 @@ package games.catan;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
-import core.components.Card;
-import core.components.Deck;
+import core.components.BoardNodeWithEdges;
+import core.components.Counter;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
-import games.catan.components.Settlement;
+import evaluation.optimisation.TunableParameters;
+import games.catan.components.Building;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.developmentDeckHash;
+import static games.catan.components.Building.Type.Settlement;
 
 public class CatanHeuristic extends TunableParameters implements IStateHeuristic {
     double playerScore = 0.4;
@@ -74,21 +75,20 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
 
         // value total resources, caps out at 7
         if(playerResources != 0.0){
-            stateValue += playerResources * Math.min(((double) ((Deck<Card>)state.getComponent(playerHandHash,playerId)).getSize())/7.0,1.0);
+            stateValue += playerResources * Math.min(((double) state.getNResourcesInHand(playerId))/7.0,1.0);
         }
 
         // value development card count
         if(playerDevelopmentCards != 0){
-            stateValue += playerDevelopmentCards * Math.min(((double) ((Deck<Card>)state.getComponent(developmentDeckHash,playerId)).getSize())/3.0,1.0);
+            stateValue += playerDevelopmentCards * Math.min(((double) state.playerDevCards.get(playerId).getSize())/3.0,1.0);
         }
 
         // value player cities and settlements
         if(playerCities != 0.0 || playerSettlements != 0.0){
             int settlementCount = 0, cityCount = 0;
-            boolean[] harbours = new boolean[6]; // 0: brick, 1: lumber, 2: ore, 3: grain, 4: wool, 5: generic
-            ArrayList<Settlement> settlements = state.getPlayersSettlements(playerId);
-            for (Settlement settlement : settlements) {
-                if(settlement.getType()==1)
+            ArrayList<BoardNodeWithEdges> settlements = state.getPlayersSettlements(playerId);
+            for (BoardNodeWithEdges settlement : settlements) {
+                if(((Building)settlement).getBuildingType() == Settlement)
                     settlementCount++;
                 else
                     cityCount++;
@@ -98,11 +98,11 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
 
         // value player ports
         if (playerPorts != 0.0){
-            int[] playerExchangeRates = state.getExchangeRates(playerId);
-            for(int exchangeRate : playerExchangeRates){
-                    if(exchangeRate < ((CatanParameters)state.getGameParameters()).default_exchange_rate - 1)
+            HashMap<CatanParameters.Resource, Counter> playerExchangeRates = state.getExchangeRates(playerId);
+            for(Map.Entry<CatanParameters.Resource, Counter> e: playerExchangeRates.entrySet()){
+                    if(e.getValue().getValue() < ((CatanParameters)state.getGameParameters()).default_exchange_rate - 1)
                         stateValue += playerPorts * 0.2;
-                    else if (exchangeRate < ((CatanParameters)state.getGameParameters()).default_exchange_rate)
+                    else if (e.getValue().getValue() < ((CatanParameters)state.getGameParameters()).default_exchange_rate)
                         stateValue += playerPorts * 0.1;
             }
         }

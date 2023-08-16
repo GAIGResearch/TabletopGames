@@ -12,6 +12,7 @@ import utilities.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Set;
 
 import static games.coltexpress.gui.ColtExpressGUIManager.*;
 
@@ -120,7 +121,7 @@ public class ColtExpressPlayerView extends JComponent {
      * @param gameState - current game state.
      * @param humanID - ID of human player
      */
-    public void update(ColtExpressGameState gameState, int humanID) {
+    public void update(ColtExpressGameState gameState, Set<Integer> humanID) {
         playerDeck = gameState.getPlayerDecks().get(playerId);
         playerHand.updateComponent(gameState.getPlayerHandCards().get(playerId));
         playerLoot.updateComponent(gameState.getLoot(playerId));
@@ -133,7 +134,7 @@ public class ColtExpressPlayerView extends JComponent {
         bulletsLeft = gameState.getBulletsLeft()[playerId];
 
         playerHand.setFront(playerId == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                || playerId == humanID
+                || humanID.contains(playerId)
                 || gameState.getCoreGameParameters().alwaysDisplayFullObservable);
     }
 }

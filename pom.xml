@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.13</artifactId>
-            <version>3.4.0</version>
+            <version>3.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -110,6 +110,11 @@
             <groupId>tech.tablesaw</groupId>
             <artifactId>tablesaw-excel</artifactId>
             <version>0.43.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.globalmentor</groupId>
+            <artifactId>hadoop-bare-naked-local-fs</artifactId>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
 
@@ -164,17 +169,17 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>GameReport</id>
+                        <id>RunGames</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.GameReport</mainClass>
+                                    <mainClass>evaluation.RunGames</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>GameReport</finalName>
+                            <finalName>RunGames</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -189,28 +194,10 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.ParameterSearch</mainClass>
+                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>ParameterSearch</finalName>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>Tournament</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.tournaments.RoundRobinTournament</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>Tournament</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -229,6 +216,24 @@
                                 </manifest>
                             </archive>
                             <finalName>ProgressiveLearner</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>SkillLadder</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>SkillLadder</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

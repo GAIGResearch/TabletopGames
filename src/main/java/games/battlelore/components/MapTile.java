@@ -71,31 +71,22 @@ public class MapTile extends Component {
         }
     }
 
-    public Boolean AddUnit(Unit unit) {
+    public void AddUnit(Unit unit) {
             units.add(unit);
-            return true;
     }
 
-    public Boolean SetAsOrderable() {
+    public void SetAsOrderable() {
         if (!units.isEmpty()) {
-            for (int i = 0; i < units.size(); i++) {
-                units.get(i).SetCanMove(true);
-                units.get(i).SetCanAttack(true);
+            for (Unit unit : units) {
+                unit.SetCanMove(true);
+                unit.SetCanAttack(true);
             }
-            return true;
-        }
-        else {
-            return false;
         }
     }
 
-    public Boolean RemoveUnit() {
+    public void RemoveUnit() {
         if (!units.isEmpty()) {
             units.remove(units.size()-1);
-            return true;
-        }
-        else {
-            return false;
         }
     }
 

@@ -1,18 +1,17 @@
 package evaluation.listeners;
 
+import core.AbstractPlayer;
 import core.Game;
-import core.interfaces.IStatisticLogger;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
-import evaluation.metrics.IDataLogger;
-import evaluation.metrics.IMetricsCollection;
+import core.interfaces.IGameEvent;
+import evaluation.metrics.*;
 import evaluation.metrics.tablessaw.DataTableSaw;
+import utilities.Utils;
 
 import java.io.File;
 import java.util.*;
 
-import static evaluation.metrics.IDataLogger.ReportDestination.ToBoth;
-import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
+import static evaluation.metrics.Event.GameEvent.*;
+import static evaluation.metrics.IDataLogger.ReportDestination.*;
 import static evaluation.metrics.IDataLogger.ReportType.*;
 
 /**
@@ -30,34 +29,48 @@ public class MetricsGameListener implements IGameListener {
     protected Map<String, AbstractMetric> metrics;
 
     // Events the metrics in this listener respond to. Game over is always added.
-    protected Set<Event.GameEvent> eventsOfInterest = new HashSet<>();
+    protected Set<IGameEvent> eventsOfInterest = new HashSet<>();
 
     // Game this listener listens to
     protected Game game;
 
     // Types of reports to generate: RawData, Summary, Plot
-    List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary, Plot);  //todo this needs to be read from JSON
+    List<IDataLogger.ReportType> reportTypes = new ArrayList<>();
 
     // Where to send the reports: ToConsole, ToFile or ToBoth
-    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
+    List<IDataLogger.ReportDestination> reportDestinations;
 
     // Destination directory for the reports
     String destDir = "metrics/out/"; //by default
 
-    public MetricsGameListener() {}
-    public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
+    public MetricsGameListener() {
+    }
+
+    public MetricsGameListener(AbstractMetric[] metrics) {
+        this(ToBoth, metrics);
+    }
+
+    public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
+        this(logTo, new IDataLogger.ReportType[]{RawData, Summary, Plot}, metrics);
+    }
+
+    public MetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {
+        reportDestinations = Collections.singletonList(logTo);
+        this.reportTypes = Arrays.asList(dataTypes);
         this.metrics = new LinkedHashMap<>();
         for (AbstractMetric m : metrics) {
             m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
             this.metrics.put(m.getName(), m);
             eventsOfInterest.addAll(m.getEventTypes());
         }
+        eventsOfInterest.add(Event.GameEvent.GAME_OVER);
     }
 
     /**
      * Manages all events.
-     * @param event  Event has information about its type and data fields for game, state, action and player.
-     *               It's not guaranteed that the data fields are different to null, so a check is necessary.
+     *
+     * @param event Event has information about its type and data fields for game, state, action and player.
+     *              It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
     public void onEvent(Event event) {
         if (!eventsOfInterest.contains(event.type))
@@ -72,40 +85,23 @@ public class MetricsGameListener implements IGameListener {
                 metric.run(this, event);
             }
 
-            if(event.type == Event.GameEvent.GAME_OVER)
+            if (event.type == GAME_OVER)
                 metric.notifyGameOver();
         }
-
     }
 
-
-    public boolean setOutputDirectory(String out, String time, String players){
+    @Override
+    public boolean setOutputDirectory(String... nestedDirectories) {
 
         boolean success = true;
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // If the "metrics/out/" does not exist, create it
-            File outFolder = new File(out);
-            if (!outFolder.exists()) {
-                success = outFolder.mkdir();
-            }
-
-            File timestampFolder = new File(out + "/" + time);
-            if (!timestampFolder.exists()) {
-                success = timestampFolder.mkdir();
-            }
-
-            File subfolder = new File(timestampFolder + "/" + players);
-            if (!subfolder.exists()) {
-                success = subfolder.mkdir();
-            }
-
-            if (success)
-                destDir = subfolder.getAbsolutePath() + "/";
+            String folder = Utils.createDirectory(nestedDirectories);
+            destDir = new File(folder).getAbsolutePath() + File.separator;
         }
         return success;
     }
-
 
     /**
      * This is called when all processing is finished, for example after running a sequence of games
@@ -113,8 +109,7 @@ public class MetricsGameListener implements IGameListener {
      * <p>
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
-    public void allGamesFinished() {
-
+    public void report() {
         boolean success = true;
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
@@ -127,39 +122,40 @@ public class MetricsGameListener implements IGameListener {
 
         // All metrics report themselves
         if (success) {
-            for (AbstractMetric metric : metrics.values()) {
-                metric.processFinishedGames(destDir, reportTypes, reportDestinations);
-            }
+            // If we only want the raw data per event (e.g. if you are James), then this just creates a whole load
+            // of redundant directories
+            if (!(reportTypes.size() == 1 && reportTypes.contains(RawDataPerEvent)))
+                for (AbstractMetric metric : metrics.values()) {
+                    metric.report(destDir, reportTypes, reportDestinations);
+                }
 
             // We also create raw data files for groups of metrics responding to the same event
-            for (Event.GameEvent event : eventsOfInterest) {
-                List<AbstractMetric> eventMetrics = new ArrayList<>();
-                for (AbstractMetric metric : metrics.values()) {
-                    if (metric.listens(event)) {
-                        eventMetrics.add(metric);
+            if (reportTypes.contains(RawDataPerEvent)) {
+                for (IGameEvent event : eventsOfInterest) {
+                    List<AbstractMetric> eventMetrics = new ArrayList<>();
+                    for (AbstractMetric metric : metrics.values()) {
+                        if (metric.listens(event)) {
+                            eventMetrics.add(metric);
+                        }
                     }
-                }
-                if (eventMetrics.size() > 1) {
-                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event.name(), eventToIndexingColumn(event));
-                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    if (eventMetrics.size() > 1) {
+                        IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
+                        dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    }
                 }
             }
         }
     }
 
-    private String eventToIndexingColumn(Event.GameEvent e) {
-        switch (e) {
-            case ABOUT_TO_START:
-            case GAME_OVER:
-                return "GameID";
-            case ROUND_OVER:
-                return "Round";
-            case TURN_OVER:
-                return "Turn";
-            case ACTION_CHOSEN:
-            case ACTION_TAKEN:
-            case GAME_EVENT:
-                return "Tick";
+    private String eventToIndexingColumn(IGameEvent e) {
+        if (e == ABOUT_TO_START || e == GAME_OVER) {
+            return "GameID";
+        } else if (e == ROUND_OVER) {
+            return "Round";
+        } else if (e == TURN_OVER) {
+            return "Turn";
+        } else if (e == ACTION_CHOSEN || e == ACTION_TAKEN || e == GAME_EVENT) {
+            return "Tick";
         }
         return null;
     }
@@ -168,21 +164,24 @@ public class MetricsGameListener implements IGameListener {
     public final void setGame(Game game) {
         this.game = game;
     }
-    public final Game getGame() { return game; }
 
-    public void reset()
-    {
+    public final Game getGame() {
+        return game;
+    }
+
+    public void reset() {
         for (AbstractMetric metric : metrics.values()) {
             metric.reset();
         }
     }
 
     @Override
-    public void init(Game game) {
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
         this.game = game;
 
         for (AbstractMetric metric : metrics.values()) {
-            metric.init(game);
+            metric.init(game, nPlayersPerGame, playerNames);
         }
     }
+
 }

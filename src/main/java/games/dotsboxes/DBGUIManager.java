@@ -10,12 +10,13 @@ import utilities.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Set;
 
 public class DBGUIManager extends AbstractGUIManager {
     DBGridBoardView view;
     int gapRight = 30;
 
-    public DBGUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public DBGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         this(parent, game, ac, humanId, defaultDisplayWidth, defaultDisplayHeight);
     }
 
@@ -24,7 +25,7 @@ public class DBGUIManager extends AbstractGUIManager {
         return 100;
     }
 
-    public DBGUIManager(GamePanel parent, Game game, ActionController ac, int humanId,
+    public DBGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId,
                         int displayWidth, int displayHeight) {
         super(parent, game, ac, humanId);
 

@@ -1,18 +1,18 @@
 package evaluation.metrics;
 
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class AbstractMetric
-{
+public abstract class AbstractMetric {
     // Data logger, wrapper around a library that logs data into a table
-    private IDataLogger dataLogger;
+    protected IDataLogger dataLogger;
 
     // Set of event types this metric listens to, to record data when they occur
-    private final Set<Event.GameEvent> eventTypes;
+    private final Set<IGameEvent> eventTypes;
 
     // Arguments for the metric, if any
     protected final String[] args;
@@ -32,6 +32,11 @@ public abstract class AbstractMetric
     public AbstractMetric(Event.GameEvent... args) {
         this.gamesCompleted = 0;
         this.eventTypes = Arrays.stream(args).collect(Collectors.toSet());
+        this.args = null;
+    }
+    public AbstractMetric(Set<IGameEvent> events) {
+        this.gamesCompleted = 0;
+        this.eventTypes = events;
         this.args = null;
     }
 
@@ -59,10 +64,9 @@ public abstract class AbstractMetric
     /**
      * @return set of game events this metric should record information for.
      */
-    public abstract Set<Event.GameEvent> getDefaultEventTypes();
+    public abstract Set<IGameEvent> getDefaultEventTypes();
 
-    public void reset()
-    {
+    public void reset() {
         this.gamesCompleted = 0;
         columnNames.clear();
         dataLogger.reset();
@@ -70,24 +74,26 @@ public abstract class AbstractMetric
 
     /**
      * Initialize columns separately when we have access to the game.
+     *
      * @param game - game to initialize columns for
      */
-    public void init(Game game) {
-        dataLogger.init(game);
+    public void init(Game game, int nPlayers, Set<String> playerNames) {
+        dataLogger.init(game, nPlayers, playerNames);
     }
 
     /**
      * Runs this metric. It first adds the data for the default columns after a given event. THen it runs _run() to
      * record the data specified in the metric subclass. All data is added to the data logger.
+     *
      * @param listener - game listener object, with access to the game itself
-     * @param e - event, which includes game event type, state, action and player ID
+     * @param e        - event, which includes game event type, state, action and player ID
      */
     public final void run(MetricsGameListener listener, Event e) {
         // Ask for custom records from the metric and record these too
         Map<String, Object> records = new HashMap<>();
 
         // Fill in the map with column names and null values for the custom columns we need data for
-        for (String name: columnNames) {
+        for (String name : columnNames) {
             records.put(name, null);
         }
 
@@ -105,23 +111,24 @@ public abstract class AbstractMetric
         }
     }
 
-
     /**
      * Return a list of columns that will be recorded for this metric. The string is the name of the column and
      * the class<?> is the type of data that will be recorded in that column.
      * !! If you want categorical data, make it a string column and use the string value, even if number
-     * @param game - game to initialize columns for
+     *
+     * @param nPlayersPerGame
+     * @param playerNames
      * @return map of column names and types
      */
-    public abstract Map<String, Class<?>> getColumns(Game game);
+    public abstract Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames);
 
     /**
      * Returns a map of default column names and types. This will be included in all metrics unless overwritten by the metric subclass.
      * The string is the name of the column and the class<?> is the type of data that will be recorded in that column.
+     *
      * @return map of column names and types
      */
-    public Map<String, Class<?>> getDefaultColumns()
-    {
+    public Map<String, Class<?>> getDefaultColumns() {
         HashMap<String, Class<?>> columns = new HashMap<>();
         columns.put("GameID", String.class);
         columns.put("GameName", String.class);
@@ -130,12 +137,14 @@ public abstract class AbstractMetric
         columns.put("Tick", Integer.class);
         columns.put("Turn", Integer.class);
         columns.put("Round", Integer.class);
+        columns.put("Event", String.class);
         return columns;
     }
 
 
     /**
      * Records data for the default columns. It must match the column names and types in getDefaultColumns().
+     *
      * @param e event for which the data is recorded
      */
     public void addDefaultData(Event e) {
@@ -146,13 +155,15 @@ public abstract class AbstractMetric
         dataLogger.addData("Tick", e.state.getGameTick());
         dataLogger.addData("Turn", e.state.getTurnCounter());
         dataLogger.addData("Round", e.state.getRoundCounter());
+        dataLogger.addData("Event", e.type.name());
     }
 
     /**
      * Returs the set of events this metric listens to
+     *
      * @return set of events
      */
-    public Set<Event.GameEvent> getEventTypes() {
+    public Set<IGameEvent> getEventTypes() {
         return eventTypes;
     }
 
@@ -166,21 +177,30 @@ public abstract class AbstractMetric
     /**
      * @return true if this metric listens to the given game event type, false otherwise.
      */
-    public final boolean listens(Event.GameEvent eventType)
+    public final boolean listens(IGameEvent eventType)
     {
         //by default, we listen to all types of events.
-        if(eventTypes == null) return true;
+        if (eventTypes == null) return true;
         return eventTypes.contains(eventType);
     }
 
+    /**
+     * @return true if this metric should filter data in table by event type when reporting, creating several
+     * tables of separate relevant data instead of one. Default behaviour is true. May override to return false
+     * if the metric is not event-specific or would like to keep all data together.
+     */
+    public boolean filterByEventTypeWhenReporting() {
+        return true;
+    }
 
     /**
      * Produces reports of data for this metric.
-     * @param folderName - name of the folder to save the reports in
-     * @param reportTypes - list of report types to produce
+     *
+     * @param folderName         - name of the folder to save the reports in
+     * @param reportTypes        - list of report types to produce
      * @param reportDestinations - list of report destinations to produce
      */
-    public void processFinishedGames(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
+    public void report(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
     {
         //DataProcessor with compatibility assertion:
         IDataProcessor dataProcessor = getDataProcessor();
@@ -192,7 +212,7 @@ public abstract class AbstractMetric
         for (int i = 0; i < reportTypes.size(); i++) {
             IDataLogger.ReportType reportType = reportTypes.get(i);
             IDataLogger.ReportDestination reportDestination;
-            if(reportDestinations.size() == 1) reportDestination = reportDestinations.get(0);
+            if (reportDestinations.size() == 1) reportDestination = reportDestinations.get(0);
             else reportDestination = reportDestinations.get(i);
 
             if (reportType == IDataLogger.ReportType.RawData) {
@@ -202,16 +222,14 @@ public abstract class AbstractMetric
                 if (reportDestination == IDataLogger.ReportDestination.ToConsole || reportDestination == IDataLogger.ReportDestination.ToBoth) {
                     dataProcessor.processRawDataToConsole(dataLogger);
                 }
-            }
-            else if (reportType == IDataLogger.ReportType.Summary) {
+            } else if (reportType == IDataLogger.ReportType.Summary) {
                 if (reportDestination == IDataLogger.ReportDestination.ToFile || reportDestination == IDataLogger.ReportDestination.ToBoth) {
                     dataProcessor.processSummaryToFile(dataLogger, folderName);
                 }
                 if (reportDestination == IDataLogger.ReportDestination.ToConsole || reportDestination == IDataLogger.ReportDestination.ToBoth) {
                     dataProcessor.processSummaryToConsole(dataLogger);
                 }
-            }
-            else if (reportType == IDataLogger.ReportType.Plot) {
+            } else if (reportType == IDataLogger.ReportType.Plot) {
                 if (reportDestination == IDataLogger.ReportDestination.ToFile || reportDestination == IDataLogger.ReportDestination.ToBoth) {
                     dataProcessor.processPlotToFile(dataLogger, folderName);
                 }
@@ -226,6 +244,7 @@ public abstract class AbstractMetric
     /**
      * Provides an object of the class that implements reporting. This class must implement the different ways to report
      * (ReportType) and the destination (ReportDestination).
+     *
      * @return the data processor
      */
     public IDataProcessor getDataProcessor() {
@@ -254,5 +273,20 @@ public abstract class AbstractMetric
 
     public IDataLogger getDataLogger() {
         return dataLogger;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractMetric)) return false;
+        AbstractMetric that = (AbstractMetric) o;
+        return Objects.equals(eventTypes, that.eventTypes) && Arrays.equals(args, that.args) && Objects.equals(columnNames, that.columnNames);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(eventTypes, columnNames);
+        result = 31 * result + Arrays.hashCode(args);
+        return result;
     }
 }

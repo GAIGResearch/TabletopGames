@@ -1,20 +1,20 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
+import players.PlayerParameters;
 
 import java.util.*;
 
 public abstract class AbstractPlayer {
 
-    protected IStatisticLogger statsLogger = null;
     // ID of this player, assigned by the game
     int playerID;
     String name;
-    Random rnd = new Random(System.currentTimeMillis());
+    protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
     private AbstractForwardModel forwardModel;
+    public PlayerParameters parameters = new PlayerParameters(System.currentTimeMillis());
     protected List<AbstractPlayerDecorator> decorators = new ArrayList<>();
 
     /* Final methods */
@@ -48,14 +48,6 @@ public abstract class AbstractPlayer {
         return this.getClass().getSimpleName();
     }
 
-    public final IStatisticLogger getStatsLogger() {
-        return statsLogger;
-    }
-
-    public final void setStatsLogger(IStatisticLogger logger) {
-        this.statsLogger = logger;
-    }
-
     public final void addDecorator(AbstractPlayerDecorator decorator) {
         decorators.add(decorator);
     }
@@ -74,22 +66,22 @@ public abstract class AbstractPlayer {
      * Then we apply any decorators to the chosen action.
      *
      * @param gameState
-     * @param possibleActions
+     * @param observedActions
      * @return
      */
-    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> observedActions) {
         for (AbstractPlayerDecorator decorator : decorators) {
-            possibleActions = decorator.actionFilter(gameState, possibleActions);
+            observedActions = decorator.actionFilter(gameState, observedActions);
         }
         AbstractAction action;
-        switch (possibleActions.size()) {
+        switch (observedActions.size()) {
             case 0:
                 throw new AssertionError("No actions available for player " + this);
             case 1:
-                action = possibleActions.get(0);
+                action = observedActions.get(0);
                 break;
             default:
-                action = _getAction(gameState, possibleActions);
+                action = _getAction(gameState, observedActions);
         }
         for (AbstractPlayerDecorator decorator : decorators) {
             decorator.recordDecision(gameState, action);
@@ -114,7 +106,6 @@ public abstract class AbstractPlayer {
     public void setForwardModel(AbstractForwardModel model) {
         this.forwardModel = model;
     }
-
 
     /* Methods that should be implemented in subclass */
 
@@ -164,4 +155,7 @@ public abstract class AbstractPlayer {
         return Collections.emptyMap();
     }
 
+    public PlayerParameters getParameters() {
+        return parameters;
+    }
 }

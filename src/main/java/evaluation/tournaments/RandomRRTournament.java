@@ -2,12 +2,11 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import evaluation.listeners.IGameListener;
 import games.GameType;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
@@ -23,11 +22,11 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param agents          - players for the tournament.
      * @param gameToPlay      - game to play in this tournament.
      * @param playersPerGame  - number of players per game.
-     * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              boolean selfPlay, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, 1, selfPlay, gameParams);
+                              TournamentMode tournamentMode, int totalMatchUps, int reportPeriod, long seed,
+                              AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
@@ -39,18 +38,17 @@ public class RandomRRTournament extends RoundRobinTournament {
      * search of all permutations would be prohibitive.
      *
      * @param ignored - this input is ignored
-     * @param gameIdx - index of game to play with this match-up.
      */
     @Override
-    public void createAndRunMatchUp(LinkedList<Integer> ignored, int gameIdx) {
-        int nPlayers = playersPerGame.get(gameIdx);
+    public void createAndRunMatchUp(List<Integer> ignored) {
         for (int i = 0; i < totalMatchups; i++) {
-            List<Integer> matchup = new ArrayList<>(nPlayers);
-            for (int j = 0; j < nPlayers; j++)
+            List<Integer> matchup = new ArrayList<>(this.nPlayers);
+            for (int j = 0; j < this.nPlayers; j++)
                 matchup.add(idStream.getAsInt());
-            evaluateMatchUp(matchup, gameIdx);
-            if((i+1) % reportPeriod == 0 && i != totalMatchups - 1)
-                reportResults(gameIdx);
+            evaluateMatchUp(matchup);
+            if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1) {
+                reportResults();
+            }
         }
     }
 
@@ -89,8 +87,7 @@ public class RandomRRTournament extends RoundRobinTournament {
          */
         private void shuffle() {
             int[] leastEntries = new int[nPlayers - 1];
-            for (int i = 0; i < leastEntries.length; i++)
-                leastEntries[i] = currentPermutation[currentPermutation.length - (nPlayers - 1) + i];
+            System.arraycopy(currentPermutation, currentPermutation.length - (nPlayers - 1), leastEntries, 0, leastEntries.length);
             for (int i = 0; i < currentPermutation.length - 1; i++) {
                 int swapPosition = rnd.nextInt(currentPermutation.length - i) + i;
                 if (swapPosition != i && !overlapRisk(i, swapPosition, leastEntries)) {

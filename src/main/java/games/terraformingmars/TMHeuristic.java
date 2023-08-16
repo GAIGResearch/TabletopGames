@@ -2,7 +2,7 @@ package games.terraformingmars;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlayCard;
 import games.terraformingmars.components.Award;

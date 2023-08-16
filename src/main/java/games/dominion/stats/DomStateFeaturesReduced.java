@@ -60,4 +60,5 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
     public String[] names() {
         return names;
     }
+
 }

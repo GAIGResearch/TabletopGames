@@ -21,7 +21,13 @@ public class Counter extends Component {
     protected int maximum;  // Maximum value (inclusive)
 
     public Counter() {
-        this(0, 0, 0, "");
+        this(0, 0, Integer.MAX_VALUE, "");
+    }
+    public Counter(String name) {
+        this(0, 0, Integer.MAX_VALUE, name);
+    }
+    public Counter(int max, String name) {
+        this(0, 0, max, name);
     }
 
     public Counter(int valueIdx, int minimum, int maximum, String name) {

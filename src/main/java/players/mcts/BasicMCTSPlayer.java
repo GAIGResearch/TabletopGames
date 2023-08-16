@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -54,7 +55,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> allActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
         BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
 
@@ -64,6 +65,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         // Return best action
         return root.bestAction();
     }
+
 
     public void setStateHeuristic(IStateHeuristic heuristic) {
         this.params.heuristic = heuristic;

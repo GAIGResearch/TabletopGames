@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
 import players.learners.AbstractLearner;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.io.File;
@@ -20,28 +21,31 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static evaluation.tournaments.AbstractTournament.TournamentMode.SELF_PLAY;
+import static utilities.JSONUtils.loadClassFromFile;
 import static utilities.Utils.getArg;
 
 public class ProgressiveLearner {
 
     GameType gameToPlay;
-    String dataDir, player, defaultHeuristic, heuristic;
+    String dataDir, player, heuristic;
     AbstractParameters params;
     List<AbstractPlayer> agents;
     EpsilonRandom randomExplorer;
     ILearner learner;
+    FeatureListener listener;
     int nPlayers, matchups, iterations, iter, finalMatchups;
     double maxExplore;
     AbstractPlayer basePlayer;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
-    IStateFeatureVector phi;
-    Event.GameEvent frequency;
-    boolean currentPlayerOnly;
-    String phiClass, prefix;
-    boolean useOnlyLast;
+    String prefix;
+    int elite;
+    boolean verbose;
+    List<Integer> currentElite = new ArrayList<>();
 
     public ProgressiveLearner(String[] args) {
 
@@ -57,18 +61,20 @@ public class ProgressiveLearner {
         matchups = getArg(args, "matchups", 1);
         finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
-        useOnlyLast = getArg(args, "useOnlyLast", false);
         maxExplore = getArg(args, "explore", 0.0);
+        verbose = getArg(args, "verbose", false);
+        elite = getArg(args, "elite", iterations + 1);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
-        String learnerClass = getArg(args, "learner", "");
-        if (learnerClass.equals(""))
-            throw new IllegalArgumentException("Must specify a learner class");
-        learner = Utils.loadClassFromString(learnerClass);
-        if (learner instanceof AbstractLearner) {
-            ((AbstractLearner) learner).setGamma(getArg(args, "gamma", 1.0));
-            ((AbstractLearner) learner).setTarget(getArg(args, "target", AbstractLearner.Target.WIN));
-        }
+        String learnerDefinition = getArg(args, "learner", "");
+        if (learnerDefinition.equals(""))
+            throw new IllegalArgumentException("Must specify a learner file");
+        learner = loadClassFromFile(learnerDefinition);
+        String listenerDefinition = getArg(args, "listener", "");
+        if (listenerDefinition.equals(""))
+            throw new IllegalArgumentException("Must specify a listener file");
+        listener = loadClassFromFile(listenerDefinition);
+        prefix = getArg(args, "prefix", "ProgLearn");
 
         learnedFilesByIteration = new String[iterations];
         player = getArg(args, "player", "");
@@ -77,15 +83,7 @@ public class ProgressiveLearner {
 
         params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
-        phiClass = getArg(args, "statePhi", "");
-        if (phiClass.equals(""))
-            throw new IllegalArgumentException("Must specify a state feature vector");
-        phi = Utils.loadClassFromString(phiClass);
-        prefix = getArg(args, "fileName", String.format("%tF-%s", System.currentTimeMillis(), phi.getClass().getSimpleName()));
-        defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
-        heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
-        currentPlayerOnly = getArg(args, "stateCPO", false);
-        frequency = Event.GameEvent.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
+        heuristic = getArg(args, "heuristic", "");
     }
 
     public static void main(String[] args) {
@@ -101,31 +99,20 @@ public class ProgressiveLearner {
                             "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n" +
                             "\t               It can also optionally have the class to be used as FeatureVector marked with '*PHI*'\n" +
                             "\t               in which case the value specified in the statePhi argument will be injected.\n" +
-                            "\t               A default heuristic can be specified for the initial iteration with '*DEFAULT*'\n" +
-                            "\t               in which case the defaultHeuristic argument will be used.\n" +
-                            "\tfileName=      The prefix to use on the files generate on each learning iteration.\n" +
-                            "\t               The default will use the name of the learner and the system date.\n" +
-                            "\tlearner=       The full class name of an ILearner implementation.\n" +
+                            "\tlistener=      A JSON file that contains the definition to be used for the FeatureListener.\n" +
+                            "\tlearner=       The JSON file that specifies an ILearner implementation.\n" +
                             "\t               This learner must be compatible with the heuristic - in that it must \n" +
                             "\t               generate a file that the heuristic can read.\n" +
-                            "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN, ORD_MEAN_SCALE, ORD_SCALE, SCORE_DELTA)\n" +
-                            "\tgamma=         The discount factor to use - this is applied per round, not per action\n" +
+                            "\theuristic=     (optional) Class name that specifies the heuristic to be injected into Agents as described above.\n" +
+                            "\tprefix=        Name to use as output directory.\n" +
                             "\texplore=       The starting exploration rate - at which random actions are taken by agents.\n" +
                             "\t               This will reduce linearly to zero for the final iteration.\n" +
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
-                            "\tstatePhi=      The full class name of an IStateFeatureVector implementation that defines the inputs \n" +
-                            "\t               to the heuristic used in the player files.\n" +
-                            "\tstateFreq=     How frequently to record a value to regress against (ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN)\n" +
-                            "\t               Defaults to ACTION_TAKEN.\n" +
-                            "\tstateCPO=      Whether to only record states for the current player (defaults to all players)\n" +
-                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON definition (see 'player')\n" +
-                            "\t               Defaults to players.heuristics.LinearStateHeuristic\n" +
-                            "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
-                            "\t               when we have no data.  \n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
-                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n"
+                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n" +
+                            "\telite=         The number of agents to keep in the tournament. Defaults to iterations.\n"
             );
             return;
         }
@@ -163,25 +150,45 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
-        IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("evaluation.listeners.MetricsGameListener", logger, null);
-        tournament.getListeners().add(gameTracker);
-        tournament.runTournament();
+        tournament.run();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
             // if the basePlayer won, then meh!
-            String fileName = String.format("%s_Winner.txt", prefix);
-            try {
-                FileUtils.copyFile(new File(learnedFilesByIteration[winnerIndex]), new File(fileName));
-            } catch (IOException e) {
-                System.out.println("Error copying the final winning heuristic");
-                e.printStackTrace();
+            // In this case we need to check whether the winning file is a single file or a directory
+            File winningLocation = new File(learnedFilesByIteration[winnerIndex]);
+            if (winningLocation.exists() && winningLocation.isDirectory()) {
+                try {
+                    FileUtils.copyDirectory(winningLocation, new File(String.format("%s_OverallWinner", prefix)));
+                } catch (IOException e) {
+                    System.out.println("Error copying the final winning heuristic directory");
+                    e.printStackTrace();
+                }
+            } else {
+                File winningFile = new File(learnedFilesByIteration[winnerIndex] + ".txt");
+                // just copy the file
+                if (winningFile.exists()) {
+                    String fileName = String.format("%s_OverallWinner.txt", prefix);
+                    try {
+                        FileUtils.copyFile(winningFile, new File(fileName));
+                    } catch (IOException e) {
+                        System.out.println("Error copying the final winning heuristic");
+                        e.printStackTrace();
+                    }
+                } else
+                    throw new AssertionError("No winning heuristic file found " + winningFile.getName());
             }
         }
+    }
+
+    private List<Integer> topNAgents(RoundRobinTournament tournament, int N) {
+        return IntStream.range(0, tournament.getNumberOfAgents())
+                .mapToObj(i -> new Pair<>(i, tournament.getOrdinalRank(i)))
+                .sorted(Comparator.comparingDouble(p -> p.b))   // lower rank is better
+                .limit(N).map(p -> p.a).collect(Collectors.toList());
     }
 
     private void loadAgents() {
@@ -192,31 +199,34 @@ public class ProgressiveLearner {
         if (playerLoc.isDirectory()) {
             throw new IllegalArgumentException("Not yet implemented for a directory of players");
         }
-        if (iter == 0 || useOnlyLast) {
-            String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
+        if (iter == 0) {
+            String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter];
             agents.add(PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName)));
-            if (iter == 0) {
-                basePlayer = agents.get(0);
-                basePlayer.setName("Default Agent");
-            }
+            basePlayer = agents.get(0);
+            basePlayer.setName("Default Agent");
         } else {
             agents.add(basePlayer);
             agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
         }
+
         randomExplorer = new EpsilonRandom();
         agents.forEach(a -> a.addDecorator(randomExplorer));
     }
 
-    private String injectAgentAttributes(String raw, String file) {
-        return raw.replaceAll(Pattern.quote("*FILE*"), file)
-                .replaceAll(Pattern.quote("*PHI*"), phiClass)
-                .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic)
-                .replaceAll(Pattern.quote("*DEFAULT*"), defaultHeuristic);
+    private String injectAgentAttributes(String rawJSON, String fileName) {
+        return listener.injectAgentAttributes(rawJSON.replaceAll(Pattern.quote("*FILE*"), fileName)
+                .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic));
     }
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
+        // First we only put the elite agents into the tournament, and track their numbers
+        if (currentElite.isEmpty()) {
+            currentElite = IntStream.range(0, agents.size()).boxed().collect(Collectors.toList());
+        }
+        List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
+
+        RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, SELF_PLAY, matchups,
                 matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
@@ -225,21 +235,48 @@ public class ProgressiveLearner {
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
-        StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
-        tournament.setListeners(Collections.singletonList(dataTracker));
-        tournament.runTournament();
+        listener.setLogger(new FileStatsLogger(fileName, "\t", false));
+        tournament.setListeners(Collections.singletonList(listener));
+        tournament.run();
+
+        if (verbose) {
+            for (int i = 0; i < agentsToPlay.size(); i++) {
+                System.out.printf("Agent: %d %s\twins %.2f +/- %.3f\tOrd %.2f +/- %.2f%n", i, agentsToPlay.get(i).toString(),
+                        tournament.getWinRate(i), tournament.getWinStdErr(i), tournament.getOrdinalRank(i), tournament.getOrdinalStdErr(i));
+            }
+        }
+        List<Integer> eliteIndices = topNAgents(tournament, elite); // these are the indices within currentElite
+        List<Integer> newElite = eliteIndices.stream().map(i -> currentElite.get(i))
+                .collect(Collectors.toList());
+        if (verbose) {
+            System.out.println("Current elite = " + Arrays.toString(currentElite.toArray()));
+            System.out.println("Elite indices = " + Arrays.toString(eliteIndices.toArray()));
+            System.out.println("Elite agents  = " + Arrays.toString(newElite.toArray()));
+        }
+        if (elite < agentsToPlay.size()) {
+            // we need to select the elite agents
+            Set<Integer> removedAgents = new HashSet<>(currentElite);
+            for (Integer i : newElite)
+                removedAgents.remove(i); // generate a list of agents that were elite but now aren't
+            if (verbose) {
+                System.out.println("Elite agents = " + Arrays.toString(newElite.toArray()));
+                System.out.println("Removed agents = " + Arrays.toString(removedAgents.toArray()));
+            }
+            currentElite = newElite;
+        }
+        currentElite.add(iter + 1); // add the new agent
     }
 
     private void learnFromNewData() {
         // for the moment we will just supply the most recent file
         learner.learnFrom(dataFilesByIteration[iter]);
 
-        String fileName = String.format("%s_%d.txt", prefix, iter);
-        learnedFilesByIteration[iter] = fileName;
-        learner.writeToFile(fileName);
+        String iterationPrefix = String.format("%s_%d", prefix, iter);
+        learnedFilesByIteration[iter] = iterationPrefix;
+        learner.writeToFile(iterationPrefix);
 
         // if we only have one agent type, then we can create one agent as the result of this round
-        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName));
+        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, iterationPrefix));
         agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter + 1));
         agentsPerGeneration[iter].addDecorator(randomExplorer);
     }

@@ -3,7 +3,7 @@ package games.explodingkittens;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.explodingkittens.actions.IsNopeable;
 import games.explodingkittens.cards.ExplodingKittensCard;
 

@@ -49,7 +49,7 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (action instanceof GainCard && ((GainCard) action).buyingPlayer == player)
             executed = true;
     }

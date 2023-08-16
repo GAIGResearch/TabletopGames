@@ -11,7 +11,7 @@ public class StrategoParams extends AbstractParameters {
     public int[] pieceSetupCount = {1,8,5,4,4,4,3,2,1,1}; // {1,1,2,3,4,4,4,5,8,1};
     public int pieceSetupNBombs = 6;
     public int pieceSetupNFlags = 1;
-    public int maxRounds = 500;
+    public int maxRounds = 2000;
 
     public boolean isTileValid(final int x, final int y){
         if ((x>=0 && x<gridSize) && (y>=0 && y<gridSize)){

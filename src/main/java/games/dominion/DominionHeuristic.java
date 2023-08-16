@@ -3,7 +3,7 @@ package games.dominion;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 import utilities.Utils;
