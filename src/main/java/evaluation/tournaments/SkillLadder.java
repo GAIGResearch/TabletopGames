@@ -66,6 +66,7 @@ public class SkillLadder {
                             "\tgrid=          Default false. If true, then we run against all previous agents too.\n" +
                             "\tgridStart=     (Optional). The budget at which to start...the startBudget is still relevant\n" +
                             "\t               for the opponents against which we test. Do not use with NTBEABudget.\n" +
+                            "\tgridMinorStart=(Optional). The budget at which to start the lower grid budget. Do not use with NTBEABudget.\n" +
                             "\tstartSettings= (Optional). A sequence of numbers that defines the starting agent. This is \n" +
                             "\t               primarily useful if you need to re-start the ladder from a pre-calculated rung.\n"
 
