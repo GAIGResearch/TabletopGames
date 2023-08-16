@@ -379,6 +379,8 @@ public class MonopolyDealGameState extends AbstractGameState {
         return playerPropertySets[playerID];
     }
     public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks[playerId]; }
+    public Deck<MonopolyDealCard> getDiscardPile() { return discardPile; }
+    public Deck<MonopolyDealCard> getDrawPile(){ return drawPile; }
     public boolean CheckForJustSayNo(int playerID) { return playerHands[playerID].getComponents().contains(MonopolyDealCard.create(CardType.JustSayNo)); }
 
     public boolean checkForGameEnd() {

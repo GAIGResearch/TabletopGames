@@ -21,6 +21,7 @@ import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.monopolydeal.gui.MonopolyDealGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;

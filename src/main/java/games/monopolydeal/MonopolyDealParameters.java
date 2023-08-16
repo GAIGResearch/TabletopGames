@@ -26,6 +26,7 @@ import java.util.Objects;
  */
 public class MonopolyDealParameters extends TunableParameters {
 
+    public String dataPath = "data/monopolydeal/";
     public int HAND_SIZE;
     public int DRAWS_WHEN_EMPTY;
     public int BOARD_MODIFICATIONS_PER_TURN;
@@ -113,6 +114,8 @@ public class MonopolyDealParameters extends TunableParameters {
         cardsIncludedInGame.put(CardType.RedYellowRent,2);
         cardsIncludedInGame.put(CardType.RailRoadUtilityRent,2);
     }
+
+    public String getDataPath() { return dataPath; }
 
     @Override
     protected AbstractParameters _copy() {
