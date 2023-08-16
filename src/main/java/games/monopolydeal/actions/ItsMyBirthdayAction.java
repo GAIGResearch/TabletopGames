@@ -170,7 +170,12 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
     @Override
     public ItsMyBirthdayAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        ItsMyBirthdayAction action = new ItsMyBirthdayAction(playerID);
+        action.target = target;
+        action.actionState = actionState;
+        action.collectedRent = collectedRent;
+        action.reaction = reaction;
+        return action;
     }
 
     @Override

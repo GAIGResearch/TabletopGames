@@ -56,7 +56,7 @@ public class ChooseCardFrom extends AbstractAction {
     @Override
     public ChooseCardFrom copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new ChooseCardFrom(take,from,actionType);
     }
 
     @Override

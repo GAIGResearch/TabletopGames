@@ -57,7 +57,7 @@ public class AddProperty extends AbstractAction {
     @Override
     public AddProperty copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new AddProperty(card,player);
     }
 
     @Override

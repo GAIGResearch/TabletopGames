@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 public class PayCardFrom extends AbstractAction {
 
-    MonopolyDealCard card;
+    final MonopolyDealCard card;
     SetType from;
     BoardType type;
 
@@ -60,7 +60,10 @@ public class PayCardFrom extends AbstractAction {
     @Override
     public PayCardFrom copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        PayCardFrom action = new PayCardFrom(card);
+        action.type = type;
+        action.from = from;
+        return action;
     }
 
     @Override

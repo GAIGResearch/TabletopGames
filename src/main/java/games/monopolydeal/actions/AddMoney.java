@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.MonopolyDealCard;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.Objects;
 
@@ -56,7 +57,7 @@ public class AddMoney extends AbstractAction {
     @Override
     public AddMoney copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new AddMoney(card,player);
     }
 
     @Override

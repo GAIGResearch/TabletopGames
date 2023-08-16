@@ -159,7 +159,12 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     @Override
     public DebtCollectorAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        DebtCollectorAction action = new DebtCollectorAction(playerID);
+        action.target = target;
+        action.actionState = actionState;
+        action.reaction = reaction;
+        action.executed = executed;
+        return action;
     }
 
     @Override

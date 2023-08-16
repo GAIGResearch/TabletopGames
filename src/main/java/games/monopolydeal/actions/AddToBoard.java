@@ -7,6 +7,7 @@ import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
+import org.apache.spark.sql.catalyst.expressions.Add;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +132,9 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public AddToBoard copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        AddToBoard action = new AddToBoard(playerID);
+        action.executed = executed;
+        return action;
     }
 
     @Override

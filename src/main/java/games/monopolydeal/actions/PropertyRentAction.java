@@ -189,7 +189,13 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
     @Override
     public PropertyRentAction copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        PropertyRentAction action = new PropertyRentAction(playerID,setType,cardType,doubleTheRent);
+        action.target = target;
+        action.rent = rent;
+        action.actionState = actionState;
+        action.collectedRent = collectedRent;
+        action.reaction = reaction;
+        return action;
     }
 
     @Override

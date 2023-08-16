@@ -221,7 +221,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     @Override
     public PlayActionCard copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new PlayActionCard(playerID);
     }
 
     @Override

@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
+import org.apache.spark.internal.config.R;
 
 import java.util.Objects;
 
@@ -29,6 +30,10 @@ public class RentOf extends AbstractAction {
     final PropertySet pSet;
     int rent;
 
+    public RentOf(PropertySet pSet, int rent){
+        this.pSet = pSet;
+        this.rent = rent;
+    }
     public RentOf(PropertySet pSet) {
         this.pSet = pSet;
         SetType setType = pSet.getSetType();
@@ -64,7 +69,7 @@ public class RentOf extends AbstractAction {
     @Override
     public RentOf copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new RentOf(pSet,rent);
     }
 
     @Override

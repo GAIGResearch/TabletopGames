@@ -61,7 +61,7 @@ public class AddWildTo extends AbstractAction {
     @Override
     public AddWildTo copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new AddWildTo(pSet,player);
     }
 
     @Override
