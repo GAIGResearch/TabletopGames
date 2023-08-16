@@ -36,8 +36,11 @@ public class RentOf extends AbstractAction {
             rent = setType.rent[setType.setSize-1];
             if(pSet.hasHouse) rent = rent + 3;
             if(pSet.hasHotel) rent = rent + 4;
+        } else {
+            if(pSet.getSize()-1 >= setType.rent.length)
+                throw new AssertionError("Another thing which should not happen");
+            rent = setType.rent[pSet.getSize() - 1];
         }
-        else rent = setType.rent[pSet.getSize() - 1];
     }
 
     /**
