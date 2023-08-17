@@ -63,6 +63,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp)){
             availableActions.addAll(MDGS.getPropertySets(playerID).stream().filter(((Predicate<? super PropertySet>)PropertySet::getIsComplete).negate())
                     .map(propertySet -> new AddWildTo(propertySet,playerID)).collect(toList()));
+            availableActions.add(new AddProperty(temp,playerID));
         }
         return availableActions;
     }
