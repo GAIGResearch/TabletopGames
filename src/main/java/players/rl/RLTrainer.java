@@ -14,6 +14,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import javax.swing.JOptionPane;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import core.AbstractGameState;
@@ -93,7 +100,6 @@ class RLTrainer {
 
     void train(RLPlayer player, AbstractGameState finalGameState) {
         addTurn(player, finalGameState, null, null);
-        // TODO implement other methods than qLearning
         qwds.qLearning(player, playerTurns.get(player.getPlayerID()));
     }
 
@@ -120,7 +126,8 @@ class RLTrainer {
             dp.updateAndWriteFile(0);
         }
 
-        System.out.println("\rStarting Training!" + " ".repeat(23));
+        System.out.println("\rStarting Training!" + " ".repeat(25));
+        printProgress();
 
         int gamesPlayedSinceLastWrite = 0;
         for (int _i = 0; _i < trainingParams.nGames; _i++) {
@@ -133,8 +140,7 @@ class RLTrainer {
                 dp.initNextSegmentFile(getNextSegmentThreshold(i));
                 gamesPlayedSinceLastWrite = 0;
                 dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
-            }
-            else if (shouldUpdate(i)) {
+            } else if (shouldUpdate(i)) {
                 dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
                 gamesPlayedSinceLastWrite = 0;
             }
@@ -142,17 +148,21 @@ class RLTrainer {
             // Print progress
             int _progress = progress[agentID];
             progress[agentID] = (100 * (i - dp.nGamesPlayedFromInfile + 1)) / trainingParams.nGames;
-            if (_progress != progress[agentID]) {
-                String progressString = "| ";
-                for (int t = 0; t < progress.length; t++) {
-                    progressString += String.format("%d%% | ", progress[t]);
-                }
-                System.out.print("\r" + progressString);
-            }
+            if (_progress != progress[agentID])
+                printProgress();
         }
 
         dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
-        System.out.println("\rTraining complete!" + " ".repeat(23));
+        System.out.println("\rTraining complete!" + " ".repeat(25));
+        printProgress();
+    }
+
+    private void printProgress() {
+        String progressString = "| ";
+        for (int t = 0; t < progress.length; t++) {
+            progressString += String.format("%d%% | ", progress[t]);
+        }
+        System.out.print("\r" + progressString);
     }
 
     private int getNextSegmentThreshold(int n) {
@@ -200,7 +210,7 @@ class RLTrainer {
     }
 
     static RLTrainingParams params_phase(String gamename, int n) {
-        RLTrainingParams params = new RLTrainingParams(gamename, 2, n != 3 ? 409600 : 819200);
+        RLTrainingParams params = new RLTrainingParams(gamename, 2, n < 3 ? 409600 : 819200);
         if (n == 1) {
             params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
             params.writeSegmentFactor = 2;
@@ -221,7 +231,6 @@ class RLTrainer {
         params.gamma = 0.75f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-
 
         int[] gamesAfterPhase = { 409600, 819200, 1638400 };
 
@@ -254,28 +263,10 @@ class RLTrainer {
         String finalDir = null;
         String destDir = null;
 
-        // agents.add(new RLPlayer(new
-        // RLParams("LinearApprox/Test_01a_Agent_02_n=819200.json")));
-        // agents.add(new RLPlayer(new
-        // RLParams("LinearApprox/Test_01b_Agent_05_n=1638400.json")));
-
-        // for (int i = 1; i <= 4; i++) {
-        // RLPlayer p = new RLPlayer(new
-        // RLParams(String.format("LinearApprox/Test_2P01_Agent_%02d_n=51200.json",
-        // i)));
-        // p.setName("RL" + i);
-        // agents.add(p);
-        // }
-
-        // agents.add(new RLPlayer(new
-        // RLParams("LinearApprox/Test_2P01_Agent_01_n=409600.json")));
-
         MCTSParams p_mcts = new MCTSParams();
         p_mcts.budgetType = PlayerConstants.BUDGET_TIME;
         p_mcts.budget = 20;
         // agents.add(new MCTSPlayer(p_mcts));
-
-        // agents.add(new RandomPlayer());
 
         for (int n = 1; n <= nAgents; n++) {
             RLPlayer p = new RLPlayer(
@@ -291,6 +282,112 @@ class RLTrainer {
         rrt.run();
     }
 
+    static void main_competition(String gameName, RLType type, String prefix) {
+        int nGames = 1000;
+
+        int playersPerGame = 2;
+        int gamesPerMatchup = nGames / 2;
+        TournamentMode mode = TournamentMode.NO_SELF_PLAY;
+        AbstractParameters gameParams = null;
+        String finalDir = null;
+        String destDir = null;
+
+        String gameFolderPath = String.format("src/main/java/players/rl/resources/qWeights/%s", gameName);
+
+        String outFileName = String.format("%s_%s_%s.txt", gameName, type.name(), prefix);
+        String outFilePath = String.format("src/main/java/players/rl/resources/results/%s", outFileName);
+
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(outFilePath, true);
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
+
+            int[] possibleNGames = { 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600,
+                    614400, 819200, 1024000, 1228800, 1433600, 1638400, 1843200, 2048000, 2252800, 2457600 };
+
+            for (int b = 8; b <= 200; b *= 5) {
+                final int finalB = b;
+                bufferedWriter.write(String.format("MCTS %dms (%d Games)", b, nGames));
+                bufferedWriter.newLine();
+                for (int i = 0; i < possibleNGames.length; i += nAgents) {
+
+                    CombinedOutputStream outputStream = new CombinedOutputStream();
+                    PrintStream originalPrintStream = System.out;
+                    System.setOut(new PrintStream(outputStream));
+
+                    String[] outputs = new String[nAgents];
+                    ExecutorService executor = Executors.newFixedThreadPool(nAgents);
+                    for (int thread = 0; thread < nAgents; thread++) {
+                        if (i + thread >= possibleNGames.length)
+                            break;
+                        final int currentThread = thread;
+                        final int n = possibleNGames[i + thread];
+                        executor.execute(() -> {
+                            System.out.println(String.format("\n\t=== %dms MCTS vs. RL with n=%d ===\n", finalB, n));
+                            List<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
+
+                            String filePath = String.format("%s/%s/%s_n=%d.json",
+                                    gameFolderPath, type.name(), prefix, n);
+                            if (!(new File(filePath)).exists())
+                                return;
+
+                            RLPlayer rlPlayer = new RLPlayer(new RLParams(filePath));
+                            rlPlayer.setName("RL_" + currentThread);
+                            agents.add(rlPlayer);
+
+                            MCTSParams mctsParams = new MCTSParams();
+                            mctsParams.budgetType = PlayerConstants.BUDGET_TIME;
+                            mctsParams.budget = finalB;
+                            mctsParams.breakMS = 0;
+                            MCTSPlayer mctsPlayer = new MCTSPlayer(mctsParams);
+                            mctsPlayer.setName("MCTS_" + currentThread);
+                            agents.add(mctsPlayer);
+
+                            RoundRobinTournament rrt = new RoundRobinTournament(agents, GameType.valueOf(gameName),
+                                    playersPerGame,
+                                    gamesPerMatchup, mode, gameParams, finalDir, destDir);
+                            rrt.run();
+
+                            String output = outputStream.getCapturedOutput();
+
+                            String mcts = output.split("MCTS_" + currentThread + ": Win rate ")[1].substring(0, 13);
+                            String rl = output.split("RL_" + currentThread + ": Win rate ")[1].substring(0, 13);
+
+                            int mctsWin = Integer
+                                    .parseInt(output.split("MCTS_" + currentThread + " won ")[1].split("\\%")[0]
+                                            .replace(".", ""));
+                            int rlWin = Integer.parseInt(
+                                    output.split("RL_" + currentThread + " won ")[1].split("\\%")[0].replace(".", ""));
+                            int nDraws = (int) Math.round(1000 - mctsWin - rlWin);
+
+                            outputs[currentThread] = String.format("n=%8s: %4sW %4sD %4sL (%s vs. %s)", n, rlWin,
+                                    nDraws, mctsWin, rl, mcts, nGames);
+                        });
+                    }
+                    executor.shutdown();
+                    try {
+                        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                    } catch (InterruptedException e) {
+                        System.err.println("Error waiting for threads to finish");
+                    }
+                    for (String output : outputs) {
+                        if (output == null)
+                            break;
+                        bufferedWriter.write(output);
+                        bufferedWriter.newLine();
+                    }
+                    bufferedWriter.flush();
+                    System.setOut(originalPrintStream);
+                }
+                bufferedWriter.newLine();
+            }
+            bufferedWriter.newLine();
+            bufferedWriter.close();
+            System.out.println("Done writing to file!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void custom_tournament() {
         List<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
         int playersPerGame = 2;
@@ -302,12 +399,15 @@ class RLTrainer {
 
         MCTSParams p_mcts = new MCTSParams();
         p_mcts.budgetType = PlayerConstants.BUDGET_TIME;
-        p_mcts.budget = 20;
-        agents.add(new MCTSPlayer(p_mcts));
+        p_mcts.budget = 8;
+        MCTSPlayer p1 = new MCTSPlayer(p_mcts);
+        p1.setName("MCTS_8ms");
+        agents.add(p1);
 
-        // agents.add(new RandomPlayer());
-        agents.add(
-                new RLPlayer(new RLParams("LinearApprox/SushiGo2PlayerFeatureVector_Phase03_Agent01_n=1638400.json")));
+        RLPlayer p4 = new RLPlayer(
+                new RLParams("LinearApprox/SushiGo2PlayerFeatureVector_Phase04_Agent05_n=2457600.json"));
+        p4.setName("RL4");
+        agents.add(p4);
 
         RoundRobinTournament rrt = new RoundRobinTournament(agents, GameType.valueOf("SushiGo"), playersPerGame,
                 gamesPerMatchup, mode, gameParams, finalDir, destDir);
@@ -316,94 +416,148 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        int[] nGames = { 409600, 819200, 1638400, 2457600 };
-        int[][] filesToDeletePerPhase = {
-                { 100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200, 102400, 204800 },
-                { 614400 },
-                { 1024000, 1228800, 1433600 }
-        };
+        String[] options = { "Train", "Compete", "Custom", "Cancel" };
+        int choice = JOptionPane.showOptionDialog(
+                null,
+                "How would you like to run RLTrainer?",
+                "RLTrainer",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[3]);
 
-        RLType type = RLType.LinearApprox;
-        boolean runExperiments = false;
+        switch (choice) {
+            case 0: // Train
+                RLType type = RLType.LinearApprox;
 
-        Map<String, Object> gamesToRun = new HashMap<String, Object>() {
-            {
-                put("TicTacToe", new TicTacToeDim2StateVector());
-                put("DotsAndBoxes", new DBStateFeaturesReduced());
-                put("SushiGo", new SushiGo2PlayerFeatureVector());
-            }
-        };
+                class Phase {
+                    int nGames;
+                    int[] filesToDelete;
 
-        for (Entry<String, Object> gtr : gamesToRun.entrySet()) {
-            String gameName = gtr.getKey();
-            Object featureVector = gtr.getValue();
-            int[] bestAgents = new int[4];
-            if (runExperiments) {
-                for (int phase = 1; phase <= 3; phase++) {
-                    final int currentPhase = phase;
-                    final int currentBestAgentFromPrevPhase = phase == 1 ? 0 : bestAgents[phase - 2];
-                    ExecutorService executor = Executors.newFixedThreadPool(nAgents);
-                    for (int agent = 1; agent <= nAgents; agent++) {
-                        final int currentAgent = agent;
-                        executor.execute(() -> {
-                            main_train(gameName, featureVector, type, currentPhase, currentBestAgentFromPrevPhase,
-                                    currentAgent);
-                        });
-                        Random rng = new Random();
-                        try {
-                            Thread.sleep(rng.nextInt(5000) + 1);
-                        } catch (InterruptedException e) {
-                            System.err.println("Error sleeping");
-                        }
+                    Phase(int nGames, int[] filesToDelete) {
+                        this.nGames = nGames;
+                        this.filesToDelete = filesToDelete;
                     }
-                    executor.shutdown();
-                    try {
-                        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-                    } catch (InterruptedException e) {
-                        System.err.println("Error waiting for threads to finish");
-                    }
+                }
+                Phase[] phases = {
+                        new Phase(409600,
+                                new int[] { 100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200, 102400,
+                                        204800 }),
+                        new Phase(819200, new int[] { 614400 }),
+                        new Phase(1638400, new int[] { 1024000, 1228800, 1433600 }),
+                        new Phase(2457600, new int[] { 1843200, 2048000, 2252800 })
 
-                    CombinedOutputStream outputStream = new CombinedOutputStream();
-                    PrintStream originalPrintStream = System.out;
-                    System.setOut(new PrintStream(outputStream));
+                };
 
-                    if (nAgents == 1) {
-                        bestAgents[phase - 1] = 1;
-                        continue;
+                class GameData {
+                    Object featureVector;
+                    int phaseStart;
+                    int phaseEnd;
+                    int[] bestAgents = new int[] {};
+
+                    GameData(Object featureVector, int phaseStart, int phaseEnd) {
+                        this.featureVector = featureVector;
+                        this.phaseStart = phaseStart;
+                        this.phaseEnd = phaseEnd;
                     }
 
-                    main_tournament(gameName, featureVector, type, phase, nGames[phase - 1]);
+                    GameData(Object featureVector, int phaseStart, int phaseEnd, int[] bestAgents) {
+                        this(featureVector, phaseStart, phaseEnd);
+                        this.bestAgents = bestAgents;
+                    }
+                }
+                Map<String, GameData> gamesToRun = new HashMap<String, GameData>() {
+                    {
+                        // put("TicTacToe", new TicTacToeDim2StateVector());
+                        put("DotsAndBoxes", new GameData(new DBStateFeaturesReduced(), 1, 3));
+                        // put("SushiGo", new GameData(new SushiGo2PlayerFeatureVector(), 2, 4, new
+                        // int[] { 6 }));
+                    }
+                };
 
-                    String capturedOutput = outputStream.getCapturedOutput();
-                    String winner = capturedOutput.split("---- Ranking ----")[1].substring(4, 5);
-                    bestAgents[phase - 1] = Integer.parseInt(winner);
-
-                    for (int i = 0; i < filesToDeletePerPhase[phase - 1].length; i++) {
+                for (Entry<String, GameData> gtr : gamesToRun.entrySet()) {
+                    String gameName = gtr.getKey();
+                    GameData data = gtr.getValue();
+                    Object featureVector = data.featureVector;
+                    int[] bestAgents = new int[4];
+                    for (int i = 0; i < data.bestAgents.length; i++)
+                        bestAgents[i] = data.bestAgents[i];
+                    for (int phase = data.phaseStart; phase <= data.phaseEnd; phase++) {
+                        final int currentPhase = phase;
+                        final int currentBestAgentFromPrevPhase = phase == 1 ? 0 : bestAgents[phase - 2];
+                        ExecutorService executor = Executors.newFixedThreadPool(nAgents);
                         for (int agent = 1; agent <= nAgents; agent++) {
-                            if (agent == bestAgents[phase - 1])
-                                continue;
-                            String filePath = String.format(
-                                    "src/main/java/players/rl/resources/qWeights/%s/%s/%s_Phase%02d_Agent%02d_n=%d.json",
-                                    gameName, type.name(), featureVector.getClass().getSimpleName(), phase, agent,
-                                    filesToDeletePerPhase[phase - 1][i]);
-                            File file = new File(filePath);
-                            file.delete();
+                            final int currentAgent = agent;
+                            executor.execute(() -> {
+                                main_train(gameName, featureVector, type, currentPhase, currentBestAgentFromPrevPhase,
+                                        currentAgent);
+                            });
+                            Random rng = new Random();
+                            try {
+                                Thread.sleep(rng.nextInt(5000) + 1);
+                            } catch (InterruptedException e) {
+                                System.err.println("Error sleeping");
+                            }
                         }
-                    }
+                        executor.shutdown();
+                        try {
+                            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                        } catch (InterruptedException e) {
+                            System.err.println("Error waiting for threads to finish");
+                        }
 
-                    System.setOut(originalPrintStream);
+                        CombinedOutputStream outputStream = new CombinedOutputStream();
+                        PrintStream originalPrintStream = System.out;
+                        System.setOut(new PrintStream(outputStream));
+
+                        if (nAgents == 1) {
+                            bestAgents[phase - 1] = 1;
+                            continue;
+                        }
+
+                        main_tournament(gameName, featureVector, type, phase, phases[phase - 1].nGames);
+
+                        String capturedOutput = outputStream.getCapturedOutput();
+                        String winner = capturedOutput.split("---- Ranking ----")[1].substring(4, 5);
+                        bestAgents[phase - 1] = Integer.parseInt(winner);
+
+                        for (int i = 0; i < phases[phase - 1].filesToDelete.length; i++) {
+                            for (int agent = 1; agent <= nAgents; agent++) {
+                                if (agent == bestAgents[phase - 1])
+                                    continue;
+                                String filePath = String.format(
+                                        "src/main/java/players/rl/resources/qWeights/%s/%s/%s_Phase%02d_Agent%02d_n=%d.json",
+                                        gameName, type.name(), featureVector.getClass().getSimpleName(), phase, agent,
+                                        phases[phase - 1].filesToDelete[i]);
+                                File file = new File(filePath);
+                                file.delete();
+                            }
+                        }
+
+                        System.setOut(originalPrintStream);
+                    }
+                    String bestAgentsString = "| ";
+                    for (int i = 0; i < bestAgents.length; i++) {
+                        bestAgentsString += bestAgents[i] + " | ";
+                    }
+                    System.out.println("Best agents were: " + bestAgentsString);
                 }
-                String bestAgentsString = "| ";
-                for (int i = 0; i < bestAgents.length; i++) {
-                    bestAgentsString += bestAgents[i] + " | ";
-                }
-                System.out.println("Best agents were: " + bestAgentsString);
-            } else {
+                break;
+            case 1: // Compete
+                main_competition("SushiGo", RLType.LinearApprox, "SushiGo");
+                main_competition("TicTacToe", RLType.Tabular, "TTT");
+                main_competition("TicTacToe", RLType.LinearApprox, "TTT1D");
+                main_competition("TicTacToe", RLType.LinearApprox, "TTT2D");
+                main_competition("TicTacToe", RLType.LinearApprox, "TTT3D");
+                break;
+            case 2: // Custom
                 custom_tournament();
-            }
+                break;
+            default: // Cancel
+                break;
         }
     }
-
 }
 
 class CombinedOutputStream extends OutputStream {

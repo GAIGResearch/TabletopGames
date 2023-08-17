@@ -36,12 +36,30 @@ public class SushiGo2PlayerFeatureVector implements IActionFeatureVector {
             add("PointTrail");
 
             // Pudding Features
-            add("PuddingLead");
-            add("PuddingTrail");
+            add("PuddingLead5+");
+            add("PuddingLead4");
+            add("PuddingLead3");
+            add("PuddingLead2");
+            add("PuddingLead1");
+            add("PuddingEven");
+            add("PuddingTrail1");
+            add("PuddingTrail2");
+            add("PuddingTrail3");
+            add("PuddingTrail4");
+            add("PuddingTrail5+");
 
             // Maki Features
-            add("MakiLead");
-            add("MakiTrail");
+            add("MakiLead10+");
+            add("MakiLead8-9");
+            add("MakiLead6-7");
+            add("MakiLead4-5");
+            add("MakiLead1-3");
+            add("MakiEven");
+            add("MakiTrail1-3");
+            add("MakiTrail4-5");
+            add("MakiTrail6-7");
+            add("MakiTrail8-9");
+            add("MakiTrail10+");
 
             // Tempura & Sashimi Features
             for (String prefix : Arrays.asList("", "Next")) {
@@ -96,27 +114,23 @@ public class SushiGo2PlayerFeatureVector implements IActionFeatureVector {
 
     @Override
     public double[] featureVector(AbstractAction action, AbstractGameState state, int playerID) {
-        Random rng = new Random(state.getGameParameters().getRandomSeed());
         double[] features = new double[names.length];
         SGGameState sggs = (SGGameState) state.copy(playerID);
 
         // Update hand and played lists with the chosen card
         // Remove random card from every other players hand
-        for (int p = 0; p < sggs.getNPlayers(); p++) {
-            int cardIdx = p == playerID ? ((ChooseCard) action).cardIdx
-                    : rng.nextInt(sggs.getPlayerHands().get(p).getSize());
-            SGCard card = sggs.getPlayerHands().get(p).get(cardIdx);
-            sggs.getPlayerHands().get(p).remove(cardIdx);
-            sggs.getPlayedCardTypes(card.type, p).increment(card.count);
+        int cardIdx = ((ChooseCard) action).cardIdx;
+        SGCard card = sggs.getPlayerHands().get(playerID).get(cardIdx);
+        sggs.getPlayerHands().get(playerID).remove(cardIdx);
+        sggs.getPlayedCardTypes(card.type, playerID).increment(card.count);
 
-            // Handle special cases
-            if (Arrays.asList(SGCardType.SquidNigiri, SGCardType.SalmonNigiri, SGCardType.EggNigiri)
-                    .contains(card.type))
-                sggs.getPlayedCardTypes(SGCardType.Wasabi, p).decrement();
-            if (((ChooseCard) action).useChopsticks) {
-                sggs.getPlayedCardTypes(SGCardType.Chopsticks, p).decrement();
-                sggs.getPlayerHands().get(p).add(new SGCard(SGCardType.Chopsticks));
-            }
+        // Handle special cases
+        if (Arrays.asList(SGCardType.SquidNigiri, SGCardType.SalmonNigiri, SGCardType.EggNigiri)
+                .contains(card.type))
+            sggs.getPlayedCardTypes(SGCardType.Wasabi, playerID).decrement();
+        if (((ChooseCard) action).useChopsticks) {
+            sggs.getPlayedCardTypes(SGCardType.Chopsticks, playerID).decrement();
+            sggs.getPlayerHands().get(playerID).add(new SGCard(SGCardType.Chopsticks));
         }
 
         MutableInt f = new MutableInt(0);
@@ -154,15 +168,33 @@ public class SushiGo2PlayerFeatureVector implements IActionFeatureVector {
         int maki = sggs.getPlayedCardTypes(SGCardType.Maki, playerID).getValue();
         int nextMaki = sggs.getPlayedCardTypes(SGCardType.Maki, nextPlayerID).getValue();
 
-        double puddingDiffToNext = (pudding - nextPudding) / MAX_PUDDING;
-        double makiDiffToNext = (maki - nextMaki) / HIGH_MAKI;
+        int puddingDiffToNext = pudding - nextPudding;
+        double makiDiffToNext = maki - nextMaki;
 
         // Pudding Features
-        features[offset.getAndIncrement()] = Math.max(0, puddingDiffToNext); // PuddingLeadToNext
-        features[offset.getAndIncrement()] = Math.max(0, -puddingDiffToNext); // PuddingTrailToNext
+        features[offset.getAndIncrement()] = puddingDiffToNext >= 5 ? 1 : 0; // PuddingLead5+
+        features[offset.getAndIncrement()] = puddingDiffToNext == 4 ? 1 : 0; // PuddingLead4
+        features[offset.getAndIncrement()] = puddingDiffToNext == 3 ? 1 : 0; // PuddingLead3
+        features[offset.getAndIncrement()] = puddingDiffToNext == 2 ? 1 : 0; // PuddingLead2
+        features[offset.getAndIncrement()] = puddingDiffToNext == 1 ? 1 : 0; // PuddingLead1
+        features[offset.getAndIncrement()] = puddingDiffToNext == 0 ? 1 : 0; // PuddingEven
+        features[offset.getAndIncrement()] = puddingDiffToNext == -1 ? 1 : 0; // PuddingTrail1
+        features[offset.getAndIncrement()] = puddingDiffToNext == -2 ? 1 : 0; // PuddingTrail2
+        features[offset.getAndIncrement()] = puddingDiffToNext == -3 ? 1 : 0; // PuddingTrail3
+        features[offset.getAndIncrement()] = puddingDiffToNext == -4 ? 1 : 0; // PuddingTrail4
+        features[offset.getAndIncrement()] = puddingDiffToNext <= -5 ? 1 : 0; // PuddingTrail5+
         // Maki Features
-        features[offset.getAndIncrement()] = Math.max(0, makiDiffToNext); // MakiLeadToNext
-        features[offset.getAndIncrement()] = Math.max(0, -makiDiffToNext); // MakiTrailToNext
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 >= 5 ? 1 : 0; // MakiLead10+
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 == 4 ? 1 : 0; // MakiLead8-9
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 == 3 ? 1 : 0; // MakiLead6-7
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 == 2 ? 1 : 0; // MakiLead4-5
+        features[offset.getAndIncrement()] = (makiDiffToNext + 2) / 3 == 1 ? 1 : 0; // MakiLead1-3
+        features[offset.getAndIncrement()] = makiDiffToNext == 0 ? 1 : 0; // MakiEven
+        features[offset.getAndIncrement()] = (makiDiffToNext - 2) / 3 == -1 ? 1 : 0; // MakiTrail1-3
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 == -2 ? 1 : 0; // MakiTrail4-5
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 == -3 ? 1 : 0; // MakiTrail6-7
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 == -4 ? 1 : 0; // MakiTrail8-9
+        features[offset.getAndIncrement()] = makiDiffToNext / 2 <= -5 ? 1 : 0; // MakiTrail10+
     }
 
     void calcTempuraSashimiFeatures(SGGameState sggs, int playerID, double[] features, MutableInt offset) {

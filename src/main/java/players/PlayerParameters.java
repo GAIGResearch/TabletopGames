@@ -13,7 +13,7 @@ public class PlayerParameters extends TunableParameters {
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;
     public int budget = 4000;
-    public int breakMS = 10;
+    public int breakMS = 0;
 
     // Heuristic
     public IStateHeuristic gameHeuristic;

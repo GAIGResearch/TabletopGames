@@ -1,7 +1,7 @@
 {
   "Metadata" : {
     "Game" : "DotsAndBoxes",
-    "Seed" : 1692086736672,
+    "Seed" : 1692174503255,
     "Type" : "LinearApprox",
     "Alpha" : 0.0010000000474974513,
     "Gamma" : 0.75,
@@ -11,14 +11,14 @@
     "FeatureVector" : "games.dotsboxes.DBStateFeaturesReduced",
     "NGamesTotal" : 200,
     "NGamesWithTheseSettings" : 200,
-    "TimeTaken" : "00h 00m 22.7s",
+    "TimeTaken" : "00h 00m 23.7s",
     "ContinuedFrom" : null
   },
   "Weights" : {
-    "POINT_ADVANTAGE" : 0.12313326852014458,
-    "POINTS" : 0.036724435671993225,
-    "THREE_BOXES" : 4.0019541842620574E-4,
-    "TWO_BOXES" : 6.672734479834898E-4,
-    "ORDINAL" : -0.04619618047661729
+    "POINT_ADVANTAGE" : 0.13579092493299727,
+    "POINTS" : 0.037420481971598224,
+    "THREE_BOXES" : 7.129993644692252E-4,
+    "TWO_BOXES" : 6.765873809057475E-4,
+    "ORDINAL" : -0.04755436806903191
   }
 }
