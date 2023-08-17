@@ -545,8 +545,8 @@ class RLTrainer {
                 }
                 break;
             case 1: // Compete
-                main_competition("SushiGo", RLType.LinearApprox, "SushiGo");
-                main_competition("TicTacToe", RLType.Tabular, "TTT");
+                // main_competition("SushiGo", RLType.LinearApprox, "SushiGo");
+                // main_competition("TicTacToe", RLType.Tabular, "TTT");
                 main_competition("TicTacToe", RLType.LinearApprox, "TTT1D");
                 main_competition("TicTacToe", RLType.LinearApprox, "TTT2D");
                 main_competition("TicTacToe", RLType.LinearApprox, "TTT3D");
