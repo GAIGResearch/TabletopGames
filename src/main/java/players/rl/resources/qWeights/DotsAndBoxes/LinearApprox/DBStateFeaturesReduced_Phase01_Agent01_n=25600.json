@@ -9,16 +9,16 @@
     "Solver" : "Q_LEARNING",
     "Heuristic" : "players.heuristics.WinOnlyHeuristic",
     "FeatureVector" : "games.dotsboxes.DBStateFeaturesReduced",
-    "NGamesTotal" : 200,
-    "NGamesWithTheseSettings" : 200,
-    "TimeTaken" : "00h 00m 20.2s",
+    "NGamesTotal" : 25600,
+    "NGamesWithTheseSettings" : 25600,
+    "TimeTaken" : "00h 43m 30.6s",
     "ContinuedFrom" : null
   },
   "Weights" : {
-    "POINT_ADVANTAGE" : 0.12942478885548658,
-    "POINTS" : 0.03780897982273647,
-    "THREE_BOXES" : 6.8861809589671E-4,
-    "TWO_BOXES" : 7.356029100488737E-4,
-    "ORDINAL" : -0.051140161787302296
+    "POINT_ADVANTAGE" : 0.31513536789165486,
+    "POINTS" : 0.04044289490925137,
+    "THREE_BOXES" : 9.106812261118E-4,
+    "TWO_BOXES" : 9.781747969527918E-4,
+    "ORDINAL" : -0.06813662800539966
   }
 }

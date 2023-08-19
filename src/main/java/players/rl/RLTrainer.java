@@ -232,7 +232,7 @@ class RLTrainer {
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
 
-        int[] gamesAfterPhase = { 409600, 819200, 1638400 };
+        int[] gamesAfterPhase = { 409600, 819200, 1638400, 2457600, 3276800 };
 
         long seed = System.currentTimeMillis();
         String infilePath = phase == 1 ? null
@@ -302,7 +302,9 @@ class RLTrainer {
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
 
             int[] possibleNGames = { 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600,
-                    614400, 819200, 1024000, 1228800, 1433600, 1638400, 1843200, 2048000, 2252800, 2457600 };
+                    614400, 819200, 1024000, 1228800, 1433600, 1638400, 1843200, 2048000, 2252800, 2457600, 2662400,
+                    2867200, 3072000, 3276800 };
+            possibleNGames = new int[] { 409600 };
 
             for (int b = 8; b <= 200; b *= 5) {
                 final int finalB = b;
@@ -338,6 +340,7 @@ class RLTrainer {
                             mctsParams.budgetType = PlayerConstants.BUDGET_TIME;
                             mctsParams.budget = finalB;
                             mctsParams.breakMS = 0;
+                            mctsParams.rolloutLength = 1;
                             MCTSPlayer mctsPlayer = new MCTSPlayer(mctsParams);
                             mctsPlayer.setName("MCTS_" + currentThread);
                             agents.add(mctsPlayer);
@@ -446,7 +449,8 @@ class RLTrainer {
                                         204800 }),
                         new Phase(819200, new int[] { 614400 }),
                         new Phase(1638400, new int[] { 1024000, 1228800, 1433600 }),
-                        new Phase(2457600, new int[] { 1843200, 2048000, 2252800 })
+                        new Phase(2457600, new int[] { 1843200, 2048000, 2252800 }),
+                        new Phase(3276800, new int[] { 2662400, 2867200, 3072000 })
 
                 };
 
@@ -471,8 +475,8 @@ class RLTrainer {
                     {
                         // put("TicTacToe", new TicTacToeDim2StateVector());
                         put("DotsAndBoxes", new GameData(new DBStateFeaturesReduced(), 1, 3));
-                        // put("SushiGo", new GameData(new SushiGo2PlayerFeatureVector(), 2, 4, new
-                        // int[] { 6 }));
+                        // put("SushiGo", new GameData(new SushiGo2PlayerFeatureVector(), 5, 5, new
+                        // int[] { 0, 0, 0, 5 }));
                     }
                 };
 
@@ -480,7 +484,7 @@ class RLTrainer {
                     String gameName = gtr.getKey();
                     GameData data = gtr.getValue();
                     Object featureVector = data.featureVector;
-                    int[] bestAgents = new int[4];
+                    int[] bestAgents = new int[5];
                     for (int i = 0; i < data.bestAgents.length; i++)
                         bestAgents[i] = data.bestAgents[i];
                     for (int phase = data.phaseStart; phase <= data.phaseEnd; phase++) {
@@ -547,9 +551,10 @@ class RLTrainer {
             case 1: // Compete
                 // main_competition("SushiGo", RLType.LinearApprox, "SushiGo");
                 // main_competition("TicTacToe", RLType.Tabular, "TTT");
-                main_competition("TicTacToe", RLType.LinearApprox, "TTT1D");
-                main_competition("TicTacToe", RLType.LinearApprox, "TTT2D");
-                main_competition("TicTacToe", RLType.LinearApprox, "TTT3D");
+                // main_competition("TicTacToe", RLType.LinearApprox, "TTT1D");
+                // main_competition("TicTacToe", RLType.LinearApprox, "TTT2D");
+                // main_competition("TicTacToe", RLType.LinearApprox, "TTT3D");
+                main_competition("DotsAndBoxes", RLType.LinearApprox, "DBStateFeaturesReduced_Phase01_Agent01");
                 break;
             case 2: // Custom
                 custom_tournament();
