@@ -5,15 +5,15 @@ import core.AbstractPlayer;
 import core.interfaces.IGameRunner;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.AbstractTournament;
-import evaluation.tournaments.SkillGrid;
 import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
+import evaluation.tournaments.SkillGrid;
 import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.PlayerFactory;
-import players.mcts.BasicMCTSPlayer;
+import players.PlayerType;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
@@ -31,8 +31,6 @@ import java.util.regex.Pattern;
 import static evaluation.RunArg.*;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static utilities.Utils.getArg;
 
 
 public class RunGames implements IGameRunner {
@@ -88,7 +86,7 @@ public class RunGames implements IGameRunner {
             agents.addAll(PlayerFactory.createPlayers((String) runGames.config.get(playerDirectory)));
         } else {
             agents.add(new MCTSPlayer());
-            agents.add(new BasicMCTSPlayer());
+//            agents.add(new BasicMCTSPlayer());
             agents.add(new RandomPlayer());
             agents.add(new RMHCPlayer());
             agents.add(new OSLAPlayer());
@@ -200,13 +198,21 @@ public class RunGames implements IGameRunner {
         // And repair min/max player counts that were specified incorrectly
         for (int i = 0; i < nPlayers.size(); i++) {
             GameType game = GameType.valueOf(games.get(i));
+            int max = game.getMaxPlayers();
+
+            // Cap max number of players to those available in the framework if no player directory specified
+            // (in which case the framework will use 1 of each default players)
+            if (config.get(playerDirectory).equals("") && max > PlayerType.values().length - 2) {
+                max = PlayerType.values().length - 2;  // Ignore the 2 human players (console, GUI)
+            }
+
             if (nPlayers.get(i).a == -1) {
-                nPlayers.set(i, new Pair<>(game.getMinPlayers(), game.getMaxPlayers()));
+                nPlayers.set(i, new Pair<>(game.getMinPlayers(), max));
             }
             if (nPlayers.get(i).a < game.getMinPlayers())
                 nPlayers.set(i, new Pair<>(game.getMinPlayers(), nPlayers.get(i).b));
-            if (nPlayers.get(i).b > game.getMaxPlayers())
-                nPlayers.set(i, new Pair<>(nPlayers.get(i).a, game.getMaxPlayers()));
+            if (nPlayers.get(i).b > max)
+                nPlayers.set(i, new Pair<>(nPlayers.get(i).a, max));
         }
 
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())

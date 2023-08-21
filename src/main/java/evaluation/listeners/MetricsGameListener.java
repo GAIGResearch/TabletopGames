@@ -1,9 +1,11 @@
 package evaluation.listeners;
 
-import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IGameEvent;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IDataLogger;
+import evaluation.metrics.IMetricsCollection;
 import evaluation.metrics.tablessaw.DataTableSaw;
 import utilities.Utils;
 
@@ -47,11 +49,11 @@ public class MetricsGameListener implements IGameListener {
     }
 
     public MetricsGameListener(AbstractMetric[] metrics) {
-        this(ToBoth, metrics);
+        this(ToConsole, metrics);
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
-        this(logTo, new IDataLogger.ReportType[]{RawData, Summary, Plot}, metrics);
+        this(logTo, new IDataLogger.ReportType[]{Summary, Plot}, metrics);
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {

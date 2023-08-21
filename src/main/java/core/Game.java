@@ -20,12 +20,12 @@ import utilities.Pair;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 public class Game {
@@ -110,8 +110,17 @@ public class Game {
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
-            if (listeners != null)
-                listeners.forEach(game::addListener);
+
+            if (listeners != null) {
+                Set<String> agentNames = players.stream()
+                        //           .peek(a -> System.out.println(a.toString()))
+                        .map(AbstractPlayer::toString).collect(Collectors.toSet());
+
+                for (IGameListener gameTracker : listeners) {
+                    gameTracker.init(game, players.size(), agentNames);
+                    game.addListener(gameTracker);
+                }
+            }
 
             // Randomize parameters
             if (randomizeParameters) {
@@ -797,7 +806,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Stratego");
+        String gameType = Utils.getArg(args, "game", "Pandemic");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -814,7 +823,7 @@ public class Game {
 
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 
