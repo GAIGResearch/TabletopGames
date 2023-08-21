@@ -213,6 +213,6 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return hero.getName().contains(heroName) && hero.isFeatAvailable();
+        return hero.getName().contains(heroName) && hero.isFeatAvailable() && !hero.getNActionsExecuted().isMaximum();
     }
 }

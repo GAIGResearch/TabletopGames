@@ -442,11 +442,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             AttackType attackType = getAttackType(actingFigure);
 
-            if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
-                actions.addAll(meleeAttackActions(dgs, actingFigure));
-            }
-            if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
-                actions.addAll(rangedAttackActions(dgs, actingFigure));
+            // Monsters may only perform one attack per activation, so we must check if we have already attacked this turn
+            if (!(actingFigure instanceof Monster && actingFigure.hasAttacked())) {
+                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                    actions.addAll(meleeAttackActions(dgs, actingFigure));
+                }
+                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                    actions.addAll(rangedAttackActions(dgs, actingFigure));
+                }
             }
 
             // - Open/close a door TODO

@@ -49,6 +49,7 @@ public class RangedAttack extends MeleeAttack {
         super.movePhaseForward(state);
 
         attacker.getNActionsExecuted().increment();
+        attacker.setHasAttacked(true);
 
         return true;
     }

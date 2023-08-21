@@ -48,6 +48,7 @@ public class FreeAttack extends RangedAttack{
 
         // Remove the ability to use the Extra Action this turn
         attacker.setUsedExtraAction(true);
+        attacker.setHasAttacked(true);
 
         return true;
     }

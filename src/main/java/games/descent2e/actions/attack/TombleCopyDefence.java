@@ -21,7 +21,7 @@ public class TombleCopyDefence extends DescentAction {
     // Tomble Burrowell Hero Ability
     String heroName = "Tomble Burrowell";
     Hero tomble, ally;
-    List<DescentDice> defenceDice, combinedDice;
+    List<DescentDice> defenceDice;
     public TombleCopyDefence(Hero hero, Hero ally) {
         super(Triggers.ROLL_OTHER_DICE);
         this.tomble = hero;

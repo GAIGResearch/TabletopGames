@@ -70,6 +70,7 @@ public class EndTurn extends DescentAction{
         }
 
         f.setHasMoved(false);
+        f.setHasAttacked(false);
         f.setRemovedConditionThisTurn(false);
         f.setUsedExtraAction(false);
 
@@ -119,6 +120,11 @@ public class EndTurn extends DescentAction{
     @Override
     public DescentAction copy() {
         return this;
+    }
+
+    @Override
+    public int hashCode() {
+        return 111404;
     }
 
     @Override

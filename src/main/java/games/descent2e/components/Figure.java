@@ -71,7 +71,7 @@ public class Figure extends Token {
     Set<String> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
     MeleeAttack currentAttack;
-    boolean hasMoved, hasRerolled;
+    boolean hasMoved, hasAttacked, hasRerolled;
     boolean isOffMap, canIgnoreEnemies, extraAction = false;
 
     public Figure(String name, int nActionsPossible) {
@@ -151,6 +151,12 @@ public class Figure extends Token {
     }
     public void setHasMoved(boolean hasMoved) {
         this.hasMoved = hasMoved;
+    }
+    public boolean hasAttacked() {
+        return hasAttacked;
+    }
+    public void setHasAttacked(boolean hasAttacked) {
+        this.hasAttacked = hasAttacked;
     }
     public boolean hasRerolled() {
         return hasRerolled;

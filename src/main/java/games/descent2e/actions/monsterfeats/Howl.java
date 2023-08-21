@@ -44,7 +44,7 @@ public class Howl extends DescentAction {
 
 
                 HowlTest howlTest = new HowlTest(h.getComponentID(),Figure.Attribute.Willpower);
-                howlTest.setTestCount(monster.getNActionsExecuted().getValue() + 1);
+                howlTest.setTestCount(monster.getNActionsExecuted().getValue());
                 howlTest.setSourceFigure(monster);
                 howlTest.setAttributeTestName();
                 tests.add(howlTest);
@@ -59,6 +59,7 @@ public class Howl extends DescentAction {
         }*/
 
         monster.getNActionsExecuted().increment();
+        monster.setHasAttacked(true);
         return true;
     }
 
@@ -89,6 +90,6 @@ public class Howl extends DescentAction {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         boolean canHowl = isNearHeroes(dgs);
-        return f instanceof Monster && (((Monster) f).hasAction("Howl")) && !f.getNActionsExecuted().isMaximum() && canHowl;
+        return f instanceof Monster && (((Monster) f).hasAction("Howl")) && !f.getNActionsExecuted().isMaximum() && !f.hasAttacked() && canHowl;
     }
 }

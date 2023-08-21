@@ -96,6 +96,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         movePhaseForward(state);
 
         attacker.getNActionsExecuted().increment();
+        attacker.setHasAttacked(true);
 
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
