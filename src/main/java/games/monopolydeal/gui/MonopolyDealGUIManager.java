@@ -3,8 +3,10 @@ package games.monopolydeal.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.components.Deck;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.MonopolyDealParameters;
+import games.monopolydeal.cards.MonopolyDealCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -16,6 +18,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Set;
+
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
 /**
  * <p>This class allows the visualisation of the game. The game components (accessible through {@link Game#getGameState()}
@@ -39,10 +43,17 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
     final static int MonopolyDealCardWidth = 107;
     final static int MonopolyDealCardHeight = 150;
 
+    final static int HandBankWidth = 53;
+    final static int HandBankHeight = 75;
+    final static int PropertyWidth = 36;
+    final static int PropertyHeight = 50;
+
     MonopolyDealDeckView discardPile;
     MonopolyDealDeckView drawPile;
     int activePlayer = -1;
-    MonopolyDealPlayerHandView[] playerHands;
+    MonopolyDealDeckView[] playerBanks;
+    MonopolyDealCardsView[] playerHands;
+    MonopolyDealCardsView[][] playerProperties;
 
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
@@ -63,7 +74,9 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
             MonopolyDealGameState mdgs = (MonopolyDealGameState) gameState;
             MonopolyDealParameters mdp = (MonopolyDealParameters) gameState.getGameParameters();
 
-            playerHands = new MonopolyDealPlayerHandView[nPlayers];
+            playerHands = new MonopolyDealCardsView[nPlayers];
+            playerBanks = new MonopolyDealDeckView[nPlayers];
+            playerProperties = new MonopolyDealCardsView[nPlayers][10];
             playerViewBorders = new Border[nPlayers];
             JPanel mainGameArea = new JPanel();
             mainGameArea.setLayout(new BorderLayout());
@@ -74,7 +87,27 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
             int next = 0;
 
             for (int i = 0; i < nPlayers; i++){
-                MonopolyDealPlayerHandView playerHand = new MonopolyDealPlayerHandView(mdgs.getPlayerHand(i),i,humanID,mdp.getDataPath());
+                JPanel playerView = new JPanel();
+                playerView.setLayout(new BorderLayout());
+                MonopolyDealCardsView playerHand = new MonopolyDealCardsView(mdgs.getPlayerHand(i),i,humanID,mdp.getDataPath(), MonopolyDealGUIType.Hand);
+                MonopolyDealDeckView playerBank = new MonopolyDealDeckView(-1, mdgs.getDrawPile(), true, mdp.getDataPath(), new Rectangle(0, 0, MonopolyDealCardWidth/2, MonopolyDealCardHeight/2), MonopolyDealCardWidth/2, MonopolyDealCardHeight/2);
+                playerView.add(playerBank,BorderLayout.EAST);
+                // Adding player properties
+                JPanel propertiesNorthView = new JPanel();
+                JPanel propertiesSouthView = new JPanel();
+                for(int j=0;j<10;j++){
+                    MonopolyDealCardsView playerProperty = new MonopolyDealCardsView(new Deck<MonopolyDealCard>("Property of Player"+i,VISIBLE_TO_ALL),i,humanID,mdp.getDataPath(), MonopolyDealGUIType.Property);
+                    playerProperties[i][j] = playerProperty;
+                    if(j<5) propertiesNorthView.add(playerProperty);
+                    else propertiesSouthView.add(playerProperty);
+                }
+                JPanel propertiesView = new JPanel();
+                propertiesView.setLayout(new BorderLayout());
+                propertiesView.add(propertiesNorthView,BorderLayout.NORTH);
+                propertiesView.add(propertiesSouthView,BorderLayout.SOUTH);
+
+                playerView.add(propertiesView,BorderLayout.NORTH);
+                playerView.add(playerHand,BorderLayout.SOUTH);
 
                 // Get agent name
                 String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -87,10 +120,11 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
                 playerViewBorders[i] = title;
                 playerHand.setBorder(title);
 
-                sides[next].add(playerHand);
+                sides[next].add(playerView);
                 sides[next].setLayout(new GridBagLayout());
                 next = (next + 1) % (locations.length);
                 playerHands[i] = playerHand;
+                playerBanks[i] = playerBank;
             }
             for (int i = 0; i < locations.length; i++) {
                 mainGameArea.add(sides[i], locations[i]);
@@ -99,8 +133,8 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
             // Discard and draw piles go in the center
             JPanel centerArea = new JPanel();
             centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.X_AXIS));
-            discardPile = new MonopolyDealDeckView(-1, mdgs.getDiscardPile(), true, mdp.getDataPath(), new Rectangle(0, 0, MonopolyDealCardWidth, MonopolyDealCardHeight));
-            drawPile = new MonopolyDealDeckView(-1, mdgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, mdp.getDataPath(), new Rectangle(0, 0, MonopolyDealCardWidth, MonopolyDealCardHeight));
+            discardPile = new MonopolyDealDeckView(-1, mdgs.getDiscardPile(), true, mdp.getDataPath(), new Rectangle(0, 0, MonopolyDealCardWidth, MonopolyDealCardHeight), MonopolyDealCardWidth, MonopolyDealCardHeight);
+            drawPile = new MonopolyDealDeckView(-1, mdgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, mdp.getDataPath(), new Rectangle(0, 0, MonopolyDealCardWidth, MonopolyDealCardHeight), MonopolyDealCardWidth, MonopolyDealCardHeight);
             centerArea.add(drawPile);
             centerArea.add(discardPile);
             JPanel jp = new JPanel();
@@ -152,11 +186,21 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
                 activePlayer = gameState.getCurrentPlayer();
             }
         }
-
+        // Clearing all properties
+        for(int i=0;i<gameState.getNPlayers();i++){
+            for(int j=0;j<10;j++){
+                playerProperties[i][j].clear();
+            }
+        }
         // Update decks and visibility
         MonopolyDealGameState mdgs = (MonopolyDealGameState) gameState;
+
         for (int i = 0; i < gameState.getNPlayers(); i++){
             playerHands[i].update(mdgs);
+            playerBanks[i].updateComponent(mdgs.getPlayerBank(i));
+            for(int j=0;j < mdgs.getPropertySets(i).size(); j++){
+                playerProperties[i][j].updateProperty(mdgs,i,j);
+            }
             if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                     || humanPlayerId.contains(i)
                     || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {

@@ -30,10 +30,9 @@ public class MonopolyDealGameState extends AbstractGameState {
     MonopolyDealParameters params;
     Random rnd;
 
-    //GameState members
-    //Player Data members
+    // GameState members
+    // Player Data members
     PartialObservableDeck<MonopolyDealCard>[] playerHands;
-    //Board[] playerBoards;
     Deck<MonopolyDealCard>[] playerBanks;
     List<PropertySet>[] playerPropertySets;
 
@@ -163,6 +162,7 @@ public class MonopolyDealGameState extends AbstractGameState {
 //        retValue.playerPropertySets = playerPropertySets.clone();
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
+        retValue.deckEmpty = deckEmpty;
 
         return retValue;
     }
@@ -433,8 +433,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), params, rnd, drawPile, discardPile, actionsLeft);
-        result = 31 * result + Arrays.hashCode(playerHands);
+        int result = Objects.hash(super.hashCode(), params, discardPile, actionsLeft, deckEmpty);
         result = 31 * result + Arrays.hashCode(playerBanks);
         result = 31 * result + Arrays.hashCode(playerPropertySets);
         return result;

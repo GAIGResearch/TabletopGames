@@ -3,7 +3,7 @@
   "args": [
     {
       "class" : "evaluation.loggers.FileStatsLogger",
-      "args" : ["GameResults.txt"]
+      "args" : ["MonopolyDealGameResults.txt"]
     },
     [
       {"class": "evaluation.metrics.GameMetrics$GameScore" },

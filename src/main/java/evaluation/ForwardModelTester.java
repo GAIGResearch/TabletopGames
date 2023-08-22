@@ -38,7 +38,7 @@ public class ForwardModelTester {
     public ForwardModelTester(String... args) {
         String agentToPlay = Utils.getArg(args, "agent", "random");
         int numberOfGames = Utils.getArg(args, "nGames", 1);
-        String gameToRun = Utils.getArg(args, "game", "TicTacToe");
+        String gameToRun = Utils.getArg(args, "game", "MonopolyDeal");
         int nPlayers = Utils.getArg(args, "nPlayers", 2);
         boolean verbose = Arrays.asList(args).contains("verbose");
         GameType gt = GameType.valueOf(gameToRun);

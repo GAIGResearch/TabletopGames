@@ -16,8 +16,8 @@ public class MonopolyDealDeckView extends DeckView<MonopolyDealCard> {
     String dataPath;
     Image backOfCard;
 
-    public MonopolyDealDeckView(int player, Deck<MonopolyDealCard> d, boolean visible, String dataPath, Rectangle rect) {
-        super(player, d, visible, MonopolyDealCardWidth, MonopolyDealCardHeight, rect);
+    public MonopolyDealDeckView(int player, Deck<MonopolyDealCard> d, boolean visible, String dataPath, Rectangle rect, int cardWidth, int cardHeight) {
+        super(player, d, visible, cardWidth, cardHeight, rect);
         this.dataPath = dataPath;
         backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
     }
