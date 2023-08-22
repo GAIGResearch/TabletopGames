@@ -50,13 +50,12 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     public MonopolyDealGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-
+        rnd = new Random(gameParameters.getRandomSeed());
         params = (MonopolyDealParameters) gameParameters;
         this._reset();
     }
 
     protected void _reset() {
-        rnd = new Random(gameParameters.getRandomSeed());
         playerHands = new PartialObservableDeck[getNPlayers()];
         playerBanks = new Deck[getNPlayers()];
         playerPropertySets = new List[getNPlayers()];
@@ -152,11 +151,10 @@ public class MonopolyDealGameState extends AbstractGameState {
                 retValue.playerPropertySets[i].add(propertySet.copy());
             }
         }
-//        retValue.playerBanks = playerBanks.clone();
-//        retValue.playerPropertySets = playerPropertySets.clone();
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
         retValue.deckEmpty = deckEmpty;
+        retValue.boardModificationsLeft = boardModificationsLeft;
 
         return retValue;
     }

@@ -38,6 +38,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
         // initialization of variables and game setup
         MonopolyDealGameState state = (MonopolyDealGameState) firstState;
+        state._reset();
         MonopolyDealParameters params = state.params;
 
         state.actionsLeft = params.ACTIONS_PER_TURN;
