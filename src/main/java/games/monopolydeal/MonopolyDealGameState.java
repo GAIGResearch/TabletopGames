@@ -51,18 +51,15 @@ public class MonopolyDealGameState extends AbstractGameState {
     public MonopolyDealGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
 
-        rnd = new Random(gameParameters.getRandomSeed());
         params = (MonopolyDealParameters) gameParameters;
-        actionsLeft = params.ACTIONS_PER_TURN;
-        boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
         this._reset();
     }
 
     protected void _reset() {
+        rnd = new Random(gameParameters.getRandomSeed());
         playerHands = new PartialObservableDeck[getNPlayers()];
         playerBanks = new Deck[getNPlayers()];
         playerPropertySets = new List[getNPlayers()];
-
         drawPile = new Deck<>("Draw Pile",HIDDEN_TO_ALL);
         discardPile = new Deck<>("Discard Pile",VISIBLE_TO_ALL);
         for(int i=0;i<getNPlayers();i++){
@@ -118,9 +115,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     protected MonopolyDealGameState _copy(int playerId) {
         MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
-        retValue.rnd = new Random(gameParameters.getRandomSeed());
-        retValue.params = (MonopolyDealParameters) params._copy();
-        retValue._reset();
 
         // Placeholder to know how many cards each player had for redrawing cards
         int[] playerHandSize = new int[getNPlayers()];

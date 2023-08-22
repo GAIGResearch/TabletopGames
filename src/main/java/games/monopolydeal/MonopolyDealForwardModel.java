@@ -39,11 +39,13 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
         // initialization of variables and game setup
         MonopolyDealGameState state = (MonopolyDealGameState) firstState;
         MonopolyDealParameters params = state.params;
-        state._reset();
+
+        state.actionsLeft = params.ACTIONS_PER_TURN;
+        state.boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
 
         // Add cards to Deck
-        for (CardType cT:state.params.cardsIncludedInGame.keySet()) {
-            for(int i =0;i<state.params.cardsIncludedInGame.get(cT);i++){
+        for (CardType cT:params.cardsIncludedInGame.keySet()) {
+            for(int i =0;i<params.cardsIncludedInGame.get(cT);i++){
                 state.drawPile.add(MonopolyDealCard.create(cT));
             }
         }
@@ -51,7 +53,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
         state.drawPile.shuffle(state.rnd);
         //Deal 5 cards to each player
         for(int i=0;i< state.getNPlayers();i++) {
-            state.drawCard(i,state.params.INITIAL_DEAL);
+            state.drawCard(i,params.INITIAL_DEAL);
         }
         state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
         // Draw cards at the start of the turn

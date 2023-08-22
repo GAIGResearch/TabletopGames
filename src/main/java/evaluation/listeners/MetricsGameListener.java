@@ -51,7 +51,7 @@ public class MetricsGameListener implements IGameListener {
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
-        this(logTo, new IDataLogger.ReportType[]{RawData, Summary, Plot}, metrics);
+        this(logTo, new IDataLogger.ReportType[]{ Summary, Plot}, metrics);
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {
