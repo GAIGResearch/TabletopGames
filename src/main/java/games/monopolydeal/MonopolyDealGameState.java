@@ -113,7 +113,7 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     @Override
     protected MonopolyDealGameState _copy(int playerId) {
-        MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters, getNPlayers());
+        MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters.copy(), getNPlayers());
         // TODO: deep copy all variables to the new game state.
 
         // Placeholder to know how many cards each player had for redrawing cards
