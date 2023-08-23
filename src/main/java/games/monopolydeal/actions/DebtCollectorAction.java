@@ -171,8 +171,8 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DebtCollectorAction that = (DebtCollectorAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && actionState == that.actionState;
+        DebtCollectorAction action = (DebtCollectorAction) o;
+        return playerID == action.playerID && target == action.target && reaction == action.reaction && executed == action.executed && actionState == action.actionState;
     }
 
     @Override

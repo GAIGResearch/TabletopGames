@@ -211,11 +211,11 @@ public class MonopolyDealGameState extends AbstractGameState {
         else if (playerBanks[playerID].getSize() == 0) {
             for (PropertySet pSet : playerPropertySets[playerID]) {
                 for (int i=0; i<pSet.getSize(); i++) {
-                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) return true;
+                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) return false;
                 }
             }
         }
-        return false;
+        return true;
     }
     // add property
     public void addProperty(int playerID, MonopolyDealCard card){
