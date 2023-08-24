@@ -67,8 +67,11 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
                 if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
-                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,5));
+                if(MDGS.isBoardEmpty(target)) {
+                    availableActions.add(new DoNothing());
+                } else {
+                    availableActions.add(new PayRent(target,playerID,5));
+                }
                 break;
         }
         return availableActions;

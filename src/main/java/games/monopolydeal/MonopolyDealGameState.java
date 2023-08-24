@@ -214,6 +214,8 @@ public class MonopolyDealGameState extends AbstractGameState {
                     if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) return false;
                 }
             }
+        }else if(playerBanks[playerID].getSize()>0){
+            return false;
         }
         return true;
     }
