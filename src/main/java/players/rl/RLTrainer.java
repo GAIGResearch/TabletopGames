@@ -304,7 +304,6 @@ class RLTrainer {
             int[] possibleNGames = { 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200, 102400, 204800, 409600,
                     614400, 819200, 1024000, 1228800, 1433600, 1638400, 1843200, 2048000, 2252800, 2457600, 2662400,
                     2867200, 3072000, 3276800 };
-            possibleNGames = new int[] { 409600 };
 
             for (int b = 8; b <= 200; b *= 5) {
                 final int finalB = b;
@@ -554,7 +553,7 @@ class RLTrainer {
                 // main_competition("TicTacToe", RLType.LinearApprox, "TTT1D");
                 // main_competition("TicTacToe", RLType.LinearApprox, "TTT2D");
                 // main_competition("TicTacToe", RLType.LinearApprox, "TTT3D");
-                main_competition("DotsAndBoxes", RLType.LinearApprox, "DBStateFeaturesReduced_Phase01_Agent01");
+                main_competition("DotsAndBoxes", RLType.LinearApprox, "DAB");
                 break;
             case 2: // Custom
                 custom_tournament();
