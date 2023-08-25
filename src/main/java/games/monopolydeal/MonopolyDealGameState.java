@@ -207,13 +207,14 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerBanks[playerID].remove(money);
     }
     public boolean isBoardEmpty(int playerID){
-        if (playerBanks[playerID].getSize() == 0 && playerPropertySets[playerID].size() == 0) return true;
-        else if (playerBanks[playerID].getSize() == 0) {
+        if (playerBanks[playerID].getSize() == 0) {
             for (PropertySet pSet : playerPropertySets[playerID]) {
                 for (int i=0; i<pSet.getSize(); i++) {
                     if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild)) return false;
                 }
             }
+        } else if (playerBanks[playerID].getSize()>0) {
+            return false;
         }
         return true;
     }

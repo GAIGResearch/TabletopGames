@@ -87,6 +87,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                                 if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Blue,type,j)))
                                     availableActions.add(new PropertyRentAction(playerID,SetType.Blue,type,j));
                         }
+                        break;
                     case BrownLightBlueRent:
                         if(MDGS.playerHasSet(playerID, SetType.Brown)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
@@ -98,6 +99,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                                 if(!availableActions.contains(new PropertyRentAction(playerID,SetType.LightBlue,type,j)))
                                     availableActions.add(new PropertyRentAction(playerID,SetType.LightBlue,type,j));
                         }
+                        break;
                     case PinkOrangeRent:
                         if(MDGS.playerHasSet(playerID, SetType.Pink)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
@@ -109,6 +111,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                                 if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Orange,type,j)))
                                     availableActions.add(new PropertyRentAction(playerID,SetType.Orange,type,j));
                         }
+                        break;
                     case RedYellowRent:
                         if(MDGS.playerHasSet(playerID, SetType.Red)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
@@ -120,6 +123,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                                 if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Yellow,type,j)))
                                     availableActions.add(new PropertyRentAction(playerID,SetType.Yellow,type,j));
                         }
+                        break;
                     case RailRoadUtilityRent:
                         if(MDGS.playerHasSet(playerID, SetType.RailRoad)) {
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
@@ -131,6 +135,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                                 if(!availableActions.contains(new PropertyRentAction(playerID,SetType.Utility,type,j)))
                                     availableActions.add(new PropertyRentAction(playerID,SetType.Utility,type,j));
                         }
+                        break;
                     case PassGo:
                         if(!availableActions.contains(new PassGoAction()))
                             availableActions.add(new PassGoAction());
