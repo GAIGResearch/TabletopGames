@@ -423,6 +423,19 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         copyComponentTo(deck);
     }
 
+
+    protected void copyTo(Deck<T> deck, int playerId) {
+        List<T> newComponents = new ArrayList<>();
+        for (T c : components) {
+            newComponents.add((T) c.copy(playerId));
+        }
+        deck.components = newComponents;
+        deck.capacity = capacity;
+
+        //copy type and component.
+        copyComponentTo(deck);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

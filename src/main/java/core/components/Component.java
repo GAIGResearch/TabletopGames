@@ -49,6 +49,7 @@ public abstract class Component {
      * @return - a new Component with the same properties.
      */
     public abstract Component copy();
+    public Component copy(int playerId) { return copy(); }
 
     /**
      * Get and set the type of this component.
@@ -222,6 +223,10 @@ public abstract class Component {
                 ", componentName='" + componentName + '\'' +
                 ", properties=" + properties +
                 '}';
+    }
+
+    public String toString(int playerId) {
+        return toString();
     }
 
     @Override

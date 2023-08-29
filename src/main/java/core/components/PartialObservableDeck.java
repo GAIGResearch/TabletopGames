@@ -365,6 +365,21 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         return dp;
     }
 
+    public PartialObservableDeck<T> copy(int playerId) {
+        PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, ownerId, deckVisibility, componentID);
+        this.copyTo(dp, playerId); // Copy super
+
+        dp.deckVisibility = deckVisibility.clone();
+
+        ArrayList<boolean[]> newVisibility = new ArrayList<>();
+        for (boolean[] visibility : elementVisibility) {
+            newVisibility.add(visibility.clone());
+        }
+        dp.elementVisibility = newVisibility;
+
+        return dp;
+    }
+
     public String toString(AbstractGameState gs, int playerID) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < components.size(); i++) {

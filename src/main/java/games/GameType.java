@@ -19,6 +19,10 @@ import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
 import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.hanabi.HanabiForwardModel;
+import games.hanabi.HanabiGameState;
+import games.hanabi.HanabiParameters;
+import games.hanabi.gui.HanabiGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
@@ -167,7 +171,7 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
-
+    Hanabi(2,5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
