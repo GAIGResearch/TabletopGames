@@ -3,7 +3,7 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 

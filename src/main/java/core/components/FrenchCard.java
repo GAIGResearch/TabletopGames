@@ -2,6 +2,8 @@ package core.components;
 
 import core.CoreConstants;
 
+import java.util.Objects;
+
 public class FrenchCard extends Card {
 
     public static int[] numbers = {2,3,4,5,6,7,8,9,10};
@@ -13,7 +15,7 @@ public class FrenchCard extends Card {
         Ace (14),
         Number (-1);
 
-        int number;
+        final int number;
         FrenchCardType(int number) {
             this.number = number;
         }
@@ -73,7 +75,21 @@ public class FrenchCard extends Card {
 
     @Override
     public FrenchCard copy() {
-        return new FrenchCard(type, suite, number, componentID);
+        return this; // immutable
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(suite.ordinal(), type.ordinal(), number);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof FrenchCard) {
+            FrenchCard other = (FrenchCard) o;
+            return this.suite == other.suite && this.type == other.type && this.number == other.number;
+        }
+        return false;
     }
 
     @Override

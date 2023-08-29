@@ -23,8 +23,8 @@ import java.util.Random;
  */
 public class BoltzmannActionPlayer extends AbstractPlayer {
 
-    final double temperature;
-    final double epsilon;
+    final public double temperature;
+    final public double epsilon;
     final Random rnd;
 
     protected IActionHeuristic actionHeuristic;

@@ -1,13 +1,12 @@
 package evaluation.listeners;
 
-import core.AbstractPlayer;
 import core.Game;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameMetrics;
 import evaluation.metrics.IMetricsCollection;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
-import utilities.Utils;
+import utilities.JSONUtils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -59,11 +58,11 @@ public interface IGameListener {
         File listenerDetails = new File(listenerClass);
         if (listenerDetails.exists()) {
             // in this case we construct from file
-            listener = Utils.loadClassFromFile(listenerClass);
+            listener = JSONUtils.loadClassFromFile(listenerClass);
         } else {
             // In this case we first check if we have a Metrics class
             // And if we do, we extract all the metrics from the class
-            if (metricsClass != null && !metricsClass.equals("")) {
+            if (metricsClass != null && !metricsClass.isEmpty()) {
                 try {
                     Class<?> clazz = Class.forName(metricsClass);
                     Constructor<?> constructor;
@@ -99,9 +98,6 @@ public interface IGameListener {
                         }
                     }
                 }
-                // If no metrics (or a problem occurred), then we use the no-arg constructor
-                if (listener == null)
-                    return createListener(listenerClass);
             } catch (Exception e) {
                 System.out.println("Error occurred trying to instantiate listener " + listenerClass + ": " + e.getMessage() + " : " + e.toString());
             }
@@ -120,18 +116,7 @@ public interface IGameListener {
      * @return empty game listener given class, no logger, no metrics
      */
     static IGameListener createListener(String listenerClass) {
-        IGameListener listener = null;
-        try {
-            Class<?> clazz = Class.forName(listenerClass);
-            Constructor<?> constructor;
-            constructor = clazz.getConstructor();
-            listener = (IGameListener) constructor.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if(listener == null)
-            return new MetricsGameListener(new AbstractMetric[0]);
-        return listener;
+        return createListener(listenerClass, "");
     }
 
     default void reset() {
@@ -139,5 +124,4 @@ public interface IGameListener {
 
     default void init(Game game, int nPlayersPerGame, Set<String> playerNames) {}
 
-    default void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {}
 }

@@ -7,7 +7,6 @@ import core.actions.LogEvent;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.AbstractTournamentMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
@@ -202,7 +201,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class WinCause extends AbstractTournamentMetric
+    public static class WinCause extends AbstractMetric
     {
         int killer = -1;
         int victim = -1;
@@ -278,7 +277,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class RoundLength extends AbstractTournamentMetric
+    public static class RoundLength extends AbstractMetric
     {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -305,7 +304,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class EliminatingCards extends AbstractTournamentMetric {
+    public static class EliminatingCards extends AbstractMetric {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {

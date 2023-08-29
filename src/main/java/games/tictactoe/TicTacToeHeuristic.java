@@ -3,7 +3,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Token;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import utilities.Pair;
 
 public class TicTacToeHeuristic extends TunableParameters implements IStateHeuristic {

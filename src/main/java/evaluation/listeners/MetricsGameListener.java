@@ -1,10 +1,13 @@
 package evaluation.listeners;
 
-import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IGameEvent;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IDataLogger;
+import evaluation.metrics.IMetricsCollection;
 import evaluation.metrics.tablessaw.DataTableSaw;
+import utilities.Utils;
 
 import java.io.File;
 import java.util.*;
@@ -46,11 +49,11 @@ public class MetricsGameListener implements IGameListener {
     }
 
     public MetricsGameListener(AbstractMetric[] metrics) {
-        this(ToBoth, metrics);
+        this(ToConsole, metrics);
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
-        this(logTo, new IDataLogger.ReportType[]{RawData, Summary, Plot}, metrics);
+        this(logTo, new IDataLogger.ReportType[]{Summary, Plot}, metrics);
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {
@@ -96,17 +99,7 @@ public class MetricsGameListener implements IGameListener {
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // If the "metrics/out/" does not exist, create it
-            String folder = "";
-            for (String nestedDir : nestedDirectories) {
-                folder = folder + nestedDir + File.separator;
-                File outFolder = new File(folder);
-                if (!outFolder.exists()) {
-                    success = outFolder.mkdir();
-                }
-                if (!success)
-                    throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
-            }
-
+            String folder = Utils.createDirectory(nestedDirectories);
             destDir = new File(folder).getAbsolutePath() + File.separator;
         }
         return success;
@@ -131,9 +124,12 @@ public class MetricsGameListener implements IGameListener {
 
         // All metrics report themselves
         if (success) {
-            for (AbstractMetric metric : metrics.values()) {
-                metric.report(destDir, reportTypes, reportDestinations);
-            }
+            // If we only want the raw data per event (e.g. if you are James), then this just creates a whole load
+            // of redundant directories
+            if (!(reportTypes.size() == 1 && reportTypes.contains(RawDataPerEvent)))
+                for (AbstractMetric metric : metrics.values()) {
+                    metric.report(destDir, reportTypes, reportDestinations);
+                }
 
             // We also create raw data files for groups of metrics responding to the same event
             if (reportTypes.contains(RawDataPerEvent)) {
@@ -159,7 +155,7 @@ public class MetricsGameListener implements IGameListener {
         } else if (e == ROUND_OVER) {
             return "Round";
         } else if (e == TURN_OVER) {
-                return "Turn";
+            return "Turn";
         } else if (e == ACTION_CHOSEN || e == ACTION_TAKEN || e == GAME_EVENT) {
             return "Tick";
         }
@@ -190,12 +186,4 @@ public class MetricsGameListener implements IGameListener {
         }
     }
 
-    @Override
-    public void tournamentInit(Game game, int nPlayersPerGame, Set<String> playerNames, Set<AbstractPlayer> matchup) {
-        for (AbstractMetric metric : metrics.values()) {
-            if (metric instanceof AbstractTournamentMetric) {
-                ((AbstractTournamentMetric)metric).tournamentInit(game, nPlayersPerGame, playerNames, matchup);
-            }
-        }
-    }
 }

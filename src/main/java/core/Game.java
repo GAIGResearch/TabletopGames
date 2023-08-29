@@ -20,12 +20,12 @@ import utilities.Pair;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 public class Game {
@@ -110,8 +110,17 @@ public class Game {
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
-            if (listeners != null)
-                listeners.forEach(game::addListener);
+
+            if (listeners != null) {
+                Set<String> agentNames = players.stream()
+                        //           .peek(a -> System.out.println(a.toString()))
+                        .map(AbstractPlayer::toString).collect(Collectors.toSet());
+
+                for (IGameListener gameTracker : listeners) {
+                    gameTracker.init(game, players.size(), agentNames);
+                    game.addListener(gameTracker);
+                }
+            }
 
             // Randomize parameters
             if (randomizeParameters) {
@@ -430,8 +439,8 @@ public class Game {
                  */
 
                 // Get player to ask for actions next (This horrendous line is for backwards compatibility).
-                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder() instanceof ReactiveTurnOrder
-                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder()).getReactivePlayers().size() > 0);
+                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder) gameState).getTurnOrder()).getReactivePlayers().size() > 0);
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
@@ -500,7 +509,7 @@ public class Game {
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
         copyTime = (System.nanoTime() - s);
-  //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
+        //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
         s = System.nanoTime();
@@ -516,9 +525,9 @@ public class Game {
                 lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
             }
             throw new AssertionError("No actions available for player " + activePlayer
-                    + (lastAction != null? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
+                    + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + (topOfStack != null? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
+                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
 
         }
         actionComputeTime = (System.nanoTime() - s);
@@ -545,8 +554,11 @@ public class Game {
             } else {
                 // Get action from player, and time it
                 s = System.nanoTime();
-                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
+                if (debug)
+                    System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
+                if (debug)
+                    System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;
@@ -574,7 +586,7 @@ public class Game {
 
         // Check player timeout
         if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-            forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
+            action = forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
         } else {
             // Resolve action and game rules, time it
             s = System.nanoTime();
@@ -654,7 +666,7 @@ public class Game {
      * @return - copy time
      */
     public double getCopyTime() {
-      //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
+        //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
         return copyTime;
     }
 
@@ -729,6 +741,7 @@ public class Game {
             listener.setGame(this);
         }
     }
+
     public List<IGameListener> getListeners() {
         return listeners;
     }
@@ -793,7 +806,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Stratego");
+        String gameType = Utils.getArg(args, "game", "Pandemic");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -810,7 +823,7 @@ public class Game {
 
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 

@@ -2,7 +2,7 @@ package players.simple;
 
 import core.AbstractParameters;
 import core.interfaces.IActionHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 public class BoltzmannActionParams extends TunableParameters {
 
@@ -31,17 +31,12 @@ public class BoltzmannActionParams extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        BoltzmannActionParams bap = new BoltzmannActionParams();
-        bap.setParameterValue("temperature", temperature);
-        bap.setParameterValue("epsilon", epsilon);
-        bap.setParameterValue("actionHeuristic", actionHeuristic);
-        bap._reset();
-        return bap;
+        return new BoltzmannActionParams();
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return o == this;
+        return o instanceof BoltzmannActionParams;
     }
 
 

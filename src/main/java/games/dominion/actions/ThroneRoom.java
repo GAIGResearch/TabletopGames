@@ -40,11 +40,17 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         if (enthronedCard == null) {
             if (executionCount != 0)
                 throw new AssertionError("Something has gone wrong with Throne Room");
-            return state.getDeck(DeckType.HAND, player).stream()
+            List<AbstractAction> options = state.getDeck(DeckType.HAND, player).stream()
                     .filter(DominionCard::isActionCard)
                     .map(c -> DominionCard.create(c.cardType()).getAction(player))
                     .distinct()
                     .collect(toList());
+            if (options.isEmpty()) {
+                // this is possible if we throne room a throne room (etc.) and then have no action cards
+                executionCount = 2; // and we are done
+                options.add(new EndPhase());
+            }
+            return options;
         } else {
             if (executionCount != 1)
                 throw new AssertionError("Something has gone wrong with Throne Room");
@@ -59,7 +65,10 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        DominionGameState dgs = (DominionGameState) state;
+        if (action instanceof EndPhase) {
+            executionCount = 2;
+            return;
+        }
         DominionAction da = (DominionAction) action;
         if (enthronedCard == null) {
             enthronedCard = da.type;

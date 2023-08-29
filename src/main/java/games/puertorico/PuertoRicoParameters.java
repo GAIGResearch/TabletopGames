@@ -1,7 +1,7 @@
 package games.puertorico;
 
 import core.AbstractParameters;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 public class PuertoRicoParameters extends TunableParameters {
 

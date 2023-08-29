@@ -169,17 +169,17 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>ParameterSearch</id>
+                        <id>RunGames</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.ParameterSearch</mainClass>
+                                    <mainClass>evaluation.RunGames</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>ParameterSearch</finalName>
+                            <finalName>RunGames</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -187,17 +187,17 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>Tournament</id>
+                        <id>ParameterSearch</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.tournaments.RoundRobinTournament</mainClass>
+                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>Tournament</finalName>
+                            <finalName>ParameterSearch</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -230,7 +230,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.SkillLadder</mainClass>
+                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>SkillLadder</finalName>

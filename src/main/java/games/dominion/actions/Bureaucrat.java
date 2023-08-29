@@ -17,6 +17,7 @@ public class Bureaucrat extends DominionAttackAction {
     public Bureaucrat(int playerId) {
         super(CardType.BUREAUCRAT, playerId);
     }
+
     public Bureaucrat(int playerId, boolean dummy) {
         super(CardType.BUREAUCRAT, playerId, dummy);
     }
@@ -25,13 +26,16 @@ public class Bureaucrat extends DominionAttackAction {
 
     @Override
     boolean _execute(DominionGameState state) {
-        // first gain a silver onto drawpile
-        (new GainCard(CardType.SILVER, player, DeckType.DRAW)).execute(state);
-        // and now everyone knows this
-        PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, player);
-        for (int i = 0; i< state.getNPlayers(); i++)
-        drawDeck.setVisibilityOfComponent(0, i, true);
-
+        // first we check to see if there is any silver
+        if (state.getCardsIncludedInGame().get(CardType.SILVER) > 0) {
+            // first gain a silver onto drawpile
+            (new GainCard(CardType.SILVER, player, DeckType.DRAW)).execute(state);
+            // and now everyone knows this
+            PartialObservableDeck<DominionCard> drawDeck = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.DRAW, player);
+            for (int i = 0; i < state.getNPlayers(); i++) {
+                drawDeck.setVisibilityOfComponent(0, i, true);
+            }
+        }
         // the rest is an attack, with decisions made by the victims
         initiateAttack(state);
         return true;

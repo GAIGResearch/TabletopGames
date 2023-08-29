@@ -2,7 +2,7 @@ package games.connect4;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 public class Connect4Heuristic extends TunableParameters implements IStateHeuristic {
 

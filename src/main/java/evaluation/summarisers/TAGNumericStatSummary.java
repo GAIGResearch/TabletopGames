@@ -95,6 +95,8 @@ public class TAGNumericStatSummary extends TAGStatSummary {
             if (!elements.isEmpty()) {
                 max = elements.stream().mapToDouble(i -> i).max().getAsDouble();
                 min = elements.stream().mapToDouble(i -> i).min().getAsDouble();
+            } else {
+                return;
             }
             mean = sum / n;
             double num = sumsq - (n * mean * mean);

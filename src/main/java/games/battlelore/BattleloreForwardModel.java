@@ -68,7 +68,9 @@ public class BattleloreForwardModel extends StandardForwardModel {
                 break;
             case AttackStep:
                 if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty()) {
-                    endPlayerTurn(state);
+                    endPlayerTurn(currentState);
+                    if (currentState.getCurrentPlayer() == 0)
+                        endRound(currentState);
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
                 }
                 break;
@@ -78,10 +80,6 @@ public class BattleloreForwardModel extends StandardForwardModel {
 
         if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getRoundCounter() >= maxRounds) {
             endGame(currentState);
-        } else {
-            endPlayerTurn(currentState);
-            if (currentState.getCurrentPlayer() == 0)
-                endRound(currentState);
         }
     }
 

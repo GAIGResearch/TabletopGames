@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static evaluation.tournaments.AbstractTournament.TournamentMode.SELF_PLAY;
+import static utilities.JSONUtils.loadClassFromFile;
 import static utilities.Utils.getArg;
 
 public class ProgressiveLearner {
@@ -68,11 +69,11 @@ public class ProgressiveLearner {
         String learnerDefinition = getArg(args, "learner", "");
         if (learnerDefinition.equals(""))
             throw new IllegalArgumentException("Must specify a learner file");
-        learner = Utils.loadClassFromFile(learnerDefinition);
+        learner = loadClassFromFile(learnerDefinition);
         String listenerDefinition = getArg(args, "listener", "");
         if (listenerDefinition.equals(""))
             throw new IllegalArgumentException("Must specify a listener file");
-        listener = Utils.loadClassFromFile(listenerDefinition);
+        listener = loadClassFromFile(listenerDefinition);
         prefix = getArg(args, "prefix", "ProgLearn");
 
         learnedFilesByIteration = new String[iterations];
@@ -150,7 +151,7 @@ public class ProgressiveLearner {
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
-                finalMatchups, System.currentTimeMillis(), params, "", "");
+                finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
         tournament.run();
@@ -226,7 +227,7 @@ public class ProgressiveLearner {
         List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
 
         RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, SELF_PLAY, matchups,
-                matchups, System.currentTimeMillis(), params, "", "");
+                matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
