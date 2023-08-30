@@ -51,6 +51,7 @@ public class ResForwardModel extends StandardForwardModel {
         resgs.failedVoteCounter = 0;
         resgs.playerHandCards = new ArrayList<>(firstState.getNPlayers());
         resgs.gameBoard = resp.getPlayerBoard(firstState.getNPlayers());
+        resgs.teamChoice = new ArrayList<>();
         if (resgs.gameBoard == null) {
             throw new AssertionError("GameBoard shouldn't be null");
         }
@@ -159,10 +160,12 @@ public class ResForwardModel extends StandardForwardModel {
         if (resgs.getGamePhase() == LeaderSelectsTeam) {
             int turn = resgs.getTurnCounter();
 
+            // TODO: This does not cater for cases where we have deleted votes with a copy
+            // This needs to check if we have votes in from all players
+            // the same will apply to both TeamSelectionVote and MissionVote phases
             if ((turn + 1) % (resgs.getNPlayers()) == 0) {
                 revealCards(resgs);
                 resgs.setGamePhase(TeamSelectionVote);
-
             } else {
                 resgs.previousGamePhase = resgs.getGamePhase();
             }
@@ -282,9 +285,7 @@ public class ResForwardModel extends StandardForwardModel {
         }
 
         if (resgs.getGamePhase() == LeaderSelectsTeam) {
-            for (List<Integer> cc : resgs.teamChoice) {
-                resgs.finalTeamChoice = new ArrayList<>(cc);
-            }
+            resgs.finalTeamChoice = resgs.teamChoice;
         }
 
         if (resgs.getGamePhase() == MissionVote) {

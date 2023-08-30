@@ -27,7 +27,7 @@ public class ResGameState extends AbstractGameState {
     ResPlayerCards.CardType[] votingChoice;
     ResPlayerCards.CardType[] missionVotingChoice;
 
-    List<List<Integer>> teamChoice = new ArrayList<>();
+    List<Integer> teamChoice;
     IGamePhase previousGamePhase = null;
 
     public int getWinningTeam() {
@@ -217,7 +217,7 @@ public class ResGameState extends AbstractGameState {
 
 
     public void addTeamChoice(ResTeamBuilding ResTeamBuilding) {
-        teamChoice.add(ResTeamBuilding.getTeam());
+        teamChoice = ResTeamBuilding.getTeam();
     }
 
     @Override
