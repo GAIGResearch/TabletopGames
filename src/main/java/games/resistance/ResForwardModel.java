@@ -28,9 +28,6 @@ import static games.resistance.ResGameState.ResGamePhase.*;
  * </ol>
  */
 public class ResForwardModel extends StandardForwardModel {
-    public int counter = 0;
-    boolean haveBeenInLoop = false;
-    boolean roundEnded = false;
 
     /**
      * Initializes all variables in the given game state. Performs initial game setup according to game rules, e.g.:
@@ -48,8 +45,8 @@ public class ResForwardModel extends StandardForwardModel {
         ResGameState resgs = (ResGameState) firstState;
         resgs.rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ResParameters resp = (ResParameters) firstState.getGameParameters();
-        resgs.votingChoice = new ArrayList<>(firstState.getNPlayers());
-        resgs.missionVotingChoice = new ArrayList<>(firstState.getNPlayers());
+        resgs.votingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
+        resgs.missionVotingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
         resgs.gameBoardValues = new ArrayList<>(5);
         resgs.failedVoteCounter = 0;
         resgs.playerHandCards = new ArrayList<>(firstState.getNPlayers());
@@ -61,8 +58,6 @@ public class ResForwardModel extends StandardForwardModel {
 
         List<Boolean> spies = ResParameters.randomiseSpies(resgs.factions[1], firstState.getNPlayers(), resgs.rnd);
         for (int i = 0; i < firstState.getNPlayers(); i++) {
-            resgs.votingChoice.add(new ArrayList<>());
-            resgs.missionVotingChoice.add(new ArrayList<>());
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = false;
             PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", visible);
@@ -157,9 +152,11 @@ public class ResForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         ResGameState resgs = (ResGameState) currentState;
+        boolean haveBeenInLoop = false;
+        boolean roundEnded = false;
 
         //Leader Selects Team
-        if (resgs.getGamePhase() == LeaderSelectsTeam && haveBeenInLoop == false) {
+        if (resgs.getGamePhase() == LeaderSelectsTeam) {
             int turn = resgs.getTurnCounter();
 
             if ((turn + 1) % (resgs.getNPlayers()) == 0) {
@@ -172,10 +169,10 @@ public class ResForwardModel extends StandardForwardModel {
             haveBeenInLoop = true;
         }
 
-        if (resgs.getGamePhase() == TeamSelectionVote && haveBeenInLoop == false) {
+        if (resgs.getGamePhase() == TeamSelectionVote && !haveBeenInLoop) {
 
             int turn = resgs.getTurnCounter();
-            if (resgs.teamChoice.size() == 0) {
+            if (resgs.teamChoice.isEmpty()) {
                 throw new AssertionError("Team Choice Size is Zero");
             }
             if ((turn + 1) % resgs.getNPlayers() == 0 && resgs.previousGamePhase == resgs.getGamePhase()) {
@@ -193,12 +190,11 @@ public class ResForwardModel extends StandardForwardModel {
                     resgs.winners = 1;
                 }
 
-                if (resgs.voteSuccess == true) {
+                if (resgs.voteSuccess) {
                     resgs.setGamePhase(MissionVote);
                 } else {
                     resgs.clearCardChoices();
                     resgs.clearTeamChoices();
-                    resgs.clearVoteChoices();
 
                     // CHANGE LEADER
                     changeLeader(resgs);
@@ -211,10 +207,10 @@ public class ResForwardModel extends StandardForwardModel {
             haveBeenInLoop = true;
         }
 
-        if (resgs.getGamePhase() == MissionVote && haveBeenInLoop == false) {
+        if (resgs.getGamePhase() == MissionVote && !haveBeenInLoop) {
 
             int turn = resgs.getTurnCounter();
-            if (resgs.finalTeamChoice.size() == 0) {
+            if (resgs.finalTeamChoice.isEmpty()) {
                 throw new AssertionError("Final Team Choice Size is Zero");
             }
             if ((turn + 1) % resgs.getNPlayers() == 0 && resgs.previousGamePhase == resgs.getGamePhase()) {
@@ -222,12 +218,10 @@ public class ResForwardModel extends StandardForwardModel {
                 revealCards(resgs);
                 resgs.clearCardChoices();
                 resgs.clearMissionChoices();
-                resgs.clearVoteChoices();
                 resgs.clearTeamChoices();
                 changeLeader(resgs);
                 endRound(resgs);
                 roundEnded = true;
-                _endRound(resgs);
 
                 // Check if the game is over
                 int occurrenceCountTrue = Collections.frequency(resgs.gameBoardValues, true);
@@ -268,33 +262,18 @@ public class ResForwardModel extends StandardForwardModel {
             } else {
                 resgs.previousGamePhase = resgs.getGamePhase();
             }
-            haveBeenInLoop = true;
         }
         //End player turn
-        if (resgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && roundEnded == false) {
+        if (resgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !roundEnded) {
             endPlayerTurn(resgs);
         }
-        haveBeenInLoop = false;
-        roundEnded = false;
-
     }
 
     void revealCards(ResGameState resgs) {
         if (resgs.getGamePhase() == TeamSelectionVote) {
 
-            ArrayList<ResPlayerCards.CardType> allVotes = new ArrayList<>();
-            for (int i = 0; i < resgs.getNPlayers(); i++) {
-                for (ResVoting cc : resgs.votingChoice.get(i)) {
-                    allVotes.add(cc.cardType);
-                    break;
-                }
-            }
-
-            int occurrenceCount = Collections.frequency(allVotes, ResPlayerCards.CardType.Yes);
-            if (allVotes.contains(ResPlayerCards.CardType.LEADER) || allVotes.contains(ResPlayerCards.CardType.RESISTANCE) || allVotes.contains(ResPlayerCards.CardType.SPY)) {
-                throw new AssertionError("Incorrect Type in Team Vote");
-            }
-            if (occurrenceCount > allVotes.size() / 2) {
+            int occurrenceCount = (int) Arrays.stream(resgs.votingChoice).filter(c -> c == ResPlayerCards.CardType.Yes).count();
+            if (occurrenceCount > resgs.getNPlayers() / 2) {
                 resgs.voteSuccess = true;
             } else {
                 resgs.voteSuccess = false;
@@ -309,20 +288,7 @@ public class ResForwardModel extends StandardForwardModel {
         }
 
         if (resgs.getGamePhase() == MissionVote) {
-            ArrayList<ResPlayerCards.CardType> allVotes = new ArrayList<>();
-            for (int i = 0; i < resgs.getNPlayers(); i++) {
-                for (ResMissionVoting cc : resgs.missionVotingChoice.get(i)) {
-                    allVotes.add(cc.cardType);
-                    break;
-                }
-
-            }
-
-
-            if (allVotes.contains(ResPlayerCards.CardType.LEADER) || allVotes.contains(ResPlayerCards.CardType.RESISTANCE) || allVotes.contains(ResPlayerCards.CardType.SPY)) {
-                throw new AssertionError("Incorrect Type in Mission Vote");
-            }
-            int occurrenceCount = Collections.frequency(allVotes, ResPlayerCards.CardType.No);
+            int occurrenceCount = (int) Arrays.stream(resgs.missionVotingChoice).filter(c -> c == ResPlayerCards.CardType.No).count();
             if (occurrenceCount > 0) {
                 resgs.gameBoardValues.add(false);
             } else {
@@ -333,18 +299,6 @@ public class ResForwardModel extends StandardForwardModel {
 
     }
 
-
-    public void _endRound(ResGameState resgs) {
-        // Apply card end of round rules
-//        for (SHPlayerCards.CardType type: SHPlayerCards.CardType.values()) {
-//            type.onRoundEnd(resgs);
-//        }
-        //resgs.setGamePhase(LeaderSelectsTeam);
-        //resgs.teamChoice.clear();
-        roundEnded = true;
-
-
-    }
 
     @Override
     protected void endGame(AbstractGameState gs) {
