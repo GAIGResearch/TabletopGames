@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class ResMissionVoting extends AbstractAction implements IExtendedSequence {
+public class ResMissionVoting extends AbstractAction{
     public final int playerId;
     public final ResPlayerCards.CardType cardType;
 
@@ -21,50 +21,10 @@ public class ResMissionVoting extends AbstractAction implements IExtendedSequenc
         this.cardType = cardType;
     }
 
-    public ResMissionVoting getHiddenChoice( int i) {
-        Random rnd = new Random();
-        if (rnd.nextInt(2) == 0){return new ResMissionVoting(i, ResPlayerCards.CardType.Yes);}
-        else {return new ResMissionVoting(i, ResPlayerCards.CardType.No);}
-
-    }
-
     @Override
     public boolean execute(AbstractGameState gs) {
-
-        ((ResGameState)gs).addMissionChoice(this, gs.getCurrentPlayer());
+        ((ResGameState) gs).addMissionChoice(this, gs.getCurrentPlayer());
         return true;
-    }
-
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-
-        ResGameState resgs = (ResGameState) state;
-        List<AbstractAction> actions = new ArrayList<>();
-        if(resgs.getFinalTeam().contains(playerId)){
-
-            actions.add(new ResMissionVoting(playerId, ResPlayerCards.CardType.Yes));
-            actions.add(new ResMissionVoting(playerId, ResPlayerCards.CardType.No));
-        }
-        else {
-            actions.add(new ResWait(playerId));
-        }
-
-        return actions;
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return playerId;
-    }
-
-    @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return false;
     }
 
     @Override

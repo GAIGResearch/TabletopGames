@@ -17,6 +17,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Collections;
 
 public class HanabiGUIManager extends AbstractGUIManager {
     final static int playerAreaWidth = 300;
@@ -46,7 +47,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
     Border[] playerViewBorders;
 
     public HanabiGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, game, ac, humanID);
+        super(parent, game, ac, Collections.singleton(humanID));
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
@@ -114,7 +115,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Hanabi", gameState, width, defaultInfoPanelHeight+50);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());
@@ -165,7 +166,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width/2 - 10, height);
+        createActionHistoryPanel(width/2 - 10, height, Collections.emptySet());
         wrapper.add(historyContainer);
         return wrapper;
     }

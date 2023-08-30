@@ -350,20 +350,20 @@ public class TestResistance {
         }
 
         for (int i = 0; i < state.getNPlayers()-1; i++) {
-            if(state.getWinners() == 0)
+            if(state.getWinningTeam() == 0)
             {
                 if(state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.RESISTANCE)
-                {assertEquals( CoreConstants.GameResult.WIN,state.getPlayerResults()[i]);}
+                {assertEquals( CoreConstants.GameResult.WIN_GAME,state.getPlayerResults()[i]);}
                 if(state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.SPY)
-                {assertEquals(CoreConstants.GameResult.LOSE,state.getPlayerResults()[i] );}
+                {assertEquals(CoreConstants.GameResult.LOSE_GAME,state.getPlayerResults()[i] );}
             }
 
-            if(state.getWinners() == 1)
+            if(state.getWinningTeam() == 1)
             {
                 if(state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.RESISTANCE)
-                {assertEquals(CoreConstants.GameResult.LOSE,state.getPlayerResults()[i] );}
+                {assertEquals(CoreConstants.GameResult.LOSE_GAME,state.getPlayerResults()[i] );}
                 if(state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.SPY)
-                {assertEquals( CoreConstants.GameResult.WIN,state.getPlayerResults()[i]);}
+                {assertEquals( CoreConstants.GameResult.WIN_GAME,state.getPlayerResults()[i]);}
             }
         }
     }

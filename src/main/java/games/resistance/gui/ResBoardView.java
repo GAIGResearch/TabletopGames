@@ -1,28 +1,16 @@
 package games.resistance.gui;
 
-import core.AbstractGameState;
-import core.components.Deck;
-import core.properties.PropertyString;
-import games.pandemic.PandemicGameState;
-import games.resistance.ResGameState;
-import games.resistance.components.ResPlayerCards;
-import gui.views.CardView;
-import gui.views.DeckView;
-import utilities.ImageIO;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
 
-import static core.CoreConstants.imgHash;
-import static games.resistance.gui.ResGUIManager.ResPlayerCardsHeight;
-import static games.resistance.gui.ResGUIManager.ResPlayerCardsWidth;
-
-public class ResBoardView extends JComponent {
-
+public class ResBoardView extends JPanel {
 
     private Image backgroundImage;
 
+    public ResBoardView(Image backgroundImage) {
+        this.backgroundImage = backgroundImage;
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -36,4 +24,5 @@ public class ResBoardView extends JComponent {
 
         g.drawImage(backgroundImage, x, y, imgWidth, imgHeight, this);
     }
+
 }

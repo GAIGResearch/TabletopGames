@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class ResVoting extends AbstractAction implements IExtendedSequence {
+public class ResVoting extends AbstractAction {
     public final int playerId;
     public final ResPlayerCards.CardType cardType;
 
@@ -25,30 +25,6 @@ public class ResVoting extends AbstractAction implements IExtendedSequence {
     public boolean execute(AbstractGameState gs) {
         ((ResGameState)gs).addCardChoice(this, gs.getCurrentPlayer());
         return true;
-    }
-
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new ResVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.Yes));
-        actions.add(new ResVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.No));
-
-        return actions;
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return playerId;
-    }
-
-    @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return false;
     }
 
     @Override

@@ -3,11 +3,9 @@ package games.resistance.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import games.pandemic.gui.PandemicBoardView;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.components.ResPlayerCards;
-import games.secrethitler.gui.SHBoardView;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -47,7 +45,7 @@ public class ResGUIManager extends AbstractGUIManager {
     protected JLabel missionFailCounter = new JLabel("Mission Fail Counter :" + 0 );
 
     public ResGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, game, ac, humanID);
+        super(parent, game, ac, Collections.singleton(humanID));
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
@@ -113,7 +111,7 @@ public class ResGUIManager extends AbstractGUIManager {
                 int newWidth = backgroundImage.getWidth(null) / 2; // Replace 2 with the desired scale factor
                 int newHeight = backgroundImage.getHeight(null) /2; // Replace 2 with the desired scale factor
                 backgroundImage = backgroundImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
-                SHBoardView jp = new SHBoardView(backgroundImage);
+                ResBoardView jp = new ResBoardView(backgroundImage);
                 jp.setLayout(new GridBagLayout());
                 jp.add(centerArea);
                 mainGameArea.add(jp, BorderLayout.CENTER);
@@ -122,7 +120,7 @@ public class ResGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("The Resistance", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
                 parent.setLayout(new BorderLayout());
                 parent.add(mainGameArea, BorderLayout.CENTER);
@@ -164,7 +162,7 @@ public class ResGUIManager extends AbstractGUIManager {
                 }
                 else{
                     if (i == gameState.getCurrentPlayer()
-                            || i == humanPlayerId) {
+                            || humanPlayerId.contains(i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {

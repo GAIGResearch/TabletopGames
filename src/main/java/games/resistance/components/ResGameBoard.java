@@ -14,8 +14,7 @@ import static core.CoreConstants.ComponentType.BOARD_NODE;
 
 public class ResGameBoard extends Component {
 
-    int[] missionSuccessValues = new int[5];
-    ResGameBoard type;
+    int[] missionSuccessValues;
 
     public ResGameBoard(int[] missionSuccessValues) {
         super(BOARD, "Board");
@@ -27,19 +26,13 @@ public class ResGameBoard extends Component {
         this.missionSuccessValues = missionSuccessValues;
     }
 
-    public void setType(ResGameBoard type) {
-        this.type = type;
-    }
     public int[] getMissionSuccessValues() {
         return missionSuccessValues;
     }
 
     @Override
     public ResGameBoard copy() {
-        ResGameBoard copy = new ResGameBoard(missionSuccessValues, componentID);
-        copyComponentTo(copy);
-        copy.type = type;
-        return copy;
+        return this;
     }
 
     @Override
@@ -47,14 +40,12 @@ public class ResGameBoard extends Component {
         if (this == o) return true;
         if (!(o instanceof ResGameBoard)) return false;
         if (!super.equals(o)) return false;
-
-        return Arrays.equals(missionSuccessValues,this.missionSuccessValues) && type == this.type;
+        ResGameBoard other = (ResGameBoard) o;
+        return Arrays.equals(missionSuccessValues, other.missionSuccessValues);
     }
 
     @Override
     public int hashCode() {
-        // Potentially get rid of ownerID. Sets the owner of the gameboard as the game.
-        int result = Objects.hash(super.hashCode(), ownerId, type, missionSuccessValues);
-        return result;
+        return Objects.hash(super.hashCode(), Arrays.hashCode(missionSuccessValues));
     }
 }

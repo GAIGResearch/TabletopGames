@@ -10,48 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ResWait extends AbstractAction implements IExtendedSequence {
-    public final int playerId;
-
-
-    public ResWait(int playerId ) {
-        this.playerId = playerId;
-
-    }
-
+public class ResWait extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-
         return true;
-    }
-
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-
-        ResGameState resgs = (ResGameState) state;
-
-        List<AbstractAction> actions = new ArrayList<>();
-
-
-        actions.add(new ResWait(playerId));
-
-        return actions;
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return playerId;
-    }
-
-    @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return false;
     }
 
     @Override
@@ -61,15 +24,12 @@ public class ResWait extends AbstractAction implements IExtendedSequence {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ResWait)) return false;
-        ResWait that = (ResWait) o;
-        return playerId == that.playerId;
+        return (o instanceof ResWait);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId);
+        return 4739;
     }
 
     @Override
