@@ -92,7 +92,7 @@ public class HanabiDeckView extends DeckView<HanabiCard> {
 
         int i = 0;
         for (String s : wraps) {
-            g.drawString(s, rect.x + 10, rect.y + i * size + 20);
+            g.drawString(s, rect.x + rect.width - 20, rect.y + i * size + 20);
             i++;
         }
 
