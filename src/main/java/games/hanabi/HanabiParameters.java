@@ -2,7 +2,7 @@ package games.hanabi;
 
 import core.AbstractParameters;
 import core.Game;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 

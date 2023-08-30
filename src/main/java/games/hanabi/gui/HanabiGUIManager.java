@@ -17,6 +17,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Set;
 
 public class HanabiGUIManager extends AbstractGUIManager {
     final static int playerAreaWidth = 300;
@@ -45,7 +46,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
-    public HanabiGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public HanabiGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         if (game != null) {
