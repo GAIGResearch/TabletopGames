@@ -18,8 +18,6 @@ import java.util.*;
 
 public class ResGameState extends AbstractGameState {
 
-    int spyCounter = 0;
-    int resistanceCounter = 0;
     public int[] factions;
     List<Boolean> gameBoardValues = new ArrayList<>();
     boolean voteSuccess;
@@ -50,7 +48,7 @@ public class ResGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return super.hashCode() + 31 * Objects.hash(leaderID, playerHandCards, gameBoardValues,
-                missionVotingChoice, teamChoice, finalTeamChoice, spyCounter, resistanceCounter, voteSuccess, winners, failedVoteCounter) +
+                missionVotingChoice, teamChoice, finalTeamChoice, voteSuccess, winners, failedVoteCounter) +
                 Arrays.hashCode(factions);
     }
 
@@ -67,8 +65,6 @@ public class ResGameState extends AbstractGameState {
                         Objects.equals(teamChoice, that.teamChoice) &&
                         Objects.equals(votingChoice, that.votingChoice) &&
                         Objects.equals(finalTeamChoice, that.finalTeamChoice) &&
-                        Objects.equals(spyCounter, that.spyCounter) &&
-                        Objects.equals(resistanceCounter, that.resistanceCounter) &&
                         Objects.equals(voteSuccess, that.voteSuccess) &&
                         Objects.equals(winners, that.winners) &&
                         Objects.equals(failedVoteCounter, that.failedVoteCounter) &&
@@ -152,8 +148,6 @@ public class ResGameState extends AbstractGameState {
             }
 
         } else {
-            spyCounter = 0;
-            resistanceCounter = 0;
             boolean isSpy = playerHandCards.get(playerId).get(playerHandCards.get(playerId).getSize() - 1).cardType == ResPlayerCards.CardType.SPY;
             // If the player is a spy, then they know everyone's identity
             // if not, we need to shuffle all the other players
@@ -170,6 +164,9 @@ public class ResGameState extends AbstractGameState {
                     copy.playerHandCards.add(playerHandCards.get(i));
                     copy.leaderID = leaderID;
                     //Checking MissionVote Eligibility
+                    // TODO: This looks dubious. We know our vote (but no-one elses).
+                    // TODO: However we don't know that our vote is at index i!
+                    // We need to clearly indicate which players have voted; so having a null to indicate this?
                     copy.votingChoice.add(new ArrayList<>(votingChoice.get(i)));
                     copy.missionVotingChoice.add(new ArrayList<>(missionVotingChoice.get(i)));
                 } else {
@@ -194,7 +191,6 @@ public class ResGameState extends AbstractGameState {
                     copy.votingChoice.add(new ArrayList<>());
                     copy.missionVotingChoice.add(new ArrayList<>());
                 }
-
             }
         }
         return copy;
