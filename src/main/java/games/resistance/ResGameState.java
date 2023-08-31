@@ -66,14 +66,17 @@ public class ResGameState extends AbstractGameState {
     @Override
     public String toString() {
         return
-                leaderID + "leaderID|" +
-                        gameBoardValues.hashCode() + "gameBoardValues|" +
-                        teamChoice.hashCode() + "teamChoice|" +
-                        Arrays.hashCode(votingChoice) + "votingChoice|" +
+                leaderID + "|" +
+                        gameBoardValues.hashCode() + "|" +
+                        teamChoice.hashCode() + "|" +
+                        Arrays.hashCode(votingChoice) + "|" +
                         playerHandCards.hashCode() + "|" +
                         Arrays.hashCode(missionVotingChoice) + "|" +
                         finalTeamChoice.hashCode() + "|" +
-
+                        teamChoice.hashCode() + "|" +
+                        voteSuccess + "|" +
+                        failedVoteCounter + "|" +
+                        Arrays.hashCode(factions) + "|" +
                         super.hashCode() + "|";
     }
 
@@ -115,12 +118,14 @@ public class ResGameState extends AbstractGameState {
 
         copy.previousGamePhase = previousGamePhase;
         copy.voteSuccess = voteSuccess;
+        copy.failedVoteCounter = failedVoteCounter;
         copy.teamChoice = new ArrayList<>();
         copy.votingChoice = new ResPlayerCards.CardType[getNPlayers()];
         copy.missionVotingChoice = new ResPlayerCards.CardType[getNPlayers()];
         copy.playerHandCards = new ArrayList<>();
         copy.finalTeamChoice = new ArrayList<>();
         copy.gameBoardValues = new ArrayList<>();
+        copy.rnd = new Random(rnd.nextLong());
 
         if (playerId == -1) {
             copy.leaderID = leaderID;
