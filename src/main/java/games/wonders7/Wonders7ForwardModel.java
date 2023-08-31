@@ -139,19 +139,18 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         // PLAYERS SELECT A CARD (SELECTION ROUND)
         else { // When turn order is clockwise/anticlockwise
             wgs.setTurnAction(wgs.getCurrentPlayer(), action); // PLAYER CHOOSES ACTION
-            endPlayerTurn(wgs);
+            endWondersPlayerTurn(wgs);
         }
     }
 
-    @Override
-    public void endPlayerTurn(AbstractGameState gs) {
+    public void endWondersPlayerTurn(AbstractGameState gs) {
         int turnOwner = gs.getTurnOwner();
         do {
             turnOwner = (gs.getNPlayers() + turnOwner + ((Wonders7GameState)gs).direction) % gs.getNPlayers();
             if (turnOwner == gs.getTurnOwner())
                 throw new AssertionError("Infinite loop - apparently all players are terminal, but game state is not");
         } while (!gs.isNotTerminalForPlayer(turnOwner));
-        endPlayerTurn(gs, turnOwner);
+        super.endPlayerTurn(gs, turnOwner);
     }
 
     protected boolean checkActionRound(AbstractGameState gameState){
@@ -216,8 +215,10 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         if (wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize() == 1){  // If all players hands are empty
 
             for (int i=0; i< wgs.getNPlayers(); i++){
-                wgs.getDiscardPile().add(wgs.getPlayerHand(i).get(0));
-                wgs.getPlayerHand(i).remove(0);
+                if (wgs.getPlayerHand(i).getSize() > 0) {
+                    wgs.getDiscardPile().add(wgs.getPlayerHand(i).get(0));
+                    wgs.getPlayerHand(i).remove(0);
+                }
             }
 
             endRound(wgs); // Ends the round,
