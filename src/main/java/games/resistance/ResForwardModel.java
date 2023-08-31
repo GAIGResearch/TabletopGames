@@ -101,8 +101,6 @@ public class ResForwardModel extends StandardForwardModel {
         List<AbstractAction> actions = new ArrayList<>();
         int currentPlayer = resgs.getCurrentPlayer();
 
-        Deck<ResPlayerCards> currentPlayerHand = resgs.getPlayerHandCards().get(currentPlayer);
-
         if (resgs.getGamePhase() == LeaderSelectsTeam) {
 
             //Leader Creates Team
@@ -119,31 +117,24 @@ public class ResForwardModel extends StandardForwardModel {
                     }
                 }
             }
-            //Every Other Player Waits
-            else {
-                actions.add(new ResWait());
-            }
-        }
-
-
-        if (resgs.getGamePhase() == TeamSelectionVote) {
+        } else if (resgs.getGamePhase() == TeamSelectionVote) {
 
             // All players can do is choose a yes or no card in hand to play.
             actions.add(new ResVoting(currentPlayer, ResPlayerCards.CardType.Yes));
             actions.add(new ResVoting(currentPlayer, ResPlayerCards.CardType.No));
 
-        }
-
-        if (resgs.getGamePhase() == MissionVote) {
+        } else if (resgs.getGamePhase() == MissionVote) {
 
             if (resgs.finalTeamChoice.contains(currentPlayer)) {
                 actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.Yes));
                 actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.No));
             } else {
-                actions.add(new ResWait());
+                throw new AssertionError("Should not be a player's turn if they are not on the mission");
             }
         }
 
+        if (actions.size() == 0)
+            throw new AssertionError("No Actions Available");
         return actions;
     }
 
@@ -153,8 +144,8 @@ public class ResForwardModel extends StandardForwardModel {
 
         //Leader Selects Team
         if (resgs.getGamePhase() == LeaderSelectsTeam) {
-            revealCards(resgs);
             resgs.setGamePhase(TeamSelectionVote);
+            endPlayerTurn(resgs);
         } else if (resgs.getGamePhase() == TeamSelectionVote) {
             if (resgs.teamChoice.isEmpty()) {
                 throw new AssertionError("Team Choice Size is Zero");
@@ -174,6 +165,7 @@ public class ResForwardModel extends StandardForwardModel {
             }
 
             if (resgs.voteSuccess) {
+                resgs.finalTeamChoice = resgs.teamChoice;
                 resgs.setGamePhase(MissionVote);
                 endPlayerTurn(resgs, resgs.finalTeamChoice.get(0));
             } else {
@@ -184,7 +176,6 @@ public class ResForwardModel extends StandardForwardModel {
                 changeLeader(resgs);
                 resgs.setGamePhase(LeaderSelectsTeam);
                 endPlayerTurn(resgs, resgs.leaderID);
-                return;
             }
         } else if (resgs.getGamePhase() == MissionVote) {
 
@@ -222,11 +213,6 @@ public class ResForwardModel extends StandardForwardModel {
             resgs.failedVoteCounter = 0;
             resgs.setGamePhase(LeaderSelectsTeam);
             endPlayerTurn(resgs, resgs.leaderID);
-            return;
-        }
-        //End player turn
-        if (resgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(resgs);
         }
 
     }
@@ -253,10 +239,6 @@ public class ResForwardModel extends StandardForwardModel {
                 resgs.voteSuccess = false;
                 resgs.failedVoteCounter += 1;
             }
-        }
-
-        if (resgs.getGamePhase() == LeaderSelectsTeam) {
-            resgs.finalTeamChoice = resgs.teamChoice;
         }
 
         if (resgs.getGamePhase() == MissionVote) {

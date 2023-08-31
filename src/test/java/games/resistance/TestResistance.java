@@ -7,13 +7,9 @@ import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.resistance.components.ResPlayerCards;
-import games.resistance.ResGameState;
-import games.resistance.ResForwardModel;
-import games.resistance.ResParameters;
 import games.resistance.actions.ResMissionVoting;
 import games.resistance.actions.ResVoting;
 import games.resistance.actions.ResTeamBuilding;
-import games.resistance.actions.ResWait;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -31,15 +27,6 @@ public class TestResistance {
     List<AbstractPlayer> players;
     ResForwardModel fm = new ResForwardModel();
     RandomPlayer rnd = new RandomPlayer();
-
-
-    private void progressGame(ResGameState state, ResGameState.ResGamePhase requiredGamePhase, int playerTurn) {
-        while (state.getGamePhase() != requiredGamePhase &&
-                state.getCurrentPlayer() != playerTurn &&
-                state.getGameStatus() != CoreConstants.GameResult.GAME_END) {
-            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
-        }
-    }
 
     private void progressGame(ResGameState state, ResGameState.ResGamePhase requiredGamePhase) {
         while (state.getGamePhase() != requiredGamePhase &&
@@ -69,176 +56,55 @@ public class TestResistance {
     @Test
     public void checkingActionsForFirstPhaseTest() {
         ResGameState state = (ResGameState) resistance.getGameState();
-        progressGame(state, ResGameState.ResGamePhase.LeaderSelectsTeam, 0);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.LeaderSelectsTeam) {
+        do {
+            progressGame(state, ResGameState.ResGamePhase.LeaderSelectsTeam);
+            if (state.getGameStatus() == CoreConstants.GameResult.GAME_END) return;
+            assertEquals(state.getGamePhase(), ResGameState.ResGamePhase.LeaderSelectsTeam);
+            assertEquals(state.getLeaderID(), state.getCurrentPlayer());
             List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getLeaderID() != state.getCurrentPlayer()) {
-                assertEquals(actions.size(), 1);
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            } else {
-                int[] players = new int[state.getNPlayers()];
-                for (int i = 0; i < state.getNPlayers(); i++) {
-                    players[i] = i;
-                }
-                ArrayList<int[]> choiceOfTeams = Utils.generateCombinations(players, state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()]);
-                assertEquals(choiceOfTeams.size(), actions.size());
-                for (int i = 0; i < actions.size(); i++) {
-                    assertEquals(actions.get(i).getClass(), ResTeamBuilding.class);
-                }
+            int[] players = new int[state.getNPlayers()];
+            for (int i = 0; i < state.getNPlayers(); i++) {
+                players[i] = i;
             }
-        }
-        progressGame(state, ResGameState.ResGamePhase.LeaderSelectsTeam, 1);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.LeaderSelectsTeam) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getLeaderID() != state.getCurrentPlayer()) {
-                assertEquals(actions.size(), 1);
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            } else {
-                int[] players = new int[state.getNPlayers()];
-                for (int i = 0; i < state.getNPlayers(); i++) {
-                    players[i] = i;
-                }
-                ArrayList<int[]> choiceOfTeams = Utils.generateCombinations(players, state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()]);
-                assertEquals(choiceOfTeams.size(), actions.size());
-                for (int i = 0; i < actions.size(); i++) {
-                    assertEquals(actions.get(i).getClass(), ResTeamBuilding.class);
-                }
+            ArrayList<int[]> choiceOfTeams = Utils.generateCombinations(players, state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()]);
+            assertEquals(choiceOfTeams.size(), actions.size());
+            for (AbstractAction action : actions) {
+                assertEquals(action.getClass(), ResTeamBuilding.class);
             }
-        }
-        progressGame(state, ResGameState.ResGamePhase.LeaderSelectsTeam, 2);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.LeaderSelectsTeam) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getLeaderID() != state.getCurrentPlayer()) {
-                assertEquals(actions.size(), 1);
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            } else {
-                int[] players = new int[state.getNPlayers()];
-                for (int i = 0; i < state.getNPlayers(); i++) {
-                    players[i] = i;
-                }
-                ArrayList<int[]> choiceOfTeams = Utils.generateCombinations(players, state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()]);
-                assertEquals(choiceOfTeams.size(), actions.size());
-                for (int i = 0; i < actions.size(); i++) {
-                    assertEquals(actions.get(i).getClass(), ResTeamBuilding.class);
-                }
-            }
-        }
-        progressGame(state, ResGameState.ResGamePhase.LeaderSelectsTeam, 3);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.LeaderSelectsTeam) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getLeaderID() != state.getCurrentPlayer()) {
-                assertEquals(actions.size(), 1);
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            } else {
-                int[] players = new int[state.getNPlayers()];
-                for (int i = 0; i < state.getNPlayers(); i++) {
-                    players[i] = i;
-                }
-                ArrayList<int[]> choiceOfTeams = Utils.generateCombinations(players, state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()]);
-                assertEquals(choiceOfTeams.size(), actions.size());
-                for (int i = 0; i < actions.size(); i++) {
-                    assertEquals(actions.get(i).getClass(), ResTeamBuilding.class);
-                }
-            }
-        }
-        progressGame(state, ResGameState.ResGamePhase.LeaderSelectsTeam, 4);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.LeaderSelectsTeam) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getLeaderID() != state.getCurrentPlayer()) {
-                assertEquals(actions.size(), 1);
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            } else {
-                int[] players = new int[state.getNPlayers()];
-                for (int i = 0; i < state.getNPlayers(); i++) {
-                    players[i] = i;
-                }
-                ArrayList<int[]> choiceOfTeams = Utils.generateCombinations(players, state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()]);
-                assertEquals(choiceOfTeams.size(), actions.size());
-                for (int i = 0; i < actions.size(); i++) {
-                    assertEquals(actions.get(i).getClass(), ResTeamBuilding.class);
-                }
-            }
-        }
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+        } while (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
     }
 
     @Test
     public void checkingActionsForSecondPhaseTest() {
         ResGameState state = (ResGameState) resistance.getGameState();
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote, 0);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.TeamSelectionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            assertEquals(actions.get(0).getClass(), ResVoting.class);
-        }
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote, 1);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.TeamSelectionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            assertEquals(actions.get(0).getClass(), ResVoting.class);
-        }
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote, 2);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.TeamSelectionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            assertEquals(actions.get(0).getClass(), ResVoting.class);
-        }
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote, 3);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.TeamSelectionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            assertEquals(actions.get(0).getClass(), ResVoting.class);
-        }
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote, 4);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.TeamSelectionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            assertEquals(actions.get(0).getClass(), ResVoting.class);
-        }
+        do {
+            progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote);
+            if (state.getGameStatus() == CoreConstants.GameResult.GAME_END) return;
+            assertEquals(state.getGamePhase(), ResGameState.ResGamePhase.TeamSelectionVote);
+            do {
+                List<AbstractAction> actions = fm.computeAvailableActions(state);
+                assertEquals(2, actions.size());
+                assertTrue(actions.stream().allMatch(a -> a instanceof ResVoting));
+                fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+            } while (state.getGamePhase() == ResGameState.ResGamePhase.TeamSelectionVote);
+        } while (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
     }
 
     @Test
     public void checkingActionsForThirdPhaseTest() {
         ResGameState state = (ResGameState) resistance.getGameState();
-        progressGame(state, ResGameState.ResGamePhase.MissionVote, 0);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getFinalTeam().contains(state.getCurrentPlayer())) {
-                assertEquals(actions.get(0).getClass(), ResMissionVoting.class);
-            } else {
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            }
-        }
-        progressGame(state, ResGameState.ResGamePhase.MissionVote, 1);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getFinalTeam().contains(state.getCurrentPlayer())) {
-                assertEquals(actions.get(0).getClass(), ResMissionVoting.class);
-            } else {
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            }
-        }
-        progressGame(state, ResGameState.ResGamePhase.MissionVote, 2);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getFinalTeam().contains(state.getCurrentPlayer())) {
-                assertEquals(actions.get(0).getClass(), ResMissionVoting.class);
-            } else {
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            }
-        }
-        progressGame(state, ResGameState.ResGamePhase.MissionVote, 3);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getFinalTeam().contains(state.getCurrentPlayer())) {
-                assertEquals(actions.get(0).getClass(), ResMissionVoting.class);
-            } else {
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            }
-        }
-        progressGame(state, ResGameState.ResGamePhase.MissionVote, 4);
-        if (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote) {
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (state.getFinalTeam().contains(state.getCurrentPlayer())) {
-                assertEquals(actions.get(0).getClass(), ResMissionVoting.class);
-            } else {
-                assertEquals(actions.get(0).getClass(), ResWait.class);
-            }
-        }
+        do {
+            progressGame(state, ResGameState.ResGamePhase.MissionVote);
+            if (state.getGameStatus() == CoreConstants.GameResult.GAME_END) return;
+            do {
+                assertEquals(state.getGamePhase(), ResGameState.ResGamePhase.MissionVote);
+                List<AbstractAction> actions = fm.computeAvailableActions(state);
+                assertEquals(2, actions.size());
+                assertTrue(actions.stream().allMatch(a -> a instanceof ResMissionVoting));
+                fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+            } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote && state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
+        } while (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
     }
 
     @Test
@@ -437,24 +303,26 @@ public class TestResistance {
 
         //Checking Round 0
         progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote);
+        assertEquals(0, state.getFinalTeam().size());
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
         assertEquals(0, state.getRoundCounter());
         assertEquals(state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()], state.getFinalTeam().size());
 
         //Checking Round 1
         progressGameOneRound(state);
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote);
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
         assertEquals(1, state.getRoundCounter());
         assertEquals(state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()], state.getFinalTeam().size());
 
         //Checking Round 2
         progressGameOneRound(state);
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote);
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
         assertEquals(2, state.getRoundCounter());
         assertEquals(state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()], state.getFinalTeam().size());
 
         //Checking Round 3
         progressGameOneRound(state);
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote);
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
         assertEquals(3, state.getRoundCounter());
         if (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
             assertEquals(state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()], state.getFinalTeam().size());
@@ -462,7 +330,7 @@ public class TestResistance {
 
         //Checking Round 4
         progressGameOneRound(state);
-        progressGame(state, ResGameState.ResGamePhase.TeamSelectionVote);
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
         assertEquals(4, state.getRoundCounter());
         if (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
             assertEquals(state.gameBoard.getMissionSuccessValues()[state.getRoundCounter()], state.getFinalTeam().size());
@@ -471,7 +339,7 @@ public class TestResistance {
     @Test
     public void checkingLeaderMovesAfterRoundEnds() {
         ResGameState state = (ResGameState) resistance.getGameState();
-        progressGame(state, ResGameState.ResGamePhase.MissionVote, state.getNPlayers() - 1);
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
         int previousLeader = state.getLeaderID();
         int previousRound = state.getRoundCounter();
 
@@ -576,20 +444,4 @@ public class TestResistance {
             }
         }
     }
-
-    //
-//    @Test
-//    public void testTeamVoteNumber() {
-//        SHGameState state = (SHGameState) resistance.getGameState();
-//        fm.next(state, new RollDice());
-//        do {
-//            fm.next(state, fm.computeAvailableActions(state).get(0));
-//            fm.next(state, new RollDice());
-//            // we keep rolling dice until we go bust
-//        } while (!fm.computeAvailableActions(state).get(0).equals(new Pass(true)));
-//        fm.next(state, new Pass(true));
-//        assertEquals(CantStopGamePhase.Decision, state.getGamePhase());
-//    }
-
-
 }
