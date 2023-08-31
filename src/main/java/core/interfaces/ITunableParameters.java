@@ -1,6 +1,5 @@
 package core.interfaces;
 
-import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 
 import java.util.*;
@@ -123,32 +122,5 @@ public interface ITunableParameters {
      * @return mapping from int ID of parameter to parameter name.
      */
     Map<String, Class<?>> getParameterTypes();
-
-    /**
-     * registerChild() is called when we find a JSONObject as a property in the JSON file as we instantiate.
-     * It must instantiate the relevant object from the json fragment, and return this.
-     *
-     * This is also used to support recursion of TunableParameters. The classic example is for a search algorithm
-     * such as MCTS or RHEA, in which we use a heuristic to value the leaf/end-state. This heuristic is likely to
-     * be domain dependent, and tunable in its own right.
-     * To support this use-case we allow ITunableParameters to contain other ITunableParameters.
-     *
-     * Not everything in a JSON parameters file now needs to subclass TunableParameters.
-     * If a thing is instantiated from JSON that is not such a sub-class, then we stop further recursion to find tunable parameters,
-     * but still instantiate the thing. The best current example is heuristic or opponentHeuristic in MCTS.
-     * These can provide a specific class that implements IStateHeuristic without also needing to themselves be TunableParameters.
-     *
-     * <p>
-     * For a default concrete implementation see TunableParameters. Crucially, this 'pulls up' the searchSpace from
-     * the child into the parent (and hence, theoretically, also from any grandchildren, or great-grandchildren). This
-     * means that the full searchSpace across all nested parameters is available at the top level for optimisation.
-     *
-     * @param name      The nameSpace to use for the sub-parameters. For example if an algorithm uses a
-     *                  heuristic in two ways, one could use 'rollout', and one 'treeNode' as their name spaces
-     *                  so that they are optimised independently, even if instances of the same class
-     * @param json      The raw JSON detailing the parameters
-     * @return          The instantiated object
-     */
-    Object registerChild(String name, JSONObject json);
 
 }

@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.actions.DoNothing;
 import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 
@@ -99,14 +100,16 @@ public abstract class AbstractForwardModel {
      * @param flag - boolean to check if player should be disqualified, or random action should be played
      * @param gameState - current game state
      */
-    protected final void disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
+    protected final AbstractAction disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
         if (flag) {
             gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             endPlayerTurn(gameState);
+            return new DoNothing();
         } else {
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);
             int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
             next(gameState, possibleActions.get(randomAction));
+            return possibleActions.get(randomAction);
         }
     }
 

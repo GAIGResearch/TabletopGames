@@ -6,7 +6,7 @@ import core.CoreConstants;
 import core.components.BoardNodeWithEdges;
 import core.components.Counter;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.catan.components.Building;
 
 import java.util.ArrayList;

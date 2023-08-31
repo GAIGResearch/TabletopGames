@@ -8,6 +8,8 @@ import core.interfaces.IActionHeuristic;
 import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
+import players.IAnyTimePlayer;
+import players.heuristics.CoarseTunableHeuristic;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 
-public class MCTSPlayer extends AbstractPlayer {
+public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     // Random object for this player
     protected Random rnd;
@@ -26,12 +28,10 @@ public class MCTSPlayer extends AbstractPlayer {
     protected MCTSParams params;
     // Heuristics used for the agent
     protected IStateHeuristic heuristic;
-    // TODO: opponentHeuristic Not actually used yet
-    protected IStateHeuristic opponentHeuristic;
     protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
     protected SingleTreeNode root;
-    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
+    List<Map<Object, Pair<Integer, Double>>> MASTStats;
     private AbstractPlayer opponentModel;
     private IActionHeuristic advantageFunction;
 
@@ -54,7 +54,6 @@ public class MCTSPlayer extends AbstractPlayer {
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
-        opponentHeuristic = params.getOpponentHeuristic();
         advantageFunction = params.advantageFunction;
         setName(name);
     }
@@ -95,22 +94,14 @@ public class MCTSPlayer extends AbstractPlayer {
                     .map(m -> Utils.decay(m, params.MASTGamma))
                     .collect(Collectors.toList());
 
-        if (rolloutStrategy instanceof MASTPlayer) {
-            ((MASTPlayer) rolloutStrategy).setStats(root.MASTStatistics);
-            ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
+        if (rolloutStrategy instanceof IMASTUser) {
+            ((IMASTUser) rolloutStrategy).setStats(root.MASTStatistics);
         }
-        if (opponentModel instanceof MASTPlayer) {
-            ((MASTPlayer) opponentModel).setStats(root.MASTStatistics);
-            ((MASTPlayer) opponentModel).temperature = params.MASTBoltzmann;
+        if (opponentModel instanceof IMASTUser) {
+            ((IMASTUser) opponentModel).setStats(root.MASTStatistics);
         }
         root.mctsSearch();
-        if (params.gatherExpertIterationData) {
-            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(
-                    params.expertIterationFileStem,
-                    params.EIStateFeatureVector, params.EIActionFeatureVector);
-            eidg.recordData(root, getForwardModel());
-            eidg.close();
-        }
+
         if (advantageFunction instanceof ITreeProcessor)
             ((ITreeProcessor) advantageFunction).process(root);
         if (rolloutStrategy instanceof ITreeProcessor)
@@ -124,9 +115,9 @@ public class MCTSPlayer extends AbstractPlayer {
             System.out.println(root.toString());
 
         MASTStats = root.MASTStatistics;
-        // Return best action  // TODO turn back on
-//        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-//            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
+
+        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();
     }
 
@@ -189,4 +180,19 @@ public class MCTSPlayer extends AbstractPlayer {
         return retValue;
     }
 
+    @Override
+    public void setBudget(int budget) {
+        params.budget = budget;
+        params.setParameterValue("budget", budget);
+    }
+
+    @Override
+    public int getBudget() {
+        return params.budget;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 }

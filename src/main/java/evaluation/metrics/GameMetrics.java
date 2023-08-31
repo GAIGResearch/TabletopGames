@@ -15,7 +15,7 @@ import static evaluation.metrics.Event.GameEvent.*;
 
 @SuppressWarnings("unused")
 public class GameMetrics implements IMetricsCollection {
-    public static class GameScore extends AbstractTournamentMetric {
+    public static class GameScore extends AbstractMetric {
         public GameScore() {
             super();
         }
@@ -64,7 +64,7 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-    public static class FinalScore extends AbstractTournamentMetric {
+    public static class FinalScore extends AbstractMetric {
         public FinalScore() {
             super();
         }
@@ -99,7 +99,7 @@ public class GameMetrics implements IMetricsCollection {
     }
 
 
-    public static class StateSpace extends AbstractTournamentMetric {
+    public static class StateSpace extends AbstractMetric {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             records.put("Size", countComponents(e.state).a);
@@ -120,7 +120,7 @@ public class GameMetrics implements IMetricsCollection {
     }
 
 
-    public static class PlayerType extends AbstractTournamentMetric {
+    public static class PlayerType extends AbstractMetric {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             for (int i = 0; i < e.state.getNPlayers(); i++) {
@@ -146,7 +146,7 @@ public class GameMetrics implements IMetricsCollection {
     }
 
 
-    public static class CurrentPlayerVisibility extends AbstractTournamentMetric {
+    public static class CurrentPlayerVisibility extends AbstractMetric {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -171,7 +171,7 @@ public class GameMetrics implements IMetricsCollection {
     }
 
 
-    public static class ComputationTimes extends AbstractTournamentMetric {
+    public static class ComputationTimes extends AbstractMetric {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
@@ -198,7 +198,7 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-    public static class OrdinalPosition extends AbstractTournamentMetric {
+    public static class OrdinalPosition extends AbstractMetric {
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
@@ -227,7 +227,7 @@ public class GameMetrics implements IMetricsCollection {
 
     }
 
-    public static class Decisions extends AbstractTournamentMetric {
+    public static class Decisions extends AbstractMetric {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
@@ -262,7 +262,7 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-    public static class Actions extends AbstractTournamentMetric {
+    public static class Actions extends AbstractMetric {
         Set<String> playerNames;
         public Actions() {
             super();
@@ -319,7 +319,7 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-    public static class Winner extends AbstractTournamentMetric {
+    public static class Winner extends AbstractMetric {
         public Winner() {
             super();
         }

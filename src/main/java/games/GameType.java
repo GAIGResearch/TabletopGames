@@ -36,9 +36,7 @@ import games.dicemonastery.DiceMonasteryForwardModel;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.DiceMonasteryParams;
 import games.dicemonastery.gui.DiceMonasteryGUI;
-import games.dominion.DominionForwardModel;
-import games.dominion.DominionGameState;
-import games.dominion.DominionParameters;
+import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUIManager;
@@ -48,6 +46,10 @@ import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.hanabi.HanabiForwardModel;
+import games.hanabi.HanabiGameState;
+import games.hanabi.HanabiParameters;
+import games.hanabi.gui.HanabiGUIManager;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
@@ -184,15 +186,15 @@ public enum GameType {
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
-            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+            DominionGameState.class, DominionForwardModel.class, DominionFGParameters.class, DominionGUIManager.class),
     DominionSizeDistortion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
-            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+            DominionGameState.class, DominionForwardModel.class, DominionSDParameters.class, DominionGUIManager.class),
     DominionImprovements(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
-            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+            DominionGameState.class, DominionForwardModel.class, DominionIParameters.class, DominionGUIManager.class),
     Battlelore(2, 2,
             Arrays.asList(Fantasy, Miniatures, Wargame),
             Arrays.asList(Campaign, BattleCardDriven, CommandCards, DiceRolling, GridMovement, ModularBoard, VariablePlayerPowers),
@@ -218,6 +220,7 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+    Hanabi(2,5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),

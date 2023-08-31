@@ -34,6 +34,11 @@ public abstract class AbstractMetric {
         this.eventTypes = Arrays.stream(args).collect(Collectors.toSet());
         this.args = null;
     }
+    public AbstractMetric(Set<IGameEvent> events) {
+        this.gamesCompleted = 0;
+        this.eventTypes = events;
+        this.args = null;
+    }
 
     public AbstractMetric(String[] args) {
         this.gamesCompleted = 0;

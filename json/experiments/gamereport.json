@@ -1,12 +1,7 @@
 {
-  "class" : "evaluation.GameReport",
-  "args" : [
-    [
-      "games=LoveLetter",
-      "player=json/players/mcts.json",
-      "nPlayers=2",
-      "nGames=1000",
-      "listener=data/metrics/loveletter.json"
-    ]
-  ]
+  "game": "LoveLetter",
+  "playerDirectory" : "json/players/mcts.json",
+  "nPlayers" : 2,
+  "matchups" : 1000,
+  "listener" : "data/metrics/loveletter.json"
 }
