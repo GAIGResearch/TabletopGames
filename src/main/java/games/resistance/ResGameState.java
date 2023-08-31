@@ -11,6 +11,7 @@ import games.resistance.actions.ResTeamBuilding;
 import games.resistance.actions.ResVoting;
 import games.resistance.components.ResGameBoard;
 import games.resistance.components.ResPlayerCards;
+import org.apache.avro.generic.GenericData;
 
 import java.util.*;
 
@@ -29,6 +30,7 @@ public class ResGameState extends AbstractGameState {
     List<Integer> teamChoice;
     IGamePhase previousGamePhase = null;
     List<Integer> finalTeamChoice = new ArrayList<>();
+    List<List<Integer>> historicTeams = new ArrayList<>();
 
     public enum ResGamePhase implements IGamePhase {
         MissionVote, TeamSelectionVote, LeaderSelectsTeam
@@ -40,7 +42,7 @@ public class ResGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return super.hashCode() + 31 * Objects.hash(leaderID, playerHandCards, gameBoardValues,
-                teamChoice, finalTeamChoice, voteSuccess, failedVoteCounter) +
+                teamChoice, finalTeamChoice, voteSuccess, failedVoteCounter, historicTeams) +
                 Arrays.hashCode(factions) + 31 * Arrays.hashCode(votingChoice) + 31 * 31 * Arrays.hashCode(missionVotingChoice);
     }
 
@@ -60,6 +62,7 @@ public class ResGameState extends AbstractGameState {
                         Objects.equals(finalTeamChoice, that.finalTeamChoice) &&
                         Objects.equals(voteSuccess, that.voteSuccess) &&
                         Objects.equals(failedVoteCounter, that.failedVoteCounter) &&
+                        Objects.equals(historicTeams, that.historicTeams) &&
                         Arrays.equals(factions, that.factions);
     }
 
@@ -77,6 +80,7 @@ public class ResGameState extends AbstractGameState {
                         voteSuccess + "|" +
                         failedVoteCounter + "|" +
                         Arrays.hashCode(factions) + "|" +
+                        historicTeams.hashCode() + "|" +
                         super.hashCode() + "|";
     }
 
@@ -124,41 +128,33 @@ public class ResGameState extends AbstractGameState {
         copy.missionVotingChoice = new ResPlayerCards.CardType[getNPlayers()];
         copy.playerHandCards = new ArrayList<>();
         copy.finalTeamChoice = new ArrayList<>();
-        copy.gameBoardValues = new ArrayList<>();
+        copy.gameBoardValues = new ArrayList<>(gameBoardValues);
         copy.rnd = new Random(rnd.nextLong());
+        copy.historicTeams = new ArrayList<>(historicTeams);  // we do not need to copy the sub-lists, as they are immutable
+        copy.leaderID = leaderID;
+        copy.teamChoice = new ArrayList<>(teamChoice);
+        copy.finalTeamChoice = new ArrayList<>(finalTeamChoice);
 
         if (playerId == -1) {
-            copy.leaderID = leaderID;
-
             for (int i = 0; i < getNPlayers(); i++) {
                 copy.playerHandCards.add(playerHandCards.get(i));
             }
-
-            copy.gameBoardValues.addAll(gameBoardValues);
-            copy.finalTeamChoice.addAll(finalTeamChoice);
-            copy.teamChoice.addAll(teamChoice);
-
             for (int i = 0; i < getNPlayers(); i++) {
                 copy.votingChoice[i] = votingChoice[i];
                 copy.missionVotingChoice[i] = missionVotingChoice[i];
             }
-
         } else {
-            boolean isSpy = playerHandCards.get(playerId).get(playerHandCards.get(playerId).getSize() - 1).cardType == ResPlayerCards.CardType.SPY;
+            boolean isSpy = playerHandCards.get(playerId).get(2).cardType == ResPlayerCards.CardType.SPY;
             // If the player is a spy, then they know everyone's identity
             // if not, we need to shuffle all the other players
-            LinkedList<Boolean> spyAllocation = new LinkedList<>(ResParameters.randomiseSpies(factions[1], getNPlayers() - 1, rnd));
-            // then add a false for the player themselves (as known info)
-            spyAllocation.add(playerId, false);
+            LinkedList<Boolean> spyAllocation = new LinkedList<>();
+            if (!isSpy) {
+                spyAllocation = new LinkedList<>(ResParameters.randomiseSpies(factions[1], this, playerId));
+            }
             for (int i = 0; i < getNPlayers(); i++) {
                 //Knowledge of Own Hand/Votes
                 if (i == playerId) {
-                    copy.leaderID = leaderID;
-                    copy.gameBoardValues.addAll(gameBoardValues);
-                    copy.finalTeamChoice.addAll(finalTeamChoice);
-                    copy.teamChoice.addAll(teamChoice);
                     copy.playerHandCards.add(playerHandCards.get(i));
-                    copy.leaderID = leaderID;
                     //Checking MissionVote Eligibility
                     copy.votingChoice[i] = votingChoice[i];
                     copy.missionVotingChoice[i] = missionVotingChoice[i];
@@ -173,8 +169,8 @@ public class ResGameState extends AbstractGameState {
                             idCard = new ResPlayerCards(ResPlayerCards.CardType.SPY);
                         }
                         idCard.setOwnerId(i);
-                        playerHand.remove(0);
-                        playerHand.add(idCard, 0);
+                        playerHand.remove(2);
+                        playerHand.add(idCard, 2);
                         // the other two cards are the voting YES/NO cards
                         copy.playerHandCards.add(playerHand);
                     }
@@ -188,28 +184,53 @@ public class ResGameState extends AbstractGameState {
     public void clearCardChoices() {
         votingChoice = new ResPlayerCards.CardType[getNPlayers()];
     }
-
-
+    public void clearMissionChoices() {
+        missionVotingChoice = new ResPlayerCards.CardType[getNPlayers()];
+    }
     public void addCardChoice(ResVoting ResVoting, int playerId) {
         votingChoice[playerId] = ResVoting.cardType;
     }
-
     public void addMissionChoice(ResMissionVoting ResMissionVoting, int playerId) {
         missionVotingChoice[playerId] = ResMissionVoting.cardType;
     }
 
-    public void clearMissionChoices() {
-        missionVotingChoice = new ResPlayerCards.CardType[getNPlayers()];
+    public void addTeamChoice(ResTeamBuilding ResTeamBuilding) {
+        teamChoice = ResTeamBuilding.getTeam();
     }
 
     public void clearTeamChoices() {
-        for (int i = 0; i < getNPlayers(); i++) teamChoice.clear();
-        for (int i = 0; i < getNPlayers(); i++) finalTeamChoice.clear();
+        teamChoice.clear();
+        finalTeamChoice.clear();
     }
 
+    public int getMissionsSoFar() {
+        return historicTeams.size();
+    }
+    public List<Integer> getHistoricTeam(int i) {
+        return new ArrayList<>(historicTeams.get(i-1));
+    }
+    public boolean getHistoricMissionSuccess(int i) {
+        return gameBoardValues.get(i-1);
+    }
+    public List<List<Integer>> getFailedTeams() {
+        List<List<Integer>> retValue = new ArrayList<>();
+        for (int i = 1; i <= historicTeams.size(); i++) {
+            if (!getHistoricMissionSuccess(i)) {
+                retValue.add(getHistoricTeam(i));
+            }
+        }
+        return retValue;
+    }
 
-    public void addTeamChoice(ResTeamBuilding ResTeamBuilding) {
-        teamChoice = ResTeamBuilding.getTeam();
+    // this method is purely for ease of testing
+    public void setMissionData(List<Integer> team, boolean success) {
+        historicTeams.add(team);
+        gameBoardValues.add(success);
+    }
+    // for testing only
+    public void setPlayerIdentity(int playerID, ResPlayerCards.CardType cardType) {
+        playerHandCards.get(playerID).remove(2);
+        playerHandCards.get(playerID).add(new ResPlayerCards(cardType), 2);
     }
 
     @Override

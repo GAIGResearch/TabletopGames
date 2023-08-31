@@ -8,6 +8,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.resistance.actions.*;
 import games.resistance.components.ResPlayerCards;
+import org.apache.avro.generic.GenericData;
 import utilities.Utils;
 
 import java.util.*;
@@ -49,13 +50,14 @@ public class ResForwardModel extends StandardForwardModel {
         resgs.failedVoteCounter = 0;
         resgs.playerHandCards = new ArrayList<>(firstState.getNPlayers());
         resgs.gameBoard = resp.getPlayerBoard(firstState.getNPlayers());
+        resgs.historicTeams = new ArrayList<>();
         resgs.teamChoice = new ArrayList<>();
         if (resgs.gameBoard == null) {
             throw new AssertionError("GameBoard shouldn't be null");
         }
         resgs.factions = resp.getFactions(firstState.getNPlayers());
 
-        List<Boolean> spies = ResParameters.randomiseSpies(resgs.factions[1], firstState.getNPlayers(), resgs.rnd);
+        List<Boolean> spies = ResParameters.randomiseSpies(resgs.factions[1], resgs, -1);
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = false;
@@ -235,7 +237,6 @@ public class ResForwardModel extends StandardForwardModel {
 
     void revealCards(ResGameState resgs) {
         if (resgs.getGamePhase() == TeamSelectionVote) {
-
             int occurrenceCount = (int) Arrays.stream(resgs.votingChoice).filter(c -> c == ResPlayerCards.CardType.Yes).count();
             if (occurrenceCount > resgs.getNPlayers() / 2) {
                 resgs.voteSuccess = true;
@@ -252,7 +253,7 @@ public class ResForwardModel extends StandardForwardModel {
             } else {
                 resgs.gameBoardValues.add(true);
             }
-
+            resgs.historicTeams.add(new ArrayList<>(resgs.finalTeamChoice));
         }
 
     }

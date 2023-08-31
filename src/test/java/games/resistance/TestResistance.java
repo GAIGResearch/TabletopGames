@@ -1,5 +1,6 @@
 package games.resistance;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
@@ -10,6 +11,7 @@ import games.resistance.components.ResPlayerCards;
 import games.resistance.actions.ResMissionVoting;
 import games.resistance.actions.ResVoting;
 import games.resistance.actions.ResTeamBuilding;
+import org.apache.avro.generic.GenericData;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -17,6 +19,8 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static games.resistance.components.ResPlayerCards.CardType.RESISTANCE;
+import static games.resistance.components.ResPlayerCards.CardType.SPY;
 import static org.junit.Assert.*;
 
 
@@ -100,7 +104,7 @@ public class TestResistance {
             do {
                 assertEquals(state.getGamePhase(), ResGameState.ResGamePhase.MissionVote);
                 List<AbstractAction> actions = fm.computeAvailableActions(state);
-                int possibleActions = state.getPlayerHandCards().get(state.getCurrentPlayer()).get(2).cardType == ResPlayerCards.CardType.SPY ? 2 : 1;
+                int possibleActions = state.getPlayerHandCards().get(state.getCurrentPlayer()).get(2).cardType == SPY ? 2 : 1;
                 assertEquals(possibleActions, actions.size());
                 assertTrue(actions.stream().allMatch(a -> a instanceof ResMissionVoting));
                 fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
@@ -226,7 +230,7 @@ public class TestResistance {
         ResGameState state = (ResGameState) resistance.getGameState();
         for (int i = 0; i < state.getNPlayers(); i++) {
             assertEquals(state.getPlayerHandCards().get(i).getSize(), 3);
-            if (state.getPlayerHandCards().get(i).get(2).cardType != ResPlayerCards.CardType.RESISTANCE && state.getPlayerHandCards().get(i).get(2).cardType != ResPlayerCards.CardType.SPY) {
+            if (state.getPlayerHandCards().get(i).get(2).cardType != ResPlayerCards.CardType.RESISTANCE && state.getPlayerHandCards().get(i).get(2).cardType != SPY) {
                 throw new AssertionError("last card isn't SPY or RESISTANCE");
             }
             if (state.getPlayerHandCards().get(i).get(0).cardType != ResPlayerCards.CardType.No && state.getPlayerHandCards().get(i).get(0).cardType != ResPlayerCards.CardType.Yes) {
@@ -249,7 +253,7 @@ public class TestResistance {
             if (state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.RESISTANCE) {
                 resistanceCount += 1;
             }
-            if (state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.SPY) {
+            if (state.getPlayerHandCards().get(i).get(2).cardType == SPY) {
                 spyCount += 1;
             }
         }
@@ -271,14 +275,14 @@ public class TestResistance {
                 if (state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.RESISTANCE) {
                     assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[i]);
                 }
-                if (state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.SPY) {
+                if (state.getPlayerHandCards().get(i).get(2).cardType == SPY) {
                     assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[i]);
                 }
             } else {
                 if (state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.RESISTANCE) {
                     assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[i]);
                 }
-                if (state.getPlayerHandCards().get(i).get(2).cardType == ResPlayerCards.CardType.SPY) {
+                if (state.getPlayerHandCards().get(i).get(2).cardType == SPY) {
                     assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[i]);
                 }
             }
@@ -424,7 +428,7 @@ public class TestResistance {
 
 
     private void checkingSpiesKnowEveryonesCardsMethod(ResGameState state, ResGameState playerState, List<ResPlayerCards.CardType> listOfIdentityCards) {
-        if (state.getPlayerHandCards().get(state.getCurrentPlayer()).get(2).cardType == ResPlayerCards.CardType.SPY) {
+        if (state.getPlayerHandCards().get(state.getCurrentPlayer()).get(2).cardType == SPY) {
             List<ResPlayerCards.CardType> listOfSpyKnownIdentityCards = new ArrayList<>();
             for (int j = 0; j < state.getNPlayers(); j++) {
                 listOfSpyKnownIdentityCards.add(playerState.getPlayerHandCards().get(j).get(2).cardType);
@@ -444,5 +448,131 @@ public class TestResistance {
                 atLeastOneHandRearranged += 1;
             }
         }
+    }
+
+    @Test
+    public void redeterminisationKeepsSpiesConsistentWithFailedMissionsI() {
+        // We set one mission with a failure
+        // then confirm that over a number of redeterminisations, there is always at least one spy who went on that mission
+        ResGameState state = (ResGameState) resistance.getGameState();
+        state.setPlayerIdentity(0, RESISTANCE);
+        state.setPlayerIdentity(1, SPY);
+        state.setPlayerIdentity(2, SPY);
+        state.setPlayerIdentity(3, RESISTANCE);
+        state.setPlayerIdentity(4, RESISTANCE);
+        state.setMissionData(Arrays.asList(0, 1, 2), false);
+        // we now redeterminise for player 0 (who was on the team, but not a spy)
+        int[] spyCounts = new int[5];
+        for (int i = 0; i < 100; i++) {
+            ResGameState copyState = (ResGameState) state.copy(0);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(0).get(2).cardType);
+            if (copyState.getPlayerHandCards().get(1).get(2).cardType == SPY) spyCounts[1]++;
+            if (copyState.getPlayerHandCards().get(2).get(2).cardType == SPY) spyCounts[2]++;
+            if (copyState.getPlayerHandCards().get(3).get(2).cardType == SPY) spyCounts[3]++;
+            if (copyState.getPlayerHandCards().get(4).get(2).cardType == SPY) spyCounts[4]++;
+            // at least one person on the team must be a spy
+            assertTrue(
+                    copyState.getPlayerHandCards().get(1).get(2).cardType == SPY ||
+                            copyState.getPlayerHandCards().get(2).get(2).cardType == SPY);
+        }
+        // and all other players might be the spy
+        assertTrue(spyCounts[1] > 10);
+        assertTrue(spyCounts[2] > 10);
+        assertTrue(spyCounts[3] > 5);
+        assertTrue(spyCounts[4] > 5);
+        assertTrue(spyCounts[1] + spyCounts[2] > spyCounts[3] + spyCounts[4]);
+
+        // and then for player 1 (who is a spy)
+        for (int i = 0; i < 100; i++) {
+            ResGameState copyState = (ResGameState) state.copy(1);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(0).get(2).cardType);
+            assertEquals(SPY, copyState.getPlayerHandCards().get(1).get(2).cardType);
+            assertEquals(SPY, copyState.getPlayerHandCards().get(2).get(2).cardType);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(3).get(2).cardType);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(4).get(2).cardType);
+        }
+
+        // and then for player 4, who was not on the team
+        spyCounts = new int[5];
+        for (int i = 0; i < 100; i++) {
+            ResGameState copyState = (ResGameState) state.copy(4);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(4).get(2).cardType);
+            if (copyState.getPlayerHandCards().get(1).get(2).cardType == SPY) spyCounts[1]++;
+            if (copyState.getPlayerHandCards().get(2).get(2).cardType == SPY) spyCounts[2]++;
+            if (copyState.getPlayerHandCards().get(3).get(2).cardType == SPY) spyCounts[3]++;
+            if (copyState.getPlayerHandCards().get(0).get(2).cardType == SPY) spyCounts[0]++;
+            // at least one person on the team must be a spy
+            assertTrue(
+                    copyState.getPlayerHandCards().get(0).get(2).cardType == SPY ||
+                            copyState.getPlayerHandCards().get(1).get(2).cardType == SPY ||
+                            copyState.getPlayerHandCards().get(2).get(2).cardType == SPY);
+        }
+        // and all other players might be the spy
+        assertTrue(spyCounts[0] > 10);
+        assertTrue(spyCounts[1] > 10);
+        assertTrue(spyCounts[2] > 10);
+        assertTrue(spyCounts[3] > 10);
+    }
+
+    @Test
+    public void redeterminisationKeepsSpiesConsistentWithFailedMissionsII() {
+        // We set two missions with a failure (with one overlapping agent)
+        // then confirm that over a number of redeterminisations, there is always at least one spy who went on each mission
+        // and that not all of these incriminate the overlapping agent
+        // We set one mission with a failure
+        // then confirm that over a number of redeterminisations, there is always at least one spy who went on that mission
+        ResGameState state = (ResGameState) resistance.getGameState();
+        state.setPlayerIdentity(0, RESISTANCE);
+        state.setPlayerIdentity(1, SPY);
+        state.setPlayerIdentity(2, RESISTANCE);
+        state.setPlayerIdentity(3, RESISTANCE);
+        state.setPlayerIdentity(4, SPY);
+        state.setMissionData(Arrays.asList(0, 1, 2), false);
+        state.setMissionData(Arrays.asList(1, 2, 3), false);
+        // we now redeterminise for player 0 (who was on one team, but not a spy)
+        int[] spyCounts = new int[5];
+        for (int i = 0; i < 100; i++) {
+            ResGameState copyState = (ResGameState) state.copy(0);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(0).get(2).cardType);
+            if (copyState.getPlayerHandCards().get(1).get(2).cardType == SPY) spyCounts[1]++;
+            if (copyState.getPlayerHandCards().get(2).get(2).cardType == SPY) spyCounts[2]++;
+            if (copyState.getPlayerHandCards().get(3).get(2).cardType == SPY) spyCounts[3]++;
+            if (copyState.getPlayerHandCards().get(4).get(2).cardType == SPY) spyCounts[4]++;
+            // at least one person on the team must be a spy
+            assertTrue(
+                    copyState.getPlayerHandCards().get(1).get(2).cardType == SPY ||
+                            copyState.getPlayerHandCards().get(2).get(2).cardType == SPY);
+        }
+        // and all other players might be the spy
+        assertTrue(spyCounts[1] > 10);
+        assertTrue(spyCounts[2] > 10);
+        assertTrue(spyCounts[3] > 5);
+        assertTrue(spyCounts[4] > 5);
+        assertTrue(spyCounts[1] + spyCounts[2] > spyCounts[3] + spyCounts[4]);
+
+    }
+
+    @Test
+    public void historyOfMissionSuccessesIsCorrect() {
+        ResGameState state = (ResGameState) resistance.getGameState();
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
+        List<Integer> team = new ArrayList<>(state.getFinalTeam());
+        do {
+            fm.next(state, new ResMissionVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.Yes));
+        } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote);
+        assertEquals(1, state.getMissionsSoFar());
+        assertEquals(team, state.getHistoricTeam(1));
+        assertTrue(state.getHistoricMissionSuccess(1));
+
+        progressGame(state, ResGameState.ResGamePhase.MissionVote);
+        team = new ArrayList<>(state.getFinalTeam());
+        do {
+            fm.next(state, new ResMissionVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.No));
+        } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote);
+        assertEquals(2, state.getMissionsSoFar());
+        assertNotEquals(team, state.getHistoricTeam(1));
+        assertEquals(team, state.getHistoricTeam(2));
+        assertTrue(state.getHistoricMissionSuccess(1));
+        assertFalse(state.getHistoricMissionSuccess(2));
     }
 }
