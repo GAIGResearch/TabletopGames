@@ -126,8 +126,12 @@ public class ResForwardModel extends StandardForwardModel {
         } else if (resgs.getGamePhase() == MissionVote) {
 
             if (resgs.finalTeamChoice.contains(currentPlayer)) {
+                // Resistance members can only play a success card
                 actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.Yes));
-                actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.No));
+                if (resgs.playerHandCards.get(currentPlayer).get(2).cardType == ResPlayerCards.CardType.SPY) {
+                    // Spies can play either a success or fail card
+                    actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.No));
+                }
             } else {
                 throw new AssertionError("Should not be a player's turn if they are not on the mission");
             }

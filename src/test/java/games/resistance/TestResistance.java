@@ -100,7 +100,8 @@ public class TestResistance {
             do {
                 assertEquals(state.getGamePhase(), ResGameState.ResGamePhase.MissionVote);
                 List<AbstractAction> actions = fm.computeAvailableActions(state);
-                assertEquals(2, actions.size());
+                int possibleActions = state.getPlayerHandCards().get(state.getCurrentPlayer()).get(2).cardType == ResPlayerCards.CardType.SPY ? 2 : 1;
+                assertEquals(possibleActions, actions.size());
                 assertTrue(actions.stream().allMatch(a -> a instanceof ResMissionVoting));
                 fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
             } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote && state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
