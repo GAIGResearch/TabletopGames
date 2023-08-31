@@ -165,49 +165,41 @@ public class Wonders7ForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
+        int player = wgs.getCurrentPlayer();
+        Deck<Wonder7Card> playerHand = wgs.getPlayerHand(player);
         Set<AbstractAction> actions = new HashSet<>();
-        // If player has the prerequisite card/enough resources/the card is free/the player can pay for the resources to play the card
-        for (int i=0; i<wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize(); i++){ // Goes through each card in hand
-            if (wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).isFree(wgs)){ // Checks if player has prerequisite
-                actions.add((new FreeCard(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName)));
-            }
-            else if (wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).isPlayable(wgs)&&(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).constructionCost.size()!=0)){ // If player can afford the card cost
-                actions.add(new PlayCard(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName));
-            }
-            else if (wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).isPlayable(wgs)) {
-                actions.add(new FreeCard(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName)); // Checks if card has no cost
-            }
 
-            if (wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).isPayableR(wgs)&&(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).constructionCost.size()!=0)&&wgs.getNPlayers()>1){ // Checks if card can be played after buying resources from the player to the right
-                actions.add(new BuyResourceR(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName));
+        // If player has the prerequisite card/enough resources/the card is free/the player can pay for the resources to play the card
+        for (Wonder7Card card: playerHand.getComponents()){ // Goes through each card in hand
+            if (card.isAlreadyPlayed(player, wgs)) continue;
+
+            if (card.isFree(player, wgs)){ // Checks if player has prerequisite
+                actions.add((new PlayCard(player, card.cardName, true)));
             }
-            if (wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).isPayableL(wgs)&&(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).constructionCost.size()!=0)&&wgs.getNPlayers()>1){ // Checks if card can be played after buying resources from the player to the left
-                actions.add(new BuyResourceL(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName));
+            else if (card.isPlayable(player, wgs)) {  // Meets the costs / can pay neighbours for resources
+                actions.add(new PlayCard(player, card.cardName, false));
             }
         }
 
         // If next stage is playable or not
-        if (wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).isPlayable(wgs)){
-            for (int i=0; i<wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize(); i++) { // Goes through each card in hand
-                actions.add(new BuildStage(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName, wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage));
+        if (wgs.getPlayerWonderBoard(player).isPlayable(wgs)){
+            for (int i=0; i<playerHand.getSize(); i++) { // Goes through each card in hand
+                actions.add(new BuildStage(player, playerHand.get(i).cardName));
             }
         }
 
-        // All player can use special effect on card
-        if ((!wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed)){
-            for (int i=0; i<wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize(); i++) { // Goes through each card in hand
-                actions.add(new SpecialEffect(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName));
+        // All player can use special effect on wonder board
+        if ((!wgs.getPlayerWonderBoard(player).effectUsed)){
+            for (int i=0; i<playerHand.getSize(); i++) { // Goes through each card in hand
+                actions.add(new SpecialEffect(player, playerHand.get(i).cardName));
             }
         }
 
         // All discard-able cards in player hand
-        for (int i=0; i<wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize(); i++){
-            actions.add(new DiscardCard(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName));
+        for (int i=0; i<playerHand.getSize(); i++){
+            actions.add(new DiscardCard(playerHand.get(i).cardName, player));
         }
 
-        //System.out.println(wgs.getPlayerHand(wgs.getCurrentPlayer()));
-        //System.out.println(wgs.getCurrentPlayer());
-        //System.out.println("LIST OF ACTIONS FOR CURRENT PLAYER: "+actions);
         return new ArrayList<>(actions);
     }
 

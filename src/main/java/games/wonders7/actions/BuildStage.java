@@ -12,11 +12,11 @@ import java.util.Set;
 
 public class BuildStage extends AbstractAction {
     public final String cardName;
-    private final int wonderStage;
+    private final int player;
 
-    public BuildStage(String cardName, int wonderStage){
+    public BuildStage(int player, String cardName){
+        this.player = player;
         this.cardName = cardName;
-        this.wonderStage = wonderStage;
     }
 
     @Override
@@ -24,41 +24,44 @@ public class BuildStage extends AbstractAction {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds the played card
-        int index=0; // The index of the card in hand
-        for (int i=0; i<wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize(); i++){ // Goes through each card in the playerHand
-            if (cardName.equals(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName)){ // If cardName is the one searching for (being played)
-                index = i;
+        Wonder7Card card = null;
+        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
+            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
+                card = cardSearch;
+                break;
             }
         }
-        Wonder7Card card = wgs.getPlayerHand(wgs.getCurrentPlayer()).get(index); // Card being selected
 
-
+        if (card == null) {
+            throw new AssertionError("Card not found in player hand");
+        }
+        
         // The second stage has been built, now the player can play their special action (if they have the wonder)
-        if (wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage == 2){
-            Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
+        if (wgs.getPlayerWonderBoard(player).wonderStage == 2){
+            Wonder7Board board = wgs.getPlayerWonderBoard(player);
             switch (board.type){
                 case TheLighthouseOfAlexandria:
                 case TheMausoleumOfHalicarnassus:
                 case TheHangingGardensOfBabylon:
                 case TheStatueOfZeusInOlympia:
-                    wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed = false;
+                    wgs.getPlayerWonderBoard(player).effectUsed = false;
                 default:
                     break;
             }}
 
         // Gives player resources produced from stage
-        Set<Wonders7Constants.Resource> keys = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).type.stageProduce.get(wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage-1).keySet(); // Gets all the resources the stage provides
+        Set<Wonders7Constants.Resource> keys = wgs.getPlayerWonderBoard(player).type.stageProduce.get(wgs.getPlayerWonderBoard(player).wonderStage-1).keySet(); // Gets all the resources the stage provides
         for (Wonders7Constants.Resource resource: keys){  // Goes through all keys for each resource
-            int stageValue = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).type.getStageProduce(wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage - 1, resource); // Number of resource the stage provides
-            int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource); // Number of resource the player owns
-            wgs.getPlayerResources(wgs.getCurrentPlayer()).put(resource, playerValue + stageValue); // Adds the resources provided by the stage to the players resource count
+            int stageValue = wgs.getPlayerWonderBoard(player).type.getStageProduce(wgs.getPlayerWonderBoard(player).wonderStage - 1, resource); // Number of resource the stage provides
+            int playerValue = wgs.getPlayerResources(player).get(resource); // Number of resource the player owns
+            wgs.getPlayerResources(player).put(resource, playerValue + stageValue); // Adds the resources provided by the stage to the players resource count
         }
 
         // remove the card from the players hand to the playedDeck
-        wgs.getPlayerHand(wgs.getCurrentPlayer()).remove(card);
+        wgs.getPlayerHand(player).remove(card);
         wgs.getDiscardPile().add(card);
 
-        wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).changeStage(); // Increases wonderstage value to the next stage
+        wgs.getPlayerWonderBoard(player).changeStage(); // Increases wonderstage value to the next stage
         return true;
     }
 
@@ -67,21 +70,21 @@ public class BuildStage extends AbstractAction {
 
 
     @Override
-    public String toString() {return "Built stage " + wonderStage + " using " + cardName;}
+    public String toString() {return "Player " + player + " built wonder stage";}
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BuildStage)) return false;
         BuildStage that = (BuildStage) o;
-        return wonderStage == that.wonderStage && Objects.equals(cardName, that.cardName);
+        return player == that.player && Objects.equals(cardName, that.cardName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardName, wonderStage);
+        return Objects.hash(cardName, player);
     }
 
     @Override
-    public AbstractAction copy() {return this; }
+    public BuildStage copy() {return this; }
 }

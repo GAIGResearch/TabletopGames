@@ -1,7 +1,6 @@
 package games.wonders7.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7GameState;
@@ -13,13 +12,14 @@ import java.util.Set;
 
 public class SpecialEffect extends DrawCard {
 
-    public String cardName;
+    public final String cardName;
+    public final int player;
 
     // Player chooses card to play
-    public SpecialEffect(String cardName){
+    public SpecialEffect(int player, String cardName){
         super();
+        this.player = player;
         this.cardName = cardName;
-
     }
 
 
@@ -29,13 +29,17 @@ public class SpecialEffect extends DrawCard {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds the played card
-        int index=0; // The index of the card in hand
-        for (int i=0; i<wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize(); i++){ // Goes through each card in the playerHand
-            if (cardName.equals(wgs.getPlayerHand(wgs.getCurrentPlayer()).get(i).cardName)){ // If cardName is the one searching for (being played)
-                index = i;
+        Wonder7Card card = null;
+        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
+            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
+                card = cardSearch;
+                break;
             }
         }
-        Wonder7Card card = wgs.getPlayerHand(wgs.getCurrentPlayer()).get(index); // Card being selected
+
+        if (card == null) {
+            throw new AssertionError("Card not found in player hand");
+        }
 
         Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
         switch (board.type){
@@ -65,7 +69,7 @@ public class SpecialEffect extends DrawCard {
 
     @Override
     public String toString() {
-        return "Special Effect " + cardName;
+        return "Player " + player + " uses Wonder special effect with card " + cardName;
     }
 
     @Override
@@ -79,14 +83,14 @@ public class SpecialEffect extends DrawCard {
         if (!(o instanceof SpecialEffect)) return false;
         if (!super.equals(o)) return false;
         SpecialEffect that = (SpecialEffect) o;
-        return Objects.equals(cardName, that.cardName);
+        return player == that.player && Objects.equals(cardName, that.cardName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardName);
+        return Objects.hash(super.hashCode(), cardName, player);
     }
 
     @Override
-    public AbstractAction copy(){return new SpecialEffect(cardName);}
+    public SpecialEffect copy(){return this;}
 }

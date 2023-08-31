@@ -1,14 +1,15 @@
 package games.wonders7.cards;
 
-import core.AbstractGameState;
 import core.components.Card;
 import games.wonders7.Wonders7Constants;
+import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
+import static games.wonders7.Wonders7Constants.Resource.Coin;
 
 public class Wonder7Card extends Card {
 
@@ -101,184 +102,58 @@ public class Wonder7Card extends Card {
         return s.toString().replace(",]", "");
     }
 
-
-    // Checks if player can pay the cost of the card or if the player is allowed to build the structure
-    public boolean isPlayable(AbstractGameState gameState) {
-        Wonders7GameState wgs = (Wonders7GameState) gameState;
-        // Checks if the player has an identical structure
-        for (int i=0;i<wgs.getPlayedCards(wgs.getCurrentPlayer()).getSize();i++){
-            if(Objects.equals(wgs.getPlayedCards(wgs.getCurrentPlayer()).get(i).cardName, cardName)){
-                return false;
+    public boolean isFree(int player, Wonders7GameState wgs){
+        // Checks if the player has prerequisite cards and can play for free
+        for (Wonder7Card card: wgs.getPlayedCards(player).getComponents()){
+            if (prerequisiteCard.equals(card.cardName)){
+                return true;
             }
         }
-
-        // Checks if player can afford the cost of the card
-        Set<Wonders7Constants.Resource> key = constructionCost.keySet(); //Gets the resources of the player
-        for (Wonders7Constants.Resource resource : key) { // Goes through every resource the player has
-            if ((wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)) < constructionCost.get(resource)) { // Checks if players resource count is more or equal to card resource count (i.e. the player can afford the card)
-                return false; // Player cant afford card
-            }
-        }
-        return true;
+        return constructionCost.isEmpty(); // Card is free (no construction cost)
     }
 
-    // Checks if the card is free using pre-requisite card
-    public boolean isFree(AbstractGameState gameState){
-        Wonders7GameState wgs = (Wonders7GameState) gameState;
-
-        // Checks if the player has an identical structure
-        for (int i=0;i<wgs.getPlayedCards(wgs.getCurrentPlayer()).getSize();i++){
-            if(Objects.equals(wgs.getPlayedCards(wgs.getCurrentPlayer()).get(i).cardName, cardName)){
-                return false;
+    public boolean isAlreadyPlayed(int player, Wonders7GameState wgs) {
+        for (Wonder7Card card: wgs.getPlayedCards(player).getComponents()){
+            if(Objects.equals(card.cardName, cardName)){
+                // Player already has an identical structure, can't play another
+                return true;
             }
         }
-
-        // Checks if the player has prerequisite cards
-            for (int i=0;i<wgs.getPlayedCards(wgs.getCurrentPlayer()).getSize();i++){
-                if (prerequisiteCard.equals(wgs.getPlayedCards(wgs.getCurrentPlayer()).get(i).cardName)){
-                    return true;
-                }
-            }
         return false;
     }
 
-    // Checks if neighbour on the right can provide resources to build the structure
-    public boolean isPayableR(AbstractGameState gameState){
-        Wonders7GameState wgs = (Wonders7GameState) gameState;
-
-        // Checks if the player has an identical structure
-        for (int i=0;i<wgs.getPlayedCards(wgs.getCurrentPlayer()).getSize();i++){
-            if(Objects.equals(wgs.getPlayedCards(wgs.getCurrentPlayer()).get(i).cardName, cardName)){
-                return false;
-            }
-        }
+    // Checks if the player can play the card, several conditions must be met
+    public boolean isPlayable(int player, Wonders7GameState wgs){
+        if (isAlreadyPlayed(player, wgs)) return false; // If player already has an identical structure (can't play another
+        if (isFree(player, wgs)) return true; // If player can play for free (has prerequisite card
 
         // Collects the resources player does not have
-        Set<Wonders7Constants.Resource> key = constructionCost.keySet();
         HashMap<Wonders7Constants.Resource, Long> neededResources = new HashMap<>();
-        for (Wonders7Constants.Resource resource : key) { // Goes through every resource the player needs
-            if ((wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
-                neededResources.put(resource, constructionCost.get(resource)-wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource));
+        for (Wonders7Constants.Resource resource : constructionCost.keySet()) { // Goes through every resource the player needs
+            if ((wgs.getPlayerResources(player).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
+                neededResources.put(resource, constructionCost.get(resource)-wgs.getPlayerResources(player).get(resource));
             }
         }
+        if (neededResources.isEmpty()) return true; // If player can afford the card (no resources needed)
+
         // Calculates the cost of resources
-        int coinCost=0;
-        key = neededResources.keySet();
-        for (Wonders7Constants.Resource resource : key)
-            coinCost += 2*neededResources.get(resource); // For each unit of the resource needed
-        if (coinCost>wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin)){return false;} // If player can pay the neighbour for the resources
+        int coinCost = 0;
+        for (Wonders7Constants.Resource resource : neededResources.keySet())
+            coinCost += (int) (((Wonders7GameParameters)wgs.getGameParameters()).nCostNeighbourResource * neededResources.get(resource)); // For each unit of the resource needed
+        if (coinCost > wgs.getPlayerResources(player).get(Coin))
+            return false; // If player can't pay the neighbours for the resources needed
 
-
-        HashMap<Wonders7Constants.Resource, Long> neighbourResources = new HashMap<>(); // Resources offered by the neighbour
-        // Resources provided by neighbour's wonder
-        key = wgs.getPlayerWonderBoard(((wgs.getCurrentPlayer()+1)%wgs.getNPlayers())).type.resourcesProduced.keySet();
-        for (Wonders7Constants.Resource resource : key) {
-            neighbourResources.put(resource, wgs.getPlayerWonderBoard(((wgs.getCurrentPlayer()+1)%wgs.getNPlayers())).type.resourcesProduced.get(resource));
-        }
-        // Resources provided by neighbour's raw materials
-        for (int i=0;i<wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).getSize();i++){
-            if ((wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(i).type== Type.RawMaterials)){
-                key = wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(i).resourcesProduced.keySet();
-                for (Wonders7Constants.Resource resource : key) {
-                    neighbourResources.put(resource, wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(i).resourcesProduced.get(resource));
-                }
-            }
-        }
-        // Resources provided by neighbour's manufactured goods
-        for (int i=0;i<wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).getSize();i++){
-            if ((wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(i).type== Type.ManufacturedGoods)){
-                key = wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(i).resourcesProduced.keySet();
-                for (Wonders7Constants.Resource resource : key) {
-                    neighbourResources.put(resource, wgs.getPlayedCards((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(i).resourcesProduced.get(resource));
-                }
-            }
-        }
+        HashMap<Wonders7Constants.Resource, Integer> neighbourLResources = wgs.getPlayerResources((wgs.getNPlayers()+player-1)%wgs.getNPlayers()); // Resources available to the neighbour on left
+        HashMap<Wonders7Constants.Resource, Integer> neighbourRResources = wgs.getPlayerResources((player+1)%wgs.getNPlayers()); // Resources available to the neighbour on right
 
         // Calculates combined resources of neighbour and player
-        HashMap<Wonders7Constants.Resource, Long> combinedResources = new HashMap<>();
-        key = neighbourResources.keySet();
-        for (Wonders7Constants.Resource resource : key) { // Goes through every resource provided by the neighbour
-            combinedResources.put(resource, wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)+neighbourResources.get(resource)); // Adds player and neighbour values into combined resources hashmap
+        for (Wonders7Constants.Resource resource : constructionCost.keySet()) { // Goes through every resource provided by the neighbour
+            int combined = wgs.getPlayerResources(player).get(resource)
+                    + neighbourLResources.get(resource)
+                    + neighbourRResources.get(resource);
+            if (combined < constructionCost.get(resource)) return false; // Player can't afford card with bought resources
         }
 
-        // Checks if the combinedResources can pay the cost of the card
-        key = constructionCost.keySet();
-        for (Wonders7Constants.Resource resource : key) {
-            if (combinedResources.get(resource)== null){return false;}
-            if ((combinedResources.get(resource)) < constructionCost.get(resource)) { // Checks whether player's resource (after 'buying' resources) count can now afford the card
-                return false; // Player can't afford card with bought resources
-            }
-        }
-        return true;
-    }
-
-    // Checks if neighbour on the left can provide resources to build the structure
-    public boolean isPayableL(AbstractGameState gameState){
-        Wonders7GameState wgs = (Wonders7GameState) gameState;
-
-        // Checks if the player has an identical structure
-        for (int i=0;i<wgs.getPlayedCards(wgs.getCurrentPlayer()).getSize();i++){
-            if(Objects.equals(wgs.getPlayedCards(wgs.getCurrentPlayer()).get(i).cardName, cardName)){
-                return false;
-            }
-        }
-
-        // Collects the resources player does not have
-        Set<Wonders7Constants.Resource> key = constructionCost.keySet();
-        HashMap<Wonders7Constants.Resource, Long> neededResources = new HashMap<>();
-        for (Wonders7Constants.Resource resource : key) { // Goes through every resource the player needs
-            if ((wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
-                neededResources.put(resource, constructionCost.get(resource)-wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource));
-            }
-        }
-        // Calculates the cost of resources
-        int coinCost=0;
-        key = neededResources.keySet();
-        for (Wonders7Constants.Resource resource : key)
-            coinCost += 2*neededResources.get(resource); // For each unit of the resource needed
-        if (coinCost>wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin)){return false;} // If player can pay the neighbour for the resources
-
-
-        HashMap<Wonders7Constants.Resource, Long> neighbourResources = new HashMap<>(); // Resources offered by the neighbour
-        // Resources provided by neighbour's wonder
-        key = wgs.getPlayerWonderBoard(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).type.resourcesProduced.keySet();
-        for (Wonders7Constants.Resource resource : key) {
-            neighbourResources.put(resource, wgs.getPlayerWonderBoard(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).type.resourcesProduced.get(resource));
-        }
-        // Resources provided by neighbour's raw materials
-        for (int i=0;i<wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).getSize();i++){
-            if ((wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).get(i).type== Type.RawMaterials)){
-                key = wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).get(i).resourcesProduced.keySet();
-                for (Wonders7Constants.Resource resource : key) {
-                    neighbourResources.put(resource, wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).get(i).resourcesProduced.get(resource));
-                }
-            }
-        }
-        // Resources provided by neighbour's manufactured goods
-        for (int i=0;i<wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).getSize();i++){
-            if ((wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).get(i).type== Type.ManufacturedGoods)){
-                key = wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).get(i).resourcesProduced.keySet();
-                for (Wonders7Constants.Resource resource : key) {
-                    neighbourResources.put(resource, wgs.getPlayedCards(Math.floorMod(wgs.getCurrentPlayer()-1, wgs.getNPlayers())).get(i).resourcesProduced.get(resource));
-                }
-            }
-        }
-
-        // Calculates combined resources of neighbour and player
-        HashMap<Wonders7Constants.Resource, Long> combinedResources = new HashMap<>();
-        key = neighbourResources.keySet();
-        for (Wonders7Constants.Resource resource : key) { // Goes through every resource provided by the neighbour
-            combinedResources.put(resource, wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)+neighbourResources.get(resource)); // Adds player and neighbour values into combined resources hashmap
-        }
-
-        // Checks if the combinedResources can pay the cost of the card
-        key = constructionCost.keySet();
-        for (Wonders7Constants.Resource resource : key) {
-            if (combinedResources.get(resource)== null){return false;}
-            if ((combinedResources.get(resource)) < constructionCost.get(resource)) { // Checks whether player's resource (after 'buying' resources) count can now afford the card
-                return false; // Player can't afford card with bought resources
-            }
-        }
         return true;
     }
 

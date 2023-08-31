@@ -1,9 +1,8 @@
 package games.wonders7;
 
 import core.AbstractGameState;
-
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -9,6 +9,8 @@ import java.util.Objects;
 
 public class Wonders7GameParameters extends TunableParameters {
     public int nWonderCardsPerPlayer = 7;
+    public int nCostNeighbourResource = 2;
+    public int nCoinsDiscard = 3;
 
     public Wonders7GameParameters(long seed) {
         super(seed);
