@@ -32,47 +32,6 @@ public class ResParameters extends AbstractParameters {
         throw new AssertionError("shouldn't be null, incorrect players:" + numberPlayers);
     }
 
-    public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID) {
-        // We want to randomly assign the number of spies across the total number of players
-        // and return a boolean[] with length of total, and spies number of true values
-        // we also need to ensure that there is at least one spy per historically failed mission
-        boolean valid = true;
-        int total = state.getNPlayers();
-        boolean[] retValue;
-        do {
-            retValue = new boolean[state.getNPlayers()];
-            for (int i = 0; i < spies; i++) {
-                boolean done = false;
-                int count = 0;
-                while (!done) {
-                    int rndIndex = state.rnd.nextInt(total);
-                    if (!retValue[rndIndex] && rndIndex != playerID) {
-                        retValue[rndIndex] = true;
-                        done = true;
-                    }
-                    count++;
-                    if (count > 200)
-                        throw new AssertionError(String.format("Infinite loop allocating %d spies amongst %d players", spies, total));
-                }
-                // now check constraints
-                valid = true;
-                for (List<Integer> failedMission : state.getFailedTeams()) {
-                    boolean[] finalRetValue = retValue;
-                    if (failedMission.stream().noneMatch(s -> finalRetValue[s])) {
-                        // we have a failed team without a spy
-                        valid = false;
-                    }
-                    if (!valid)
-                        break;
-                }
-            }
-        } while (!valid);
-        List<Boolean> RV = new ArrayList<>();
-        for (boolean b : retValue) {
-            RV.add(b);
-        }
-        return RV;
-    }
 
 
     public int[] getFactions(int numberPlayers) {

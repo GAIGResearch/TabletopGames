@@ -18,6 +18,7 @@ import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static games.resistance.components.ResPlayerCards.CardType.RESISTANCE;
 import static games.resistance.components.ResPlayerCards.CardType.SPY;
@@ -460,7 +461,7 @@ public class TestResistance {
         state.setPlayerIdentity(2, SPY);
         state.setPlayerIdentity(3, RESISTANCE);
         state.setPlayerIdentity(4, RESISTANCE);
-        state.setMissionData(Arrays.asList(0, 1, 2), false);
+        state.setMissionData(Arrays.asList(0, 1, 2), 1);
         // we now redeterminise for player 0 (who was on the team, but not a spy)
         int[] spyCounts = new int[5];
         for (int i = 0; i < 100; i++) {
@@ -527,8 +528,8 @@ public class TestResistance {
         state.setPlayerIdentity(2, RESISTANCE);
         state.setPlayerIdentity(3, RESISTANCE);
         state.setPlayerIdentity(4, SPY);
-        state.setMissionData(Arrays.asList(0, 1, 2), false);
-        state.setMissionData(Arrays.asList(1, 2, 3), false);
+        state.setMissionData(Arrays.asList(0, 1, 2), 1);
+        state.setMissionData(Arrays.asList(1, 2, 3), 1);
         // we now redeterminise for player 0 (who was on one team, but not a spy)
         int[] spyCounts = new int[5];
         for (int i = 0; i < 100; i++) {
@@ -553,6 +554,48 @@ public class TestResistance {
     }
 
     @Test
+    public void redeterminisationKeepsSpiesConsistentWithFailedMissionsIII() {
+        // We have one mission with a failure; but 2 votes, so two of the members must be spies
+        ResGameState state = (ResGameState) resistance.getGameState();
+        state.setPlayerIdentity(0, RESISTANCE);
+        state.setPlayerIdentity(1, SPY);
+        state.setPlayerIdentity(2, RESISTANCE);
+        state.setPlayerIdentity(3, RESISTANCE);
+        state.setPlayerIdentity(4, SPY);
+        state.setMissionData(Arrays.asList(0, 1, 4), 2);
+        // we now redeterminise for player 0 (who was on the team, but not a spy)
+        // Hence they know everything
+        for (int i = 0; i < 100; i++) {
+            ResGameState copyState = (ResGameState) state.copy(0);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(0).get(2).cardType);
+            assertEquals(SPY, copyState.getPlayerHandCards().get(1).get(2).cardType);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(2).get(2).cardType);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(3).get(2).cardType);
+            assertEquals(SPY, copyState.getPlayerHandCards().get(4).get(2).cardType);
+        }
+
+        // and then for player 2, who was not on the team
+        int[] spyCounts = new int[5];
+        for (int i = 0; i < 100; i++) {
+            ResGameState copyState = (ResGameState) state.copy(2);
+            assertEquals(RESISTANCE, copyState.getPlayerHandCards().get(2).get(2).cardType);
+            if (copyState.getPlayerHandCards().get(1).get(2).cardType == SPY) spyCounts[1]++;
+            if (copyState.getPlayerHandCards().get(0).get(2).cardType == SPY) spyCounts[0]++;
+            if (copyState.getPlayerHandCards().get(3).get(2).cardType == SPY) spyCounts[3]++;
+            if (copyState.getPlayerHandCards().get(4).get(2).cardType == SPY) spyCounts[4]++;
+            // at least two people on the team must be spies
+            int nSpies = IntStream.of(0, 1, 4).map(j -> copyState.getPlayerHandCards().get(j).get(2).cardType == SPY ? 1 : 0).sum();
+            assertEquals(2, nSpies);
+        }
+        // and all other players might be the spy
+        assertTrue(spyCounts[0] > 20);
+        assertTrue(spyCounts[1] > 20);
+        assertEquals(0, spyCounts[3]);
+        assertTrue(spyCounts[4] > 20);
+
+    }
+
+    @Test
     public void historyOfMissionSuccessesIsCorrect() {
         ResGameState state = (ResGameState) resistance.getGameState();
         progressGame(state, ResGameState.ResGamePhase.MissionVote);
@@ -563,6 +606,7 @@ public class TestResistance {
         assertEquals(1, state.getMissionsSoFar());
         assertEquals(team, state.getHistoricTeam(1));
         assertTrue(state.getHistoricMissionSuccess(1));
+        assertEquals(0, state.getHistoricNoVotes(1));
 
         progressGame(state, ResGameState.ResGamePhase.MissionVote);
         team = new ArrayList<>(state.getFinalTeam());
@@ -574,5 +618,7 @@ public class TestResistance {
         assertEquals(team, state.getHistoricTeam(2));
         assertTrue(state.getHistoricMissionSuccess(1));
         assertFalse(state.getHistoricMissionSuccess(2));
+        assertEquals(0, state.getHistoricNoVotes(1));
+        assertEquals(3, state.getHistoricNoVotes(2));
     }
 }

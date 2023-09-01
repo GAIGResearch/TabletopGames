@@ -19,6 +19,7 @@ public class ResGameState extends AbstractGameState {
 
     public int[] factions;
     List<Boolean> gameBoardValues = new ArrayList<>();
+    List<Integer> noVotesPerMission = new ArrayList<>();
     boolean voteSuccess;
     int leaderID;
     int failedVoteCounter = 0;
@@ -42,7 +43,7 @@ public class ResGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return super.hashCode() + 31 * Objects.hash(leaderID, playerHandCards, gameBoardValues,
-                teamChoice, finalTeamChoice, voteSuccess, failedVoteCounter, historicTeams) +
+                teamChoice, finalTeamChoice, voteSuccess, failedVoteCounter, historicTeams, noVotesPerMission) +
                 Arrays.hashCode(factions) + 31 * Arrays.hashCode(votingChoice) + 31 * 31 * Arrays.hashCode(missionVotingChoice);
     }
 
@@ -63,6 +64,7 @@ public class ResGameState extends AbstractGameState {
                         Objects.equals(voteSuccess, that.voteSuccess) &&
                         Objects.equals(failedVoteCounter, that.failedVoteCounter) &&
                         Objects.equals(historicTeams, that.historicTeams) &&
+                        Objects.equals(noVotesPerMission, that.noVotesPerMission) &&
                         Arrays.equals(factions, that.factions);
     }
 
@@ -132,6 +134,7 @@ public class ResGameState extends AbstractGameState {
         copy.gameBoardValues = new ArrayList<>(gameBoardValues);
         copy.rnd = new Random(rnd.nextLong());
         copy.historicTeams = new ArrayList<>(historicTeams);  // we do not need to copy the sub-lists, as they are immutable
+        copy.noVotesPerMission = new ArrayList<>(noVotesPerMission);
         copy.leaderID = leaderID;
         copy.teamChoice = new ArrayList<>(teamChoice);
         copy.finalTeamChoice = new ArrayList<>(finalTeamChoice);
@@ -150,7 +153,7 @@ public class ResGameState extends AbstractGameState {
             // if not, we need to shuffle all the other players
             LinkedList<Boolean> spyAllocation = new LinkedList<>();
             if (!isSpy) {
-                spyAllocation = new LinkedList<>(ResParameters.randomiseSpies(factions[1], this, playerId));
+                spyAllocation = new LinkedList<>(ResForwardModel.randomiseSpies(factions[1], this, playerId));
             }
             for (int i = 0; i < getNPlayers(); i++) {
                 //Knowledge of Own Hand/Votes
@@ -219,20 +222,14 @@ public class ResGameState extends AbstractGameState {
     public boolean getHistoricMissionSuccess(int i) {
         return gameBoardValues.get(i-1);
     }
-    public List<List<Integer>> getFailedTeams() {
-        List<List<Integer>> retValue = new ArrayList<>();
-        for (int i = 1; i <= historicTeams.size(); i++) {
-            if (!getHistoricMissionSuccess(i)) {
-                retValue.add(getHistoricTeam(i));
-            }
-        }
-        return retValue;
+    public int getHistoricNoVotes(int i) {
+        return noVotesPerMission.get(i-1);
     }
-
     // this method is purely for ease of testing
-    public void setMissionData(List<Integer> team, boolean success) {
+    public void setMissionData(List<Integer> team, int noVotes) {
         historicTeams.add(team);
-        gameBoardValues.add(success);
+        gameBoardValues.add(noVotes == 0);
+        noVotesPerMission.add(noVotes);
     }
     // for testing only
     public void setPlayerIdentity(int playerID, ResPlayerCards.CardType cardType) {

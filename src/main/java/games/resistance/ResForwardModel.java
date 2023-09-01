@@ -57,7 +57,7 @@ public class ResForwardModel extends StandardForwardModel {
         }
         resgs.factions = resp.getFactions(firstState.getNPlayers());
 
-        List<Boolean> spies = ResParameters.randomiseSpies(resgs.factions[1], resgs, -1);
+        List<Boolean> spies = ResForwardModel.randomiseSpies(resgs.factions[1], resgs, -1);
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = false;
@@ -254,6 +254,7 @@ public class ResForwardModel extends StandardForwardModel {
                 resgs.gameBoardValues.add(true);
             }
             resgs.historicTeams.add(new ArrayList<>(resgs.finalTeamChoice));
+            resgs.noVotesPerMission.add(occurrenceCount);
         }
 
     }
@@ -269,5 +270,54 @@ public class ResForwardModel extends StandardForwardModel {
 
     public void changeLeader(ResGameState resgs) {
         resgs.leaderID = (resgs.leaderID + 1) % resgs.getNPlayers();
+    }
+
+
+    public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID) {
+        // We want to randomly assign the number of spies across the total number of players
+        // and return a boolean[] with length of total, and spies number of true values
+        // we also need to ensure that there is at least one spy per historically failed mission
+        boolean valid = true;
+        int total = state.getNPlayers();
+        boolean[] retValue;
+        do {
+            retValue = new boolean[state.getNPlayers()];
+            for (int i = 0; i < spies; i++) {
+                boolean done = false;
+                int count = 0;
+                while (!done) {
+                    int rndIndex = state.rnd.nextInt(total);
+                    if (!retValue[rndIndex] && rndIndex != playerID) {
+                        retValue[rndIndex] = true;
+                        done = true;
+                    }
+                    count++;
+                    if (count > 200)
+                        throw new AssertionError(String.format("Infinite loop allocating %d spies amongst %d players", spies, total));
+                }
+            }
+            // now check constraints
+            valid = true;
+            for (int previousMission = 1; previousMission <= state.getMissionsSoFar(); previousMission++) {
+                int noVotes = state.getHistoricNoVotes(previousMission);
+                if (noVotes == 0)
+                    continue;
+                List<Integer> failedMission = state.getHistoricTeam(previousMission);
+                boolean[] finalRetValue = retValue;
+                int spiesOnMission = failedMission.stream()
+                        .mapToInt(p -> finalRetValue[p] ? 1 : 0)
+                        .sum();
+                if (spiesOnMission < noVotes)
+                    valid = false;
+                if (!valid)
+                    break;
+            }
+        } while (!valid);
+        List<Boolean> RV = new ArrayList<>();
+        for (
+                boolean b : retValue) {
+            RV.add(b);
+        }
+        return RV;
     }
 }
