@@ -25,8 +25,8 @@ public class RandomRRTournament extends RoundRobinTournament {
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                               TournamentMode tournamentMode, int totalMatchUps, int reportPeriod, long seed,
-                              AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams);
+                              AbstractParameters gameParams, boolean byTeam) {
+        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams, byTeam);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);

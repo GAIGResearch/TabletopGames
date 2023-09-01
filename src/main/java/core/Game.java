@@ -109,63 +109,60 @@ public class Game {
             AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
-        if (game != null) {
-
-            if (listeners != null) {
-                Set<String> agentNames = players.stream()
-                        //           .peek(a -> System.out.println(a.toString()))
-                        .map(AbstractPlayer::toString).collect(Collectors.toSet());
-
-                for (IGameListener gameTracker : listeners) {
-                    gameTracker.init(game, players.size(), agentNames);
-                    game.addListener(gameTracker);
-                }
-            }
-
-            // Randomize parameters
-            if (randomizeParameters) {
-                AbstractParameters gameParameters = game.getGameState().getGameParameters();
-                gameParameters.randomize();
-                System.out.println("Parameters: " + gameParameters);
-            }
-
-            // Reset game instance, passing the players for this game
-            game.reset(players);
-            game.setTurnPause(turnPause);
-
-            if (ac != null) {
-                // We spawn the GUI off in another thread
-
-                GUI frame = new GUI();
-                GamePanel gamePanel = new GamePanel();
-                frame.setContentPane(gamePanel);
-
-                AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
-
-                frame.setFrameProperties();
-                frame.validate();
-                frame.pack();
-
-                // Video recording setup
-                if (game.recordingVideo) {
-                    game.areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
-                }
-
-                Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
-                guiUpdater.start();
-
-                game.run();
-                guiUpdater.stop();
-                // and update GUI to final game state
-                game.updateGUI(gui, frame);
-
-            } else {
-
-                // Run!
-                game.run();
-            }
-        } else {
+        if (game == null)
             System.out.println("Error game: " + gameToPlay);
+
+        if (listeners != null) {
+            Set<String> agentNames = players.stream()
+                    //           .peek(a -> System.out.println(a.toString()))
+                    .map(AbstractPlayer::toString).collect(Collectors.toSet());
+
+            for (IGameListener gameTracker : listeners) {
+                gameTracker.init(game, players.size(), agentNames);
+                game.addListener(gameTracker);
+            }
+        }
+
+        // Randomize parameters
+        if (randomizeParameters) {
+            AbstractParameters gameParameters = game.getGameState().getGameParameters();
+            gameParameters.randomize();
+            System.out.println("Parameters: " + gameParameters);
+        }
+
+        // Reset game instance, passing the players for this game
+        game.reset(players);
+        game.setTurnPause(turnPause);
+
+        if (ac != null) {
+            // We spawn the GUI off in another thread
+
+            GUI frame = new GUI();
+            GamePanel gamePanel = new GamePanel();
+            frame.setContentPane(gamePanel);
+
+            AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+
+            frame.setFrameProperties();
+            frame.validate();
+            frame.pack();
+
+            // Video recording setup
+            if (game.recordingVideo) {
+                game.areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
+            }
+
+            Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
+            guiUpdater.start();
+
+            game.run();
+            guiUpdater.stop();
+            // and update GUI to final game state
+            game.updateGUI(gui, frame);
+
+        } else {
+            // Run!
+            game.run();
         }
 
         return game;
@@ -359,6 +356,14 @@ public class Game {
             this.players = players;
         } else if (players.isEmpty()) {
             // keep existing players
+        } else if (players.size() == gameState.nTeams){
+            // In this case we use (copies of) each agent for all players on the team
+            // loop over each player; find out what team they are in; and add an agent copy
+            for (int i = 0; i < gameState.getNPlayers(); i++) {
+                int team = gameState.getTeam(i);
+                AbstractPlayer player = players.get(team);
+                this.players.add(player.copy());
+            }
         } else
             throw new IllegalArgumentException("PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
         int id = 0;

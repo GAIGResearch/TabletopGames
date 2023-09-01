@@ -48,7 +48,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param mode            - SELF_PLAY, NO_SELF_PLAY, or ONE_VS_ALL
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, TournamentMode mode, AbstractParameters gameParams) {
+                                int gamesPerMatchUp, TournamentMode mode, AbstractParameters gameParams, boolean ignoreTeams) {
         super(mode, agents, gameToPlay, playersPerGame, gameParams);
         if (mode == NO_SELF_PLAY && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +

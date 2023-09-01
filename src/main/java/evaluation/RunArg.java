@@ -22,6 +22,10 @@ public enum RunArg {
             "\t This may be useful if you want to use the same destDir for multiple experiments.",
             false,
             new Usage[]{Usage.RunGames}),
+    byTeam("If true (the default) and the game supports teams, then one player type will be assigned to all players on a team.\n" +
+            "\t If false, then each player will be assigned a player type independently.",
+            true,
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     config("The location of a JSON file from which to read the configuration. \n" +
             "\t If this is specified, then all other arguments are ignored.",
             "",

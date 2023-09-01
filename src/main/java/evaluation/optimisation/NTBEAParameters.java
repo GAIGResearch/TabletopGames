@@ -43,6 +43,7 @@ public class NTBEAParameters {
     public String destDir;
     public ITPSearchSpace searchSpace;
     public AbstractParameters gameParams;
+    public boolean byTeam;
 
     public NTBEAParameters(Map<RunArg, Object> args) {
         this(args, Function.identity());
@@ -62,6 +63,7 @@ public class NTBEAParameters {
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
         seed = (long) args.get(RunArg.seed);
+        byTeam = (boolean) args.get(RunArg.byTeam);
         GameType game = GameType.valueOf(args.get(RunArg.game).toString());
         gameParams = args.get(RunArg.gameParams).equals("") ? null :
                 AbstractParameters.createFromFile(game, (String) args.get(RunArg.gameParams));

@@ -156,7 +156,7 @@ public class NTBEA {
                 System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
                         gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
 
-            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams);
+            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams, params.byTeam);
             tournament.verbose = false;
             createListeners().forEach(tournament::addListener);
             tournament.run();
