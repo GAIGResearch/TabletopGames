@@ -51,6 +51,7 @@ public class ResForwardModel extends StandardForwardModel {
         resgs.playerHandCards = new ArrayList<>(firstState.getNPlayers());
         resgs.gameBoard = resp.getPlayerBoard(firstState.getNPlayers());
         resgs.historicTeams = new ArrayList<>();
+        resgs.noVotesPerMission = new ArrayList<>();
         resgs.teamChoice = new ArrayList<>();
         if (resgs.gameBoard == null) {
             throw new AssertionError("GameBoard shouldn't be null");
@@ -280,20 +281,18 @@ public class ResForwardModel extends StandardForwardModel {
         boolean valid = true;
         int total = state.getNPlayers();
         boolean[] retValue;
+        int count = 0;
         do {
             retValue = new boolean[state.getNPlayers()];
             for (int i = 0; i < spies; i++) {
                 boolean done = false;
-                int count = 0;
+
                 while (!done) {
                     int rndIndex = state.rnd.nextInt(total);
                     if (!retValue[rndIndex] && rndIndex != playerID) {
                         retValue[rndIndex] = true;
                         done = true;
                     }
-                    count++;
-                    if (count > 200)
-                        throw new AssertionError(String.format("Infinite loop allocating %d spies amongst %d players", spies, total));
                 }
             }
             // now check constraints
@@ -312,6 +311,9 @@ public class ResForwardModel extends StandardForwardModel {
                 if (!valid)
                     break;
             }
+            count++;
+            if (count > 200)
+                throw new AssertionError(String.format("Infinite loop allocating %d spies amongst %d players", spies, total));
         } while (!valid);
         List<Boolean> RV = new ArrayList<>();
         for (
