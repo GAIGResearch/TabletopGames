@@ -132,7 +132,7 @@ public class NTBEA {
         // After all runs are complete, if tournamentGames are specified, then we allow all the
         // winners from each iteration to play in a tournament and pick the winner of this tournament
         if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
-            if (elites.size() > 0) {
+            if (!elites.isEmpty()) {
                 // first of all we add the elites into winnerSettings, and winnersPerRun
                 // i.e. we effectively add an extra 'run' for each elite
                 for (int[] elite : elites) {
@@ -150,7 +150,8 @@ public class NTBEA {
             // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
             // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
             //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
-            long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nPlayers);
+            int nTeams = params.byTeam ?  game.createGameInstance(nPlayers).getGameState().getNTeams() : nPlayers;
+            long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nTeams);
             int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
             if (params.verbose)
                 System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",

@@ -53,10 +53,10 @@ public class NTBEAParameters {
         tuningGame = (boolean) args.get(RunArg.tuneGame);
         iterationsPerRun = (int) args.get(RunArg.iterations);
         repeats = (int) args.get(RunArg.repeats);
-        evalGames = (int) args.get(RunArg.evalGames);
-        if (evalGames == 0) evalGames = iterationsPerRun / 5;
-        kExplore = (double) args.get(RunArg.kExplore);
         tournamentGames = (int) args.get(RunArg.matchups);
+        evalGames = (int) args.get(RunArg.evalGames);
+        if (evalGames == -1) evalGames = iterationsPerRun / 5;
+        kExplore = (double) args.get(RunArg.kExplore);
         neighbourhoodSize = (int) args.get(RunArg.neighbourhood);
         opponentDescriptor = (String) args.get(RunArg.opponent);
         evalMethod = (String) args.get(RunArg.evalMethod);
