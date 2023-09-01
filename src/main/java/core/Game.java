@@ -357,6 +357,7 @@ public class Game {
         } else if (players.isEmpty()) {
             // keep existing players
         } else if (players.size() == gameState.nTeams){
+            this.players = new ArrayList<>();
             // In this case we use (copies of) each agent for all players on the team
             // loop over each player; find out what team they are in; and add an agent copy
             for (int i = 0; i < gameState.getNPlayers(); i++) {

@@ -80,8 +80,10 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
 
         nEvals++;
         double[] retValue = new double[nPlayers];
-        for (int i = 0; i < nPlayers; i++)
-            retValue[i] = stateHeuristic.evaluateState(finalState, i);
+        for (int i = 0; i < nPlayers; i++) {
+            int team = finalState.getTeam(i);
+            retValue[team] = stateHeuristic.evaluateState(finalState, i);
+        }
 
      //   System.out.printf("Result : %s%n", Arrays.toString(retValue));
         return retValue;

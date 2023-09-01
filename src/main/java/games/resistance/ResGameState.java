@@ -90,6 +90,7 @@ public class ResGameState extends AbstractGameState {
      */
     public ResGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+        nTeams = 2;
     }
 
     /**
@@ -196,6 +197,12 @@ public class ResGameState extends AbstractGameState {
 
     public void addTeamChoice(ResTeamBuilding ResTeamBuilding) {
         teamChoice = ResTeamBuilding.getTeam();
+    }
+
+    @Override
+    public int getTeam(int player) {
+        ResPlayerCards.CardType id = playerHandCards.get(player).get(2).cardType;
+        return (id == ResPlayerCards.CardType.SPY) ? 1 : 0;
     }
 
     public void clearTeamChoices() {

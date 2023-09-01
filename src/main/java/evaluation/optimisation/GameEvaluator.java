@@ -130,7 +130,15 @@ public class GameEvaluator implements SolutionEvaluator {
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
-        double retValue = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+        int playerOnTeam = -1;
+        for (int p = 0; p < newGame.getGameState().getNPlayers(); p++) {
+            if (newGame.getGameState().getTeam(p) == playerIndex) {
+                playerOnTeam = p;
+            }
+        }
+        if (playerOnTeam == -1)
+            throw new AssertionError("No Player found on team " + playerIndex);
+        double retValue = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam);
 
     //    System.out.println("GameEvaluator: " + retValue);
 
