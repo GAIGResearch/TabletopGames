@@ -47,7 +47,6 @@ public abstract class AbstractGameState {
     protected int roundCounter, turnCounter, turnOwner, firstPlayer;
     protected int nPlayers;
     protected int nTeams;
-    Map<Integer, Integer> playersToTeams = new HashMap<>();
     protected List<IGameListener> listeners = new ArrayList<>();
 
     // Timers for all players
