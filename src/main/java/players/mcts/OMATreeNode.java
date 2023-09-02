@@ -45,8 +45,8 @@ public class OMATreeNode extends SingleTreeNode {
      * @param result - value of rollout to backup
      */
     @Override
-    protected void backUp(double[] result) {
-        super.backUp(result); // first we do the usual stuff
+    protected void backUpSingleNode(AbstractAction actionTaken, double[] result) {
+        super.backUpSingleNode(actionTaken, result); // first we do the usual stuff
         // and now we add on the OMA statistics
         // These are updated on the node from which an action was taken (the OMAParent)
         // and not the node that is reached by taking an action.

@@ -60,6 +60,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
+    public IStateFeatureVector MCGSStateFeatureVector;
     public double MASTDefaultValue = 0.0;
 
     public MCTSParams() {

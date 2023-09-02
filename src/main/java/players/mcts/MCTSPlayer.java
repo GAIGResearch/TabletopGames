@@ -10,6 +10,7 @@ import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import players.IAnyTimePlayer;
 import players.heuristics.CoarseTunableHeuristic;
+import players.mcgs.MCGSNode;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -76,6 +77,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         return () -> {
             if (params.opponentTreePolicy == OMA || params.opponentTreePolicy == OMA_All)
                 return new OMATreeNode();
+            else if (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)
+                return new MCGSNode();
             else
                 return new SingleTreeNode();
         };
@@ -117,7 +120,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         MASTStats = root.MASTStatistics;
 
         if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
         return root.bestAction();
     }
 
@@ -163,7 +166,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             for (AbstractAction action : root.children.keySet()) {
                 int visits = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToInt(SingleTreeNode::getVisits).sum();
                 double visitProportion = visits / (double) root.getVisits();
-                double meanValue =  Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum()/ visits;
+                double meanValue = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum() / visits;
                 double heuristicValue = heuristic != null ? heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
                 double advantageValue = advantageFunction != null ? advantageFunction.evaluateAction(action, root.state) : 0.0;
 

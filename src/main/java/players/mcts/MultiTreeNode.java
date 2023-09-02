@@ -128,7 +128,6 @@ public class MultiTreeNode extends SingleTreeNode {
                     throw new AssertionError("We should always have something to choose from");
 
                 AbstractAction chosen = agent.getAction(currentState, availableActions);
-                actionsInRollout.add(new Pair<>(currentActor, chosen));
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);
 
@@ -157,7 +156,6 @@ public class MultiTreeNode extends SingleTreeNode {
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
                     advance(currentState, chosen, false);
                 }
-                actionsInTree.add(new Pair<>(currentActor, chosen));
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
