@@ -165,10 +165,6 @@ public class MultiTreeNode extends SingleTreeNode {
                 !(actionsInRollout.size() >= params.rolloutLength &&
                         (maxDepthReached[decisionPlayer] || nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
 
-        for (int i = 0; i < nodeExpanded.length; i++) {
-            updateCurrentLocation(i, currentState);
-        }
-
         // Evaluate final state and return normalised score
         double[] finalValues = new double[state.getNPlayers()];
 
@@ -176,8 +172,17 @@ public class MultiTreeNode extends SingleTreeNode {
             finalValues[i] = heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
         }
         for (SingleTreeNode singleTreeNode : currentLocation) {
-            if (singleTreeNode != null)
+            if (singleTreeNode != null) {
+                // the full actions in tree and rollout are stored on the overall root
+                // for each player-specific sub-tree we filter these to just their actions
+                singleTreeNode.root.actionsInTree = actionsInTree.stream()
+                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
+                        .collect(Collectors.toList());
+                singleTreeNode.root.actionsInRollout = actionsInRollout.stream()
+                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
+                        .collect(Collectors.toList());
                 singleTreeNode.backUp(finalValues);
+            }
         }
         rolloutActionsTaken += actionsInRollout.size();
         root.updateMASTStatistics(actionsInTree, actionsInRollout, finalValues);
@@ -212,51 +217,6 @@ public class MultiTreeNode extends SingleTreeNode {
 
     public SingleTreeNode getRoot(int player) {
         return roots[player];
-    }
-
-
-    protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
-        Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("round", state.getRoundCounter());
-        stats.put("turn", state.getTurnCounter());
-        stats.put("turnOwner", state.getCurrentPlayer());
-        stats.put("iterations", numIters);
-        stats.put("rolloutActions", rolloutActionsTaken / numIters);
-        stats.put("time", timeTaken);
-        int validRoots = (int) Arrays.stream(roots).filter(Objects::nonNull).count();
-        for (SingleTreeNode node : roots) {
-            if (node == null) continue;
-            boolean mainPlayer = node.decisionPlayer == this.decisionPlayer;
-            TreeStatistics treeStats = new TreeStatistics(node);
-
-            int copy = node.copyCount + (node == roots[decisionPlayer] ? this.copyCount : 0);
-            int fm = node.fmCallsCount + (node == roots[decisionPlayer] ? this.fmCallsCount : 0);
-            double multiplier = mainPlayer ? 1 : 1.0 / (validRoots - 1.0);
-            String suffix = mainPlayer ? "-main" : "-other";
-            BiFunction<Object, Object, Double> addFn = (v1, v2) -> ((double) v1 + ((double) v2));
-
-            stats.merge("copyCalls" + suffix, copy * multiplier, addFn);
-            stats.merge("fmCalls" + suffix, fm * multiplier, addFn);
-            stats.merge("totalNodes" + suffix, treeStats.totalNodes * multiplier, addFn);
-            stats.merge("leafNodes" + suffix, treeStats.totalLeaves * multiplier, addFn);
-            stats.merge("terminalNodes" + suffix, treeStats.totalTerminalNodes * multiplier, addFn);
-            stats.merge("maxDepth" + suffix, treeStats.depthReached * multiplier, addFn);
-            stats.merge("nActionsRoot" + suffix, node.children.size() * multiplier, addFn);
-            stats.merge("nActionsTree" + suffix, treeStats.meanActionsAtNode * multiplier, addFn);
-            stats.merge("maxActionsAtNode" + suffix, treeStats.maxActionsAtNode * multiplier, addFn);
-
-            OptionalInt maxVisits = Arrays.stream(node.actionVisits()).max();
-            stats.merge("maxVisitProportion" + suffix, (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters * multiplier, addFn);
-            double[] visitProportions = Arrays.stream(node.actionVisits()).asDoubleStream().map(d -> d / node.getVisits()).toArray();
-            stats.merge("visitEntropy" + suffix, entropyOf(visitProportions) * multiplier, addFn);
-            AbstractAction bestAction = node.bestAction();
-            stats.put("bestAction" + suffix, bestAction);
-            stats.put("bestValue" + suffix, node.actionTotValue(bestAction, node.decisionPlayer) / node.actionVisits(bestAction));
-            stats.put("normalisedBestValue" + suffix, Utils.normalise(node.actionTotValue(bestAction, node.decisionPlayer) / node.actionVisits(bestAction), node.lowReward, node.highReward));
-            stats.put("lowReward" + suffix, node.lowReward);
-            stats.put("highReward" + suffix, node.highReward);
-        }
-        statsLogger.record(stats);
     }
 
 }

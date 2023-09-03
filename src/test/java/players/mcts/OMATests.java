@@ -88,8 +88,8 @@ public class OMATests {
         assertEquals(0, problemNodes.size());
 
         // and check that we have non-zero values (so that OMA does normal back-prop)
-        assertNotEquals(0.0, mctsPlayer.getRoot(0).getTotValue()[0]);
-        assertNotEquals(0.0, mctsPlayer.getRoot(0).getTotValue()[1]);
+        assertNotEquals(0.0, mctsPlayer.getRoot(0).nodeValue(0));
+        assertNotEquals(0.0, mctsPlayer.getRoot(0).nodeValue(1));
     }
 
     @Test
@@ -231,7 +231,7 @@ public class OMATests {
                                         .stream())
                                 .collect(toList());
                         // We now need to get weighted value of grandchildren stats
-                        double totalValue = grandchildren.stream().mapToDouble(gc -> gc.getTotValue()[player]).sum();
+                        double totalValue = grandchildren.stream().mapToDouble(gc -> gc.nodeValue(player) * gc.getVisits()).sum();
                         int totVisits = grandchildren.stream().mapToInt(SingleTreeNode::getVisits).sum();
                         OMATreeNode.OMAStats stats = n.getOMAStats(parentAction, childAction);
                         System.out.printf("%s GC: %.2f/%d, OMA: %.2f/%d%n", childAction, totalValue, totVisits,

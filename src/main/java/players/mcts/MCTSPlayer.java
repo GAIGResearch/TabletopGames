@@ -164,19 +164,20 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
         if (root != null && root.getVisits() > 1) {
             for (AbstractAction action : root.children.keySet()) {
-                int visits = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToInt(SingleTreeNode::getVisits).sum();
-                double visitProportion = visits / (double) root.getVisits();
-                double meanValue = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum() / visits;
-                double heuristicValue = heuristic != null ? heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
-                double advantageValue = advantageFunction != null ? advantageFunction.evaluateAction(action, root.state) : 0.0;
+                ActionStats stats = root.actionValues.get(action);
+                    int visits = stats == null ? 0 : stats.nVisits;
+                    double visitProportion = visits / (double) root.getVisits();
+                    double meanValue = stats == null || visits == 0 ? 0.0 : stats.totValue[root.decisionPlayer] / visits;
+                    double heuristicValue = heuristic != null ? heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
+                    double advantageValue = advantageFunction != null ? advantageFunction.evaluateAction(action, root.state) : 0.0;
 
-                Map<String, Object> actionValues = new HashMap<>();
-                actionValues.put("visits", visits);
-                actionValues.put("visitProportion", visitProportion);
-                actionValues.put("meanValue", meanValue);
-                actionValues.put("heuristic", heuristicValue);
-                actionValues.put("advantage", advantageValue);
-                retValue.put(action, actionValues);
+                    Map<String, Object> actionValues = new HashMap<>();
+                    actionValues.put("visits", visits);
+                    actionValues.put("visitProportion", visitProportion);
+                    actionValues.put("meanValue", meanValue);
+                    actionValues.put("heuristic", heuristicValue);
+                    actionValues.put("advantage", advantageValue);
+                    retValue.put(action, actionValues);
             }
         }
 

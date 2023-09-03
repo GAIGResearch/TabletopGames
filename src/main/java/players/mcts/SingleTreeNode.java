@@ -392,6 +392,8 @@ public class SingleTreeNode {
                     // In open loop we never re-use the state...the only purpose of storing it on the Node is
                     // to pick it up in the next uct() call as we descend the tree
                     cur.advance(cur.openLoopState, chosen, false);
+                } else {
+                    actionsInTree.add(new Pair<>(cur.openLoopState.getCurrentPlayer(), chosen));
                 }
                 cur = cur.nextNodeInTree(chosen);
                 // else we keep cur, but will exit immediately
@@ -575,6 +577,7 @@ public class SingleTreeNode {
     protected SingleTreeNode nextNodeInTree(AbstractAction actionChosen) {
         // Only advance the state if this is open loop
         SingleTreeNode[] nodeArray = children.get(actionChosen);
+        //   root.actionsInTree.add(new Pair<>(openLoopState.getCurrentPlayer(), actionChosen));
         if (params.information == Closed_Loop) {
             // in this case we have determinism...there should just be a single child node in the array...so we get that
             Optional<SingleTreeNode> next = Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst();
@@ -634,7 +637,11 @@ public class SingleTreeNode {
                         if (iteratingNode == null)
                             throw new AssertionError("Should always find OMA node before root");
                     } while (iteratingNode != oma);
-                    OMATreeNode.OMAStats stats = oma.OMAChildren.get(lastActionTaken).get(action);
+                    Map<AbstractAction, OMATreeNode.OMAStats> tmp = oma.OMAChildren.get(lastActionTaken);
+                    if (tmp == null) {
+                        throw new AssertionError("We have somehow failed to find the OMA node for this action");
+                    }
+                    OMATreeNode.OMAStats stats = tmp.get(action);
                     if (stats != null) {
                         double omaValue = stats.OMATotValue / stats.OMAVisits;
                         childValue = (1.0 - beta) * childValue + beta * omaValue;
@@ -804,7 +811,6 @@ public class SingleTreeNode {
                 }
                 next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
-                root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
             }
         }
@@ -847,23 +853,26 @@ public class SingleTreeNode {
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
      *
-     * @param result - value of rollout to backup
+     * @param baseResult - value of rollout to backup
      */
-    protected void backUp(double[] result) {
-        normaliseRewardsAfterIteration(result);
-        result = processResultsForParanoidOrSelfOnly(result);
+    protected void backUp(double[] baseResult) {
+        normaliseRewardsAfterIteration(baseResult);
+        double[] result = processResultsForParanoidOrSelfOnly(baseResult);
 
         // we also need the action taken at each step which we should be able to get from actionsInTree...
         SingleTreeNode n = root;
-        for (int i = 0; i < actionsInTree.size(); i++) {
-            int actingPlayer = actionsInTree.get(i).a;
-            AbstractAction action = actionsInTree.get(i).b;
+        for (int i = 0; i < root.actionsInTree.size(); i++) {
+            int actingPlayer = root.actionsInTree.get(i).a;
+            AbstractAction action = root.actionsInTree.get(i).b;
             if (n.decisionPlayer != actingPlayer)
                 throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
             n.backUpSingleNode(action, result);
-            if (i < actionsInTree.size() - 1) {
-                int nextPlayer = actionsInTree.get(i + 1).a;
-                n = n.children.get(action)[nextPlayer];
+            if (i < root.actionsInTree.size() - 1) {
+                int nextPlayer = root.actionsInTree.get(i + 1).a;
+                SingleTreeNode[] nextN = n.children.get(action);
+                if (nextN == null)
+                    throw new AssertionError("We have somehow failed to find the next node in the tree");
+                n = nextN[nextPlayer];
             }
         }
     }
@@ -879,6 +888,7 @@ public class SingleTreeNode {
                 root.highReward = stats.getMax();
         }
     }
+
     protected double[] processResultsForParanoidOrSelfOnly(double[] result) {
         // then we take of SelfOnly or Paranoid assumptions to update the results
         double[] retValue = result.clone();
@@ -907,7 +917,8 @@ public class SingleTreeNode {
 
     protected void backUpSingleNode(AbstractAction actionTaken, double[] result) {
         if (params.discardStateAfterEachIteration) {
-            openLoopState = null; // releases for Garbage Collection
+            if (depth > 0)
+                openLoopState = null; // releases for Garbage Collection
             if (depth > 0 && !params.maintainMasterState)
                 state = null;
         }
@@ -923,7 +934,9 @@ public class SingleTreeNode {
             }
 
         // then we update the statistics for the action taken
-        ActionStats stats = actionValues.getOrDefault(actionTaken, new ActionStats(result.length));
+        if (!actionValues.containsKey(actionTaken))
+            actionValues.put(actionTaken, new ActionStats(result.length));
+        ActionStats stats = actionValues.get(actionTaken);
         stats.update(result);
     }
 
