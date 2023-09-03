@@ -631,14 +631,14 @@ public class SingleTreeNode {
                     double beta = Math.sqrt(params.omaVisits / (double) (params.omaVisits + 3 * actionVisits));
                     // we need to find the action taken from the OMAParent
                     SingleTreeNode iteratingNode = this;
-                    AbstractAction lastActionTaken;
+                    List<AbstractAction> actionsTaken = new ArrayList<>();
                     do {
-                        lastActionTaken = iteratingNode.actionToReach;
+                        actionsTaken.add(iteratingNode.actionToReach);
                         iteratingNode = iteratingNode.parent;
                         if (iteratingNode == null)
                             throw new AssertionError("Should always find OMA node before root");
                     } while (iteratingNode != oma);
-                    Map<AbstractAction, OMATreeNode.OMAStats> tmp = oma.OMAChildren.get(lastActionTaken);
+                    Map<AbstractAction, OMATreeNode.OMAStats> tmp = oma.OMAChildren.get(actionsTaken.get(actionsTaken.size() - 1));
                     if (tmp == null) {
                         throw new AssertionError("We have somehow failed to find the OMA node for this action");
                     }
@@ -1048,6 +1048,13 @@ public class SingleTreeNode {
         return allNodesInTree().stream().filter(allMatch).collect(toList());
     }
 
+    /**
+     * This looks for the first parent node that matches the specified Predicate
+     * This will look at parent first, then grandparent, etc.
+     * This returns null if no match is found
+     * @param match
+     * @return
+     */
     public SingleTreeNode matchingParent(Predicate<SingleTreeNode> match) {
         if (parent == null || match.test(parent))
             return parent;
