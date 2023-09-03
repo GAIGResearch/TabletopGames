@@ -9,8 +9,6 @@ import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import players.IAnyTimePlayer;
-import players.heuristics.CoarseTunableHeuristic;
-import players.mcgs.MCGSNode;
 import utilities.Pair;
 import utilities.Utils;
 
