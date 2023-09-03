@@ -21,7 +21,7 @@ import static utilities.Utils.*;
 
 public class SingleTreeNode {
 
-    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
+    //  private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
     // State in this node (closed loop)
     protected AbstractGameState state;
     // State in this node (open loop - this is updated by onward trajectory....be very careful about using)
@@ -324,7 +324,8 @@ public class SingleTreeNode {
     private int validVisitsFor(AbstractAction action) {
         if (params.information == Closed_Loop)
             return nVisits;
-        return nValidVisits.getOrDefault(action, 1);
+        ActionStats stats = actionValues.get(action);
+        return stats == null ? 1 : stats.validVisits;
     }
 
     /**
@@ -925,19 +926,14 @@ public class SingleTreeNode {
         nVisits++;
         // Here we look at actionsFromOpenLoopState to see which ones were valid
         // when we passed through, and keep track of valid visits
-        if (params.information != Closed_Loop)
-            for (AbstractAction action : actionsFromOpenLoopState) {
-                if (!nValidVisits.containsKey(action))
-                    nValidVisits.put(action, 1);
-                else
-                    nValidVisits.put(action, nValidVisits.get(action) + 1);
-            }
 
         // then we update the statistics for the action taken
-        if (!actionValues.containsKey(actionTaken))
-            actionValues.put(actionTaken, new ActionStats(result.length));
-        ActionStats stats = actionValues.get(actionTaken);
-        stats.update(result);
+        for (AbstractAction action : actionsFromOpenLoopState) {
+            if (!actionValues.containsKey(action))
+                actionValues.put(action, new ActionStats(result.length));
+            actionValues.get(action).validVisits++;
+        }
+        actionValues.get(actionTaken).update(result);
     }
 
 

@@ -1,11 +1,16 @@
 package players.mcts;
 
+import core.actions.AbstractAction;
+
+import java.util.*;
+
 public class ActionStats {
     // Total value of this node
     public double[] totValue;
     public double[] squaredTotValue;
     // Number of visits
     public int nVisits;
+    public int validVisits;
 
     public ActionStats(int nPlayers) {
         totValue = new double[nPlayers];
