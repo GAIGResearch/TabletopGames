@@ -70,7 +70,7 @@ public class SingleTreeNode {
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // The total value of all trajectories through this node (one element per player)
-    private Supplier<? extends SingleTreeNode> factory;
+    private BiFunction<AbstractGameState, MCTSParams, ? extends SingleTreeNode> factory;
     // Total value of this node
     protected List<Pair<Integer, AbstractAction>> actionsInTree;
     List<Pair<Integer, AbstractAction>> actionsInRollout;
@@ -80,8 +80,8 @@ public class SingleTreeNode {
     }
 
     // Called in tree expansion
-    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd, Supplier<? extends SingleTreeNode> factory) {
-        SingleTreeNode retValue = factory.get();
+    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd, BiFunction<AbstractGameState, MCTSParams, ? extends SingleTreeNode> factory) {
+        SingleTreeNode retValue = factory.apply(state, player.params);
         retValue.factory = factory;
         retValue.decisionPlayer = state.getCurrentPlayer();
         retValue.params = player.params;
@@ -107,8 +107,8 @@ public class SingleTreeNode {
     }
 
     public static SingleTreeNode createChildNode(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state,
-                                                 Supplier<? extends SingleTreeNode> factory) {
-        SingleTreeNode retValue = factory.get();
+                                                 BiFunction<AbstractGameState, MCTSParams, ? extends SingleTreeNode> factory) {
+        SingleTreeNode retValue = factory.apply(state, parent.params);
         retValue.instantiate(parent, actionToReach, state);
         return retValue;
     }
@@ -972,14 +972,15 @@ public class SingleTreeNode {
             // (and this is good, as it throws an error as a bug-check if this is not true).
             bestAction = treePolicyAction(false);
         } else {
-            for (AbstractAction action : children.keySet()) {
-                if (!children.containsKey(action)) {
+            for (AbstractAction action : actionValues.keySet()) {
+                if (!actionValues.containsKey(action)) {
                     throw new AssertionError("Hashcode / equals contract issue for " + action);
                 }
-                if (children.get(action) != null) {
-                    double childValue = actionVisits(action); // if ROBUST
+                if (actionValues.get(action) != null) {
+                    ActionStats stats = actionValues.get(action);
+                    double childValue = stats.nVisits; // if ROBUST
                     if (policy == SIMPLE)
-                        childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
+                        childValue = stats.totValue[decisionPlayer] / (stats.nVisits + params.epsilon);
 
                     // Apply small noise to break ties randomly
                     childValue = noise(childValue, params.epsilon, rnd.nextDouble());

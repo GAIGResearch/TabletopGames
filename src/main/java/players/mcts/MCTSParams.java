@@ -108,6 +108,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
+        addTunableParameter("MCGSStateFeatureVector", IStateFeatureVector.class);
     }
 
     @Override
@@ -161,6 +162,7 @@ public class MCTSParams extends PlayerParameters {
 
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
+        MCGSStateFeatureVector = (IStateFeatureVector) getParameterValue("MCGSStateFeatureVector");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 

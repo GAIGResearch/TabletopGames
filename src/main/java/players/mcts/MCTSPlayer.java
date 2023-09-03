@@ -13,6 +13,8 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -71,12 +73,12 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
      * factory that specifies the node class, and can have relevant tests/hooks inserted; for
      * example to run a check after each MCTS iteration
      */
-    protected Supplier<? extends SingleTreeNode> getFactory() {
-        return () -> {
+    protected BiFunction<AbstractGameState, MCTSParams, ? extends SingleTreeNode> getFactory() {
+        return (s, p) -> {
             if (params.opponentTreePolicy == OMA || params.opponentTreePolicy == OMA_All)
                 return new OMATreeNode();
             else if (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)
-                return new MCGSNode();
+                return new MCGSNode(s, p);
             else
                 return new SingleTreeNode();
         };

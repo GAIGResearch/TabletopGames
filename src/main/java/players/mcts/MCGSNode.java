@@ -9,9 +9,20 @@ import java.util.*;
 public class MCGSNode extends SingleTreeNode {
 
     private final Map<String, MCGSNode> transpositionMap = new HashMap<>();
-    protected Map<AbstractAction, ActionStats> actionsFrom = new HashMap<>();
-
     public List<String> trajectory = new ArrayList<>();
+
+    protected MCGSNode(AbstractGameState gameState, MCTSParams params) {
+        this.params = params;
+        this.root = this;
+        addToTranspositionTable(this, gameState);
+    }
+
+    private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
+        int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : keyState.getCurrentPlayer();
+        double[] featureVector = params.MCGSStateFeatureVector.featureVector(keyState, nextPlayer);
+        String key = String.format("%d-%s", keyState.getCurrentPlayer(), Arrays.toString(featureVector));
+        ((MCGSNode) root).transpositionMap.put(key, node);
+    }
 
     /**
      * Expands the node by creating a new child node for the action taken and adding to the tree.
@@ -26,10 +37,7 @@ public class MCGSNode extends SingleTreeNode {
         // this enforces (for the moment) the rule that each iteration adds one new node.
 
         MCGSNode newNode = (MCGSNode) createChildNode(actionCopy, nextState);
-        int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
-        double[] featureVector = params.MCGSStateFeatureVector.featureVector(nextState, nextPlayer);
-        String key = String.format("%d-%s", nextState.getCurrentPlayer(), Arrays.toString(featureVector));
-        transpositionMap.put(key, newNode);
+        addToTranspositionTable(newNode, nextState);
         return newNode;
     }
 
@@ -42,11 +50,11 @@ public class MCGSNode extends SingleTreeNode {
 
         double[] featureVector = params.MCGSStateFeatureVector.featureVector(openLoopState, openLoopState.getCurrentPlayer());
         String key = String.format("%d-%s", openLoopState.getCurrentPlayer(), Arrays.toString(featureVector));
-        MCGSNode nextNode = transpositionMap.get(key);
+        MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode == null) {
             nextNode = (MCGSNode) createChildNode(actionChosen.copy(), openLoopState);
-            transpositionMap.put(key, nextNode);
+            ((MCGSNode) root).transpositionMap.put(key, nextNode);
         }
         return nextNode;
     }
@@ -70,17 +78,17 @@ public class MCGSNode extends SingleTreeNode {
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
      *
-     * @param result - value of rollout to backup
+     * @param baseResult - value of rollout to backup
      */
-    protected void backUp(double[] result) {
+    protected void backUp(double[] baseResult) {
         MCGSNode nRoot = (MCGSNode) root;
         if (nRoot.trajectory.size() != nRoot.actionsInTree.size()) {
             throw new AssertionError("Trajectory and actionsInTree should be the same size " +
                     nRoot.trajectory.size() + " != " + nRoot.actionsInTree.size());
         }
 
-        normaliseRewardsAfterIteration(result);
-        result = processResultsForParanoidOrSelfOnly(result);
+        normaliseRewardsAfterIteration(baseResult);
+        double[] result = processResultsForParanoidOrSelfOnly(baseResult);
 
         for (int i = 0; i < nRoot.trajectory.size(); i++) {
             String key = nRoot.trajectory.get(i);
@@ -91,6 +99,7 @@ public class MCGSNode extends SingleTreeNode {
             }
             node.backUpSingleNode(action, result);
         }
+        nRoot.trajectory.clear();
     }
 
 
