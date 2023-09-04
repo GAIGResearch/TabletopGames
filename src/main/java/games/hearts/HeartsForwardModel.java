@@ -25,10 +25,10 @@ public class HeartsForwardModel extends StandardForwardModel {
     @Override
     public void _setup(AbstractGameState firstState) {
         HeartsGameState hgs = (HeartsGameState) firstState;
-        hgs.chosenCards = new HashMap<>();
         hgs.playerPoints = new HashMap<>();
-        hgs.resetGameScores();
-        hgs.playerPassCounter = new int[hgs.getNPlayers()];
+        for (int i = 0; i < hgs.getNPlayers(); i++) {
+            hgs.playerPoints.put(i, 0);
+        }
         hgs.playerTricksTaken = new int[hgs.getNPlayers()];
         hgs.trickDecks = new ArrayList<>();
         hgs.playerDecks = new ArrayList<>();
@@ -46,8 +46,8 @@ public class HeartsForwardModel extends StandardForwardModel {
 
     public void _setupRound(HeartsGameState hgs){
         hgs.setGamePhase(HeartsGameState.Phase.PASSING);
+        hgs.heartsBroken = false;
 
-        hgs.playerWithTwoOfClubs = -1;
         hgs.setFirstPlayer(0);
         hgs.pendingPasses = new ArrayList<>(hgs.getNPlayers());
         for (int i = 0; i < hgs.getNPlayers(); i++) {
@@ -123,22 +123,12 @@ public class HeartsForwardModel extends StandardForwardModel {
 
         if (hgs.getGamePhase() == HeartsGameState.Phase.PASSING) {
             if (action instanceof Pass) {
-                Pass passAction = (Pass) action;
-
-                Deck<FrenchCard> playerDeck = hgs.playerDecks.get(passAction.playerID);
-
-                playerDeck.remove(passAction.card1);
-                hgs.pendingPasses.get(passAction.playerID).add(passAction.card1);
-
-                hgs.playerPassCounter[passAction.playerID]++;
 
                 // Check if current player has passed 3 cards
-                if (hgs.playerPassCounter[passAction.playerID] == 3) {
-                    // Reset player's pass counter
-                    hgs.playerPassCounter[passAction.playerID] = 0;
-
+                int cardsPassed = hgs.pendingPasses.get(hgs.getCurrentPlayer()).size();
+                if (cardsPassed == 3) {
                     // Check if all players have passed their cards
-                    if (passAction.playerID == hgs.getNPlayers() - 1) {
+                    if (hgs.pendingPasses.stream().allMatch(passes -> passes.size() == 3)) {
                         hgs.setGamePhase(HeartsGameState.Phase.PLAYING);
 
                         // Determine the pass direction based on the current round
@@ -182,31 +172,11 @@ public class HeartsForwardModel extends StandardForwardModel {
 
                     // End player's turn here after 3 passes
                     endPlayerTurn(hgs);
-                    return;
                 }
             } else {
                 throw new IllegalArgumentException("Invalid action type during PASSING phase.");
             }
         } else {
-            if (action instanceof Play) {
-                Play play = (Play) action;
-                if (hgs.currentPlayedCards.isEmpty()) {
-                    hgs.firstCardSuit = play.card.suite;  // Save the suit of the first card
-                }
-
-                // Store played card and its player ID
-                hgs.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(play.playerID, play.card));
-
-                // If a heart has been played, set heartsBroken to true
-                if (play.card.suite == FrenchCard.Suite.Hearts) {
-                    hgs.heartsBroken = true;
-                }
-
-                // Remove the card from the player's deck
-                hgs.playerDecks.get(play.playerID).remove(play.card);
-                hgs.calculatePoints(play.playerID);
-            }
-
             // Check if all players have played a card in this round
             if (hgs.currentPlayedCards.size() == hgs.getNPlayers()) {
                 endTrick(hgs);
@@ -216,11 +186,6 @@ public class HeartsForwardModel extends StandardForwardModel {
                 // Do not endPlayerTurn here, that is done in startNewTrick
                 return;
             }
-        }
-
-        // Only end player's turn here if it's not PASSING phase
-        // As in PASSING phase a player decides three cards, abnd then the next player decides
-        if (hgs.getGamePhase() != HeartsGameState.Phase.PASSING) {
             endPlayerTurn(hgs);
         }
     }
@@ -298,6 +263,7 @@ public class HeartsForwardModel extends StandardForwardModel {
 
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {
+            hgs.scorePointsAtEndOfRound();
             boolean scoreAbove100 = hgs.getPlayerPointsMap().values().stream().anyMatch(score -> score >= 100);
 
             // If any player has reached 100 points or more, end the game

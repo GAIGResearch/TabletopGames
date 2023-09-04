@@ -37,16 +37,11 @@ public class HeartsGameState extends AbstractGameState {
 
     public boolean heartsBroken;
 
-    public int[] playerPassCounter;
-
     public int[] playerTricksTaken;
-    public int numberOfCards;
 
     public List<List<FrenchCard>> pendingPasses;
-    public int playerWithTwoOfClubs;
 
     // This map stores each player's chosen card
-    Map<Integer, FrenchCard> chosenCards;
     public Map<Integer, Integer> playerPoints;
 
     List<List<FrenchCard>> passedCards;
@@ -74,7 +69,6 @@ public class HeartsGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // TODO: add all components to the list
         return new ArrayList<Component>() {{
             addAll(playerDecks);
             add(drawDeck);
@@ -90,52 +84,46 @@ public class HeartsGameState extends AbstractGameState {
         return drawDeck;
     }
 
-    public Map<Integer, FrenchCard> getChosenCards() {
-        return this.chosenCards;
-    }
-
-    // Setter for chosenCards
-    public void setChosenCards(Map<Integer, FrenchCard> chosenCards) {
-        this.chosenCards = chosenCards;
-    }
-
     public List<Deck<FrenchCard>> getPlayerDecks() {
         return playerDecks;
     }
 
-    public void calculatePoints(int playerId) {
-        // Get the trick deck for the player
-        Deck<FrenchCard> trickDeck = trickDecks.get(playerId);
-        if (trickDeck != null) {
-            int points = 0;
+    public void scorePointsAtEndOfRound() {
+        for (int playerId = 0; playerId < getNPlayers(); playerId++) {
 
-            // Iterate over all cards in the trick deck
-            for (FrenchCard card : trickDeck.getComponents()) {
-                if (card.suite == FrenchCard.Suite.Hearts) {
-                    points += 1;
+            // Get the trick deck for the player
+            Deck<FrenchCard> trickDeck = trickDecks.get(playerId);
+            if (trickDeck != null) {
+                int points = 0;
+
+                // Iterate over all cards in the trick deck
+                for (FrenchCard card : trickDeck.getComponents()) {
+                    if (card.suite == FrenchCard.Suite.Hearts) {
+                        points += 1;
+                    }
+                    // The queen of spades is worth 13 points
+                    else if (card.suite == FrenchCard.Suite.Spades && card.number == 12) {
+                        points += 13;
+                    }
                 }
-                // The queen of spades is worth 13 points
-                else if (card.suite == FrenchCard.Suite.Spades && card.number == 12) {
-                    points += 13;
+
+                // Check if the playerID exists in the map
+                if (playerPoints.containsKey(playerId)) {
+                    // If it does, add the points
+                    playerPoints.put(playerId, playerPoints.get(playerId) + points);
+                } else {
+                    // If not, add the playerID to the map with the calculated points
+                    playerPoints.put(playerId, points);
                 }
-            }
 
-            // Check if the playerID exists in the map
-            if (playerPoints.containsKey(playerId)) {
-                // If it does, add the points
-                playerPoints.put(playerId, playerPoints.get(playerId) + points);
-            } else {
-                // If not, add the playerID to the map with the calculated points
-                playerPoints.put(playerId, points);
+                // Clear the trick deck after its points have been added
+                trickDeck.clear();
             }
-
-            // Clear the trick deck after its points have been added
-            trickDeck.clear();
         }
     }
 
     public int getPlayerPoints(int playerID) {
-        return playerPoints.getOrDefault(playerID,0);
+        return playerPoints.getOrDefault(playerID, 0);
     }
 
     public Map<Integer, Integer> getPlayerPointsMap() {
@@ -143,17 +131,17 @@ public class HeartsGameState extends AbstractGameState {
     }
 
     /**
-         * <p>Create a deep copy of the game state containing only those components the given player can observe.</p>
-         * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
-         * of other players or a face-down deck), then these components should instead be randomized (in the previous examples,
-         * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
-         * for the other players).</p>
-         * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
-         *
-         * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
-         *
-         * @param playerId - player observing this game state.
-         */
+     * <p>Create a deep copy of the game state containing only those components the given player can observe.</p>
+     * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
+     * of other players or a face-down deck), then these components should instead be randomized (in the previous examples,
+     * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
+     * for the other players).</p>
+     * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
+     *
+     * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
+     *
+     * @param playerId - player observing this game state.
+     */
     @Override
     protected AbstractGameState _copy(int playerId) {
         HeartsGameState copy = new HeartsGameState(gameParameters.copy(), getNPlayers());
@@ -196,9 +184,6 @@ public class HeartsGameState extends AbstractGameState {
 
         copy.heartsBroken = heartsBroken;
 
-        // Deep Copy playerPassCounter
-        copy.playerPassCounter = Arrays.copyOf(playerPassCounter, playerPassCounter.length);
-
         // Deep Copy playerTricksTaken
         copy.playerTricksTaken = Arrays.copyOf(playerTricksTaken, playerTricksTaken.length);
 
@@ -206,14 +191,6 @@ public class HeartsGameState extends AbstractGameState {
         copy.pendingPasses = new ArrayList<>();
         for (List<FrenchCard> list : pendingPasses) {
             copy.pendingPasses.add(new ArrayList<>(list));
-        }
-
-        copy.playerWithTwoOfClubs = playerWithTwoOfClubs;
-
-        // Deep Copy chosenCards
-        copy.chosenCards = new HashMap<>();
-        for (Map.Entry<Integer, FrenchCard> entry : chosenCards.entrySet()) {
-            copy.chosenCards.put(entry.getKey(), entry.getValue().copy());
         }
 
         // Deep Copy playerPoints
@@ -236,7 +213,6 @@ public class HeartsGameState extends AbstractGameState {
     }
 
 
-
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
@@ -247,21 +223,13 @@ public class HeartsGameState extends AbstractGameState {
         return new HeartsHeuristic().evaluateState(this, playerId);
     }
 
-
-
     /**
      * @param playerId - player observing the state.
      * @return the true score for the player, according to the game rules. May be 0 if there is no score in the game.
      */
     @Override
     public double getGameScore(int playerId) {
-        return playerPoints.getOrDefault(playerId,0);
-    }
-
-    public void resetGameScores() {
-        for (Integer playerId : playerPoints.keySet()) {
-            playerPoints.put(playerId, 0);
-        }
+        return playerPoints.getOrDefault(playerId, 0);
     }
 
     public void setPlayerPoints(int playerId, int points) {
@@ -289,14 +257,11 @@ public class HeartsGameState extends AbstractGameState {
         if (!super.equals(o)) return false;
         HeartsGameState that = (HeartsGameState) o;
         return heartsBroken == that.heartsBroken &&
-                playerWithTwoOfClubs == that.playerWithTwoOfClubs &&
-                Arrays.equals(playerPassCounter, that.playerPassCounter) &&
                 Arrays.equals(playerTricksTaken, that.playerTricksTaken) &&
                 Objects.equals(playerDecks, that.playerDecks) &&
                 Objects.equals(drawDeck, that.drawDeck) &&
                 Objects.equals(trickDecks, that.trickDecks) &&
                 Objects.equals(pendingPasses, that.pendingPasses) &&
-                Objects.equals(chosenCards, that.chosenCards) &&
                 Objects.equals(playerPoints, that.playerPoints) &&
                 Objects.equals(passedCards, that.passedCards) &&
                 Objects.equals(currentPlayedCards, that.currentPlayedCards) &&
@@ -306,27 +271,14 @@ public class HeartsGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, heartsBroken,
-                playerWithTwoOfClubs, firstCardSuit, trickDecks, numberOfCards,
-                pendingPasses, chosenCards, playerPoints, passedCards, currentPlayedCards);
-        result = 31 * result + Arrays.hashCode(playerPassCounter);
+                firstCardSuit, trickDecks,
+                pendingPasses, playerPoints, passedCards, currentPlayedCards);
         result = 31 * result + Arrays.hashCode(playerTricksTaken);
         return result;
     }
 
     public List<Deck<FrenchCard>> getPlayerTrickDecks() {
         return trickDecks;
-    }
-
-    public void setPlayerWithTwoOfClubs(int player){
-        this.playerWithTwoOfClubs = player;
-    }
-
-    public int getPlayerWithTwoOfClubs() {
-        return this.playerWithTwoOfClubs;
-    }
-
-    public void setNumberOfCards(int numberOfCards){
-        this.numberOfCards = numberOfCards;
     }
 
     @Override
@@ -344,10 +296,6 @@ public class HeartsGameState extends AbstractGameState {
         }
         return ordinal;
     }
-
-
-
-
 
 
 }

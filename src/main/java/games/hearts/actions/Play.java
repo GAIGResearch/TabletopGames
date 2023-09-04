@@ -7,6 +7,7 @@ import core.components.FrenchCard;
 import core.interfaces.IPrintable;
 import games.hearts.HeartsGameState;
 
+import java.util.AbstractMap;
 import java.util.Objects;
 
 public class Play extends AbstractAction implements IPrintable {
@@ -17,17 +18,33 @@ public class Play extends AbstractAction implements IPrintable {
     public Play(int playerID, FrenchCard card) {
         this.playerID = playerID;
         this.card = card;
-
     }
 
     @Override
     public boolean execute(AbstractGameState gameState) {
         HeartsGameState hgs = (HeartsGameState) gameState;
+        if (hgs.getCurrentPlayer() != playerID) {
+            throw new AssertionError("Player " + playerID + " tried to play out of turn");
+        }
         if (playerID >= 0 && playerID < hgs.getPlayerDecks().size()) {
             Deck<FrenchCard> playerHand = hgs.getPlayerDecks().get(playerID);
+            // Remove the card from the player's deck
+
             if (playerHand.getComponents().remove(card)) {
-                hgs.getChosenCards().put(playerID, card);
-                return true;
+
+                if (hgs.currentPlayedCards.isEmpty()) {
+                    hgs.firstCardSuit = card.suite;  // Save the suit of the first card
+                }
+
+                // Store played card and its player ID
+                hgs.currentPlayedCards.add(new AbstractMap.SimpleEntry<>(playerID, card));
+
+                // If a heart has been played, set heartsBroken to true
+                if (card.suite == FrenchCard.Suite.Hearts) {
+                    hgs.heartsBroken = true;
+                }
+            } else {
+                throw new AssertionError("Card not found in player's hand" + card.toString());
             }
         }
         return false;
@@ -35,7 +52,7 @@ public class Play extends AbstractAction implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new Play(playerID, card.copy());
+        return this; // immutable
     }
 
     @Override

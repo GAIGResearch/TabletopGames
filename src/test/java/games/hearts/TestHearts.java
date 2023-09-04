@@ -1,4 +1,4 @@
-package test.games.Hearts;
+package games.hearts;
 
 import core.AbstractParameters;
 import core.CoreConstants;
@@ -15,9 +15,6 @@ import games.hearts.actions.Pass;
 import org.junit.*;
 import core.components.FrenchCard;
 import java.util.AbstractMap;
-import java.util.Map;
-import java.util.HashMap;
-
 
 
 import static core.CoreConstants.GameResult.*;
@@ -30,16 +27,12 @@ public class TestHearts {
 
     AbstractParameters gameParameters = new HeartsParameters(System.currentTimeMillis());
 
-    List<AbstractAction> actions;
-
-
     @Before
     public void setUp() {
         forwardModel = new HeartsForwardModel();
         // Assuming the constructor HeartsGameState(int nPlayers) exists.
         gameState = new HeartsGameState(gameParameters, 3);
         forwardModel.setup(gameState);
-
     }
 
     @Test
@@ -56,7 +49,7 @@ public class TestHearts {
         // Setup a Pass action
         FrenchCard cardToPass = gameState.getPlayerDecks().get(0).get(0); // Get first card of first player
         Pass passAction = new Pass(0, cardToPass);
-        forwardModel._afterAction(gameState, passAction);
+        forwardModel.next(gameState, passAction);
 
         // Assert that the card has been removed from the player's deck
         assertFalse(gameState.getPlayerDecks().get(0).contains(cardToPass));
@@ -101,7 +94,7 @@ public class TestHearts {
         int initialDeckSize = gameState.getPlayerDecks().get(0).getSize();
         FrenchCard card = gameState.getPlayerDecks().get(0).get(0);
         Pass passAction = new Pass(0, card);
-        forwardModel._afterAction(gameState, passAction);
+        forwardModel.next(gameState, passAction);
 
         // Check that the card has been removed from the player's deck
         assertEquals(initialDeckSize - 1, gameState.getPlayerDecks().get(0).getSize());
@@ -346,18 +339,6 @@ public class TestHearts {
         assertTrue(gameState.getDrawDeck().contains(card));
     }
 
-    @Test
-    public void testGetAndSetChosenCards() {
-        // Create a map with some chosen cards
-        Map<Integer, FrenchCard> chosenCards = new HashMap<>();
-        chosenCards.put(0, new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Hearts, 2));
-
-        // Set the chosen cards
-        gameState.setChosenCards(chosenCards);
-
-        // Test that the correct chosen cards are returned
-        assertEquals(chosenCards, gameState.getChosenCards());
-    }
 
     @Test
     public void testGetPlayerDecks() {
@@ -386,7 +367,7 @@ public class TestHearts {
         gameState.trickDecks.add(0, deck);
 
         // Calculate points
-        gameState.calculatePoints(0);
+        gameState.scorePointsAtEndOfRound();
 
         // Test that the correct number of points was calculated
         assertEquals(14, gameState.getPlayerPoints(0));
@@ -407,25 +388,13 @@ public class TestHearts {
         gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
 
         // Assign points to players
-        gameState.calculatePoints(0);  // Assuming that player 0 has some cards in their trick deck
+        gameState.scorePointsAtEndOfRound();  // Assuming that player 0 has some cards in their trick deck
 
         // Test getGameScore
         int playerScore = (int) gameState.getGameScore(0);
         assertEquals(playerScore, gameState.getPlayerPoints(0));
     }
 
-    @Test
-    public void testResetGameScores() {
-        // Set the game state
-        gameState.setGamePhase(HeartsGameState.Phase.PLAYING);
-
-        // Assign points to players
-        gameState.calculatePoints(0);  // Assuming that player 0 has some cards in their trick deck
-
-        // Test resetGameScores
-        gameState.resetGameScores();
-        assertEquals(0, gameState.getPlayerPoints(0));
-    }
     @Test
     public void testGetOrdinalPosition() {
         // Set the game state

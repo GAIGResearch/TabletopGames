@@ -23,17 +23,20 @@ public class Pass extends AbstractAction implements IPrintable {
     public boolean execute(AbstractGameState gameState) {
         HeartsGameState hgs = (HeartsGameState) gameState;
         if (playerID >= 0 && playerID < hgs.getPlayerDecks().size()) {
+
             Deck<FrenchCard> playerHand = hgs.getPlayerDecks().get(playerID);
-            if (playerHand.getComponents().remove(card1)) {
-                return true;
+            if (!playerHand.getComponents().remove(card1)) {
+                throw new AssertionError("Card not found in player's hand" + card1.toString());
             }
+
+            hgs.pendingPasses.get(playerID).add(card1);
         }
         return false;
     }
 
     @Override
     public AbstractAction copy() {
-        return new Pass(playerID, card1.copy());
+        return this; // immutable
     }
 
     @Override
