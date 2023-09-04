@@ -23,6 +23,10 @@ import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
 import games.hanabi.gui.HanabiGUIManager;
+import games.hearts.HeartsForwardModel;
+import games.hearts.HeartsGameState;
+import games.hearts.HeartsParameters;
+import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
@@ -175,7 +179,13 @@ public enum GameType {
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
-            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class);
+            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+
+    Hearts(3,6,Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class);
+
+
 
 
     // Core classes where the game is defined
