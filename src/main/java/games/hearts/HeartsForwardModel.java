@@ -6,6 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.FrenchCard;
+import core.interfaces.IComponentContainer;
 import games.hearts.actions.Play;
 import games.hearts.actions.Pass;
 
@@ -40,7 +41,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         _setupRound(hgs);
     }
 
-    public void _setupRound(HeartsGameState hgs){
+    public void _setupRound(HeartsGameState hgs) {
         hgs.setGamePhase(HeartsGameState.Phase.PASSING);
         hgs.heartsBroken = false;
 
@@ -84,7 +85,7 @@ public class HeartsForwardModel extends StandardForwardModel {
             }
         }
 
-        for (int i = 0; i < hgs.getNPlayers(); i++){
+        for (int i = 0; i < hgs.getNPlayers(); i++) {
             Deck<FrenchCard> playerDeck = new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
             hgs.playerDecks.add(playerDeck);
             int numberOfCards = getNumberOfCards(hgs);
@@ -99,10 +100,9 @@ public class HeartsForwardModel extends StandardForwardModel {
         int numberOfCards;
         if (hgs.getNPlayers() == 3) {
             numberOfCards = 17;
-        } else if(hgs.getNPlayers()==4){
+        } else if (hgs.getNPlayers() == 4) {
             numberOfCards = 13;
-        }
-        else if (hgs.getNPlayers() == 5) {
+        } else if (hgs.getNPlayers() == 5) {
             numberOfCards = 10;
         } else if (hgs.getNPlayers() == 6) {
             numberOfCards = 8;
@@ -199,9 +199,9 @@ public class HeartsForwardModel extends StandardForwardModel {
             for (FrenchCard card : cards) {
                 actions.add(new Pass(player, card));
             }
-        }else {
+        } else {
 
-            if (hgs.getTurnCounter() == 0) {
+            if (!hgs.trickDecks.stream().flatMap(IComponentContainer::stream).findAny().isPresent()) {
                 // First turn of the game, the player with 2 of clubs must play it
                 for (FrenchCard card : playerHand.getComponents()) {
                     if (card.suite == FrenchCard.Suite.Clubs && card.number == 2) {
@@ -211,20 +211,27 @@ public class HeartsForwardModel extends StandardForwardModel {
                 }
             }
 
-            boolean hasLeadSuit = playerHand.getComponents().stream().anyMatch(card -> card.suite.equals(hgs.firstCardSuit));
-
-            if (hasLeadSuit) {
-                // Player can only play cards of the lead suit
+            if (hgs.firstCardSuit == null) {
+                // this is the lead player, they can play any card (except for Hearts if they are not yet broken, or they have no choice)
+                boolean onlyHasHearts = playerHand.getComponents().stream().allMatch(card -> card.suite == FrenchCard.Suite.Hearts);
                 for (FrenchCard card : playerHand.getComponents()) {
-                    if (card.suite.equals(hgs.firstCardSuit)) {
+                    if (onlyHasHearts || hgs.heartsBroken || card.suite != FrenchCard.Suite.Hearts ) {
                         actions.add(new Play(player, card));
                     }
                 }
             } else {
-                // Player can play cards of any other suit, but only play a heart if hearts have been broken or their hand only contains hearts
-                boolean onlyHasHearts = playerHand.getComponents().stream().allMatch(card -> card.suite == FrenchCard.Suite.Hearts);
-                for (FrenchCard card : playerHand.getComponents()) {
-                    if (card.suite != FrenchCard.Suite.Hearts || hgs.heartsBroken || onlyHasHearts) {
+                // Check if player has any cards of the lead suit
+                boolean hasLeadSuit = playerHand.getComponents().stream().anyMatch(card -> card.suite.equals(hgs.firstCardSuit));
+
+                if (hasLeadSuit) {
+                    // Player can only play cards of the lead suit
+                    for (FrenchCard card : playerHand.getComponents()) {
+                        if (card.suite.equals(hgs.firstCardSuit)) {
+                            actions.add(new Play(player, card));
+                        }
+                    }
+                } else {
+                    for (FrenchCard card : playerHand.getComponents()) {
                         actions.add(new Play(player, card));
                     }
                 }

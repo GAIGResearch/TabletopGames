@@ -94,16 +94,11 @@ public class HeartsGameState extends AbstractGameState {
                             playerPoints.put(i, playerPoints.getOrDefault(i, 0) + points);
                         }
                     }
+                } else {
+                    // Add the points to the player's score
+                    playerPoints.put(playerId, playerPoints.getOrDefault(playerId, 0) + points);
                 }
 
-                // Check if the playerID exists in the map
-                if (playerPoints.containsKey(playerId)) {
-                    // If it does, add the points
-                    playerPoints.put(playerId, playerPoints.get(playerId) + points);
-                } else {
-                    // If not, add the playerID to the map with the calculated points
-                    playerPoints.put(playerId, points);
-                }
 
                 // Clear the trick deck after its points have been added
                 trickDeck.clear();
@@ -180,7 +175,10 @@ public class HeartsGameState extends AbstractGameState {
                         copy.playerDecks.get(i).add(copy.drawDeck.draw());
                     }
                     for (int j = 0; j < pendingPasses.get(i).size(); j++) {
-                        copy.pendingPasses.get(i).add(copy.drawDeck.draw());
+                        // We put the previously pending cards into the hand
+                        // the agent can then use its opponent model to figure out what was passed
+                        // Passing is all simultaneous
+                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
                     }
                 }
             }

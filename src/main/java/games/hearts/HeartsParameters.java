@@ -21,7 +21,7 @@ import java.util.Objects;
 public class HeartsParameters extends TunableParameters {
     public String dataPath = "data/FrenchCards/";
     public  final int shootTheMoon = 26;
-    public  final int heartCard = 11;
+    public  final int heartCard = 1;
     public  final int queenOfSpades = 13;
 
     private static final double MAX_HIGH_VALUE_CARD_PASS_BONUS = 1.6;
