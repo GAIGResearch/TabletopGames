@@ -25,48 +25,27 @@ import java.util.function.*;
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
 public class HeartsGameState extends AbstractGameState {
-    /**
-     * @param gameParameters - game parameters.
-     * @param nPlayers       - number of players in the game
-     */
-
     List<Deck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
-
     public List<Deck<FrenchCard>> trickDecks;
-
     public boolean heartsBroken;
-
     public int[] playerTricksTaken;
-
     public List<List<FrenchCard>> pendingPasses;
-
-    // This map stores each player's chosen card
     public Map<Integer, Integer> playerPoints;
-
-    List<List<FrenchCard>> passedCards;
-
     public List<Map.Entry<Integer, FrenchCard>> currentPlayedCards = new ArrayList<>();
     public FrenchCard.Suite firstCardSuit;
+    Random rnd;
 
     public HeartsGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+        rnd = new Random(gameParameters.getRandomSeed());
     }
 
-    /**
-     * @return the enum value corresponding to this game, declared in {@link GameType}.
-     */
     @Override
     protected GameType _getGameType() {
         return GameType.Hearts;
     }
 
-    /**
-     * Returns all Components used in the game and referred to by componentId from actions or rules.
-     * This method is called after initialising the game state, so all components will be initialised already.
-     *
-     * @return - List of Components in the game.
-     */
     @Override
     protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{
@@ -89,6 +68,7 @@ public class HeartsGameState extends AbstractGameState {
     }
 
     public void scorePointsAtEndOfRound() {
+        HeartsParameters params = (HeartsParameters) getGameParameters();
         for (int playerId = 0; playerId < getNPlayers(); playerId++) {
 
             // Get the trick deck for the player
@@ -99,11 +79,20 @@ public class HeartsGameState extends AbstractGameState {
                 // Iterate over all cards in the trick deck
                 for (FrenchCard card : trickDeck.getComponents()) {
                     if (card.suite == FrenchCard.Suite.Hearts) {
-                        points += 1;
+                        points += params.heartCard;
                     }
                     // The queen of spades is worth 13 points
                     else if (card.suite == FrenchCard.Suite.Spades && card.number == 12) {
-                        points += 13;
+                        points += params.queenOfSpades;
+                    }
+                }
+
+                if (points == params.shootTheMoon) {
+                    // all other players get the points instead
+                    for (int i = 0; i < getNPlayers(); i++) {
+                        if (i != playerId) {
+                            playerPoints.put(i, playerPoints.getOrDefault(i, 0) + points);
+                        }
                     }
                 }
 
@@ -130,18 +119,6 @@ public class HeartsGameState extends AbstractGameState {
         return playerPoints;
     }
 
-    /**
-     * <p>Create a deep copy of the game state containing only those components the given player can observe.</p>
-     * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
-     * of other players or a face-down deck), then these components should instead be randomized (in the previous examples,
-     * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
-     * for the other players).</p>
-     * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
-     *
-     * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
-     *
-     * @param playerId - player observing this game state.
-     */
     @Override
     protected AbstractGameState _copy(int playerId) {
         HeartsGameState copy = new HeartsGameState(gameParameters.copy(), getNPlayers());
@@ -155,32 +132,11 @@ public class HeartsGameState extends AbstractGameState {
         // Deep Copy draw deck
         copy.drawDeck = drawDeck.copy();
 
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    int originalSize = playerDecks.get(i).getSize();  // Store the original size of the deck
-                    copy.drawDeck.add(copy.playerDecks.get(i));
-                    copy.playerDecks.get(i).clear();
-                }
-            }
-            copy.drawDeck.shuffle(new Random(copy.gameParameters.getRandomSeed()));
-
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
-                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
-                    }
-                }
-            }
-
-        }
-
         // Deep Copy trickDecks
         copy.trickDecks = new ArrayList<>();
         for (Deck<FrenchCard> d : trickDecks) {
             copy.trickDecks.add(d.copy());
         }
-
 
         copy.heartsBroken = heartsBroken;
 
@@ -196,11 +152,6 @@ public class HeartsGameState extends AbstractGameState {
         // Deep Copy playerPoints
         copy.playerPoints = new HashMap<>(playerPoints);
 
-        // Deep Copy passedCards
-        copy.passedCards = new ArrayList<>();
-        for (List<FrenchCard> list : passedCards) {
-            copy.passedCards.add(new ArrayList<>(list));
-        }
 
         // Deep Copy currentRoundCards
         copy.currentPlayedCards = new ArrayList<>();
@@ -209,24 +160,40 @@ public class HeartsGameState extends AbstractGameState {
         }
 
         copy.firstCardSuit = firstCardSuit;
+
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
+            // Now we need to blank out the passed cards that the player cannot see
+            // and these need to go into the draw deck for shuffling
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    copy.drawDeck.add(copy.pendingPasses.get(i));
+                    copy.drawDeck.add(copy.playerDecks.get(i));
+                    copy.playerDecks.get(i).clear();
+                    copy.pendingPasses.get(i).clear();
+                }
+            }
+            copy.drawDeck.shuffle(rnd);
+
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
+                        copy.playerDecks.get(i).add(copy.drawDeck.draw());
+                    }
+                    for (int j = 0; j < pendingPasses.get(i).size(); j++) {
+                        copy.pendingPasses.get(i).add(copy.drawDeck.draw());
+                    }
+                }
+            }
+        }
+
         return copy;
     }
 
-
-    /**
-     * @param playerId - player observing the state.
-     * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
-     * the game); a value between 0 and 1 is preferred, where 0 means the game was lost, and 1 means the game was won.
-     */
     @Override
     protected double _getHeuristicScore(int playerId) {
         return new HeartsHeuristic().evaluateState(this, playerId);
     }
 
-    /**
-     * @param playerId - player observing the state.
-     * @return the true score for the player, according to the game rules. May be 0 if there is no score in the game.
-     */
     @Override
     public double getGameScore(int playerId) {
         return playerPoints.getOrDefault(playerId, 0);
@@ -263,7 +230,6 @@ public class HeartsGameState extends AbstractGameState {
                 Objects.equals(trickDecks, that.trickDecks) &&
                 Objects.equals(pendingPasses, that.pendingPasses) &&
                 Objects.equals(playerPoints, that.playerPoints) &&
-                Objects.equals(passedCards, that.passedCards) &&
                 Objects.equals(currentPlayedCards, that.currentPlayedCards) &&
                 Objects.equals(firstCardSuit, that.firstCardSuit);
     }
@@ -272,7 +238,7 @@ public class HeartsGameState extends AbstractGameState {
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, heartsBroken,
                 firstCardSuit, trickDecks,
-                pendingPasses, playerPoints, passedCards, currentPlayedCards);
+                pendingPasses, playerPoints, currentPlayedCards);
         result = 31 * result + Arrays.hashCode(playerTricksTaken);
         return result;
     }

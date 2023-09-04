@@ -20,9 +20,9 @@ import java.util.Objects;
  */
 public class HeartsParameters extends TunableParameters {
     public String dataPath = "data/FrenchCards/";
-    public static final int maxPossibleScore = 26;
-    public static final int maxHighValueCards = 14;
-    public static final int maxPossibleTricks = 13;
+    public  final int shootTheMoon = 26;
+    public  final int heartCard = 11;
+    public  final int queenOfSpades = 13;
 
     private static final double MAX_HIGH_VALUE_CARD_PASS_BONUS = 1.6;
 
@@ -68,7 +68,6 @@ public class HeartsParameters extends TunableParameters {
 
     @Override
     public Game instantiate() {
-        System.out.println("New game is being instantiated");  // add this line
         return new Game(GameType.Hearts, new HeartsForwardModel(), new HeartsGameState(this, GameType.Hearts.getMinPlayers()));
     }
 }

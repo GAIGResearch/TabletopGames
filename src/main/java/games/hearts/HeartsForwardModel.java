@@ -37,10 +37,6 @@ public class HeartsForwardModel extends StandardForwardModel {
             hgs.pendingPasses.add(new ArrayList<>());
             hgs.trickDecks.add(new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
         }
-        hgs.passedCards = new ArrayList<>(hgs.getNPlayers());
-        for (int i = 0; i < hgs.getNPlayers(); i++) {
-            hgs.passedCards.add(new ArrayList<>());
-        }
         _setupRound(hgs);
     }
 
