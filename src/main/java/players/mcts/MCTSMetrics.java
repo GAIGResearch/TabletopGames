@@ -42,7 +42,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 OptionalInt maxVisits = Arrays.stream(root.actionVisits()).max();
                 records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) visits);
                 records.put("Action", e.action.getString(e.state));
-                records.put("ActionsAtRoot", root.children.size());
+                records.put("ActionsAtRoot", root.actionValues.size());
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
@@ -104,7 +104,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("Nodes", treeStats.stream().mapToInt(ts -> ts.totalNodes).average().orElse(0.0));
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
-                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.children.size()).average().orElse(0.0));
+                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.actionValues.size()).average().orElse(0.0));
                 return true;
             }
             return false;

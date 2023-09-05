@@ -190,7 +190,8 @@ public class SingleTreeNode {
                 }
             }
             for (AbstractAction action : actionsFromOpenLoopState) {
-                if (!children.containsKey(action)) {
+                if (!actionValues.containsKey(action)) {
+                    actionValues.put(action, new ActionStats(actionState.getNPlayers()));
                     children.put(action.copy(), null); // mark a new node to be expanded
                     // This *does* rely on a good equals method being implemented for Actions
                     if (!children.containsKey(action))
@@ -996,7 +997,7 @@ public class SingleTreeNode {
         if (bestAction == null) {
             if (nVisits == 1) {
 //                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
-                bestAction = children.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
+                bestAction = actionValues.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else
                 throw new AssertionError("Unexpected - no selection made.");
         }
@@ -1095,10 +1096,10 @@ public class SingleTreeNode {
                     .mapToObj(v -> String.format("%.2f", v))
                     .collect(joining(", "));
         }
-        retValue.append(String.format("%d total visits, value %s, with %d children, depth %d, FMCalls %d: \n",
-                nVisits, valueString, children.size(), depth, fmCallsCount));
+        retValue.append(String.format("%d total visits, value %s, with %d children, %d actions, depth %d, FMCalls %d: \n",
+                nVisits, valueString, children.size(), actionValues.size(), depth, fmCallsCount));
         // sort all actions by visit count
-        List<AbstractAction> sortedActions = children.keySet().stream()
+        List<AbstractAction> sortedActions = actionValues.keySet().stream()
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(a -> -actionVisits(a)))
                 .collect(toList());

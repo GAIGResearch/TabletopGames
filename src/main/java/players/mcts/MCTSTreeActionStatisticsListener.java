@@ -76,7 +76,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
             AbstractAction bestAction = null;
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : actionsFromState) {
-                if (node.children.get(action) == null) {
+                if (node.actionValues.get(action) == null) {
                     actionTargets.put(action, 0.0);  // we have no data for this action
                     continue;
                 }

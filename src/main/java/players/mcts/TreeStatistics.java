@@ -42,11 +42,11 @@ public class TreeStatistics {
                 nodesAtDepth[node.depth]++;
                 if (node.terminalNode)
                     gameTerminalNodesAtDepth[node.depth]++;
-                totalActions += node.children.size();
-                if (node.children.size() == 1)
+                totalActions += node.actionValues.size();
+                if (node.actionValues.size() == 1)
                     oneAction++;
-                if (node.children.size() > maxActions)
-                    maxActions = node.children.size();
+                if (node.actionValues.size() > maxActions)
+                    maxActions = node.actionValues.size();
                 for (SingleTreeNode child : node.children.values().stream()
                         .filter(Objects::nonNull)
                         .flatMap(Arrays::stream)

@@ -163,7 +163,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         Map<AbstractAction, Map<String, Object>> retValue = new LinkedHashMap<>();
 
         if (root != null && root.getVisits() > 1) {
-            for (AbstractAction action : root.children.keySet()) {
+            for (AbstractAction action : root.actionValues.keySet()) {
                 ActionStats stats = root.actionValues.get(action);
                     int visits = stats == null ? 0 : stats.nVisits;
                     double visitProportion = visits / (double) root.getVisits();
