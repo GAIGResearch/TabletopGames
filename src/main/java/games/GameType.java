@@ -10,6 +10,10 @@ import games.cantstop.*;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.*;
 import games.catan.gui.CatanGUI;
+import games.chinesecheckers.CCForwardModel;
+import games.chinesecheckers.CCGameState;
+import games.chinesecheckers.CCParameters;
+import games.chinesecheckers.gui.CCGUIManager;
 import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
@@ -175,7 +179,11 @@ public enum GameType {
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
-            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class);
+            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+    ChineseCheckers(2, 6,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
 
 
     // Core classes where the game is defined
