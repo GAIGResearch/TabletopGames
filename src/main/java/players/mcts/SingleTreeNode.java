@@ -426,7 +426,7 @@ public class SingleTreeNode {
         List<AbstractAction> topActions = params.progressiveWideningConstant >= 1.0
                 ? actionsToConsider(actionsFromOpenLoopState, 0)
                 : actionsFromOpenLoopState;
-        List<AbstractAction> allUnexpanded = topActions.stream().filter(a -> children.get(a) == null).collect(toList());
+        List<AbstractAction> allUnexpanded = topActions.stream().filter(a -> actionValues.get(a) == null || actionValues.get(a).nVisits == 0).collect(toList());
         return actionsToConsider(allUnexpanded, topActions.size() - allUnexpanded.size());
     }
 
@@ -614,11 +614,10 @@ public class SingleTreeNode {
         double bestValue = -Double.MAX_VALUE;
 
         for (AbstractAction action : availableActions) {
-            SingleTreeNode[] childArray = children.get(action);
-            if (childArray == null)
-                throw new AssertionError("Should not be here with a null child array");
-
             // Find child value
+            if (actionValues.get(action).nVisits == 0) {
+                throw new AssertionError("We should only be here if we have already taken all actions");
+            }
             double hvVal = actionTotValue(action, decisionPlayer);
 
             int actionVisits = actionVisits(action);
@@ -1053,6 +1052,7 @@ public class SingleTreeNode {
      * This looks for the first parent node that matches the specified Predicate
      * This will look at parent first, then grandparent, etc.
      * This returns null if no match is found
+     *
      * @param match
      * @return
      */

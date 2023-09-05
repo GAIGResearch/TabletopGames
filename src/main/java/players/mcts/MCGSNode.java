@@ -56,6 +56,7 @@ public class MCGSNode extends SingleTreeNode {
             nextNode = (MCGSNode) createChildNode(actionChosen.copy(), openLoopState);
             ((MCGSNode) root).transpositionMap.put(key, nextNode);
         }
+        nextNode.setActionsFromOpenLoopState(openLoopState);
         return nextNode;
     }
 
