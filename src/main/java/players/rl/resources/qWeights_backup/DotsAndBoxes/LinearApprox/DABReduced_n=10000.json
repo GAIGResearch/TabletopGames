@@ -1,0 +1,23 @@
+{
+  "Metadata" : {
+    "Seed" : 1688547917241,
+    "Type" : "LinearApprox",
+    "Alpha" : 0.0010000000474974513,
+    "Gamma" : 0.875,
+    "Epsilon" : 0.375,
+    "Solver" : "Q_LEARNING",
+    "Heuristic" : "players.heuristics.WinOnlyHeuristic",
+    "QWeightsDataStructure" : "players.rl.QWDSLinearApprox",
+    "FeatureVector" : "games.dotsboxes.DBStateFeaturesReduced",
+    "NGamesTotal" : 10000,
+    "NGamesWithTheseSettings" : 10000,
+    "ContinuedFrom" : null
+  },
+  "Weights" : {
+    "POINT_ADVANTAGE" : 0.6178489858388393,
+    "POINTS" : -0.10471436033068995,
+    "THREE_BOXES" : 0.06677277186802992,
+    "TWO_BOXES" : -5.823677029125759E-6,
+    "ORDINAL" : 0.11569216232754578
+  }
+}
