@@ -15,7 +15,7 @@ import static core.CoreConstants.GameResult.*;
 
 public class CCForwardModel extends StandardForwardModel {
 
-    private static boolean isPlayingColour(Peg.Colour col, CCGameState state) {
+    private static boolean isColourInPlay(Peg.Colour col, CCGameState state) {
         if (col == Peg.Colour.neutral) return true;
         CCParameters params = (CCParameters) state.getGameParameters();
         Peg.Colour[] colours = params.playerColours.get(state.getNPlayers());
@@ -47,7 +47,7 @@ public class CCForwardModel extends StandardForwardModel {
         return loadPlayerActions(player, state);
     }
 
-    private static CCNode neighbourInDirection(CCNode node, int dir, CCGameState state) {
+    private static CCNode neighbourInDirection(CCNode node, int dir) {
         for (CCNode neig : node.getNeighbours()) {
             if (node.getNeighbourSideMapping().get(neig) == dir) {
                 return neig;
@@ -56,10 +56,17 @@ public class CCForwardModel extends StandardForwardModel {
         return null;
     }
 
+    /**
+     * Returns true if the peg can be placed on the node
+     * All board nodes in the main areas are neutral; the colour here refers just to the 10
+     * starting nodes for each player
+     * @param col
+     * @param playerCol
+     * @return
+     */
     private static boolean isPlayerPlacable(Peg.Colour col, Peg.Colour playerCol) {
-        return col == playerCol ||
-                col == Peg.Colour.values()[(playerCol.ordinal() + 3) % 6] || //opposite
-                col == Peg.Colour.neutral;
+        return col == playerCol || col == Peg.Colour.neutral ||
+                col == Peg.Colour.values()[(playerCol.ordinal() + 3) % 6]; //opposite
     }
 
     private List<AbstractAction> loadPlayerActions(int player, CCGameState state) {
@@ -75,13 +82,20 @@ public class CCForwardModel extends StandardForwardModel {
         return actions;
     }
 
+    /**
+     * In which we use a form of breadth-first search to find all the possible moves we can make
+     * starting from the given node
+     * @param node
+     * @param state
+     * @return
+     */
     private static List<AbstractAction> exploreNodeAction(CCNode node, CCGameState state) {
         Peg.Colour playerCol = node.getOccupiedPeg().getColour();
         List<AbstractAction> actions = new ArrayList<>();
         for (CCNode nei_0 : node.getNeighbours()) {
             if (nei_0.isNodeOccupied()) {
                 repeatAction(node, actions, playerCol, state);
-            } else if (isPlayingColour(nei_0.getBaseColour(), state)) {
+            } else if (isColourInPlay(nei_0.getBaseColour(), state)) {
                 if (node.getOccupiedPeg().getInDestination()) {
                     if (nei_0.getBaseColour() != Peg.Colour.neutral) {
                         MovePeg action = new MovePeg(node.getID(), nei_0.getID());
@@ -114,7 +128,7 @@ public class CCForwardModel extends StandardForwardModel {
             for (CCNode neighbour : expNode.getNeighbours()) {
                 int side = expNode.getNeighbourSideMapping().get(neighbour);
                 if (neighbour.isNodeOccupied()) {
-                    CCNode stride = neighbourInDirection(neighbour, side, state);
+                    CCNode stride = neighbourInDirection(neighbour, side);
                     if (stride != null && !stride.isNodeOccupied() &&
                             (canLeaveZone || stride.getBaseColour() == oppositeCol) &&
                             !visited.contains(stride)) {

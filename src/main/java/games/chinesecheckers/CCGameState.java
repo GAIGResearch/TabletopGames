@@ -81,21 +81,8 @@ public class CCGameState extends AbstractGameState {
     }
 
     public Peg.Colour getPlayerColour(int player) {
-        if (nPlayers == 2) {
-            return Peg.Colour.values()[player * 3];
-        }
-        else if (nPlayers == 3) {
-            return Peg.Colour.values()[player * 2];
-        }
-        else if (nPlayers == 4) {
-            int[] orderForFourPlayers = {0, 2, 3, 5};
-            return Peg.Colour.values()[orderForFourPlayers[player]];
-        }
-        else if (nPlayers == 6) {
-            return Peg.Colour.values()[player];
-        }
-        else {
-            throw new AssertionError("Chinese Checkers does not support player " + player);
-        }
+        CCParameters params = (CCParameters) gameParameters;
+        int nPlayers = getNPlayers();
+        return params.playerColours.get(nPlayers)[player];
     }
 }
