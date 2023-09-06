@@ -1,17 +1,22 @@
 package games.pandemic;
 
-import core.*;
-import evaluation.listeners.GameListener;
+import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.Game;
+import evaluation.listeners.IGameListener;
+import evaluation.listeners.MetricsGameListener;
+import evaluation.loggers.SummaryLogger;
+import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import games.pandemic.stats.PandemicMetrics;
 import players.PlayerType;
 import players.human.ActionController;
-import evaluation.loggers.FileStatsLogger;
-import evaluation.loggers.SummaryLogger;
-import evaluation.summarisers.TAGNumericStatSummary;
 import players.simple.RandomPlayer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
@@ -23,7 +28,7 @@ public class PandemicGame extends Game {
     }
 
     public static Game runCompetition(String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                                      boolean randomizeParameters, List<GameListener> listeners, int nRepetitions, ActionController ac){
+                                      boolean randomizeParameters, List<IGameListener> listeners, int nRepetitions, ActionController ac){
         boolean detailedStatistics = true;
         boolean printStatSummary = false;
 
@@ -64,10 +69,9 @@ public class PandemicGame extends Game {
         ActionController ac =  null; // new ActionController();
 
         // logging setup
-        FileStatsLogger logger = new FileStatsLogger(logFile);
-        GameListener pl = new GameListener(logger, new PandemicMetrics().getAllMetrics());
+        MetricsGameListener pl = new MetricsGameListener(new PandemicMetrics().getAllMetrics());
 
-        ArrayList<GameListener> listeners = new ArrayList<>();
+        List<IGameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
         List<AbstractPlayer> players = new ArrayList<>();
@@ -79,7 +83,7 @@ public class PandemicGame extends Game {
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         runCompetition(config, players, -1, false, listeners, nRepetition, ac);
-        logger.processDataAndFinish();
+        pl.report();
     }
 
 
@@ -145,8 +149,8 @@ public class PandemicGame extends Game {
         for (PlayerType playerType : playersToTest) {
 
             // logging setup
-            GameListener pl = new GameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
-            ArrayList<GameListener> listeners = new ArrayList<>();
+            MetricsGameListener pl = new MetricsGameListener(new PandemicMetrics().getAllMetrics());
+            List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
             PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
@@ -159,7 +163,7 @@ public class PandemicGame extends Game {
 
             System.out.println(playerType.name());
             System.out.println("-----------------");
-            pl.allGamesFinished();
+            pl.report();
         }
 
         // Calculate ranking as per competition rules

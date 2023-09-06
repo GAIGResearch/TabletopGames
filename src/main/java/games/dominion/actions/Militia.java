@@ -15,6 +15,9 @@ public class Militia extends DominionAttackAction {
     public Militia(int playerId) {
         super(CardType.MILITIA, playerId);
     }
+    public Militia(int playerId, boolean dummy) {
+        super(CardType.MILITIA, playerId, dummy);
+    }
 
     public final int OTHERS_DISCARD_DOWN_TO = 3;
 
@@ -43,7 +46,7 @@ public class Militia extends DominionAttackAction {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         // Do nothing
     }
 
@@ -55,7 +58,7 @@ public class Militia extends DominionAttackAction {
      */
     @Override
     public DominionAttackAction _copy() {
-        return new Militia(player);
+        return new Militia(player, dummyAction);
     }
 
     @Override

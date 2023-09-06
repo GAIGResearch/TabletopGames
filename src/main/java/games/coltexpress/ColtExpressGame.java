@@ -42,7 +42,7 @@ public class ColtExpressGame extends Game {
 
             CoreConstants.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){
-                if (playerResults[j] == CoreConstants.GameResult.WIN)
+                if (playerResults[j] == CoreConstants.GameResult.WIN_GAME)
                     System.out.println("Player " + j + " won");
             }
         }

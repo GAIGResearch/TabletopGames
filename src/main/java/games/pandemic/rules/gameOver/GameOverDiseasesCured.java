@@ -9,7 +9,7 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
-import static core.CoreConstants.GameResult.WIN;
+import static core.CoreConstants.GameResult.WIN_GAME;
 
 public class GameOverDiseasesCured extends GameOverCondition {
     @Override
@@ -22,7 +22,7 @@ public class GameOverDiseasesCured extends GameOverCondition {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("WIN!");
             }
-            return WIN;
+            return WIN_GAME;
         }
         return GAME_ONGOING;
     }

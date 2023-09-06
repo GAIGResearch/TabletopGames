@@ -1,50 +1,33 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.LoveLetterCard;
 
 /**
  * The handmaid protects the player from any targeted effects until the next turn.
  */
-public class HandmaidAction extends core.actions.DrawCard implements IPrintable {
+public class HandmaidAction extends PlayCard implements IPrintable {
 
-    public HandmaidAction(int deckFrom, int deckTo, int fromIndex) {
-        super(deckFrom, deckTo, fromIndex);
+    public HandmaidAction(int cardIdx, int playerID) {
+        super(LoveLetterCard.CardType.Handmaid, cardIdx, playerID, -1, null, null, true, true);
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    protected boolean _execute(LoveLetterGameState gs) {
         // set the player's protection status
-        ((LoveLetterGameState) gs).setProtection(gs.getCurrentPlayer(), true);
-        return super.execute(gs);
+        gs.setProtection(playerID, true);
+        return true;
     }
 
     @Override
-    public String toString() {
-        return "Handmaid - get protection status";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return "Handmaid (protect)";
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
-    }
-
-    @Override
-    public AbstractAction copy() {
-        return new HandmaidAction(deckFrom, deckTo, fromIndex);
+    public HandmaidAction copy() {
+        return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof HandmaidAction)) return false;
-        return super.equals(o);
+        return o instanceof HandmaidAction && super.equals(o);
     }
 }

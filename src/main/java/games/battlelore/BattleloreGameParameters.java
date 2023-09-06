@@ -16,7 +16,6 @@ public class BattleloreGameParameters extends AbstractParameters {
         super(seed);
         this.dataPath = dataPath;
         setMaxRounds(100);
-        super.setThinkingTimeMins(Long.MAX_VALUE);
     }
 
     @Override

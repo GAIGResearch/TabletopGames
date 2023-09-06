@@ -1,6 +1,6 @@
 package players.learners;
 
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import libsvm.svm_parameter;
 
 import static players.learners.SVMParams.SVM_CONSTANTS.NU_SVR;

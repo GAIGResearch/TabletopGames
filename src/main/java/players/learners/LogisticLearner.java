@@ -1,18 +1,24 @@
 package players.learners;
 
 import org.apache.spark.ml.feature.RFormula;
-import org.apache.spark.ml.regression.*;
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.types.*;
+import org.apache.spark.ml.regression.GeneralizedLinearRegression;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
+import org.apache.spark.sql.AnalysisException;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 
 import java.io.FileWriter;
-import java.util.*;
+import java.util.Arrays;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 
 public class LogisticLearner extends ApacheLearner {
 
     double[] coefficients;
+
+    public LogisticLearner(double gamma, Target target) {
+        super(gamma, target);
+    }
 
     public static void main(String[] args) {
 
@@ -114,4 +120,5 @@ public class LogisticLearner extends ApacheLearner {
         public String name() {
             return "Logistic";
         }
-    }
+
+}

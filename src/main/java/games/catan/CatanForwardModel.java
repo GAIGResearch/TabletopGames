@@ -2,201 +2,235 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.components.Area;
-import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.properties.PropertyString;
-import games.catan.actions.*;
-import games.catan.components.Graph;
-import games.catan.components.Road;
-import games.catan.components.Settlement;
+import core.components.Edge;
+import core.components.GraphBoardWithEdges;
+import evaluation.metrics.Event;
+import games.catan.actions.build.BuyAction;
+import games.catan.actions.discard.DiscardResourcesPhase;
+import games.catan.actions.trade.OfferPlayerTrade;
+import games.catan.components.Building;
+import games.catan.components.CatanCard;
+import games.catan.components.CatanTile;
+import games.catan.stats.CatanMetrics;
 
 import java.util.*;
 
-import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.*;
-import static games.catan.CatanGameState.CatanGamePhase.*;
+import static core.CoreConstants.DefaultGamePhase.Main;
+import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.CatanGameState.CatanGamePhase.Robber;
+import static games.catan.CatanGameState.CatanGamePhase.Setup;
+import static games.catan.stats.CatanMetrics.CatanEvent.RobberRoll;
+import static games.catan.stats.CatanMetrics.CatanEvent.SevenOut;
 
-public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
+@SuppressWarnings("OptionalGetWithoutIsPresent")
+public class CatanForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
 
         CatanGameState state = (CatanGameState) firstState;
-        state._reset();
         CatanParameters params = (CatanParameters) state.getGameParameters();
+        firstState.getCoreGameParameters().setMaxRounds(params.maxRounds);
+        state.rnd = new Random(params.getRandomSeed());
 
         state.setBoard(generateBoard(params));
-        state.setGraph(extractGraphFromBoard(state.getBoard()));
-        state.areas = new HashMap<>();
+        state.setGraph(extractGraphFromBoard(state.getBoard(), params));
+
+        state.scores = new int[state.getNPlayers()];
+        state.victoryPoints = new int[state.getNPlayers()];
+        state.knights = new int[state.getNPlayers()];
+        state.roadLengths = new int[state.getNPlayers()];
+        state.largestArmyOwner = -1;
+        state.longestRoadOwner = -1;
+        state.largestArmySize = 0;
+        state.longestRoadLength = 0;
+        state.rollValue = -1;
+        state.developmentCardPlayed = false;
+
+        state.tradeOffer = null;
+        state.negotiationStepsCount = 0;
+        state.nTradesThisTurn = 0;
+
+        state.exchangeRates = new ArrayList<>();
+        state.playerDevCards = new ArrayList<>();
+        state.playerTokens = new ArrayList<>();
+        state.playerResources = new ArrayList<>();
 
         // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
-            Area playerArea = new Area(i, "Player Area");
-            Deck<Card> playerHand = new Deck<>("Player Resource Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            playerHand.setOwnerId(i);
-            playerArea.putComponent(playerHandHash, playerHand);
+            state.playerDevCards.add(new Deck<>("Player Development Deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            HashMap<BuyAction.BuyType, Counter> tokens = new HashMap<>();
+            for (Map.Entry<BuyAction.BuyType, Integer> type: params.tokenCounts.entrySet()) {
+                tokens.put(type.getKey(), new Counter(type.getValue(), type.getKey().name() + " Counter " + i));
+            }
+            state.playerTokens.add(tokens);
 
-            Deck<Card> playerDevDeck = new Deck<>("Player Development Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            playerDevDeck.setOwnerId(i);
-            playerArea.putComponent(developmentDeckHash, playerDevDeck);
-
-            // counter value, min, max, name
-            playerArea.putComponent(roadCounterHash, new Counter(0, 0, params.n_roads, "Road Counter"));
-            playerArea.putComponent(settlementCounterHash, new Counter(0, 0, params.n_settlements, "Settlement Counter"));
-            playerArea.putComponent(cityCounterHash, new Counter(0, 0, params.n_cities, "City Counter"));
-
-            state.areas.put(i, playerArea);
+            HashMap<CatanParameters.Resource, Counter> resources = new HashMap<>();
+            HashMap<CatanParameters.Resource, Counter> exchange = new HashMap<>();
+            for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
+                resources.put(res, new Counter(res + " " + i));
+                exchange.put(res, new Counter(params.default_exchange_rate,1, params.default_exchange_rate,res + " " + i));
+            }
+            state.playerResources.add(resources);
+            state.exchangeRates.add(exchange);
 
         }
 
-        // Initialize the game area
-        Area gameArea = new Area(-1, "Game Area");
-        state.areas.put(-1, gameArea);
-
-        // create resource deck
-        Deck<Card> resourceDeck = new Deck("resourceDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-        for (CatanParameters.Resources res : CatanParameters.Resources.values()) {
-            for (int i = 0; i < params.n_resource_cards; i++) {
-                Card c = new Card();
-                c.setProperty(new PropertyString("cardType", res.name()));
-                resourceDeck.add(c);
-            }
+        // create resource pool
+        state.resourcePool = new HashMap<>();
+        for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+            state.resourcePool.put(res, new Counter(res.name()));
+            state.resourcePool.get(res).increment(params.n_resource_cards);
         }
 
         // create and shuffle developmentDeck
-        Deck<Card> developmentDeck = new Deck("developmentDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        for (Map.Entry<CatanParameters.CardTypes, Integer> entry : params.developmentCardCount.entrySet()) {
+        state.devCards = new Deck<>("Development Deck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        for (Map.Entry<CatanCard.CardType, Integer> entry : params.developmentCardCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++) {
-                Card card = new Card();
-                card.setProperty(new PropertyString("cardType", entry.getKey().toString()));
-                developmentDeck.add(card);
+                CatanCard card = new CatanCard(entry.getKey());
+                state.devCards.add(card);
             }
         }
-        developmentDeck.shuffle(state.rnd);
-
-        gameArea.putComponent(resourceDeckHash, resourceDeck);
-        gameArea.putComponent(developmentDeckHash, developmentDeck);
-        gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-
-        state.addComponents();
+        state.devCards.shuffle(state.rnd);
         state.setGamePhase(Setup);
-
     }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+        if (currentState.isActionInProgress()) return;
+
         CatanGameState gs = (CatanGameState) currentState;
-        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
         CatanParameters params = (CatanParameters) gs.getGameParameters();
+        int player = gs.getCurrentPlayer();
 
-        // handle scoring
-        if (action instanceof BuildRoad) {
-            BuildRoad br = (BuildRoad) action;
-            int new_length = gs.getRoadDistance(br.getX(), br.getY(), br.getEdge());
-            if (new_length > gs.longestRoadLength) {
-                gs.longestRoadLength = new_length;
-                // add points for longest road and set the new road in gamestate
-                if (gs.longestRoad >= 0) {
-                    // in this case the longest road was not claimed yet
-                    gs.addScore(gs.longestRoad, -params.longest_road_value);
+        if (gs.getGamePhase() == Setup) {
+            if (gs.getRoundCounter() == 0) {
+                if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
+                    endRound(gs, gs.getCurrentPlayer());
+                } else {
+                    endCatanPlayerTurn(gs);
                 }
-                gs.addScore(gs.getCurrentPlayer(), params.longest_road_value);
-                gs.longestRoad = gs.getCurrentPlayer();
+            } else {
+                if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
+                    // Finished setup
+                    gs.logEvent(CatanMetrics.CatanEvent.SetupComplete);
+
+                    endRound(gs, 0);
+                    gs.setGamePhase(Main);
+                    rollDiceAndAllocateResources(gs, params);
+                } else {
+                    int nextPlayer = gs.getCurrentPlayer()-1;
+                    if (nextPlayer < 0) nextPlayer = 0;
+                    endPlayerTurn(gs, nextPlayer);
+                }
+            }
+        }
+
+        else if (gs.getGamePhase() == Main) {
+
+            // Win condition
+            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win || gs.getRoundCounter() >= gs.getCoreGameParameters().getMaxRounds()) {
+                endGame(currentState);
                 if (gs.getCoreGameParameters().verbose) {
-                    System.out.println("Player " + gs.getCurrentPlayer() + " has the longest road with length " + gs.longestRoad);
+                    System.out.println("Game over! winner = " + player);
+                }
+                return;
+            }
+
+            if (action instanceof DoNothing) {
+                // end player's turn; roll dice and allocate resources
+                if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
+                    endRound(gs, 0);
+                } else {
+                    endCatanPlayerTurn(gs);
+                }
+                rollDiceAndAllocateResources(gs, params);
+            } else if (gs.tradeOffer != null) {
+                OfferPlayerTrade opt = (OfferPlayerTrade) gs.tradeOffer;
+                gs.negotiationStepsCount++;
+
+                // Check if this should be rejected automatically
+                if (gs.negotiationStepsCount >= params.max_negotiation_count) {
+                    if (gs.getCoreGameParameters().verbose) {
+                        System.out.println("Trade rejected by default (too many attempts)");
+                    }
+                    gs.negotiationStepsCount = 0;
+                    gs.tradeOffer = null;
+                    gs.setTurnOwner(opt.offeringPlayerID);
+                    gs.nTradesThisTurn++;
+                } else {
+
+                    // Trade offer reply needed, swap player between offering and other in action
+                    switch (opt.stage) {
+                        case Offer:
+                            gs.setTurnOwner(opt.otherPlayerID);
+                        case CounterOffer:
+                            gs.setTurnOwner(opt.offeringPlayerID);
+                    }
                 }
             }
-            if (gs.getCoreGameParameters().verbose) {
-                System.out.println("Calculated road length: " + new_length);
-            }
-        } else if (action instanceof PlaceSettlementWithRoad) {
-            // As player always places a settlement in the setup phase it is awarded the score for it
-            gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
-        } else if (action instanceof BuildSettlement) {
-            gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
-        } else if (action instanceof BuildCity) {
-            gs.addScore(gs.getCurrentPlayer(), -params.settlement_value);
-            gs.addScore(gs.getCurrentPlayer(), params.city_value);
         }
-
-        // win condition
-        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win) {
-            endGame(currentState);
-            if (gs.getCoreGameParameters().verbose) {
-                System.out.println("Game over! winner = " + gs.getCurrentPlayer());
-            }
-        }
-        // prevents multiple DoNothing actions with multi-action turn stages
-        if (action instanceof DoNothing && (gs.getGamePhase() == Build || gs.getGamePhase() == Trade)) {
-            cto.skipTurnStage(gs);
-        }
-
-        if (action instanceof OfferPlayerTrade) {
-            cto.endReaction(gs);  // remove previous player to act...this is safe if called (the first time) with no reactive player
-            cto.addReactivePlayer(((OfferPlayerTrade) action).otherPlayerID);  // add new one
-            // We do not consider the end of a turn until the back-and-forth of negotiation finishes
-        } else if (action instanceof PlayKnightCard) {
-            // continue...we skip endTurn as we now need to execute the ensuing Robber phase
-        } else {
-            // end player's turn; roll dice and allocate resources
-            cto.endTurnStage(gs);
-        }
-
-        if (gs.getGamePhase() == CoreConstants.DefaultGamePhase.Main) {
-            // reset recently bought dev card to null
-            gs.boughtDevCard = null;
-            rollDiceAndAllocateResources(gs);
-        }
-
     }
 
-    private void rollDiceAndAllocateResources(CatanGameState gs) {
+    public void endCatanPlayerTurn(CatanGameState gs) {
+        super.endPlayerTurn(gs);
+        gs.nTradesThisTurn = 0;
+    }
+
+    private void rollDiceAndAllocateResources(CatanGameState gs, CatanParameters cp) {
         /* Gives players the resources depending on the current rollValue stored in the game state */
-        // roll dice
-        gs.rollDice();
 
-        int value = gs.getRollValue();
-        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
-        cto.logEvent(() -> "Dice roll of " + value, gs);
+        /* Rolls 2 random dice given a single random seed */
+        int n = cp.dieType.nSides;
+        int nDice = cp.nDice;
+        int rollValue = 0;
+        for (int i = 0; i < nDice; i++) {
+            rollValue += gs.rnd.nextInt(n) + 1;
+        }
+        gs.setRollValue(rollValue);
+
+        int roll = rollValue;
+        gs.logEvent(Event.GameEvent.GAME_EVENT, () -> "Dice roll of " + roll);
+        if (gs.getCoreGameParameters().verbose) {
+            System.out.println("Dice roll: " + gs.rollValue);
+        }
         CatanTile[][] board = gs.getBoard();
-        if (value == 7) {
-            // Dice roll was 7 so we change the phase
-            cto.setGamePhase(Robber, gs);
+        if (rollValue == cp.robber_die_roll) {
+            // Dice roll was 7, so we change the phase
+            // Check if anyone needs to discard cards
+            for (int p = 0; p < gs.getNPlayers(); p++) {
+                int nResInHand = gs.getNResourcesInHand(p);
+                if (nResInHand > cp.max_cards_without_discard) {
+                    gs.logEvent(SevenOut, String.valueOf(p));
+                    int r = (int)(nResInHand * cp.perc_discard_robber); // remove half of the resources
+                    new DiscardResourcesPhase(p, r).execute(gs);
+                }
+            }
+            gs.logEvent(RobberRoll);
+            gs.setGamePhase(Robber);
         } else {
-            cto.setGamePhase(Trade, gs);
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    if (tile.getNumber() == value && !tile.hasRobber()) {
-                        // allocate resource for each settlement/city
-                        for (Settlement settl : tile.getSettlements()) {
-                            if (settl.getOwner() != -1) {
+            for (CatanTile[] catanTiles : board) {
+                for (CatanTile tile : catanTiles) {
+                    if (tile.getNumber() == rollValue && !tile.hasRobber()) {
+                        // Allocate resource for each settlement/city on this tile to their owner
+                        for (Building settl : gs.getBuildings(tile)) {
+                            int who = settl.getOwnerId();
+                            if (who != -1) {
                                 // Move the card from the resource deck and give it to the player
-                                List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
-                                int counter = 0;
-                                for (int i = 0; i < resourceDeck.size(); i++) {
-                                    Card card = resourceDeck.get(i);
-                                    if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
-                                        // remove from deck and give it to player
-                                        if (gs.getCoreGameParameters().verbose) {
-                                            System.out.println("With Roll value " + gs.rollValue + " Player " + settl.getOwner() + " got " + card.getProperty(cardType));
-                                        }
-                                        cto.logEvent(() -> " Player " + settl.getOwner() + " got " + card.getProperty(cardType), gs);
-                                        ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
-                                        ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
-                                        counter++;
-                                    }
-                                    // getType is 1 for settlement; 2 for city
-                                    if (counter >= settl.getType()) {
-                                        break;
-                                    }
+                                CatanParameters.Resource res = cp.productMapping.get(tile.getTileType());
+                                int nGenerated = cp.nProduction.get(settl.getBuildingType());
+                                gs.resourcePool.get(res).decrement(nGenerated);
+                                gs.playerResources.get(who).get(res).increment(nGenerated);
+                                if (gs.getCoreGameParameters().verbose) {
+                                    System.out.println("p" + who + " gets " + res);
                                 }
-
+                                gs.logEvent(Event.GameEvent.GAME_EVENT, () -> "Player " + who + " gets " + res);
                             }
                         }
                     }
@@ -205,52 +239,73 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
         }
     }
 
-    @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         CatanGameState cgs = (CatanGameState) gameState;
+        CatanParameters cp = (CatanParameters) gameState.getGameParameters();
+        int player = cgs.getCurrentPlayer();
+
         if (cgs.getGamePhase() == Setup) {
-            return CatanActionFactory.getSetupActions(cgs);
+            return CatanActionFactory.getSetupActions(cgs, actionSpace, player);
         }
         if (cgs.getGamePhase() == Robber) {
-            return CatanActionFactory.getRobberActions(cgs);
+            return CatanActionFactory.getRobberActions(cgs, actionSpace, player, false);
         }
-        if (cgs.getGamePhase() == Steal) {
-            return CatanActionFactory.getStealActions(cgs);
+        // Main phase: trade, build (road, city, dev card), or play dev card
+        List<AbstractAction> mainActions = new ArrayList<>();
+
+        if (cgs.tradeOffer != null) {
+            // Only replies allowed
+            mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
+
+        } else {
+
+            // Trade With the bank / ports
+            mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
+
+            // Trade With other players, unless already too many trades this turn
+            if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
+                mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
+            }
+
+            // Build
+            mainActions.addAll(CatanActionFactory.getBuyActions(cgs, actionSpace, player));
+
+            // Dev cards
+            if (cgs.noDevelopmentCardPlayed()) {
+                mainActions.addAll(CatanActionFactory.getDevCardActions(cgs, actionSpace, player));
+            }
+
+            mainActions.add(new DoNothing());  // End turn
         }
-        if (cgs.getGamePhase() == Discard) {
-            return CatanActionFactory.getDiscardActions(cgs);
-        }
-        if (cgs.getGamePhase() == Trade) {
-            if (cgs.getCurrentTradeOffer() != null)
-                return CatanActionFactory.getTradeReactionActions(cgs);
-            return CatanActionFactory.getTradeStageActions(cgs);
-        }
-        if (cgs.getGamePhase() == Build) {
-            return CatanActionFactory.getBuildStageActions(cgs);
-        }
-        throw new AssertionError("GamePhase is not in the defined set of options");
+
+        return mainActions;
     }
 
     private CatanTile[][] generateBoard(CatanParameters params) {
         // Shuffle the tile types
-        ArrayList<CatanParameters.TileType> tileList = new ArrayList<>();
-        for (Map.Entry tileCount : params.tileCounts.entrySet()) {
-            for (int i = 0; i < (int) tileCount.getValue(); i++) {
-                tileList.add((CatanParameters.TileType) tileCount.getKey());
+        ArrayList<CatanTile.TileType> tileList = new ArrayList<>();
+        for (Map.Entry<CatanTile.TileType, Integer> tileCount : params.tileCounts.entrySet()) {
+            for (int i = 0; i < tileCount.getValue(); i++) {
+                tileList.add(tileCount.getKey());
             }
         }
         // Shuffle number tokens
         ArrayList<Integer> numberList = new ArrayList<>();
-        for (Map.Entry numberCount : params.numberTokens.entrySet()) {
-            for (int i = 0; i < (int) numberCount.getValue(); i++) {
-                numberList.add((Integer) numberCount.getKey());
+        for (Map.Entry<Integer, Integer> numberCount : params.numberTokens.entrySet()) {
+            for (int i = 0; i < numberCount.getValue(); i++) {
+                numberList.add(numberCount.getKey());
             }
         }
-        // shuffle collections so we get randomized tiles and tokens on them
+        // shuffle collections, so we get randomized tiles and tokens on them
         Collections.shuffle(tileList);
         Collections.shuffle(numberList);
 
-        CatanTile[][] board = new CatanTile[7][7];
+        CatanTile[][] board = new CatanTile[params.n_tiles_per_row][params.n_tiles_per_row];
         int midX = board.length / 2;
         int midY = board[0].length / 2;
 
@@ -261,11 +316,11 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
                 CatanTile tile = new CatanTile(x, y);
                 // mid_x should be the same as the distance
                 if (midTile.getDistanceToTile(tile) >= midX) {
-                    tile.setTileType(CatanParameters.TileType.SEA);
+                    tile.setTileType(CatanTile.TileType.SEA);
                 } else if (tileList.size() > 0) {
                     tile.setTileType(tileList.remove(0));
                     // desert has no number and has to place the robber there
-                    if (tile.getType().equals(CatanParameters.TileType.DESERT)) {
+                    if (tile.getTileType().equals(CatanTile.TileType.DESERT)) {
                         tile.placeRobber();
                     } else {
                         tile.setNumber(numberList.remove(0));
@@ -275,119 +330,98 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
                 board[x][y] = tile;
             }
         }
+        return board;
+    }
 
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
+    private GraphBoardWithEdges extractGraphFromBoard(CatanTile[][] board, CatanParameters cp) {
+        GraphBoardWithEdges graph = new GraphBoardWithEdges();
 
-                // --------- Road ------------
-                for (int edge = 0; edge < HEX_SIDES; edge++) {
-                    // Road has already been set
-                    if (tile.getRoads()[edge] == null) {
-                        // set a new road without owner
-                        Road road = new Road(-1);
-                        tile.setRoad(edge, road);
-
-                        int[] neighbourCoord = CatanTile.getNeighbourOnEdge(tile, edge);
-                        // need to check if neighbour is on the board
-                        if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
-                                Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
-                            // if in range then set road references
-                            CatanTile neighbour = board[neighbourCoord[0]][neighbourCoord[1]];
-                            neighbour.setRoad((edge + 3) % HEX_SIDES, road);
-                        }
-                    }
-
-                }
-
-                // ------ Settlement ------------
+        // Create vertices and add references in tiles
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
                 for (int vertex = 0; vertex < HEX_SIDES; vertex++) {
                     // settlement has already been set so skip this loop
-                    if (tile.getSettlements()[vertex] == null) {
-                        Settlement settlement = new Settlement(-1);
-                        tile.setSettlement(vertex, settlement);
+                    if (tile.getVerticesBoardNodeIDs()[vertex] == -1) {
+                        Building building = new Building();
+                        graph.addBoardNode(building);
+                        tile.setVertexBoardNodeID(vertex, building.getComponentID());
 
                         // Get the other 2 settlements along that vertex and set both of them separately
-                        // has to do it in 2 steps as there could cases with only 2 tiles on along a vertex
-                        int[][] neighbourCoords = CatanTile.getNeighboursOnVertex(tile, vertex);
+                        // has to do it in 2 steps as there could be cases with only 2 tiles on along a vertex
+                        int[][] neighbourCoords = tile.getNeighboursOnVertex(vertex);
                         // check neighbour #1
                         if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
                                 Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
-                            board[neighbourCoords[0][0]][neighbourCoords[0][1]].setSettlement((vertex + 2) % HEX_SIDES, settlement);
+                            board[neighbourCoords[0][0]][neighbourCoords[0][1]].setVertexBoardNodeID((vertex + 2) % HEX_SIDES, building.getComponentID());
                         }
                         // check neighbour #2
                         if (Arrays.stream(neighbourCoords[1]).max().getAsInt() < board.length &&
                                 Arrays.stream(neighbourCoords[1]).min().getAsInt() >= 0) {
-                            board[neighbourCoords[1][0]][neighbourCoords[1][1]].setSettlement((vertex + 4) % HEX_SIDES, settlement);
+                            board[neighbourCoords[1][0]][neighbourCoords[1][1]].setVertexBoardNodeID((vertex + 4) % HEX_SIDES, building.getComponentID());
                         }
                     }
                 }
             }
         }
-        // Finally set Harbors types
-        setHarbors(board);
-        return board;
-    }
 
-    private Graph extractGraphFromBoard(CatanTile[][] board) {
-        Graph<Settlement, Road> graph = new Graph<>();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
+        // Create connections between vertices (edges/roads) and add references in tiles
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
                 // logic to generate the graph from the board representation
                 // We are not interested in references to DESERT or SEA tiles
-                if (!(tile.getType() == CatanParameters.TileType.DESERT || tile.getType() == CatanParameters.TileType.SEA)) {
-                    Settlement[] settlements = tile.getSettlements();
-                    Road[] roads = tile.getRoads();
-                    for (int i = 0; i < settlements.length; i++) {
-                        //  2 roads are along the same HEX
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i + 5) % HEX_SIDES], roads[(i + 5) % HEX_SIDES]);
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i + 1) % HEX_SIDES], roads[i]);
+                if (!(tile.getTileType() == CatanTile.TileType.DESERT || tile.getTileType() == CatanTile.TileType.SEA)) {
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Edge edge = graph.addConnection(tile.getVerticesBoardNodeIDs()[i], tile.getVerticesBoardNodeIDs()[(i + 1) % HEX_SIDES]);
+                        tile.setEdgeID(i, edge.getComponentID());
 
                         // last one requires a road and a settlement from a neighbour
-                        int[] otherCoords = CatanTile.getNeighbourOnEdge(tile, i);
+                        int[] otherCoords = tile.getNeighbourOnEdge(i);
                         if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
-                            Road[] neighbourRoads = neighbour.getRoads();
-                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i + 5) % HEX_SIDES], neighbourRoads[(i + 4) % HEX_SIDES]);
+                            neighbour.setEdgeID((i+3) % HEX_SIDES, edge.getComponentID());
                         }
                     }
                 }
             }
         }
+
+        // Finally set Harbors types
+        setHarbors(board, graph, cp);
+
         return graph;
     }
 
-    private void setHarbors(CatanTile[][] board) {
+    private void setHarbors(CatanTile[][] board, GraphBoardWithEdges graphBoard, CatanParameters cp) {
         // set harbors along the tiles where the SEA borders the land
-        ArrayList<Integer> harbors = new ArrayList<>();
-        for (Map.Entry<CatanParameters.HarborTypes, Integer> entry : CatanParameters.harborCount.entrySet()) {
+        ArrayList<CatanParameters.Resource> harbors = new ArrayList<>();
+        for (Map.Entry<CatanParameters.Resource, Integer> entry : cp.harborCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++)
-                harbors.add(CatanParameters.HarborTypes.valueOf(entry.getKey().toString()).ordinal());
+                harbors.add(entry.getKey());
         }
         Collections.shuffle(harbors);
 
         int radius = board.length / 2;
         // todo edge 4 can work, but random would be better, the math changes with different directions.
-        //Random random = new Random(params.getRandomSeed());
         //int edge = random.nextInt(HEX_SIDES);
         int edge = 4;
         // Get mid tile
         CatanTile tile = board[radius][radius];
         // move along a certain edge to reach SEA tiles
         for (int i = 0; i < radius; i++) {
-            int[] tileLocation = CatanTile.getNeighbourOnEdge(tile, edge);
+            int[] tileLocation = tile.getNeighbourOnEdge(edge);
             tile = board[tileLocation[0]][tileLocation[1]];
         }
         // go around in a circle
         int counter = 0;
         for (int i = 0; i < HEX_SIDES; i++) {
             for (int j = 0; j < board.length / 2; j++) {
-                int[] tileLocation = CatanTile.getNeighbourOnEdge(tile, i);
+                int[] tileLocation = tile.getNeighbourOnEdge(i);
                 tile = board[tileLocation[0]][tileLocation[1]];
                 if (counter % 2 == 0 && harbors.size() > 0) {
-                    tile.addHarbor((i + 2) % HEX_SIDES, harbors.remove(0));
+                    CatanParameters.Resource harbour = harbors.remove(0);
+                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 2) % HEX_SIDES])).setHarbour(harbour);
+                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 3) % HEX_SIDES])).setHarbour(harbour);
                 }
                 counter++;
             }

@@ -27,6 +27,11 @@ public class ShareKnowledge extends DrawCard {
     }
 
     @Override
+    public ShareKnowledge copy() {
+        return new ShareKnowledge(giver, receiver, fromIndex);
+    }
+
+    @Override
     public boolean execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
         Deck<Card> giverHand = (Deck<Card>) pgs.getComponent(playerHandHash, giver);
@@ -39,10 +44,15 @@ public class ShareKnowledge extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof ShareKnowledge)) return false;
         if (!super.equals(o)) return false;
         ShareKnowledge that = (ShareKnowledge) o;
         return giver == that.giver && receiver == that.receiver;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), giver, receiver);
     }
 
     @Override
@@ -57,11 +67,6 @@ public class ShareKnowledge extends DrawCard {
             return c;
         }
         return (Card) gs.getComponentById(cardId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), giver, receiver);
     }
 
     @Override

@@ -1,13 +1,12 @@
 package players.learners;
 
+import libsvm.*;
 import utilities.Pair;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
-
-import libsvm.*;
 
 public class SVMLearner extends AbstractLearner {
 
@@ -45,7 +44,7 @@ public class SVMLearner extends AbstractLearner {
     public void learnFrom(String... files) {
         loadData(files);
 
-        // SVM is at least available as a regressor
+        // SVM is at least available as a regressor (Apache only supports SVMs for classification)
         // unlike the Weka Logistic implementation, here we do not do any messing about with a bias term
         // which is just passed through (it is the first element in dataArray)
         svm_problem data = new svm_problem();
@@ -89,7 +88,8 @@ public class SVMLearner extends AbstractLearner {
 
 
     @Override
-    public void writeToFile(String file) {
+    public void writeToFile(String prefix) {
+        String file = prefix + ".txt";
         try {
             svm.svm_save_model(file, model);
         } catch (IOException e) {

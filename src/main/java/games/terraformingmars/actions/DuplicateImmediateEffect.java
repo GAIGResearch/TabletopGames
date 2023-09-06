@@ -90,7 +90,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         setCardID(((TMAction)action).getCardID());
         TMGameState gs = (TMGameState) state;
         gs.getPlayerCardChoice()[player].clear();

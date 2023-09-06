@@ -1,0 +1,14 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.SummaryLogger"
+    },
+    [
+      {"class": "games.dominion.stats.DominionMetrics$EmptySupplySlots" },
+      {"class": "games.dominion.stats.DominionMetrics$CardsInSupplyGameEnd",
+        "args": [["ESTATE", "DUCHY", "PROVINCE"]]
+      }
+    ]
+  ]
+}

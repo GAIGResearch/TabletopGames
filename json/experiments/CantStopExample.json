@@ -1,0 +1,12 @@
+{
+  "game" : "CantStop",
+  "nPlayers" : 3,
+  "playerDirectory" : "CantStop_Agents/3P",
+  "mode" : "random",
+  "matchups" : 1000,
+  "verbose" : false,
+  "listener" : "GameResultsListener.json",
+  "destDir" : "SkillGrid_CantStop_3P",
+  "output" : "SkillGrid_CantStop_3P/Tournament.log",
+  "seed" : 740234
+}

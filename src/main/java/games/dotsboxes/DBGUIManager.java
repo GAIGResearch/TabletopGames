@@ -1,26 +1,22 @@
 package games.dotsboxes;
 
-import core.CoreConstants;
-import core.Game;
+import core.*;
+import core.actions.AbstractAction;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.actions.AbstractAction;
 import players.human.ActionController;
+import utilities.ImageIO;
 
 import javax.swing.*;
 import java.awt.*;
-
-import utilities.ImageIO;
-
 import java.util.List;
+import java.util.Set;
 
 public class DBGUIManager extends AbstractGUIManager {
     DBGridBoardView view;
     int gapRight = 30;
 
-    public DBGUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public DBGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         this(parent, game, ac, humanId, defaultDisplayWidth, defaultDisplayHeight);
     }
 
@@ -29,7 +25,7 @@ public class DBGUIManager extends AbstractGUIManager {
         return 100;
     }
 
-    public DBGUIManager(GamePanel parent, Game game, ActionController ac, int humanId,
+    public DBGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId,
                         int displayWidth, int displayHeight) {
         super(parent, game, ac, humanId);
 
@@ -90,7 +86,6 @@ public class DBGUIManager extends AbstractGUIManager {
         gameInfo.add(playerStatus);
         gameInfo.add(playerScores);
         gameInfo.add(gamePhase);
-        gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
 

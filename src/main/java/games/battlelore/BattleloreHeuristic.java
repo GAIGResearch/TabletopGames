@@ -3,7 +3,7 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
@@ -34,13 +34,13 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
         int orderableUnitCount = 0;
         int enemyUnitPower = 0;
 
-        if (playerResult == CoreConstants.GameResult.LOSE) {
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        else if (playerResult == CoreConstants.GameResult.WIN) {
+        else if (playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
-        else if (playerResult == CoreConstants.GameResult.DRAW) {
+        else if (playerResult == CoreConstants.GameResult.DRAW_GAME) {
             return 0;
         }
 

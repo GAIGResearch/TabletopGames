@@ -9,8 +9,10 @@ import games.uno.UnoGameParameters.UnoScoring;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
 import games.uno.cards.UnoCard;
+import utilities.Pair;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.*;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
@@ -184,6 +186,15 @@ public class UnoForwardModel extends StandardForwardModel {
                     break;
                 }
             }
+            UnoGameParameters params = (UnoGameParameters) ugs.getGameParameters();
+            if (ugs.getTurnCounter() > params.maxTurnsPerRound) {
+                roundEnd = true;
+                roundWinner = IntStream.range(0, ugs.getNPlayers())
+                        .mapToObj(i -> new Pair<>(i, ugs.playerDecks.get(i).getSize()))
+                        .min(Comparator.comparingInt(p -> p.b))
+                        .orElseThrow(() -> new AssertionError("No min card count found")).a;
+                break;
+            }
         }
 
         if (roundEnd) {
@@ -251,9 +262,9 @@ public class UnoForwardModel extends StandardForwardModel {
                     );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (playerScores[i] == maxScore) {
-                            ugs.setPlayerResult(CoreConstants.GameResult.WIN, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i);
                         } else {
-                            ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
                         }
                     }
                     ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
@@ -266,9 +277,9 @@ public class UnoForwardModel extends StandardForwardModel {
                     );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (playerScores[i] == minScore) {
-                            ugs.setPlayerResult(CoreConstants.GameResult.WIN, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i);
                         } else {
-                            ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
                         }
                     }
                     ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
@@ -281,7 +292,7 @@ public class UnoForwardModel extends StandardForwardModel {
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
                             if (playerScores[i] >= ugp.nWinPoints) {
-                                ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
+                                ugs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
                                 ugs.expulsionRound[i] = ugs.getRoundCounter();
                                 if (playerScores[i] < lowScore) {
                                     lowScore = playerScores[i];
@@ -300,7 +311,7 @@ public class UnoForwardModel extends StandardForwardModel {
                         case 0:
                             // everyone breached, so winner is the lowest score
                             for (int p : lowScoreIds) {
-                                ugs.setPlayerResult(CoreConstants.GameResult.WIN, p);
+                                ugs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, p);
                                 ugs.expulsionRound[p] = ugs.getRoundCounter() + 1;
                             }
                             ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
@@ -308,7 +319,7 @@ public class UnoForwardModel extends StandardForwardModel {
                         case 1:
                             for (int p = 0; p < ugs.getNPlayers(); p++) {
                                 if (ugs.getPlayerResults()[p] == GAME_ONGOING) {
-                                    ugs.setPlayerResult(CoreConstants.GameResult.WIN, p);
+                                    ugs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, p);
                                     ugs.expulsionRound[p] = ugs.getRoundCounter() + 1;
                                 }
                             }

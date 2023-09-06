@@ -7,8 +7,9 @@ import core.components.Component;
 import core.components.PartialObservableDeck;
 import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
+import core.interfaces.IGameEvent;
 import core.interfaces.IGamePhase;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
@@ -18,8 +19,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static java.util.stream.Collectors.toList;
-import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -45,7 +46,7 @@ public abstract class AbstractGameState {
     // Migrated from TurnOrder...may move later
     protected int roundCounter, turnCounter, turnOwner, firstPlayer;
     protected int nPlayers;
-    protected List<GameListener> listeners = new ArrayList<>();
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
@@ -91,7 +92,7 @@ public abstract class AbstractGameState {
         turnCounter = 0;
         roundCounter = 0;
         firstPlayer = 0;
-        actionsInProgress.empty();
+        actionsInProgress.clear();
     }
 
     /**
@@ -114,13 +115,23 @@ public abstract class AbstractGameState {
     }
     public int getNPlayers() { return nPlayers; }
     public int getCurrentPlayer() {
-        if (isActionInProgress()) {
-            return actionsInProgress.peek().getCurrentPlayer(this);
-        }
-        // else we have the data locally
-        return turnOwner;
+        return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
+    public final Set<Integer> getWinners() {
+        Set<Integer> winners = new HashSet<>();
+        for (int i = 0; i < playerResults.length; i++) {
+            if (playerResults[i] == CoreConstants.GameResult.WIN_GAME) winners.add(i);
+        }
+        return winners;
+    }
+    public final Set<Integer> getTied() {
+        Set<Integer> tied = new HashSet<>();
+        for (int i = 0; i < playerResults.length; i++) {
+            if (playerResults[i] == CoreConstants.GameResult.DRAW_GAME) tied.add(i);
+        }
+        return tied;
+    }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
@@ -143,6 +154,13 @@ public abstract class AbstractGameState {
     }
     public int getRoundCounter() {return roundCounter;}
     public int getTurnCounter() {return turnCounter;}
+
+    /**
+     * In general getCurrentPlayer() should be used to find the current player.
+     * getTurnOwner() will give a different answer if an Extended Action Sequence is in progress.
+     * In this case getTurnOwner() returns the underlying player on whose turn the Action Sequence was initiated.
+     * @return
+     */
     public int getTurnOwner() {return turnOwner;}
     public int getFirstPlayer() {return firstPlayer;}
 
@@ -170,7 +188,7 @@ public abstract class AbstractGameState {
         turnOwner = newFirstPlayer;
     }
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }
@@ -204,6 +222,7 @@ public abstract class AbstractGameState {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
         return allComponents;
     }
+    public double[] getFeatureVector() {return null;} //Gets a feature vector for games that have it, otherwise returns null
 
     /**
      * While getAllComponents() returns an Area containing every component, this method
@@ -296,16 +315,23 @@ public abstract class AbstractGameState {
 
     // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere
-    public void logEvent(Supplier<String> eventText) {
+    public void logEvent(IGameEvent event, Supplier<String> eventText) {
         if (listeners.isEmpty() && !getCoreGameParameters().recordEventHistory)
             return; // to avoid expensive string manipulations
-        logEvent(eventText.get());
+        logEvent(event, eventText.get());
     }
-    public void logEvent(String eventText) {
-        AbstractAction logAction = new LogEvent(eventText);
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, this, logAction)));
+    public void logEvent(IGameEvent event, String eventText) {
+        LogEvent logAction = new LogEvent(eventText);
+        listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
         if (getCoreGameParameters().recordEventHistory) {
             recordHistory(eventText);
+        }
+    }
+    public void logEvent(IGameEvent event) {
+        LogEvent logAction = new LogEvent(event.name());
+        listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
+        if (getCoreGameParameters().recordEventHistory) {
+            recordHistory(event.name());
         }
     }
 
@@ -328,11 +354,12 @@ public abstract class AbstractGameState {
         return !actionsInProgress.empty();
     }
 
-    public final void setActionInProgress(IExtendedSequence action) {
+    public final boolean setActionInProgress(IExtendedSequence action) {
         if (action == null && !actionsInProgress.isEmpty())
             actionsInProgress.pop();
         else
             actionsInProgress.push(action);
+        return true;
     }
 
     final void checkActionsInProgress() {
@@ -386,26 +413,20 @@ public abstract class AbstractGameState {
     public abstract double getGameScore(int playerId);
 
     /**
-     * This is an optional implementation and is used in getOrdinalPosition() to break any ties based on pure game score
-     * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
-     * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
-     * if the score is a tie.
-     *
      * @param playerId - the player observed
-     * @return null by default - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score
+     * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
+     * @return Double.MAX_VALUE - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
      */
-    public Double getTiebreak(int playerId) {
-        return getTiebreak(playerId, 1);
+    public double getTiebreak(int playerId, int tier) {
+        return Double.MAX_VALUE;
     }
 
     /**
-     * @param playerId - the player observed
-     * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
-     * @return null - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
+     * This sets the number of tieBreak levels in a game.
+     * If we reach this level then we stop recursing.
+     * @return
      */
-    public Double getTiebreak(int playerId, int tier) {
-        return null;
-    }
+    public int getTiebreakLevels() {return 5;}
 
     /**
      * Returns the ordinal position of a player using getGameScore().
@@ -424,13 +445,14 @@ public abstract class AbstractGameState {
             double otherScore = scoreFunction.apply(i);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != null) {
+            else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != Double.MAX_VALUE) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, 1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, 1))
                     ordinal++;
             }
         }
         return ordinal;
     }
+
     public int getOrdinalPositionTiebreak(int playerId, BiFunction<Integer, Integer, Double> tiebreakFunction, int tier) {
         int ordinal = 1;
         Double playerScore = tiebreakFunction.apply(playerId, tier);
@@ -440,7 +462,7 @@ public abstract class AbstractGameState {
             double otherScore = tiebreakFunction.apply(i, tier);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction.apply(i, tier+1) != null) {
+            else if (otherScore == playerScore && tier < getTiebreakLevels() && tiebreakFunction.apply(i, tier+1) != null) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, tier+1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, tier+1))
                     ordinal++;
             }

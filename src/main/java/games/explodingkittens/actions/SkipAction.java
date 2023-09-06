@@ -62,4 +62,16 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
     public AbstractAction copy() {
         return new SkipAction(deckFrom, deckTo, fromIndex);
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof SkipAction)) return false;
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + 190;
+    }
 }

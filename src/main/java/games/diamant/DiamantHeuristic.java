@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Counter;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,9 +49,9 @@ public class DiamantHeuristic extends TunableParameters implements IStateHeurist
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
-        if (playerResult == CoreConstants.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == CoreConstants.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         DiamantGameState dgs = (DiamantGameState) gs;

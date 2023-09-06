@@ -86,14 +86,14 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
     @Override
     public HashMap<HashMap<Integer, Double>, GameResult> getTerminalFeatures(int playerId) {
         HashMap<HashMap<Integer, Double>, GameResult> terminals = new HashMap<>();
-        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, GameResult.WIN);
-        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, GameResult.LOSE);
+        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, GameResult.WIN_GAME);
+        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, GameResult.LOSE_GAME);
         terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).loseMaxOutbreak); }},
-                GameResult.LOSE);
+                GameResult.LOSE_GAME);
         int i = 3;
         for (String color: colors) {
             int id = i;
-            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, GameResult.LOSE);
+            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, GameResult.LOSE_GAME);
             i++;
         }
         return terminals;

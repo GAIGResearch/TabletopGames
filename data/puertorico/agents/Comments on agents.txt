@@ -1,0 +1,10 @@
+The good set of agents here across various budgets and player counts are:
+
+MCTS_Heuristic_PW
+MCTS_Leader_5P (+variants)
+MCTS_HeuristicRollout
+
+The bad ones are:
+MCTS_Score
+MCTS_HeuristicEval
+MCTS_Leader_3P

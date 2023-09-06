@@ -1,27 +1,21 @@
 package evaluation;
 
 import core.interfaces.IStatisticLogger;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
-import evaluation.summarisers.TAGNumericStatSummary;
-import evaluation.summarisers.TAGOccurrenceStatSummary;
-import evaluation.summarisers.TAGStatSummary;
+import evaluation.summarisers.*;
 import games.GameType;
 import games.terraformingmars.stats.TMStatsVisualiser;
 import gui.TiledImage;
-import gui.plotting.BarPlot;
-import gui.plotting.DotPlot;
-import gui.plotting.PiePlot;
+import gui.plotting.*;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.*;
 
 /**
  * Used to visualise the data recorded by metrics in a game. Includes many helpful methods.
@@ -29,18 +23,19 @@ import java.util.List;
  *      1. Extend this class
  *      2. Add their constructor in the {@link #getVisualiserForGame(GameType, List)} method in this class as a new case
  * See example for {@link GameType#TerraformingMars} in {@link TMStatsVisualiser}
- * The visualisers are called in {@link GameReport#main(String[])}, to display stats at the end of a run *
+ * The visualisers are called to display stats at the end of a run *
  */
 public abstract class StatsVisualiser extends JFrame {
-    private final HashMap<Event.GameEvent, IStatisticLogger> loggers;
+    private final Map<Event.GameEvent, IStatisticLogger> loggers;
     protected static int fontSize = 16;
     protected static Color fontColor = Color.white;
     protected static Color backgroundColor = Color.black;
     protected GridBagConstraints gridBagConstraints;
 
-    public StatsVisualiser(List<GameListener> listeners) {
+    public StatsVisualiser(List<MetricsGameListener> listeners) {
         if (listeners.size() > 1) System.out.println("Only showing first listener");
-        loggers = listeners.get(0).getLoggers();
+//        loggers = listeners.get(0).get();
+        loggers = new HashMap<>(); // todo
 
         // Default colors
         getContentPane().setBackground(backgroundColor);
@@ -222,7 +217,7 @@ public abstract class StatsVisualiser extends JFrame {
         piePlot.setMaxHeight(200);
     }
 
-    static StatsVisualiser getVisualiserForGame(GameType gameType, List<GameListener> listeners) {
+    static StatsVisualiser getVisualiserForGame(GameType gameType, List<MetricsGameListener> listeners) {
         switch (gameType) {
             case TerraformingMars: return new TMStatsVisualiser(listeners);
             default: return null;

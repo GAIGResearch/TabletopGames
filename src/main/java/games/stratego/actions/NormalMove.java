@@ -6,26 +6,49 @@ import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
 import games.stratego.components.Piece;
 import utilities.Distance;
+import utilities.Pair;
+import utilities.Vector2D;
 
-import java.util.Arrays;
+import java.util.Objects;
 
 // TODO: can't move back and forth between the same 2 squares in 3 consecutive turns
 public class NormalMove extends Move{
 
-    public final int[] destinationCoordinate;
+    // Dependent
+    public final Vector2D displacement;
 
-    public NormalMove(int movedPieceID, int[] destinationCoordinate) {
+    // Independent
+    public Vector2D destinationCoordinate;
+
+    public NormalMove(Vector2D position, Vector2D displacement) {
+        super(position);
+        this.displacement = displacement.copy();
+        this.destinationCoordinate = null;
+    }
+
+    public NormalMove(int movedPieceID, Vector2D destinationCoordinate) {
         super(movedPieceID);
-        this.destinationCoordinate = destinationCoordinate.clone();
+        this.destinationCoordinate = destinationCoordinate.copy();
+        this.displacement = null;
+    }
+
+    private NormalMove(Vector2D position, int movePieceID, Vector2D destinationCoordinate, Vector2D displacement) {
+        super(position, movePieceID);
+        this.destinationCoordinate = destinationCoordinate != null? destinationCoordinate.copy() : null;
+        this.displacement = displacement != null? displacement.copy() : null;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        Piece movedPiece = (Piece) gs.getComponentById(movedPieceID);
+        Piece movedPiece = getPiece((StrategoGameState) gs);
         GridBoard<Piece> board = ((StrategoGameState)gs).getGridBoard();
 
-        board.setElement(movedPiece.getPiecePosition()[0], movedPiece.getPiecePosition()[1], null);
-        board.setElement(destinationCoordinate[0], destinationCoordinate[1], movedPiece);
+        board.setElement(movedPiece.getPiecePosition().getX(), movedPiece.getPiecePosition().getY(), null);
+        if (destinationCoordinate == null) {
+            destinationCoordinate = position.add(displacement);
+        }
+
+        board.setElement(destinationCoordinate.getX(), destinationCoordinate.getY(), movedPiece);
 
         if (movedPiece.getPieceType() == Piece.PieceType.SCOUT &&
                 Distance.manhattan_distance(destinationCoordinate, movedPiece.getPiecePosition()) >
@@ -40,41 +63,52 @@ public class NormalMove extends Move{
 
     @Override
     public NormalMove copy() {
-        return new NormalMove(movedPieceID, destinationCoordinate.clone());
+        return new NormalMove(position, movedPieceID, destinationCoordinate != null? destinationCoordinate.copy() : null, displacement);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Piece movedPiece = (Piece) gameState.getComponentById(movedPieceID);
-        return "Move (" + movedPieceID + ": " + Arrays.toString(movedPiece.getPiecePosition()) + " -> " +
-                Arrays.toString(destinationCoordinate) + ")";
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        if (position == null) {
+            return "Move " + movedPieceID + " -> " + destinationCoordinate.toString();
+        } else {
+            Pair<Vector2D.Direction, Integer> direction = Vector2D.Direction.approxVecToDir(displacement);
+            if (direction != null) {
+                return "Move from " + position + " " + direction;
+            } else return "Move from " + position + " " + displacement;
+        }
     }
 
     @Override
     public String getPOString(StrategoGameState gameState) {
-        Piece movedPiece = (Piece) gameState.getComponentById(movedPieceID);
-        return "Move (" + Arrays.toString(movedPiece.getPiecePosition()) + " -> " +
-                Arrays.toString(destinationCoordinate) + ")";
+        Piece movedPiece = getPiece(gameState);
+        return "Move (" + movedPiece.getPiecePosition().toString() + " -> " +
+                destinationCoordinate.toString() + ")";
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof NormalMove)) return false;
         if (!super.equals(o)) return false;
         NormalMove that = (NormalMove) o;
-        return Arrays.equals(destinationCoordinate, that.destinationCoordinate);
+        return Objects.equals(displacement, that.displacement) && Objects.equals(destinationCoordinate, that.destinationCoordinate);
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + Arrays.hashCode(destinationCoordinate);
-        return result;
+        return Objects.hash(super.hashCode(), displacement, destinationCoordinate);
     }
 
     @Override
-    public int[] to(StrategoGameState gs) {
-        return destinationCoordinate;
+    public Vector2D to(StrategoGameState gs) {
+        if (destinationCoordinate != null) {
+            return destinationCoordinate;
+        }
+        return position.add(displacement);
     }
 }

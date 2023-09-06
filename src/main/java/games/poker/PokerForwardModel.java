@@ -1,4 +1,5 @@
 package games.poker;
+
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
@@ -14,7 +15,7 @@ import utilities.Pair;
 import java.util.*;
 
 import static games.poker.PokerGameState.PokerGamePhase.*;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 
 public class PokerForwardModel extends StandardForwardModel {
@@ -50,6 +51,7 @@ public class PokerForwardModel extends StandardForwardModel {
 
     /**
      * Sets up a round for the game, including draw pile, discard deck and player decks, all reset.
+     *
      * @param pgs - current game state.
      */
     private void setupRound(PokerGameState pgs) {
@@ -78,7 +80,7 @@ public class PokerForwardModel extends StandardForwardModel {
         // Blinds
         int smallId = pgs.getFirstPlayer();
         int bigId = (pgs.getNPlayers() + smallId + 1) % pgs.getNPlayers();
-        while ((pgs.playerFold[bigId] || pgs.getPlayerResults()[bigId] == LOSE)) {
+        while ((pgs.playerFold[bigId] || pgs.getPlayerResults()[bigId] == LOSE_GAME)) {
             bigId = (pgs.getNPlayers() + bigId + 1) % pgs.getNPlayers();
         }
         new Bet(smallId, params.smallBlind).execute(pgs);
@@ -90,7 +92,7 @@ public class PokerForwardModel extends StandardForwardModel {
 
     private void drawCardsToPlayers(PokerGameState pgs) {
         for (int player = 0; player < pgs.getNPlayers(); player++) {
-            for (int card = 0; card < ((PokerGameParameters)pgs.getGameParameters()).nCardsPerPlayer; card++) {
+            for (int card = 0; card < ((PokerGameParameters) pgs.getGameParameters()).nCardsPerPlayer; card++) {
                 pgs.playerDecks.get(player).add(pgs.drawDeck.draw());
             }
         }
@@ -103,7 +105,7 @@ public class PokerForwardModel extends StandardForwardModel {
         PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
 
         if (action instanceof Fold) {
-            fold(pgs, ((Fold)action).playerId);
+            fold(pgs, ((Fold) action).playerId);
         }
 
         pgs.playerActStreet[pgs.getCurrentPlayer()] = true;
@@ -112,9 +114,9 @@ public class PokerForwardModel extends StandardForwardModel {
             boolean remainingDecisions = false;
             int stillAlive = 0;
             for (int i = 0; i < pgs.getNPlayers(); i++) {
-                if (pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i]) {
+                if (pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i]) {
                     stillAlive++;
-                    if (pgs.playerNeedsToCall[i] || !pgs.playerActStreet[i]){
+                    if (pgs.playerNeedsToCall[i] || !pgs.playerActStreet[i]) {
                         remainingDecisions = true;
                     }
                 }
@@ -152,11 +154,13 @@ public class PokerForwardModel extends StandardForwardModel {
                 }
             }
         }
-        endPlayerTurn(pgs);
+        if (pgs.isNotTerminal())
+            endPlayerTurn(pgs);
     }
 
     /**
      * Called when round is over. Calculate winner of round and distribute money.
+     *
      * @param pgs - current game state
      */
     private void roundEnd(PokerGameState pgs) {
@@ -166,7 +170,7 @@ public class PokerForwardModel extends StandardForwardModel {
         HashMap<Integer, Integer> ranks = translated.a;
         HashMap<Integer, HashSet<Integer>> hands = translated.b;
 
-        for (MoneyPot pot: pgs.moneyPots) {
+        for (MoneyPot pot : pgs.moneyPots) {
             // Calculate winners separately for each money pot
             HashSet<Integer> winners = getWinner(pgs, pot, ranks, hands);
             for (int i : winners) {
@@ -177,7 +181,7 @@ public class PokerForwardModel extends StandardForwardModel {
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             if (pgs.playerMoney[i].isMinimum()) {
                 // Player is out of the game
-                pgs.setPlayerResult(LOSE, i);
+                pgs.setPlayerResult(LOSE_GAME, i);
             }
         }
 
@@ -196,7 +200,7 @@ public class PokerForwardModel extends StandardForwardModel {
         HashMap<Integer, Integer> ranks = new HashMap<>();
         HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
                 pgs.playerDecks.get(i).add(pgs.communityCards.copy());
                 Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
                 if (hand != null) {
@@ -215,14 +219,14 @@ public class PokerForwardModel extends StandardForwardModel {
         HashSet<Integer> playersInPot = new HashSet<>(pot.getPlayerContribution().keySet());
 
         int smallestRank = 11;
-        for (int i: playersInPot) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE && ranks.containsKey(i) && ranks.get(i) < smallestRank) {
+        for (int i : playersInPot) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME && ranks.containsKey(i) && ranks.get(i) < smallestRank) {
                 smallestRank = ranks.get(i);
             }
         }
         HashSet<Integer> winners = new HashSet<>();
-        for (int i: playersInPot) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+        for (int i : playersInPot) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
                 if (ranks.get(i) == smallestRank) winners.add(i);
             }
         }
@@ -255,6 +259,7 @@ public class PokerForwardModel extends StandardForwardModel {
 
     /**
      * Game ends when a player has the minimum money required to win. Player with most money wins.
+     *
      * @param pgs - game state
      * @return - true if game ended, false otherwise
      */
@@ -300,7 +305,7 @@ public class PokerForwardModel extends StandardForwardModel {
             // Move first player to next one
             pgs.setFirstPlayer((pgs.getNPlayers() + pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
             int nTries = 1;
-            while ((pgs.playerFold[pgs.getFirstPlayer()] || pgs.getPlayerResults()[pgs.getFirstPlayer()] == LOSE) && nTries <= pgs.getNPlayers()) {
+            while ((pgs.playerFold[pgs.getFirstPlayer()] || pgs.getPlayerResults()[pgs.getFirstPlayer()] == LOSE_GAME) && nTries <= pgs.getNPlayers()) {
                 pgs.setFirstPlayer((pgs.getNPlayers() + pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
                 nTries++;
             }
@@ -312,8 +317,8 @@ public class PokerForwardModel extends StandardForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        PokerGameState pgs = (PokerGameState)gameState;
-        PokerGameParameters pgp = (PokerGameParameters)gameState.getGameParameters();
+        PokerGameState pgs = (PokerGameState) gameState;
+        PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = pgs.getCurrentPlayer();
@@ -324,7 +329,8 @@ public class PokerForwardModel extends StandardForwardModel {
         boolean othersAllIn = true;  // True if all others are all in / out of the game, false otherwise
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             if (pgs.getPlayerBet()[i].getValue() > biggestBet) biggestBet = pgs.getPlayerBet()[i].getValue();
-            if (i != player && pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i] && !pgs.playerMoney[i].isMinimum()) othersAllIn = false;
+            if (i != player && pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i] && !pgs.playerMoney[i].isMinimum())
+                othersAllIn = false;
         }
 
         if (pgs.playerNeedsToCall[player] && !pgs.getPlayerMoney()[player].isMinimum()) {
