@@ -44,18 +44,18 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     }
 
     final int testingFigure;
-    int testingPlayer;
+    protected int testingPlayer;
     String testingName;
     String attributeTestName = "Attribute Test";
     int testCount = 0;
-    Figure sourceFigure;
-    AttributeTest.TestPhase phase = NOT_STARTED;
-    int interruptPlayer;
+    int sourceFigure;
+    protected AttributeTest.TestPhase phase = NOT_STARTED;
+    protected int interruptPlayer;
     Figure.Attribute attribute;
-    int attributeValue = 0;
-    int penaltyToAttribute = 0;
-    int penaltyToRoll = 0;
-    boolean result = false;
+    protected int attributeValue = 0;
+    protected int penaltyToAttribute = 0;
+    protected int penaltyToRoll = 0;
+    protected boolean result = false;
 
 
 
@@ -145,7 +145,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 break;
             case POST_TEST_ROLL:
                 // Any rerolls are executed via interrupts
-                resolveTest(state, state.getActingFigure(), result);
+                resolveTest(state, (Figure) state.getComponentById(testingFigure), result);
                 phase = ALL_DONE;
                 break;
         }
@@ -154,7 +154,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
     private void testAttribute(DescentGameState dgs)
     {
-        Figure f = dgs.getActingFigure();
+        Figure f = (Figure) dgs.getComponentById(testingFigure);
 
         // Only Heroes and Lieutenant Monsters can make Attribute Tests
 
@@ -193,8 +193,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        if (phase.interrupt == null)
+        if (phase.interrupt == null) {
+            System.out.println(phase + " " + phase.interrupt + " " + phase.interrupters + " " + interruptPlayer);
             throw new AssertionError("Should not be reachable");
+        }
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
         return retValue;
@@ -267,6 +269,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 result, testCount, testingName, sourceFigure);
     }
 
+    public Figure.Attribute getAttribute()
+    {
+        return attribute;
+    }
     public void setAttribute(Figure.Attribute a)
     {
         attribute = a;
@@ -321,11 +327,11 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         return attributeTestName;
     }
 
-    public void setSourceFigure (Figure source)
+    public void setSourceFigure (int source)
     {
         sourceFigure = source;
     }
-    public Figure getSourceFigure()
+    public int getSourceFigure()
     {
         return sourceFigure;
     }

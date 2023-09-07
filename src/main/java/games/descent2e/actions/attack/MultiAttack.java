@@ -11,10 +11,7 @@ import utilities.Distance;
 
 import java.util.List;
 
-import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
-import static games.descent2e.actions.attack.MeleeAttack.Interrupters.ATTACKER;
-import static games.descent2e.actions.attack.MeleeAttack.Interrupters.DEFENDER;
 
 /**
  *   This works in exactly the same way as a Melee Attack

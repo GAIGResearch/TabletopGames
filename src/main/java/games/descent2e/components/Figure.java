@@ -68,7 +68,7 @@ public class Figure extends Token {
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
     boolean removedConditionThisTurn = false;
-    Set<String> attributeTests;
+    Set<AttributeTest> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
     MeleeAttack currentAttack;
     boolean hasMoved, hasAttacked, hasRerolled;
@@ -224,11 +224,15 @@ public class Figure extends Token {
         this.removedConditionThisTurn = removedConditionThisTurn;
     }
 
-    public void addAttributeTest(String attributeTest) {
+    public Set<AttributeTest> getAttributeTests() {
+        return attributeTests;
+    }
+
+    public void addAttributeTest(AttributeTest attributeTest) {
         attributeTests.add(attributeTest);
     }
 
-    public void removeAttributeTest(String attributeTest) {
+    public void removeAttributeTest(AttributeTest attributeTest) {
         attributeTests.remove(attributeTest);
     }
     public void clearAttributeTest() {
@@ -237,7 +241,7 @@ public class Figure extends Token {
         }
     }
 
-    public boolean hasAttributeTest(String attributeTest) {
+    public boolean hasAttributeTest(AttributeTest attributeTest) {
         if (attributeTests == null) {
             return false;
         }

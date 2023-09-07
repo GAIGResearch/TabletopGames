@@ -691,9 +691,23 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         for (String action : actingFigure.getActions()) {
             switch (action.toUpperCase(Locale.ROOT)) {
                 case "HOWL":
-                    DescentAction howl = new Howl();
-                    if (howl.canExecute(dgs))
-                        actions.add(new Howl());
+
+                    List<Hero> heroes = dgs.getHeroes();
+                    List<Hero> targets = new ArrayList<>();
+                    Vector2D position = actingFigure.getPosition();
+                    for (Hero h : heroes) {
+                        Vector2D other = h.getPosition();
+                        //System.out.println("Comparing " + position + " to " + other);
+                        if (inRange(position, other, 3)) {
+                            targets.add(h);
+                        }
+                    }
+
+                    if (!targets.isEmpty()) {
+                        DescentAction howl = new Howl(actingFigure.getComponentID(), targets);
+                        if (howl.canExecute(dgs))
+                            actions.add(howl);
+                    }
                     break;
                 case "GRAB":
                     /*DescentAction grab = new Grab();

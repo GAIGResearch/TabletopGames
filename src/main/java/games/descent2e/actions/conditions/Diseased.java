@@ -12,6 +12,8 @@ public class Diseased extends AttributeTest {
 
     public Diseased(int testingFigure, Figure.Attribute attribute) {
         super(testingFigure, attribute);
+        super.setSourceFigure(testingFigure);
+        super.setTestCount(0);
     }
 
     @Override
@@ -41,13 +43,13 @@ public class Diseased extends AttributeTest {
             }
         }
 
-        f.addAttributeTest(attributeTestName);
+        f.addAttributeTest(this);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         // We can only make one Diseased attribute test per turn - if we have already taken it, we can't make another attempt
-        return f.hasCondition(DescentTypes.DescentCondition.Disease) && !f.hasAttributeTest(attributeTestName) && f.getNActionsExecuted().isMinimum();
+        return f.hasCondition(DescentTypes.DescentCondition.Disease) && !f.hasAttributeTest(this) && f.getNActionsExecuted().isMinimum();
     }
 }

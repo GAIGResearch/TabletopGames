@@ -2,24 +2,24 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
-import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.Triggers;
+import games.descent2e.actions.attack.TriggerAttributeTest;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
-import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class Howl extends DescentAction {
+import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.*;
+
+public class Howl extends TriggerAttributeTest {
 
     List<Hero> heroes;
-    public Howl() {
-        super(Triggers.ACTION_POINT_SPEND);
+    int heroIndex = 0;
+    public Howl(int attackingFigure, List<Hero> targets) {
+        super(attackingFigure, targets.get(0).getComponentID());
+        this.heroes = targets;
     }
 
     @Override
@@ -28,68 +28,107 @@ public class Howl extends DescentAction {
     }
 
     @Override
-    public boolean execute(DescentGameState dgs) {
+    public boolean execute(DescentGameState state) {
+        state.setActionInProgress(this);
+        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
+        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
 
-        ArrayList<IExtendedSequence> tests = new ArrayList<>();
+        phase = PRE_TEST;
+        interruptPlayer = attackingPlayer;
 
-        Monster monster = (Monster)dgs.getActingFigure();
+        movePhaseForward(state);
 
-        Vector2D position = monster.getPosition();
-
-        heroes = dgs.getHeroes();
-
-        for (Hero h : heroes) {
-            Vector2D other = h.getPosition();
-            if (Math.abs(position.getX() - other.getX()) <= 3 && Math.abs(position.getY() - other.getY()) <= 3) {
-
-
-                HowlTest howlTest = new HowlTest(h.getComponentID(),Figure.Attribute.Willpower);
-                howlTest.setTestCount(monster.getNActionsExecuted().getValue());
-                howlTest.setSourceFigure(monster);
-                howlTest.setAttributeTestName();
-                tests.add(howlTest);
-
-                System.out.println(h.getName() + " must make a Howl Test!");
-            }
-        }
-
-        // TODO: Figure out how to implement the Attribute Tests without crashing the framework
-        /*for (IExtendedSequence a : tests) {
-            dgs.setActionInProgress(a);
-        }*/
-
-        monster.getNActionsExecuted().increment();
-        monster.setHasAttacked(true);
         return true;
     }
 
-    public boolean isNearHeroes (DescentGameState dgs)
-    {
-        Monster monster = (Monster)dgs.getActingFigure();
-
-        Vector2D position = monster.getPosition();
-
-        heroes = dgs.getHeroes();
-
-        for (Hero h : heroes) {
-            Vector2D other = h.getPosition();
-            //System.out.println("Comparing " + position + " to " + other);
-            if (Math.abs(position.getX() - other.getX()) <= 3 && Math.abs(position.getY() - other.getY()) <= 3) {
-                return true;
+    void movePhaseForward(DescentGameState state) {
+        // The goal here is to work out which player may have an interrupt for the phase we are in
+        // If none do, then we can move forward to the next phase directly.
+        // If one (or more) does, then we stop, and go back to the main game loop for this
+        // decision to be made
+        boolean foundInterrupt = false;
+        do {
+            if (playerHasInterruptOption(state)) {
+                foundInterrupt = true;
+                // System.out.println("Melee Attack Interrupt: " + phase + ", Interrupter:" + phase.interrupters + ", Interrupt:" + phase.interrupt + ", Player: " + interruptPlayer);
+                // we need to get a decision from this player
+            } else {
+                interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
+                if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
+                    // we have completed the loop, and start again with the attacking player
+                    executePhase(state);
+                    interruptPlayer = attackingPlayer;
+                }
             }
+        } while (!foundInterrupt && phase != GetAttributeTests.ALL_DONE);
+    }
+
+    void executePhase(DescentGameState state) {
+        System.out.println("Executing phase " + phase);
+        System.out.println(heroIndex + " " + heroes.size());
+        switch (phase) {
+            case NOT_STARTED:
+            case ALL_DONE:
+                // TODO Fix this temporary solution: it should not keep looping back to ALL_DONE, put the error back in
+                break;
+            //throw new AssertionError("Should never be executed");
+            case PRE_TEST:
+                phase = INDEX_CHECK;
+                break;
+            case INDEX_CHECK:
+                if (heroIndex < heroes.size() - 1) {
+                    phase = PRE_TEST;
+                    heroIndex++;
+                    super.defendingFigure = heroes.get(heroIndex).getComponentID();
+                    super.defendingPlayer = heroes.get(heroIndex).getOwnerId();
+                } else {
+                    phase = POST_TEST;
+                }
+                break;
+            case POST_TEST:
+                phase = ALL_DONE;
+                Figure monster = (Figure) state.getComponentById(attackingFigure);
+                monster.getNActionsExecuted().increment();
+                monster.setHasAttacked(true);
+                break;
         }
-        return false;
+        // and reset interrupts
     }
 
     @Override
-    public DescentAction copy() {
-        return this;
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+        if (phase.interrupt == null)
+            throw new AssertionError("Should not be reachable");
+        DescentGameState dgs = (DescentGameState) state;
+        Monster monster = (Monster) dgs.getComponentById(attackingFigure);
+        List<AbstractAction> retVal = new ArrayList<>();
+
+        System.out.println(((Figure) dgs.getComponentById(defendingFigure)).getName());
+
+        HowlTest howlTest = new HowlTest(defendingFigure, Figure.Attribute.Willpower, attackingFigure, monster.getNActionsExecuted().getValue());
+
+        if (howlTest.canExecute(dgs)) {
+            System.out.println(((Figure) dgs.getComponentById(defendingFigure)).getName() + " must make a Howl Test!");
+            retVal.add(howlTest);
+        }
+
+        return retVal;
+    }
+
+    @Override
+    public Howl copy() {
+        Howl retVal = new Howl(attackingFigure, heroes);
+        retVal.attackingPlayer = attackingPlayer;
+        retVal.defendingPlayer = defendingPlayer;
+        retVal.interruptPlayer = interruptPlayer;
+        retVal.phase = phase;
+        retVal.heroIndex = heroIndex;
+        return retVal;
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        boolean canHowl = isNearHeroes(dgs);
-        return f instanceof Monster && (((Monster) f).hasAction("Howl")) && !f.getNActionsExecuted().isMaximum() && !f.hasAttacked() && canHowl;
+        return f instanceof Monster && (((Monster) f).hasAction("Howl")) && !f.getNActionsExecuted().isMaximum() && !f.hasAttacked();
     }
 }
