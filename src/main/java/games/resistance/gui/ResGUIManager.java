@@ -190,8 +190,6 @@ public class ResGUIManager extends AbstractGUIManager {
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
         gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
 
-        ResGameState shgs = (ResGameState) gameState;
-
         updateGameStateInfo(gameState);
 
         gameInfo.add(missionFailCounter);
@@ -209,15 +207,18 @@ public class ResGUIManager extends AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
-        historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width / 2 - 25, height));
+        createActionHistoryPanel(width / 2 - 10, height, humanPlayerId);
         wrapper.add(historyContainer);
+
+//        historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
+//        historyContainer = new JScrollPane(historyInfo);
+//        historyContainer.setPreferredSize(new Dimension(width / 2 - 25, height));
+//        wrapper.add(historyContainer);
         historyInfo.setOpaque(false);
         historyContainer.setOpaque(false);
         historyContainer.getViewport().setBackground(new Color(43, 108, 25, 111));
-//        historyContainer.getViewport().setOpaque(false);
-        historyInfo.setEditable(false);
+        historyContainer.getViewport().setOpaque(false);
+//        historyInfo.setEditable(false);
         return wrapper;
     }
 

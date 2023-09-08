@@ -48,9 +48,13 @@ public class ResTeamBuilding extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
-        return "Leader Has Suggested Team :  " + Arrays.toString(team);
+    public String toString() {
+        return "Player " + playerId + " suggested team " + Arrays.toString(team);
     }
 
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
 
 }

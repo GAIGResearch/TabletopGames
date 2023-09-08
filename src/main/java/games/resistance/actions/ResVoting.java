@@ -18,7 +18,7 @@ public class ResVoting extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((ResGameState)gs).addVoteChoice(this, gs.getCurrentPlayer());
+        ((ResGameState) gs).addVoteChoice(this, gs.getCurrentPlayer());
         return true;
     }
 
@@ -40,10 +40,23 @@ public class ResVoting extends AbstractAction {
         return Objects.hash(playerId, cardType);
     }
 
+
+    @Override
+    public String toString() {
+        return "Player " + playerId + " voted " + cardType;
+    }
     @Override
     public String getString(AbstractGameState gameState) {
-        return cardType + ".";
+        return toString();
     }
+
+    @Override
+    public String getString(AbstractGameState gameState, int perspective) {
+        if (perspective == playerId)
+            return toString();
+        return "Player " + playerId + " votes";
+    }
+
 }
 
 

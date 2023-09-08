@@ -5,13 +5,16 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
+import core.interfaces.IGameEvent;
 import games.resistance.actions.*;
 import games.resistance.components.ResPlayerCards;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.GameResult.*;
+import static evaluation.metrics.Event.GameEvent.GAME_EVENT;
 import static games.resistance.ResGameState.ResGamePhase.*;
 
 
@@ -167,12 +170,15 @@ public class ResForwardModel extends StandardForwardModel {
                 return;
             }
 
+            resgs.logEvent(GAME_EVENT, "Vote was " + Arrays.stream(resgs.votingChoice).map(Objects::toString).collect(Collectors.joining(",")));
+            resgs.clearVoteChoices();
+
             if (resgs.voteSuccess) {
                 resgs.finalTeamChoice = resgs.teamChoice;
                 resgs.setGamePhase(MissionVote);
                 endPlayerTurn(resgs, resgs.finalTeamChoice.get(0));
             } else {
-                resgs.clearVoteChoices();
+;
                 resgs.clearTeamChoices();
 
                 // CHANGE LEADER
