@@ -4,11 +4,9 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.resistance.actions.*;
 import games.resistance.components.ResPlayerCards;
-import org.apache.avro.generic.GenericData;
 import utilities.Utils;
 
 import java.util.*;
@@ -45,7 +43,6 @@ public class ResForwardModel extends StandardForwardModel {
         resgs.rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ResParameters resp = (ResParameters) firstState.getGameParameters();
         resgs.votingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
-        resgs.missionVotingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
         resgs.gameBoardValues = new ArrayList<>(5);
         resgs.failedVoteCounter = 0;
         resgs.playerHandCards = new ArrayList<>(firstState.getNPlayers());
@@ -87,7 +84,6 @@ public class ResForwardModel extends StandardForwardModel {
 
         resgs.leaderID = 0;
         resgs.setGamePhase(LeaderSelectsTeam);
-        resgs.previousGamePhase = LeaderSelectsTeam;
         resgs.setTurnOwner(resgs.leaderID);
     }
 
@@ -130,10 +126,10 @@ public class ResForwardModel extends StandardForwardModel {
 
             if (resgs.finalTeamChoice.contains(currentPlayer)) {
                 // Resistance members can only play a success card
-                actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.Yes));
+                actions.add(new ResVoting(currentPlayer, ResPlayerCards.CardType.Yes));
                 if (resgs.playerHandCards.get(currentPlayer).get(2).cardType == ResPlayerCards.CardType.SPY) {
                     // Spies can play either a success or fail card
-                    actions.add(new ResMissionVoting(currentPlayer, ResPlayerCards.CardType.No));
+                    actions.add(new ResVoting(currentPlayer, ResPlayerCards.CardType.No));
                 }
             } else {
                 throw new AssertionError("Should not be a player's turn if they are not on the mission");
@@ -176,7 +172,7 @@ public class ResForwardModel extends StandardForwardModel {
                 resgs.setGamePhase(MissionVote);
                 endPlayerTurn(resgs, resgs.finalTeamChoice.get(0));
             } else {
-                resgs.clearCardChoices();
+                resgs.clearVoteChoices();
                 resgs.clearTeamChoices();
 
                 // CHANGE LEADER
@@ -192,15 +188,14 @@ public class ResForwardModel extends StandardForwardModel {
             // Now we have to check if all players have voted
             for (int i = 0; i < resgs.finalTeamChoice.size(); i++) {
                 int p = resgs.finalTeamChoice.get(i);
-                if (resgs.missionVotingChoice[p] == null) {
+                if (resgs.votingChoice[p] == null) {
                     endPlayerTurn(resgs, p);
                     return;
                 }
             }
             // If we reach this point, then all players have voted
             revealCards(resgs);
-            resgs.clearCardChoices();
-            resgs.clearMissionChoices();
+            resgs.clearVoteChoices();
             resgs.clearTeamChoices();
             changeLeader(resgs);
             endRound(resgs);
@@ -248,7 +243,7 @@ public class ResForwardModel extends StandardForwardModel {
         }
 
         if (resgs.getGamePhase() == MissionVote) {
-            int occurrenceCount = (int) Arrays.stream(resgs.missionVotingChoice).filter(c -> c == ResPlayerCards.CardType.No).count();
+            int occurrenceCount = (int) Arrays.stream(resgs.votingChoice).filter(c -> c == ResPlayerCards.CardType.No).count();
             if (occurrenceCount > 0) {
                 resgs.gameBoardValues.add(false);
             } else {

@@ -2,15 +2,10 @@ package games.resistance.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.PartialObservableDeck;
-import core.interfaces.IExtendedSequence;
 import games.resistance.ResGameState;
 import games.resistance.components.ResPlayerCards;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class ResVoting extends AbstractAction {
     public final int playerId;
@@ -23,7 +18,7 @@ public class ResVoting extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((ResGameState)gs).addCardChoice(this, gs.getCurrentPlayer());
+        ((ResGameState)gs).addVoteChoice(this, gs.getCurrentPlayer());
         return true;
     }
 

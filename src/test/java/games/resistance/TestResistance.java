@@ -1,6 +1,5 @@
 package games.resistance;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
@@ -8,10 +7,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.resistance.components.ResPlayerCards;
-import games.resistance.actions.ResMissionVoting;
 import games.resistance.actions.ResVoting;
 import games.resistance.actions.ResTeamBuilding;
-import org.apache.avro.generic.GenericData;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -107,7 +104,7 @@ public class TestResistance {
                 List<AbstractAction> actions = fm.computeAvailableActions(state);
                 int possibleActions = state.getPlayerHandCards().get(state.getCurrentPlayer()).get(2).cardType == SPY ? 2 : 1;
                 assertEquals(possibleActions, actions.size());
-                assertTrue(actions.stream().allMatch(a -> a instanceof ResMissionVoting));
+                assertTrue(actions.stream().allMatch(a -> a instanceof ResVoting));
                 fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
             } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote && state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
         } while (state.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING);
@@ -601,7 +598,7 @@ public class TestResistance {
         progressGame(state, ResGameState.ResGamePhase.MissionVote);
         List<Integer> team = new ArrayList<>(state.getFinalTeam());
         do {
-            fm.next(state, new ResMissionVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.Yes));
+            fm.next(state, new ResVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.Yes));
         } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote);
         assertEquals(1, state.getMissionsSoFar());
         assertEquals(team, state.getHistoricTeam(1));
@@ -611,7 +608,7 @@ public class TestResistance {
         progressGame(state, ResGameState.ResGamePhase.MissionVote);
         team = new ArrayList<>(state.getFinalTeam());
         do {
-            fm.next(state, new ResMissionVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.No));
+            fm.next(state, new ResVoting(state.getCurrentPlayer(), ResPlayerCards.CardType.No));
         } while (state.getGamePhase() == ResGameState.ResGamePhase.MissionVote);
         assertEquals(2, state.getMissionsSoFar());
         assertNotEquals(team, state.getHistoricTeam(1));

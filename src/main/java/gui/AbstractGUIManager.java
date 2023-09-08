@@ -202,15 +202,15 @@ public abstract class AbstractGUIManager {
         return wrapper;
     }
 
-    protected void createActionHistoryPanel(int width, int height, Set<Integer> perspective) {
-        this.historyPerspective = perspective;
-        if (perspective.size() > 0) {
+    protected void createActionHistoryPanel(int width, int height, Set<Integer> perspectiveSet) {
+        this.historyPerspective = perspectiveSet;
+        if (perspectiveSet.size() > 0) {
             // we need to create a GameListener for ACTION_CHOSEN events
             game.addListener(new IGameListener() {
                 @Override
                 public void onEvent(Event event) {
                     if (event.type == Event.GameEvent.ACTION_CHOSEN) {
-                        history.add("Player " + event.state.getCurrentPlayer() + " : " + event.action.getString(game.getGameState(), perspective));
+                        history.add("Player " + event.state.getCurrentPlayer() + " : " + event.action.getString(game.getGameState(), perspectiveSet));
                     } else if (event.type == Event.GameEvent.GAME_EVENT) {
                         history.add(event.toString());
                     } else if (event.type == Event.GameEvent.GAME_OVER) {
