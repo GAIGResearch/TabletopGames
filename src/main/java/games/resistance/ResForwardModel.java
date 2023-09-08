@@ -140,7 +140,7 @@ public class ResForwardModel extends StandardForwardModel {
             }
         }
 
-        if (actions.size() == 0)
+        if (actions.isEmpty())
             throw new AssertionError("No Actions Available");
         return actions;
     }

@@ -29,7 +29,6 @@ public class ResGameState extends AbstractGameState {
     ResPlayerCards.CardType[] missionVotingChoice;
 
     List<Integer> teamChoice;
-    IGamePhase previousGamePhase = null;
     List<Integer> finalTeamChoice = new ArrayList<>();
     List<List<Integer>> historicTeams = new ArrayList<>();
 
@@ -73,7 +72,6 @@ public class ResGameState extends AbstractGameState {
         return
                 leaderID + "|" +
                         gameBoardValues.hashCode() + "|" +
-                        teamChoice.hashCode() + "|" +
                         Arrays.hashCode(votingChoice) + "|" +
                         playerHandCards.hashCode() + "|" +
                         Arrays.hashCode(missionVotingChoice) + "|" +
@@ -123,7 +121,6 @@ public class ResGameState extends AbstractGameState {
         copy.gameBoard = gameBoard;
         copy.factions = factions;
 
-        copy.previousGamePhase = previousGamePhase;
         copy.voteSuccess = voteSuccess;
         copy.failedVoteCounter = failedVoteCounter;
         copy.teamChoice = new ArrayList<>();

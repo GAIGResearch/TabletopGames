@@ -18,6 +18,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collections;
+import java.util.Set;
 
 
 /// Code Was Taken and adapted from SushiGo!
@@ -38,14 +39,14 @@ public class ResGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
-    protected JLabel failedVoteCounter = new JLabel("Failed Vote Counter :" + 0 );
+    protected JLabel failedVoteCounter = new JLabel("Failed Vote Counter :" + 0);
 
-    protected JLabel missionSuccessCounter = new JLabel("Mission Success Counter :" + 0 );
+    protected JLabel missionSuccessCounter = new JLabel("Mission Success Counter :" + 0);
 
-    protected JLabel missionFailCounter = new JLabel("Mission Fail Counter :" + 0 );
+    protected JLabel missionFailCounter = new JLabel("Mission Fail Counter :" + 0);
 
-    public ResGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, game, ac, Collections.singleton(humanID));
+    public ResGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
+        super(parent, game, ac, humanID);
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             if (gameState != null) {
@@ -74,7 +75,7 @@ public class ResGUIManager extends AbstractGUIManager {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    ResPlayerView playerHand = new ResPlayerView(parsedGameState.getPlayerHandCards().get(i), i, humanID, parameters.getDataPath());
+                    ResPlayerView playerHand = new ResPlayerView(parsedGameState.getPlayerHandCards().get(i), i, humanID.stream().findFirst().orElse(0), parameters.getDataPath());
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
                     String agentName = split[split.length - 1];
@@ -90,7 +91,6 @@ public class ResGUIManager extends AbstractGUIManager {
                     sides[next].setLayout(new GridBagLayout());
                     next = (next + 1) % (locations.length);
                     playerHands[i] = playerHand;
-                    System.out.println(playerHand.playerHandView);
                 }
 
 
@@ -99,17 +99,19 @@ public class ResGUIManager extends AbstractGUIManager {
                 }
 
 
+                ResParameters params = (ResParameters) gameState.getGameParameters();
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
                 Image backgroundImage;
-                if(gameState.getNPlayers() == 5){ backgroundImage = ImageIO.GetInstance().getImage("data/resistance/5missions.png");}
-                else if (gameState.getNPlayers() == 6){ backgroundImage = ImageIO.GetInstance().getImage("data/resistance/6missions.png");}
-                else if (gameState.getNPlayers() == 7){ backgroundImage = ImageIO.GetInstance().getImage("data/resistance/7missions.png");}
-                else{ backgroundImage = ImageIO.GetInstance().getImage("data/resistance/8missions.png");}
+                String imageName = params.dataPath + gameState.getNPlayers() + "missions.png";
+                backgroundImage = ImageIO.GetInstance().getImage(imageName);
 
+                if (backgroundImage == null) {
+                    throw new AssertionError("Problem loading game data from  " + params.dataPath);
+                }
 
                 int newWidth = backgroundImage.getWidth(null) / 2; // Replace 2 with the desired scale factor
-                int newHeight = backgroundImage.getHeight(null) /2; // Replace 2 with the desired scale factor
+                int newHeight = backgroundImage.getHeight(null) / 2; // Replace 2 with the desired scale factor
                 backgroundImage = backgroundImage.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
                 ResBoardView jp = new ResBoardView(backgroundImage);
                 jp.setLayout(new GridBagLayout());
@@ -155,19 +157,18 @@ public class ResGUIManager extends AbstractGUIManager {
             //missionSuccessText = createGameStateInfoPanel("Size of Mission Team needed : " + parsedGameState.gameBoard.getMissionSuccessValues()[parsedGameState.getRoundCounter()], gameState, width, 100);
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(parsedGameState);
-                if(((ResGameState) gameState).getPlayerHandCards().get(gameState.getCurrentPlayer()).get(2).cardType == ResPlayerCards.CardType.SPY)
-                {
+                if (((ResGameState) gameState).getPlayerHandCards().get(gameState.getCurrentPlayer()).get(2).cardType == ResPlayerCards.CardType.SPY) {
                     playerHands[i].playerHandView.setFront(true);
                     //playerHands[i].setFocusable(true);
-                }
-                else{
+                } else {
                     if (i == gameState.getCurrentPlayer()
                             || humanPlayerId.contains(i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {
                         playerHands[i].playerHandView.setFront(false);
-                    }}
+                    }
+                }
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {
@@ -201,16 +202,16 @@ public class ResGUIManager extends AbstractGUIManager {
         gameInfo.add(currentPlayer);
         gameInfo.add(gameStatus);
 
-        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
 
         JPanel wrapper = new JPanel();
         wrapper.setOpaque(false);
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
         historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        historyContainer.setPreferredSize(new Dimension(width / 2 - 25, height));
         wrapper.add(historyContainer);
         historyInfo.setOpaque(false);
         historyContainer.setOpaque(false);
@@ -224,8 +225,8 @@ public class ResGUIManager extends AbstractGUIManager {
         super.updateGameStateInfo(gameState);
         ResGameState resgs = (ResGameState) gameState;
 
-        missionFailCounter.setText( "Mission Fail Counter :" + Collections.frequency(resgs.getGameBoardValues(),false) );
-        missionSuccessCounter.setText( "Mission Success Counter :" + Collections.frequency(resgs.getGameBoardValues(),true) );
+        missionFailCounter.setText("Mission Fail Counter :" + Collections.frequency(resgs.getGameBoardValues(), false));
+        missionSuccessCounter.setText("Mission Success Counter :" + Collections.frequency(resgs.getGameBoardValues(), true));
         failedVoteCounter.setText("Failed Vote Counter :" + resgs.getFailedVoteCounter());
     }
 
