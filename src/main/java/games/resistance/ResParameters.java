@@ -3,8 +3,6 @@ package games.resistance;
 import core.AbstractParameters;
 import games.resistance.components.ResGameBoard;
 
-import java.util.*;
-
 public class ResParameters extends AbstractParameters {
     public String dataPath = "data/resistance/";
 
@@ -12,50 +10,31 @@ public class ResParameters extends AbstractParameters {
         super(seed);
     }
 
-    public int getMaxRounds() {
-        return 5;
+    public int[][] playersPerMission = {
+            {2, 3, 2, 3, 3},
+            {2, 3, 4, 3, 4},
+            {2, 3, 3, 4, 4},
+            {3, 4, 4, 5, 5},
+            {3, 4, 4, 5, 5},
+            {3, 4, 4, 5, 5}
+    };
+
+    public int[] spiesByPlayerCount = {2, 2, 3, 3, 3, 4};
+
+    public int[] playersPerMission(int players) {
+        return playersPerMission[players - 5];
     }
 
     public ResGameBoard getPlayerBoard(int numberPlayers) {
-        if (numberPlayers == 5) {
-            return new ResGameBoard(new int[]{2, 3, 2, 3, 3});
-        }
-        if (numberPlayers == 6) {
-            return new ResGameBoard(new int[]{2, 3, 4, 3, 4});
-        }
-        if (numberPlayers == 7) {
-            return new ResGameBoard(new int[]{2, 3, 3, 4, 4});
-        }
-        if (numberPlayers == 8 || numberPlayers == 9 || numberPlayers == 10) {
-            return new ResGameBoard(new int[]{3, 4, 4, 5, 5});
-        }
-        throw new AssertionError("shouldn't be null, incorrect players:" + numberPlayers);
+        return new ResGameBoard(playersPerMission(numberPlayers));
     }
 
 
-
     public int[] getFactions(int numberPlayers) {
-
-        if (numberPlayers == 5) {
-            return new int[]{3, 2};
-        }
-        if (numberPlayers == 6) {
-            return new int[]{4, 2};
-        }
-        if (numberPlayers == 7) {
-            return new int[]{4, 3};
-        }
-        if (numberPlayers == 8) {
-            return new int[]{5, 3};
-        }
-        if (numberPlayers == 9) {
-            return new int[]{6, 3};
-        }
-        if (numberPlayers == 10) {
-            return new int[]{6, 4};
-        }
-        return null;
-
+        int[] factions = new int[2];
+        factions[1] = spiesByPlayerCount[numberPlayers - 5];
+        factions[0] = numberPlayers - factions[1];
+        return factions;
     }
 
     public String getDataPath() {
