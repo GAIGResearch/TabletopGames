@@ -267,7 +267,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {
             hgs.scorePointsAtEndOfRound();
-            boolean scoreAbove100 = hgs.getPlayerPointsMap().values().stream().anyMatch(score -> score >= 100);
+            boolean scoreAbove100 = hgs.playerPoints.values().stream().anyMatch(score -> score >= 100);
 
             // If any player has reached 100 points or more, end the game
             if (scoreAbove100) {

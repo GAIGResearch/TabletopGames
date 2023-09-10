@@ -110,10 +110,6 @@ public class HeartsGameState extends AbstractGameState {
         return playerPoints.getOrDefault(playerID, 0);
     }
 
-    public Map<Integer, Integer> getPlayerPointsMap() {
-        return playerPoints;
-    }
-
     @Override
     protected AbstractGameState _copy(int playerId) {
         HeartsGameState copy = new HeartsGameState(gameParameters.copy(), getNPlayers());
@@ -192,9 +188,14 @@ public class HeartsGameState extends AbstractGameState {
         return new HeartsHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * For Hearts a lower score is better than a high one. So we return the negative of the player's score.
+     * @param playerId - player observing the state.
+     * @return
+     */
     @Override
     public double getGameScore(int playerId) {
-        return playerPoints.getOrDefault(playerId, 0);
+        return -playerPoints.getOrDefault(playerId, 0);
     }
 
     public void setPlayerPoints(int playerId, int points) {
