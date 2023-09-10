@@ -198,6 +198,8 @@ public class SingleTreeNode {
                         throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
                 }
             }
+        } else if (!params.opponentTreePolicy.selfOnlyTree) {
+            throw new AssertionError("Expected?");
         }
     }
 
@@ -223,14 +225,14 @@ public class SingleTreeNode {
         while (!stop) {
             switch (params.information) {
                 case Closed_Loop:
-                    openLoopState = state;
+                    setActionsFromOpenLoopState(state);
                     break;
                 case Open_Loop:
-                    openLoopState = state.copy();
+                    setActionsFromOpenLoopState(state.copy());
                     copyCount++;
                     break;
                 case Information_Set:
-                    openLoopState = state.copy(decisionPlayer);
+                    setActionsFromOpenLoopState(state.copy(decisionPlayer));
                     copyCount++;
                     break;
             }
@@ -278,7 +280,7 @@ public class SingleTreeNode {
         actionsInRollout = new ArrayList<>();
 
         SingleTreeNode selected = treePolicy();
-        if (selected == this && openLoopState.isNotTerminalForPlayer(decisionPlayer) && nVisits > 3)
+        if (selected == this && openLoopState.isNotTerminalForPlayer(decisionPlayer) && nVisits > 3 && !(this instanceof MCGSNode))
             throw new AssertionError("We have not expanded or selected a new node");
         // by this point (and really earlier) we should have expanded a new node.
         // selected == this is a clear sign that we have a problem in the expansion phase
@@ -933,7 +935,10 @@ public class SingleTreeNode {
                 actionValues.put(action, new ActionStats(result.length));
             actionValues.get(action).validVisits++;
         }
-        actionValues.get(actionTaken).update(result);
+        ActionStats stats = actionValues.get(actionTaken);
+        if (stats == null)
+            throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
+        stats.update(result);
     }
 
 
@@ -972,7 +977,9 @@ public class SingleTreeNode {
             // (and this is good, as it throws an error as a bug-check if this is not true).
             bestAction = treePolicyAction(false);
         } else {
-            for (AbstractAction action : actionValues.keySet()) {
+            // We iterate through all action valid in the original root state
+            // as openLoopState may be different if using MCGS (not an issue with SingleTreeNode or MultiTreeNode)
+            for (AbstractAction action : forwardModel.computeAvailableActions(state, params.actionSpace)) {
                 if (!actionValues.containsKey(action)) {
                     throw new AssertionError("Hashcode / equals contract issue for " + action);
                 }

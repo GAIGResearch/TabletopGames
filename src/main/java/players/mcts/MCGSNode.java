@@ -2,7 +2,6 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import players.mcgsHung.ActionStats;
 
 import java.util.*;
 
@@ -11,17 +10,27 @@ public class MCGSNode extends SingleTreeNode {
     private final Map<String, MCGSNode> transpositionMap = new HashMap<>();
     public List<String> trajectory = new ArrayList<>();
 
-    protected MCGSNode(AbstractGameState gameState, MCTSParams params) {
-        this.params = params;
-        this.root = this;
-        addToTranspositionTable(this, gameState);
+    protected MCGSNode() {
+    }
+
+    @Override
+    protected void instantiate(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state) {
+        super.instantiate(parent, actionToReach, state);
+        // the only additional instantiation we need to do is to add the state to the transposition table
+        addToTranspositionTable(this, state);
+    }
+    protected String getKeyOf(AbstractGameState state) {
+        double[] featureVector = params.MCGSStateFeatureVector.featureVector(state, state.getCurrentPlayer());
+        return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(featureVector));
     }
 
     private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
-        int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : keyState.getCurrentPlayer();
-        double[] featureVector = params.MCGSStateFeatureVector.featureVector(keyState, nextPlayer);
-        String key = String.format("%d-%s", keyState.getCurrentPlayer(), Arrays.toString(featureVector));
-        ((MCGSNode) root).transpositionMap.put(key, node);
+        String key = getKeyOf(keyState);
+        MCGSNode graphRoot = (MCGSNode) root;
+        if (graphRoot.transpositionMap.containsKey(key)) {
+            throw new AssertionError("Unexpected?");
+        }
+        graphRoot.transpositionMap.put(key, node);
     }
 
     /**
@@ -35,10 +44,14 @@ public class MCGSNode extends SingleTreeNode {
 
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
-
-        MCGSNode newNode = (MCGSNode) createChildNode(actionCopy, nextState);
-        addToTranspositionTable(newNode, nextState);
-        return newNode;
+        MCGSNode graphRoot = (MCGSNode) root;
+        String key = getKeyOf(nextState);
+        if (graphRoot.transpositionMap.containsKey(key)) {
+            MCGSNode newNode =  graphRoot.transpositionMap.get(key);
+            newNode.setActionsFromOpenLoopState(nextState);
+            return newNode;
+        }
+        return createChildNode(actionCopy, nextState);
     }
 
     @Override

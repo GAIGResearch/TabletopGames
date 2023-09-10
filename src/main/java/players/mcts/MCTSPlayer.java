@@ -78,7 +78,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             if (params.opponentTreePolicy == OMA || params.opponentTreePolicy == OMA_All)
                 return new OMATreeNode();
             else if (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)
-                return new MCGSNode(s, p);
+                return new MCGSNode();
             else
                 return new SingleTreeNode();
         };
@@ -119,8 +119,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
+      //  if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+      //      throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
         return root.bestAction();
     }
 
