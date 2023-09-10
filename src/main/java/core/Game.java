@@ -12,10 +12,16 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCParams;
+import players.rmhc.RMHCPlayer;
+import players.simple.FirstActionPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -27,6 +33,8 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static games.GameType.*;
 
 
 public class Game {
@@ -217,7 +225,7 @@ public class Game {
                 } else {
                     break;
                 }
-                // System.out.println("Game " + i + "/" + nRepetitions);
+//                System.out.println("Game " + i + "/" + nRepetitions);
             }
 
             if (game != null) {
@@ -823,7 +831,14 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+
+//        RMHCParams params = new RMHCParams();
+//        params.horizon = 15;
+//        params.discountFactor = 0.99;
+//        params.heuristic = AbstractGameState::getHeuristicScore;
+//        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+//        players.add(rmhcPlayer);
 
 //        MCTSParams params = new MCTSParams();
 //        players.add(new MCTSPlayer(params));
@@ -841,12 +856,9 @@ public class Game {
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.add(GameType.Stratego);
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, true, null, turnPause);
+//        ArrayList<GameType> games = new ArrayList<>();
+//        games.add(Connect4);
+//        runMany(games, players, 100L, 5, false, false, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 

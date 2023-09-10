@@ -1,4 +1,4 @@
-package players.mcts;
+package players.basicMCTS;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
