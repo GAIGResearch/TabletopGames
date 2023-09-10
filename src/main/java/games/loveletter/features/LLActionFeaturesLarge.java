@@ -1,9 +1,10 @@
-package games.loveletter;
+package games.loveletter.features;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import core.interfaces.IActionFeatureVector;
+import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 
