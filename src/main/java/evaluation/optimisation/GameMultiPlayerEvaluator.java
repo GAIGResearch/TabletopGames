@@ -64,14 +64,15 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
    //     System.out.printf("Starting evaluation %d of %n\t%s at %tT%n", nEvals,
      //           settings.stream().map(Arrays::toString).collect(joining(",\n\t")), System.currentTimeMillis());
 
-        List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
+        Game newGame = game.createGameInstance(nPlayers);
+        int nTeams = newGame.getGameState().getNTeams();
+        List<AbstractPlayer> allPlayers = new ArrayList<>(nTeams);
 
-        for (int i = 0; i < nPlayers; i++) {
+        for (int i = 0; i < nTeams; i++) {
             AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings.get(i));
             allPlayers.add(tunedPlayer);
         }
 
-        Game newGame = game.createGameInstance(nPlayers);
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
@@ -79,8 +80,10 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
 
         nEvals++;
         double[] retValue = new double[nPlayers];
-        for (int i = 0; i < nPlayers; i++)
-            retValue[i] = stateHeuristic.evaluateState(finalState, i);
+        for (int i = 0; i < nPlayers; i++) {
+            int team = finalState.getTeam(i);
+            retValue[team] = stateHeuristic.evaluateState(finalState, i);
+        }
 
      //   System.out.printf("Result : %s%n", Arrays.toString(retValue));
         return retValue;

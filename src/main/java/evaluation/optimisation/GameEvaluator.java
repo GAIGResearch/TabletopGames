@@ -101,21 +101,24 @@ public class GameEvaluator implements SolutionEvaluator {
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;
 
-        List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
+        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
+        // we assign one player to each team (the default for a game is each player being their own team of 1)
+        int nTeams = newGame.getGameState().getNTeams();
+        List<AbstractPlayer> allPlayers = new ArrayList<>(nTeams);
 
         // We can reduce variance here by cycling the playerIndex on each iteration
         // If we're not tuning the player, then setting index to -99 means we just use the provided opponents list
-        int playerIndex = tuningPlayer ? nEvals % nPlayers : -99;
+        int playerIndex = tuningPlayer ? nEvals % nTeams : -99;
 
         // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
         // if we allow duplicates, then we randomise them all independently
         List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(toList());
         Collections.shuffle(opponentOrdering);
         int count = 0;
-        for (int i = 0; i < nPlayers; i++) {
+        for (int i = 0; i < nTeams; i++) {
             if (!fullyCoop && i != playerIndex) {
                 int oppIndex = (avoidOppDupes) ? count : rnd.nextInt(opponents.size());
-                count = (count + 1) % nPlayers;
+                count = (count + 1) % nTeams;
                 allPlayers.add(opponents.get(oppIndex).copy());
             } else {
                 AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
@@ -123,12 +126,19 @@ public class GameEvaluator implements SolutionEvaluator {
             }
         }
 
-        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
         // always reset the random seed for each new game
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
-        double retValue = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+        int playerOnTeam = -1;
+        for (int p = 0; p < newGame.getGameState().getNPlayers(); p++) {
+            if (newGame.getGameState().getTeam(p) == playerIndex) {
+                playerOnTeam = p;
+            }
+        }
+        if (playerOnTeam == -1)
+            throw new AssertionError("No Player found on team " + playerIndex);
+        double retValue = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam);
 
     //    System.out.println("GameEvaluator: " + retValue);
 

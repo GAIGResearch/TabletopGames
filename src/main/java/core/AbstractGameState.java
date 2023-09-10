@@ -46,6 +46,7 @@ public abstract class AbstractGameState {
     // Migrated from TurnOrder...may move later
     protected int roundCounter, turnCounter, turnOwner, firstPlayer;
     protected int nPlayers;
+    protected int nTeams;
     protected List<IGameListener> listeners = new ArrayList<>();
 
     // Timers for all players
@@ -70,6 +71,8 @@ public abstract class AbstractGameState {
      */
     public AbstractGameState(AbstractParameters gameParameters, int nPlayers) {
         this.nPlayers = nPlayers;
+        this.nTeams = nPlayers;  // we always default the number of teams to the number of players
+        // this is then overridden in the game-specific constructor if needed
         this.gameParameters = gameParameters;
         this.coreGameParameters = new CoreParameters();
     }
@@ -114,6 +117,13 @@ public abstract class AbstractGameState {
         return this.gameParameters;
     }
     public int getNPlayers() { return nPlayers; }
+    public int getNTeams() { return nTeams; }
+    /**
+     * Returns the team number the specified player is on.
+     * This defaults to one team per player and should be overridden
+     * in child classes if relevant to the game
+     */
+    public int getTeam(int player) { return player;}
     public int getCurrentPlayer() {
         return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }

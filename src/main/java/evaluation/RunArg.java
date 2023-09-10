@@ -22,6 +22,10 @@ public enum RunArg {
             "\t This may be useful if you want to use the same destDir for multiple experiments.",
             false,
             new Usage[]{Usage.RunGames}),
+    byTeam("If true (the default) and the game supports teams, then one player type will be assigned to all players on a team.\n" +
+            "\t If false, then each player will be assigned a player type independently.",
+            true,
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     config("The location of a JSON file from which to read the configuration. \n" +
             "\t If this is specified, then all other arguments are ignored.",
             "",
@@ -32,7 +36,7 @@ public enum RunArg {
             "metrics" + File.separator + "out",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
-            0,
+            -1,
             new Usage[]{Usage.ParameterSearch}),
     evalMethod("Score|Ordinal|Heuristic|Win specifies what we are optimising (if not tuneGame). Defaults to Win.\n" +
             "\tIf tuneGame, then instead the name of a IGameHeuristic class in the evaluation.heuristics package\n" +
