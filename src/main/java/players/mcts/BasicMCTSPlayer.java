@@ -1,6 +1,5 @@
 package players.mcts;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
