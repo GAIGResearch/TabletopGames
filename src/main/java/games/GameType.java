@@ -180,6 +180,10 @@ public enum GameType {
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
             PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+    Wonders7(3, 7,
+            Arrays.asList(Strategy, Civilization, Ancient, Cards, CityBuilding, Economic),
+            Arrays.asList(ClosedDrafting, HandManagement, NeighbourScope, SetCollection, SimultaneousActionSelection, VariablePlayerPowers),
+            Wonders7GameState.class, Wonders7ForwardModel.class, Wonders7GameParameters.class, Wonders7GUI.class),
     Resistance(5, 10,
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
@@ -410,7 +414,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame;
+        Wargame, Civilization, Ancient;
 
         /**
          * @return a list of all games within this category.
@@ -484,7 +488,7 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection;
+        RoleSelection, ClosedDrafting, NeighbourScope;
 
         /**
          * @return a list of all games using this mechanic.

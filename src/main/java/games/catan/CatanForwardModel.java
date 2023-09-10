@@ -114,7 +114,7 @@ public class CatanForwardModel extends StandardForwardModel {
                 if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
                     endRound(gs, gs.getCurrentPlayer());
                 } else {
-                    endCatanTurn(gs);
+                    endCatanPlayerTurn(gs);
                 }
             } else {
                 if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
@@ -148,7 +148,7 @@ public class CatanForwardModel extends StandardForwardModel {
                 if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
                     endRound(gs, 0);
                 } else {
-                    endCatanTurn(gs);
+                    endCatanPlayerTurn(gs);
                 }
                 rollDiceAndAllocateResources(gs, params);
             } else if (gs.tradeOffer != null) {
@@ -178,8 +178,8 @@ public class CatanForwardModel extends StandardForwardModel {
         }
     }
 
-    public void endCatanTurn(CatanGameState gs) {
-        endPlayerTurn(gs);
+    public void endCatanPlayerTurn(CatanGameState gs) {
+        super.endPlayerTurn(gs);
         gs.nTradesThisTurn = 0;
     }
 
