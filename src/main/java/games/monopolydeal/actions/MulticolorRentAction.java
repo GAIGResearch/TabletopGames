@@ -78,8 +78,11 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
-                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,rent));
+                if(MDGS.isBoardEmpty(target)) {
+                    availableActions.add(new DoNothing());
+                } else {
+                    availableActions.add(new PayRent(target,playerID,rent));
+                }
                 break;
         }
         return availableActions;
