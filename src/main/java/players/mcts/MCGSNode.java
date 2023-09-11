@@ -116,5 +116,8 @@ public class MCGSNode extends SingleTreeNode {
         nRoot.trajectory.clear();
     }
 
+    public Map<String, MCGSNode> getTranspositionMap() {
+        return new HashMap<>(transpositionMap);
+    }
 
 }
