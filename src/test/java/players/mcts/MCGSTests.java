@@ -6,6 +6,7 @@ import core.Game;
 import core.components.Token;
 import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
+import games.dotsboxes.DBStateFeaturesReduced;
 import games.loveletter.LoveLetterParameters;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeForwardModel;
@@ -24,6 +25,7 @@ public class MCGSTests {
 
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
+
 
     private final Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
             node.getChildren().isEmpty() ||  // first condition is that this is a terminal node
@@ -62,7 +64,7 @@ public class MCGSTests {
         params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.nodesStoreScoreDelta = false;
-        params.maintainMasterState = false;
+        params.maintainMasterState = true;
         params.K = 1.0;
     }
 
@@ -119,4 +121,21 @@ public class MCGSTests {
         assertEquals(8, root.getTranspositionMap().size(), 1);
     }
 
+    @Test
+    public void DotsAndBoxesFullRunActionVisits() {
+        // In this case we run through a whole game, relying on the predicate test
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
+        params.MCGSStateFeatureVector = new DBStateFeaturesReduced();
+        params.budget = 1000;
+        Game game = createDotsAndBoxes(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0) {
+                MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
+                assertEquals(0, problemNodes.size());
+            }
+        } while (game.getGameState().isNotTerminal());
+    }
 }

@@ -1,6 +1,7 @@
 package players.mcts;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -8,21 +9,51 @@ import static java.util.stream.Collectors.toList;
 public class TreeStatistics {
 
     final public int maxDepth = 100;
-    final public int depthReached;
-    final public double meanLeafDepth;
-    final public int[] nodesAtDepth = new int[maxDepth];
-    final public int[] leavesAtDepth = new int[maxDepth];
-    final public int[] gameTerminalNodesAtDepth = new int[maxDepth];
-    final public int totalNodes;
-    final public int totalLeaves;
-    final public int totalTerminalNodes;
-    final public double[] nodeDistribution;
-    final public double[] leafDistribution;
-    final public int maxActionsAtNode;
-    final public double meanActionsAtNode;
-    final public int oneActionNodes;
+    public int depthReached;
+    public double meanLeafDepth;
+    public int[] nodesAtDepth = new int[maxDepth];
+    public int[] leavesAtDepth = new int[maxDepth];
+    public int[] gameTerminalNodesAtDepth = new int[maxDepth];
+    public int totalNodes;
+    public int totalLeaves;
+    public int totalTerminalNodes;
+    public double[] nodeDistribution;
+    public double[] leafDistribution;
+    public int maxActionsAtNode;
+    public double meanActionsAtNode;
+    public int oneActionNodes;
+
+
+    public void mcgsStats(MCGSNode root) {
+        Map<String, MCGSNode> transpositionMap = root.getTranspositionMap();
+        totalNodes = transpositionMap.size();
+        Map<Integer, List<MCGSNode>> byDepth = transpositionMap.values().stream()
+                .collect(Collectors.groupingBy(MCGSNode::getDepth));
+        depthReached = byDepth.keySet().stream().max(Integer::compareTo).orElse(0);
+        nodeDistribution = IntStream.range(0, depthReached + 1)
+                .mapToDouble(i -> byDepth.getOrDefault(i, new ArrayList<>()).size() / (double) totalNodes)
+                .toArray();
+        meanActionsAtNode = transpositionMap.values().stream().mapToInt(n -> n.actionValues.size()).sum() / (double) totalNodes;
+        maxActionsAtNode = transpositionMap.values().stream().mapToInt(n -> n.actionValues.size()).max().orElse(0);
+        totalLeaves = (int) transpositionMap.values().stream().filter(n -> n.nVisits == 0).count();
+        totalTerminalNodes = (int) transpositionMap.values().stream().filter(n -> !n.state.isNotTerminal()).count();
+        leafDistribution = IntStream.range(0, depthReached + 1)
+                .mapToDouble(i -> byDepth.getOrDefault(i, new ArrayList<>()).stream().filter(n -> n.nVisits == 0).count() / (double) totalLeaves)
+                .toArray();
+        meanLeafDepth = IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum();
+        oneActionNodes = (int) transpositionMap.values().stream().filter(n -> n.actionValues.size() == 1).count();
+    }
 
     public TreeStatistics(SingleTreeNode root) {
+        if (root instanceof MCGSNode)
+            mcgsStats((MCGSNode) root);
+        else if (root instanceof MultiTreeNode)
+            throw new AssertionError("Not expected");
+        else
+            mctsStats(root);
+    }
+
+    public void mctsStats(SingleTreeNode root) {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
         if (root instanceof MultiTreeNode) {
             throw new AssertionError("Not expected");

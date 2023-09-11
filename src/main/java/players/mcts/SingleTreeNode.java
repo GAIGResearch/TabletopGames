@@ -1097,7 +1097,7 @@ public class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         String valueString = String.format("%.2f", nodeValue(decisionPlayer));
-        if (params.opponentTreePolicy == OneTree) {
+        if (!params.opponentTreePolicy.selfOnlyTree) {
             valueString = IntStream.range(0, openLoopState.getNPlayers())
                     .mapToDouble(this::nodeValue)
                     .mapToObj(v -> String.format("%.2f", v))
@@ -1130,5 +1130,4 @@ public class SingleTreeNode {
             retValue.append(new TreeStatistics(root));
         return retValue.toString();
     }
-
 }
