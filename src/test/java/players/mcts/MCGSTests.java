@@ -8,6 +8,7 @@ import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
 import games.dotsboxes.DBStateFeaturesReduced;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.features.LLStateFeaturesReduced;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
@@ -26,30 +27,11 @@ public class MCGSTests {
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
-
-    private final Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
-            node.getChildren().isEmpty() ||  // first condition is that this is a terminal node
-                    node.getParent() == null || // the root node is different (and is checked elsewhere)
-                    node.getChildren().values().stream().flatMap(arr -> {
-                                if (arr == null)
-                                    return new ArrayList<SingleTreeNode>().stream();
-                                return Arrays.stream(arr);
-                            }).filter(Objects::nonNull)
-                            .anyMatch(n -> n.state != null && n.state.isNotTerminalForPlayer(n.decisionPlayer)) ||
-                    node.getVisits() == node.getChildren().values().stream().mapToInt(arr -> {
-                                if (arr == null)
-                                    return 0;
-                                int retValue = 1;
-                                for (SingleTreeNode singleTreeNode : arr) {
-                                    if (singleTreeNode != null)
-                                        retValue += singleTreeNode.getVisits();
-                                }
-                                return retValue;
-                            }
-                    ).sum();
-
     private final Predicate<SingleTreeNode> actionVisitsAddUp = node ->
             node.getVisits() == node.actionValues.values().stream().mapToInt(s -> s.nVisits).sum();
+
+    private final Predicate<SingleTreeNode> allNodesForPlayerZero = node ->
+            node.decisionPlayer == 0 && node.state.getCurrentPlayer() == 0;
 
     @Before
     public void setup() {
@@ -128,6 +110,65 @@ public class MCGSTests {
         params.MCGSStateFeatureVector = new DBStateFeaturesReduced();
         params.budget = 1000;
         Game game = createDotsAndBoxes(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0) {
+                MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
+                assertEquals(0, problemNodes.size());
+            }
+        } while (game.getGameState().isNotTerminal());
+    }
+
+    @Test
+    public void DotsAndBoxesFullRunActionVisitsSelfOnly() {
+        // In this case we run through a whole game, relying on the predicate test
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
+        params.MCGSStateFeatureVector = new DBStateFeaturesReduced();
+        params.budget = 1000;
+        Game game = createDotsAndBoxes(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0) {
+                MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
+                assertEquals(0, problemNodes.size());
+                problemNodes = root.nonMatchingNodes(allNodesForPlayerZero);
+                assertEquals(0, problemNodes.size());
+            }
+        } while (game.getGameState().isNotTerminal());
+    }
+
+    @Test
+    public void LoveLetterFullRunActionVisitsSelfOnly() {
+        // In this case we run through a whole game, relying on the predicate test
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
+        params.MCGSStateFeatureVector = new LLStateFeaturesReduced();
+        params.budget = 1000;
+        Game game = createLoveLetter(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0) {
+                MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
+                assertEquals(0, problemNodes.size());
+                problemNodes = root.nonMatchingNodes(allNodesForPlayerZero);
+                assertEquals(0, problemNodes.size());
+            }
+        } while (game.getGameState().isNotTerminal());
+    }
+
+
+
+    @Test
+    public void LoveLetterFullRunActionVisits() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
+        params.MCGSStateFeatureVector = new LLStateFeaturesReduced();
+        params.budget = 1000;
+        Game game = createLoveLetter(params);
         do {
             int p = game.getGameState().getCurrentPlayer();
             game.oneAction();
