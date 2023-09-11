@@ -197,16 +197,17 @@ public class MonopolyDealGUIManager extends AbstractGUIManager {
 
         for (int i = 0; i < gameState.getNPlayers(); i++){
             playerHands[i].update(mdgs);
-            playerHands[i].playerHandView.setFront(false);
             playerBanks[i].updateComponent(mdgs.getPlayerBank(i));
             for(int j=0;j < mdgs.getPropertySets(i).size(); j++){
                 playerProperties[i][j].updateProperty(mdgs,i,j);
             }
-            if (i == gameState.getCurrentPlayer() && (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
+            if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                     || humanPlayerId.contains(i)
-                    || gameState.getCoreGameParameters().alwaysDisplayFullObservable)) {
+                    || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                 playerHands[i].playerHandView.setFront(true);
                 playerHands[i].setFocusable(true);
+            } else {
+                playerHands[i].playerHandView.setFront(false);
             }
 
             // Highlight active player

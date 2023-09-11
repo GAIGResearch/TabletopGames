@@ -70,11 +70,8 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
                 if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
-                if(MDGS.isBoardEmpty(target)) {
-                    availableActions.add(new DoNothing());
-                } else {
-                    availableActions.add(new PayRent(target,playerID,rent));
-                }
+                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
+                else availableActions.add(new PayRent(target,playerID,rent));
         }
         return availableActions;
     }
@@ -219,10 +216,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        if(doubleTheRent > 0)
-            return "Rent of "+ setType + " with " + doubleTheRent + " Double the rent";
-        else
-            return "Rent of "+ setType ;
+        return "Collect rent : " + setType;
     }
 
     /**
