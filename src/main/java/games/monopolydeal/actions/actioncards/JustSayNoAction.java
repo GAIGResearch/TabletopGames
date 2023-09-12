@@ -1,8 +1,11 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
+import games.monopolydeal.cards.MonopolyDealCard;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -20,7 +23,7 @@ import core.components.Component;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class MonopolyDealAction extends AbstractAction {
+public class JustSayNoAction extends AbstractAction {
 
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -31,6 +34,8 @@ public class MonopolyDealAction extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(CardType.JustSayNo),MDGS.getCurrentPlayer());
         return true;
     }
 
@@ -41,7 +46,7 @@ public class MonopolyDealAction extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public MonopolyDealAction copy() {
+    public JustSayNoAction copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -49,19 +54,19 @@ public class MonopolyDealAction extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof MonopolyDealAction;
+        return obj instanceof JustSayNoAction;
     }
 
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return 0;
+        return 123;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "JustSayNo Action";
     }
 
     /**

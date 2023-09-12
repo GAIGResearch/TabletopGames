@@ -1,4 +1,4 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.boardmanagement;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,9 @@ import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
+
+import java.util.Objects;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -23,7 +26,15 @@ import games.monopolydeal.cards.MonopolyDealCard;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class JustSayNoAction extends AbstractAction {
+public class AddWildTo extends AbstractAction {
+
+    final int player;
+    final PropertySet pSet;
+
+    public AddWildTo(PropertySet pSet, int playerID){
+        this.player = playerID;
+        this.pSet = pSet;
+    }
 
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -34,8 +45,10 @@ public class JustSayNoAction extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.JustSayNo),MDGS.getCurrentPlayer());
+        MonopolyDealGameState state = (MonopolyDealGameState) gs;
+        state.removeCardFromHand(player, MonopolyDealCard.create(CardType.MulticolorWild));
+        state.addPropertyToSet(player,MonopolyDealCard.create(CardType.MulticolorWild),pSet.getSetType());
+        state.useAction(1);
         return true;
     }
 
@@ -46,27 +59,27 @@ public class JustSayNoAction extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public JustSayNoAction copy() {
+    public AddWildTo copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new AddWildTo(pSet,player);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof JustSayNoAction;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AddWildTo addWildTo = (AddWildTo) o;
+        return player == addWildTo.player && Objects.equals(pSet, addWildTo.pSet);
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 123;
+        return Objects.hash(player, pSet);
     }
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "JustSayNo Action";
+        return "Add MulticolorWild to "+ pSet.toString();
     }
 
     /**

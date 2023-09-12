@@ -1,11 +1,8 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.informationcontainer;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.monopolydeal.cards.MonopolyDealCard;
-import games.monopolydeal.cards.PropertySet;
-import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
 
@@ -25,15 +22,10 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class ChoosePropertySet extends AbstractAction {
-
-    final int setSize;
-    final SetType setType;
-
-
-    public ChoosePropertySet(PropertySet pSet){
-        this.setType = pSet.getSetType();
-        this.setSize = pSet.getSize();
+public class TargetPlayer extends AbstractAction {
+    public int target;
+    public TargetPlayer(int target){
+        this.target = target;
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -54,7 +46,7 @@ public class ChoosePropertySet extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ChoosePropertySet copy() {
+    public TargetPlayer copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -63,19 +55,19 @@ public class ChoosePropertySet extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ChoosePropertySet that = (ChoosePropertySet) o;
-        return setSize == that.setSize && setType == that.setType;
+        TargetPlayer that = (TargetPlayer) o;
+        return target == that.target;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(setSize, setType);
+        return Objects.hash(target);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Steal set : " + setType.toString() + " of size " + setSize;
+        return "Target player "+ target;
     }
 
     /**

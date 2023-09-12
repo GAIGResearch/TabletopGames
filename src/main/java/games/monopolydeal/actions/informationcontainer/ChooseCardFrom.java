@@ -1,4 +1,4 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.informationcontainer;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -26,8 +26,8 @@ import java.util.Objects;
  */
 public class ChooseCardFrom extends AbstractAction {
 
-    final MonopolyDealCard take;
-    final SetType from;
+    public final MonopolyDealCard take;
+    public final SetType from;
     final int actionType;
 
     public ChooseCardFrom(MonopolyDealCard take, SetType from, int actionType){

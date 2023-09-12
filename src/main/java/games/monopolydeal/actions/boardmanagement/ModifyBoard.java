@@ -1,11 +1,10 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.boardmanagement;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.informationcontainer.MoveCardFromTo;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
@@ -25,20 +24,13 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class SlyDealAction extends AbstractAction implements IExtendedSequence {
+public class ModifyBoard extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    int target;
-    MonopolyDealCard take;
-    SetType from;
-    ActionState actionState;
-    boolean reaction = false;
-    boolean executed = false;
-    public SlyDealAction(int playerID) {
-        this.playerID = playerID;
-        actionState = ActionState.Target;
-    }
+    boolean executed;
+
+    public ModifyBoard(int playerID) { this.playerID = playerID; }
 
     /**
      * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
@@ -52,34 +44,48 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        // move card from to
+        // Iterate through sets
+        //   find wilds
+        //      get alternate
+        //      MoveFromTo
         List<AbstractAction> availableActions = new ArrayList<>();
-
-        switch (actionState){
-            case Target:
-                for(int i=0;i<MDGS.getNPlayers();i++){
-                    if(playerID!=i)
-                        if(MDGS.checkForFreeProperty(i))
-                            availableActions.add(new TargetPlayer(i));
-                }
-                break;
-            case TakeCard:
-                for (PropertySet pSet: MDGS.getPropertySets(target)) {
-                    if(!pSet.isComplete){
-                        for(int i=0;i<pSet.getSize();i++){
-                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0)))
-                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
+        for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
+            if(pSet.hasWild && !pSet.hasHouse){
+                for (int i=0;i<pSet.getSize();i++) {
+                    MonopolyDealCard card = pSet.get(i);
+                    if(card.isPropertyWildCard()){
+                        SetType sType = card.getAlternateSetType(card);
+                        if(sType==SetType.UNDEFINED){
+                            for (PropertySet propSet:MDGS.getPropertySets(playerID)) {
+                                if(propSet.getSetType() != card.getUseAs() && !availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()))){
+                                    availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()));
+                                }
+                            }
                         }
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType)))
+                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
                     }
                 }
-                break;
-            case GetReaction:
-                availableActions.add(new DoNothing());
-                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
-                break;
-            case ReactToReaction:
-                availableActions.add(new DoNothing());
-                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
-                break;
+            } else if (pSet.isComplete && pSet.hasHouse && !pSet.hasHotel) { // Moving House
+                for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
+                    if(propSet!= pSet && propSet.isComplete && !propSet.hasHouse){
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType())))
+                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType()));
+                    }
+                }
+                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED)))
+                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED));
+            }else if (pSet.isComplete && pSet.hasHouse && pSet.hasHotel){ // Moving Hotel
+                for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
+                    if(propSet!= pSet && propSet.isComplete && propSet.hasHouse && !propSet.hasHotel){
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType())))
+                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType()));
+                    }
+                }
+                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED)))
+                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED));
+            }
         }
         return availableActions;
     }
@@ -93,8 +99,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        if(actionState == ActionState.GetReaction) return target;
-        else return playerID;
+        return playerID;
     }
 
     /**
@@ -111,32 +116,21 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        switch (actionState){
-            case Target:
-                target = ((TargetPlayer) action).target;
-                actionState = ActionState.TakeCard;
-                break;
-            case TakeCard:
-                take = ((ChooseCardFrom) action).take;
-                from = ((ChooseCardFrom) action).from;
-                actionState = ActionState.GetReaction;
-                break;
-            case GetReaction:
-                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
-                else executeAction(state);
-                break;
-            case  ReactToReaction:
-                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
-                else executed = true;
-                break;
-        }
-    }
-    protected void executeAction(AbstractGameState state){
+        MoveCardFromTo actionTaken = (MoveCardFromTo) action;
+
+        MonopolyDealCard card = actionTaken.card;
+        SetType from = actionTaken.from;
+        SetType to = actionTaken.to;
+
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-        MDGS.removePropertyFrom(target, take, from);
-        MDGS.addProperty(playerID, take);
+        MDGS.removePropertyFrom(playerID,card,from);
+        card.setUseAs(to);
+        MDGS.addProperty(playerID,card);
+        MDGS.modifyBoard();
         executed = true;
+
     }
+
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
@@ -160,9 +154,6 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.SlyDeal),playerID);
-        MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;
     }
@@ -174,14 +165,9 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public SlyDealAction copy() {
+    public ModifyBoard copy() {
         // TODO: copy non-final variables appropriately
-        SlyDealAction action = new SlyDealAction(playerID);
-        action.target = target;
-        action.take = take;
-        action.from = from;
-        action.actionState = actionState;
-        action.reaction = reaction;
+        ModifyBoard action = new ModifyBoard(playerID);
         action.executed = executed;
         return action;
     }
@@ -190,19 +176,18 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SlyDealAction that = (SlyDealAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(from, that.from) && actionState == that.actionState;
+        ModifyBoard that = (ModifyBoard) o;
+        return playerID == that.playerID && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, take, from, actionState, reaction, executed);
+        return Objects.hash(playerID, executed);
     }
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "SlyDeal action";
+        return "Modify Board";
     }
 
     /**

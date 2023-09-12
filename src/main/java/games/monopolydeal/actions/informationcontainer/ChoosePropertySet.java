@@ -1,9 +1,9 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.informationcontainer;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
@@ -24,20 +24,15 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class PayCardFrom extends AbstractAction {
+public class ChoosePropertySet extends AbstractAction {
 
-    final MonopolyDealCard card;
-    SetType from;
-    BoardType type;
+    public final int setSize;
+    public final SetType setType;
 
-    public PayCardFrom(MonopolyDealCard card, SetType from){
-        this.card = card;
-        this.from = from;
-        this.type = BoardType.PropertySet;
-    }
-    public PayCardFrom(MonopolyDealCard card){
-        this.card = card;
-        this.type = BoardType.Bank;
+
+    public ChoosePropertySet(PropertySet pSet){
+        this.setType = pSet.getSetType();
+        this.setSize = pSet.getSize();
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -58,31 +53,28 @@ public class PayCardFrom extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public PayCardFrom copy() {
+    public ChoosePropertySet copy() {
         // TODO: copy non-final variables appropriately
-        PayCardFrom action = new PayCardFrom(card);
-        action.type = type;
-        action.from = from;
-        return action;
+        return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PayCardFrom that = (PayCardFrom) o;
-        return Objects.equals(card, that.card) && from == that.from && type == that.type;
+        ChoosePropertySet that = (ChoosePropertySet) o;
+        return setSize == that.setSize && setType == that.setType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(card, from, type);
+        return Objects.hash(setSize, setType);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Pay with " + card;
+        return "Steal set : " + setType.toString() + " of size " + setSize;
     }
 
     /**

@@ -1,4 +1,4 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.boardmanagement;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -7,13 +7,10 @@ import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
-import org.apache.spark.sql.catalyst.expressions.Add;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 

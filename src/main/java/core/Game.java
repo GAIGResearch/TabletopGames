@@ -810,10 +810,10 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
 
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         players.add(new MCTSPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        MCTSParams params = new MCTSParams();
 //        players.add(new MCTSPlayer(params));
 

@@ -1,16 +1,16 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.ActionState;
+import games.monopolydeal.actions.informationcontainer.TargetPlayer;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,18 +24,17 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequence {
+public class DebtCollectorAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     int target;
     ActionState actionState;
-    boolean[] collectedRent;
-    boolean reaction;
-
-    public ItsMyBirthdayAction(int playerID) {
+    boolean reaction = false;
+    boolean executed = false;
+    public DebtCollectorAction(int playerID) {
         this.playerID = playerID;
-        actionState = ActionState.GetReaction;
+        actionState = ActionState.Target;
     }
 
     /**
@@ -51,8 +50,13 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         List<AbstractAction> availableActions = new ArrayList<>();
-
         switch (actionState){
+            case Target:
+                for(int i=0;i<MDGS.getNPlayers();i++){
+                    if(playerID!=i)
+                        availableActions.add(new TargetPlayer(i));
+                }
+                break;
             case GetReaction:
                 availableActions.add(new DoNothing());
                 if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
@@ -63,7 +67,8 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
                 break;
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,2));
+                else availableActions.add(new PayRent(target,playerID,5));
+                break;
         }
         return availableActions;
     }
@@ -96,34 +101,22 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
         switch (actionState){
+            case Target:
+                target = ((TargetPlayer) action).target;
+                actionState = ActionState.GetReaction;
+                break;
             case GetReaction:
                 if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
                 else actionState = ActionState.CollectRent;
                 break;
-            case ReactToReaction:
-                if(!(action instanceof JustSayNoAction)) {
-                    collectedRent[target] = true;
-                    getNextTarget();
-                }
-                actionState = ActionState.GetReaction;
-            case CollectRent:
-                collectedRent[target] = true;
-                getNextTarget();
-                actionState = ActionState.GetReaction;
+            case  ReactToReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
+                else executed = true;
                 break;
-        }
-    }
-    public boolean collectedAllRent() {
-        for (boolean b : collectedRent) if (!b) return false;
-        return true;
-    }
-    public void getNextTarget(){
-        if(!collectedAllRent()) {
-            for (int i = 0; i < collectedRent.length; i++) {
-                if (!collectedRent[i]) {
-                    target = i;
-                }
-            }
+            case CollectRent:
+                executed = true;
+                break;
+
         }
     }
     /**
@@ -133,7 +126,7 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return collectedAllRent();
+        return executed;
     }
 
     /**
@@ -149,14 +142,9 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        collectedRent = new boolean[gs.getNPlayers()];
-        collectedRent[playerID] = true;
-        // Discard card used
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.ItsMyBirthday),playerID);
+        MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
         MDGS.useAction(1);
-        // Set first target
-        getNextTarget();
         gs.setActionInProgress(this);
         return true;
     }
@@ -168,13 +156,13 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ItsMyBirthdayAction copy() {
+    public DebtCollectorAction copy() {
         // TODO: copy non-final variables appropriately
-        ItsMyBirthdayAction action = new ItsMyBirthdayAction(playerID);
+        DebtCollectorAction action = new DebtCollectorAction(playerID);
         action.target = target;
         action.actionState = actionState;
-        action.collectedRent = collectedRent;
         action.reaction = reaction;
+        action.executed = executed;
         return action;
     }
 
@@ -182,21 +170,19 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ItsMyBirthdayAction that = (ItsMyBirthdayAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && actionState == that.actionState && Arrays.equals(collectedRent, that.collectedRent);
+        DebtCollectorAction action = (DebtCollectorAction) o;
+        return playerID == action.playerID && target == action.target && reaction == action.reaction && executed == action.executed && actionState == action.actionState;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(playerID, target, actionState, reaction);
-        result = 31 * result + Arrays.hashCode(collectedRent);
-        return result;
+        return Objects.hash(playerID, target, actionState, reaction, executed);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "It's my Birthday action";
+        return "DebtCollector action";
     }
 
     /**

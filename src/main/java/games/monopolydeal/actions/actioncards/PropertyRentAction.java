@@ -1,18 +1,20 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.ActionState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -24,13 +26,26 @@ import java.util.Set;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class ModifyBoard extends AbstractAction implements IExtendedSequence {
+public class PropertyRentAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    boolean executed;
+    final SetType setType;
+    final CardType cardType;
+    final int doubleTheRent;
+    int target;
+    int rent;
+    ActionState actionState;
+    boolean[] collectedRent;
+    boolean reaction;
 
-    public ModifyBoard(int playerID) { this.playerID = playerID; }
+    public PropertyRentAction(int playerID, SetType setType, CardType cardType, int doubleTheRent) {
+        this.playerID = playerID;
+        this.setType = setType;
+        this.cardType = cardType;
+        this.doubleTheRent = doubleTheRent;
+        actionState = ActionState.GetReaction;
+    }
 
     /**
      * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
@@ -44,48 +59,21 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-        // move card from to
-        // Iterate through sets
-        //   find wilds
-        //      get alternate
-        //      MoveFromTo
         List<AbstractAction> availableActions = new ArrayList<>();
-        for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-            if(pSet.hasWild && !pSet.hasHouse){
-                for (int i=0;i<pSet.getSize();i++) {
-                    MonopolyDealCard card = pSet.get(i);
-                    if(card.isPropertyWildCard()){
-                        SetType sType = card.getAlternateSetType(card);
-                        if(sType==SetType.UNDEFINED){
-                            for (PropertySet propSet:MDGS.getPropertySets(playerID)) {
-                                if(propSet.getSetType() != card.getUseAs() && !availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()))){
-                                    availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()));
-                                }
-                            }
-                        }
-                        if(!availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType)))
-                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
-                    }
-                }
-            } else if (pSet.isComplete && pSet.hasHouse && !pSet.hasHotel) { // Moving House
-                for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
-                    if(propSet!= pSet && propSet.isComplete && !propSet.hasHouse){
-                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType())))
-                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType()));
-                    }
-                }
-                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED)))
-                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED));
-            }else if (pSet.isComplete && pSet.hasHouse && pSet.hasHotel){ // Moving Hotel
-                for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
-                    if(propSet!= pSet && propSet.isComplete && propSet.hasHouse && !propSet.hasHotel){
-                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType())))
-                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType()));
-                    }
-                }
-                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED)))
-                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED));
-            }
+
+        switch (actionState){
+            case GetReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
+                break;
+            case ReactToReaction:
+                availableActions.add(new DoNothing());
+                if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
+                break;
+            case CollectRent:
+                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
+                else availableActions.add(new PayRent(target,playerID,rent));
+                break;
         }
         return availableActions;
     }
@@ -99,7 +87,8 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return playerID;
+        if(actionState == ActionState.GetReaction) return target;
+        else return playerID;
     }
 
     /**
@@ -116,21 +105,39 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        MoveCardFromTo actionTaken = (MoveCardFromTo) action;
-
-        MonopolyDealCard card = actionTaken.card;
-        SetType from = actionTaken.from;
-        SetType to = actionTaken.to;
-
-        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-        MDGS.removePropertyFrom(playerID,card,from);
-        card.setUseAs(to);
-        MDGS.addProperty(playerID,card);
-        MDGS.modifyBoard();
-        executed = true;
-
+        switch (actionState){
+            case GetReaction:
+                if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
+                else actionState = ActionState.CollectRent;
+                break;
+            case ReactToReaction:
+                if(!(action instanceof JustSayNoAction)) {
+                    collectedRent[target] = true;
+                    getNextTarget();
+                }
+                actionState = ActionState.GetReaction;
+                break;
+            case CollectRent:
+                collectedRent[target] = true;
+                getNextTarget();
+                actionState = ActionState.GetReaction;
+                break;
+        }
     }
-
+    public boolean collectedAllRent() {
+        for (boolean b : collectedRent) if (!b) return false;
+        return true;
+    }
+    public void getNextTarget(){
+        if(!collectedAllRent()) {
+            for (int i = 0; i < collectedRent.length; i++) {
+                if (!collectedRent[i]) {
+                    target = i;
+                    return;
+                }
+            }
+        }
+    }
     /**
      * @param state The current game state
      * @return True if this extended sequence has now completed and there is nothing left to do.
@@ -138,7 +145,7 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return executed;
+        return collectedAllRent();
     }
 
     /**
@@ -154,6 +161,25 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        collectedRent = new boolean[gs.getNPlayers()];
+        collectedRent[playerID] = true;
+        // Discard card used
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.discardCard(MonopolyDealCard.create(cardType),playerID);
+        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
+        MDGS.useAction(1 + doubleTheRent);
+        // Calculate rent
+        PropertySet pSet = MDGS.getPlayerPropertySet(playerID,setType);
+        if(pSet.isComplete){
+            rent = setType.rent[setType.setSize - 1];
+            if(pSet.hasHouse) rent = rent + 3;
+            if(pSet.hasHotel) rent = rent + 4;
+        }
+        else rent = setType.rent[pSet.getSize() - 1];
+        // Double the rent
+        rent = (int) (rent * Math.pow(2,doubleTheRent));
+        // Set first target
+        getNextTarget();
         gs.setActionInProgress(this);
         return true;
     }
@@ -165,10 +191,14 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ModifyBoard copy() {
+    public PropertyRentAction copy() {
         // TODO: copy non-final variables appropriately
-        ModifyBoard action = new ModifyBoard(playerID);
-        action.executed = executed;
+        PropertyRentAction action = new PropertyRentAction(playerID,setType,cardType,doubleTheRent);
+        action.target = target;
+        action.rent = rent;
+        action.actionState = actionState;
+        action.collectedRent = collectedRent;
+        action.reaction = reaction;
         return action;
     }
 
@@ -176,18 +206,24 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ModifyBoard that = (ModifyBoard) o;
-        return playerID == that.playerID && executed == that.executed;
+        PropertyRentAction that = (PropertyRentAction) o;
+        return playerID == that.playerID && doubleTheRent == that.doubleTheRent && target == that.target && rent == that.rent && reaction == that.reaction && setType == that.setType && cardType == that.cardType && actionState == that.actionState && Arrays.equals(collectedRent, that.collectedRent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, executed);
+        int result = Objects.hash(playerID, setType, cardType, doubleTheRent, target, rent, actionState, reaction);
+        result = 31 * result + Arrays.hashCode(collectedRent);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "Modify Board";
+        // TODO: Replace with appropriate string, including any action parameters
+        if(doubleTheRent == 0)
+            return "Collect rent : " + setType;
+        else
+            return "Collect rent : " + setType + " With " + doubleTheRent + " DTR";
     }
 
     /**

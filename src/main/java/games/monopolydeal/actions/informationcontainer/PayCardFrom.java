@@ -1,11 +1,11 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.informationcontainer;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.dominion.cards.CardType;
-import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.BoardType;
 import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
 
@@ -25,12 +25,20 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class AddProperty extends AbstractAction {
-    final int player;
-    final MonopolyDealCard card;
-    public AddProperty(MonopolyDealCard card, int playerId) {
+public class PayCardFrom extends AbstractAction {
+
+    public final MonopolyDealCard card;
+    public SetType from;
+    public BoardType type;
+
+    public PayCardFrom(MonopolyDealCard card, SetType from){
         this.card = card;
-        player = playerId;
+        this.from = from;
+        this.type = BoardType.PropertySet;
+    }
+    public PayCardFrom(MonopolyDealCard card){
+        this.card = card;
+        this.type = BoardType.Bank;
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -41,10 +49,6 @@ public class AddProperty extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        MonopolyDealGameState state = (MonopolyDealGameState) gs;
-        state.removeCardFromHand(player, card);
-        state.addProperty(player,card);
-        state.useAction(1);
         return true;
     }
 
@@ -55,28 +59,31 @@ public class AddProperty extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public AddProperty copy() {
+    public PayCardFrom copy() {
         // TODO: copy non-final variables appropriately
-        return new AddProperty(card,player);
+        PayCardFrom action = new PayCardFrom(card);
+        action.type = type;
+        action.from = from;
+        return action;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddProperty that = (AddProperty) o;
-        return player == that.player && Objects.equals(card, that.card);
+        PayCardFrom that = (PayCardFrom) o;
+        return Objects.equals(card, that.card) && from == that.from && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, card);
+        return Objects.hash(card, from, type);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Add " + card.toString() +" to properties";
+        return "Pay with " + card;
     }
 
     /**

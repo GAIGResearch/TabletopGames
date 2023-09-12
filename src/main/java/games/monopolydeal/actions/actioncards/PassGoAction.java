@@ -1,4 +1,4 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,9 +6,6 @@ import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
-import games.monopolydeal.cards.PropertySet;
-
-import java.util.Objects;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -26,15 +23,7 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class AddWildTo extends AbstractAction {
-
-    final int player;
-    final PropertySet pSet;
-
-    public AddWildTo(PropertySet pSet, int playerID){
-        this.player = playerID;
-        this.pSet = pSet;
-    }
+public class PassGoAction extends AbstractAction {
 
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -45,10 +34,10 @@ public class AddWildTo extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
-        MonopolyDealGameState state = (MonopolyDealGameState) gs;
-        state.removeCardFromHand(player, MonopolyDealCard.create(CardType.MulticolorWild));
-        state.addPropertyToSet(player,MonopolyDealCard.create(CardType.MulticolorWild),pSet.getSetType());
-        state.useAction(1);
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
+        MDGS.drawCard(MDGS.getCurrentPlayer(),2);
+        MDGS.discardCard(MonopolyDealCard.create(CardType.PassGo),MDGS.getCurrentPlayer());
+        MDGS.useAction(1);
         return true;
     }
 
@@ -59,27 +48,27 @@ public class AddWildTo extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public AddWildTo copy() {
+    public PassGoAction copy() {
         // TODO: copy non-final variables appropriately
-        return new AddWildTo(pSet,player);
+        return this;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AddWildTo addWildTo = (AddWildTo) o;
-        return player == addWildTo.player && Objects.equals(pSet, addWildTo.pSet);
+    public boolean equals(Object obj) {
+        // TODO: compare all other variables in the class
+        return obj instanceof PassGoAction;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, pSet);
+        // TODO: return the hash of all other variables in the class
+        return 234;
     }
 
     @Override
     public String toString() {
-        return "Add MulticolorWild to "+ pSet.toString();
+        // TODO: Replace with appropriate string, including any action parameters
+        return "PassGo Action";
     }
 
     /**

@@ -1,11 +1,13 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.ActionState;
+import games.monopolydeal.actions.informationcontainer.ChooseCardFrom;
+import games.monopolydeal.actions.informationcontainer.TargetPlayer;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
@@ -25,15 +27,17 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class DebtCollectorAction extends AbstractAction implements IExtendedSequence {
+public class SlyDealAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     int target;
+    MonopolyDealCard take;
+    SetType from;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
-    public DebtCollectorAction(int playerID) {
+    public SlyDealAction(int playerID) {
         this.playerID = playerID;
         actionState = ActionState.Target;
     }
@@ -51,11 +55,23 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         List<AbstractAction> availableActions = new ArrayList<>();
+
         switch (actionState){
             case Target:
                 for(int i=0;i<MDGS.getNPlayers();i++){
                     if(playerID!=i)
-                        availableActions.add(new TargetPlayer(i));
+                        if(MDGS.checkForFreeProperty(i))
+                            availableActions.add(new TargetPlayer(i));
+                }
+                break;
+            case TakeCard:
+                for (PropertySet pSet: MDGS.getPropertySets(target)) {
+                    if(!pSet.isComplete){
+                        for(int i=0;i<pSet.getSize();i++){
+                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0)))
+                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
+                        }
+                    }
                 }
                 break;
             case GetReaction:
@@ -65,10 +81,6 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
             case ReactToReaction:
                 availableActions.add(new DoNothing());
                 if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
-                break;
-            case CollectRent:
-                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,5));
                 break;
         }
         return availableActions;
@@ -104,21 +116,28 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
         switch (actionState){
             case Target:
                 target = ((TargetPlayer) action).target;
+                actionState = ActionState.TakeCard;
+                break;
+            case TakeCard:
+                take = ((ChooseCardFrom) action).take;
+                from = ((ChooseCardFrom) action).from;
                 actionState = ActionState.GetReaction;
                 break;
             case GetReaction:
                 if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
-                else actionState = ActionState.CollectRent;
+                else executeAction(state);
                 break;
             case  ReactToReaction:
                 if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
                 else executed = true;
                 break;
-            case CollectRent:
-                executed = true;
-                break;
-
         }
+    }
+    protected void executeAction(AbstractGameState state){
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        MDGS.removePropertyFrom(target, take, from);
+        MDGS.addProperty(playerID, take);
+        executed = true;
     }
     /**
      * @param state The current game state
@@ -144,7 +163,7 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
+        MDGS.discardCard(MonopolyDealCard.create(CardType.SlyDeal),playerID);
         MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;
@@ -157,10 +176,12 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public DebtCollectorAction copy() {
+    public SlyDealAction copy() {
         // TODO: copy non-final variables appropriately
-        DebtCollectorAction action = new DebtCollectorAction(playerID);
+        SlyDealAction action = new SlyDealAction(playerID);
         action.target = target;
+        action.take = take;
+        action.from = from;
         action.actionState = actionState;
         action.reaction = reaction;
         action.executed = executed;
@@ -171,19 +192,19 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DebtCollectorAction action = (DebtCollectorAction) o;
-        return playerID == action.playerID && target == action.target && reaction == action.reaction && executed == action.executed && actionState == action.actionState;
+        SlyDealAction that = (SlyDealAction) o;
+        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(from, that.from) && actionState == that.actionState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, actionState, reaction, executed);
+        return Objects.hash(playerID, target, take, from, actionState, reaction, executed);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "DebtCollector action";
+        return "SlyDeal action";
     }
 
     /**

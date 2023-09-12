@@ -1,11 +1,10 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.boardmanagement;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.MonopolyDealCard;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.Objects;
 
@@ -25,10 +24,10 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class AddMoney extends AbstractAction {
+public class AddProperty extends AbstractAction {
     final int player;
     final MonopolyDealCard card;
-    public AddMoney(MonopolyDealCard card, int playerId) {
+    public AddProperty(MonopolyDealCard card, int playerId) {
         this.card = card;
         player = playerId;
     }
@@ -43,7 +42,7 @@ public class AddMoney extends AbstractAction {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
         state.removeCardFromHand(player, card);
-        state.addMoney(player,card);
+        state.addProperty(player,card);
         state.useAction(1);
         return true;
     }
@@ -55,17 +54,17 @@ public class AddMoney extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public AddMoney copy() {
+    public AddProperty copy() {
         // TODO: copy non-final variables appropriately
-        return new AddMoney(card,player);
+        return new AddProperty(card,player);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddMoney addMoney = (AddMoney) o;
-        return player == addMoney.player && Objects.equals(card, addMoney.card);
+        AddProperty that = (AddProperty) o;
+        return player == that.player && Objects.equals(card, that.card);
     }
 
     @Override
@@ -75,7 +74,8 @@ public class AddMoney extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Add " + card.toString() + " to Bank";
+        // TODO: Replace with appropriate string, including any action parameters
+        return "Add " + card.toString() +" to properties";
     }
 
     /**

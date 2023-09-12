@@ -1,11 +1,10 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.informationcontainer;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.SetType;
-import org.apache.spark.internal.config.R;
 
 import java.util.Objects;
 
@@ -25,27 +24,17 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class RentOf extends AbstractAction {
+public class MoveCardFromTo extends AbstractAction {
 
-    final PropertySet pSet;
-    int rent;
+    final int player;
+    public final SetType from,to;
+    public final MonopolyDealCard card;
 
-    public RentOf(PropertySet pSet, int rent){
-        this.pSet = pSet;
-        this.rent = rent;
-    }
-    public RentOf(PropertySet pSet) {
-        this.pSet = pSet;
-        SetType setType = pSet.getSetType();
-        if(pSet.isComplete){
-            rent = setType.rent[setType.setSize-1];
-            if(pSet.hasHouse) rent = rent + 3;
-            if(pSet.hasHotel) rent = rent + 4;
-        } else {
-            if(pSet.getSize()-1 >= setType.rent.length)
-                throw new AssertionError("Another thing which should not happen");
-            rent = setType.rent[pSet.getSize() - 1];
-        }
+    public MoveCardFromTo(int playerId, MonopolyDealCard card, SetType from, SetType to){
+        player = playerId;
+        this.card = card;
+        this.from = from;
+        this.to = to;
     }
 
     /**
@@ -67,28 +56,28 @@ public class RentOf extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public RentOf copy() {
+    public MoveCardFromTo copy() {
         // TODO: copy non-final variables appropriately
-        return new RentOf(pSet,rent);
+        return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RentOf rentOf = (RentOf) o;
-        return rent == rentOf.rent && Objects.equals(pSet, rentOf.pSet);
+        MoveCardFromTo that = (MoveCardFromTo) o;
+        return player == that.player && from == that.from && to == that.to && Objects.equals(card, that.card);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pSet, rent);
+        return Objects.hash(player, from, to, card);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return pSet + " rent is " + rent;
+        return "Move "+ card.toString() + " from " + from.toString() + " to " + to.toString();
     }
 
     /**

@@ -5,12 +5,13 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.monopolydeal.actions.*;
+import games.monopolydeal.actions.actioncards.PlayActionCard;
+import games.monopolydeal.actions.boardmanagement.AddToBoard;
+import games.monopolydeal.actions.boardmanagement.ModifyBoard;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>

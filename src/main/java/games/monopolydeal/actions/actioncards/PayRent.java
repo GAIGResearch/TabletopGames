@@ -1,11 +1,20 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.BoardType;
+import games.monopolydeal.actions.informationcontainer.PayCardFrom;
+import games.monopolydeal.cards.CardType;
+import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -17,13 +26,21 @@ import java.util.List;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class MonopolyDealExtendedSequenceAction extends AbstractAction implements IExtendedSequence {
+public class PayRent extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
-    final int playerID;
+    final int payer; // current player
+    final int payee; // pays to
+    int amtToPay;
+    boolean boardEmpty;
+    MonopolyDealCard cardToPay;
+    BoardType boardType;
 
-    public MonopolyDealExtendedSequenceAction(int playerID) {
-        this.playerID = playerID;
+
+    public PayRent(int payer, int payee, int amtToPay) {
+        this.payer = payer;
+        this.payee = payee;
+        this.amtToPay = amtToPay;
     }
 
     /**
@@ -37,7 +54,27 @@ public class MonopolyDealExtendedSequenceAction extends AbstractAction implement
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
-        return new ArrayList<>();
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        Deck<MonopolyDealCard> payerBank = MDGS.getPlayerBank(payer);
+        List<PropertySet> payerPropertySets = MDGS.getPropertySets(payer);
+        List<AbstractAction> availableActions = new ArrayList<>();
+
+        if(boardEmpty || amtToPay <= 0) availableActions.add(new DoNothing());
+        else {
+            // iterate through bank and add action
+            // iterate through properties and add action
+            for(int i=0;i<payerBank.getSize();i++){
+                if(!availableActions.contains(new PayCardFrom(payerBank.get(i))))
+                availableActions.add(new PayCardFrom(payerBank.get(i)));
+            }
+            for (PropertySet pSet: payerPropertySets) {
+                for(int i=0;i<pSet.getSize();i++)
+                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild) && !availableActions.contains(new PayCardFrom(pSet.get(i),pSet.getSetType())))
+                        availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
+            }
+        }
+
+        return availableActions;
     }
 
     /**
@@ -49,7 +86,7 @@ public class MonopolyDealExtendedSequenceAction extends AbstractAction implement
      */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return playerID;
+        return payer;
     }
 
     /**
@@ -66,6 +103,24 @@ public class MonopolyDealExtendedSequenceAction extends AbstractAction implement
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
+        if(!(action instanceof DoNothing)){
+            MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+            cardToPay = ((PayCardFrom) action).card;
+            boardType = ((PayCardFrom) action).type;
+            switch (boardType){
+                case Bank:
+                    MDGS.removeMoneyFrom(payer,cardToPay);
+                    MDGS.addMoney(payee,cardToPay);
+                    break;
+                case PropertySet:
+                    MDGS.removePropertyFrom(payer,cardToPay,((PayCardFrom) action).from);
+                    MDGS.addProperty(payee,cardToPay);
+                    break;
+            }
+            amtToPay = amtToPay - cardToPay.cardMoneyValue();
+            if(MDGS.isBoardEmpty(payer)) boardEmpty = true;
+        }
+
     }
 
     /**
@@ -75,7 +130,8 @@ public class MonopolyDealExtendedSequenceAction extends AbstractAction implement
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return true;
+        if(amtToPay <= 0 || boardEmpty) return true;
+        else return false;
     }
 
     /**
@@ -102,27 +158,32 @@ public class MonopolyDealExtendedSequenceAction extends AbstractAction implement
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public MonopolyDealExtendedSequenceAction copy() {
+    public PayRent copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        PayRent action = new PayRent(payer,payee,amtToPay);
+        action.boardEmpty = boardEmpty;
+        action.cardToPay = cardToPay;
+        action.boardType = boardType;
+        return action;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof MonopolyDealAction;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PayRent payRent = (PayRent) o;
+        return payer == payRent.payer && payee == payRent.payee && amtToPay == payRent.amtToPay && boardEmpty == payRent.boardEmpty && Objects.equals(cardToPay, payRent.cardToPay) && boardType == payRent.boardType;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(payer, payee, amtToPay, boardEmpty, cardToPay, boardType);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "PayRent action";
     }
 
     /**

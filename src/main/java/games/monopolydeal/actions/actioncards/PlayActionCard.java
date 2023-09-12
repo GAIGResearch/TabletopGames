@@ -1,4 +1,4 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -72,8 +72,8 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
                     case MulticolorRent:
                         if(MDGS.checkForMulticolorRent(playerID)){
                             for(int j=0; j < MDGS.getActionsLeft() && j <= noDoubleTheRent; j++)
-                                if(!availableActions.contains(new MulticolorRentAction(playerID,j)))
-                                    availableActions.add(new MulticolorRentAction(playerID,j));
+                                if(!availableActions.contains(new DealBreakerAction.MulticolorRentAction(playerID,j)))
+                                    availableActions.add(new DealBreakerAction.MulticolorRentAction(playerID,j));
                         }
                         break;
                     case GreenBlueRent:

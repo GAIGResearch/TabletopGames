@@ -1,17 +1,16 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.actioncards;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.actions.ActionState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
-import games.monopolydeal.cards.PropertySet;
-import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,20 +24,18 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class MulticolorRentAction extends AbstractAction implements IExtendedSequence {
+public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    final int doubleTheRent;
     int target;
-    int rent;
     ActionState actionState;
-    boolean reaction = false;
-    boolean executed = false;
-    public MulticolorRentAction(int playerID, int doubleTheRent) {
+    boolean[] collectedRent;
+    boolean reaction;
+
+    public ItsMyBirthdayAction(int playerID) {
         this.playerID = playerID;
-        this.doubleTheRent = doubleTheRent;
-        actionState = ActionState.Target;
+        actionState = ActionState.GetReaction;
     }
 
     /**
@@ -56,19 +53,6 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
         List<AbstractAction> availableActions = new ArrayList<>();
 
         switch (actionState){
-            case Target:
-                for(int i=0;i<MDGS.getNPlayers();i++){
-                    if(playerID!=i)
-                        availableActions.add(new TargetPlayer(i));
-                }
-                break;
-            case ChoosePropertySet:
-                for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-                    if(pSet.getSetType() != SetType.UNDEFINED){
-                        availableActions.add(new RentOf(pSet));
-                    }
-                }
-                break;
             case GetReaction:
                 availableActions.add(new DoNothing());
                 if(MDGS.CheckForJustSayNo(target)) availableActions.add(new JustSayNoAction());
@@ -79,8 +63,7 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 break;
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,rent));
-                break;
+                else availableActions.add(new PayRent(target,playerID,2));
         }
         return availableActions;
     }
@@ -113,25 +96,34 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
         switch (actionState){
-            case Target:
-                target = ((TargetPlayer) action).target;
-                actionState = ActionState.ChoosePropertySet;
-                break;
-            case ChoosePropertySet:
-                rent = (int) ((((RentOf) action).rent) * Math.pow(2,doubleTheRent));
-                actionState = ActionState.GetReaction;
-                break;
             case GetReaction:
                 if(action instanceof JustSayNoAction) actionState = ActionState.ReactToReaction;
                 else actionState = ActionState.CollectRent;
                 break;
-            case  ReactToReaction:
-                if(action instanceof JustSayNoAction) actionState = ActionState.GetReaction;
-                else executed = true;
-                break;
+            case ReactToReaction:
+                if(!(action instanceof JustSayNoAction)) {
+                    collectedRent[target] = true;
+                    getNextTarget();
+                }
+                actionState = ActionState.GetReaction;
             case CollectRent:
-                executed = true;
+                collectedRent[target] = true;
+                getNextTarget();
+                actionState = ActionState.GetReaction;
                 break;
+        }
+    }
+    public boolean collectedAllRent() {
+        for (boolean b : collectedRent) if (!b) return false;
+        return true;
+    }
+    public void getNextTarget(){
+        if(!collectedAllRent()) {
+            for (int i = 0; i < collectedRent.length; i++) {
+                if (!collectedRent[i]) {
+                    target = i;
+                }
+            }
         }
     }
     /**
@@ -141,7 +133,7 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return executed;
+        return collectedAllRent();
     }
 
     /**
@@ -157,10 +149,14 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        collectedRent = new boolean[gs.getNPlayers()];
+        collectedRent[playerID] = true;
+        // Discard card used
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.MulticolorRent),playerID);
-        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
-        MDGS.useAction(1 + doubleTheRent);
+        MDGS.discardCard(MonopolyDealCard.create(CardType.ItsMyBirthday),playerID);
+        MDGS.useAction(1);
+        // Set first target
+        getNextTarget();
         gs.setActionInProgress(this);
         return true;
     }
@@ -172,14 +168,13 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public MulticolorRentAction copy() {
+    public ItsMyBirthdayAction copy() {
         // TODO: copy non-final variables appropriately
-        MulticolorRentAction action = new MulticolorRentAction(playerID,doubleTheRent);
+        ItsMyBirthdayAction action = new ItsMyBirthdayAction(playerID);
         action.target = target;
-        action.rent = rent;
         action.actionState = actionState;
+        action.collectedRent = collectedRent;
         action.reaction = reaction;
-        action.executed = executed;
         return action;
     }
 
@@ -187,22 +182,21 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MulticolorRentAction that = (MulticolorRentAction) o;
-        return playerID == that.playerID && doubleTheRent == that.doubleTheRent && target == that.target && rent == that.rent && reaction == that.reaction && executed == that.executed && actionState == that.actionState;
+        ItsMyBirthdayAction that = (ItsMyBirthdayAction) o;
+        return playerID == that.playerID && target == that.target && reaction == that.reaction && actionState == that.actionState && Arrays.equals(collectedRent, that.collectedRent);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, doubleTheRent, target, rent, actionState, reaction, executed);
+        int result = Objects.hash(playerID, target, actionState, reaction);
+        result = 31 * result + Arrays.hashCode(collectedRent);
+        return result;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        if(doubleTheRent > 0)
-            return "Multicolor Rent with " + doubleTheRent + " Double the rent";
-        else
-            return "Multicolor Rent action";
+        return "It's my Birthday action";
     }
 
     /**

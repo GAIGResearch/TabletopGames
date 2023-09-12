@@ -1,8 +1,10 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.actions.informationcontainer;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
 
@@ -22,11 +24,29 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class TargetPlayer extends AbstractAction {
-    int target;
-    public TargetPlayer(int target){
-        this.target = target;
+public class RentOf extends AbstractAction {
+
+    final PropertySet pSet;
+    public int rent;
+
+    public RentOf(PropertySet pSet, int rent){
+        this.pSet = pSet;
+        this.rent = rent;
     }
+    public RentOf(PropertySet pSet) {
+        this.pSet = pSet;
+        SetType setType = pSet.getSetType();
+        if(pSet.isComplete){
+            rent = setType.rent[setType.setSize-1];
+            if(pSet.hasHouse) rent = rent + 3;
+            if(pSet.hasHotel) rent = rent + 4;
+        } else {
+            if(pSet.getSize()-1 >= setType.rent.length)
+                throw new AssertionError("Another thing which should not happen");
+            rent = setType.rent[pSet.getSize() - 1];
+        }
+    }
+
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the {@link AbstractGameState#getComponentById(int)} method.
@@ -46,28 +66,28 @@ public class TargetPlayer extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public TargetPlayer copy() {
+    public RentOf copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        return new RentOf(pSet,rent);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TargetPlayer that = (TargetPlayer) o;
-        return target == that.target;
+        RentOf rentOf = (RentOf) o;
+        return rent == rentOf.rent && Objects.equals(pSet, rentOf.pSet);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(target);
+        return Objects.hash(pSet, rent);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Target player "+ target;
+        return pSet + " rent is " + rent;
     }
 
     /**
