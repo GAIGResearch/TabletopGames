@@ -72,6 +72,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
                 else availableActions.add(new PayRent(target,playerID,rent));
+                break;
         }
         return availableActions;
     }
@@ -114,6 +115,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
                     getNextTarget();
                 }
                 actionState = ActionState.GetReaction;
+                break;
             case CollectRent:
                 collectedRent[target] = true;
                 getNextTarget();
@@ -130,6 +132,7 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
             for (int i = 0; i < collectedRent.length; i++) {
                 if (!collectedRent[i]) {
                     target = i;
+                    return;
                 }
             }
         }
@@ -216,7 +219,10 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Collect rent : " + setType;
+        if(doubleTheRent == 0)
+            return "Collect rent : " + setType;
+        else
+            return "Collect rent : " + setType + " With " + doubleTheRent + " DTR";
     }
 
     /**

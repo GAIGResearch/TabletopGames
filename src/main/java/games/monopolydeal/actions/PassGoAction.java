@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
+import games.monopolydeal.cards.MonopolyDealCard;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -34,6 +36,7 @@ public class PassGoAction extends AbstractAction {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
         MDGS.drawCard(MDGS.getCurrentPlayer(),2);
+        MDGS.discardCard(MonopolyDealCard.create(CardType.PassGo),MDGS.getCurrentPlayer());
         MDGS.useAction(1);
         return true;
     }

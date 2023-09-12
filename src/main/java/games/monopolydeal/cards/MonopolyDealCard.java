@@ -12,9 +12,6 @@ public class MonopolyDealCard extends Card{
         super(type.name());
         this.type = type;
         this.useAs = getSetType(type);
-        if(type.isPropertyWild){
-            //Modify use as;
-        }
     }
     public SetType getSetType(CardType type){
         SetType sType;
@@ -123,8 +120,14 @@ public class MonopolyDealCard extends Card{
 
     @Override
     public MonopolyDealCard copy() {
-        // Currently all cardTypes are immutable - so we can save resources when copying
-        return this;
+        // Only property cards need to keep reference of their useAs other cards are immutable
+        if(!isPropertyCard())
+            return this;
+        else {
+            MonopolyDealCard cardCopy = new MonopolyDealCard(this.cardType());
+            cardCopy.useAs = this.useAs;
+            return cardCopy;
+        }
     }
 
     @Override

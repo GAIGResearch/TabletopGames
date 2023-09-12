@@ -1,0 +1,27 @@
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: NO_SELF_PLAY
+MCTSPlayer got 46.25 points. MCTSPlayer won 45.0% of the 100 games of the tournament. MCTSPlayer won 45.0% of the 100 games it played during the tournament.
+MCTSPlayer won 45.0% of the 100 games against Random.
+MCTSPlayer won 45.0% of the 100 games against RMHC.
+MCTSPlayer won 45.0% of the 100 games against OSLA.
+
+Random got 5.25 points. Random won 4.0% of the 100 games of the tournament. Random won 4.0% of the 100 games it played during the tournament.
+Random won 4.0% of the 100 games against MCTSPlayer.
+Random won 4.0% of the 100 games against RMHC.
+Random won 4.0% of the 100 games against OSLA.
+
+RMHC got 9.25 points. RMHC won 8.0% of the 100 games of the tournament. RMHC won 8.0% of the 100 games it played during the tournament.
+RMHC won 8.0% of the 100 games against MCTSPlayer.
+RMHC won 8.0% of the 100 games against Random.
+RMHC won 8.0% of the 100 games against OSLA.
+
+OSLA got 39.25 points. OSLA won 38.0% of the 100 games of the tournament. OSLA won 38.0% of the 100 games it played during the tournament.
+OSLA won 38.0% of the 100 games against MCTSPlayer.
+OSLA won 38.0% of the 100 games against Random.
+OSLA won 38.0% of the 100 games against RMHC.
+
+---- Ranking ---- 
+MCTSPlayer: Win rate 0.46 +/- 0.02	Mean Ordinal 1.50 +/- 0.03
+OSLA: Win rate 0.39 +/- 0.02	Mean Ordinal 1.57 +/- 0.02
+RMHC: Win rate 0.09 +/- 0.01	Mean Ordinal 1.87 +/- 0.01
+Random: Win rate 0.05 +/- 0.00	Mean Ordinal 1.91 +/- 0.01
+

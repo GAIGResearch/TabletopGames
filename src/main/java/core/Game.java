@@ -802,7 +802,7 @@ public class Game {
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "MonopolyDeal");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 05);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
@@ -813,13 +813,13 @@ public class Game {
         players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         players.add(new MCTSPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        MCTSParams params = new MCTSParams();
 //        players.add(new MCTSPlayer(params));
 
-//        players.add(new OSLAPlayer());
         players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
+//        players.add(new OSLAPlayer());
+        players.add(new RMHCPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new RandomPlayer());
