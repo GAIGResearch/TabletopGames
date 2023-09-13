@@ -28,7 +28,7 @@ public class MonopolyDealCardsView extends JComponent {
                 this.width = playerAreaWidth + border * 2;
                 this.height = (playerAreaHeight + borderBottom * 2)/2;
                 this.playerId = playerId;
-                this.playerHandView = new MonopolyDealDeckView(playerId, d, true, dataPath, new Rectangle(border, borderBottom, playerAreaWidth, MonopolyDealCardHeight/2), MonopolyDealCardWidth/2, MonopolyDealCardHeight/2);
+                this.playerHandView = new MonopolyDealDeckView(humanId.iterator().next(), d, true, dataPath, new Rectangle(border, borderBottom, playerAreaWidth, MonopolyDealCardHeight/2), MonopolyDealCardWidth/2, MonopolyDealCardHeight/2);
                 break;
             case Property:
                 this.width = MonopolyDealCardWidth/5;

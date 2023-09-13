@@ -26,13 +26,13 @@ import java.util.Objects;
  *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
  * </ol></p>
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
+ * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link } apply here as well.</p>
  */
 public class DealBreakerAction extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    int target,setSize;
+    int target;
     SetType setType;
     ActionState actionState;
     boolean reaction = false;
@@ -122,7 +122,6 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
                 break;
             case ChoosePropertySet:
                 setType = ((ChoosePropertySet) action).setType;
-                setSize = ((ChoosePropertySet) action).setSize;
                 actionState = ActionState.GetReaction;
                 break;
             case GetReaction:
@@ -182,7 +181,6 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
         DealBreakerAction action = new DealBreakerAction(playerID);
 
         action.target = target;
-        action.setSize = setSize;
         action.setType = setType;
         action.actionState = actionState;
         action.reaction = reaction;
@@ -195,12 +193,12 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DealBreakerAction that = (DealBreakerAction) o;
-        return playerID == that.playerID && target == that.target && setSize == that.setSize && reaction == that.reaction && executed == that.executed && setType == that.setType && actionState == that.actionState;
+        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && setType == that.setType && actionState == that.actionState;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, setSize, setType, actionState, reaction, executed);
+        return Objects.hash(playerID, target, setType, actionState, reaction, executed);
     }
 
     @Override
@@ -228,7 +226,7 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
      *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
      * </ol></p>
      * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
-     * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
+     * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link } apply here as well.</p>
      */
     public static class MulticolorRentAction extends AbstractAction implements IExtendedSequence {
 

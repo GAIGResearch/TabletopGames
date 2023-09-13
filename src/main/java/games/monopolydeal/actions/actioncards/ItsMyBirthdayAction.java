@@ -22,7 +22,7 @@ import java.util.Objects;
  *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
  * </ol></p>
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
+ * <p>They should also extend the {@link AbstractAction} class, or any other core actions.</p>
  */
 public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequence {
 
@@ -64,6 +64,7 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
             case CollectRent:
                 if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
                 else availableActions.add(new PayRent(target,playerID,2));
+                break;
         }
         return availableActions;
     }
@@ -106,6 +107,7 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
                     getNextTarget();
                 }
                 actionState = ActionState.GetReaction;
+                break;
             case CollectRent:
                 collectedRent[target] = true;
                 getNextTarget();
@@ -122,6 +124,7 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
             for (int i = 0; i < collectedRent.length; i++) {
                 if (!collectedRent[i]) {
                     target = i;
+                    return;
                 }
             }
         }

@@ -26,13 +26,11 @@ import java.util.Objects;
  */
 public class ChoosePropertySet extends AbstractAction {
 
-    public final int setSize;
     public final SetType setType;
 
 
     public ChoosePropertySet(PropertySet pSet){
         this.setType = pSet.getSetType();
-        this.setSize = pSet.getSize();
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -63,18 +61,18 @@ public class ChoosePropertySet extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChoosePropertySet that = (ChoosePropertySet) o;
-        return setSize == that.setSize && setType == that.setType;
+        return setType == that.setType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(setSize, setType);
+        return Objects.hash(setType);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Steal set : " + setType.toString() + " of size " + setSize;
+        return "Steal set : " + setType.toString();
     }
 
     /**
