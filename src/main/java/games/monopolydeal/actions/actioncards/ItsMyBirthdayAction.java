@@ -173,7 +173,8 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         ItsMyBirthdayAction action = new ItsMyBirthdayAction(playerID);
         action.target = target;
         action.actionState = actionState;
-        action.collectedRent = collectedRent;
+        if(collectedRent != null) action.collectedRent = collectedRent.clone();
+        else action.collectedRent = collectedRent;
         action.reaction = reaction;
         return action;
     }

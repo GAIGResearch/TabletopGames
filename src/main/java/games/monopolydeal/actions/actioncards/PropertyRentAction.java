@@ -197,7 +197,8 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         action.target = target;
         action.rent = rent;
         action.actionState = actionState;
-        action.collectedRent = collectedRent;
+        if(collectedRent != null) action.collectedRent = collectedRent.clone();
+        else action.collectedRent = collectedRent;
         action.reaction = reaction;
         return action;
     }

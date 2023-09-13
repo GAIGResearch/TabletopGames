@@ -24,13 +24,13 @@ import static java.util.stream.Collectors.toList;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class AddToBoard extends AbstractAction implements IExtendedSequence {
+public class PlayOnBoard extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     boolean executed;
 
-    public AddToBoard(int playerID) {
+    public PlayOnBoard(int playerID) {
         this.playerID = playerID;
     }
 
@@ -128,9 +128,9 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public AddToBoard copy() {
+    public PlayOnBoard copy() {
         // TODO: copy non-final variables appropriately
-        AddToBoard action = new AddToBoard(playerID);
+        PlayOnBoard action = new PlayOnBoard(playerID);
         action.executed = executed;
         return action;
     }
@@ -139,7 +139,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AddToBoard that = (AddToBoard) o;
+        PlayOnBoard that = (PlayOnBoard) o;
         return playerID == that.playerID && executed == that.executed;
     }
 

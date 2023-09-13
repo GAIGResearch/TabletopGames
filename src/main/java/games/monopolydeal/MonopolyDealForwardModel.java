@@ -6,7 +6,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.monopolydeal.actions.*;
 import games.monopolydeal.actions.actioncards.PlayActionCard;
-import games.monopolydeal.actions.boardmanagement.AddToBoard;
+import games.monopolydeal.actions.boardmanagement.PlayOnBoard;
 import games.monopolydeal.actions.boardmanagement.ModifyBoard;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
@@ -78,7 +78,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                     if(state.checkForActionCards(playerID))
                         availableActions.add(new PlayActionCard(playerID));
 
-                    availableActions.add(new AddToBoard(playerID));
+                    availableActions.add(new PlayOnBoard(playerID));
 
                     if(state.canModifyBoard(playerID))
                         availableActions.add(new ModifyBoard(playerID));
