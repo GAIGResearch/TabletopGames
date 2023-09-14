@@ -392,8 +392,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
             // TODO calculate an approximate value
-
-
             return getGameScore(playerId);
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
