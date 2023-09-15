@@ -8,6 +8,7 @@ import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
 import games.dotsboxes.DBStateFeaturesReduced;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.features.LLHandCards;
 import games.loveletter.features.LLStateFeaturesReduced;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeForwardModel;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class MCGSTests {
 
@@ -115,7 +117,9 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
+                assertEquals(0, problemNodes.size());
                 assertEquals(0, problemNodes.size());
             }
         } while (game.getGameState().isNotTerminal());
@@ -133,6 +137,8 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
+                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
                 problemNodes = root.nonMatchingNodes(allNodesForPlayerZero);
@@ -153,6 +159,9 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
+                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+                //                        root.getTranspositionMap().get(s).openLoopState.isNotTerminalForPlayer(0)).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
                 problemNodes = root.nonMatchingNodes(allNodesForPlayerZero);
@@ -160,7 +169,6 @@ public class MCGSTests {
             }
         } while (game.getGameState().isNotTerminal());
     }
-
 
 
     @Test
@@ -174,9 +182,24 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
             }
         } while (game.getGameState().isNotTerminal());
+    }
+
+    @Test
+    public void LoveLetterHandCardsOnlyTest() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
+        params.MCGSStateFeatureVector = new LLHandCards();
+        params.budget = 2000;
+
+        Game game = createLoveLetter(params);
+        // We now have a total space of 7 + 6 + 5 + 5 + 4 + 3 + 2 + 1 = 33 states
+        game.oneAction();
+        MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+        assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+        assertEquals(33, root.getTranspositionMap().size());
     }
 }

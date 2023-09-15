@@ -372,7 +372,7 @@ public class SingleTreeNode {
         int actingPlayer = cur.decisionPlayer;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.openLoopState.isNotTerminalForPlayer(actingPlayer) && cur.depth < params.maxTreeDepth && !cur.actionsFromOpenLoopState.isEmpty()) {
+        while (cur != null && cur.openLoopState.isNotTerminalForPlayer(actingPlayer) && cur.depth < params.maxTreeDepth && !cur.actionsFromOpenLoopState.isEmpty()) {
             List<AbstractAction> unexpanded = cur.unexpandedActions();
             if (!unexpanded.isEmpty()) {
                 // We have an unexpanded action

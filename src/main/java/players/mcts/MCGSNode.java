@@ -45,6 +45,10 @@ public class MCGSNode extends SingleTreeNode {
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
         MCGSNode graphRoot = (MCGSNode) root;
+        if (!openLoopState.isNotTerminal() || (params.opponentTreePolicy.selfOnlyTree && !openLoopState.isNotTerminalForPlayer(root.decisionPlayer))) {
+            // in this case we have reached a terminal state, and do not need to create a node
+            return this;
+        }
         String key = getKeyOf(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
             MCGSNode newNode =  graphRoot.transpositionMap.get(key);
@@ -61,13 +65,16 @@ public class MCGSNode extends SingleTreeNode {
         // extending...the next action from this new node will inevitably be an expansion (as no actions have yet been
         // tried from it). This just means that we'll often add two nodes to the graph in one iteration.
 
-        double[] featureVector = params.MCGSStateFeatureVector.featureVector(openLoopState, openLoopState.getCurrentPlayer());
-        String key = String.format("%d-%s", openLoopState.getCurrentPlayer(), Arrays.toString(featureVector));
+        if (!openLoopState.isNotTerminal() || (params.opponentTreePolicy.selfOnlyTree && !openLoopState.isNotTerminalForPlayer(root.decisionPlayer))) {
+            // in this case we have reached a terminal state, and do not need to create a node
+            return this;
+        }
+
+        String key = getKeyOf(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode == null) {
             nextNode = (MCGSNode) createChildNode(actionChosen.copy(), openLoopState);
-            ((MCGSNode) root).transpositionMap.put(key, nextNode);
         }
         nextNode.setActionsFromOpenLoopState(openLoopState);
         return nextNode;
