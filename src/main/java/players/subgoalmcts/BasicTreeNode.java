@@ -1,5 +1,4 @@
-package players.mcts;
-
+package players.subgoalmcts;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.MacroAction;
@@ -10,7 +9,7 @@ import utilities.ElapsedCpuTimer;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static players.PlayerConstants.*;
 import static utilities.Utils.noise;
 
@@ -21,6 +20,7 @@ class BasicTreeNode {
     BasicTreeNode parent;
     // Children of this node
     Map<AbstractAction, BasicTreeNode> children = new HashMap<>();
+    Map<MacroAction, BasicTreeNode> subGoalChildren = new HashMap<>();
     // Depth of this node
     final int depth;
 
@@ -130,7 +130,7 @@ class BasicTreeNode {
                 AbstractAction actionChosen = cur.ucb();
                 sequence.add(actionChosen);
                 hashCodes.add(cur.state.hashCode());
-                cur = cur.children.get(actionChosen);
+                cur = cur.children.get(actionChosen);  // TODO consider subgoal children too
             }
         }
 
@@ -174,9 +174,11 @@ class BasicTreeNode {
         // then instantiate a new node
         BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
-        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal()) {
+        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal()) { // TODO add subgoal predicate to whatever game
             MacroAction macroAction = new MacroAction(state.getCurrentPlayer(), sequence, hashCodes);
             // Create link from root or previous subgoal in this branch
+            // TODO check if not already exist, check rewards?
+            rootSubGoal.subGoalChildren.put(macroAction, tn);
         }
         return tn;
     }
@@ -242,7 +244,7 @@ class BasicTreeNode {
      * @return - value of rollout.
      */
     private double rollOut() {
-
+        // TODO subgoals could be here too
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
