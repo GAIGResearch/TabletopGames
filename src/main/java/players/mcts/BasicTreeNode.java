@@ -16,7 +16,7 @@ import static utilities.Utils.noise;
 
 class BasicTreeNode {
     // Root node of tree
-    BasicTreeNode root, rootSubGoal;
+    BasicTreeNode root;
     // Parent of this node
     BasicTreeNode parent;
     // Children of this node
@@ -43,7 +43,6 @@ class BasicTreeNode {
         this.fmCallsCount = 0;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
-        this.rootSubGoal = parent == null? this : parent.rootSubGoal == null? root : parent.rootSubGoal;
         totValue = 0.0;
         setState(state);
         if (parent != null) {
