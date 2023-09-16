@@ -31,6 +31,7 @@ public class MCGSNode extends SingleTreeNode {
             throw new AssertionError("Unexpected?");
         }
         graphRoot.transpositionMap.put(key, node);
+  //      System.out.println("Adding to transposition table: " + key);
     }
 
     /**
@@ -45,7 +46,7 @@ public class MCGSNode extends SingleTreeNode {
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
         MCGSNode graphRoot = (MCGSNode) root;
-        if (!openLoopState.isNotTerminal() || (params.opponentTreePolicy.selfOnlyTree && !openLoopState.isNotTerminalForPlayer(root.decisionPlayer))) {
+        if (!nextState.isNotTerminal() || (params.opponentTreePolicy.selfOnlyTree && !nextState.isNotTerminalForPlayer(root.decisionPlayer))) {
             // in this case we have reached a terminal state, and do not need to create a node
             return this;
         }
@@ -87,9 +88,12 @@ public class MCGSNode extends SingleTreeNode {
             // We only track this while in the tree (we could do the rollout as well, but at the overhead
             // of featureVector calculations
             MCGSNode mcgsRoot = (MCGSNode) root;
-            double[] featureVector = params.MCGSStateFeatureVector.featureVector(gs, gs.getCurrentPlayer());
-            String key = String.format("%d-%s", openLoopState.getCurrentPlayer(), Arrays.toString(featureVector));
+            String key = getKeyOf(gs);
             mcgsRoot.trajectory.add(key);
+//            System.out.println("Adding to trajectory: " + key);
+//            if (mcgsRoot.transpositionMap.size() == 1 && mcgsRoot.trajectory.size() == 1 && !mcgsRoot.transpositionMap.containsKey(key)) {
+//                throw new AssertionError("Trajectory should be the same size as the transposition map");
+//            }
             // this means we should be adding one state to the trajectory every time we add an action to the rollout
         }
         super.advance(gs, act, inRollout);

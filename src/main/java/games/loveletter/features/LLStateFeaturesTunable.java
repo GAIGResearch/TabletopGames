@@ -1,6 +1,7 @@
 package games.loveletter.features;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.PartialObservableDeck;
 import core.interfaces.IStateFeatureVector;
 import evaluation.optimisation.TunableParameters;
@@ -8,10 +9,12 @@ import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.cards.LoveLetterCard;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import static core.CoreConstants.GameResult.LOSE_ROUND;
 import static games.loveletter.cards.LoveLetterCard.CardType.*;
 
 /**
@@ -19,15 +22,20 @@ import static games.loveletter.cards.LoveLetterCard.CardType.*;
  */
 public class LLStateFeaturesTunable extends TunableParameters implements IStateFeatureVector {
 
-    boolean[] active = new boolean[]{true, true, true, true, true, true, true, true, true, true, true, true};
 
     String[] allNames = new String[]{"CARDS", "AFFECTION", "COUNTESS", "BARON",
             "GUARD", "HANDMAID", "KING", "PRIEST", "PRINCE", "PRINCESS", "HIDDEN",
-            "ADVANTAGE"};
+            "ADVANTAGE", "TURN", "ROUND",
+            "KNOWLEDGE", "PROTECTION", "KNOCKED_OUT",
+            "GUARD_DISCARD", "HANDMAID_DISCARD", "PRIEST_DISCARD", "BARON_DISCARD", "PRINCE_DISCARD",
+            "KING_DISCARD", "COUNTESS_DISCARD", "PRINCESS_DISCARD"};
+
+    boolean[] active = new boolean[allNames.length];
 
     String[] namesUsed;
 
     public LLStateFeaturesTunable() {
+        Arrays.fill(active, true);
         for (String name : allNames) {
             addTunableParameter(name, true);
         }
@@ -56,14 +64,10 @@ public class LLStateFeaturesTunable extends TunableParameters implements IStateF
                 cardValues += card.cardType.getValue();
                 cardTypes.add(card.cardType);
             }
-            double maxCardValue = 1 + llgs.getPlayerHandCards().get(playerId).getSize() * getMaxCardValue();
-            data[0] = cardValues / maxCardValue;
+            data[0] = cardValues;
         }
 
-        double nRequiredTokens = (llgs.getNPlayers() == 2 ? llp.nTokensWin2 : llgs.getNPlayers() == 3 ? llp.nTokensWin3 : llp.nTokensWin4);
-        if (nRequiredTokens < llgs.getGameScore(playerId)) nRequiredTokens = llgs.getGameScore(playerId);
-
-        data[1] = llgs.getGameScore(playerId) / nRequiredTokens;
+        data[1] = llgs.getGameScore(playerId);
 
         if (cardTypes.contains(Countess)) data[2] = 1.0;
         if (cardTypes.contains(King)) data[6] = 1.0;
@@ -82,15 +86,65 @@ public class LLStateFeaturesTunable extends TunableParameters implements IStateF
                     visibleCards += (int) IntStream.range(0, deck.getSize()).filter(i -> deck.getVisibilityForPlayer(i, playerId)).count();
                 }
             }
-            data[10] = visibleCards / (llgs.getNPlayers() - 1.0);
+            data[10] = visibleCards;
         }
 
         if (active[11]) {
             int maxOtherScore = IntStream.range(0, llgs.getNPlayers())
                     .filter(p -> p != playerId)
                     .map(p -> (int) llgs.getGameScore(p)).max().orElseThrow(() -> new AssertionError("??"));
-            data[11] = (llgs.getGameScore(playerId) - maxOtherScore) / nRequiredTokens;
+            data[11] = llgs.getGameScore(playerId) - maxOtherScore;
         }
+        data[12] = llgs.getTurnCounter();
+        data[13] = llgs.getRoundCounter();
+        // Knowledge - known player identities
+        if (active[14]) {
+            int value = 0;
+            for (int p = 0; p < llgs.getNPlayers(); p++) {
+                if (p != llgs.getCurrentPlayer() && llgs.isNotTerminalForPlayer(p)) {
+                    PartialObservableDeck<LoveLetterCard> hand = llgs.getPlayerHandCards().get(p);
+                    if (hand.getSize() > 0 && hand.getVisibilityForPlayer(0, llgs.getCurrentPlayer())) {
+                        value += (int) (Math.pow(10, p)) * hand.getComponents().get(0).cardType.getValue();
+                        break; // we just care if any other player knows the card
+                    }
+                }
+            }
+            data[14] = value;
+        }
+        // Protection - whether the player is protected
+        if (active[15]) {
+            data[15] = IntStream.range(0, llgs.getNPlayers()).map(p -> llgs.isProtected(p) ? (int) Math.pow(2, p) : 0).sum();
+        }
+        // Knocked out - whether the player is knocked out
+        if (active[16]) {
+            data[16] = IntStream.range(0, llgs.getNPlayers()).map(p -> llgs.getPlayerResults()[p] == LOSE_ROUND ? (int) Math.pow(2, p) : 0).sum();
+        }
+        // Discard piles
+        if (active[17])
+            data[17] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Guard).count();
+        if (active[18])
+            data[18] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Handmaid).count();
+        if (active[19])
+            data[19] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Priest).count();
+        if (active[20])
+            data[20] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Baron).count();
+        if (active[21])
+            data[21] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Prince).count();
+        if (active[22])
+            data[22] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == King).count();
+        if (active[23])
+            data[23] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Countess).count();
+        if (active[24])
+            data[24] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
+                    .filter(card -> card.cardType == Princess).count();
+
 
         double[] retValue = new double[namesUsed.length];
         int count = 0;

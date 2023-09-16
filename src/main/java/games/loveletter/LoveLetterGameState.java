@@ -80,6 +80,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         llgs.affectionTokens = affectionTokens.clone();
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
+            llgs.drawPile.add(llgs.removedCard);
             // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
@@ -94,6 +95,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             }
             Random r = new Random(llgs.getGameParameters().getRandomSeed());
             llgs.drawPile.shuffle(r);
+            llgs.removedCard = llgs.drawPile.draw();
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // New random cards

@@ -240,6 +240,8 @@ public class SingleTreeNode {
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
+          //  System.out.println("Starting MCTS Search iteration " + numIters);
+
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
             oneSearchIteration();
 
