@@ -166,13 +166,13 @@ public class PokerForwardModel extends StandardForwardModel {
     private void roundEnd(PokerGameState pgs) {
         // Calculate winner of round for each of the pots, they earn the money. Ties split money equally.
 
-        Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translated = translatePokerHands(pgs);
-        HashMap<Integer, Integer> ranks = translated.a;
-        HashMap<Integer, HashSet<Integer>> hands = translated.b;
+        Pair<Map<Integer, Integer>, Map<Integer, Set<Integer>>> translated = translatePokerHands(pgs);
+        Map<Integer, Integer> ranks = translated.a;
+        Map<Integer, Set<Integer>> hands = translated.b;
 
         for (MoneyPot pot : pgs.moneyPots) {
             // Calculate winners separately for each money pot
-            HashSet<Integer> winners = getWinner(pgs, pot, ranks, hands);
+            Set<Integer> winners = getWinner(pgs, pot, ranks, hands);
             for (int i : winners) {
                 pgs.playerMoney[i].increment(pot.getValue() / winners.size());
             }
@@ -196,13 +196,14 @@ public class PokerForwardModel extends StandardForwardModel {
         setupRound(pgs);
     }
 
-    public Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translatePokerHands(PokerGameState pgs) {
-        HashMap<Integer, Integer> ranks = new HashMap<>();
-        HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
+    public Pair<Map<Integer, Integer>, Map<Integer, Set<Integer>>> translatePokerHands(PokerGameState pgs) {
+        Map<Integer, Integer> ranks = new HashMap<>();
+        Map<Integer, Set<Integer>> hands = new HashMap<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
-                pgs.playerDecks.get(i).add(pgs.communityCards.copy());
-                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
+                Deck<FrenchCard> cardsToEvaluate = pgs.playerDecks.get(i).copy();
+                cardsToEvaluate.add(pgs.communityCards.copy());
+                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(cardsToEvaluate);
                 if (hand != null) {
                     ranks.put(i, hand.a.rank);
                     hands.put(i, hand.b);
@@ -213,10 +214,10 @@ public class PokerForwardModel extends StandardForwardModel {
     }
 
     @SuppressWarnings("unchecked")
-    public HashSet<Integer> getWinner(PokerGameState pgs, MoneyPot pot,
-                                      HashMap<Integer, Integer> ranks, HashMap<Integer, HashSet<Integer>> hands) {
+    public Set<Integer> getWinner(PokerGameState pgs, MoneyPot pot,
+                                      Map<Integer, Integer> ranks, Map<Integer, Set<Integer>> hands) {
         // Calculate winners separately for each money pot
-        HashSet<Integer> playersInPot = new HashSet<>(pot.getPlayerContribution().keySet());
+        Set<Integer> playersInPot = new HashSet<>(pot.getPlayerContribution().keySet());
 
         int smallestRank = 11;
         for (int i : playersInPot) {
@@ -224,7 +225,7 @@ public class PokerForwardModel extends StandardForwardModel {
                 smallestRank = ranks.get(i);
             }
         }
-        HashSet<Integer> winners = new HashSet<>();
+        Set<Integer> winners = new HashSet<>();
         for (int i : playersInPot) {
             if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
                 if (ranks.get(i) == smallestRank) winners.add(i);

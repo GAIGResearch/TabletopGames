@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.PartialObservableDeck;
 import core.interfaces.IStateFeatureVector;
+import evaluation.features.TunableStateFeatures;
 import evaluation.optimisation.TunableParameters;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
@@ -20,39 +21,22 @@ import static games.loveletter.cards.LoveLetterCard.CardType.*;
 /**
  * A set of features designed to tie in exactly with those used in LoveLetterHeuristic
  */
-public class LLStateFeaturesTunable extends TunableParameters implements IStateFeatureVector {
+public class LLStateFeaturesTunable extends TunableStateFeatures {
 
-
-    String[] allNames = new String[]{"CARDS", "AFFECTION", "COUNTESS", "BARON",
+    static String[] allNames = new String[]{"CARDS", "AFFECTION", "COUNTESS", "BARON",
             "GUARD", "HANDMAID", "KING", "PRIEST", "PRINCE", "PRINCESS", "HIDDEN",
             "ADVANTAGE", "TURN", "ROUND",
             "KNOWLEDGE", "PROTECTION", "KNOCKED_OUT",
             "GUARD_DISCARD", "HANDMAID_DISCARD", "PRIEST_DISCARD", "BARON_DISCARD", "PRINCE_DISCARD",
             "KING_DISCARD", "COUNTESS_DISCARD", "PRINCESS_DISCARD"};
 
-    boolean[] active = new boolean[allNames.length];
-
-    String[] namesUsed;
-
     public LLStateFeaturesTunable() {
-        Arrays.fill(active, true);
-        for (String name : allNames) {
-            addTunableParameter(name, true);
-        }
+        super(allNames);
     }
 
     @Override
-    public void _reset() {
-        for (int i = 0; i < allNames.length; i++) {
-            active[i] = (Boolean) getParameterValue(allNames[i]);
-        }
-        namesUsed = IntStream.range(0, allNames.length).filter(i -> active[i]).mapToObj(i -> allNames[i]).toArray(String[]::new);
-    }
-
-    @Override
-    public double[] featureVector(AbstractGameState gs, int playerId) {
+    public double[] fullFeatureVector(AbstractGameState gs, int playerId) {
         LoveLetterGameState llgs = (LoveLetterGameState) gs;
-        LoveLetterParameters llp = (LoveLetterParameters) gs.getGameParameters();
 
         double[] data = new double[allNames.length];
 
@@ -145,47 +129,13 @@ public class LLStateFeaturesTunable extends TunableParameters implements IStateF
             data[24] = llgs.getPlayerDiscardCards().stream().flatMap(deck -> deck.getComponents().stream())
                     .filter(card -> card.cardType == Princess).count();
 
-
-        double[] retValue = new double[namesUsed.length];
-        int count = 0;
-        for (int i = 0; i < allNames.length; i++) {
-            if (active[i]) {
-                retValue[count] = data[i];
-                count++;
-            }
-        }
-        return retValue;
-    }
-
-    @Override
-    public String[] names() {
-        return namesUsed;
+        return data;
     }
 
     @Override
     protected LLStateFeaturesTunable _copy() {
         return new LLStateFeaturesTunable();
         // setting of values is done in TunableParameters
-    }
-
-    @Override
-    protected boolean _equals(Object o) {
-        if (o instanceof LLStateFeaturesTunable) {
-            LLStateFeaturesTunable other = (LLStateFeaturesTunable) o;
-            if (other.active.length != active.length)
-                return false;
-            for (int i = 0; i < active.length; i++) {
-                if (other.active[i] != active[i])
-                    return false;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public LLStateFeaturesTunable instantiate() {
-        return this._copy();
     }
 
 }
