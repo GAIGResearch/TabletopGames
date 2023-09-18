@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
@@ -62,6 +63,7 @@ public class MCTSParams extends PlayerParameters {
     public IActionKey MASTActionKey;
     public IStateFeatureVector MCGSStateFeatureVector;
     public double MASTDefaultValue = 0.0;
+    public double firstPlayUrgency = 1000000000.0;
 
     public MCTSParams() {
         this(System.currentTimeMillis());

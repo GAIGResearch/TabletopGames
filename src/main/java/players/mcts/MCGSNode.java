@@ -82,7 +82,7 @@ public class MCGSNode extends SingleTreeNode {
     }
 
     @Override
-    protected void advance(AbstractGameState gs, AbstractAction act, boolean inRollout) {
+    protected SingleTreeNode advance(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // This is a convenient point to record the trajectory for use during the backup
         if (!inRollout) {
             // We only track this while in the tree (we could do the rollout as well, but at the overhead
@@ -96,7 +96,7 @@ public class MCGSNode extends SingleTreeNode {
 //            }
             // this means we should be adding one state to the trajectory every time we add an action to the rollout
         }
-        super.advance(gs, act, inRollout);
+        return super.advance(gs, act, inRollout);
     }
 
 
