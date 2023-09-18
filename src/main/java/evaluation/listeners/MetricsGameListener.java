@@ -49,7 +49,7 @@ public class MetricsGameListener implements IGameListener {
     }
 
     public MetricsGameListener(AbstractMetric[] metrics) {
-        this(ToConsole, metrics);
+        this(ToFile, metrics);
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
