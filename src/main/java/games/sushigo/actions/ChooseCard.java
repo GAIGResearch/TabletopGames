@@ -39,7 +39,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         // Chopsticks allowing to pick second card, different from that already selected
         SGGameState sggs = (SGGameState) state;
         int idxSelected = sggs.getCardChoices().get(playerId).get(0).cardIdx;
-        List<AbstractAction> actions = new ArrayList<>();
+        Set<AbstractAction> actions = new HashSet<>();
 
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(playerId);
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
@@ -51,7 +51,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         }
         if (actions.isEmpty())
             throw new AssertionError("No actions");
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     @Override

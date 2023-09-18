@@ -256,7 +256,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         SGGameState sggs = (SGGameState) gameState;
-        List<AbstractAction> actions = new ArrayList<>();
+        Set<AbstractAction> actions = new HashSet<>();
 
         int currentPlayer = sggs.getCurrentPlayer();
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
@@ -268,7 +268,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                 actions.add(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, true));
             }
         }
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     @Override
