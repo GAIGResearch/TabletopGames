@@ -29,14 +29,14 @@ public class SGCard extends Card {
             Tempura.onReveal = (gs, p) -> {
                 // Adds points for pairs (/2)
                 Counter amount = gs.getPlayedCardTypes(Tempura, p);
-                int value = ((SGParameters)gs.getGameParameters()).valueTempuraPair * (amount.getValue() / 2);
-                gs.addPlayerScore(p, value, Tempura);
+                if (amount.getValue() % 2 == 0)
+                    gs.addPlayerScore(p, ((SGParameters)gs.getGameParameters()).valueTempuraPair, Tempura);
             };
             Sashimi.onReveal = (gs, p) -> {
                 // Adds points for triplets (/3)
                 Counter amount = gs.getPlayedCardTypes(Sashimi, p);
-                int value = ((SGParameters)gs.getGameParameters()).valueSashimiTriss * (amount.getValue() / 3);
-                gs.addPlayerScore(p, value, Sashimi);
+                if (amount.getValue() % 3 == 0)
+                    gs.addPlayerScore(p, ((SGParameters)gs.getGameParameters()).valueSashimiTriss, Sashimi);
             };
             Dumpling.onReveal = (gs, p) -> {
                 // Add points depending on how many were collected, parameter array used for increments
