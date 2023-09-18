@@ -326,6 +326,7 @@ class BasicTreeNode {
      * @param result - value of rollout to backup
      */
     private void backUp(double result) {
+        // TODO: should we favour shorter macro-actions?
         BasicTreeNode n = this;
         while (n != null) {
             n.nVisits++;
