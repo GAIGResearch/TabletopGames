@@ -13,15 +13,17 @@ import java.util.*;
 public class ChooseCard extends AbstractAction implements IExtendedSequence {
     public final int playerId;
     public final SGCard.SGCardType cardType;
+    public final int iconCount;
     public final int cardIdx;
     public final boolean useChopsticks;
 
     boolean chopstickChooseDone;
 
-    public ChooseCard(int playerId, int idx, SGCard.SGCardType type, boolean useChopsticks) {
+    public ChooseCard(int playerId, int idx, SGCard.SGCardType type, int iconCount, boolean useChopsticks) {
         this.playerId = playerId;
         this.cardIdx = idx;
         this.cardType = type;
+        this.iconCount = iconCount;
         this.useChopsticks = useChopsticks;
     }
 
@@ -46,7 +48,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
             // All players can do is choose a card in hand to play. Cannot chain chopsticks, only 1 per turn can be used.
             // So all of these actions can only be 'useChopsticks = false'
             if (idxSelected != i) {
-                actions.add(new ChooseCard(playerId, i, currentPlayerHand.get(i).type, false));
+                actions.add(new ChooseCard(playerId, i, currentPlayerHand.get(i).type, currentPlayerHand.get(i).count, false));
             }
         }
         if (actions.isEmpty())
@@ -72,7 +74,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
     @Override
     public ChooseCard copy() {
         if (useChopsticks) {
-            ChooseCard retValue = new ChooseCard(playerId, cardIdx, cardType, useChopsticks);
+            ChooseCard retValue = new ChooseCard(playerId, cardIdx, cardType, iconCount, useChopsticks);
             retValue.chopstickChooseDone = chopstickChooseDone;
             return retValue;
         }
@@ -85,25 +87,25 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         if (!(o instanceof ChooseCard)) return false;
         ChooseCard that = (ChooseCard) o;
         if (useChopsticks) {
-            return playerId == that.playerId && chopstickChooseDone == that.chopstickChooseDone && cardType == that.cardType && cardIdx == that.cardIdx;
+            return playerId == that.playerId && iconCount == that.iconCount && chopstickChooseDone == that.chopstickChooseDone && cardType == that.cardType && cardIdx == that.cardIdx;
         } else {
             // ignore card idx
-            return playerId == that.playerId && cardType == that.cardType;
+            return playerId == that.playerId && cardType == that.cardType && iconCount == that.iconCount;
         }
     }
 
     @Override
     public int hashCode() {
         if (useChopsticks) {
-            return Objects.hash(playerId, cardIdx, cardType, useChopsticks, chopstickChooseDone);
+            return Objects.hash(playerId, cardIdx, cardType, iconCount, useChopsticks, chopstickChooseDone);
         } else {
-            return Objects.hash(playerId, cardType);
+            return Objects.hash(playerId, cardType, iconCount);
         }
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Choose card " + cardType + " [" + cardIdx + "] " + (useChopsticks ? " (+chopsticks)" : "");
+        return "Choose card " + (cardType == SGCard.SGCardType.Maki? cardType + "-" + iconCount : cardType) + " [" + cardIdx + "] " + (useChopsticks ? " (+chopsticks)" : "");
     }
 
     public Card getCard(AbstractGameState gs) {
@@ -113,7 +115,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return cardType + " (" + playerId + ")" + (useChopsticks ? " !!" : "");  // Compact version
+        return (cardType == SGCard.SGCardType.Maki? cardType + "-" + iconCount : cardType) + " (" + playerId + ")" + (useChopsticks ? " !!" : "");  // Compact version
 //        return "ChooseCard{" +
 //                "playerId=" + playerId +
 //                "type=" + cardType +

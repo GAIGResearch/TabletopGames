@@ -1,4 +1,5 @@
 package players.subgoalmcts;
+
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -6,11 +7,6 @@ import core.interfaces.IStateHeuristic;
 
 import java.util.List;
 import java.util.Random;
-
-import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
-import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
-import static players.mcts.MCTSEnums.TreePolicy.UCB;
 
 /**
  * This is a simple version of MCTS that may be useful for newcomers to TAG and MCTS-like algorithms
@@ -42,7 +38,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     public BasicMCTSPlayer(MCTSParams params) {
         this.params = params;
         rnd = new Random(params.getRandomSeed());
-        setName("Basic MCTS");
+        setName("Subgoal MCTS");
     }
 
     @Override
@@ -65,7 +61,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
     @Override
     public String toString() {
-        return "BasicMCTS";
+        return "Subgoal MCTS";
     }
 
     @Override
