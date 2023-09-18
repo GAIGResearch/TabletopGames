@@ -18,6 +18,10 @@ public class MCTSParams extends PlayerParameters {
         SUBGOAL_PARENT, NATURAL_PARENT, BOTH
     }
 
+    public enum RecommendationPolicy {
+        SUBGOALS, STANDARD
+    }
+
     public double K = Math.sqrt(2);
     public int rolloutLength = 10; // assuming we have a good heuristic
     public int maxTreeDepth = 1000; // effectively no limit
@@ -47,6 +51,7 @@ public class MCTSParams extends PlayerParameters {
     public IActionKey MASTActionKey;
     public double MASTDefaultValue = 0.0;
     public BackUpPolicy backUpPolicy = BackUpPolicy.NATURAL_PARENT;
+    public RecommendationPolicy recommendationPolicy = RecommendationPolicy.STANDARD;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -84,7 +89,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
-        addTunableParameter("BackupPolicy", BackUpPolicy.NATURAL_PARENT);
+        addTunableParameter("backupPolicy", BackUpPolicy.NATURAL_PARENT);
+        addTunableParameter("recommendationPolicy", RecommendationPolicy.STANDARD);
     }
 
     @Override
@@ -121,7 +127,8 @@ public class MCTSParams extends PlayerParameters {
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 
-        backUpPolicy = (BackUpPolicy) getParameterValue("BackupPolicy");
+        backUpPolicy = (BackUpPolicy) getParameterValue("backupPolicy");
+        recommendationPolicy = (RecommendationPolicy) getParameterValue("recommendationPolicy");
 
     }
 
