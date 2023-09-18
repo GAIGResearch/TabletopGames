@@ -113,12 +113,13 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "ChooseCard{" +
-                "playerId=" + playerId +
-                "type=" + cardType +
-                ", cardIdx=" + cardIdx +
-                ", useChopsticks=" + useChopsticks +
-                ", chopstickChooseDone=" + chopstickChooseDone +
-                '}';
+        return cardType + " (" + playerId + ")" + (useChopsticks ? " !!" : "");  // Compact version
+//        return "ChooseCard{" +
+//                "playerId=" + playerId +
+//                "type=" + cardType +
+//                ", cardIdx=" + cardIdx +
+//                ", useChopsticks=" + useChopsticks +
+//                ", chopstickChooseDone=" + chopstickChooseDone +
+//                '}';
     }
 }
