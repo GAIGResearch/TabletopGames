@@ -8,20 +8,20 @@ import java.util.Objects;
 
 public class MacroAction extends AbstractAction {
     final List<AbstractAction> actions;  // atomic actions that when applied in sequence make this macro action
-    final List<Integer> stateHashes;  // hash of sets action at corresponding index can be applied in
+    final List<AbstractGameState> states;  // sets of states we've gone through.
     final int playerID;
     int nextToBeApplied;
 
-    public MacroAction(int playerID, List<AbstractAction> actions, List<Integer> stateHashes) {
+    public MacroAction(int playerID, List<AbstractAction> actions, List<AbstractGameState> stateHashes) {
         this.playerID = playerID;
         this.actions = actions;
-        this.stateHashes = stateHashes;
+        this.states = stateHashes;
         nextToBeApplied = 0;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (stateHashes.get(nextToBeApplied) == gs.hashCode()) {
+        if (states.get(nextToBeApplied).hashCode() == gs.hashCode()) {
             actions.get(nextToBeApplied).execute(gs);
             nextToBeApplied++;
             return true;
@@ -30,15 +30,15 @@ public class MacroAction extends AbstractAction {
     }
 
     public Integer getFinalStateHash() {
-        return stateHashes.get(stateHashes.size() - 1);
+        return states.get(states.size() - 1).hashCode();
     }
 
     public List<AbstractAction> getActions() {
         return actions;
     }
 
-    public List<Integer> getStateHashes() {
-        return stateHashes;
+    public List<AbstractGameState> getStates() {
+        return states;
     }
 
     public AbstractAction getNext() {
@@ -58,7 +58,7 @@ public class MacroAction extends AbstractAction {
         for (AbstractAction action : actions) {
             actionsCopy.add(action.copy());
         }
-        MacroAction copy = new MacroAction(playerID, actionsCopy, new ArrayList<>(stateHashes));
+        MacroAction copy = new MacroAction(playerID, actionsCopy, new ArrayList<>(states));
         copy.nextToBeApplied = nextToBeApplied;
         return copy;
     }

@@ -4,8 +4,10 @@
 	"rolloutLength" : 0,
 	"maxTreeDepth" : 30,
 	"epsilon" : 1e-6,
-	"budgetType" : "BUDGET_TIME",
-	"budget" : 40,
+	"budgetType" : "BUDGET_FM_CALLS",
+	"recommendationPolicy" : "SUBGOALS",
+	"backupPolicy" : "SUBGOAL_PARENT",
+	"budget" : 500,
 	"breakMS" : 0,
 	"heuristic" : {
  		"class" : "players.heuristics.ScoreHeuristic"

@@ -121,20 +121,20 @@ class BasicTreeNode {
 
         BasicTreeNode cur = this;
         List<AbstractAction> sequence = new ArrayList<>();
-        List<Integer> hashCodes = new ArrayList<>();
+        List<AbstractGameState> stateSequence = new ArrayList<>();
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
-                cur = cur.expand(sequence, hashCodes);
+                cur = cur.expand(sequence, stateSequence);
                 return cur;
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
                 boolean toSubgoal = actionChosen instanceof MacroAction;
                 sequence.add(actionChosen);
-                hashCodes.add(cur.state.hashCode());
+                stateSequence.add(cur.state);
                 if(toSubgoal)
                     cur = cur.subGoalChildren.get(actionChosen);
                 else
@@ -165,14 +165,14 @@ class BasicTreeNode {
      *
      * @return - new child node.
      */
-    private BasicTreeNode expand(List<AbstractAction> sequence, List<Integer> hashCodes) {
+    private BasicTreeNode expand(List<AbstractAction> sequence, List<AbstractGameState> stateSequence) {
         // Find random child not already created
         Random r = new Random(player.params.getRandomSeed());
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
         AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
         sequence.add(chosen);
-        hashCodes.add(state.hashCode());
+        stateSequence.add(state);
 
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
@@ -182,8 +182,13 @@ class BasicTreeNode {
         // then instantiate a new node
         BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
-        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal(state, chosen) && !rootSubGoal.containsSubgoal(nextState)) {
-            MacroAction macroAction = new MacroAction(state.getCurrentPlayer(), sequence, hashCodes);
+
+        // TODO We can also try to manage subgoals for the opponent.
+        if (state.getCurrentPlayer() == player.getPlayerID() &&
+                nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal(state, chosen) &&
+                !rootSubGoal.containsSubgoal(nextState)) {
+
+            MacroAction macroAction = new MacroAction(state.getCurrentPlayer(), sequence, stateSequence);
             // Create link from root or previous subgoal in this branch
             rootSubGoal.subGoalChildren.put(macroAction, tn);
             tn.subgoalParent = rootSubGoal;
@@ -352,21 +357,39 @@ class BasicTreeNode {
         double bestValue = -Double.MAX_VALUE;
         AbstractAction bestAction = null;
 
-        for (AbstractAction action : children.keySet()) {
-            if (children.get(action) != null) {
-                BasicTreeNode node = children.get(action);
-                double childValue = node.nVisits;
+        if(player.params.recommendationPolicy == MCTSParams.RecommendationPolicy.STANDARD || subGoalChildren.size() == 0)
+            for (AbstractAction action : children.keySet()) {
+                if (children.get(action) != null) {
+                    BasicTreeNode node = children.get(action);
+                    double childValue = node.nVisits;
 
-                // Apply small noise to break ties randomly
-                childValue = noise(childValue, player.params.epsilon, player.rnd.nextDouble());
+                    // Apply small noise to break ties randomly
+                    childValue = noise(childValue, player.params.epsilon, player.rnd.nextDouble());
 
-                // Save best value (highest visit count)
-                if (childValue > bestValue) {
-                    bestValue = childValue;
-                    bestAction = action;
+                    // Save best value (highest visit count)
+                    if (childValue > bestValue) {
+                        bestValue = childValue;
+                        bestAction = action;
+                    }
                 }
             }
-        }
+
+        if(player.params.recommendationPolicy == MCTSParams.RecommendationPolicy.SUBGOALS)
+            for (MacroAction action : subGoalChildren.keySet()) {
+                if (subGoalChildren.get(action) != null) {
+                    BasicTreeNode node = subGoalChildren.get(action);
+                    double childValue = node.nVisits;
+
+                    // Apply small noise to break ties randomly
+                    childValue = noise(childValue, player.params.epsilon, player.rnd.nextDouble());
+
+                    // Save best value (highest visit count)
+                    if (childValue > bestValue) {
+                        bestValue = childValue;
+                        bestAction = action.getActions().get(0);
+                    }
+                }
+            }
 
         if (bestAction == null) {
             throw new AssertionError("Unexpected - no selection made.");
