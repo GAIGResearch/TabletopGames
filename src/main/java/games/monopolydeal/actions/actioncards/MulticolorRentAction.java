@@ -67,7 +67,7 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 break;
             case ChoosePropertySet:
                 for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-                    if(pSet.getSetType() != SetType.UNDEFINED){
+                    if(pSet.getSetType() != SetType.UNDEFINED && pSet.getPropertySetSize()>0){
                         availableActions.add(new RentOf(pSet));
                     }
                 }

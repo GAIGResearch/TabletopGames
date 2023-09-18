@@ -1,9 +1,10 @@
-package games.monopolydeal.actions.informationcontainer;
+package games.monopolydeal.actions.boardmanagement;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
@@ -24,29 +25,15 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class RentOf extends AbstractAction {
-
-    final PropertySet pSet;
-    public int rent;
-
-    public RentOf(PropertySet pSet, int rent){
-        this.pSet = pSet;
-        this.rent = rent;
+public class AddBuilding extends AbstractAction {
+    final int player;
+    final MonopolyDealCard card;
+    final SetType setType;
+    public AddBuilding(MonopolyDealCard card, int playerId, SetType setType) {
+        this.card = card;
+        this.setType = setType;
+        player = playerId;
     }
-    public RentOf(PropertySet pSet) {
-        this.pSet = pSet;
-        SetType setType = pSet.getSetType();
-        if(pSet.isComplete){
-            rent = setType.rent[setType.setSize-1];
-            if(pSet.hasHouse) rent = rent + 3;
-            if(pSet.hasHotel) rent = rent + 4;
-        } else {
-            if(pSet.getPropertySetSize()-1 >= setType.rent.length)
-                throw new AssertionError("Another thing which should not happen");
-            rent = setType.rent[pSet.getPropertySetSize() - 1];
-        }
-    }
-
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the {@link AbstractGameState#getComponentById(int)} method.
@@ -56,6 +43,10 @@ public class RentOf extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState state = (MonopolyDealGameState) gs;
+        state.removeCardFromHand(player, card);
+        state.addPropertyToSet(player,card,setType);
+        state.useAction(1);
         return true;
     }
 
@@ -66,28 +57,26 @@ public class RentOf extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public RentOf copy() {
-        // TODO: copy non-final variables appropriately
-        return new RentOf(pSet,rent);
+    public AddBuilding copy() {
+        return new AddBuilding(card,player,setType);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        RentOf rentOf = (RentOf) o;
-        return rent == rentOf.rent && Objects.equals(pSet, rentOf.pSet);
+        AddBuilding that = (AddBuilding) o;
+        return player == that.player && Objects.equals(card, that.card) && setType == that.setType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pSet, rent);
+        return Objects.hash(player, card, setType);
     }
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return pSet + " rent is " + rent;
+        return "Add " + card.toString() + " to " + setType;
     }
 
     /**

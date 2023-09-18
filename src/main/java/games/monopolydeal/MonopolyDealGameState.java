@@ -250,15 +250,13 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerPropertySets[target].remove(indx);
         playerPropertySets[playerID].add(pSet);
     }
-    // Using setSize as a verification incase there are multiple versions of same setType
     public int getSetIndx(int playerID, SetType type){
-        int setIndx = 99;
-        for (PropertySet set:playerPropertySets[playerID]) {
+        for (PropertySet set: playerPropertySets[playerID]) {
             if(set.getSetType() == type){
                 return playerPropertySets[playerID].indexOf(set);
             }
         }
-        return setIndx;
+        return 99;
     }
     public boolean checkForForcedDeal(int playerID){
         boolean target;
@@ -290,7 +288,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public boolean checkForMulticolorRent(int playerID){
         for (PropertySet pSet: playerPropertySets[playerID]) {
-            if(pSet.getSetType() != SetType.UNDEFINED && pSet.getSize()>0){
+            if(pSet.getSetType() != SetType.UNDEFINED && pSet.getPropertySetSize()>0){
                 return true;
             }
         }
@@ -310,7 +308,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public boolean playerHasSet(int playerID, SetType setType){
         for (PropertySet pSet: playerPropertySets[playerID]) {
-            if(pSet.getSetType() == setType && pSet.getSize()>0) return true;
+            if(pSet.getSetType() == setType && pSet.getPropertySetSize() > 0) return true;
         }
         return false;
     }

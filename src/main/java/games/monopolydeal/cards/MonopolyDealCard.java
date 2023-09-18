@@ -121,7 +121,7 @@ public class MonopolyDealCard extends Card{
     @Override
     public MonopolyDealCard copy() {
         // Only property cards need to keep reference of their useAs other cards are immutable
-        if(!isPropertyCard())
+        if(!(isPropertyCard()|| cardType()==CardType.House || cardType()==CardType.Hotel))
             return this;
         else {
             MonopolyDealCard cardCopy = new MonopolyDealCard(this.cardType());
@@ -134,7 +134,7 @@ public class MonopolyDealCard extends Card{
     public boolean equals(Object obj) {
         if (obj instanceof MonopolyDealCard) {
             MonopolyDealCard other = (MonopolyDealCard) obj;
-            return other.type == type && other.useAs == useAs;
+            return other.type == type;
         }
         return false;
     }

@@ -51,7 +51,7 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         //      MoveFromTo
         List<AbstractAction> availableActions = new ArrayList<>();
         for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
-            if(pSet.hasWild && !pSet.hasHouse){
+            if(pSet.hasWild){
                 for (int i=0;i<pSet.getSize();i++) {
                     MonopolyDealCard card = pSet.get(i);
                     if(card.isPropertyWildCard()){
@@ -67,7 +67,7 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
                             availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
                     }
                 }
-            } else if (pSet.isComplete && pSet.hasHouse && !pSet.hasHotel) { // Moving House
+            } else if (pSet.hasHouse && !pSet.hasHotel) { // Moving House
                 for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
                     if(propSet!= pSet && propSet.isComplete && !propSet.hasHouse){
                         if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType())))
@@ -76,7 +76,7 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
                 }
                 if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED)))
                     availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED));
-            }else if (pSet.isComplete && pSet.hasHouse && pSet.hasHotel){ // Moving Hotel
+            }else if (pSet.hasHotel){ // Moving Hotel
                 for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
                     if(propSet!= pSet && propSet.isComplete && propSet.hasHouse && !propSet.hasHotel){
                         if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType())))

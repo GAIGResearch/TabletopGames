@@ -34,16 +34,20 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         newSet.hasHotel = hasHotel;
         return newSet;
     }
+    public int getPropertySetSize(){
+        int count = 0;
+        for (int i=0; i<this.getSize();i++) {
+            if(this.get(i).isPropertyCard()) count = count+1;
+        }
+        return count;
+    }
     public SetType getSetType(){return type;}
     public boolean getIsComplete(){return isComplete;}
-    // Note to self
-    // Add house/hotel only if complete set
-    // modify properties only if no house/hotel present
     @Override
     public boolean add(MonopolyDealCard c) {
         if(c.type == CardType.House ) hasHouse = true;
         else if (c.type == CardType.Hotel ) hasHotel = true;
-        else if(getSize() >= getSetType().setSize - 1)
+        else if(getPropertySetSize() >= getSetType().setSize - 1)
             isComplete = true;
         if(c.isPropertyWildCard())hasWild = true;
         return super.add(c);
@@ -52,7 +56,7 @@ public class PropertySet extends Deck<MonopolyDealCard> {
     public boolean remove(MonopolyDealCard c) {
         if(c.type == CardType.House ) hasHouse = false;
         else if (c.type == CardType.Hotel ) hasHotel = false;
-        if(c.isPropertyCard() && getSize() <= getSetType().setSize-1) isComplete = false;
+        if(c.isPropertyCard() && getPropertySetSize() <= getSetType().setSize-1) isComplete = false;
         if(c.isPropertyWildCard()){
             int wildCount = 0;
             for (MonopolyDealCard dealCard: this.components) {

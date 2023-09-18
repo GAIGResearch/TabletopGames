@@ -7,7 +7,9 @@ import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -24,13 +26,13 @@ import static java.util.stream.Collectors.toList;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
  */
-public class PlayOnBoard extends AbstractAction implements IExtendedSequence {
+public class AddToBoard extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     boolean executed;
 
-    public PlayOnBoard(int playerID) {
+    public AddToBoard(int playerID) {
         this.playerID = playerID;
     }
 
@@ -62,7 +64,29 @@ public class PlayOnBoard extends AbstractAction implements IExtendedSequence {
                     .map(propertySet -> new AddWildTo(propertySet,playerID)).collect(toList()));
             availableActions.add(new AddProperty(temp,playerID));
         }
-        return availableActions;
+        // Add house or hotel
+        MonopolyDealCard temp1 = MonopolyDealCard.create(CardType.House);
+        if(MDGS.getPlayerHand(playerID).getComponents().contains(temp1)){
+            List<PropertySet> playerProperties = MDGS.getPropertySets(playerID);
+            for (PropertySet pSet: playerProperties) {
+                if(pSet.isComplete) availableActions.add(new AddBuilding(temp1, playerID, pSet.getSetType()));
+            }
+            availableActions.add(new AddBuilding(temp1, playerID, SetType.UNDEFINED));
+        }
+        MonopolyDealCard temp2 = MonopolyDealCard.create(CardType.Hotel);
+        if(MDGS.getPlayerHand(playerID).getComponents().contains(temp2)){
+            List<PropertySet> playerProperties = MDGS.getPropertySets(playerID);
+            for (PropertySet pSet: playerProperties) {
+                if(pSet.isComplete && pSet.hasHouse) availableActions.add(new AddBuilding(temp2, playerID, pSet.getSetType()));
+            }
+            availableActions.add(new AddBuilding(temp2, playerID, SetType.UNDEFINED));
+        }
+        // remove duplicate actions
+        List<AbstractAction> retActions = new ArrayList<>();
+        for (AbstractAction action: availableActions) {
+            if(!retActions.contains(action)) retActions.add(action);
+        }
+        return retActions;
     }
 
     /**
@@ -128,9 +152,9 @@ public class PlayOnBoard extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public PlayOnBoard copy() {
+    public AddToBoard copy() {
         // TODO: copy non-final variables appropriately
-        PlayOnBoard action = new PlayOnBoard(playerID);
+        AddToBoard action = new AddToBoard(playerID);
         action.executed = executed;
         return action;
     }
@@ -139,7 +163,7 @@ public class PlayOnBoard extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PlayOnBoard that = (PlayOnBoard) o;
+        AddToBoard that = (AddToBoard) o;
         return playerID == that.playerID && executed == that.executed;
     }
 
