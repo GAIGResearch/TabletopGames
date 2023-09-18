@@ -1,0 +1,9 @@
+{
+  "game": "SushiGo",
+  "selfPlay": true,
+  "nPlayers": 2,
+  "matchups": 100,
+  "listener": "metrics/sushigo.json",
+  "reportPeriod": 100,
+  "playersDirectory": "json/experiments/subgoals/exp1"
+}

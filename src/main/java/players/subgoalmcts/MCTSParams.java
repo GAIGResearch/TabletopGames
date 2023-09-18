@@ -1,4 +1,5 @@
 package players.subgoalmcts;
+
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.IActionHeuristic;
@@ -8,6 +9,7 @@ import core.interfaces.ITunableParameters;
 import evaluation.optimisation.TunableParameters;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
+
 import java.util.Arrays;
 
 public class MCTSParams extends PlayerParameters {
@@ -133,6 +135,11 @@ public class MCTSParams extends PlayerParameters {
 
     public IStateHeuristic getHeuristic() {
         return heuristic;
+    }
+
+    @Override
+    public BasicMCTSPlayer instantiate() {
+        return new BasicMCTSPlayer((MCTSParams) this.copy());
     }
 
 }
