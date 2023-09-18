@@ -5,5 +5,5 @@
   "matchups": 100,
   "listener": "metrics/sushigo.json",
   "reportPeriod": 100,
-  "playersDirectory": "json/experiments/subgoals/exp1"
+  "playerDirectory": "json/experiments/subgoals/exp1"
 }

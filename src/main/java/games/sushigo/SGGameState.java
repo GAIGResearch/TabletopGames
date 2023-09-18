@@ -282,6 +282,7 @@ public class SGGameState extends AbstractGameState implements ISubGoal {
     @Override
     public boolean isSubGoal(AbstractGameState previousState, AbstractAction action) {
         SGGameState prev = (SGGameState) previousState;
+        boolean isSubGoal = false;
         if (action instanceof ChooseCard) {
             ChooseCard cc = (ChooseCard) action;
             int nPreviousSets, nCurrentSets;
@@ -290,22 +291,25 @@ public class SGGameState extends AbstractGameState implements ISubGoal {
                     // Check if a new set of 3 sashimi has been completed by playing this last actions
                     nPreviousSets = prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Sashimi).getValue() / 3;
                     nCurrentSets = playedCardTypes[cc.playerId].get(SGCard.SGCardType.Sashimi).getValue() / 3;
-                    return nCurrentSets > nPreviousSets;
+                    isSubGoal =  nCurrentSets > nPreviousSets;
+                    break;
                 case Tempura:
                     // Check if a new set of 2 tempura has been completed by playing this last actions
                     nPreviousSets = prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Tempura).getValue() / 2;
                     nCurrentSets = playedCardTypes[cc.playerId].get(SGCard.SGCardType.Tempura).getValue() / 2;
-                    return nCurrentSets > nPreviousSets;
+                    isSubGoal =  nCurrentSets > nPreviousSets;
+                    break;
                 case SquidNigiri:
                 case EggNigiri:
                 case SalmonNigiri:
                     // Check if there was an available Wasabi and if so, if it was used to play this nigiri
                     if (prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue() > 0) {
-                        return prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue() >
+                        isSubGoal =  prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue() >
                                 playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue();
                     }
+                    break;
             }
         }
-        return false;
+        return isSubGoal;
     }
 }

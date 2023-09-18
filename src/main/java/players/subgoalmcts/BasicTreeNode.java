@@ -132,9 +132,13 @@ class BasicTreeNode {
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
+                boolean toSubgoal = actionChosen instanceof MacroAction;
                 sequence.add(actionChosen);
                 hashCodes.add(cur.state.hashCode());
-                cur = cur.children.get(actionChosen);  // TODO consider subgoal children too
+                if(toSubgoal)
+                    cur = cur.subGoalChildren.get(actionChosen);
+                else
+                    cur = cur.children.get(actionChosen);
             }
         }
 
@@ -209,35 +213,58 @@ class BasicTreeNode {
         root.fmCallsCount++;
     }
 
+    private double ucb1Value(BasicTreeNode node)
+    {
+        // Find child value
+        double hvVal = node.totValue;
+        double childValue = hvVal / (node.nVisits + player.params.epsilon);
+
+        // default to standard UCB
+        double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (node.nVisits + player.params.epsilon));
+        // unless we are using a variant
+
+        // Find 'UCB' value
+        // If 'we' are taking a turn we use classic UCB
+        // If it is an opponent's turn, then we assume they are trying to minimise our score (with exploration)
+        boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
+        double uctValue = iAmMoving ? childValue : -childValue;
+        uctValue += explorationTerm;
+
+        // Apply small noise to break ties randomly
+        uctValue = noise(uctValue, player.params.epsilon, player.rnd.nextDouble());
+
+        return uctValue;
+    }
+
     private AbstractAction ucb() {
         // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
 
+        //Normal children of the node.
         for (AbstractAction action : children.keySet()) {
-            BasicTreeNode child = children.get(action);
-            if (child == null)
+            BasicTreeNode node = children.get(action);
+            if (node == null)
                 throw new AssertionError("Should not be here");
-            else if (bestAction == null)
+            if (bestAction == null)
                 bestAction = action;
 
-            // Find child value
-            double hvVal = child.totValue;
-            double childValue = hvVal / (child.nVisits + player.params.epsilon);
+            double uctValue = ucb1Value(node);
 
-            // default to standard UCB
-            double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + player.params.epsilon));
-            // unless we are using a variant
+            // Assign value
+            if (uctValue > bestValue) {
+                bestAction = action;
+                bestValue = uctValue;
+            }
+        }
 
-            // Find 'UCB' value
-            // If 'we' are taking a turn we use classic UCB
-            // If it is an opponent's turn, then we assume they are trying to minimise our score (with exploration)
-            boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
-            double uctValue = iAmMoving ? childValue : -childValue;
-            uctValue += explorationTerm;
+        //Subgoal children of the node
+        for (MacroAction action : subGoalChildren.keySet()) {
+            BasicTreeNode node = subGoalChildren.get(action);
+            if (node == null)
+                throw new AssertionError("Should not be here");
 
-            // Apply small noise to break ties randomly
-            uctValue = noise(uctValue, player.params.epsilon, player.rnd.nextDouble());
+            double uctValue = ucb1Value(node);
 
             // Assign value
             if (uctValue > bestValue) {
@@ -259,7 +286,7 @@ class BasicTreeNode {
      * @return - value of rollout.
      */
     private double rollOut() {
-        // TODO subgoals could be here too
+        // TODO subgoals could be here too (issue: what's the natural parent of the subgoal?)
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
@@ -299,12 +326,19 @@ class BasicTreeNode {
      * @param result - value of rollout to backup
      */
     private void backUp(double result) {
-        // TODO: if we found subgoals, there would be multiple branches to backup through
         BasicTreeNode n = this;
         while (n != null) {
             n.nVisits++;
             n.totValue += result;
-            n = n.parent;
+            if(player.params.backUpPolicy == MCTSParams.BackUpPolicy.SUBGOAL_PARENT){
+                n = (n.subgoalParent != null) ? n.subgoalParent : n.parent;
+            }else if(player.params.backUpPolicy == MCTSParams.BackUpPolicy.NATURAL_PARENT){
+                n = n.parent;
+            }else if(player.params.backUpPolicy == MCTSParams.BackUpPolicy.BOTH) {
+                if(n.subgoalParent != null)
+                    n.subgoalParent.backUp(result);
+                n = n.parent;
+            }
         }
     }
 
