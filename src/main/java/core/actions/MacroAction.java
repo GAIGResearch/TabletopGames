@@ -29,6 +29,10 @@ public class MacroAction extends AbstractAction {
         return false;
     }
 
+    public Integer getFinalStateHash() {
+        return stateHashes.get(stateHashes.size() - 1);
+    }
+
     public List<AbstractAction> getActions() {
         return actions;
     }

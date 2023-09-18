@@ -2,8 +2,6 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.MacroAction;
-import core.interfaces.ISubGoal;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
@@ -173,10 +171,6 @@ class BasicTreeNode {
         // then instantiate a new node
         BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
-        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal()) {
-            MacroAction macroAction = new MacroAction(state.getCurrentPlayer(), sequence, hashCodes);
-            // Create link from root or previous subgoal in this branch
-        }
         return tn;
     }
 

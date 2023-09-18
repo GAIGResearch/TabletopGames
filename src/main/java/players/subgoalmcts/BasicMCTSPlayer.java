@@ -3,8 +3,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import players.mcts.MCTSEnums;
-import players.mcts.MCTSParams;
 
 import java.util.List;
 import java.util.Random;
@@ -31,21 +29,14 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     public BasicMCTSPlayer(long seed) {
         this.params = new MCTSParams(seed);
         rnd = new Random(seed);
-        setName("Basic MCTS");
+        setName("Subgoal MCTS");
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
         this.params.K = Math.sqrt(2);
         this.params.rolloutLength = 10;
         this.params.maxTreeDepth = 5;
         this.params.epsilon = 1e-6;
-
-        // These parameters are ignored by BasicMCTS - if you want to play with these, you'll
-        // need to upgrade to MCTSPlayer
-        this.params.information = MCTSEnums.Information.Closed_Loop;
-        this.params.rolloutType = RANDOM;
-        this.params.selectionPolicy = ROBUST;
-        this.params.opponentTreePolicy = OneTree;
-        this.params.treePolicy = UCB;
+        this.params.backUpPolicy = MCTSParams.BackUpPolicy.NATURAL_PARENT;
     }
 
     public BasicMCTSPlayer(MCTSParams params) {
