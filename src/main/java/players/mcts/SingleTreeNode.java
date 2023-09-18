@@ -239,7 +239,7 @@ public class SingleTreeNode {
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
-            //     System.out.println("Starting MCTS Search iteration " + numIters);
+                System.out.println("Starting MCTS Search iteration " + numIters);
 
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
             oneSearchIteration();
@@ -524,6 +524,8 @@ public class SingleTreeNode {
                 params.opponentTreePolicy.selfOnlyTree &&
                 gs.getCurrentPlayer() != decisionPlayer)
             advanceToTurnOfPlayer(gs, decisionPlayer, inRollout);
+        // TODO : Fix this for MCGS
+        // change to checkExpandNode - and make this differrent for MCGS and MCTS
         if (!inRollout && params.opponentTreePolicy != MultiTree && actionValues.get(act).nVisits == 0) {
             return expandNode(act, gs);
         }

@@ -31,7 +31,7 @@ public class MCGSNode extends SingleTreeNode {
             throw new AssertionError("Unexpected?");
         }
         graphRoot.transpositionMap.put(key, node);
-     //   System.out.println("Adding to transposition table: " + key);
+        System.out.println("Adding to transposition table: " + key);
     }
 
     /**
@@ -90,7 +90,7 @@ public class MCGSNode extends SingleTreeNode {
             MCGSNode mcgsRoot = (MCGSNode) root;
             String key = getKeyOf(gs);
             mcgsRoot.trajectory.add(key);
- //           System.out.println("Adding to trajectory: " + key);
+            System.out.println("Adding to trajectory: " + key);
 //            if (mcgsRoot.transpositionMap.size() == 1 && mcgsRoot.trajectory.size() == 1 && !mcgsRoot.transpositionMap.containsKey(key)) {
 //                throw new AssertionError("Trajectory should be the same size as the transposition map");
 //            }
