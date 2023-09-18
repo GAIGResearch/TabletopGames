@@ -178,7 +178,7 @@ class BasicTreeNode {
         // then instantiate a new node
         BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
-        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal() && !rootSubGoal.containsSubgoal(state)) {
+        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal(state, chosen) && !rootSubGoal.containsSubgoal(nextState)) {
             MacroAction macroAction = new MacroAction(state.getCurrentPlayer(), sequence, hashCodes);
             // Create link from root or previous subgoal in this branch
             rootSubGoal.subGoalChildren.put(macroAction, tn);
@@ -191,13 +191,10 @@ class BasicTreeNode {
     {
         //Iterate over all subgoal states
         for (MacroAction macroAction : subGoalChildren.keySet())
-        {
             //If the current state is a subgoal state
             if (macroAction.getFinalStateHash() == gs.hashCode())
-            {
                 return true;
-            }
-        }
+
         return false;
     }
 
