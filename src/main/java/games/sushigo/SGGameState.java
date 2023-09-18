@@ -2,18 +2,19 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.*;
-import core.interfaces.IStateFeatureJSON;
+import core.actions.AbstractAction;
+import core.components.Component;
+import core.components.Counter;
+import core.components.Deck;
+import core.interfaces.ISubGoal;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
-import org.json.simple.JSONObject;
-import utilities.Pair;
 
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class SGGameState extends AbstractGameState {
+public class SGGameState extends AbstractGameState implements ISubGoal {
     List<Deck<SGCard>> playerHands;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
@@ -278,4 +279,33 @@ public class SGGameState extends AbstractGameState {
                 super.hashCode() + "|";
     }
 
+    @Override
+    public boolean isSubGoal(AbstractGameState previousState, AbstractAction action) {
+        SGGameState prev = (SGGameState) previousState;
+        if (action instanceof ChooseCard) {
+            ChooseCard cc = (ChooseCard) action;
+            int nPreviousSets, nCurrentSets;
+            switch (cc.cardType) {
+                case Sashimi:
+                    // Check if a new set of 3 sashimi has been completed by playing this last actions
+                    nPreviousSets = prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Sashimi).getValue() / 3;
+                    nCurrentSets = playedCardTypes[cc.playerId].get(SGCard.SGCardType.Sashimi).getValue() / 3;
+                    return nCurrentSets > nPreviousSets;
+                case Tempura:
+                    // Check if a new set of 2 tempura has been completed by playing this last actions
+                    nPreviousSets = prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Tempura).getValue() / 2;
+                    nCurrentSets = playedCardTypes[cc.playerId].get(SGCard.SGCardType.Tempura).getValue() / 2;
+                    return nCurrentSets > nPreviousSets;
+                case SquidNigiri:
+                case EggNigiri:
+                case SalmonNigiri:
+                    // Check if there was an available Wasabi and if so, if it was used to play this nigiri
+                    if (prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue() > 0) {
+                        return prev.playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue() >
+                                playedCardTypes[cc.playerId].get(SGCard.SGCardType.Wasabi).getValue();
+                    }
+            }
+        }
+        return false;
+    }
 }
