@@ -6,7 +6,7 @@
 	"epsilon" : 1e-6,
 	"budgetType" : "BUDGET_FM_CALLS",
 	"recommendationPolicy" : "SUBGOALS",
-	"backupPolicy" : "SUBGOAL_PARENT",
+	"backupPolicy" : "BOTH",
 	"budget" : 500,
 	"breakMS" : 0,
 	"heuristic" : {

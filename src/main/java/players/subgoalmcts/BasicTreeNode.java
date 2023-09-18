@@ -387,7 +387,11 @@ class BasicTreeNode {
                     // Save best value (highest visit count)
                     if (childValue > bestValue) {
                         bestValue = childValue;
-                        bestAction = action.getActions().get(0);
+
+                        AbstractAction atomicAction = action.getActions().get(0);
+                        while (atomicAction instanceof MacroAction)
+                            atomicAction = ((MacroAction) atomicAction).getActions().get(0);
+                        bestAction = atomicAction;
                     }
                 }
             }
