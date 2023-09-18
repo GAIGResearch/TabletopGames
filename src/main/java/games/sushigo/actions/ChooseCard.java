@@ -84,12 +84,21 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (!(o instanceof ChooseCard)) return false;
         ChooseCard that = (ChooseCard) o;
-        return playerId == that.playerId && useChopsticks == that.useChopsticks && chopstickChooseDone == that.chopstickChooseDone && cardType == that.cardType && cardIdx == that.cardIdx;
+        if (useChopsticks) {
+            return playerId == that.playerId && chopstickChooseDone == that.chopstickChooseDone && cardType == that.cardType && cardIdx == that.cardIdx;
+        } else {
+            // ignore card idx
+            return playerId == that.playerId && cardType == that.cardType;
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, cardIdx, cardType, useChopsticks, chopstickChooseDone);
+        if (useChopsticks) {
+            return Objects.hash(playerId, cardIdx, cardType, useChopsticks, chopstickChooseDone);
+        } else {
+            return Objects.hash(playerId, cardType);
+        }
     }
 
     @Override
@@ -104,12 +113,13 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "ChooseCard{" +
-                "playerId=" + playerId +
-                "type=" + cardType +
-                ", cardIdx=" + cardIdx +
-                ", useChopsticks=" + useChopsticks +
-                ", chopstickChooseDone=" + chopstickChooseDone +
-                '}';
+        return cardType + " (" + playerId + ")" + (useChopsticks ? " !!" : "");  // Compact version
+//        return "ChooseCard{" +
+//                "playerId=" + playerId +
+//                "type=" + cardType +
+//                ", cardIdx=" + cardIdx +
+//                ", useChopsticks=" + useChopsticks +
+//                ", chopstickChooseDone=" + chopstickChooseDone +
+//                '}';
     }
 }

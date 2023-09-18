@@ -83,6 +83,12 @@ public class MacroAction extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Macro";
+        StringBuilder actionString = new StringBuilder("M[");
+        for (AbstractAction action : actions) {
+            actionString.append(action.toString()).append(", ");
+        }
+        actionString.append("]");
+        actionString = new StringBuilder(actionString.toString().replace(", ]", "]"));
+        return playerID + ": " + actionString;
     }
 }
