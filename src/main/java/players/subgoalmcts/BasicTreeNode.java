@@ -247,6 +247,15 @@ class BasicTreeNode {
         double bestValue = -Double.MAX_VALUE;
 
         //Normal children of the node.
+        double bias;
+        if(player.params.useBiasDecay) {
+            //Goes from 1 to 0. Reaches 0 when the number of visits of this node is equal to the biasDecayValue param
+            bias = Math.max(0, (player.params.biasDecayValue - nVisits) / player.params.biasDecayValue);
+        }else if (player.params.useSubgoalBias){
+            bias = 1 - player.params.subgoalBias;
+        }else
+            bias = 1;
+
         for (AbstractAction action : children.keySet()) {
             BasicTreeNode node = children.get(action);
             if (node == null)
@@ -254,7 +263,7 @@ class BasicTreeNode {
             if (bestAction == null)
                 bestAction = action;
 
-            double uctValue = ucb1Value(node);
+            double uctValue = bias * ucb1Value(node);
 
             // Assign value
             if (uctValue > bestValue) {
@@ -264,12 +273,16 @@ class BasicTreeNode {
         }
 
         //Subgoal children of the node
+        if (player.params.useSubgoalBias || player.params.useBiasDecay)
+            bias = 1 - bias;
+        else bias = 1;
+
         for (MacroAction action : subGoalChildren.keySet()) {
             BasicTreeNode node = subGoalChildren.get(action);
             if (node == null)
                 throw new AssertionError("Should not be here");
 
-            double uctValue = ucb1Value(node);
+            double uctValue = bias * ucb1Value(node);
 
             // Assign value
             if (uctValue > bestValue) {

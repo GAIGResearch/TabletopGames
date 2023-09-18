@@ -5,9 +5,13 @@
 	"maxTreeDepth" : 30,
 	"epsilon" : 1e-6,
 	"budgetType" : "BUDGET_FM_CALLS",
+	"budget" : 500,
 	"recommendationPolicy" : "SUBGOALS",
 	"backupPolicy" : "BOTH",
-	"budget" : 500,
+	"useSubgoalBias" : true,
+	"subgoalBias" : 0.5,
+	"useBiasDecay" : true,
+	"biasDecayValue" : 50,
 	"breakMS" : 0,
 	"heuristic" : {
  		"class" : "players.heuristics.ScoreHeuristic"

@@ -33,9 +33,7 @@ public class MCTSParams extends PlayerParameters {
     public double hedgeBoltzmann = 0.1;
     public boolean paranoid = false;
     public String rolloutClass, oppModelClass = "";
-    public AbstractPlayer rolloutPolicy;
     public ITunableParameters rolloutPolicyParams;
-    public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
     public IActionHeuristic advantageFunction;
@@ -52,6 +50,10 @@ public class MCTSParams extends PlayerParameters {
     public double MASTDefaultValue = 0.0;
     public BackUpPolicy backUpPolicy = BackUpPolicy.NATURAL_PARENT;
     public RecommendationPolicy recommendationPolicy = RecommendationPolicy.STANDARD;
+    public boolean useSubgoalBias = false;
+    public double subgoalBias = 0.5;
+    public boolean useBiasDecay = false;
+    public double biasDecayValue = 50; //V in a bias = max {0, (V-N(s))/V} decay rate. Ignored if useBiasDecay is false
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -91,6 +93,12 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTDefaultValue", 0.0);
         addTunableParameter("backupPolicy", BackUpPolicy.NATURAL_PARENT);
         addTunableParameter("recommendationPolicy", RecommendationPolicy.STANDARD);
+        addTunableParameter("useSubgoalBias", false);
+        addTunableParameter("subgoalBias", 0.5, Arrays.asList(0.0, 0.25, 0.5, 0.75, 1.0));
+        addTunableParameter("useBiasDecay", false);
+        addTunableParameter("biasDecayValue", 50, Arrays.asList(0, 10, 50, 100, 500));
+
+
     }
 
     @Override
@@ -129,8 +137,10 @@ public class MCTSParams extends PlayerParameters {
 
         backUpPolicy = (BackUpPolicy) getParameterValue("backupPolicy");
         recommendationPolicy = (RecommendationPolicy) getParameterValue("recommendationPolicy");
-
-    }
+        useSubgoalBias = (boolean) getParameterValue("useSubgoalBias");
+        subgoalBias = (double) getParameterValue("subgoalBias");
+        useBiasDecay = (boolean) getParameterValue("useBiasDecay");
+        biasDecayValue = (int) getParameterValue("biasDecayValue");    }
 
     @Override
     protected MCTSParams _copy() {
