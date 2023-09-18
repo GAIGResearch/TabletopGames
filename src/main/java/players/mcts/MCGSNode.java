@@ -19,6 +19,7 @@ public class MCGSNode extends SingleTreeNode {
         // the only additional instantiation we need to do is to add the state to the transposition table
         addToTranspositionTable(this, state);
     }
+
     protected String getKeyOf(AbstractGameState state) {
         double[] featureVector = params.MCGSStateFeatureVector.featureVector(state, state.getCurrentPlayer());
         return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(featureVector));
@@ -39,20 +40,16 @@ public class MCGSNode extends SingleTreeNode {
      *
      * @return - new child node.
      */
-    protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
+    protected SingleTreeNode checkAndExpandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // this marks the first time we have taken an action that has not been tried before from this node
         // in the main algorithm it moves us into the 'rollout' phase
 
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
         MCGSNode graphRoot = (MCGSNode) root;
-        if (!nextState.isNotTerminal() || (params.opponentTreePolicy.selfOnlyTree && !nextState.isNotTerminalForPlayer(root.decisionPlayer))) {
-            // in this case we have reached a terminal state, and do not need to create a node
-            return this;
-        }
         String key = getKeyOf(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
-            MCGSNode newNode =  graphRoot.transpositionMap.get(key);
+            MCGSNode newNode = graphRoot.transpositionMap.get(key);
             newNode.setActionsFromOpenLoopState(nextState);
             return newNode;
         }
@@ -66,11 +63,6 @@ public class MCGSNode extends SingleTreeNode {
         // extending...the next action from this new node will inevitably be an expansion (as no actions have yet been
         // tried from it). This just means that we'll often add two nodes to the graph in one iteration.
 
-        if (!openLoopState.isNotTerminal() || (params.opponentTreePolicy.selfOnlyTree && !openLoopState.isNotTerminalForPlayer(root.decisionPlayer))) {
-            // in this case we have reached a terminal state, and do not need to create a node
-            return this;
-        }
-
         String key = getKeyOf(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
@@ -82,7 +74,7 @@ public class MCGSNode extends SingleTreeNode {
     }
 
     @Override
-    protected SingleTreeNode advance(AbstractGameState gs, AbstractAction act, boolean inRollout) {
+    protected void advanceState(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // This is a convenient point to record the trajectory for use during the backup
         if (!inRollout) {
             // We only track this while in the tree (we could do the rollout as well, but at the overhead
@@ -96,7 +88,7 @@ public class MCGSNode extends SingleTreeNode {
 //            }
             // this means we should be adding one state to the trajectory every time we add an action to the rollout
         }
-        return super.advance(gs, act, inRollout);
+        super.advanceState(gs, act, inRollout);
     }
 
 

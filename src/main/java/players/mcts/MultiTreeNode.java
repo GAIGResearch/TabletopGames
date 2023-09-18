@@ -3,16 +3,11 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static utilities.Utils.entropyOf;
 
 /**
  * MultiTreeNode is really a wrapper for SingleTreeNode when we are using MultiTree MCTS.
@@ -131,7 +126,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);
 
-                advance(currentState, chosen, true);
+                advanceState(currentState, chosen, true);
             } else {  // in the tree still for this player
                 // currentNode is the last node that this actor was at in their tree
                 currentNode = currentLocation[currentActor];
@@ -147,14 +142,14 @@ public class MultiTreeNode extends SingleTreeNode {
                     expansionActionTaken[currentActor] = true;
                     if (debug)
                         System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen, false);
+                    advanceState(currentState, chosen, false);
                     // we will create the new node once we get back to a point when it is this player's action again
                 } else {
                     chosen = currentNode.treePolicyAction(true);
                     lastAction[currentActor] = chosen;
                     if (debug)
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen, false);
+                    advanceState(currentState, chosen, false);
                 }
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
@@ -190,7 +185,7 @@ public class MultiTreeNode extends SingleTreeNode {
 
     private void expandNode(int currentActor, AbstractGameState currentState) {
         // we now expand a node
-        currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState);
+        currentLocation[currentActor] = currentLocation[currentActor].checkAndExpandNode(lastAction[currentActor], currentState);
         // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
         nodeExpanded[currentActor] = true;
         if (debug)

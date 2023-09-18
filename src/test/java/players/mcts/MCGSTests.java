@@ -117,7 +117,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
+                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
                 assertEquals(0, problemNodes.size());
@@ -137,7 +137,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
+                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
                 assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
@@ -159,7 +159,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
+                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
                 assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
                 //                        root.getTranspositionMap().get(s).openLoopState.isNotTerminalForPlayer(0)).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
@@ -182,7 +182,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertTrue(root.getVisits() >= root.getTranspositionMap().size());
+                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
             }
