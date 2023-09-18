@@ -262,10 +262,10 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
         Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
             // All players can do is choose a card in hand to play.
-            actions.add(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, false));
+            actions.add(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, currentPlayerHand.get(i).count, false));
             if (sggs.playedCardTypes[currentPlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
                 // If the player played chopsticks in a previous round, then they can choose to use the chopsticks now (and will choose one extra card in hand)
-                actions.add(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, true));
+                actions.add(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, currentPlayerHand.get(i).count, true));
             }
         }
         return new ArrayList<>(actions);
@@ -304,10 +304,10 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
         // normal action selection
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
             // All players can do is choose a card in hand to play.
-            playNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, false));
+            playNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, currentPlayerHand.get(i).count, false));
             if (sggs.playedCardTypes[currentPlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
                 // If the player played chopsticks in a previous round, then they can choose to use the chopsticks now (and will choose one extra card in hand)
-                chopsticksNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, true));
+                chopsticksNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, currentPlayerHand.get(i).type, currentPlayerHand.get(i).count, true));
             }
         }
         return root;
