@@ -11,6 +11,7 @@ public class TreeStatistics {
     final public int maxDepth = 100;
     public int depthReached;
     public double meanLeafDepth;
+    public double meanNodeDepth;
     public int[] nodesAtDepth = new int[maxDepth];
     public int[] leavesAtDepth = new int[maxDepth];
     public int[] gameTerminalNodesAtDepth = new int[maxDepth];
@@ -40,7 +41,8 @@ public class TreeStatistics {
         leafDistribution = IntStream.range(0, depthReached + 1)
                 .mapToDouble(i -> byDepth.getOrDefault(i, new ArrayList<>()).stream().filter(n -> n.nVisits == 0).count() / (double) totalLeaves)
                 .toArray();
-        meanLeafDepth = IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum();
+        meanLeafDepth = totalLeaves > 0 ? IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum() : 0;
+        meanNodeDepth = IntStream.range(0, depthReached + 1).mapToDouble(i -> i * nodeDistribution[i]).sum();
         oneActionNodes = (int) transpositionMap.values().stream().filter(n -> n.actionValues.size() == 1).count();
     }
 
@@ -86,7 +88,7 @@ public class TreeStatistics {
                     if (child != null)
                         nodeQueue.add(child);
                 }
-                if (node.children.values().stream().allMatch(Objects::isNull))
+                if (node.actionValues.values().stream().allMatch(stats -> stats.nVisits == 0))
                     leavesAtDepth[node.depth]++;
             }
             if (node.depth > greatestDepth)
@@ -105,7 +107,8 @@ public class TreeStatistics {
      //   totalTerminalNodes = Arrays.stream(gameTerminalNodesAtDepth).sum();
         nodeDistribution = Arrays.stream(nodesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalNodes).toArray();
         leafDistribution = Arrays.stream(leavesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalLeaves).toArray();
-        meanLeafDepth = IntStream.range(0, Math.min(depthReached + 1, maxDepth)).mapToDouble(i -> i * leafDistribution[i]).sum();
+        meanLeafDepth = totalLeaves > 0 ? IntStream.range(0, depthReached + 1).mapToDouble(i -> i * leafDistribution[i]).sum() : 0;
+        meanNodeDepth = IntStream.range(0, Math.min(depthReached + 1, maxDepth)).mapToDouble(i -> i * nodeDistribution[i]).sum();
     }
 
 
