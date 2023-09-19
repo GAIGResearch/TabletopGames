@@ -11,6 +11,7 @@ import games.serveTheKing.components.PlateCard;
 import javax.servlet.http.Part;
 import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,16 +29,14 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
-    int cardValue;
     int currentPlayer;
     int firstChoice[];
     int secondChoice[];
     boolean hasSwapped;
 
-    public LookSwap(int playerID, int cardValue) {
+    public LookSwap(int playerID) {
         this.playerID = playerID;
         currentPlayer = playerID;
-        this.cardValue= cardValue;
         int fc[] = {-1,-1};
         firstChoice= fc;
         int sc[] = {-1,-1};
@@ -120,7 +119,7 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
             secondChoice[0]= ((ChooseCard) action).getChosenPlayer();
             secondChoice[1] = ((ChooseCard) action).getChosenCard();
         }
-        else {
+        else if (((ChooseSwap) action).getChoice()){
             // the swap
             PartialObservableDeck<PlateCard> p1Plates=  stkgs.getPlayersPlates().get(firstChoice[0]);
             PartialObservableDeck<PlateCard> p2Plates=  stkgs.getPlayersPlates().get(secondChoice[0]);
@@ -132,6 +131,9 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
             p2Plates.add(firstCard);
             stkgs.getPlayersPlates().get(playerID).setVisibilityOfComponent(firstChoice[1],firstChoice[0],true);
             stkgs.getPlayersPlates().get(playerID).setVisibilityOfComponent(secondChoice[1],secondChoice[0],true);
+            hasSwapped=true;
+        }
+        else {
             hasSwapped=true;
         }
     }
@@ -173,7 +175,11 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
     @Override
     public LookSwap copy() {
         // TODO: copy non-final variables appropriately
-        LookSwap  copy = new LookSwap(playerID,cardValue);
+        LookSwap  copy = new LookSwap(playerID);
+        copy.firstChoice=firstChoice;
+        copy.secondChoice=secondChoice;
+        copy.currentPlayer=currentPlayer;
+        copy.hasSwapped=hasSwapped;
         return copy ;
     }
 
@@ -183,19 +189,24 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
         return obj instanceof LookSwap
                 && ((LookSwap) obj).playerID==playerID
                 && ((LookSwap) obj).currentPlayer==currentPlayer
-                && ((LookSwap) obj).cardValue==cardValue;
+                && ((LookSwap) obj).hasSwapped == hasSwapped
+                && ((LookSwap) obj).firstChoice == firstChoice
+                && ((LookSwap) obj).secondChoice==secondChoice;
     }
 
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return Objects.hash(playerID,currentPlayer,cardValue);
+        int hash= Objects.hash(playerID,hasSwapped,currentPlayer);
+        hash= hash + 99 * Arrays.hashCode(firstChoice);
+        hash= hash + 99 * Arrays.hashCode(secondChoice);
+        return hash;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Swaped and looked at card "+firstChoice[1]+" from player"+firstChoice[0]+" with card "+secondChoice[1]+" from player"+secondChoice[0];
     }
 
     /**

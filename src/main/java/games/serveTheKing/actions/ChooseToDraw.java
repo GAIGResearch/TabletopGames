@@ -3,7 +3,6 @@ package games.serveTheKing.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import games.serveTheKing.STKGameState;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -21,7 +20,7 @@ import games.serveTheKing.STKGameState;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class Serve extends AbstractAction {
+public class ChooseToDraw extends AbstractAction {
 
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -29,12 +28,10 @@ public class Serve extends AbstractAction {
      * @param gs - game state which should be modified by this action.
      * @return - true if successfully executed, false otherwise.
      */
-
     @Override
     public boolean execute(AbstractGameState gs) {
-        STKGameState stkgs = (STKGameState) gs;
-        stkgs.setPlayerCalledServe(stkgs.getCurrentPlayer());
-        return false;
+        // Do nothing
+        return true;
     }
 
     /**
@@ -44,7 +41,7 @@ public class Serve extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public Serve copy() {
+    public ChooseToDraw copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -52,19 +49,19 @@ public class Serve extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof Serve;
+        return obj instanceof ChooseToDraw;
     }
 
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return 984164;
+        return 135695;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Serve The King!!!";
+        return "Choose to Draw";
     }
 
     /**

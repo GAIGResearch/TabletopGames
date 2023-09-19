@@ -2,15 +2,15 @@ package games.serveTheKing.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.serveTheKing.STKGameState;
 import games.serveTheKing.components.PlateCard;
-import org.apache.spark.sql.catalyst.expressions.Abs;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -22,19 +22,23 @@ import java.util.List;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link TrashPlate} apply here as well.</p>
  */
-public class UseAbility extends AbstractAction implements IExtendedSequence {
+public class Swap extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     int currentPlayer;
-    int cardValue;
-    boolean abilityFinished;
+    int firstChoice[];
+    int secondChoice[];
+    boolean hasSwapped;
 
-    public UseAbility(int playerID) {
+    public Swap(int playerID) {
         this.playerID = playerID;
-        this.currentPlayer = playerID;
-        this.cardValue= -1000;
-        this.abilityFinished = false;
+        currentPlayer = playerID;
+        int fc[] = {-1,-1};
+        firstChoice= fc;
+        int sc[] = {-1,-1};
+        secondChoice=sc;
+        hasSwapped=false;
     }
 
     /**
@@ -49,41 +53,29 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         ArrayList<AbstractAction> available = new ArrayList<>();
         STKGameState stkgs = (STKGameState) state;
-        // find if the ability should be executed
-        if(abilityFinished){
-            // find if the player can trash any card in his plate
-            int topDiscard = stkgs.getDiscardPile().peek().getValue();
-            System.out.println("Current Player "+stkgs.getCurrentPlayer());
-            PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
-            for(PlateCard c :playerPlates.getComponents()){
-                if (c.getValue()==topDiscard){
-                    TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
-                    available.add(trashAction);
-                }
-            }
-            // a player can always pass
+
+        if(firstChoice[0]<0 && firstChoice[1]<0){
+            // a player can always pass the ability
             available.add(new Pass());
         }
-        else {
-            AbstractAction ability;
-            if(cardValue == -1 || cardValue ==15){
-                ability = new LookSwap(playerID);
-                available.add(ability);
-            }
-            else if(cardValue == 0 || cardValue ==10){
-                ability = new Swap(playerID);
-                available.add(ability);
-            }
-            else {
-                for ( int i =0; i< stkgs.getNPlayers(); i ++) {
-                    PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(i);
-                    for (PlateCard c : playerPlate.getComponents()) {
-                        ChooseCard choice = new ChooseCard(playerPlate.getComponents().indexOf(c),i,true);
-                        available.add(choice);
+        // create a combination of all possible choices
+        if(secondChoice[0]<0 && secondChoice[1]<0){
+            for ( int i =0; i< stkgs.getNPlayers(); i ++) {
+                PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(i);
+                for (PlateCard c : playerPlate.getComponents()) {
+                    if(firstChoice[0]==i && firstChoice[1]==playerPlate.getComponents().indexOf(c) ){
+                        continue;
                     }
+                    ChooseCard choice = new ChooseCard(playerPlate.getComponents().indexOf(c),i,false);
+                    available.add(choice);
                 }
             }
-
+        }
+        else {
+            ChooseSwap swapY = new ChooseSwap(true);
+            ChooseSwap swapN = new ChooseSwap(false);
+            available.add(swapN);
+            available.add(swapY);
         }
 
 
@@ -116,13 +108,28 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         STKGameState stkgs = (STKGameState) state;
-        if(action instanceof Swap|| action instanceof LookSwap|| action instanceof ChooseCard){
-            abilityFinished=true;
+        if(action instanceof Pass){
+            hasSwapped=true;
         }
-        if(abilityFinished){
-            currentPlayer = currentPlayer + 1 % stkgs.getNPlayers();
+        else if(firstChoice[0]<0 && firstChoice[1]<0 ){
+            firstChoice[0]= ((ChooseCard) action).getChosenPlayer();
+            firstChoice[1] = ((ChooseCard) action).getChosenCard();
+        } else if (secondChoice[0]<0 && secondChoice[1]<0) {
+            secondChoice[0]= ((ChooseCard) action).getChosenPlayer();
+            secondChoice[1] = ((ChooseCard) action).getChosenCard();
         }
-
+        else {
+            // the swap
+            PartialObservableDeck<PlateCard> p1Plates=  stkgs.getPlayersPlates().get(firstChoice[0]);
+            PartialObservableDeck<PlateCard> p2Plates=  stkgs.getPlayersPlates().get(secondChoice[0]);
+            PlateCard firstCard = p1Plates.get(firstChoice[1]);
+            PlateCard secondCard =p2Plates.get(secondChoice[1]);
+            p1Plates.remove(firstCard);
+            p2Plates.remove(secondCard);
+            p1Plates.add(secondCard);
+            p2Plates.add(firstCard);
+            hasSwapped=true;
+        }
     }
 
     /**
@@ -131,13 +138,7 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        if(abilityFinished && currentPlayer==playerID){
-            return true;
-        }
-        else {
-            return false;
-        }
-
+        return hasSwapped;
     }
 
     /**
@@ -152,16 +153,9 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
+        // TODO: Some functionality applied which changes the given game state.
         STKGameState stkgs = (STKGameState) gs;
-        PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
-        // put the used card in the discard pile
-        Deck<PlateCard> discard = stkgs.getDiscardPile();
-        System.out.println("Hand size of player "+playerID+" hand size is: "+hand.getComponents().size());
-        PlateCard discarded = hand.peek();
-        hand.remove(discarded);
-        discard.add(discarded);
-        // get the value of the card discarded
-        cardValue=discarded.getValue();
+
         gs.setActionInProgress(this);
         return true;
     }
@@ -173,27 +167,40 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public UseAbility copy() {
+    public Swap copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        Swap copy = new Swap(playerID);
+        copy.firstChoice=firstChoice;
+        copy.secondChoice=secondChoice;
+        copy.currentPlayer=currentPlayer;
+        copy.hasSwapped=hasSwapped;
+        return copy ;
     }
 
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof TrashPlate;
+        return obj instanceof Swap
+                && ((Swap) obj).playerID==playerID
+                && ((Swap) obj).currentPlayer==currentPlayer
+                && ((Swap) obj).hasSwapped == hasSwapped
+                && ((Swap) obj).firstChoice == firstChoice
+                && ((Swap) obj).secondChoice==secondChoice;
     }
 
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return 0;
+        int hash= Objects.hash(playerID,hasSwapped,currentPlayer);
+        hash= hash + 99 * Arrays.hashCode(firstChoice);
+        hash= hash + 99 * Arrays.hashCode(secondChoice);
+        return hash;
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Using Ability!";
+        return "Swaped card "+firstChoice[1]+" from player"+firstChoice[0]+" with card "+secondChoice[1]+" from player"+secondChoice[0];
     }
 
     /**

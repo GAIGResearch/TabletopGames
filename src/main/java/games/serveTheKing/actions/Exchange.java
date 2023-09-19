@@ -123,7 +123,8 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
         PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
         PartialObservableDeck<PlateCard> plates = stkgs.getPlayersPlates().get(playerID);
         Deck<PlateCard> discard = stkgs.getDiscardPile();
-        PlateCard exchanged = hand.get(handCardIdx);
+        System.out.println("Hand size of player "+playerID+" hand size is: "+hand.getComponents().size());
+        PlateCard exchanged = hand.peek();
         PlateCard discarded = plates.get(plateCardIdx);
         hand.remove(exchanged);
         plates.remove(discarded);

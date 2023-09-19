@@ -34,7 +34,9 @@ import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
 import games.serveTheKing.STKForwardModel;
+import games.serveTheKing.STKGUIManager;
 import games.serveTheKing.STKGameState;
+import games.serveTheKing.STKParameters;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -92,8 +94,8 @@ public enum GameType {
      */
     ServeTheKing(3,6,
             Arrays.asList(Simple, Food),
-            null,
-            STKGameState.class, STKForwardModel.class),
+            Arrays.asList(Dexterity, Memory),
+            STKGameState.class, STKForwardModel.class, STKParameters.class, PrototypeGUIManager.class),
     Pandemic(2, 4,
             Arrays.asList(Strategy, Medical),
             Arrays.asList(ActionPoints, Cooperative, HandManagement, PointToPointMovement, SetCollection, Trading, VariablePlayerPowers),
@@ -499,7 +501,8 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection, ClosedDrafting, NeighbourScope;
+        RoleSelection, ClosedDrafting, NeighbourScope,
+        Dexterity;
 
         /**
          * @return a list of all games using this mechanic.

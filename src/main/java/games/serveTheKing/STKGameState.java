@@ -95,6 +95,11 @@ public class STKGameState extends AbstractGameState {
     @Override
     protected STKGameState _copy(int playerId) {
         STKGameState copy = new STKGameState(gameParameters, getNPlayers());
+        copy.playersPlates = playersPlates;
+        copy.playerCalledServe = playerCalledServe;
+        copy.mainDeck = mainDeck;
+        copy.playersHands = playersHands;
+        copy.discardPile = discardPile;
         // TODO: deep copy all variables to the new game state.
         return copy;
     }

@@ -26,6 +26,9 @@ public class PrototypeGUIManager extends AbstractGUIManager {
     public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, Set<Integer> humanId, int maxActionSpace) {
         this(parent, gameType, game, ac, humanId, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
     }
+    public PrototypeGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
+        this(parent, GameType.ServeTheKing, game, ac, humanId, 1000000, defaultDisplayWidth, defaultDisplayHeight);
+    }
 
     public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, Set<Integer> humanId, int maxActionSpace,
                                int displayWidth, int displayHeight) {
@@ -90,7 +93,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
 
     @Override
     public int getMaxActionSpace() {
-        return 0;
+        return 10000;
     }
 
     @Override

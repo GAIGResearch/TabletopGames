@@ -6,12 +6,11 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.serveTheKing.actions.Pass;
-import games.serveTheKing.actions.TrashPlate;
-import games.serveTheKing.components.KingCard;
+import games.serveTheKing.actions.*;
 import games.serveTheKing.components.PlateCard;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -46,10 +45,10 @@ public class STKForwardModel extends StandardForwardModel {
         stkgs.playersPlates = new ArrayList<>(stkgs.getNPlayers());
         stkgs.playerCalledServe=-1;
         //TODO : implement the different kings.
-        setupRound(stkgs,null,0);
+        setupRound(stkgs);
     }
 
-    private void setupRound(STKGameState stkgs, KingCard king, int roundNumber){
+    private void setupRound(STKGameState stkgs){
         // Reset player status
         for (int i = 0; i < stkgs.getNPlayers(); i++) {
             stkgs.setPlayerResult(CoreConstants.GameResult.GAME_ONGOING, i);
@@ -78,6 +77,9 @@ public class STKForwardModel extends StandardForwardModel {
                 playerCards.add(stkgs.mainDeck.draw());
             }
             stkgs.playersPlates.add(playerCards);
+            // a player look at the two first cards
+            stkgs.playersPlates.get(i).setVisibilityOfComponent(0,i,true);
+            stkgs.playersPlates.get(i).setVisibilityOfComponent(1,i,true);
         }
 
         //Create players hands (empty)
@@ -92,8 +94,6 @@ public class STKForwardModel extends StandardForwardModel {
         // Reset the player that called the Serve
         stkgs.playerCalledServe =-1;
 
-
-
         //start at draw phase for first player
         stkgs.setGamePhase(STKGameState.STKGamePhase.Draw);
     };
@@ -105,49 +105,70 @@ public class STKForwardModel extends StandardForwardModel {
         STKGameState stkgs = (STKGameState) gameState;
 
         int playerID = stkgs.getCurrentPlayer();
-
-        switch (stkgs.getGamePhase().toString()) {
-            case "Draw":
-                if(action instanceof Pass){
-                    stkgs.setGamePhase(STKGameState.STKGamePhase.Play);
-                    // player get a card
-                    PlateCard cardDraw = stkgs.mainDeck.draw();
-                    stkgs.playersHands.get(playerID).add(cardDraw);
-                }
-                else {
-                    // set current player as caller and end the turn
-                    stkgs.playerCalledServe=playerID;
-                    int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
+        if(!checkEndOfRound(stkgs,action)) {
+            switch (stkgs.getGamePhase().toString()) {
+                case "Draw":
+                    if (action instanceof ChooseToDraw) {
+                        stkgs.setGamePhase(STKGameState.STKGamePhase.Play);
+                        // player get a card
+                        PlateCard cardDraw = stkgs.mainDeck.draw();
+                        stkgs.playersHands.get(playerID).add(cardDraw);
+                        //System.out.println("Player "+playerID+" hand size is: "+stkgs.playersHands.get(playerID).getComponents().size());
+                    } else {
+                        // set current player as caller and end the turn
+                        stkgs.playerCalledServe = playerID;
+                        int nextPlayer = (gameState.getCurrentPlayer() + 1) % stkgs.getNPlayers();
+                        endPlayerTurn(stkgs, nextPlayer);
+                    }
+                    break;
+                case "Play":
+                    int nextPlayer = (gameState.getCurrentPlayer() + 1 )% stkgs.getNPlayers();
+                    stkgs.setGamePhase(STKGameState.STKGamePhase.Draw);
                     endPlayerTurn(stkgs, nextPlayer);
-                }
-                break;
-            case "Play":
-                int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
-                endPlayerTurn(stkgs, nextPlayer);
-            default:
-                throw new AssertionError("Unknown Game Phase " + stkgs.getGamePhase());
+                    break;
+                default:
+                    throw new AssertionError("Unknown Game Phase " + stkgs.getGamePhase());
 
-        }
-        if (action instanceof TrashPlate) {
-            if (!checkEndOfRound(stkgs, action)) {
-                // move turn to the next player
-                int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
-                endPlayerTurn(stkgs, nextPlayer);
             }
-        } else {
-
 
         }
     }
+
+
     private boolean checkEndOfRound(STKGameState state, AbstractAction action){
-        boolean result = true;
-        if(state.playerCalledServe <0){
-            result = false;
-        }
-        else {
-            if((action instanceof TrashPlate) && (state.getCurrentPlayer()+1 == state.playerCalledServe)){
-                result = true;
+        boolean result = false;
+        if(state.getCurrentPlayer()+1 == state.playerCalledServe){
+            int minimumScore= 60;
+            int playerScores[] = new int[state.getNPlayers()];
+            for (int i =0 ; i<state.getNPlayers(); i++){
+                int score =0;
+                PartialObservableDeck<PlateCard> playerPlate = state.getPlayersPlates().get(i);
+                for(PlateCard c: playerPlate.getComponents()){
+                    score = score + c.getValue();
+                }
+                playerScores[i]=score;
+                if (score<minimumScore){
+                    minimumScore=score;
+                }
             }
+            HashSet<Integer> winners = new HashSet<Integer>();
+            for (int i =0 ; i<state.getNPlayers(); i++) {
+                if(playerScores[i]==minimumScore){
+                    winners.add(i);
+                }
+            }
+            int trueWin=-1;
+            for (int i = (state.playerCalledServe+1)%state.getNPlayers();i<state.getNPlayers();i++){
+                if(winners.contains(i)){
+                    state.setPlayerResult(CoreConstants.GameResult.WIN_ROUND,i);
+                    trueWin=i;
+                }
+                else {
+                    state.setPlayerResult(CoreConstants.GameResult.LOSE_ROUND,i);
+                }
+            }
+            endRound(state,trueWin);
+            result = true;
         }
         return result;
     }
@@ -157,9 +178,28 @@ public class STKForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+
         List<AbstractAction> actions = new ArrayList<>();
-        // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-        //actions.add(new ThrashPlate());
+        STKGameState stkgs = (STKGameState) gameState;
+        int currentPlayer = stkgs.getCurrentPlayer();
+        switch (stkgs.getGamePhase().toString()) {
+            case "Draw":
+
+                actions.add(new ChooseToDraw());
+                actions.add(new Serve());
+                break;
+            case "Play":
+
+                PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(currentPlayer);
+                for(int i =0; i< playerPlate.getComponents().size();i++){
+                    Exchange action = new Exchange(currentPlayer,0,i);
+                    actions.add(action);
+                }
+                actions.add(new UseAbility(currentPlayer));
+                break;
+            default:
+                throw new AssertionError("Unknown Game Phase " + stkgs.getGamePhase());
+        }
         return actions;
     }
 }
