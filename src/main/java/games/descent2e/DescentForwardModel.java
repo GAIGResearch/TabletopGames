@@ -6,6 +6,7 @@ import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.*;
+import games.descent2e.DescentTypes.*;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
 import games.descent2e.actions.attack.*;
@@ -25,11 +26,8 @@ import utilities.Pair;
 import utilities.Vector2D;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import games.descent2e.DescentTypes.*;
+import java.util.*;
 
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
@@ -160,7 +158,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         {
             Hero tarha = dgs.getHeroByName("Widow Tarha");
             for (int i = 0; i < (tarha.getAttackDice().getSize()); i++) {
-                TarhaAbilityReroll reroll = new TarhaAbilityReroll(tarha, i);
+                TarhaAbilityReroll reroll = new TarhaAbilityReroll(i);
                 if (!tarha.getAbilities().contains(reroll)) {
                     tarha.addAbility(reroll);
                 }
@@ -843,14 +841,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             for (BoardNode possibleTarget : startTargets) {
                 // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
-                Set<BoardNode> newTargets = possibleTarget.getNeighbours().keySet().stream().collect(Collectors.toSet());
+                Set<BoardNode> newTargets = new HashSet<>(possibleTarget.getNeighbours().keySet());
                 newTargets.addAll(rangedTargets);
                 rangedTargets = newTargets;
             }
         }
 
         // Prevents the attacker from trying to shoot itself
-        rangedTargets.remove(currentTile.getComponentID());
+        rangedTargets.remove(currentTile);
 
         for (BoardNode neighbour : rangedTargets) {
             if (neighbour == null) continue;
@@ -875,6 +873,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                             if (other.getComponentID() == action.getDefendingFigure()) {
                                 // If an attack action on the same enemy already exists, this prevents a duplicate from being added
                                 canAdd = false;
+                                break;
                             }
                         }
 

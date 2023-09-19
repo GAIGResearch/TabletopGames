@@ -81,25 +81,23 @@ public class HeroAbilities {
 
     // Widow Tarha's Hero Ability
     // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
-    public static int tarha(DescentGameState dgs, Figure actingFigure, DescentDice dice) {
+    public static int tarha(DescentGameState dgs, DescentDice dice) {
         int face = dice.getFace();
         Hero tarha = dgs.getHeroByName("Widow Tarha");
-        if (actingFigure.equals(tarha)) {
-            // We can only do this once per round
-            if (!((Hero) actingFigure).hasUsedHeroAbility()) {
-                DiceType type = dice.getColour();
-                System.out.println("Widow Tarha rerolls the " + type + " die");
-                DicePool reroll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
-                    put(type, 1);
-                }});
-                reroll.roll((dgs.getRandom()));
+        // We can only do this once per round
+        if (!tarha.hasUsedHeroAbility()) {
+            DiceType type = dice.getColour();
+            System.out.println("Widow Tarha rerolls the " + type + " die");
+            DicePool reroll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
+                put(type, 1);
+            }});
+            reroll.roll((dgs.getRandom()));
 
-                System.out.println("Old Result: " + face + " (Range: " + dice.getRange() + ", Surge: " + dice.getSurge() + ", Damage: " + dice.getDamage() +")");
-                face = reroll.getDice(0).getFace();
-                System.out.println("New Result: " + face + " (Range: " + reroll.getDice(0).getRange() + ", Surge: " + reroll.getDice(0).getSurge() + ", Damage: " + reroll.getDice(0).getDamage() + ")");
-                tarha.setUsedHeroAbility(true);
-                tarha.setRerolled(true);
-            }
+            System.out.println("Old Result: " + face + " (Range: " + dice.getRange() + ", Surge: " + dice.getSurge() + ", Damage: " + dice.getDamage() +")");
+            face = reroll.getDice(0).getFace();
+            System.out.println("New Result: " + face + " (Range: " + reroll.getDice(0).getRange() + ", Surge: " + reroll.getDice(0).getSurge() + ", Damage: " + reroll.getDice(0).getDamage() + ")");
+            tarha.setUsedHeroAbility(true);
+            tarha.setRerolled(true);
         }
         return face;
     }

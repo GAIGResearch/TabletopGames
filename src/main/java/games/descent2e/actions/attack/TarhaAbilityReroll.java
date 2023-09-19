@@ -15,18 +15,16 @@ public class TarhaAbilityReroll extends DescentAction {
 
     // Widow Tarha Hero Ability
     String heroName = "Widow Tarha";
-    Hero tarha;
     int dice;
-    public TarhaAbilityReroll(Hero hero, int dice) {
+    public TarhaAbilityReroll(int dice) {
         super(Triggers.ROLL_OWN_DICE);
-        this.tarha = hero;
         this.dice = dice;
 
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        int rerollFace = HeroAbilities.tarha(dgs, tarha, dgs.getAttackDicePool().getDice(dice));
+        int rerollFace = HeroAbilities.tarha(dgs, dgs.getAttackDicePool().getDice(dice));
         if (rerollFace != -1) {
             dgs.getAttackDicePool().getDice(dice).setFace(rerollFace);
         }
@@ -35,7 +33,7 @@ public class TarhaAbilityReroll extends DescentAction {
 
     @Override
     public TarhaAbilityReroll copy() {
-        return new TarhaAbilityReroll(tarha, dice);
+        return new TarhaAbilityReroll(dice);
     }
 
     @Override
@@ -45,6 +43,7 @@ public class TarhaAbilityReroll extends DescentAction {
             IExtendedSequence action = dgs.currentActionInProgress();
             // Ranged Attacks are instances of Melee Attacks, so both types are covered
             if (action instanceof MeleeAttack) {
+                Hero tarha = dgs.getHeroByName(heroName);
                 return !tarha.hasUsedHeroAbility() && !tarha.hasRerolled() && dgs.getActingFigure().equals(tarha);
             }
         }
@@ -55,14 +54,14 @@ public class TarhaAbilityReroll extends DescentAction {
     public boolean equals(Object obj) {
         if (obj instanceof TarhaAbilityReroll) {
             TarhaAbilityReroll other = (TarhaAbilityReroll) obj;
-            return other.tarha.equals(tarha) && other.dice == dice;
+            return other.dice == dice;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tarha, dice);
+        return Objects.hash(dice);
     }
 
     @Override
@@ -72,6 +71,6 @@ public class TarhaAbilityReroll extends DescentAction {
     }
 
     public String toString() {
-        return "REROLL_DICE_" + dice + " : " + tarha.getComponentID();
+        return "REROLL_DICE_" + dice;
     }
 }
