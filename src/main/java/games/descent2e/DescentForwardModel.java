@@ -573,114 +573,115 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     private List<AbstractAction> heroicFeatAction(DescentGameState dgs, Hero actingFigure)
     {
         List<AbstractAction> heroicFeats = new ArrayList<>();
-        DescentAction heroicFeat = null;
-        switch (actingFigure.getName().replace("Hero: ", ""))
-        {
-            // Healer
-            case "Ashrian":
-                // Ashrian can choose which Monster Group to target
-                for (List<Monster> monsters : dgs.getMonsters()) {
-                    heroicFeat = new StunAllInMonsterGroup(monsters, 3);
-                    if (heroicFeat.canExecute(dgs))
-                        heroicFeats.add(heroicFeat);
-                }
-                break;
-            case "Avric Albright":
-                // Avric heals all allies within 3 spaces
-                Vector2D position = dgs.getActingFigure().getPosition();
-                int range = 3;
-                List<Hero> heroesInRange = new ArrayList<>();
-                for(Hero hero : dgs.getHeroes()) {
-                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
-                        heroesInRange.add(hero);
-                    }
-                }
-                heroicFeat = new HealAllInRange(heroesInRange, 3);
-                if (heroicFeat.canExecute(dgs))
-                    heroicFeats.add(heroicFeat);
-                break;
-
-            // Mage
-            case "Leoric of the Book":
-                // Leoric attacks all adjacent monsters with a magic weapon
-                List<Integer> monsters = getMeleeTargets(dgs, actingFigure);
-                if (!monsters.isEmpty()) {
-                    heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
-                    if (heroicFeat.canExecute(dgs))
-                        heroicFeats.add(heroicFeat);
-                }
-                break;
-            case "Widow Tarha":
-                // Tarha attacks two targets with only one attack roll
-                monsters = getRangedTargets(dgs, actingFigure);
-                // Get all possible monster pairs available
-                for (int i = 0; i < monsters.size(); i++) {
-                    for (int j = i + 1; j < monsters.size(); j++) {
-                        List<Integer> monsterPair = new ArrayList<>();
-                        monsterPair.add(monsters.get(i));
-                        monsterPair.add(monsters.get(j));
-
-                        heroicFeat = new DoubleAttack(dgs.getActingFigure().getComponentID(), monsterPair);
-                        if (heroicFeat.canExecute(dgs))
-                            heroicFeats.add(heroicFeat);
-                    }
-                }
-                break;
-
-            // Scout
-            case "Jain Fairwood":
-                // Jain can move double her speed and make an attack at any point during that movement (before, during and after)
-                heroicFeat = new DoubleMoveAttack((Hero) dgs.getActingFigure());
-                if (heroicFeat.canExecute(dgs))
-                    heroicFeats.add(heroicFeat);
-                break;
-            case "Tomble Burrowell":
-                // Tomble's Heroic Feat comes in three parts
-                // Remove from Map
-                heroicFeat = new RemoveFromMap();
-                if (heroicFeat.canExecute(dgs))
-                    heroicFeats.add(heroicFeat);
-                // Choose where to return to Map (by up to 4 spaces away)
-                heroicFeat = new ReturnToMapMove(4);
-                if (heroicFeat.canExecute(dgs))
-                    heroicFeats.add(heroicFeat);
-
-                // Return to Map
-                heroicFeat = new ReturnToMapPlace();
-                if (heroicFeat.canExecute(dgs))
-                    heroicFeats.add(heroicFeat);
-                break;
-
-            // Warrior
-            case "Grisban the Thirsty":
-                // Grisban can make a free extra attack
-                monsters = getMeleeTargets(dgs, actingFigure);
-                for (int monster : monsters) {
-                    // TODO: Enable check to see if Grisban can used Ranged Attacks (by default he is Melee)
-                    heroicFeat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), monster, true);
-                    if (heroicFeat.canExecute(dgs))
-                        heroicFeats.add(heroicFeat);
-                }
-                break;
-            case "Syndrael":
-                // Syndrael allows her and any ally of her choice within 3 spaces to immediately make a Move action
-                List<Hero> heroes = dgs.getHeroes();
-                for (Hero hero : heroes) {
-                    if (hero == actingFigure)
-                        continue;
-                    position = dgs.getActingFigure().getPosition();
-                    range = 3;
-                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
-                        heroicFeat = new HeroicFeatExtraMovement(actingFigure, hero);
-                        if (heroicFeat.canExecute(dgs))
-                            heroicFeats.add(heroicFeat);
-                    }
-
-                }
-                break;
-            default:
-                break;
-        }
+        DescentAction heroicFeat = actingFigure.getHeroicFeat().action;
+        if (heroicFeat.canExecute(dgs)) heroicFeats.add(heroicFeat);
+//        switch (actingFigure.getName().replace("Hero: ", ""))
+//        {
+//            // Healer
+//            case "Ashrian":
+//                // Ashrian can choose which Monster Group to target
+//                for (List<Monster> monsters : dgs.getMonsters()) {
+//                    heroicFeat = new StunAllInMonsterGroup(monsters, 3);
+//                    if (heroicFeat.canExecute(dgs))
+//                        heroicFeats.add(heroicFeat);
+//                }
+//                break;
+//            case "Avric Albright":
+//                // Avric heals all allies within 3 spaces
+//                Vector2D position = dgs.getActingFigure().getPosition();
+//                int range = 3;
+//                List<Hero> heroesInRange = new ArrayList<>();
+//                for(Hero hero : dgs.getHeroes()) {
+//                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
+//                        heroesInRange.add(hero);
+//                    }
+//                }
+//                heroicFeat = new HealAllInRange(heroesInRange, 3);
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                break;
+//
+//            // Mage
+//            case "Leoric of the Book":
+//                // Leoric attacks all adjacent monsters with a magic weapon
+//                List<Integer> monsters = getMeleeTargets(dgs, actingFigure);
+//                if (!monsters.isEmpty()) {
+//                    heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
+//                    if (heroicFeat.canExecute(dgs))
+//                        heroicFeats.add(heroicFeat);
+//                }
+//                break;
+//            case "Widow Tarha":
+//                // Tarha attacks two targets with only one attack roll
+//                monsters = getRangedTargets(dgs, actingFigure);
+//                // Get all possible monster pairs available
+//                for (int i = 0; i < monsters.size(); i++) {
+//                    for (int j = i + 1; j < monsters.size(); j++) {
+//                        List<Integer> monsterPair = new ArrayList<>();
+//                        monsterPair.add(monsters.get(i));
+//                        monsterPair.add(monsters.get(j));
+//
+//                        heroicFeat = new DoubleAttack(dgs.getActingFigure().getComponentID(), monsterPair);
+//                        if (heroicFeat.canExecute(dgs))
+//                            heroicFeats.add(heroicFeat);
+//                    }
+//                }
+//                break;
+//
+//            // Scout
+//            case "Jain Fairwood":
+//                // Jain can move double her speed and make an attack at any point during that movement (before, during and after)
+//                heroicFeat = new DoubleMoveAttack((Hero) dgs.getActingFigure());
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                break;
+//            case "Tomble Burrowell":
+//                // Tomble's Heroic Feat comes in three parts
+//                // Remove from Map
+//                heroicFeat = new RemoveFromMap();
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                // Choose where to return to Map (by up to 4 spaces away)
+//                heroicFeat = new ReturnToMapMove(4);
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//
+//                // Return to Map
+//                heroicFeat = new ReturnToMapPlace();
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                break;
+//
+//            // Warrior
+//            case "Grisban the Thirsty":
+//                // Grisban can make a free extra attack
+//                monsters = getMeleeTargets(dgs, actingFigure);
+//                for (int monster : monsters) {
+//                    // TODO: Enable check to see if Grisban can used Ranged Attacks (by default he is Melee)
+//                    heroicFeat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), monster, true);
+//                    if (heroicFeat.canExecute(dgs))
+//                        heroicFeats.add(heroicFeat);
+//                }
+//                break;
+//            case "Syndrael":
+//                // Syndrael allows her and any ally of her choice within 3 spaces to immediately make a Move action
+//                List<Hero> heroes = dgs.getHeroes();
+//                for (Hero hero : heroes) {
+//                    if (hero == actingFigure)
+//                        continue;
+//                    position = dgs.getActingFigure().getPosition();
+//                    range = 3;
+//                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
+//                        heroicFeat = new HeroicFeatExtraMovement(actingFigure, hero);
+//                        if (heroicFeat.canExecute(dgs))
+//                            heroicFeats.add(heroicFeat);
+//                    }
+//
+//                }
+//                break;
+//            default:
+//                break;
+//        }
         return heroicFeats;
     }
     private ArrayList<AbstractAction> monsterActions(DescentGameState dgs, Monster actingFigure)

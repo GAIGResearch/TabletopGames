@@ -9,14 +9,17 @@ import java.util.List;
 
 public class AttackAllAdjacent extends MultiAttack {
 
-    // Leoric of the Book's Heroic Feat
-    String heroName = "Leoric of the Book";
+    public AttackAllAdjacent(){
+        super();
+    }
     public AttackAllAdjacent(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
+        // TODO: current acting figure is doing this, find it
+        // TODO: find all adjacent enemies next to the figure and attack them as in super class
         dgs.setActionInProgress(this);
         ((Hero) dgs.getActingFigure()).setFeatAvailable(false);
         super.execute(dgs);
@@ -27,7 +30,7 @@ public class AttackAllAdjacent extends MultiAttack {
     public boolean canExecute(DescentGameState dgs) {
         Hero f = (Hero) dgs.getActingFigure();
         // TODO: Can only use if wielding a Magic weapon
-        return  f.getName().contains(heroName) && f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum();
+        return  f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum();
     }
 
     public AttackAllAdjacent copy() {
@@ -41,7 +44,7 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public String toString() {
-        return "Heroic Feat: Leoric of the Book - Attack all adjacent monsters";
+        return "Heroic Feat: Attack all adjacent monsters";
     }
 
 }

@@ -121,10 +121,10 @@ public class DescentHeroView extends ComponentView {
         }
 
         // Character ability // TODO: symbolic version?
-        GUIUtils.drawStringCentered(g, hero.getAbility(), new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*70), (int)(characterCardScale*220), (int)(characterCardScale*190)), Color.black, 12, true);
+        GUIUtils.drawStringCentered(g, hero.getAbilityStr(), new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*70), (int)(characterCardScale*220), (int)(characterCardScale*190)), Color.black, 12, true);
 
         // Draw character heroic feat on card (indicate if executed)  // TODO symbolic?
-        GUIUtils.drawStringCentered(g, hero.getHeroicFeat(), new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*290), (int)(characterCardScale*220),
+        GUIUtils.drawStringCentered(g, hero.getHeroicFeatStr(), new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*290), (int)(characterCardScale*220),
                 (int)(characterCardScale*190)), hero.isFeatAvailable() ? Color.black : Color.lightGray, 12, true);
         if (!hero.isFeatAvailable()) {
             GUIUtils.drawStringCentered(g, "Executed", new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*380), (int)(characterCardScale*220),
