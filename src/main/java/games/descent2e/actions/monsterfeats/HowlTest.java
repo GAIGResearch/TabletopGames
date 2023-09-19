@@ -20,6 +20,12 @@ public class HowlTest extends AttributeTest {
     }
 
     @Override
+    public void announceTestDebug (DescentGameState dgs)
+    {
+        System.out.println(((Figure) dgs.getComponentById(super.getTestingFigure())).getName() + " must make a Howl Test!");
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
         return toString();
     }
@@ -46,7 +52,7 @@ public class HowlTest extends AttributeTest {
         }
 
         f.addAttributeTest(this);
-        System.out.println("Added Attribute Test");
+        System.out.println("Added Howl (Willpower) Test");
     }
 
     public HowlTest copy()

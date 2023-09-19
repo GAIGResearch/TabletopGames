@@ -246,7 +246,12 @@ public class Figure extends Token {
             return false;
         }
 
-        return attributeTests.contains(attributeTest);
+        for (AttributeTest test : attributeTests) {
+            if (attributeTest.getAttributeTestName().equals(test.getAttributeTestName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addAbility(DescentAction ability) {

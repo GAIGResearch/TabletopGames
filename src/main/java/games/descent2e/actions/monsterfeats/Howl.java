@@ -50,7 +50,6 @@ public class Howl extends TriggerAttributeTest {
         do {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
-                // System.out.println("Melee Attack Interrupt: " + phase + ", Interrupter:" + phase.interrupters + ", Interrupt:" + phase.interrupt + ", Player: " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
@@ -103,12 +102,11 @@ public class Howl extends TriggerAttributeTest {
         Monster monster = (Monster) dgs.getComponentById(attackingFigure);
         List<AbstractAction> retVal = new ArrayList<>();
 
-        System.out.println(((Figure) dgs.getComponentById(defendingFigure)).getName());
+        // System.out.println(((Figure) dgs.getComponentById(defendingFigure)).getName());
 
         HowlTest howlTest = new HowlTest(defendingFigure, Figure.Attribute.Willpower, attackingFigure, monster.getNActionsExecuted().getValue());
 
         if (howlTest.canExecute(dgs)) {
-            System.out.println(((Figure) dgs.getComponentById(defendingFigure)).getName() + " must make a Howl Test!");
             retVal.add(howlTest);
         }
 

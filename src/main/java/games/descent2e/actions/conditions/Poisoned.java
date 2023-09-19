@@ -17,6 +17,11 @@ public class Poisoned extends AttributeTest {
         super.setTestCount(0);
     }
 
+    public void announceTestDebug (DescentGameState dgs)
+    {
+        System.out.println(((Figure) dgs.getComponentById(super.getTestingFigure())).getName() + " must make a Poisoned Test!");
+    }
+
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

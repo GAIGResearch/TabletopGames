@@ -77,6 +77,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         setTestingName(tester.getName());
         attributeValue = tester.getAttributeValue(attribute);
 
+        announceTestDebug(state);
+
         movePhaseForward(state);
 
         // When executing an attribute test we need to:
@@ -87,6 +89,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         // 5) Lastly, we allow the results to be made public
 
         return true;
+    }
+
+    public void announceTestDebug (DescentGameState dgs) {
+        System.out.println(((Figure) dgs.getComponentById(testingFigure)).getName() + " must make an Attribute Test!");
     }
 
     private void movePhaseForward(DescentGameState state) {
