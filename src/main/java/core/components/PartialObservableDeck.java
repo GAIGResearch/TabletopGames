@@ -238,6 +238,13 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     @Override
+    public boolean addToBottom(T c) {
+        if(components.size() == 0)
+            return add(c, 0, deckVisibility);
+        else return add(c, components.size() -1, deckVisibility);
+    }
+
+    @Override
     public boolean add(T c) {
         return add(c, deckVisibility);
     }
@@ -263,6 +270,17 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         components = shuffled.a;
         elementVisibility = shuffled.b;
     }
+
+    /**
+     * Shuffles a deck in its entirety, and resets the visibility of all components to the default visibility of the deck.
+     * @param rnd random number generator to be used in shuffling.
+     */
+    public void shuffleAndResetVisibility(Random rnd)
+    {
+        shuffle(rnd);
+        elementVisibility.replaceAll(ignored -> deckVisibility.clone());
+    }
+
 
     /**
      * Shuffles a list of components and associated visibility
@@ -335,6 +353,21 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     public PartialObservableDeck<T> copy() {
         PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, ownerId, deckVisibility, componentID);
         this.copyTo(dp); // Copy super
+
+        dp.deckVisibility = deckVisibility.clone();
+
+        ArrayList<boolean[]> newVisibility = new ArrayList<>();
+        for (boolean[] visibility : elementVisibility) {
+            newVisibility.add(visibility.clone());
+        }
+        dp.elementVisibility = newVisibility;
+
+        return dp;
+    }
+
+    public PartialObservableDeck<T> copy(int playerId) {
+        PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, ownerId, deckVisibility, componentID);
+        this.copyTo(dp, playerId); // Copy super
 
         dp.deckVisibility = deckVisibility.clone();
 

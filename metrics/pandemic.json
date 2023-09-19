@@ -1,0 +1,19 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.SummaryLogger"
+    },
+    [
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "evaluation.metrics.GameMetrics$StateSpace" },
+      {"class": "evaluation.metrics.GameMetrics$ComputationTimes" },
+      {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "evaluation.metrics.GameMetrics$Actions" },
+      { "class": "games.pandemic.stats.PandemicMetrics$CounterValue",
+        "args": [ ["Disease yellow", "Disease Cube yellow", "Outbreaks", "Infection Rate" ]] },
+      { "class": "games.pandemic.stats.PandemicMetrics$DeckSize", "args": [ ["infection", "Player Deck" ]] }
+    ]
+  ]
+}

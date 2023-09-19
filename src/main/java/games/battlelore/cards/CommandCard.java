@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CommandCard extends Card {
 
@@ -117,11 +118,16 @@ public class CommandCard extends Card {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         CommandCard that = (CommandCard) o;
-        return title == that.title &&
-                explanation == that.explanation &&
+        return Objects.equals(title, that.title) &&
+                Objects.equals(explanation, that.explanation) &&
                 orderCount == that.orderCount &&
                 hasCondition == that.hasCondition &&
                 bonusLorePoints == that.bonusLorePoints &&
                 bonusMoveCount == that.bonusMoveCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), title, explanation, orderCount, hasCondition, bonusLorePoints, bonusMoveCount);
     }
 }

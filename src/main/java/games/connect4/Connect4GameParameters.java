@@ -1,7 +1,7 @@
 package games.connect4;
 
 import core.AbstractParameters;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.*;

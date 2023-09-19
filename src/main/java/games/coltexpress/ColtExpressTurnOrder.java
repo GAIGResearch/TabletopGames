@@ -154,7 +154,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
 
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState, getCurrentPlayer(gameState))));
 
         turnCounter++;
         ColtExpressGamePhase phase = (ColtExpressGamePhase) cegs.getGamePhase();

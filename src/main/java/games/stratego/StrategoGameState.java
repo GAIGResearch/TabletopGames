@@ -7,6 +7,7 @@ import core.components.Component;
 import core.components.GridBoard;
 import games.GameType;
 import games.stratego.components.Piece;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,14 +58,15 @@ public class StrategoGameState extends AbstractGameState {
         for (BoardNode bn : gridBoard.getComponents()){
             Piece piece = (Piece) bn;
             if (piece != null) {
+                Vector2D pos = piece.getPiecePosition();
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
                     int typeIdx = random.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
+                    s.gridBoard.setElement(pos.getX(), pos.getY(), piece.partialCopy(hiddenPieceType));
                 } else{
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+                    s.gridBoard.setElement(pos.getX(), pos.getY(), piece.copy());
                 }
             }
         }
@@ -123,4 +125,6 @@ public class StrategoGameState extends AbstractGameState {
     public void printToConsole() {
         System.out.println(gridBoard.toString());
     }
+
+
 }

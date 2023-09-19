@@ -12,6 +12,7 @@ import utilities.Pair;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static core.CoreConstants.VisibilityMode.FIRST_VISIBLE_TO_ALL;
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.*;
@@ -44,6 +45,12 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
         DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
         AbstractGameData _data = new AbstractGameData();
         _data.load(params.getDataPath());
+
+        state.season = SPRING;
+        state.year = 1;
+        state.currentAreaBeingExecuted = null;
+        state.actionPointsLeftForCurrentPlayer = 0;
+        state.playersToMakeVikingDecisions = new ArrayList<>();
 
         for (int p = 0; p < state.getNPlayers(); p++) {
             state.createMonk(4, p);

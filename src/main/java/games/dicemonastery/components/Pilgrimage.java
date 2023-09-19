@@ -5,6 +5,7 @@ import core.components.Component;
 import core.properties.PropertyInt;
 import core.properties.PropertyIntArray;
 import core.properties.PropertyString;
+import evaluation.metrics.Event;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryGameState;
 import utilities.Hash;
@@ -86,11 +87,11 @@ public class Pilgrimage extends Component {
         progress++;
         state.addVP(vpPerStep[progress], player);
         if (progress == vpPerStep.length - 1) {
-            state.logEvent(() -> String.format("Monk reaches %s and gains %s", destination, finalReward));
+            state.logEvent(Event.GameEvent.GAME_EVENT, () -> String.format("Monk reaches %s and gains %s", destination, finalReward));
 
             state.addResource(player, finalReward, 1);
 
-            state.logEvent(() -> String.format("Monk returns from %s and is promoted", destination));
+            state.logEvent(Event.GameEvent.GAME_EVENT, () -> String.format("Monk returns from %s and is promoted", destination));
             Monk pilgrim = state.getMonkById(pilgrimId);
             state.moveMonk(pilgrimId, PILGRIMAGE, DORMITORY);
             pilgrim.promote(state);

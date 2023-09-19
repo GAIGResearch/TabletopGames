@@ -20,6 +20,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class PokerGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -57,7 +58,7 @@ public class PokerGUIManager extends AbstractGUIManager {
     PokerForwardModel pfm;
     CoreParameters coreParameters;
 
-    public PokerGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public PokerGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -324,7 +325,7 @@ public class PokerGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(pgs);
                 if (i == gameState.getCurrentPlayer() && coreParameters.alwaysDisplayCurrentPlayer
-                        || i == humanPlayerId
+                        || humanPlayerId.contains(i)
                         || coreParameters.alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);

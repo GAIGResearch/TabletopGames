@@ -1,7 +1,7 @@
 package games.tictactoe;
 
 import core.AbstractParameters;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.*;

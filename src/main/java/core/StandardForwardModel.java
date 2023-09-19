@@ -5,12 +5,9 @@ import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
 import java.util.Arrays;
-import java.util.Stack;
 
-import static core.CoreConstants.GameResult.GAME_ONGOING;
-import static core.CoreConstants.GameResult.TIMEOUT;
-import static evaluation.metrics.Event.GameEvent.ROUND_OVER;
-import static evaluation.metrics.Event.GameEvent.TURN_OVER;
+import static core.CoreConstants.GameResult.*;
+import static evaluation.metrics.Event.GameEvent.*;
 
 public abstract class StandardForwardModel extends AbstractForwardModel {
 
@@ -27,16 +24,15 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         // We can't just register with all items in the Stack, as this may represent some complex dependency
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
         if (currentState.actionsInProgress.size() > 0) {
-            IExtendedSequence topOfStack = currentState.actionsInProgress.pop();
+            IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
             if (!topOfStack.equals(action)) {
-                topOfStack.registerActionTaken(currentState, action);
+                topOfStack._afterAction(currentState, action);
             } else {
-                if (currentState.actionsInProgress.size() > 0) {
-                    IExtendedSequence nextOnStack = currentState.actionsInProgress.peek();
-                    nextOnStack.registerActionTaken(currentState, action);
+                if (currentState.actionsInProgress.size() > 1) {
+                    IExtendedSequence nextOnStack = currentState.actionsInProgress.get(currentState.actionsInProgress.size() - 2);
+                    nextOnStack._afterAction(currentState, action);
                 }
             }
-            currentState.actionsInProgress.push(topOfStack);
         }
         _afterAction(currentState, action);
     }
@@ -73,8 +69,9 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
     public final void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
-        gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementTurn();
-        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(TURN_OVER, gs)));
+        int currentPlayer = gs.getCurrentPlayer();
+        gs.getPlayerTimer()[currentPlayer].incrementTurn();
+        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(TURN_OVER, gs, currentPlayer)));
         if (gs.getCoreGameParameters().recordEventHistory) {
             gs.recordHistory(TURN_OVER.name());
         }
@@ -94,7 +91,16 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      */
     @Override
     public final void endPlayerTurn(AbstractGameState gs) {
-        endPlayerTurn(gs, (gs.turnOwner + 1) % gs.nPlayers);
+        if (gs.getGameStatus() != GAME_ONGOING) return;
+        int turnOwner = gs.turnOwner;
+        do {
+            turnOwner = (turnOwner + 1) % gs.nPlayers;
+            if (turnOwner == gs.turnOwner) {
+                throw new AssertionError("Infinite loop - apparently all players are terminal, but game state is not. " +
+                        "Last action played: " + gs.getHistory().get(gs.getHistory().size() - 1));
+            }
+        } while (!gs.isNotTerminalForPlayer(turnOwner));
+        endPlayerTurn(gs, turnOwner);
     }
 
     /**
@@ -113,8 +119,9 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
     public final void endRound(AbstractGameState gs, int firstPlayerOfNextRound) {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
-        gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementRound();
-        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(ROUND_OVER, gs)));
+        int currentPlayer = gs.getCurrentPlayer();
+        gs.getPlayerTimer()[currentPlayer].incrementRound();
+        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(ROUND_OVER, gs, currentPlayer)));
         if (gs.getCoreGameParameters().recordEventHistory) {
             gs.recordHistory(ROUND_OVER.name());
         }
@@ -135,7 +142,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     /**
      * End a round, with no change to the firstPlayer
-     * @param gs
+     * @param gs - game state
      */
     public final void endRound(AbstractGameState gs) {
         endRound(gs, gs.firstPlayer);

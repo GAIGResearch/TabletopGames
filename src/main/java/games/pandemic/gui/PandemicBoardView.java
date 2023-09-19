@@ -13,7 +13,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
-import java.util.List;
 
 import static gui.views.DeckView.drawDeck;
 import static games.pandemic.PandemicConstants.*;
@@ -79,7 +78,7 @@ public class PandemicBoardView extends JComponent {
     public PandemicBoardView(AbstractGameState gs) {
         gameState = (PandemicGameState) gs;
         this.graphBoard = ((PandemicGameState) gs).getWorld();
-        String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
+        String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "/img/";
 
         // Background and card backs
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);
@@ -111,7 +110,7 @@ public class PandemicBoardView extends JComponent {
         playerLocations = new Rectangle[gs.getNPlayers()];
         highlights = new HashMap<>();
 
-        List<BoardNode> bList = graphBoard.getBoardNodes();
+        Collection<BoardNode> bList = graphBoard.getBoardNodes();
         for (BoardNode b : bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
@@ -218,7 +217,7 @@ public class PandemicBoardView extends JComponent {
         height = (int)(background.getHeight(null) * scale);
 
         boardNodeLocations = new HashMap<>();
-        List<BoardNode> bList = graphBoard.getBoardNodes();
+        Collection<BoardNode> bList = graphBoard.getBoardNodes();
         for (BoardNode b : bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
@@ -260,7 +259,7 @@ public class PandemicBoardView extends JComponent {
         drawImage(g, background, panX, panY);
 
         // Draw nodes
-        java.util.List<BoardNode> bList = graphBoard.getBoardNodes();
+        Collection<BoardNode> bList = graphBoard.getBoardNodes();
         for (BoardNode b: bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale) + panX, (int)(poss.getY()*scale) + panY);

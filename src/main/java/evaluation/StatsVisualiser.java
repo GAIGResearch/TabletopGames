@@ -23,7 +23,7 @@ import java.util.*;
  *      1. Extend this class
  *      2. Add their constructor in the {@link #getVisualiserForGame(GameType, List)} method in this class as a new case
  * See example for {@link GameType#TerraformingMars} in {@link TMStatsVisualiser}
- * The visualisers are called in {@link GameReport#main(String[])}, to display stats at the end of a run *
+ * The visualisers are called to display stats at the end of a run *
  */
 public abstract class StatsVisualiser extends JFrame {
     private final Map<Event.GameEvent, IStatisticLogger> loggers;
@@ -34,7 +34,8 @@ public abstract class StatsVisualiser extends JFrame {
 
     public StatsVisualiser(List<MetricsGameListener> listeners) {
         if (listeners.size() > 1) System.out.println("Only showing first listener");
-        loggers = listeners.get(0).getLoggers();
+//        loggers = listeners.get(0).get();
+        loggers = new HashMap<>(); // todo
 
         // Default colors
         getContentPane().setBackground(backgroundColor);

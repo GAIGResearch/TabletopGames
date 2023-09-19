@@ -11,6 +11,7 @@ import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public class GraphBoardView extends ComponentView {
         }
 
         // Draw connections
-        java.util.List<BoardNode> bList = graphBoard.getBoardNodes();
+        Collection<BoardNode> bList = graphBoard.getBoardNodes();
         for (BoardNode b: bList) {
             PropertyVector2D posProp = (PropertyVector2D) b.getProperty(coordinateHash);
             if (posProp != null) {

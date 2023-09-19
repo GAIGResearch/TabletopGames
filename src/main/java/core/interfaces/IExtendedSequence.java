@@ -2,6 +2,7 @@ package core.interfaces;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public interface IExtendedSequence {
      * @return the list of possible actions for the currentPlayer
      */
     List<AbstractAction> _computeAvailableActions(AbstractGameState state);
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
+        return _computeAvailableActions(state);
+    }
 
     /**
      * TurnOrder delegates to this from getCurrentPlayer() if this Extended Sequence is currently active.
@@ -38,7 +42,7 @@ public interface IExtendedSequence {
     int getCurrentPlayer(AbstractGameState state);
 
     /**
-     * This is called by ForwardModel whenever an action is about to be taken. It enables the IExtendedSequence
+     * This is called by ForwardModel whenever an action has just been taken. It enables the IExtendedSequence
      * to maintain local state in whichever way is most suitable.
      *
      * After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
@@ -47,9 +51,9 @@ public interface IExtendedSequence {
      *
      *
      * @param state The current game state
-     * @param action The action about to be taken (so the game state has not yet been updated with it)
+     * @param action The action that has just been taken
      */
-    void registerActionTaken(AbstractGameState state, AbstractAction action);
+    void _afterAction(AbstractGameState state, AbstractAction action);
 
     /**
      * Return true if this extended sequence has now completed and there is nothing left to do.

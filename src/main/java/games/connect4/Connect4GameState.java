@@ -81,6 +81,25 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+
+        for (int y = 0; y < gridBoard.getHeight(); y++) {
+            for (int x = 0; x < gridBoard.getWidth(); x++) {
+                if (y != 0 || x != 0) {
+                    sb.append(",");
+                }
+                Token t = gridBoard.getElement(x, y);
+                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getTokenType()).append("\"");
+            }
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), gridBoard);
     }

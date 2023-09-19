@@ -46,7 +46,7 @@ public class LLGUIListener implements IGameListener {
     }
 
     @Override
-    public void allGamesFinished() {
+    public void report() {
 
     }
 

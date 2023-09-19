@@ -66,7 +66,7 @@ public class TakeToken extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+    public void _afterAction(AbstractGameState gs, AbstractAction action) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         if (action instanceof PromoteMonk) {
             monkPromoted = true;
