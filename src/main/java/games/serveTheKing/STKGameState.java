@@ -40,6 +40,21 @@ public class STKGameState extends AbstractGameState {
         Draw,
         Play,
     }
+
+    public void setPlayerCalledServe(int player){
+        playerCalledServe=player;
+    }
+    public List<PartialObservableDeck<PlateCard>> getPlayersPlates(){
+        return this.playersPlates;
+    }
+    public List<PartialObservableDeck<PlateCard>> getPlayersHands(){
+        return this.playersHands;
+    }
+
+    public Deck<PlateCard> getDiscardPile() {
+        return discardPile;
+    }
+
     /**
      * @return the enum value corresponding to this game, declared in {@link GameType}.
      */

@@ -6,10 +6,8 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.loveletter.cards.LoveLetterCard;
 import games.serveTheKing.actions.Pass;
-import games.serveTheKing.actions.ThrashPlate;
-import games.serveTheKing.actions.UseAbility;
+import games.serveTheKing.actions.TrashPlate;
 import games.serveTheKing.components.KingCard;
 import games.serveTheKing.components.PlateCard;
 
@@ -130,7 +128,7 @@ public class STKForwardModel extends StandardForwardModel {
                 throw new AssertionError("Unknown Game Phase " + stkgs.getGamePhase());
 
         }
-        if (action instanceof ThrashPlate) {
+        if (action instanceof TrashPlate) {
             if (!checkEndOfRound(stkgs, action)) {
                 // move turn to the next player
                 int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
@@ -147,7 +145,7 @@ public class STKForwardModel extends StandardForwardModel {
             result = false;
         }
         else {
-            if((action instanceof ThrashPlate) && (state.getCurrentPlayer()+1 == state.playerCalledServe)){
+            if((action instanceof TrashPlate) && (state.getCurrentPlayer()+1 == state.playerCalledServe)){
                 result = true;
             }
         }
@@ -161,7 +159,7 @@ public class STKForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         List<AbstractAction> actions = new ArrayList<>();
         // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-        actions.add(new ThrashPlate());
+        //actions.add(new ThrashPlate());
         return actions;
     }
 }

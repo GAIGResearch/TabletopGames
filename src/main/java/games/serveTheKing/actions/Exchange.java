@@ -2,10 +2,15 @@ package games.serveTheKing.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
+import games.serveTheKing.STKGameState;
+import games.serveTheKing.components.PlateCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -15,15 +20,21 @@ import java.util.List;
  *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
  * </ol></p>
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link ThrashPlate} apply here as well.</p>
+ * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link TrashPlate} apply here as well.</p>
  */
 public class Exchange extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+    int currentPlayer;
+    int handCardIdx;
+    int plateCardIdx;
 
-    public Exchange(int playerID) {
+    public Exchange(int playerID, int handCardIdx, int plateCardIdx) {
         this.playerID = playerID;
+        this.currentPlayer = playerID;
+        this.handCardIdx = handCardIdx;
+        this.plateCardIdx = plateCardIdx;
     }
 
     /**
@@ -36,8 +47,20 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        // TODO populate this list with available actions
-        return new ArrayList<>();
+        ArrayList<AbstractAction> available = new ArrayList<AbstractAction>();
+        STKGameState stkgs = (STKGameState) state;
+        // find if the player can trash any card in his plate
+        int topDiscard = stkgs.getDiscardPile().peek().getValue();
+        PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
+        for(PlateCard c :playerPlates.getComponents()){
+            if (c.getValue()==topDiscard){
+                TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
+                available.add(trashAction);
+            }
+        }
+        // a player can always pass
+        available.add(new Pass());
+        return available;
     }
 
     /**
@@ -49,7 +72,7 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return playerID;
+        return currentPlayer;
     }
 
     /**
@@ -65,7 +88,8 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // TODO: Process the action that was taken.
+        STKGameState stkgs = (STKGameState) state;
+        currentPlayer = currentPlayer + 1 % stkgs.getNPlayers();
     }
 
     /**
@@ -75,7 +99,13 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        return true;
+        if (currentPlayer==playerID){
+            return true;
+        }
+        else {
+            return false;
+        }
+
     }
 
     /**
@@ -90,6 +120,16 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
+        STKGameState stkgs = (STKGameState) gs;
+        PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
+        PartialObservableDeck<PlateCard> plates = stkgs.getPlayersPlates().get(playerID);
+        Deck<PlateCard> discard = stkgs.getDiscardPile();
+        PlateCard exchanged = hand.get(handCardIdx);
+        PlateCard discarded = plates.get(plateCardIdx);
+        hand.remove(exchanged);
+        plates.remove(discarded);
+        plates.add(exchanged);
+        discard.add(discarded);
         // TODO: Some functionality applied which changes the given game state.
         gs.setActionInProgress(this);
         return true;
@@ -103,26 +143,27 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public Exchange copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        return new Exchange(playerID,handCardIdx,plateCardIdx);
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof ThrashPlate;
+        return obj instanceof Exchange
+                && ((Exchange) obj).currentPlayer==currentPlayer
+                && ((Exchange) obj).handCardIdx==handCardIdx
+                && ((Exchange) obj).plateCardIdx==plateCardIdx
+                && ((Exchange) obj).playerID==playerID;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(playerID,currentPlayer,handCardIdx,plateCardIdx);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Exchanging card in hand ("+handCardIdx+") to plate card ("+plateCardIdx+")";
     }
 
     /**

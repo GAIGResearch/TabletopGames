@@ -3,6 +3,7 @@ package games.serveTheKing.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.serveTheKing.STKGameState;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -28,10 +29,12 @@ public class Serve extends AbstractAction {
      * @param gs - game state which should be modified by this action.
      * @return - true if successfully executed, false otherwise.
      */
+
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Some functionality applied which changes the given game state.
-        return true;
+        STKGameState stkgs = (STKGameState) gs;
+        stkgs.setPlayerCalledServe(stkgs.getCurrentPlayer());
+        return false;
     }
 
     /**
@@ -55,7 +58,7 @@ public class Serve extends AbstractAction {
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return 0;
+        return 984164;
     }
 
     @Override

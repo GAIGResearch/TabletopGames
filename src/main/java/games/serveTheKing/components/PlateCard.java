@@ -26,6 +26,10 @@ public class PlateCard extends Card {
         value = value;
     }
 
+    public int getValue() {
+        return value;
+    }
+
     /**
      * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
      * Make sure the return type is this class (e.g. GTComponent) and NOT the super class Component.

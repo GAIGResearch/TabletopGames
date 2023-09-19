@@ -3,6 +3,14 @@ package games.serveTheKing.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
+import games.serveTheKing.STKGameState;
+import games.serveTheKing.components.PlateCard;
+
+import java.util.Objects;
+
+import static java.lang.Math.abs;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -20,7 +28,15 @@ import core.components.Component;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class ThrashPlate extends AbstractAction {
+public class TrashPlate extends AbstractAction {
+    protected int trashedIdx;
+
+    public TrashPlate(int cardIdx) {
+        this.trashedIdx = cardIdx;
+    }
+    public TrashPlate() {
+        this.trashedIdx = -1;
+    }
 
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -30,7 +46,12 @@ public class ThrashPlate extends AbstractAction {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Some functionality applied which changes the given game state.
+        STKGameState stkgs = (STKGameState) gs;
+        PartialObservableDeck<PlateCard> from = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
+        Deck<PlateCard> to = stkgs.getDiscardPile();
+        PlateCard discarded = from.get(trashedIdx);
+        from.remove(discarded);
+        to.add(discarded);
         return true;
     }
 
@@ -41,27 +62,28 @@ public class ThrashPlate extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ThrashPlate copy() {
+    public TrashPlate copy() {
         // TODO: copy non-final variables appropriately
-        return this;
+        TrashPlate trash = new TrashPlate(trashedIdx);
+        return trash;
     }
 
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof ThrashPlate;
+        return obj instanceof TrashPlate && ((TrashPlate) obj).trashedIdx==trashedIdx;
     }
 
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(trashedIdx);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Trashing card "+trashedIdx;
     }
 
     /**
