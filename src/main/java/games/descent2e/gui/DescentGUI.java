@@ -6,6 +6,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTurnOrder;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.Hero;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -106,9 +107,13 @@ public class DescentGUI extends AbstractGUIManager {
         if (ab.getButtonAction() instanceof Move) {
             view.actionHighlights.addAll(((Move) ab.getButtonAction()).getPositionsTraveled());
         }
+        if (ab.getButtonAction() instanceof MeleeAttack) {
+            view.attackTarget = ((MeleeAttack) ab.getButtonAction()).getDefendingFigure();
+        }
     }
     private void onMouseExit(ActionButton ab) {
         view.actionHighlights.clear();
+        view.attackTarget = -1;
     }
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
