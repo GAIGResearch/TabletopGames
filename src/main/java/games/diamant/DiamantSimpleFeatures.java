@@ -1,25 +1,27 @@
 package games.diamant;
 
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
+import evaluation.features.TunableStateFeatures;
 import org.json.simple.JSONObject;
 import players.heuristics.LeaderHeuristic;
 
-public class DiamantSimpleFeatures implements IStateFeatureVector {
+public class DiamantSimpleFeatures extends TunableStateFeatures {
     LeaderHeuristic heuristic = new LeaderHeuristic();
 
-    @Override
-    public String[] names(){
-        return new String[]{"TreasueChests", "GemsOnPath", "PlayersInCave", "Cave", "Hazards",
+    static String[] allNames =  new String[]{"TreasureChests", "GemsOnPath", "PlayersInCave", "Cave", "Hazards",
         "PlayerOrdinalPos", "PlayersStillInCaveEncoded", "LeaderHeuristic"};
-    }
 
+    public DiamantSimpleFeatures() {
+        super(allNames);
+    }
     @Override
-    public double[] featureVector(AbstractGameState gameState, int playerId) {
+    public double[] fullFeatureVector(AbstractGameState gameState, int playerId) {
         DiamantGameState gs = (DiamantGameState) gameState;
 
-        double[] retVal = new double[getObservationSpace()];
+        double[] retVal = new double[allNames.length];
         retVal[0] = gs.getTreasureChests().get(playerId).getValue();
         retVal[1] = gs.path.getComponents().get(gs.path.getSize()-1).getNumberOfGems(); // nGemsOnPath;
         retVal[2] = gs.playerInCave.size();
@@ -52,5 +54,10 @@ public class DiamantSimpleFeatures implements IStateFeatureVector {
 
     public int getObservationSpace() {
         return names().length;
+    }
+
+    @Override
+    protected DiamantSimpleFeatures _copy() {
+        return new DiamantSimpleFeatures();
     }
 }
