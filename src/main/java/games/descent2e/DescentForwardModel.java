@@ -783,8 +783,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         Vector2D currentLocation = f.getPosition();
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
         // Find valid neighbours in master graph - used for melee attacks
-        for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
-            BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
+        for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
             if (neighbour == null) continue;
             Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
             int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
@@ -834,17 +833,17 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
         // Find valid neighbours of neighbours in master graph - used for ranged attacks
-        Set<Integer> rangedTargets = currentTile.getNeighbours().keySet();
+        Set<BoardNode> rangedTargets = currentTile.getNeighbours().keySet();
 
 
         // Only finds neighbours up to a set maximum range
         for (int i = 1; i < RangedAttack.MAX_RANGE; i++) {
 
-            Set<Integer> startTargets = rangedTargets;
+            Set<BoardNode> startTargets = rangedTargets;
 
-            for (Integer possibleTarget : startTargets) {
+            for (BoardNode possibleTarget : startTargets) {
                 // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
-                Set<Integer> newTargets = ((BoardNode) dgs.getComponentById(possibleTarget)).getNeighbours().keySet().stream().collect(Collectors.toSet());
+                Set<BoardNode> newTargets = possibleTarget.getNeighbours().keySet().stream().collect(Collectors.toSet());
                 newTargets.addAll(rangedTargets);
                 rangedTargets = newTargets;
             }
@@ -853,8 +852,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Prevents the attacker from trying to shoot itself
         rangedTargets.remove(currentTile.getComponentID());
 
-        for (int neighbourCompID : rangedTargets) {
-            BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
+        for (BoardNode neighbour : rangedTargets) {
             if (neighbour == null) continue;
             Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
             int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
@@ -992,7 +990,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board
-        BoardNode firstTile = config.getBoardNodes().get(0);
+        BoardNode firstTile = config.getBoardNodes().iterator().next();
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = tileConfigs.get(firstTile.getComponentID());
@@ -1134,8 +1132,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             drawn.put(parentTile, tileToAdd);
 
             // Draw neighbours
-            for (int neighbourCompId: tileToAdd.getNeighbours().keySet()) {
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompId);
+            for (BoardNode neighbour: tileToAdd.getNeighbours().keySet()) {
 
                 // Find location to start drawing neighbour
                 Pair<String, Vector2D> connectionToNeighbour = findConnection(tileToAdd, neighbour, findOpenings(tileGrid));

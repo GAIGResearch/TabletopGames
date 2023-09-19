@@ -57,9 +57,8 @@ public class GraphBoardView extends ComponentView {
                 Vector2D pos = new Vector2D((int) (poss.getX() * scaleW), (int) (poss.getY() * scaleH));
                 PropertyBoolean edge = ((PropertyBoolean) b.getProperty(edgeHash));
 
-                Set<Integer> neighbours = b.getNeighbours().keySet();
-                for (int b2id : neighbours) {
-                    BoardNode b2 = (BoardNode) gs.getComponentById(b2id);
+                Set<BoardNode> neighbours = b.getNeighbours().keySet();
+                for (BoardNode b2 : neighbours) {
                     PropertyVector2D posProp2 = (PropertyVector2D) b2.getProperty(coordinateHash);
                     if (posProp2 != null) {
                         Vector2D poss2 = posProp2.values;

@@ -2,27 +2,22 @@ package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.BoardNode;
 import core.interfaces.IExtendedSequence;
-import core.properties.PropertyInt;
-import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentTypes;
-import games.descent2e.actions.*;
+import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.StopMove;
+import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
-import utilities.Pair;
-import utilities.Vector2D;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import static core.CoreConstants.coordinateHash;
-import static core.CoreConstants.playersHash;
 import static games.descent2e.DescentHelper.moveActions;
-import static games.descent2e.actions.Triggers.*;
+import static games.descent2e.actions.Triggers.ANYTIME;
 import static games.descent2e.actions.herofeats.HeroicFeatExtraMovement.ExtraMovePhase.*;
-import static games.descent2e.actions.herofeats.HeroicFeatExtraMovement.Interrupters.*;
+import static games.descent2e.actions.herofeats.HeroicFeatExtraMovement.Interrupters.ALLY;
+import static games.descent2e.actions.herofeats.HeroicFeatExtraMovement.Interrupters.HERO;
 
 public class HeroicFeatExtraMovement extends DescentAction implements IExtendedSequence {
 
@@ -124,7 +119,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
         movePhaseForward((DescentGameState) state);
     }

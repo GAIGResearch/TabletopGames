@@ -411,8 +411,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
 
                     // Check if this node is a connected neighbour
                     boolean connected = false;
-                    for (int nnid : bn.getNeighbours().keySet()) {
-                        BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+                    for (BoardNode nn : bn.getNeighbours().keySet()) {
                         if (nn == null) continue;
                         Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
                         if (location.equals(n)) {
@@ -467,14 +466,13 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         // Draw underlying graph
         g.setColor(Color.green);
         Stroke s = g.getStroke();
-        for (int nnid : bn.getNeighbours().keySet()) {
-            BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+        for (BoardNode nn : bn.getNeighbours().keySet()) {
             if (nn == null) continue;
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
             int xC2 = offsetX + location.getX() * descentItemSize;
             int yC2 = offsetY + location.getY() * descentItemSize;
 
-            g.setStroke(new BasicStroke((float) bn.getNeighbourCost(nnid)));
+            g.setStroke(new BasicStroke((float) bn.getNeighbourCost(nn)));
             g.drawLine(xC + descentItemSize /2, yC + descentItemSize /2, xC2 + descentItemSize /2, yC2 + descentItemSize /2);
         }
         g.setColor(Color.black);

@@ -193,9 +193,8 @@ public class DescentHelper {
         //For every point of interest find neighbours that are empty and add then as potential move spots
         for (Vector2D point : pointsOfInterest){
             BoardNode figureNode = dgs.masterBoard.getElement(point.getX(), point.getY());
-            Set<Integer> neighbourIDs = figureNode.getNeighbours().keySet();
-            for (Integer neighbourID : neighbourIDs){
-                BoardNode neighbourNode =  (BoardNode) dgs.getComponentById(neighbourID);
+            Set<BoardNode> neighbours = figureNode.getNeighbours().keySet();
+            for (BoardNode neighbourNode : neighbours){
                 PropertyInt figureOnLocation = (PropertyInt) neighbourNode.getProperty(playersHash);
                 if (figureOnLocation.value == -1){
                     Vector2D loc = ((PropertyVector2D) neighbourNode.getProperty(coordinateHash)).values;
@@ -232,9 +231,8 @@ public class DescentHelper {
             nodesToBeExpanded.remove(expandingNode);
 
             // Go through all the neighbour nodes
-            HashMap<Integer, Double> neighbours = expandingNode.getNeighbours();
-            for (Integer neighbourID : neighbours.keySet()){
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
+            HashMap<BoardNode, Double> neighbours = expandingNode.getNeighbours();
+            for (BoardNode neighbour : neighbours.keySet()){
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
 
                 double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);

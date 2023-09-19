@@ -22,6 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static core.CoreConstants.coordinateHash;
 
@@ -34,7 +35,7 @@ public class TileBuildGUI extends AbstractGUIManager {
 
     int width, height;
 
-    public TileBuildGUI(GamePanel parent, Game game, ActionController ac, int human) {
+    public TileBuildGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
 
         TileBuildState dgs = (TileBuildState) game.getGameState();

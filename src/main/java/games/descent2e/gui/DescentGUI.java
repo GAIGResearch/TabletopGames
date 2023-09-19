@@ -22,6 +22,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static games.descent2e.gui.DescentHeroView.labelFont;
@@ -39,7 +40,7 @@ public class DescentGUI extends AbstractGUIManager {
     static boolean prettyVersion = true;  // Turn off to not draw images
     static Color foregroundColor = Color.black;
 
-    public DescentGUI(GamePanel panel, Game game, ActionController ac, int human) {
+    public DescentGUI(GamePanel panel, Game game, ActionController ac, Set<Integer> human) {
         super(panel, game, ac, human);
 
         DescentGameState dgs = (DescentGameState) game.getGameState();

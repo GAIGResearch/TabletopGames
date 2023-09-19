@@ -1,14 +1,12 @@
 package utilities;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.lang.reflect.Constructor;
+import java.io.File;
 import java.util.List;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -457,69 +455,6 @@ public abstract class Utils {
         }
         return null;
     }
-
-    /**
-     * Given a filename that contains only a single class, this will instantiate the class
-     * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
-     * find and call the relevant constructor
-     *
-     * @param filename - the filename
-     * @param <T>      - the Class type that is to be instantiated
-     * @return
-     */
-    public static <T> T loadClassFromFile(String filename) {
-        try {
-            FileReader reader = new FileReader(filename);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            // We expect a class field to tell us the Class to use
-            // then a set of parameter values
-            return Utils.loadClassFromJSON(rawData);
-
-        } catch (FileNotFoundException e) {
-            throw new AssertionError("File not found to load : " + filename);
-        } catch (IOException e) {
-            throw new AssertionError("Problem reading file " + filename + " : " + e);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            throw new AssertionError("Problem parsing JSON in " + filename);
-        }
-    }
-
-    /**
-     * Given a string that contains the JSON for a single class, this will instantiate the class
-     *
-     * @param rawData - the JSON as a raw string
-     * @param <T>     - the Class type that is to be instantiated
-     * @return
-     */
-    public static <T> T loadClassFromString(String rawData) {
-        try {
-            if (!rawData.contains("{")) {
-                // we assume this is a class name with a no-arg constructor as a special case
-                Class<?> clazz = Class.forName(rawData);
-                Constructor<?> constructor = clazz.getConstructor();
-                return (T) constructor.newInstance();
-            }
-            Reader reader = new StringReader(rawData);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject json = (JSONObject) jsonParser.parse(reader);
-            // We expect a class field to tell us the Class to use
-            // then a set of parameter values
-            return Utils.loadClassFromJSON(json);
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-            throw new AssertionError("Problem parsing JSON in " + rawData);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new AssertionError("Problem processing String in " + rawData);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
-        }
-    }
-
 
     public static BufferedImage convertToType(BufferedImage sourceImage, int targetType) {
         BufferedImage image;

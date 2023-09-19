@@ -35,7 +35,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[]{view},
                 width, defaultActionPanelHeight, true);
 
         parent.setLayout(new BorderLayout());

@@ -3,6 +3,7 @@ package games.connect4;
 import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
+import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 import core.components.Token;
@@ -90,8 +91,8 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
                 if (y != 0 || x != 0) {
                     sb.append(",");
                 }
-                Token t = gridBoard.getElement(x, y);
-                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getTokenType()).append("\"");
+                BoardNode t = gridBoard.getElement(x, y);
+                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getComponentName()).append("\"");
             }
         }
 

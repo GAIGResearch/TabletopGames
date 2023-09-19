@@ -11,6 +11,7 @@ import utilities.Pathfinder;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class TileBuildGame {
     public static void main(String[] args) {
@@ -38,7 +39,7 @@ public class TileBuildGame {
         GamePanel gamePanel = new GamePanel();
         frame.setContentPane(gamePanel);
 
-        TileBuildGUI gui = new TileBuildGUI(gamePanel, game, ac, 0);
+        TileBuildGUI gui = new TileBuildGUI(gamePanel, game, ac, new HashSet<Integer>() {{add(0);}});
 
         frame.setFrameProperties();
         frame.validate();

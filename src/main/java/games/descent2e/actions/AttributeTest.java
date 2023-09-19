@@ -12,9 +12,8 @@ import games.descent2e.components.Monster;
 import java.util.List;
 import java.util.Objects;
 
-import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.AttributeTest.TestPhase.*;
-import static games.descent2e.actions.AttributeTest.Interrupters.*;
+import static games.descent2e.actions.Triggers.FORCED;
 
 // TODO: perform an attribute test
 public class AttributeTest extends DescentAction implements IExtendedSequence {
@@ -214,7 +213,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
         movePhaseForward((DescentGameState) state);
     }

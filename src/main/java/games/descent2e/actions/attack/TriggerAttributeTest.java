@@ -156,7 +156,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
         movePhaseForward((DescentGameState) state);
     }
