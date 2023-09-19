@@ -40,7 +40,7 @@ public class MCGSNode extends SingleTreeNode {
      *
      * @return - new child node.
      */
-    protected SingleTreeNode checkAndExpandNode(AbstractAction actionCopy, AbstractGameState nextState) {
+    protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // this marks the first time we have taken an action that has not been tried before from this node
         // in the main algorithm it moves us into the 'rollout' phase
 

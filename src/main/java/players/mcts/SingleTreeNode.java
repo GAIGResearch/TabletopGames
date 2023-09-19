@@ -74,7 +74,6 @@ public class SingleTreeNode {
     // Total value of this node
     protected List<Pair<Integer, AbstractAction>> actionsInTree;
     List<Pair<Integer, AbstractAction>> actionsInRollout;
-    protected int expansionCount = 0;
 
     protected SingleTreeNode() {
     }
@@ -164,9 +163,6 @@ public class SingleTreeNode {
     }
 
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
-        // TODO: Add a check here for the root node (only) that there is not change to the OpenLoopActions
-        // TODO: However this is complicated by MultiTree MCTS, for which this invariant only holds for the acting player
-        // so check the MCTSParams as well
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer) {
             actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
@@ -280,7 +276,6 @@ public class SingleTreeNode {
 
         actionsInTree = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
-        expansionCount = 0;
 
         SingleTreeNode selected = treePolicy();
         if (selected == this && openLoopState.isNotTerminalForPlayer(decisionPlayer) && nVisits > 3 && !(this instanceof MCGSNode))
@@ -376,7 +371,7 @@ public class SingleTreeNode {
         SingleTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (expansionCount < 1 && cur.openLoopState.isNotTerminalForPlayer(cur.decisionPlayer) &&
+        while (cur.openLoopState.isNotTerminalForPlayer(cur.decisionPlayer) &&
                 cur.depth < params.maxTreeDepth && !cur.actionsFromOpenLoopState.isEmpty()) {
             // Move to next child given by relevant selection function
             AbstractAction chosen = cur.treePolicyAction(true);
@@ -398,7 +393,7 @@ public class SingleTreeNode {
             SingleTreeNode nextNode = cur.nextNodeInTree(chosen);
             // if and only if we do not find a new node, then we need to expand and create a new node
             if (nextNode == null) {
-                return cur.checkAndExpandNode(chosen, cur.openLoopState);
+                return cur.expandNode(chosen, cur.openLoopState);
             }
             cur = nextNode;
         }
@@ -412,7 +407,10 @@ public class SingleTreeNode {
             // takes account of the expanded actions
             if (actionsToConsider <= 0) return new ArrayList<>();
             // sort in advantage order (descending)
-            allAvailable.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
+            // It is perfectly possible that a previously expanded action falls out of the considered list
+            // depending on the advantage heuristic used.
+            // However, we do break ties in favour of already expanded actions
+            allAvailable.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
             return allAvailable.subList(0, actionsToConsider);
         }
         return allAvailable;
@@ -422,6 +420,7 @@ public class SingleTreeNode {
      * @return A list of the unexpanded Actions from this State
      */
     protected List<AbstractAction> unexpandedActions() {
+        // TODO : Probably remove once MultiTree fixed
         // first cater for an edge case with progressive widening
         // where the expanded children may include available actions not in the current pruning width
         // this can occur where we have different available actions (actionsFromOpenLoopState) on each iteration
@@ -440,15 +439,13 @@ public class SingleTreeNode {
 //     * @return action chosen
 //     */
     protected AbstractAction expand(List<AbstractAction> notChosen) {
+        // TODO: Remove this completely once MultiTree is fixed
+
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
         Collections.shuffle(notChosen);
-
         AbstractAction chosen = null;
-
-        // TODO: Move this into a new nethod to be called to value any unexpanded action
-        // TODO: from ucb / sampleFromDistribution
         ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = params.expansionPolicy == MAST ? MASTFunction : advantageFunction;
         if (valueFunction != null) {
             double bestValue = Double.NEGATIVE_INFINITY;
@@ -473,7 +470,7 @@ public class SingleTreeNode {
      *
      * @return - new child node.
      */
-    protected SingleTreeNode checkAndExpandNode(AbstractAction actionCopy, AbstractGameState nextState) {
+    protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
         int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
         SingleTreeNode tn = createChildNode(actionCopy, nextState);
@@ -488,7 +485,6 @@ public class SingleTreeNode {
 
     protected SingleTreeNode createChildNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
-        root.expansionCount++;
         return SingleTreeNode.createChildNode(this, actionCopy, nextState, factory);
     }
 
@@ -550,11 +546,11 @@ public class SingleTreeNode {
      * @return - child node according to the tree policy
      */
     protected AbstractAction treePolicyAction(boolean explore) {
-        // TODO: Need to implement Progressive Widening in the tree policy now that expansion occurs here too
-
         if (params.opponentTreePolicy == SelfOnly && openLoopState != null && openLoopState.getCurrentPlayer() != decisionPlayer)
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
 
+        // actionsToConsider takes care of any Progressive Widening in play, so we only consider the
+        // widened subset
         List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
         if (availableActions.isEmpty())
             throw new AssertionError("We need to have at least one option");
@@ -576,7 +572,7 @@ public class SingleTreeNode {
                     actionChosen = sampleFromDistribution(availableActions, explore ? params.exploreEpsilon : 0.0);
                     break;
                 default:
-                    throw new AssertionError("Unknown treepolicy: " + params.treePolicy);
+                    throw new AssertionError("Unknown treePolicy: " + params.treePolicy);
             }
         }
 
@@ -627,6 +623,8 @@ public class SingleTreeNode {
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
 
+        // shuffle so that ties are broken randomly
+        Collections.shuffle(availableActions, rnd);
         for (AbstractAction action : availableActions) {
             // Find 'UCB' value
             double uctValue = 0;
@@ -981,7 +979,7 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
+        if (params.selectionPolicy == TREE) {
             // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
             // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
             // (and this is good, as it throws an error as a bug-check if this is not true).

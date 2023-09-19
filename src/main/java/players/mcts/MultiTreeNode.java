@@ -185,7 +185,7 @@ public class MultiTreeNode extends SingleTreeNode {
 
     private void expandNode(int currentActor, AbstractGameState currentState) {
         // we now expand a node
-        currentLocation[currentActor] = currentLocation[currentActor].checkAndExpandNode(lastAction[currentActor], currentState);
+        currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState);
         // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
         nodeExpanded[currentActor] = true;
         if (debug)
