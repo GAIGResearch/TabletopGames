@@ -259,6 +259,21 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                     BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
                     g.drawImage(imgToDraw, offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, null);
 
+                    if (gameState.getActingFigure().equals(m)) {
+                        g.setStroke(highlightStroke);
+                        g.setColor(highlightColor);
+                        // Check if facing Up/Down or Left/Right to draw correctly
+                        if (m.getOrientation().ordinal() % 2 == 0) {
+                            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.a, size.b);
+                        }
+                        else {
+                            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.b, size.a);
+                        }
+                    } else {
+                        g.setColor(Color.black);
+                    }
+                    g.setStroke(s);
+
                     int health = m.getAttributeValue(Figure.Attribute.Health);
                     int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
                     g.setColor(Color.red);
