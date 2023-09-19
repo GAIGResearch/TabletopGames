@@ -2,7 +2,11 @@ package games.serveTheKing.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
+import games.serveTheKing.STKGameState;
+import games.serveTheKing.components.PlateCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +25,13 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+    int cardValue;
+    boolean abilityFinished;
 
     public UseAbility(int playerID) {
         this.playerID = playerID;
+        this.cardValue= -1000;
+        this.abilityFinished = false;
     }
 
     /**
@@ -36,8 +44,20 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        // TODO populate this list with available actions
-        return new ArrayList<>();
+        ArrayList<AbstractAction> available = new ArrayList<>();
+        STKGameState stkgs = (STKGameState) state;
+        // find if the player can trash any card in his plate
+        int topDiscard = stkgs.getDiscardPile().peek().getValue();
+        PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
+        for(PlateCard c :playerPlates.getComponents()){
+            if (c.getValue()==topDiscard){
+                TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
+                available.add(trashAction);
+            }
+        }
+        // a player can always pass
+        available.add(new Pass());
+        return available;
     }
 
     /**
@@ -65,7 +85,8 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // TODO: Put card on top of discard.
+        STKGameState stkgs = (STKGameState) state;
+
     }
 
     /**
@@ -74,8 +95,9 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        // TODO is execution of this sequence of actions complete?
-        return true;
+        //TODO finish action
+            return true;
+
     }
 
     /**
@@ -91,6 +113,15 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        STKGameState stkgs = (STKGameState) gs;
+        PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
+        // put the used card in the discard pile
+        Deck<PlateCard> discard = stkgs.getDiscardPile();
+        PlateCard discarded = hand.peek();
+        hand.remove(discarded);
+        discard.add(discarded);
+        // get the value of the card discarded
+        cardValue=discarded.getValue();
         gs.setActionInProgress(this);
         return true;
     }

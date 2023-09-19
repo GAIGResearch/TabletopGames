@@ -8,6 +8,8 @@ import core.interfaces.IExtendedSequence;
 import games.serveTheKing.STKGameState;
 import games.serveTheKing.components.PlateCard;
 
+import javax.servlet.http.Part;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,19 +24,25 @@ import java.util.Objects;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link TrashPlate} apply here as well.</p>
  */
-public class Exchange extends AbstractAction implements IExtendedSequence {
+public class LookSwap extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+    int cardValue;
     int currentPlayer;
-    int handCardIdx;
-    int plateCardIdx;
+    int firstChoice[];
+    int secondChoice[];
+    boolean hasSwapped;
 
-    public Exchange(int playerID, int handCardIdx, int plateCardIdx) {
+    public LookSwap(int playerID, int cardValue) {
         this.playerID = playerID;
-        this.currentPlayer = playerID;
-        this.handCardIdx = handCardIdx;
-        this.plateCardIdx = plateCardIdx;
+        currentPlayer = playerID;
+        this.cardValue= cardValue;
+        int fc[] = {-1,-1};
+        firstChoice= fc;
+        int sc[] = {-1,-1};
+        secondChoice=sc;
+        hasSwapped=false;
     }
 
     /**
@@ -47,19 +55,32 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        ArrayList<AbstractAction> available = new ArrayList<AbstractAction>();
+        ArrayList<AbstractAction> available = new ArrayList<>();
         STKGameState stkgs = (STKGameState) state;
-        // find if the player can trash any card in his plate
-        int topDiscard = stkgs.getDiscardPile().peek().getValue();
-        PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
-        for(PlateCard c :playerPlates.getComponents()){
-            if (c.getValue()==topDiscard){
-                TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
-                available.add(trashAction);
+
+        if(firstChoice[0]<0 && firstChoice[1]<0){
+            // a player can always pass the ability
+            available.add(new Pass());
+        }
+        // create a combination of all possible choices
+        if(secondChoice[0]<0 && secondChoice[1]<0){
+            for ( int i =0; i< stkgs.getNPlayers(); i ++) {
+                PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(i);
+                for (PlateCard c : playerPlate.getComponents()) {
+                    if(firstChoice[0]==i && firstChoice[1]==playerPlate.getComponents().indexOf(c) ){
+                        continue;
+                    }
+                    ChooseCard choice = new ChooseCard(playerPlate.getComponents().indexOf(c),i,true);
+                    available.add(choice);
+                }
             }
         }
-        // a player can always pass
-        available.add(new Pass());
+        else {
+            ChooseSwap swapY = new ChooseSwap(true);
+            ChooseSwap swapN = new ChooseSwap(false);
+        }
+
+
         return available;
     }
 
@@ -89,7 +110,30 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         STKGameState stkgs = (STKGameState) state;
-        currentPlayer = currentPlayer + 1 % stkgs.getNPlayers();
+        if(action instanceof Pass){
+            hasSwapped=true;
+        }
+        else if(firstChoice[0]<0 && firstChoice[1]<0 ){
+            firstChoice[0]= ((ChooseCard) action).getChosenPlayer();
+            firstChoice[1] = ((ChooseCard) action).getChosenCard();
+        } else if (secondChoice[0]<0 && secondChoice[1]<0) {
+            secondChoice[0]= ((ChooseCard) action).getChosenPlayer();
+            secondChoice[1] = ((ChooseCard) action).getChosenCard();
+        }
+        else {
+            // the swap
+            PartialObservableDeck<PlateCard> p1Plates=  stkgs.getPlayersPlates().get(firstChoice[0]);
+            PartialObservableDeck<PlateCard> p2Plates=  stkgs.getPlayersPlates().get(secondChoice[0]);
+            PlateCard firstCard = p1Plates.get(firstChoice[1]);
+            PlateCard secondCard =p2Plates.get(secondChoice[1]);
+            p1Plates.remove(firstCard);
+            p2Plates.remove(secondCard);
+            p1Plates.add(secondCard);
+            p2Plates.add(firstCard);
+            stkgs.getPlayersPlates().get(playerID).setVisibilityOfComponent(firstChoice[1],firstChoice[0],true);
+            stkgs.getPlayersPlates().get(playerID).setVisibilityOfComponent(secondChoice[1],secondChoice[0],true);
+            hasSwapped=true;
+        }
     }
 
     /**
@@ -98,12 +142,7 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        if (currentPlayer==playerID){
-            return true;
-        }
-        else {
-            return false;
-        }
+        return hasSwapped;
     }
 
     /**
@@ -118,18 +157,9 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
+        // TODO: Some functionality applied which changes the given game state.
         STKGameState stkgs = (STKGameState) gs;
-        // put the exchanged card into the player`s plate then put the plate card in top of discard pile
-        PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
-        PartialObservableDeck<PlateCard> plates = stkgs.getPlayersPlates().get(playerID);
-        Deck<PlateCard> discard = stkgs.getDiscardPile();
-        PlateCard exchanged = hand.get(handCardIdx);
-        PlateCard discarded = plates.get(plateCardIdx);
-        hand.remove(exchanged);
-        plates.remove(discarded);
-        plates.add(exchanged);
-        discard.add(discarded);
-        plates.setVisibilityOfComponent(plates.getComponents().indexOf(exchanged),playerID,true);
+
         gs.setActionInProgress(this);
         return true;
     }
@@ -141,28 +171,31 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public Exchange copy() {
-        return new Exchange(playerID,handCardIdx,plateCardIdx);
+    public LookSwap copy() {
+        // TODO: copy non-final variables appropriately
+        LookSwap  copy = new LookSwap(playerID,cardValue);
+        return copy ;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Exchange
-                && ((Exchange) obj).currentPlayer==currentPlayer
-                && ((Exchange) obj).handCardIdx==handCardIdx
-                && ((Exchange) obj).plateCardIdx==plateCardIdx
-                && ((Exchange) obj).playerID==playerID;
+        // TODO: compare all other variables in the class
+        return obj instanceof LookSwap
+                && ((LookSwap) obj).playerID==playerID
+                && ((LookSwap) obj).currentPlayer==currentPlayer
+                && ((LookSwap) obj).cardValue==cardValue;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID,currentPlayer,handCardIdx,plateCardIdx);
+        // TODO: return the hash of all other variables in the class
+        return Objects.hash(playerID,currentPlayer,cardValue);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Exchanging card in hand ("+handCardIdx+") to plate card ("+plateCardIdx+")";
+        return "My action name";
     }
 
     /**
