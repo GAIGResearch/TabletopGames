@@ -62,8 +62,12 @@ public class MCGSNode extends SingleTreeNode {
         String key = getKeyOf(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
-        if (nextNode != null)
+        if (nextNode != null) {
             nextNode.setActionsFromOpenLoopState(openLoopState);
+            if (actionValues.get(actionChosen).nVisits == 0) {
+                root.nodeClash++;
+            }
+        }
 
         return nextNode;
     }

@@ -57,6 +57,7 @@ public class SingleTreeNode {
     double timeTaken;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
+    protected int nodeClash;
     // Root node of tree
     protected SingleTreeNode root;
     // Parent of this node
@@ -207,6 +208,7 @@ public class SingleTreeNode {
         // Variables for tracking time budget
         double avgTimeTaken;
         timeTaken = 0.0;
+        nodeClash = 0;
         long remaining;
         int remainingLimit = params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
@@ -246,10 +248,10 @@ public class SingleTreeNode {
             //   System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = params.budgetType;
+            timeTaken += (elapsedTimerIteration.elapsedMillis());
+            avgTimeTaken = timeTaken / numIters;
             if (budgetType == BUDGET_TIME) {
                 // Time budget
-                timeTaken += (elapsedTimerIteration.elapsedMillis());
-                avgTimeTaken = timeTaken / numIters;
                 remaining = elapsedTimer.remainingTimeMillis();
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {

@@ -1,31 +1,34 @@
 package games.sushigo;
 
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
+import evaluation.features.TunableStateFeatures;
 import games.sushigo.cards.SGCard;
 import org.json.simple.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class SGSimpleFeatures implements IStateFeatureVector {
+public class SGSimpleFeatures extends TunableStateFeatures {
 
-    @Override
-    public String[] names() {
-        return new String[]{"makiCount", "tempuraCount", "dumplingCount", "nigiriCount", "puddingCount",
+    static String[] allNames = new String[]{"makiCount", "tempuraCount", "dumplingCount", "nigiriCount", "puddingCount",
                 "wasabiActive", "chopstickActive"};
+
+    public SGSimpleFeatures() {
+        super(allNames);
     }
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] fullFeatureVector(AbstractGameState state, int playerID) {
         /* Normalised by default */
         // completed sets
         // - depending on type - some ordinal pos
         // chopsticks / wasabi active
         // N cards in hand
         // player scores - difference between leader
-        double[] features = new double[names().length];
+        double[] features = new double[allNames.length];
 
         // just get player score + ordinal positions + wasabi/chopstick active
         SGGameState sggs = (SGGameState) state;
@@ -97,4 +100,8 @@ public class SGSimpleFeatures implements IStateFeatureVector {
     }
 
 
+    @Override
+    protected SGSimpleFeatures _copy() {
+        return new SGSimpleFeatures();
+    }
 }

@@ -39,6 +39,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("OneActionNodes", treeStats.oneActionNodes);
                 records.put("MeanActionsAtNode", treeStats.meanActionsAtNode);
                 records.put("RolloutLength", mctsPlayer.root.rolloutActionsTaken / (double) visits);
+                records.put("NodeClashes", mctsPlayer.root.nodeClash);
                 OptionalInt maxVisits = Arrays.stream(root.actionVisits()).max();
                 records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) visits);
                 records.put("Action", e.action.getString(e.state));
@@ -68,6 +69,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("OneActionNodes", Integer.class);
             cols.put("MeanActionsAtNode", Double.class);
             cols.put("RolloutLength", Double.class);
+            cols.put("NodeClashes", Integer.class);
             cols.put("maxVisitProportion", Double.class);
             cols.put("Action", String.class);
             cols.put("ActionsAtRoot", Integer.class);

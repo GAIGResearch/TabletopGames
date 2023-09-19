@@ -94,12 +94,19 @@ public class DBGameState extends AbstractGameState {
         if (!(o instanceof DBGameState)) return false;
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
-        return lastActionScored == that.lastActionScored && Objects.equals(heuristic, that.heuristic) && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) && Objects.equals(edgeToCellMap, that.edgeToCellMap) && Objects.equals(cellToEdgesMap, that.cellToEdgesMap) && Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) && Objects.equals(cellToOwnerMap, that.cellToOwnerMap) && Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
+        return lastActionScored == that.lastActionScored && Objects.equals(heuristic, that.heuristic)
+                && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) &&
+                Objects.equals(edgeToCellMap, that.edgeToCellMap) &&
+                Objects.equals(cellToEdgesMap, that.cellToEdgesMap) &&
+                Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
+                Objects.equals(cellToOwnerMap, that.cellToOwnerMap) &&
+                Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), heuristic, edges, cells, edgeToCellMap, cellToEdgesMap, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
+        int result = Objects.hash(super.hashCode(), edges, cells, edgeToCellMap, cellToEdgesMap,
+                cellToOwnerMap, edgeToOwnerMap, lastActionScored);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }

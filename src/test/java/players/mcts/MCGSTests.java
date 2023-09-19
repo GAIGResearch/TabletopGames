@@ -4,8 +4,10 @@ import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.Game;
 import core.components.Token;
+import evaluation.features.StateHashCode;
 import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
+import games.dotsboxes.DBProperHash;
 import games.dotsboxes.DBStateFeaturesReduced;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.features.LLHandCards;
@@ -102,6 +104,57 @@ public class MCGSTests {
         root = (MCGSNode) mctsPlayer.getRoot(0);
         // We now have fewer nodes, because the game is closer to the end
         assertEquals(20, root.getTranspositionMap().size(), 10);
+    }
+
+    @Test
+    public void OneIterationHasDepthOne() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
+        params.MCGSStateFeatureVector = new StateHashCode();
+        params.budget = 1;
+        Game game = createDotsAndBoxes(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0 && game.getTick() < 50) {
+                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
+                assertEquals(1, stats.depthReached);
+                assertEquals(2, stats.totalNodes);
+            }
+        } while (game.getGameState().isNotTerminal());
+    }
+
+    @Test
+    public void OneHundredIterationsHasMaxDepth2() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
+        params.MCGSStateFeatureVector = new DBProperHash();
+        params.budget = 100;
+        Game game = createDotsAndBoxes(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0 && game.getTick() < 10) {
+                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
+                assertEquals(2, stats.depthReached);
+                assertEquals(101, stats.totalNodes);
+            }
+        } while (game.getGameState().isNotTerminal());
+    }
+
+
+    @Test
+    public void OneIterationHasDepthOneForMCTS() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        params.budget = 1;
+        Game game = createDotsAndBoxes(params);
+        do {
+            int p = game.getGameState().getCurrentPlayer();
+            game.oneAction();
+            if (p == 0 && game.getTick() < 50) {
+                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
+                assertEquals(1, stats.depthReached);
+                assertEquals(2, stats.totalNodes);
+            }
+        } while (game.getGameState().isNotTerminal());
     }
 
     @Test
