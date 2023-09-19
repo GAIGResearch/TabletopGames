@@ -148,10 +148,6 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             return false;
     }
 
-    public boolean setElement(Vector2D pos, T value){
-        return setElement(pos.getX(), pos.getY(), value);
-    }
-
     /**
      * Retrieves the element at position (x, y).
      *
@@ -165,7 +161,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         return null;
     }
 
-    public T getElement(Vector2D pos) {
+    public BoardNode getElement(Vector2D pos) {
         return getElement(pos.getX(), pos.getY());
     }
 
