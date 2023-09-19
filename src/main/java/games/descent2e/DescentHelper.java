@@ -334,6 +334,17 @@ public class DescentHelper {
                                     legal = false;
                                     break;
                                 }
+                                if (figureOnLocation.value == figure.getComponentID())
+                                {
+                                    // DOWN = 0, LEFT = 1, UP = 2, RIGHT = 3
+                                    // If they are opposite directions, the difference will be 2
+                                    // This prevents a wasted action of spinning the figure around without actually moving
+                                    if (Math.abs(((Monster) figure).getOrientation().ordinal() - d.ordinal()) == 2)
+                                    {
+                                        legal = false;
+                                        break;
+                                    }
+                                }
                             }
                             else
                             {
