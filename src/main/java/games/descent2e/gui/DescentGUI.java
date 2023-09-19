@@ -256,17 +256,8 @@ public class DescentGUI extends AbstractGUIManager {
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel() {
-            @Override
-            public Dimension getMaximumSize() {
-                return new Dimension(width, super.getMaximumSize().height);
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(width, super.getPreferredSize().height);
-            }
-        };
+        JPanel actionPanel = new JPanel();
+        actionPanel.setPreferredSize(new Dimension(width, height*100));
         actionPanel.setOpaque(false);
 
         actionButtons = new ActionButton[maxActionSpace];
@@ -285,9 +276,9 @@ public class DescentGUI extends AbstractGUIManager {
         pane.getViewport().setOpaque(false);
         pane.setPreferredSize(new Dimension(width, height));
         pane.setMaximumSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
+        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        pane.getVerticalScrollBar().setUnitIncrement(16);
         return pane;
     }
 
