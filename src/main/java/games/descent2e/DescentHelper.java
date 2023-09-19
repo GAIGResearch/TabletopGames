@@ -248,7 +248,13 @@ public class DescentHelper {
                 if (figureOnLocation.value != -1) {
                     isEmpty = false;
                     Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
-                    if (figureType.equals(neighbourFigure.getTokenType())) {
+
+                    // If our current figure is the same as our neighbour (in the case of large figures), we can move into the neighbour tile
+                    if (figure.equals(neighbourFigure)) {
+                        isEmpty = true;
+                    }
+                    // If our current figure is the same team as the neighbour (Hero or Monster), we can move through it
+                    else if (figureType.equals(neighbourFigure.getTokenType())) {
                         isFriendly = true;
                     }
                     // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
@@ -319,14 +325,18 @@ public class DescentHelper {
                     for (int j = 0; j < mSize.a; j++) {
                         for (int i = 0; i < mSize.b; i++) {
                             BoardNode spaceOccupied = dgs.getMasterBoard().getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
-                            if (spaceOccupied != null) {
+                            if (spaceOccupied != null)
+                            {
                                 PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
                                 if (!DescentTypes.TerrainType.isWalkableTerrain(spaceOccupied.getComponentName()) ||
-                                        figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID()) {
+                                        figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID())
+                                {
                                     legal = false;
                                     break;
                                 }
-                            } else {
+                            }
+                            else
+                            {
                                 legal = false;
                                 break;
                             }

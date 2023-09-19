@@ -931,9 +931,9 @@ public class Game {
 //        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
