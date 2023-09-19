@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IGamePhase;
 import games.GameType;
 import games.serveTheKing.components.PlateCard;
 
@@ -25,14 +26,20 @@ public class STKGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
      */
-    protected Deck mainDeck;
-    protected Deck discardPile;
+    protected Deck<PlateCard> mainDeck;
+    protected Deck<PlateCard> discardPile;
     protected List<PartialObservableDeck<PlateCard>> playersHands;
+    protected List<PartialObservableDeck<PlateCard>> playersPlates;
     protected int playerCalledServe;
+
     public STKGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
 
+    public enum STKGamePhase implements IGamePhase {
+        Draw,
+        Play,
+    }
     /**
      * @return the enum value corresponding to this game, declared in {@link GameType}.
      */

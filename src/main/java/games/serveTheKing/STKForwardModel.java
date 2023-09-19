@@ -7,7 +7,9 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.loveletter.cards.LoveLetterCard;
+import games.serveTheKing.actions.Pass;
 import games.serveTheKing.actions.ThrashPlate;
+import games.serveTheKing.actions.UseAbility;
 import games.serveTheKing.components.KingCard;
 import games.serveTheKing.components.PlateCard;
 
@@ -43,6 +45,8 @@ public class STKForwardModel extends StandardForwardModel {
         stkgs.mainDeck = new Deck<PlateCard>("mainDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         stkgs.discardPile = new Deck<PlateCard>("discardPile", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         stkgs.playersHands= new ArrayList<>(stkgs.getNPlayers());
+        stkgs.playersPlates = new ArrayList<>(stkgs.getNPlayers());
+        stkgs.playerCalledServe=-1;
         //TODO : implement the different kings.
         setupRound(stkgs,null,0);
     }
@@ -67,43 +71,78 @@ public class STKForwardModel extends StandardForwardModel {
             stkgs.mainDeck.add(card2);
         }
 
-        //Create Player Hands
+        //Create Player Plate area
         for (int i = 0; i < stkgs.getNPlayers(); i++) {
-            boolean[] visible = new boolean[stkgs.getNPlayers()];
+            boolean[] plateVisible = new boolean[stkgs.getNPlayers()];
             // add random cards to the player's hand
-            PartialObservableDeck<PlateCard> playerCards = new PartialObservableDeck<>("playerHand" + i, i, visible);
+            PartialObservableDeck<PlateCard> playerCards = new PartialObservableDeck<>("playerPlate" + i, i, plateVisible);
             for (int j = 0; j < 4; j++) {
                 playerCards.add(stkgs.mainDeck.draw());
             }
-            stkgs.playersHands.add(playerCards);
+            stkgs.playersPlates.add(playerCards);
         }
 
+        //Create players hands (empty)
+        for (int i = 0; i < stkgs.getNPlayers(); i++) {
+            boolean[] handVisible = new boolean[stkgs.getNPlayers()];
+            PartialObservableDeck<PlateCard> playerHand = new PartialObservableDeck<>("playerHand" + i, i, handVisible);
+            stkgs.playersHands.add(playerHand);
+        }
         // Create discard pile
         stkgs.discardPile.clear();
 
         // Reset the player that called the Serve
         stkgs.playerCalledServe =-1;
+
+
+
+        //start at draw phase for first player
+        stkgs.setGamePhase(STKGameState.STKGamePhase.Draw);
     };
+
 
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         if (gameState.isActionInProgress()) return;
         // each turn begins with the player drawing a card after which one card will be played
         STKGameState stkgs = (STKGameState) gameState;
 
-        if(action instanceof ThrashPlate ){
+        int playerID = stkgs.getCurrentPlayer();
+
+        switch (stkgs.getGamePhase().toString()) {
+            case "Draw":
+                if(action instanceof Pass){
+                    stkgs.setGamePhase(STKGameState.STKGamePhase.Play);
+                    // player get a card
+                    PlateCard cardDraw = stkgs.mainDeck.draw();
+                    stkgs.playersHands.get(playerID).add(cardDraw);
+                }
+                else {
+                    // set current player as caller and end the turn
+                    stkgs.playerCalledServe=playerID;
+                    int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
+                    endPlayerTurn(stkgs, nextPlayer);
+                }
+                break;
+            case "Play":
+                int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
+                endPlayerTurn(stkgs, nextPlayer);
+            default:
+                throw new AssertionError("Unknown Game Phase " + stkgs.getGamePhase());
+
+        }
+        if (action instanceof ThrashPlate) {
             if (!checkEndOfRound(stkgs, action)) {
-                // move turn to the next player who has not already lost the round
-                int nextPlayer = gameState.getCurrentPlayer()+1 % stkgs.getNPlayers();
+                // move turn to the next player
+                int nextPlayer = gameState.getCurrentPlayer() + 1 % stkgs.getNPlayers();
                 endPlayerTurn(stkgs, nextPlayer);
             }
-        }
-        else{
-            
+        } else {
+
 
         }
     }
     private boolean checkEndOfRound(STKGameState state, AbstractAction action){
-        boolean result;
+        boolean result = true;
         if(state.playerCalledServe <0){
             result = false;
         }
@@ -112,7 +151,7 @@ public class STKForwardModel extends StandardForwardModel {
                 result = true;
             }
         }
-        return
+        return result;
     }
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
