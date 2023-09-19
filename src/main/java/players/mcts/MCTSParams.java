@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.*;
+import evaluation.features.StateHashCode;
 import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
@@ -61,7 +62,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
-    public IStateFeatureVector MCGSStateFeatureVector;
+    public IStateFeatureVector MCGSStateFeatureVector = new StateHashCode();
     public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
 
@@ -111,6 +112,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
         addTunableParameter("MCGSStateFeatureVector", IStateFeatureVector.class);
+        setParameterValue("MCGSStateFeatureVector", new StateHashCode());
     }
 
     @Override
