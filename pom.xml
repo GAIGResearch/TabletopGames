@@ -116,6 +116,11 @@
             <artifactId>hadoop-bare-naked-local-fs</artifactId>
             <version>0.1.0</version>
         </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>0.22.0</version>
+        </dependency>
     </dependencies>
 
     <build>
