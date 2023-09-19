@@ -240,7 +240,7 @@ public class SingleTreeNode {
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
-            System.out.println("Starting MCTS Search iteration " + numIters);
+            //   System.out.println("Starting MCTS Search iteration " + numIters);
 
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
             oneSearchIteration();
@@ -477,9 +477,12 @@ public class SingleTreeNode {
         // then instantiate a new node
         int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
         SingleTreeNode tn = createChildNode(actionCopy, nextState);
-        SingleTreeNode[] nodeArray = new SingleTreeNode[nextState.getNPlayers()];
-        nodeArray[nextPlayer] = tn; // we store this by id of the player who will take their turn next
-        children.put(actionCopy, nodeArray);
+        // It is possible that we are expanding a node because a different player is the next to act
+        SingleTreeNode[] newNodeArray = children.get(actionCopy);
+        if (newNodeArray == null)
+            newNodeArray = new SingleTreeNode[nextState.getNPlayers()];
+        newNodeArray[nextPlayer] = tn; // we store this by id of the player who will take their turn next
+        children.put(actionCopy, newNodeArray);
         return tn;
     }
 
@@ -547,6 +550,7 @@ public class SingleTreeNode {
      * @return - child node according to the tree policy
      */
     protected AbstractAction treePolicyAction(boolean explore) {
+        // TODO: Need to implement Progressive Widening in the tree policy now that expansion occurs here too
 
         if (params.opponentTreePolicy == SelfOnly && openLoopState != null && openLoopState.getCurrentPlayer() != decisionPlayer)
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
@@ -595,7 +599,7 @@ public class SingleTreeNode {
             // in this case we have determinism...there should just be a single child node in the array...so we get that
             return Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst().orElse(null);
         } else {
-          //  int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : openLoopState.getCurrentPlayer();
+            //  int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : openLoopState.getCurrentPlayer();
             SingleTreeNode nextNode = nodeArray[openLoopState.getCurrentPlayer()];
 //            if (params.opponentTreePolicy.selfOnlyTree && nextNode.decisionPlayer != decisionPlayer) {
 //                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState, factory);

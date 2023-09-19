@@ -32,7 +32,7 @@ public class MCGSNode extends SingleTreeNode {
             throw new AssertionError("Unexpected?");
         }
         graphRoot.transpositionMap.put(key, node);
-        System.out.println("Adding to transposition table: " + key);
+     //   System.out.println("Adding to transposition table: " + key);
     }
 
     /**
@@ -49,9 +49,9 @@ public class MCGSNode extends SingleTreeNode {
         MCGSNode graphRoot = (MCGSNode) root;
         String key = getKeyOf(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
-            MCGSNode newNode = graphRoot.transpositionMap.get(key);
-            newNode.setActionsFromOpenLoopState(nextState);
-            return newNode;
+            //          newNode.setActionsFromOpenLoopState(nextState);
+            //return graphRoot.transpositionMap.get(key);
+            throw new AssertionError("Unexpected?");
         }
         return createChildNode(actionCopy, nextState);
     }
@@ -59,17 +59,12 @@ public class MCGSNode extends SingleTreeNode {
     @Override
     protected SingleTreeNode nextNodeInTree(AbstractAction actionChosen) {
         // we look up the node in the transposition table using the feature vector for the openLoopState
-        // if we don;t find one, then we add a new node....this is to satisfy the main algorithm that we're
-        // extending...the next action from this new node will inevitably be an expansion (as no actions have yet been
-        // tried from it). This just means that we'll often add two nodes to the graph in one iteration.
-
         String key = getKeyOf(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
-        if (nextNode == null) {
-            nextNode = (MCGSNode) createChildNode(actionChosen.copy(), openLoopState);
-        }
-        nextNode.setActionsFromOpenLoopState(openLoopState);
+        if (nextNode != null)
+            nextNode.setActionsFromOpenLoopState(openLoopState);
+
         return nextNode;
     }
 
@@ -82,7 +77,7 @@ public class MCGSNode extends SingleTreeNode {
             MCGSNode mcgsRoot = (MCGSNode) root;
             String key = getKeyOf(gs);
             mcgsRoot.trajectory.add(key);
-            System.out.println("Adding to trajectory: " + key);
+//            System.out.println("Adding to trajectory: " + key);
 //            if (mcgsRoot.transpositionMap.size() == 1 && mcgsRoot.trajectory.size() == 1 && !mcgsRoot.transpositionMap.containsKey(key)) {
 //                throw new AssertionError("Trajectory should be the same size as the transposition map");
 //            }

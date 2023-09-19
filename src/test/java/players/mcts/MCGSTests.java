@@ -89,20 +89,19 @@ public class MCGSTests {
         // We now tun one turn of the game
         game.oneAction();
         // We now check that the MCGS tree has the expected number of nodes
+        // we just check this is all the way to the end of the game (about 60 ish)
+        // and not the 4 we get if we just expand one untried action per iteration
         MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
         assertEquals(200, root.getVisits());
-        // We expand *actions* rather than nodes at the moment; so with 82 actions at root; 81 at depth 1; 80 at depth 2
-        // we would expect 4 nodes (root; depth 1; depth 2; and depth 3) Depth 1 is created on the first iteration, depth 2 on the 83rd, and depth 3 on the 164th
-        assertEquals(4, root.getTranspositionMap().size());
+        assertEquals(60, root.getTranspositionMap().size(), 10);
 
         for (int i = 0; i < 51; i++) {
             game.oneAction();
         }
         // We should now have 31 actions at the root
         root = (MCGSNode) mctsPlayer.getRoot(0);
-        // assertEquals(200, root.getVisits());
-        // We can get more visits to the root node than iterations if we have a 3-box in play (as this gives us another action without changing the turn)
-        assertEquals(8, root.getTranspositionMap().size(), 1);
+        // We now have fewer nodes, because the game is closer to the end
+        assertEquals(20, root.getTranspositionMap().size(), 10);
     }
 
     @Test
@@ -117,7 +116,9 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
+                if (game.getTick() < 30) // at this point we are at no risk of the game ending during search
+                    assertEquals(root.getVisits(), root.getTranspositionMap().size(), 1);
+                assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
                 assertEquals(0, problemNodes.size());
@@ -137,7 +138,9 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
+                if (game.getTick() < 10) // at this point we are at no risk of the game ending during search
+                    assertEquals(root.getVisits(), root.getTranspositionMap().size(), 1);
+                assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
                 assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
@@ -159,7 +162,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
+                assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
                 assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
                 //                        root.getTranspositionMap().get(s).openLoopState.isNotTerminalForPlayer(0)).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
@@ -182,7 +185,9 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-                assertEquals(root.getVisits(), root.getTranspositionMap().size(), 5);
+                if (game.getTick() < 10) // at this point we are at no risk of the game ending during search
+                    assertEquals(params.budget + 1, root.getTranspositionMap().size(), 1);
+                assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
             }
