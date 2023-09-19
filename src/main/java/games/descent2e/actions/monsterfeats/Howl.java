@@ -63,8 +63,8 @@ public class Howl extends TriggerAttributeTest {
     }
 
     void executePhase(DescentGameState state) {
-        System.out.println("Executing phase " + phase);
-        System.out.println(heroIndex + " " + heroes.size());
+        // System.out.println("Executing phase " + phase);
+        // System.out.println(heroIndex + " " + heroes.size());
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
@@ -111,6 +111,17 @@ public class Howl extends TriggerAttributeTest {
         }
 
         return retVal;
+    }
+
+    @Override
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        // after the interrupt action has been taken, we can continue to see who interrupts next
+        movePhaseForward((DescentGameState) state);
+    }
+
+    @Override
+    public boolean executionComplete(AbstractGameState state) {
+        return phase == ALL_DONE;
     }
 
     @Override
