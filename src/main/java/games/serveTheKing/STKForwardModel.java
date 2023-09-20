@@ -12,6 +12,7 @@ import games.serveTheKing.components.PlateCard;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
@@ -49,6 +50,8 @@ public class STKForwardModel extends StandardForwardModel {
     }
 
     private void setupRound(STKGameState stkgs){
+        // make sure game is not infinite
+        stkgs.getCoreGameParameters().setMaxRounds(20*stkgs.getNPlayers());
         // Reset player status
         for (int i = 0; i < stkgs.getNPlayers(); i++) {
             stkgs.setPlayerResult(CoreConstants.GameResult.GAME_ONGOING, i);
@@ -67,6 +70,8 @@ public class STKForwardModel extends StandardForwardModel {
             PlateCard card2 = new PlateCard(15);
             stkgs.mainDeck.add(card2);
         }
+        Random rnd = new Random(stkgs.getGameParameters().getRandomSeed());
+        stkgs.mainDeck.shuffle(rnd);
 
         //Create Player Plate area
         for (int i = 0; i < stkgs.getNPlayers(); i++) {
@@ -101,7 +106,6 @@ public class STKForwardModel extends StandardForwardModel {
 
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         if (gameState.isActionInProgress()) return;
-        // each turn begins with the player drawing a card after which one card will be played
         STKGameState stkgs = (STKGameState) gameState;
 
         int playerID = stkgs.getCurrentPlayer();
@@ -111,19 +115,32 @@ public class STKForwardModel extends StandardForwardModel {
                     if (action instanceof ChooseToDraw) {
                         stkgs.setGamePhase(STKGameState.STKGamePhase.Play);
                         // player get a card
+                        Deck<PlateCard> mainDeck = stkgs.mainDeck;
+                        Deck<PlateCard> discard = stkgs.discardPile;
+                        if(mainDeck.getSize()<1){
+                            int discardSize = discard.getSize();
+                            for(int i =0; i<discardSize;i++){
+                                PlateCard c = discard.draw();
+                                mainDeck.add(c);
+                            }
+                        }
+                        System.out.println("[STKForwardModdel] Deck Size before draw "+stkgs.mainDeck.getComponents().size());
                         PlateCard cardDraw = stkgs.mainDeck.draw();
+                        System.out.println("[STKForwardModdel] made player "+playerID+" draw this card: "+cardDraw);
                         stkgs.playersHands.get(playerID).add(cardDraw);
                         //System.out.println("Player "+playerID+" hand size is: "+stkgs.playersHands.get(playerID).getComponents().size());
                     } else {
                         // set current player as caller and end the turn
                         stkgs.playerCalledServe = playerID;
                         int nextPlayer = (gameState.getCurrentPlayer() + 1) % stkgs.getNPlayers();
+                        System.out.println("[STKForwardModdel] Served the king, passing to player "+nextPlayer);
                         endPlayerTurn(stkgs, nextPlayer);
                     }
                     break;
                 case "Play":
                     int nextPlayer = (gameState.getCurrentPlayer() + 1 )% stkgs.getNPlayers();
                     stkgs.setGamePhase(STKGameState.STKGamePhase.Draw);
+                    System.out.println("[STKForwardModdel] Played my turn, passing to player "+nextPlayer);
                     endPlayerTurn(stkgs, nextPlayer);
                     break;
                 default:
@@ -137,7 +154,8 @@ public class STKForwardModel extends StandardForwardModel {
 
     private boolean checkEndOfRound(STKGameState state, AbstractAction action){
         boolean result = false;
-        if(state.getCurrentPlayer()+1 == state.playerCalledServe){
+        System.out.println("[STKForwardModdel] Current turn is "+state.getTurnCounter());
+        if(state.getCurrentPlayer()+1 == state.playerCalledServe || state.getTurnCounter()>state.getCoreGameParameters().getMaxRounds()){
             int minimumScore= 60;
             int playerScores[] = new int[state.getNPlayers()];
             for (int i =0 ; i<state.getNPlayers(); i++){
@@ -168,6 +186,7 @@ public class STKForwardModel extends StandardForwardModel {
                 }
             }
             endRound(state,trueWin);
+            state.setGameStatus(CoreConstants.GameResult.GAME_END);
             result = true;
         }
         return result;
@@ -178,18 +197,17 @@ public class STKForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-
         List<AbstractAction> actions = new ArrayList<>();
         STKGameState stkgs = (STKGameState) gameState;
         int currentPlayer = stkgs.getCurrentPlayer();
         switch (stkgs.getGamePhase().toString()) {
             case "Draw":
-
                 actions.add(new ChooseToDraw());
-                actions.add(new Serve());
+                if(stkgs.playerCalledServe<0){
+                    actions.add(new Serve());
+                }
                 break;
             case "Play":
-
                 PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(currentPlayer);
                 for(int i =0; i< playerPlate.getComponents().size();i++){
                     Exchange action = new Exchange(currentPlayer,0,i);

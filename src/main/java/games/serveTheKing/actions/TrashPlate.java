@@ -49,6 +49,7 @@ public class TrashPlate extends AbstractAction {
         STKGameState stkgs = (STKGameState) gs;
         PartialObservableDeck<PlateCard> from = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
         Deck<PlateCard> to = stkgs.getDiscardPile();
+        //System.out.println("[TrashPlate] Atempting to trash card "+trashedIdx+" plate size is: "+from.getComponents().size()+" from player "+stkgs.getCurrentPlayer());
         PlateCard discarded = from.get(trashedIdx);
         from.remove(discarded);
         to.add(discarded);

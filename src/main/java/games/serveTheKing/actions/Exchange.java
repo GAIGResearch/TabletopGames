@@ -29,12 +29,14 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
     int currentPlayer;
     int handCardIdx;
     int plateCardIdx;
+    boolean hasTrashed;
 
     public Exchange(int playerID, int handCardIdx, int plateCardIdx) {
         this.playerID = playerID;
         this.currentPlayer = playerID;
         this.handCardIdx = handCardIdx;
         this.plateCardIdx = plateCardIdx;
+        this.hasTrashed=false;
     }
 
     /**
@@ -50,16 +52,20 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
         ArrayList<AbstractAction> available = new ArrayList<AbstractAction>();
         STKGameState stkgs = (STKGameState) state;
         // find if the player can trash any card in his plate
-        int topDiscard = stkgs.getDiscardPile().peek().getValue();
-        PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
-        for(PlateCard c :playerPlates.getComponents()){
-            if (c.getValue()==topDiscard){
-                TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
-                available.add(trashAction);
+        if(!hasTrashed) {
+            int topDiscard = stkgs.getDiscardPile().peek().getValue();
+            PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
+            for (PlateCard c : playerPlates.getComponents()) {
+                if (c.getValue() == topDiscard) {
+
+                    TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
+                    available.add(trashAction);
+                }
             }
         }
         // a player can always pass
         available.add(new Pass());
+        System.out.println("[Exchange] player "+stkgs.getCurrentPlayer()+ " has these actions:"+available);
         return available;
     }
 
@@ -89,7 +95,7 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         STKGameState stkgs = (STKGameState) state;
-        currentPlayer = currentPlayer + 1 % stkgs.getNPlayers();
+        currentPlayer = (currentPlayer + 1) % stkgs.getNPlayers();
     }
 
     /**
@@ -123,7 +129,7 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
         PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
         PartialObservableDeck<PlateCard> plates = stkgs.getPlayersPlates().get(playerID);
         Deck<PlateCard> discard = stkgs.getDiscardPile();
-        System.out.println("Hand size of player "+playerID+" hand size is: "+hand.getComponents().size());
+        System.out.println("[Exchange] Hand of player "+playerID+" hand size is: "+hand.getComponents().size());
         PlateCard exchanged = hand.peek();
         PlateCard discarded = plates.get(plateCardIdx);
         hand.remove(exchanged);
@@ -143,7 +149,10 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public Exchange copy() {
-        return new Exchange(playerID,handCardIdx,plateCardIdx);
+        Exchange copy = new Exchange(playerID,handCardIdx,plateCardIdx);
+        copy.currentPlayer=currentPlayer;
+        copy.hasTrashed=hasTrashed;
+        return copy;
     }
 
     @Override
@@ -152,7 +161,8 @@ public class Exchange extends AbstractAction implements IExtendedSequence {
                 && ((Exchange) obj).currentPlayer==currentPlayer
                 && ((Exchange) obj).handCardIdx==handCardIdx
                 && ((Exchange) obj).plateCardIdx==plateCardIdx
-                && ((Exchange) obj).playerID==playerID;
+                && ((Exchange) obj).playerID==playerID
+                && ((Exchange) obj).hasTrashed==hasTrashed;
     }
 
     @Override

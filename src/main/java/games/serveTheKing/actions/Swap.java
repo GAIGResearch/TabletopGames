@@ -58,26 +58,35 @@ public class Swap extends AbstractAction implements IExtendedSequence {
             // a player can always pass the ability
             available.add(new Pass());
         }
-        // create a combination of all possible choices
-        if(secondChoice[0]<0 && secondChoice[1]<0){
-            for ( int i =0; i< stkgs.getNPlayers(); i ++) {
-                PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(i);
-                for (PlateCard c : playerPlate.getComponents()) {
-                    if(firstChoice[0]==i && firstChoice[1]==playerPlate.getComponents().indexOf(c) ){
-                        continue;
+        // see if there are two cards or more in the game
+        List<PartialObservableDeck<PlateCard>> plates = stkgs.getPlayersPlates();
+        int totalPlates =0;
+        for(int i =0;i<stkgs.getNPlayers();i++){
+            totalPlates= totalPlates+ plates.get(i).getSize();
+        }
+        if(totalPlates>=2) {
+            // create a combination of all possible choices
+            if (secondChoice[0] < 0 && secondChoice[1] < 0) {
+                for (int i = 0; i < stkgs.getNPlayers(); i++) {
+                    PartialObservableDeck<PlateCard> playerPlate = stkgs.getPlayersPlates().get(i);
+                    for (PlateCard c : playerPlate.getComponents()) {
+                        if (firstChoice[0] == i && firstChoice[1] == playerPlate.getComponents().indexOf(c)) {
+                            continue;
+                        }
+                        ChooseCard choice = new ChooseCard(playerPlate.getComponents().indexOf(c), i, false);
+                        available.add(choice);
                     }
-                    ChooseCard choice = new ChooseCard(playerPlate.getComponents().indexOf(c),i,false);
-                    available.add(choice);
                 }
+            } else {
+                ChooseSwap swapY = new ChooseSwap(true);
+                ChooseSwap swapN = new ChooseSwap(false);
+                available.add(swapN);
+                available.add(swapY);
             }
         }
         else {
-            ChooseSwap swapY = new ChooseSwap(true);
-            ChooseSwap swapN = new ChooseSwap(false);
-            available.add(swapN);
-            available.add(swapY);
+            available.add(new Pass());
         }
-
 
         return available;
     }

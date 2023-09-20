@@ -32,6 +32,7 @@ public class STKGameState extends AbstractGameState {
     protected List<PartialObservableDeck<PlateCard>> playersPlates;
     protected int playerCalledServe;
 
+
     public STKGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }

@@ -8,9 +8,11 @@ import core.interfaces.IExtendedSequence;
 import games.serveTheKing.STKGameState;
 import games.serveTheKing.components.PlateCard;
 import org.apache.spark.sql.catalyst.expressions.Abs;
+import org.apache.xmlbeans.impl.xb.xsdschema.Attribute;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -29,12 +31,14 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
     int currentPlayer;
     int cardValue;
     boolean abilityFinished;
+    boolean hasTrashed;
 
     public UseAbility(int playerID) {
         this.playerID = playerID;
         this.currentPlayer = playerID;
         this.cardValue= -1000;
         this.abilityFinished = false;
+        this.hasTrashed=false;
     }
 
     /**
@@ -52,13 +56,14 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
         // find if the ability should be executed
         if(abilityFinished){
             // find if the player can trash any card in his plate
-            int topDiscard = stkgs.getDiscardPile().peek().getValue();
-            System.out.println("Current Player "+stkgs.getCurrentPlayer());
-            PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
-            for(PlateCard c :playerPlates.getComponents()){
-                if (c.getValue()==topDiscard){
-                    TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
-                    available.add(trashAction);
+            if(!hasTrashed) {
+                int topDiscard = stkgs.getDiscardPile().peek().getValue();
+                PartialObservableDeck<PlateCard> playerPlates = stkgs.getPlayersPlates().get(stkgs.getCurrentPlayer());
+                for (PlateCard c : playerPlates.getComponents()) {
+                    if (c.getValue() == topDiscard) {
+                        TrashPlate trashAction = new TrashPlate(playerPlates.getComponents().indexOf(c));
+                        available.add(trashAction);
+                    }
                 }
             }
             // a player can always pass
@@ -85,8 +90,8 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
             }
 
         }
-
-
+        System.out.println("[UseAbility] status of ability:  "+abilityFinished);
+        System.out.println("[UseAbility] player "+stkgs.getCurrentPlayer()+ " has these actions:"+available);
         return available;
     }
 
@@ -120,7 +125,7 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
             abilityFinished=true;
         }
         if(abilityFinished){
-            currentPlayer = currentPlayer + 1 % stkgs.getNPlayers();
+            currentPlayer = (currentPlayer + 1) % stkgs.getNPlayers();
         }
 
     }
@@ -156,7 +161,7 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
         PartialObservableDeck<PlateCard> hand = stkgs.getPlayersHands().get(playerID);
         // put the used card in the discard pile
         Deck<PlateCard> discard = stkgs.getDiscardPile();
-        System.out.println("Hand size of player "+playerID+" hand size is: "+hand.getComponents().size());
+        System.out.println("[UseAbility]Hand size of player "+playerID+" hand size is: "+hand.getComponents().size());
         PlateCard discarded = hand.peek();
         hand.remove(discarded);
         discard.add(discarded);
@@ -174,20 +179,29 @@ public class UseAbility extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public UseAbility copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        UseAbility copy = new UseAbility(playerID);
+        copy.hasTrashed=this.hasTrashed;
+        copy.abilityFinished=this.abilityFinished;
+        copy.currentPlayer=this.currentPlayer;
+        copy.cardValue=this.cardValue;
+        return copy;
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof TrashPlate;
+
+        return obj instanceof UseAbility
+                && ((UseAbility) obj).abilityFinished==abilityFinished
+                && ((UseAbility) obj).hasTrashed==hasTrashed
+                && ((UseAbility) obj).cardValue==cardValue
+                && ((UseAbility) obj).currentPlayer==currentPlayer
+                && ((UseAbility) obj).playerID==playerID;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+
+        return Objects.hash(abilityFinished,hasTrashed,cardValue,currentPlayer,playerID);
     }
 
     @Override

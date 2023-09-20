@@ -18,12 +18,12 @@ public class PlateCard extends Card {
     protected int value;
     public PlateCard(int value) {
         super(String.valueOf(value));
-        value=value;
+        this.value=value;
     }
 
     protected PlateCard(String name, int value,  int componentID) {
         super( name, componentID);
-        value = value;
+        this.value = value;
     }
 
     public int getValue() {
