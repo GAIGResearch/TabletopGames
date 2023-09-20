@@ -128,8 +128,12 @@ public class STKGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        // TODO: What is this player's score (if any)?
-        return 0;
+        List<PlateCard> plate = playersPlates.get(playerId).getComponents();
+        int score = 0;
+        for(PlateCard c:plate){
+            score=score + c.getValue();
+        }
+        return score;
     }
 
     @Override
