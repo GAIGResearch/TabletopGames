@@ -777,43 +777,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     }
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {
+
+        List<Integer> targets = getMeleeTargets(dgs, f);
         List<MeleeAttack> actions = new ArrayList<>();
-        Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-        // Find valid neighbours in master graph - used for melee attacks
-        for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
-            if (neighbour == null) continue;
-            Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if ( neighbourID != -1 ) {
-                Figure other = (Figure)dgs.getComponentById(neighbourID);
-                if (f instanceof Monster && other instanceof Hero) {
-                    // Monster attacks a hero
-                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
-                }
-                else if (f instanceof Hero && other instanceof Monster)
-                {
-                    // Player attacks a monster
 
-                    // Make sure that the Player only gets one instance of attacking the monster
-                    // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                    boolean canAdd = true;
-                    for (MeleeAttack action : actions)
-                    {
-                        // TODO Hash Set Comparison instead of ID
-                        if (other.getComponentID() == action.getDefendingFigure())
-                        {
-                            // If an attack action on the same enemy already exists, this prevents a duplicate from being added
-                            canAdd = false;
-                        }
-                    }
-
-                    if (canAdd)
-                    {
-                        actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
-                    }
-                }
-            }
+        for (Integer target : targets) {
+            actions.add(new MeleeAttack(f.getComponentID(), target));
         }
 
         Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
@@ -825,64 +794,15 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         return sortedActions;
     }
 
+
+
     private List<AbstractAction> rangedAttackActions(DescentGameState dgs, Figure f) {
+
+        List<Integer> targets = getRangedTargets(dgs, f);
         List<RangedAttack> actions = new ArrayList<>();
-        Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
-        // Find valid neighbours of neighbours in master graph - used for ranged attacks
-        Set<BoardNode> rangedTargets = currentTile.getNeighbours().keySet();
-
-
-        // Only finds neighbours up to a set maximum range
-        for (int i = 1; i < RangedAttack.MAX_RANGE; i++) {
-
-            Set<BoardNode> startTargets = rangedTargets;
-
-            for (BoardNode possibleTarget : startTargets) {
-                // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
-                Set<BoardNode> newTargets = new HashSet<>(possibleTarget.getNeighbours().keySet());
-                newTargets.addAll(rangedTargets);
-                rangedTargets = newTargets;
-            }
-        }
-
-        // Prevents the attacker from trying to shoot itself
-        rangedTargets.remove(currentTile);
-
-        for (BoardNode neighbour : rangedTargets) {
-            if (neighbour == null) continue;
-            Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if ( neighbourID != -1 ) {
-                Figure other = (Figure)dgs.getComponentById(neighbourID);
-
-                // Checks to make sure that there is a line of sight before approving the attack action
-                boolean lineOfSight = hasLineOfSight(dgs, f.getPosition(), other.getPosition());
-                if (lineOfSight) {
-                    if (f instanceof Monster && other instanceof Hero) {
-                        // Monster attacks a hero
-                        actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
-                    } else if (f instanceof Hero && other instanceof Monster) {
-                        // Player attacks a monster
-
-                        // Make sure that the Player only gets one instance of attacking the monster
-                        // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                        boolean canAdd = true;
-                        for (RangedAttack action : actions) {
-                            if (other.getComponentID() == action.getDefendingFigure()) {
-                                // If an attack action on the same enemy already exists, this prevents a duplicate from being added
-                                canAdd = false;
-                                break;
-                            }
-                        }
-
-                        if (canAdd) {
-                            actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
-                        }
-                    }
-                }
-            }
+        for (Integer target : targets) {
+            actions.add(new RangedAttack(f.getComponentID(), target));
         }
 
         Collections.sort(actions, Comparator.comparingInt(RangedAttack::getDefendingFigure));
@@ -1645,50 +1565,5 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
         }
-    }
-
-    private boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
-
-        int counter = 0;
-        boolean hasLineOfSight = true;
-
-        ArrayList<Vector2D> containedPoints = LineOfSight.bresenhamsLineAlgorithm(startPoint, endPoint);
-
-        // For each coordinate in the line, check:
-        // 1) Does the coordinate have its board node
-        // 2) Is the board node empty (no character on location)
-        // 3) Is the board node connected to previously checked board node
-        // If any of these are false, then there is no LOS
-        for (int i = 1; i < containedPoints.size(); i++){
-
-            Vector2D previousPoint = containedPoints.get(i - 1);
-            Vector2D point = containedPoints.get(i);
-
-            // Check 1) Does the board node exist at this coordinate
-            BoardNode currentTile = dgs.masterBoard.getElement(point.getX(), point.getY());
-            if (currentTile == null){
-                hasLineOfSight = false;
-                break;
-            }
-
-            // Check 2) Is the board node empty
-            int owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
-            if (owner != -1 && i != containedPoints.size() - 1){
-                hasLineOfSight = false;
-                break;
-            }
-
-            // Check 3) Is the board node connected to previous board node
-            BoardNode previousTile = dgs.masterBoard.getElement(previousPoint.getX(), previousPoint.getY());
-            if (!previousTile.getNeighbours().containsKey(currentTile)){
-                hasLineOfSight = false;
-                break;
-            }
-        }
-
-        if (hasLineOfSight)
-            counter++;
-
-        return (counter > 0);
     }
 }

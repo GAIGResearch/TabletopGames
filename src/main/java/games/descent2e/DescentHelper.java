@@ -27,76 +27,94 @@ public class DescentHelper {
     // A lot of these were originally within DescentForwardModel, and were originally private
     // But once more classes needed the same code, were moved here to clean it up
 
-    public static List<Integer> getMeleeTargets(DescentGameState dgs, Figure actingFigure) {
+    public static List<Integer> getMeleeTargets(DescentGameState dgs, Figure f) {
+
         List<Integer> targets = new ArrayList<>();
 
-        Vector2D loc = actingFigure.getPosition();
-        GridBoard board = dgs.getMasterBoard();
-        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+        Vector2D currentLocation = f.getPosition();
+        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        // Find valid neighbours in master graph - used for melee attacks
+        for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
+            if (neighbour == null) continue;
+            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
+            if ( neighbourID != -1 ) {
+                Figure other = (Figure)dgs.getComponentById(neighbourID);
+                if (f instanceof Monster && other instanceof Hero) {
+                    // Monster attacks a hero
+                    targets.add(other.getComponentID());
+                }
+                else if (f instanceof Hero && other instanceof Monster)
+                {
+                    // Player attacks a monster
 
-        if (actingFigure instanceof Hero) {
-            // Get all monsters that are adjacent to us, and we have line of sight to
-            for (List<Monster> monsterGroup : dgs.getMonsters()) {
-                for (Monster monster : monsterGroup) {
-                    // We only need to check if all 8 adjacent tiles have a monster on them
-                    // If we already have 8 monsters on the list, we can stop
-                    if (targets.size() >= neighbours.size())
-                        break;
-                    if (neighbours.contains(monster.getPosition())) {
-                        if (hasLineOfSight(dgs, loc, monster.getPosition()))
-                            targets.add(monster.getComponentID());
+                    // Make sure that the Player only gets one instance of attacking the monster
+                    // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                    if(!targets.contains(other.getComponentID()))
+                    {
+                        targets.add(other.getComponentID());
                     }
                 }
             }
         }
-        else if (actingFigure instanceof Monster) {
-            // Get all heroes that are adjacent to us, and we have line of sight to
-            for (Hero hero : dgs.getHeroes()) {
-                if (neighbours.contains(hero.getPosition())) {
-                    if (hasLineOfSight(dgs, loc, hero.getPosition()))
-                        targets.add(hero.getComponentID());
-                }
-            }
-        }
+
         return targets;
     }
 
-    public static List<Integer> getRangedTargets(DescentGameState dgs, Figure actingFigure) {
+    public static List<Integer> getRangedTargets(DescentGameState dgs, Figure f) {
         List<Integer> targets = new ArrayList<>();
 
-        Vector2D loc = actingFigure.getPosition();
+        Vector2D currentLocation = f.getPosition();
+        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
-        if (actingFigure instanceof Hero) {
-            for (List<Monster> monsterGroup : dgs.getMonsters()) {
-                for (Monster monster : monsterGroup) {
-                    Vector2D monsterPos = monster.getPosition();
-                    if (hasLineOfSight(dgs, loc, monsterPos)) {
-                        if (inRange(loc, monsterPos, RangedAttack.MAX_RANGE)) {
-                            if (targets.contains(monster.getComponentID()))
-                                continue;
-                            targets.add(monster.getComponentID());
+        // Find valid neighbours of neighbours in master graph - used for ranged attacks
+        Set<BoardNode> rangedTargets = currentTile.getNeighbours().keySet();
+
+        // Only finds neighbours up to a set maximum range
+        for (int i = 1; i < RangedAttack.MAX_RANGE; i++) {
+
+            Set<BoardNode> startTargets = rangedTargets;
+
+            for (BoardNode possibleTarget : startTargets) {
+                // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
+                Set<BoardNode> newTargets = new HashSet<>(possibleTarget.getNeighbours().keySet());
+                newTargets.addAll(rangedTargets);
+                rangedTargets = newTargets;
+            }
+        }
+
+        // Prevents the attacker from trying to shoot itself
+        rangedTargets.remove(currentTile);
+
+        for (BoardNode neighbour : rangedTargets) {
+            if (neighbour == null) continue;
+            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
+            if ( neighbourID != -1 ) {
+                Figure other = (Figure)dgs.getComponentById(neighbourID);
+
+                // Checks to make sure that there is a line of sight before approving the attack action
+                boolean lineOfSight = hasLineOfSight(dgs, f.getPosition(), other.getPosition());
+                if (lineOfSight) {
+                    if (f instanceof Monster && other instanceof Hero) {
+                        // Monster attacks a hero
+                        targets.add(other.getComponentID());
+                    } else if (f instanceof Hero && other instanceof Monster) {
+                        // Player attacks a monster
+
+                        // Make sure that the Player only gets one instance of attacking the monster
+                        // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                        if(!targets.contains(other.getComponentID()))
+                        {
+                            targets.add(other.getComponentID());
                         }
                     }
                 }
             }
         }
-        else if (actingFigure instanceof Monster) {
-            for (Hero hero : dgs.getHeroes()) {
-                Vector2D heroPos = hero.getPosition();
-                if (hasLineOfSight(dgs, loc, heroPos)) {
-                    if (inRange(loc, heroPos, RangedAttack.MAX_RANGE)) {
-                        if (targets.contains(hero.getComponentID()))
-                            continue;
-                        targets.add(hero.getComponentID());
-                    }
-                }
-            }
-        }
+
         return targets;
     }
 
     public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
-
         int counter = 0;
         boolean hasLineOfSight = true;
 
@@ -120,7 +138,7 @@ public class DescentHelper {
             }
 
             // Check 2) Is the board node empty
-            Integer owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
+            int owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
             if (owner != -1 && i != containedPoints.size() - 1){
                 hasLineOfSight = false;
                 break;
@@ -128,7 +146,7 @@ public class DescentHelper {
 
             // Check 3) Is the board node connected to previous board node
             BoardNode previousTile = dgs.masterBoard.getElement(previousPoint.getX(), previousPoint.getY());
-            if (!previousTile.getNeighbours().keySet().contains(currentTile.getComponentID())){
+            if (!previousTile.getNeighbours().containsKey(currentTile)){
                 hasLineOfSight = false;
                 break;
             }
