@@ -31,27 +31,39 @@ public class DescentHelper {
 
         List<Integer> targets = new ArrayList<>();
 
-        Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-        // Find valid neighbours in master graph - used for melee attacks
-        for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
-            if (neighbour == null) continue;
-            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if ( neighbourID != -1 ) {
-                Figure other = (Figure)dgs.getComponentById(neighbourID);
-                if (f instanceof Monster && other instanceof Hero) {
-                    // Monster attacks a hero
-                    targets.add(other.getComponentID());
-                }
-                else if (f instanceof Hero && other instanceof Monster)
-                {
-                    // Player attacks a monster
+        Pair<Integer, Integer> size = f.getSize();
 
-                    // Make sure that the Player only gets one instance of attacking the monster
-                    // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                    if(!targets.contains(other.getComponentID()))
-                    {
-                        targets.add(other.getComponentID());
+        List<BoardNode> attackingTiles = new ArrayList<>();
+
+        Vector2D currentLocation = f.getPosition();
+        BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        attackingTiles.add(anchorTile);
+
+        if (size.a > 1 || size.b > 1)
+        {
+            attackingTiles.addAll(getAttackingTiles(dgs, f, anchorTile, attackingTiles));
+        }
+
+        // Find valid neighbours in master graph - used for melee attacks
+        for (BoardNode currentTile : attackingTiles) {
+            for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
+                if (neighbour == null) continue;
+                int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
+                if (neighbourID != -1) {
+                    Figure other = (Figure) dgs.getComponentById(neighbourID);
+                    if (f instanceof Monster && other instanceof Hero) {
+                        // Monster attacks a hero
+                        if (!targets.contains(other.getComponentID())) {
+                            targets.add(other.getComponentID());
+                        }
+                    } else if (f instanceof Hero && other instanceof Monster) {
+                        // Player attacks a monster
+
+                        // Make sure that the Player only gets one instance of attacking the monster
+                        // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                        if (!targets.contains(other.getComponentID())) {
+                            targets.add(other.getComponentID());
+                        }
                     }
                 }
             }
@@ -61,50 +73,62 @@ public class DescentHelper {
     }
 
     public static List<Integer> getRangedTargets(DescentGameState dgs, Figure f) {
+
         List<Integer> targets = new ArrayList<>();
 
+        Pair<Integer, Integer> size = f.getSize();
+
+        List<BoardNode> attackingTiles = new ArrayList<>();
+
         Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        attackingTiles.add(anchorTile);
 
-        // Find valid neighbours of neighbours in master graph - used for ranged attacks
-        Set<BoardNode> rangedTargets = currentTile.getNeighbours().keySet();
-
-        // Only finds neighbours up to a set maximum range
-        for (int i = 1; i < RangedAttack.MAX_RANGE; i++) {
-
-            Set<BoardNode> startTargets = rangedTargets;
-
-            for (BoardNode possibleTarget : startTargets) {
-                // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
-                Set<BoardNode> newTargets = new HashSet<>(possibleTarget.getNeighbours().keySet());
-                newTargets.addAll(rangedTargets);
-                rangedTargets = newTargets;
-            }
+        if (size.a > 1 || size.b > 1)
+        {
+            attackingTiles.addAll(getAttackingTiles(dgs, f, anchorTile, attackingTiles));
         }
 
-        // Prevents the attacker from trying to shoot itself
-        rangedTargets.remove(currentTile);
+        // Find valid neighbours of neighbours in master graph - used for ranged attacks
+        for (BoardNode currentTile : attackingTiles) {
+            Set<BoardNode> rangedTargets = currentTile.getNeighbours().keySet();
 
-        for (BoardNode neighbour : rangedTargets) {
-            if (neighbour == null) continue;
-            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if ( neighbourID != -1 ) {
-                Figure other = (Figure)dgs.getComponentById(neighbourID);
+            // Only finds neighbours up to a set maximum range
+            for (int i = 1; i < RangedAttack.MAX_RANGE; i++) {
 
-                // Checks to make sure that there is a line of sight before approving the attack action
-                boolean lineOfSight = hasLineOfSight(dgs, f.getPosition(), other.getPosition());
-                if (lineOfSight) {
-                    if (f instanceof Monster && other instanceof Hero) {
-                        // Monster attacks a hero
-                        targets.add(other.getComponentID());
-                    } else if (f instanceof Hero && other instanceof Monster) {
-                        // Player attacks a monster
+                Set<BoardNode> startTargets = rangedTargets;
 
-                        // Make sure that the Player only gets one instance of attacking the monster
-                        // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                        if(!targets.contains(other.getComponentID()))
-                        {
+                for (BoardNode possibleTarget : startTargets) {
+                    // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
+                    Set<BoardNode> newTargets = new HashSet<>(possibleTarget.getNeighbours().keySet());
+                    newTargets.addAll(rangedTargets);
+                    rangedTargets = newTargets;
+                }
+            }
+
+            // Prevents the attacker from trying to shoot itself
+            attackingTiles.forEach(rangedTargets::remove);
+
+            for (BoardNode neighbour : rangedTargets) {
+                if (neighbour == null) continue;
+                int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
+                if (neighbourID != -1) {
+                    Figure other = (Figure) dgs.getComponentById(neighbourID);
+
+                    // Checks to make sure that there is a line of sight before approving the attack action
+                    boolean lineOfSight = hasLineOfSight(dgs, f.getPosition(), other.getPosition());
+                    if (lineOfSight) {
+                        if (f instanceof Monster && other instanceof Hero) {
+                            // Monster attacks a hero
                             targets.add(other.getComponentID());
+                        } else if (f instanceof Hero && other instanceof Monster) {
+                            // Player attacks a monster
+
+                            // Make sure that the Player only gets one instance of attacking the monster
+                            // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                            if (!targets.contains(other.getComponentID())) {
+                                targets.add(other.getComponentID());
+                            }
                         }
                     }
                 }
@@ -112,6 +136,24 @@ public class DescentHelper {
         }
 
         return targets;
+    }
+
+    private static List<BoardNode> getAttackingTiles(DescentGameState dgs, Figure f, BoardNode tile, List<BoardNode> attackingTiles) {
+
+        List<BoardNode> newTiles = new ArrayList<>(attackingTiles);
+
+        // TODO Only works so far for 1x2, need to fix for 2x2 or bigger
+        for (BoardNode neighbour : tile.getNeighbours().keySet()) {
+            if (neighbour == null) continue;
+            if (newTiles.contains(neighbour)) continue;
+            int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
+            if (neighbourID == f.getComponentID())
+            {
+                newTiles.add(neighbour);
+                newTiles.addAll(getAttackingTiles(dgs, f, neighbour, newTiles));
+            }
+        }
+        return  newTiles;
     }
 
     public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
