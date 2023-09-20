@@ -29,6 +29,14 @@ public class DescentHelper {
 
     public static List<Integer> getMeleeTargets(DescentGameState dgs, Figure f) {
 
+        // TODO: Check for Reach weapons, so far only affects monsters with Reach passive
+        // If the figure has the Reach passive, they can attack up to two spaces away
+        boolean reach = false;
+        if (f instanceof Monster && ((Monster) f).hasPassive("Reach"))
+        {
+            reach = true;
+        }
+
         List<Integer> targets = new ArrayList<>();
 
         Pair<Integer, Integer> size = f.getSize();
@@ -46,23 +54,40 @@ public class DescentHelper {
 
         // Find valid neighbours in master graph - used for melee attacks
         for (BoardNode currentTile : attackingTiles) {
-            for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
+
+            Set<BoardNode> neighbours = currentTile.getNeighbours().keySet();
+
+            // Reach attacks can target up to two spaces away
+            if (reach)
+            {
+                Set<BoardNode> neighboursOfNeighbours = new HashSet<>();
+                for (BoardNode neighbour : currentTile.getNeighbours().keySet()) {
+                    neighboursOfNeighbours.addAll(neighbour.getNeighbours().keySet());
+                }
+                neighbours = neighboursOfNeighbours;
+                attackingTiles.forEach(neighbours::remove);
+            }
+
+            for (BoardNode neighbour : neighbours) {
                 if (neighbour == null) continue;
                 int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
                 if (neighbourID != -1) {
                     Figure other = (Figure) dgs.getComponentById(neighbourID);
-                    if (f instanceof Monster && other instanceof Hero) {
-                        // Monster attacks a hero
-                        if (!targets.contains(other.getComponentID())) {
-                            targets.add(other.getComponentID());
-                        }
-                    } else if (f instanceof Hero && other instanceof Monster) {
-                        // Player attacks a monster
+                    // Checks to make sure that there is a line of sight before approving the attack action
+                    if (hasLineOfSight(dgs, f.getPosition(), other.getPosition())) {
+                        if (f instanceof Monster && other instanceof Hero) {
+                            // Monster attacks a hero
+                            if (!targets.contains(other.getComponentID())) {
+                                targets.add(other.getComponentID());
+                            }
+                        } else if (f instanceof Hero && other instanceof Monster) {
+                            // Player attacks a monster
 
-                        // Make sure that the Player only gets one instance of attacking the monster
-                        // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                        if (!targets.contains(other.getComponentID())) {
-                            targets.add(other.getComponentID());
+                            // Make sure that the Player only gets one instance of attacking the monster
+                            // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                            if (!targets.contains(other.getComponentID())) {
+                                targets.add(other.getComponentID());
+                            }
                         }
                     }
                 }
@@ -116,8 +141,7 @@ public class DescentHelper {
                     Figure other = (Figure) dgs.getComponentById(neighbourID);
 
                     // Checks to make sure that there is a line of sight before approving the attack action
-                    boolean lineOfSight = hasLineOfSight(dgs, f.getPosition(), other.getPosition());
-                    if (lineOfSight) {
+                    if (hasLineOfSight(dgs, f.getPosition(), other.getPosition())) {
                         if (f instanceof Monster && other instanceof Hero) {
                             // Monster attacks a hero
                             targets.add(other.getComponentID());
@@ -162,6 +186,12 @@ public class DescentHelper {
 
         ArrayList<Vector2D> containedPoints = LineOfSight.bresenhamsLineAlgorithm(startPoint, endPoint);
 
+        BoardNode startTile = dgs.masterBoard.getElement(startPoint.getX(), startPoint.getY());
+        int start = ((PropertyInt) startTile.getProperty(playersHash)).value;
+
+        BoardNode targetTile = dgs.masterBoard.getElement(endPoint.getX(), endPoint.getY());
+        int target = ((PropertyInt) targetTile.getProperty(playersHash)).value;
+
         // For each coordinate in the line, check:
         // 1) Does the coordinate have its board node
         // 2) Is the board node empty (no character on location)
@@ -179,11 +209,13 @@ public class DescentHelper {
                 break;
             }
 
-            // Check 2) Is the board node empty
+            // Check 2) Is the board node empty (or, if either figure is large, not occupied by itself or the target)
             int owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
             if (owner != -1 && i != containedPoints.size() - 1){
-                hasLineOfSight = false;
-                break;
+                if (owner != target && owner != start){
+                    hasLineOfSight = false;
+                    break;
+                }
             }
 
             // Check 3) Is the board node connected to previous board node
