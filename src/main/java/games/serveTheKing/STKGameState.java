@@ -10,6 +10,7 @@ import games.GameType;
 import games.serveTheKing.components.PlateCard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -61,7 +62,6 @@ public class STKGameState extends AbstractGameState {
      */
     @Override
     protected GameType _getGameType() {
-        // TODO: fix game-specific enum value declared in GameType
         return GameType.ServeTheKing;
     }
 
@@ -77,6 +77,7 @@ public class STKGameState extends AbstractGameState {
         components.add(mainDeck);
         components.add(discardPile);
         components.addAll(playersHands);
+        components.addAll(playersPlates);
         // TODO: add all components to the list
         return components;
     }
@@ -101,7 +102,7 @@ public class STKGameState extends AbstractGameState {
         copy.mainDeck = mainDeck;
         copy.playersHands = playersHands;
         copy.discardPile = discardPile;
-        // TODO: deep copy all variables to the new game state.
+
         return copy;
     }
 
@@ -133,14 +134,19 @@ public class STKGameState extends AbstractGameState {
 
     @Override
     protected boolean _equals(Object o) {
-        // TODO: compare all variables in the state
-        return o instanceof STKGameState;
+        return o instanceof STKGameState
+                && ((STKGameState) o).discardPile == discardPile
+                && ((STKGameState) o).mainDeck == mainDeck
+                && ((STKGameState) o).playerCalledServe==playerCalledServe
+                && ((STKGameState) o).playersHands==playersHands
+                && ((STKGameState) o).playersPlates==playersPlates;
     }
 
     @Override
     public int hashCode() {
+        int hash= Objects.hash(mainDeck,discardPile,playersPlates,playersHands,playerCalledServe);
 
-        return Objects.hash(mainDeck,discardPile,playersHands);
+        return hash;
     }
 
     // TODO: Consider the methods below for possible implementation
