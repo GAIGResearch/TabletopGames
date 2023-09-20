@@ -295,7 +295,7 @@ public class Figure extends Token {
         if (position != null) {
             copyTo.position = position.copy();
         }
-        copyTo.nActionsExecuted = nActionsExecuted;
+        copyTo.nActionsExecuted = nActionsExecuted.copy();
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
         copyTo.attributeTests = new HashSet<>(attributeTests);

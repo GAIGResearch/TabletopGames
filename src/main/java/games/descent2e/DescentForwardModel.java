@@ -1372,6 +1372,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd, int nActionsPerFigure) {
         dgs.monsters = new ArrayList<>();
+        dgs.monstersOriginal = new ArrayList<>();
+        dgs.monstersPerGroup = new ArrayList<>();
+        dgs.monsterGroups = new ArrayList<>();
         List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
