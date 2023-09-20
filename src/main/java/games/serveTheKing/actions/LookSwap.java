@@ -90,7 +90,7 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
         else {
             available.add(new Pass());
         }
-
+        System.out.println("[UseAbility] player "+stkgs.getCurrentPlayer()+ " has these actions:"+available);
         return available;
     }
 
@@ -140,8 +140,8 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
             p2Plates.remove(secondCard);
             p1Plates.add(secondCard);
             p2Plates.add(firstCard);
-            stkgs.getPlayersPlates().get(playerID).setVisibilityOfComponent(firstChoice[1],firstChoice[0],true);
-            stkgs.getPlayersPlates().get(playerID).setVisibilityOfComponent(secondChoice[1],secondChoice[0],true);
+            p1Plates.setVisibilityOfComponent(firstChoice[1],playerID,true);
+            p2Plates.setVisibilityOfComponent(secondChoice[1],playerID,true);
             hasSwapped=true;
         }
         else {
@@ -216,8 +216,7 @@ public class LookSwap extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "Swaped and looked at card "+firstChoice[1]+" from player"+firstChoice[0]+" with card "+secondChoice[1]+" from player"+secondChoice[0];
+        return "Look and maybe swap two cards";
     }
 
     /**

@@ -55,8 +55,9 @@ public class ChooseCard extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         STKGameState stkgs = (STKGameState) gs;
         if(look){
-            stkgs.getPlayersPlates().get(chosenPlayer).setVisibilityOfComponent(chosenCard,chosenPlayer,true);
+            stkgs.getPlayersPlates().get(chosenPlayer).setVisibilityOfComponent(chosenCard,chosenPlayer,look);
         }
+        System.out.println("[ChooseCard] Chose card "+chosenCard+" from player "+chosenPlayer+ " and i looked? "+look);
         return true;
     }
 

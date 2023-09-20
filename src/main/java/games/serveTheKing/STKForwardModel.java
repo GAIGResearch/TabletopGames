@@ -124,7 +124,6 @@ public class STKForwardModel extends StandardForwardModel {
                                 mainDeck.add(c);
                             }
                         }
-                        System.out.println("[STKForwardModdel] Deck Size before draw "+stkgs.mainDeck.getComponents().size());
                         PlateCard cardDraw = stkgs.mainDeck.draw();
                         System.out.println("[STKForwardModdel] made player "+playerID+" draw this card: "+cardDraw);
                         stkgs.playersHands.get(playerID).add(cardDraw);
