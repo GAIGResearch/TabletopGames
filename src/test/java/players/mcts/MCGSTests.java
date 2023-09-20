@@ -1,20 +1,15 @@
 package players.mcts;
 
-import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.Game;
-import core.components.Token;
-import evaluation.features.StateHashCode;
+import evaluation.features.StateKeyFromFeatureVector;
 import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
-import games.dotsboxes.DBProperHash;
+import games.dotsboxes.DBEdgeAndScoreKey;
 import games.dotsboxes.DBStateFeaturesReduced;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.features.LLHandCards;
 import games.loveletter.features.LLStateFeaturesReduced;
-import games.tictactoe.TicTacToeConstants;
-import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
@@ -85,7 +80,7 @@ public class MCGSTests {
     public void SingleFileDotsAndBoxes() {
         // The aim here is to have a minimal (and silly) feature that consists only of the player ID and the Round
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateFeatureVector = new TurnAndPlayerOnly();
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new TurnAndPlayerOnly());
 
         Game game = createDotsAndBoxes(params);
         // We now tun one turn of the game
@@ -109,7 +104,7 @@ public class MCGSTests {
     @Test
     public void OneIterationHasDepthOne() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateFeatureVector = new StateHashCode();
+        params.MCGSStateKey = s -> String.valueOf(s.hashCode());
         params.budget = 1;
         Game game = createDotsAndBoxes(params);
         do {
@@ -126,7 +121,7 @@ public class MCGSTests {
     @Test
     public void OneHundredIterationsHasMaxDepth2() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateFeatureVector = new DBProperHash();
+        params.MCGSStateKey = new DBEdgeAndScoreKey();
         params.budget = 100;
         Game game = createDotsAndBoxes(params);
         do {
@@ -161,7 +156,7 @@ public class MCGSTests {
     public void DotsAndBoxesFullRunActionVisits() {
         // In this case we run through a whole game, relying on the predicate test
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateFeatureVector = new DBStateFeaturesReduced();
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new DBStateFeaturesReduced());
         params.budget = 1000;
         Game game = createDotsAndBoxes(params);
         do {
@@ -183,7 +178,7 @@ public class MCGSTests {
     public void DotsAndBoxesFullRunActionVisitsSelfOnly() {
         // In this case we run through a whole game, relying on the predicate test
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
-        params.MCGSStateFeatureVector = new DBStateFeaturesReduced();
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new DBStateFeaturesReduced());
         params.budget = 1000;
         Game game = createDotsAndBoxes(params);
         do {
@@ -207,7 +202,7 @@ public class MCGSTests {
     public void LoveLetterFullRunActionVisitsSelfOnly() {
         // In this case we run through a whole game, relying on the predicate test
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
-        params.MCGSStateFeatureVector = new LLStateFeaturesReduced();
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new LLStateFeaturesReduced());
         params.budget = 1000;
         Game game = createLoveLetter(params);
         do {
@@ -230,7 +225,7 @@ public class MCGSTests {
     @Test
     public void LoveLetterFullRunActionVisits() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateFeatureVector = new LLStateFeaturesReduced();
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new LLStateFeaturesReduced());
         params.budget = 1000;
         Game game = createLoveLetter(params);
         do {
@@ -250,7 +245,7 @@ public class MCGSTests {
     @Test
     public void LoveLetterHandCardsOnlyTest() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
-        params.MCGSStateFeatureVector = new LLHandCards();
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new LLHandCards());
         params.budget = 2000;
 
         Game game = createLoveLetter(params);

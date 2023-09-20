@@ -2,13 +2,9 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.actions.AbstractAction;
 import core.interfaces.*;
-import evaluation.features.StateHashCode;
 import evaluation.optimisation.TunableParameters;
-import org.json.simple.JSONObject;
 import players.PlayerParameters;
-import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
@@ -62,7 +58,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
-    public IStateFeatureVector MCGSStateFeatureVector = new StateHashCode();
+    public IStateKey MCGSStateKey;
     public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
 
@@ -111,8 +107,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
-        addTunableParameter("MCGSStateFeatureVector", IStateFeatureVector.class);
-        setParameterValue("MCGSStateFeatureVector", new StateHashCode());
+        addTunableParameter("MCGSStateKey", IStateKey.class);
     }
 
     @Override
@@ -166,7 +161,7 @@ public class MCTSParams extends PlayerParameters {
 
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        MCGSStateFeatureVector = (IStateFeatureVector) getParameterValue("MCGSStateFeatureVector");
+        MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 

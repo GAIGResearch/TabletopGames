@@ -24,6 +24,7 @@ public abstract class TunableStateFeatures extends TunableParameters implements 
         for (String name : allNames) {
             addTunableParameter(name, true);
         }
+        _reset();
     }
 
     @Override

@@ -20,13 +20,8 @@ public class MCGSNode extends SingleTreeNode {
         addToTranspositionTable(this, state);
     }
 
-    protected String getKeyOf(AbstractGameState state) {
-        double[] featureVector = params.MCGSStateFeatureVector.featureVector(state, state.getCurrentPlayer());
-        return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(featureVector));
-    }
-
     private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
-        String key = getKeyOf(keyState);
+        String key = params.MCGSStateKey.getKey(keyState);
         MCGSNode graphRoot = (MCGSNode) root;
         if (graphRoot.transpositionMap.containsKey(key)) {
             throw new AssertionError("Unexpected?");
@@ -47,7 +42,7 @@ public class MCGSNode extends SingleTreeNode {
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
         MCGSNode graphRoot = (MCGSNode) root;
-        String key = getKeyOf(nextState);
+        String key = params.MCGSStateKey.getKey(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
             //          newNode.setActionsFromOpenLoopState(nextState);
             //return graphRoot.transpositionMap.get(key);
@@ -59,7 +54,7 @@ public class MCGSNode extends SingleTreeNode {
     @Override
     protected SingleTreeNode nextNodeInTree(AbstractAction actionChosen) {
         // we look up the node in the transposition table using the feature vector for the openLoopState
-        String key = getKeyOf(openLoopState);
+        String key = params.MCGSStateKey.getKey(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode != null) {
@@ -79,13 +74,9 @@ public class MCGSNode extends SingleTreeNode {
             // We only track this while in the tree (we could do the rollout as well, but at the overhead
             // of featureVector calculations
             MCGSNode mcgsRoot = (MCGSNode) root;
-            String key = getKeyOf(gs);
+            String key = params.MCGSStateKey.getKey(gs);
             mcgsRoot.trajectory.add(key);
 //            System.out.println("Adding to trajectory: " + key);
-//            if (mcgsRoot.transpositionMap.size() == 1 && mcgsRoot.trajectory.size() == 1 && !mcgsRoot.transpositionMap.containsKey(key)) {
-//                throw new AssertionError("Trajectory should be the same size as the transposition map");
-//            }
-            // this means we should be adding one state to the trajectory every time we add an action to the rollout
         }
         super.advanceState(gs, act, inRollout);
     }
