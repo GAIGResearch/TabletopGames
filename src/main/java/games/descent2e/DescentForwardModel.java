@@ -1672,7 +1672,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
             // Check 2) Is the board node empty
-            Integer owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
+            int owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
             if (owner != -1 && i != containedPoints.size() - 1){
                 hasLineOfSight = false;
                 break;
@@ -1680,7 +1680,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Check 3) Is the board node connected to previous board node
             BoardNode previousTile = dgs.masterBoard.getElement(previousPoint.getX(), previousPoint.getY());
-            if (!previousTile.getNeighbours().keySet().contains(currentTile.getComponentID())){
+            if (!previousTile.getNeighbours().containsKey(currentTile)){
                 hasLineOfSight = false;
                 break;
             }
