@@ -9,9 +9,6 @@ import java.util.List;
 
 public class AttackAllAdjacent extends MultiAttack {
 
-    public AttackAllAdjacent(){
-        super();
-    }
     public AttackAllAdjacent(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
     }

@@ -5,7 +5,7 @@ import games.descent2e.actions.herofeats.*;
 
 public enum HeroicFeat {
     DoubleAttack (new DoubleAttack()),
-    MagicAttackAll (new AttackAllAdjacent()),
+    MagicAttackAll (new MagicAttackAll()),
     HealAll (new HealAllInRange()),
     StunMonsters (new StunAllInMonsterGroup()),
     FreeMoveFriend (new HeroicFeatExtraMovement()),
