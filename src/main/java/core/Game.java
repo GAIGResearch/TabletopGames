@@ -568,8 +568,10 @@ public class Game {
                 action = null;
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
-            AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, activePlayer)));
+            if (observedActions.size() > 1) {
+                AbstractAction finalAction = action;
+                listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, activePlayer)));
+            }
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
