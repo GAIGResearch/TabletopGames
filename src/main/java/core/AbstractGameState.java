@@ -262,7 +262,10 @@ public abstract class AbstractGameState {
      * @return - reduced copy of the game state.
      */
     public final AbstractGameState copy(int playerId) {
-        AbstractGameState s = _copy(playerId);
+        AbstractGameState s;
+        if (coreGameParameters.partialObservable)
+            s = _copy(playerId);
+        else s = _copy(-1);
         // Copy super class things
         s.allComponents = allComponents.emptyCopy();
         s.gameStatus = gameStatus;
