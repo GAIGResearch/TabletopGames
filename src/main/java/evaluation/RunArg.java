@@ -129,6 +129,14 @@ public enum RunArg {
     seed("(Optional) Random seed to use for process",
             System.currentTimeMillis(),
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    forceFullObservability("(Optional) If true, then full observability is forced.\n" +
+            "\t Defaults to false",
+            false,
+            new Usage[]{Usage.RunGames}),
+    forceDeterministic("(Optional) If true, then the game is forced to be deterministic, using the same random seed for forward models too.\n" +
+            "\t Defaults to false",
+            false,
+            new Usage[]{Usage.RunGames}),
     selfPlay("(Optional) If true, then multiple copies of the same agent can be in one game.\n" +
             "\t Defaults to false",
             false,

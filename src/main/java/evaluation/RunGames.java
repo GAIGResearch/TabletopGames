@@ -151,10 +151,12 @@ public class RunGames implements IGameRunner {
                 }
 
                 // run tournament
-                tournament.setRandomSeed((Number) config.get(RunArg.seed));
+                tournament.setRandomSeed((Number) config.get(seed));
                 tournament.setVerbose((boolean) config.get(verbose));
                 tournament.setResultsFile((String) config.get(output));
                 tournament.setRandomGameParams((boolean) config.get(randomGameParams));
+                tournament.setForceFullObservability((boolean) config.get(forceFullObservability));
+                tournament.setForceDeterministic((boolean) config.get(forceDeterministic));
                 tournament.run();
             }
         }

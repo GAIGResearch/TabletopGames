@@ -6,5 +6,8 @@
   "listener": "metrics/sushigo.json",
   "reportPeriod": 100,
   "playerDirectory": "json/experiments/subgoals/exp1",
-  "verbose": true
+  "verbose": true,
+  "seed": 0,
+  "forceDeterministic": true,
+  "forceFullObservability": true
 }

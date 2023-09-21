@@ -8,6 +8,8 @@ import java.util.*;
 
 public abstract class AbstractParameters {
 
+    // If true, the game is forced to be deterministic, not resetting the random seed in copies.
+    public boolean deterministic = false;
     // Random seed for this game
     long randomSeed;
     // Maximum number of rounds in the game - according to the rules
@@ -143,7 +145,9 @@ public abstract class AbstractParameters {
      */
     public AbstractParameters copy() {
         AbstractParameters copy = _copy();
-        copy.randomSeed = System.currentTimeMillis();
+        if (!deterministic) {
+            copy.randomSeed = System.currentTimeMillis();
+        }
         return copy;
     }
 
@@ -184,7 +188,8 @@ public abstract class AbstractParameters {
         if (this == o) return true;
         if (!(o instanceof AbstractParameters)) return false;
         AbstractParameters that = (AbstractParameters) o;
-        return thinkingTimeMins == that.thinkingTimeMins &&
+        return deterministic == that.deterministic &&
+                thinkingTimeMins == that.thinkingTimeMins &&
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
                 incrementRoundS == that.incrementRoundS &&

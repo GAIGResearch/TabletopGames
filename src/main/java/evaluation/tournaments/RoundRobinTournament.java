@@ -32,7 +32,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected LinkedHashMap<Integer, Pair<Double, Double>> finalOrdinalRanking; // contains index of agent in agents
     LinkedList<Integer> agentIDs;
     private int matchUpsRun, totalGamesRun;
-    protected boolean randomGameParams;
+    protected boolean randomGameParams, forceFullObservability, forceDeterministic;
     public final String name;
 
     protected long randomSeed = System.currentTimeMillis();
@@ -224,6 +224,15 @@ public class RoundRobinTournament extends AbstractTournament {
                 System.out.println("Game parameters: " + game.getGameState().getGameParameters());
             }
 
+            if (forceFullObservability) {
+                game.getGameState().getCoreGameParameters().partialObservable = false;
+            }
+
+            if (forceDeterministic) {
+                game.getGameState().getCoreGameParameters().deterministic = true;
+                game.getGameState().getGameParameters().deterministic = true;
+            }
+
             game.run();  // Always running tournaments without visuals
             GameResult[] results = game.getGameState().getPlayerResults();
 
@@ -409,5 +418,13 @@ public class RoundRobinTournament extends AbstractTournament {
 
     public int getNumberOfAgents() {
         return agents.size();
+    }
+
+    public void setForceFullObservability(boolean forceFullObservability) {
+        this.forceFullObservability = forceFullObservability;
+    }
+
+    public void setForceDeterministic(boolean forceDeterministic) {
+        this.forceDeterministic = forceDeterministic;
     }
 }
