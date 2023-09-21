@@ -40,16 +40,17 @@ public class DescentHelper {
         List<Integer> targets = new ArrayList<>();
 
         Pair<Integer, Integer> size = f.getSize();
-
         List<BoardNode> attackingTiles = new ArrayList<>();
 
         Vector2D currentLocation = f.getPosition();
         BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-        attackingTiles.add(anchorTile);
 
         if (size.a > 1 || size.b > 1)
         {
-            attackingTiles.addAll(getAttackingTiles(dgs, f, anchorTile, attackingTiles));
+            attackingTiles.addAll(getAttackingTiles(f.getComponentID(), anchorTile, attackingTiles));
+        }
+        else {
+            attackingTiles.add(anchorTile);
         }
 
         // Find valid neighbours in master graph - used for melee attacks
@@ -74,7 +75,7 @@ public class DescentHelper {
                 if (neighbourID != -1) {
                     Figure other = (Figure) dgs.getComponentById(neighbourID);
                     // Checks to make sure that there is a line of sight before approving the attack action
-                    if (hasLineOfSight(dgs, f.getPosition(), other.getPosition())) {
+                    if (hasLineOfSight(dgs, ((PropertyVector2D) currentTile.getProperty("coordinates")).values, ((PropertyVector2D) neighbour.getProperty("coordinates")).values)) {
                         if (f instanceof Monster && other instanceof Hero) {
                             // Monster attacks a hero
                             if (!targets.contains(other.getComponentID())) {
@@ -111,7 +112,7 @@ public class DescentHelper {
 
         if (size.a > 1 || size.b > 1)
         {
-            attackingTiles.addAll(getAttackingTiles(dgs, f, anchorTile, attackingTiles));
+            attackingTiles.addAll(getAttackingTiles(f.getComponentID(), anchorTile, attackingTiles));
         }
 
         // Find valid neighbours of neighbours in master graph - used for ranged attacks
@@ -141,7 +142,7 @@ public class DescentHelper {
                     Figure other = (Figure) dgs.getComponentById(neighbourID);
 
                     // Checks to make sure that there is a line of sight before approving the attack action
-                    if (hasLineOfSight(dgs, f.getPosition(), other.getPosition())) {
+                    if (hasLineOfSight(dgs, ((PropertyVector2D) currentTile.getProperty("coordinates")).values, ((PropertyVector2D) neighbour.getProperty("coordinates")).values)) {
                         if (f instanceof Monster && other instanceof Hero) {
                             // Monster attacks a hero
                             targets.add(other.getComponentID());
@@ -162,22 +163,26 @@ public class DescentHelper {
         return targets;
     }
 
-    private static List<BoardNode> getAttackingTiles(DescentGameState dgs, Figure f, BoardNode tile, List<BoardNode> attackingTiles) {
+    public static List<BoardNode> getAttackingTiles(Integer f, BoardNode startTile, List<BoardNode> attackingTiles) {
 
         List<BoardNode> newTiles = new ArrayList<>(attackingTiles);
+        newTiles.add(startTile);
 
-        // TODO Only works so far for 1x2, need to fix for 2x2 or bigger
-        for (BoardNode neighbour : tile.getNeighbours().keySet()) {
+        for (BoardNode neighbour : startTile.getNeighbours().keySet()) {
             if (neighbour == null) continue;
             if (newTiles.contains(neighbour)) continue;
             int neighbourID = ((PropertyInt) neighbour.getProperty(playersHash)).value;
-            if (neighbourID == f.getComponentID())
+            if (neighbourID == f)
             {
-                newTiles.add(neighbour);
-                newTiles.addAll(getAttackingTiles(dgs, f, neighbour, newTiles));
+                newTiles.addAll(getAttackingTiles(f, neighbour, newTiles));
             }
         }
-        return  newTiles;
+
+        Set<BoardNode> tempSet = new HashSet<>(newTiles);
+        newTiles.clear();
+        newTiles.addAll(tempSet);
+
+        return newTiles;
     }
 
     public static boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){

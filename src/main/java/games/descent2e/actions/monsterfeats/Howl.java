@@ -15,10 +15,10 @@ import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTe
 
 public class Howl extends TriggerAttributeTest {
 
-    List<Hero> heroes;
+    List<Integer> heroes;
     int heroIndex = 0;
-    public Howl(int attackingFigure, List<Hero> targets) {
-        super(attackingFigure, targets.get(0).getComponentID());
+    public Howl(int attackingFigure, List<Integer> targets) {
+        super(attackingFigure, targets.get(0));
         this.heroes = targets;
     }
 
@@ -37,6 +37,10 @@ public class Howl extends TriggerAttributeTest {
         interruptPlayer = attackingPlayer;
 
         movePhaseForward(state);
+
+        Figure monster = (Figure) state.getComponentById(attackingFigure);
+        monster.getNActionsExecuted().increment();
+        monster.setHasAttacked(true);
 
         return true;
     }
@@ -63,7 +67,7 @@ public class Howl extends TriggerAttributeTest {
     }
 
     void executePhase(DescentGameState state) {
-        // System.out.println("Executing phase " + phase);
+        System.out.println("Executing phase " + phase);
         // System.out.println(heroIndex + " " + heroes.size());
         switch (phase) {
             case NOT_STARTED:
@@ -78,17 +82,14 @@ public class Howl extends TriggerAttributeTest {
                 if (heroIndex < heroes.size() - 1) {
                     phase = PRE_TEST;
                     heroIndex++;
-                    super.defendingFigure = heroes.get(heroIndex).getComponentID();
-                    super.defendingPlayer = heroes.get(heroIndex).getOwnerId();
+                    super.defendingFigure = heroes.get(heroIndex);
+                    super.defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();;
                 } else {
                     phase = POST_TEST;
                 }
                 break;
             case POST_TEST:
                 phase = ALL_DONE;
-                Figure monster = (Figure) state.getComponentById(attackingFigure);
-                monster.getNActionsExecuted().increment();
-                monster.setHasAttacked(true);
                 break;
         }
         // and reset interrupts
@@ -137,7 +138,7 @@ public class Howl extends TriggerAttributeTest {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Figure f = dgs.getActingFigure();
-        return f instanceof Monster && (((Monster) f).hasAction("Howl")) && !f.getNActionsExecuted().isMaximum() && !f.hasAttacked();
+        Figure f = (Figure) dgs.getComponentById(attackingFigure);
+        return f instanceof Monster && (((Monster) f).hasAction("Howl"));
     }
 }
