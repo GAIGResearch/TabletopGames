@@ -343,7 +343,7 @@ public class JSONUtils {
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
             if (subMap.size() == 0)
                 throw new AssertionError("Empty subMap for key " + key);
-            if (subMap.size() == 1) {
+            if (subMap.size() == 1 && subMap.containsKey(key)) {
                 // this is a single entry, so we just add it as a String
                 String value = subMap.get(key);
                 if (!value.isEmpty()) {

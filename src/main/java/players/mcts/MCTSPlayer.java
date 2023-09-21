@@ -85,8 +85,13 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
-        // Search for best action from the root
+    public void registerUpdatedObservation(AbstractGameState gameState) {
+        super.registerUpdatedObservation(gameState);
+        // We did not take a decision, so blank out the previous set of data
+        root = null;
+    }
+
+    private void createRootNode(AbstractGameState gameState) {
         if (params.opponentTreePolicy == MultiTree)
             root = new MultiTreeNode(this, gameState, rnd);
         else
@@ -103,6 +108,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (opponentModel instanceof IMASTUser) {
             ((IMASTUser) opponentModel).setStats(root.MASTStatistics);
         }
+    }
+    @Override
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
+        // Search for best action from the root
+        createRootNode(gameState);
         root.mctsSearch();
 
         if (advantageFunction instanceof ITreeProcessor)

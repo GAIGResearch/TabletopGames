@@ -12,7 +12,7 @@ public class DBEdgeAndScoreKey implements IStateKey {
     public String getKey(AbstractGameState state) {
         DBGameState dbgs = (DBGameState) state;
         String edgeString = dbgs.edgeToOwnerMap.keySet().stream()
-                .map(e -> 100 * ((e.from.getX() + e.to.getX()) / 2.0) +
+                .map(e -> 100.0 * ((e.from.getX() + e.to.getX()) / 2.0) +
                         ((e.from.getY() + e.to.getY())/ 2.0)).mapToDouble(i -> i)
                 .sorted().mapToObj(d -> String.format("%.1f", d)).collect(Collectors.joining(","));
         String scoreString = "Scores: " + Arrays.toString(dbgs.nCellsPerPlayer);

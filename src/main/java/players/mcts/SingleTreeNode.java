@@ -200,15 +200,19 @@ public class SingleTreeNode {
         }
     }
 
+    protected void initialiseRoot() {
+        timeTaken = 0.0;
+        nodeClash = 0;
+        rolloutActionsTaken = 0;
+    }
+
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
     public void mctsSearch() {
-
+        initialiseRoot();
         // Variables for tracking time budget
         double avgTimeTaken;
-        timeTaken = 0.0;
-        nodeClash = 0;
         long remaining;
         int remainingLimit = params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
@@ -218,7 +222,6 @@ public class SingleTreeNode {
 
         // Tracking number of iterations for iteration budget
         int numIters = 0;
-        rolloutActionsTaken = 0;
         boolean stop = false;
         while (!stop) {
             switch (params.information) {
@@ -236,7 +239,7 @@ public class SingleTreeNode {
             }
 
             // New timer for this iteration
-            ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
+            //      ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
             //   System.out.println("Starting MCTS Search iteration " + numIters);
 
@@ -248,11 +251,11 @@ public class SingleTreeNode {
             //   System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = params.budgetType;
-            timeTaken += (elapsedTimerIteration.elapsedMillis());
-            avgTimeTaken = timeTaken / numIters;
+            //          timeTaken += (elapsedTimerIteration.elapsedMillis());
             if (budgetType == BUDGET_TIME) {
                 // Time budget
                 remaining = elapsedTimer.remainingTimeMillis();
+                avgTimeTaken = (double) elapsedTimer.elapsedMillis() / numIters;
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
@@ -266,6 +269,7 @@ public class SingleTreeNode {
                 stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
             }
         }
+        timeTaken = elapsedTimer.elapsedMillis();
     }
 
     /**

@@ -2,19 +2,21 @@ package evaluation.features;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateKey;
 import evaluation.optimisation.TunableParameters;
 import games.loveletter.features.LLStateFeaturesTunable;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public abstract class TunableStateFeatures extends TunableParameters implements IStateFeatureVector {
+public abstract class TunableStateFeatures extends TunableParameters implements IStateFeatureVector, IStateKey {
 
     private final String[] allNames;
 
     protected boolean[] active;
 
     protected String[] namesUsed;
+
 
     // TODO: When extending this, the first thing to do is provide a list of the possible feature names in allNames
     public TunableStateFeatures(String[] allNames) {
@@ -80,5 +82,11 @@ public abstract class TunableStateFeatures extends TunableParameters implements 
     @Override
     public String[] names() {
         return namesUsed;
+    }
+
+    @Override
+    public String getKey(AbstractGameState state) {
+        double[] retValue = featureVector(state, state.getCurrentPlayer());
+        return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(retValue));
     }
 }
