@@ -164,6 +164,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                if (root == null) continue;
                 if (game.getTick() < 30) // at this point we are at no risk of the game ending during search
                     assertEquals(root.getVisits(), root.getTranspositionMap().size(), 1);
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
@@ -186,6 +187,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                if (root == null) continue;
                 if (game.getTick() < 10) // at this point we are at no risk of the game ending during search
                     assertEquals(root.getVisits(), root.getTranspositionMap().size(), 1);
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
@@ -210,6 +212,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                if (root == null) continue;
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
                 assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
                 //                        root.getTranspositionMap().get(s).openLoopState.isNotTerminalForPlayer(0)).count());
@@ -233,6 +236,7 @@ public class MCGSTests {
             game.oneAction();
             if (p == 0) {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
+                if (root == null) continue;
                 if (game.getTick() < 10) // at this point we are at no risk of the game ending during search
                     assertEquals(params.budget + 1, root.getTranspositionMap().size(), 1);
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());

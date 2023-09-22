@@ -85,17 +85,16 @@ public class MCGSNode extends SingleTreeNode {
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
      *
-     * @param baseResult - value of rollout to backup
+     * @param delta - value of rollout to backup
      */
-    protected void backUp(double[] baseResult) {
+    protected void backUp(double[] delta) {
+        normaliseRewardsAfterIteration(delta);
+        double[] result = processResultsForParanoidOrSelfOnly(delta);
         MCGSNode nRoot = (MCGSNode) root;
         if (nRoot.trajectory.size() != nRoot.actionsInTree.size()) {
             throw new AssertionError("Trajectory and actionsInTree should be the same size " +
                     nRoot.trajectory.size() + " != " + nRoot.actionsInTree.size());
         }
-
-        normaliseRewardsAfterIteration(baseResult);
-        double[] result = processResultsForParanoidOrSelfOnly(baseResult);
 
         for (int i = 0; i < nRoot.trajectory.size(); i++) {
             String key = nRoot.trajectory.get(i);

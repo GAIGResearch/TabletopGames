@@ -395,7 +395,7 @@ public class SingleTreeNode {
             // then find out where this has taken us
             boolean terminal = !cur.openLoopState.isNotTerminal() ||
                     (params.opponentTreePolicy.selfOnlyTree && !cur.openLoopState.isNotTerminalForPlayer(decisionPlayer));
-            if (terminal) return this;
+            if (terminal) return cur;
             SingleTreeNode nextNode = cur.nextNodeInTree(chosen);
             // if and only if we do not find a new node, then we need to expand and create a new node
             if (nextNode == null) {
@@ -870,12 +870,11 @@ public class SingleTreeNode {
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
      *
-     * @param baseResult - value of rollout to backup
+     * @param delta - value of rollout to backup
      */
-    protected void backUp(double[] baseResult) {
-        normaliseRewardsAfterIteration(baseResult);
-        double[] result = processResultsForParanoidOrSelfOnly(baseResult);
-
+    protected void backUp(double[] delta) {
+        normaliseRewardsAfterIteration(delta);
+        double[] result = processResultsForParanoidOrSelfOnly(delta);
         // we also need the action taken at each step which we should be able to get from actionsInTree...
         SingleTreeNode n = root;
         for (int i = 0; i < root.actionsInTree.size(); i++) {
@@ -897,6 +896,7 @@ public class SingleTreeNode {
     protected void normaliseRewardsAfterIteration(double[] result) {
         // after each iteration we update the min and max rewards seen, to be used in future iterations.
         // These are only stored on the root
+        double[] retValue = result.clone();
         if (params.normaliseRewards || params.treePolicy == MCTSEnums.TreePolicy.UCB_Tuned) {
             DoubleSummaryStatistics stats = Arrays.stream(result).summaryStatistics();
             if (root.lowReward > stats.getMin())
