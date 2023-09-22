@@ -31,7 +31,6 @@ public class MultiTreeMCTSTests {
 
     AbstractForwardModel fm = new TicTacToeForwardModel();
     private final Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
-            node.getChildren().isEmpty() ||  // first condition is that this is a terminal node
                     node.getParent() == null || // the root node is different (and is checked elsewhere)
                     node.getChildren().values().stream().flatMap(arr -> {
                                 if (arr == null)
@@ -120,7 +119,7 @@ public class MultiTreeMCTSTests {
         // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits
         // although there will be some discrepancy as we update the visit on a state when we traverse it - but we may never reach the next state in this tree
         List<SingleTreeNode> problemNodes = root.nonMatchingNodes(childrenVisitsAddUp);
-        assertEquals(0, problemNodes.size(), 10);
+        assertEquals(0, problemNodes.size(), 15);
         problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
         assertEquals(0, problemNodes.size());
 

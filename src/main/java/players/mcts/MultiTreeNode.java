@@ -24,7 +24,6 @@ public class MultiTreeNode extends SingleTreeNode {
     SingleTreeNode[] currentLocation;
     AbstractAction[] lastAction;
     boolean[] nodeExpanded;
-    boolean[] expansionActionTaken;
     boolean[] maxDepthReached;
     MCTSPlayer mctsPlayer;
 
@@ -89,10 +88,8 @@ public class MultiTreeNode extends SingleTreeNode {
         // arrays to store the expansion actions taken, and whether we have expanded - indexed by player
         lastAction = new AbstractAction[currentLocation.length];
         nodeExpanded = new boolean[currentLocation.length];
-        expansionActionTaken = new boolean[currentLocation.length];
         maxDepthReached = new boolean[currentLocation.length];
-        for (int i = 0; i < currentLocation.length; i++)
-            currentLocation[i] = roots[i];
+        System.arraycopy(roots, 0, currentLocation, 0, currentLocation.length);
 
         actionsInTree = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
@@ -131,26 +128,30 @@ public class MultiTreeNode extends SingleTreeNode {
                 // currentNode is the last node that this actor was at in their tree
                 currentNode = currentLocation[currentActor];
                 currentNode.setActionsFromOpenLoopState(currentState);
-                List<AbstractAction> unexpanded = currentNode.unexpandedActions();
-                AbstractAction chosen;
-                if (!unexpanded.isEmpty()) {
-                    // We have an unexpanded action
-                    if (expansionActionTaken[currentActor])
-                        throw new AssertionError("We have already picked an expansion action for this player");
-                    chosen = currentNode.expand(unexpanded);
-                    lastAction[currentActor] = chosen;
-                    expansionActionTaken[currentActor] = true;
-                    if (debug)
-                        System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
-                    advanceState(currentState, chosen, false);
-                    // we will create the new node once we get back to a point when it is this player's action again
-                } else {
-                    chosen = currentNode.treePolicyAction(true);
-                    lastAction[currentActor] = chosen;
-                    if (debug)
-                        System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
-                    advanceState(currentState, chosen, false);
-                }
+
+                // We want to scrap the expansion
+
+//                List<AbstractAction> unexpanded = currentNode.unexpandedActions();
+//                AbstractAction chosen;
+//                if (!unexpanded.isEmpty()) {
+//                    // We have an unexpanded action
+//                    if (expansionActionTaken[currentActor])
+//                        throw new AssertionError("We have already picked an expansion action for this player");
+//                  chosen = currentNode.expand(unexpanded);
+//                    lastAction[currentActor] = chosen;
+//                    expansionActionTaken[currentActor] = true;
+//                    if (debug)
+//                        System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
+//                    advanceState(currentState, chosen, false);
+//                    // we will create the new node once we get back to a point when it is this player's action again
+//                } else {
+                AbstractAction chosen = currentNode.treePolicyAction(true);
+                lastAction[currentActor] = chosen;
+
+                if (debug)
+                    System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
+                advanceState(currentState, chosen, false);
+
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
@@ -183,26 +184,24 @@ public class MultiTreeNode extends SingleTreeNode {
         root.updateMASTStatistics(actionsInTree, actionsInRollout, finalValues);
     }
 
-    private void expandNode(int currentActor, AbstractGameState currentState) {
-        // we now expand a node
-        currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState);
-        // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
-        nodeExpanded[currentActor] = true;
-        if (debug)
-            System.out.printf("Node expanded for P%d : %s %n", currentActor, currentLocation[currentActor].unexpandedActions().stream().map(Objects::toString).collect(Collectors.joining()));
-    }
 
     private void updateCurrentLocation(int playerId, AbstractGameState state) {
         if (lastAction[playerId] != null && !nodeExpanded[playerId]) { // we have a previous action and are not yet in rollout
-            if (expansionActionTaken[playerId]) {
-                expandNode(playerId, state);
-            } else {
-                currentLocation[playerId] = currentLocation[playerId].nextNodeInTree(lastAction[playerId]);
+            // nextNodeInTree returns null if this is an expansion node
+            SingleTreeNode newLocation = currentLocation[playerId].nextNodeInTree(lastAction[playerId]);
+            if (newLocation == null) {
+                // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
+                nodeExpanded[playerId] = true;
+                if (debug)
+                    System.out.printf("Node expanded for P%d : %s %n", playerId, lastAction[playerId]);
+                newLocation = currentLocation[playerId].expandNode(lastAction[playerId], state);
             }
-            lastAction[playerId] = null;
-            // we reset this as we have processed the action (required so that when we terminate the loop of
-            // tree/rollout policies we know what remains to be cleared up
+            currentLocation[playerId] = newLocation;
         }
+        lastAction[playerId] = null;
+        // we reset this as we have processed the action (required so that when we terminate the loop of
+        // tree/rollout policies we know what remains to be cleared up
+
     }
 
     @Override
