@@ -129,22 +129,6 @@ public class MultiTreeNode extends SingleTreeNode {
                 currentNode = currentLocation[currentActor];
                 currentNode.setActionsFromOpenLoopState(currentState);
 
-                // We want to scrap the expansion
-
-//                List<AbstractAction> unexpanded = currentNode.unexpandedActions();
-//                AbstractAction chosen;
-//                if (!unexpanded.isEmpty()) {
-//                    // We have an unexpanded action
-//                    if (expansionActionTaken[currentActor])
-//                        throw new AssertionError("We have already picked an expansion action for this player");
-//                  chosen = currentNode.expand(unexpanded);
-//                    lastAction[currentActor] = chosen;
-//                    expansionActionTaken[currentActor] = true;
-//                    if (debug)
-//                        System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
-//                    advanceState(currentState, chosen, false);
-//                    // we will create the new node once we get back to a point when it is this player's action again
-//                } else {
                 AbstractAction chosen = currentNode.treePolicyAction(true);
                 lastAction[currentActor] = chosen;
 
@@ -167,17 +151,20 @@ public class MultiTreeNode extends SingleTreeNode {
         for (int i = 0; i < finalValues.length; i++) {
             finalValues[i] = heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
         }
-        for (SingleTreeNode singleTreeNode : currentLocation) {
-            if (singleTreeNode != null) {
+        for (int p = 0; p < roots.length; p++) {
+            if (currentLocation[p] != null) { // the currentLocation will be null if the player has not acted at all (if, say they have been eliminated)
                 // the full actions in tree and rollout are stored on the overall root
                 // for each player-specific sub-tree we filter these to just their actions
-                singleTreeNode.root.actionsInTree = actionsInTree.stream()
-                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
+                if (p != currentLocation[p].decisionPlayer)
+                    throw new AssertionError("We should only be backing up for the decision player");
+                int finalP = p;
+                currentLocation[p].root.actionsInTree = actionsInTree.stream()
+                        .filter(a -> a.a == finalP)
                         .collect(Collectors.toList());
-                singleTreeNode.root.actionsInRollout = actionsInRollout.stream()
-                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
-                        .collect(Collectors.toList());
-                singleTreeNode.backUp(finalValues);
+//                singleTreeNode.root.actionsInRollout = actionsInRollout.stream()
+//                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
+//                        .collect(Collectors.toList());
+                currentLocation[p].backUp(finalValues);
             }
         }
         rolloutActionsTaken += actionsInRollout.size();
