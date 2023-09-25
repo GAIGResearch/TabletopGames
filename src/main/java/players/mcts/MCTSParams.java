@@ -73,7 +73,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("exp3Boltzmann", 0.1);
         addTunableParameter("hedgeBoltzmann", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
-        addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
+        addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100, 1000));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
