@@ -12,7 +12,7 @@ public class DiamantSimpleFeatures extends TunableStateFeatures {
     LeaderHeuristic heuristic = new LeaderHeuristic();
 
     static String[] allNames =  new String[]{"TreasureChests", "GemsOnPath", "PlayersInCave", "Cave", "Hazards",
-        "PlayerOrdinalPos", "PlayersStillInCaveEncoded", "LeaderHeuristic"};
+        "PlayerOrdinalPos", "PlayersStillInCaveEncoded", "LeaderHeuristic", "Tiles"};
 
     public DiamantSimpleFeatures() {
         super(allNames);
@@ -48,6 +48,7 @@ public class DiamantSimpleFeatures extends TunableStateFeatures {
         }
         retVal[6] = inCaveOrdinalPos;
         retVal[7] = heuristic.evaluateState(gs, playerId);
+        retVal[8] = gs.path.getSize();
 
         return retVal;
     }

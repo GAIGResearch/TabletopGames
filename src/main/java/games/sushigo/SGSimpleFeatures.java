@@ -10,11 +10,12 @@ import org.json.simple.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class SGSimpleFeatures extends TunableStateFeatures {
 
     static String[] allNames = new String[]{"makiCount", "tempuraCount", "dumplingCount", "nigiriCount", "puddingCount",
-                "wasabiActive", "chopstickActive"};
+            "wasabiActive", "chopstickActive", "otherMaki", "otherPudding", "handSize"};
 
     public SGSimpleFeatures() {
         super(allNames);
@@ -33,69 +34,25 @@ public class SGSimpleFeatures extends TunableStateFeatures {
         // just get player score + ordinal positions + wasabi/chopstick active
         SGGameState sggs = (SGGameState) state;
 
-        // Player features
-        int wasabiActive = 0;
-        int chopstickActive = 0;
-        List<SGCard> playedCardTypes = sggs.getPlayedCards().get(playerID).getComponents();
-        for (SGCard cardTypes: playedCardTypes){
-            if (cardTypes.type.equals(SGCard.SGCardType.Wasabi)){
-                wasabiActive = 1;
-            } else if (cardTypes.type.equals(SGCard.SGCardType.Chopsticks)) {
-                chopstickActive = 1;
-            }
+
+        features[0] = sggs.getPlayedCardTypes(SGCard.SGCardType.Maki, playerID).getValue();
+        features[1] = sggs.getPlayedCardTypes(SGCard.SGCardType.Tempura, playerID).getValue();
+        features[2] = sggs.getPlayedCardTypes(SGCard.SGCardType.Dumpling, playerID).getValue();
+        features[3] = sggs.getPlayedCardTypes(SGCard.SGCardType.EggNigiri, playerID).getValue() +
+                sggs.getPlayedCardTypes(SGCard.SGCardType.SalmonNigiri, playerID).getValue() +
+                sggs.getPlayedCardTypes(SGCard.SGCardType.SquidNigiri, playerID).getValue();
+        features[4] = sggs.getPlayedCardTypes(SGCard.SGCardType.Pudding, playerID).getValue();
+        features[5] = sggs.getPlayedCardTypes(SGCard.SGCardType.Wasabi, playerID).getValue();
+        features[6] = sggs.getPlayedCardTypes(SGCard.SGCardType.Chopsticks, playerID).getValue();
+        if (active[7]) {
+            features[7] = IntStream.range(0, sggs.getNPlayers()).filter(i -> i != playerID)
+                    .mapToDouble(i -> sggs.getPlayedCardTypes(SGCard.SGCardType.Maki, i).getValue()).sum();
         }
-        int makiCount = 0;
-        int tempuraCount = 0;
-        int dumplingCount = 0;
-        int nigiriCount = 0;
-        int puddingCount = 0;
-
-        int wasabiPlayed = 0;
-        List<SGCard> playedCards = sggs.getPlayedCards().get(playerID).getComponents();
-        for (SGCard cardTypes: playedCards){
-            if (cardTypes.type.equals(SGCard.SGCardType.Wasabi)){
-                wasabiPlayed += 1;
-            }
-            else if (cardTypes.type.equals(SGCard.SGCardType.Dumpling)){
-                dumplingCount += 1;
-            } else if (cardTypes.type.equals(SGCard.SGCardType.Tempura)) {
-                tempuraCount += 1;
-            } else if (cardTypes.type.equals(SGCard.SGCardType.Maki)){
-                makiCount += cardTypes.count;
-            } else if (cardTypes.type.equals(SGCard.SGCardType.Pudding)){
-                puddingCount += 1;
-            } else if (cardTypes.type.equals(SGCard.SGCardType.SquidNigiri)){
-                int score = ((SGParameters)sggs.getGameParameters()).valueSquidNigiri;
-                if (wasabiPlayed > 0){
-                    score *= ((SGParameters)sggs.getGameParameters()).multiplierWasabi;
-                    wasabiPlayed -= 1;
-                }
-                nigiriCount += score;
-            } else if (cardTypes.type.equals(SGCard.SGCardType.SalmonNigiri)){
-                int score = ((SGParameters)sggs.getGameParameters()).valueSalmonNigiri;
-                if (wasabiPlayed > 0){
-                    score *= ((SGParameters)sggs.getGameParameters()).multiplierWasabi;
-                    wasabiPlayed -= 1;
-                }
-                nigiriCount += score;
-            }else if (cardTypes.type.equals(SGCard.SGCardType.EggNigiri)){
-                int score = ((SGParameters)sggs.getGameParameters()).valueEggNigiri;
-                if (wasabiPlayed > 0){
-                    score *= ((SGParameters)sggs.getGameParameters()).multiplierWasabi;
-                    wasabiPlayed -= 1;
-                }
-                nigiriCount += score;
-            }
+        if (active[8]) {
+            features[8] = IntStream.range(0, sggs.getNPlayers()).filter(i -> i != playerID)
+                    .mapToDouble(i -> sggs.getPlayedCardTypes(SGCard.SGCardType.Pudding, i).getValue()).sum();
         }
-
-        features[0] = makiCount;
-        features[1] = tempuraCount;
-        features[2] = dumplingCount;
-        features[3] = nigiriCount;
-        features[4] = puddingCount;
-        features[5] = wasabiActive;
-        features[6] = chopstickActive;
-
+        features[9] = sggs.getPlayerHands().get(playerID).getSize();
         return features;
     }
 
