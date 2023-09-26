@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 public class SGSimpleFeatures extends TunableStateFeatures {
 
     static String[] allNames = new String[]{"makiCount", "tempuraCount", "dumplingCount", "nigiriCount", "puddingCount",
-            "wasabiActive", "chopstickActive", "otherMaki", "otherPudding", "handSize"};
+            "wasabiActive", "chopstickActive", "otherMaki", "otherPudding", "handSize", "sashimiCount", "tempuraCount"};
 
     public SGSimpleFeatures() {
         super(allNames);
@@ -53,6 +53,8 @@ public class SGSimpleFeatures extends TunableStateFeatures {
                     .mapToDouble(i -> sggs.getPlayedCardTypes(SGCard.SGCardType.Pudding, i).getValue()).sum();
         }
         features[9] = sggs.getPlayerHands().get(playerID).getSize();
+        features[10] = sggs.getPlayedCardTypes(SGCard.SGCardType.Sashimi, playerID).getValue();
+        features[11] = sggs.getPlayedCardTypes(SGCard.SGCardType.Tempura, playerID).getValue();
         return features;
     }
 
