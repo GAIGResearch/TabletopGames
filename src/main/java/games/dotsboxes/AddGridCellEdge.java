@@ -32,7 +32,7 @@ public class AddGridCellEdge extends AbstractAction {
             }
         }
         int nCellsCompleteAfter = dbgs.cellToOwnerMap.size();
-        dbgs.setLastActionScored(nCellsCompleteAfter == nCellsCompleteBefore);
+        dbgs.setLastActionDidNotScore(nCellsCompleteAfter == nCellsCompleteBefore);
         return true;  // Always able to execute
     }
 

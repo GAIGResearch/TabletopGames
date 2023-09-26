@@ -17,7 +17,7 @@ public class DBForwardModel extends StandardForwardModel {
         DBGameState dbgs = (DBGameState) firstState;
         DBParameters dbp = (DBParameters) firstState.getGameParameters();
 
-        dbgs.lastActionScored = false;
+        dbgs.lastActionDidNotScore = false;
         // Generate edge to cell mapping and all cell objects with appropriate constructor
         dbgs.edgeToCellMap = new HashMap<>();
         dbgs.cellToEdgesMap = new HashMap<>();
@@ -59,7 +59,7 @@ public class DBForwardModel extends StandardForwardModel {
         if (dbgs.cellToOwnerMap.size() == dbp.gridWidth * dbp.gridHeight) {
             // Game is over. Set status and find winner
             endGame(dbgs);
-        } else if (dbgs.getLastActionScored()) {
+        } else if (dbgs.getLastActionDidNotScore()) {
             // If not returned, check if the action completed one more box, otherwise move to the next player
             endPlayerTurn(currentState);
         }
