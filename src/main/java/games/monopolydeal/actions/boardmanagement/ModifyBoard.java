@@ -22,7 +22,7 @@ import java.util.Objects;
  *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
  * </ol></p>
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
+ * <p>They should also extend the {@link AbstractAction} class, or any other core actions.</p>
  */
 public class ModifyBoard extends AbstractAction implements IExtendedSequence {
 
@@ -119,14 +119,21 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         MoveCardFromTo actionTaken = (MoveCardFromTo) action;
 
         MonopolyDealCard card = actionTaken.card;
+        if(card.cardType()==CardType.House)
+        {
+            int i=0;
+        }
         SetType from = actionTaken.from;
         SetType to = actionTaken.to;
 
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         MDGS.removePropertyFrom(playerID,card,from);
-        card.setUseAs(to);
-        MDGS.addProperty(playerID,card);
+        MDGS.addPropertyToSet(playerID,card,to);
         MDGS.modifyBoard();
+        if(card.cardType()==CardType.House)
+        {
+            int i=0;
+        }
         executed = true;
 
     }

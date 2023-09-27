@@ -45,6 +45,11 @@ public class AddBuilding extends AbstractAction {
         // TODO: Some functionality applied which changes the given game state.
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
         state.removeCardFromHand(player, card);
+        // For debugging
+        if(setType!=SetType.UNDEFINED){
+            int i=0;
+        }
+        //
         state.addPropertyToSet(player,card,setType);
         state.useAction(1);
         return true;

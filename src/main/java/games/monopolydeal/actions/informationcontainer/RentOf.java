@@ -43,7 +43,8 @@ public class RentOf extends AbstractAction {
         } else {
             if(pSet.getPropertySetSize()-1 >= setType.rent.length)
                 throw new AssertionError("Another thing which should not happen");
-            rent = setType.rent[pSet.getPropertySetSize() - 1];
+            if(pSet.getPropertySetSize()==0) rent = 0;
+            else rent = setType.rent[pSet.getPropertySetSize() - 1];
         }
     }
 
