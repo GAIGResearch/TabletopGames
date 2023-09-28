@@ -155,8 +155,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
     public int availableSpend(int playerID) {
         if (playerID != turnOwner) {
-            System.out.println(this);
-            throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
+            return 0;
         }
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
