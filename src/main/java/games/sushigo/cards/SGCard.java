@@ -38,7 +38,7 @@ public class SGCard extends Card {
                 // Adds points for triplets
                 Counter amount = gs.getPlayedCardTypes(Sashimi, p);
                 if (amount.getValue() % 3 == 0) {
-                    int value = ((SGParameters) gs.getGameParameters()).valueSashimiTriss;
+                    int value = ((SGParameters) gs.getGameParameters()).valueSashimiTriple;
                     gs.addPlayerScore(p, value, Sashimi);
                 }
             };
