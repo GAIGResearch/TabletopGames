@@ -139,6 +139,8 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     }
                     newPots.add(newPot);
                 }
+                // then ensure that the contributions to the pot add up
+                pot.setValue(pot.getPlayerContribution().values().stream().mapToInt(Integer::intValue).sum());
             }
             moneyPots.addAll(newPots);
         }
