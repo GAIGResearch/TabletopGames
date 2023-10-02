@@ -188,16 +188,19 @@ public class PokerForwardModel extends StandardForwardModel {
             // Calculate winners separately for each money pot
             Set<Integer> winners = getWinner(pgs, pot, ranks, hands);
             if (winners.isEmpty()) {
-                // then we return to the participants
-                winners = pot.getPlayerContribution().keySet();
-            }
-            for (int i : winners) {
-                pgs.playerMoney[i].increment(pot.getValue() / winners.size());
-            }
-            // We may then have a rounding error, which we give to the first winner
-            if (winners.size() > 1) {
-                int remaining = pot.getValue() % winners.size();
-                pgs.playerMoney[winners.iterator().next()].increment(remaining);
+                // then we return to the participants their personal contribution
+                for (int i : pot.getPlayerContribution().keySet()) {
+                    pgs.playerMoney[i].increment(pot.getPlayerContribution(i));
+                }
+            } else {
+                for (int i : winners) {
+                    pgs.playerMoney[i].increment(pot.getValue() / winners.size());
+                }
+                // We may then have a rounding error, which we give to the first winner
+                if (winners.size() > 1) {
+                    int remaining = pot.getValue() % winners.size();
+                    pgs.playerMoney[winners.iterator().next()].increment(remaining);
+                }
             }
             // Then set pot to zero as we have transferred money
             pot.setValue(0);
@@ -227,9 +230,9 @@ public class PokerForwardModel extends StandardForwardModel {
         int personalMoney = Arrays.stream(pgs.playerMoney).mapToInt(Counter::getValue).sum();
         int potMoney = pgs.moneyPots.stream().mapToInt(MoneyPot::getValue).sum();
         int expectedTotal = pgs.getNPlayers() * ((PokerGameParameters) pgs.getGameParameters()).nStartingMoney;
-    //    String potDetails = pgs.moneyPots.stream().map(MoneyPot::toString).collect(Collectors.joining(", "));
-   //     String playerMoney = Arrays.stream(pgs.playerMoney).map(Counter::toString).collect(Collectors.joining(", "));
-   //     System.out.println(potDetails + "\t" + playerMoney);
+        String potDetails = pgs.moneyPots.stream().map(MoneyPot::toString).collect(Collectors.joining(", "));
+        String playerMoney = Arrays.stream(pgs.playerMoney).map(Counter::toString).collect(Collectors.joining(", "));
+        System.out.println(potDetails + "\t" + playerMoney);
         if (personalMoney + potMoney != expectedTotal) {
             throw new AssertionError(String.format("Money is not conserved! %d + %d != %d", personalMoney, potMoney, expectedTotal));
         }
