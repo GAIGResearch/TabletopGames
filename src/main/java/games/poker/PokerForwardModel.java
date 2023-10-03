@@ -230,9 +230,9 @@ public class PokerForwardModel extends StandardForwardModel {
         int personalMoney = Arrays.stream(pgs.playerMoney).mapToInt(Counter::getValue).sum();
         int potMoney = pgs.moneyPots.stream().mapToInt(MoneyPot::getValue).sum();
         int expectedTotal = pgs.getNPlayers() * ((PokerGameParameters) pgs.getGameParameters()).nStartingMoney;
-        String potDetails = pgs.moneyPots.stream().map(MoneyPot::toString).collect(Collectors.joining(", "));
-        String playerMoney = Arrays.stream(pgs.playerMoney).map(Counter::toString).collect(Collectors.joining(", "));
-        System.out.println(potDetails + "\t" + playerMoney);
+    //    String potDetails = pgs.moneyPots.stream().map(MoneyPot::toString).collect(Collectors.joining(", "));
+    //    String playerMoney = Arrays.stream(pgs.playerMoney).map(Counter::toString).collect(Collectors.joining(", "));
+    //    System.out.println(potDetails + "\t" + playerMoney);
         if (personalMoney + potMoney != expectedTotal) {
             throw new AssertionError(String.format("Money is not conserved! %d + %d != %d", personalMoney, potMoney, expectedTotal));
         }
