@@ -1,0 +1,12 @@
+{
+  "game" : "SushiGo",
+  "nPlayers" : 2,
+  "mode" : "sequential",
+  "matchups" : 500,
+  "verbose" : true,
+  "seed" : 740234,
+  "listener" : "json/listeners/tournamentlistener.json",
+  "destDir" : "outputDir",
+  "output" : "outputDir/Assignment1.log",
+  "playerDirectory" : "tournamentPlayers"
+}
