@@ -423,55 +423,6 @@ public class SingleTreeNode {
     }
 
     /**
-     * @return A list of the unexpanded Actions from this State
-     */
-    protected List<AbstractAction> unexpandedActions() {
-        // TODO : Probably remove once MultiTree fixed
-        // first cater for an edge case with progressive widening
-        // where the expanded children may include available actions not in the current pruning width
-        // this can occur where we have different available actions (actionsFromOpenLoopState) on each iteration
-        List<AbstractAction> topActions = params.progressiveWideningConstant >= 1.0
-                ? actionsToConsider(actionsFromOpenLoopState, 0)
-                : actionsFromOpenLoopState;
-        List<AbstractAction> allUnexpanded = topActions.stream().filter(a -> actionValues.get(a) == null || actionValues.get(a).nVisits == 0).collect(toList());
-        return actionsToConsider(allUnexpanded, topActions.size() - allUnexpanded.size());
-    }
-
-    //    /**
-//     * Picks one of the available (specified) actions at random, taking into account any advantage function or MAST
-//     * statistics used to decide on expansion order.
-//     *
-//     * @param notChosen
-//     * @return action chosen
-//     */
-    protected AbstractAction expand(List<AbstractAction> notChosen) {
-        // TODO: Remove this completely once MultiTree is fixed
-
-        // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
-        // else pick a random unchosen action
-
-        Collections.shuffle(notChosen);
-        AbstractAction chosen = null;
-        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = params.expansionPolicy == MAST ? MASTFunction : advantageFunction;
-        if (valueFunction != null) {
-            double bestValue = Double.NEGATIVE_INFINITY;
-            for (AbstractAction action : notChosen) {
-                double estimate = valueFunction.applyAsDouble(action, openLoopState);
-                if (estimate > bestValue) {
-                    bestValue = estimate;
-                    chosen = action;
-                }
-            }
-        } else {
-            chosen = notChosen.get(0);
-        }
-        if (chosen == null)
-            throw new AssertionError("We have somehow failed to pick an action to expand");
-
-        return chosen;
-    }
-
-    /**
      * Expands the node by creating a new child node for the action taken and adding to the tree.
      *
      * @return - new child node.
@@ -896,7 +847,6 @@ public class SingleTreeNode {
     protected void normaliseRewardsAfterIteration(double[] result) {
         // after each iteration we update the min and max rewards seen, to be used in future iterations.
         // These are only stored on the root
-        double[] retValue = result.clone();
         if (params.normaliseRewards || params.treePolicy == MCTSEnums.TreePolicy.UCB_Tuned) {
             DoubleSummaryStatistics stats = Arrays.stream(result).summaryStatistics();
             if (root.lowReward > stats.getMin())

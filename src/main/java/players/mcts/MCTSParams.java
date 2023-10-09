@@ -59,6 +59,7 @@ public class MCTSParams extends PlayerParameters {
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
+    public boolean MCGSExpandAfterClash = true;
     public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
 
@@ -108,6 +109,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
         addTunableParameter("MCGSStateKey", IStateKey.class);
+        addTunableParameter("MCGSExpandAfterClash", true);
     }
 
     @Override
@@ -162,6 +164,7 @@ public class MCTSParams extends PlayerParameters {
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
+        MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
 

@@ -44,9 +44,13 @@ public class MCGSNode extends SingleTreeNode {
         MCGSNode graphRoot = (MCGSNode) root;
         String key = params.MCGSStateKey.getKey(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
-            //          newNode.setActionsFromOpenLoopState(nextState);
-            //return graphRoot.transpositionMap.get(key);
-            throw new AssertionError("Unexpected?");
+            if (params.MCGSExpandAfterClash) {
+                throw new AssertionError("Unexpected?");
+            } else {
+                MCGSNode retValue =  graphRoot.transpositionMap.get(key);
+                retValue.setActionsFromOpenLoopState(openLoopState);
+                return retValue;
+            }
         }
         return createChildNode(actionCopy, nextState);
     }
@@ -58,10 +62,14 @@ public class MCGSNode extends SingleTreeNode {
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode != null) {
-            nextNode.setActionsFromOpenLoopState(openLoopState);
             if (actionValues.get(actionChosen).nVisits == 0) {
                 root.nodeClash++;
+                if (!params.MCGSExpandAfterClash) {
+                    // we then return null so we rollout from this point
+                    return null;
+                }
             }
+            nextNode.setActionsFromOpenLoopState(openLoopState);
         }
 
         return nextNode;
@@ -91,6 +99,7 @@ public class MCGSNode extends SingleTreeNode {
         normaliseRewardsAfterIteration(delta);
         double[] result = processResultsForParanoidOrSelfOnly(delta);
         MCGSNode nRoot = (MCGSNode) root;
+        // trajectory is the sequence of state representations that we have passed through
         if (nRoot.trajectory.size() != nRoot.actionsInTree.size()) {
             throw new AssertionError("Trajectory and actionsInTree should be the same size " +
                     nRoot.trajectory.size() + " != " + nRoot.actionsInTree.size());
