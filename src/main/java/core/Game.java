@@ -813,13 +813,14 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         players.add(new MCTSPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        MCTSParams params = new MCTSParams();
 //        players.add(new MCTSPlayer(params));
 
         players.add(new OSLAPlayer());
 //        players.add(new OSLAPlayer());
         players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new RandomPlayer());

@@ -23,18 +23,6 @@ import java.util.*;
  * </ol>
  */
 public class MonopolyDealForwardModel extends StandardForwardModel {
-
-    /**
-     * Initializes all variables in the given game state. Performs initial game setup according to game rules, e.g.:
-     * <ul>
-     *     <li>Sets up decks of cards and shuffles them</li>
-     *     <li>Gives player cards</li>
-     *     <li>Places tokens on boards</li>
-     *     <li>...</li>
-     * </ul>
-     *
-     * @param firstState - the state to be modified to the initial game state.
-     */
     @Override
     protected void _setup(AbstractGameState firstState) {
         // initialization of variables and game setup
@@ -61,11 +49,6 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
         // Draw cards at the start of the turn
         state.drawCard(state.getFirstPlayer(),params.DRAWS_PER_TURN);
     }
-
-    /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of AbstractAction objects.
-     */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         MonopolyDealGameState state = (MonopolyDealGameState) gameState;
@@ -101,22 +84,6 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
     }
-
-    // Draw cards at start of turn
-//    @Override
-//    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
-//        MonopolyDealGameState state = (MonopolyDealGameState) currentState;
-//        if(state.turnStart){
-//            int currentPlayer = state.getCurrentPlayer();
-//            if(state.playerHands[currentPlayer].getSize() == 0){
-//                state.drawCard(currentPlayer,state.params.DRAWS_WHEN_EMPTY);
-//            }
-//            else{
-//                state.drawCard(currentPlayer,state.params.DRAWS_PER_TURN);
-//            }
-//            state.turnStart = false;
-//        }
-//    }
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         MonopolyDealGameState state = (MonopolyDealGameState) currentState;

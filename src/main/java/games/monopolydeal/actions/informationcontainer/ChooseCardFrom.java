@@ -35,30 +35,14 @@ public class ChooseCardFrom extends AbstractAction {
         this.from = from;
         this.actionType = actionType;
     }
-    /**
-     * Executes this action, applying its effect to the given game state. Can access any component IDs stored
-     * through the {@link AbstractGameState#getComponentById(int)} method.
-     * @param gs - game state which should be modified by this action.
-     * @return - true if successfully executed, false otherwise.
-     */
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Some functionality applied which changes the given game state.
         return true;
     }
-
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
-     * <p>If all variables in this class are final or effectively final (which they should be),
-     * then you can just return <code>`this`</code>.</p>
-     */
     @Override
     public ChooseCardFrom copy() {
-        // TODO: copy non-final variables appropriately
         return new ChooseCardFrom(take,from,actionType);
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,26 +50,16 @@ public class ChooseCardFrom extends AbstractAction {
         ChooseCardFrom that = (ChooseCardFrom) o;
         return Objects.equals(take, that.take) && Objects.equals(from, that.from);
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(take, from);
     }
-
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
         if(actionType == 0)
             return "Take card: " + take.toString();
         else return "Give card: " + take.toString();
     }
-
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

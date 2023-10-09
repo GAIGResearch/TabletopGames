@@ -25,10 +25,8 @@ import java.util.Objects;
  * given your componentID.</p>
  */
 public class RentOf extends AbstractAction {
-
     final PropertySet pSet;
     public int rent;
-
     public RentOf(PropertySet pSet, int rent){
         this.pSet = pSet;
         this.rent = rent;
@@ -47,31 +45,14 @@ public class RentOf extends AbstractAction {
             else rent = setType.rent[pSet.getPropertySetSize() - 1];
         }
     }
-
-    /**
-     * Executes this action, applying its effect to the given game state. Can access any component IDs stored
-     * through the {@link AbstractGameState#getComponentById(int)} method.
-     * @param gs - game state which should be modified by this action.
-     * @return - true if successfully executed, false otherwise.
-     */
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Some functionality applied which changes the given game state.
         return true;
     }
-
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
-     * <p>If all variables in this class are final or effectively final (which they should be),
-     * then you can just return <code>`this`</code>.</p>
-     */
     @Override
     public RentOf copy() {
-        // TODO: copy non-final variables appropriately
         return new RentOf(pSet,rent);
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,24 +60,14 @@ public class RentOf extends AbstractAction {
         RentOf rentOf = (RentOf) o;
         return rent == rentOf.rent && Objects.equals(pSet, rentOf.pSet);
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(pSet, rent);
     }
-
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
         return pSet + " rent is " + rent;
     }
-
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

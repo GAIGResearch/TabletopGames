@@ -31,32 +31,24 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     boolean executed;
-
     public AddToBoard(int playerID) {
         this.playerID = playerID;
     }
-
-    /**
-     * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
-     * if this Extended Sequence is currently active.
-     *
-     * @param state The current game state
-     * @return the list of possible actions for the {@link AbstractGameState#getCurrentPlayer()}.
-     * These may be instances of this same class, with more choices between different values for a not-yet filled in parameter.
-     */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         int playerID = MDGS.getCurrentPlayer();
+
         // Adding property cards and base wildcards to properties
         List<AbstractAction> availableActions = MDGS.getPlayerHand(playerID).stream()
                 .filter(MonopolyDealCard::isPropertyCard)
                 .filter(MonopolyDealCard::isNotMulticolor)
                 .map(card-> new AddProperty(card,playerID))
                 .collect(toList());
+
         // Adding money to bank
         availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate()).map(card ->new AddMoney(card,playerID)).collect(toList()));
+
         // Adding multicolor wild to existing sets
         MonopolyDealCard temp = MonopolyDealCard.create(CardType.MulticolorWild);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp)){
@@ -64,6 +56,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
                     .map(propertySet -> new AddWildTo(propertySet,playerID)).collect(toList()));
             availableActions.add(new AddProperty(temp,playerID));
         }
+
         // Add house or hotel
         MonopolyDealCard temp1 = MonopolyDealCard.create(CardType.House);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp1)){
@@ -81,6 +74,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
             }
             availableActions.add(new AddBuilding(temp2, playerID, SetType.UNDEFINED));
         }
+
         // remove duplicate actions
         List<AbstractAction> retActions = new ArrayList<>();
         for (AbstractAction action: availableActions) {
@@ -88,77 +82,29 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         }
         return retActions;
     }
-
-    /**
-     * TurnOrder delegates to this from {@link core.turnorders.TurnOrder#getCurrentPlayer(AbstractGameState)}
-     * if this Extended Sequence is currently active.
-     *
-     * @param state The current game state
-     * @return The player ID whose move it is.
-     */
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
         return playerID;
     }
-
-    /**
-     * <p>This is called by ForwardModel whenever an action is about to be taken. It enables the IExtendedSequence
-     * to maintain local state in whichever way is most suitable.</p>
-     *
-     * <p>After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
-     * In some cases, there is no need to implement anything in this method - if for example you can tell if all
-     * actions are complete from the state directly, then that can be implemented purely in {@link #executionComplete(AbstractGameState)}</p>
-     *
-     * @param state The current game state
-     * @param action The action about to be taken (so the game state has not yet been updated with it)
-     */
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // TODO: Process the action that was taken.
         executed = true;
     }
-
-    /**
-     * @param state The current game state
-     * @return True if this extended sequence has now completed and there is nothing left to do.
-     */
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        // TODO is execution of this sequence of actions complete?
         return executed;
     }
-
-    /**
-     * <p>Executes this action, applying its effect to the given game state. Can access any component IDs stored
-     * through the {@link AbstractGameState#getComponentById(int)} method.</p>
-     * <p>In extended sequences, this function makes a call to the
-     * {@link AbstractGameState#setActionInProgress(IExtendedSequence)} method with the argument <code>`this`</code>
-     * to indicate that this action has multiple steps and is now in progress. This call could be wrapped in an <code>`if`</code>
-     * statement if sometimes the action simply executes an effect in one step, or all parameters have values associated.</p>
-     * @param gs - game state which should be modified by this action.
-     * @return - true if successfully executed, false otherwise.
-     */
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Some functionality applied which changes the given game state.
         gs.setActionInProgress(this);
         return true;
     }
-
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
-     * <p>If all variables in this class are final or effectively final (which they should be),
-     * then you can just return <code>`this`</code>.</p>
-     */
     @Override
     public AddToBoard copy() {
-        // TODO: copy non-final variables appropriately
         AddToBoard action = new AddToBoard(playerID);
         action.executed = executed;
         return action;
     }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -166,24 +112,12 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         AddToBoard that = (AddToBoard) o;
         return playerID == that.playerID && executed == that.executed;
     }
-
     @Override
     public int hashCode() {
         return Objects.hash(playerID, executed);
     }
-
     @Override
-    public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "Add to Board";
-    }
-
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
+    public String toString() { return "Add to Board"; }
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

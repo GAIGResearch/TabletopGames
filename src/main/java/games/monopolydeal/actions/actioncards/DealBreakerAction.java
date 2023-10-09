@@ -55,9 +55,6 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
                 }
                 break;
             case ChoosePropertySet:
-                // Iterate through player property sets
-                // Iterate through properties
-                // Add action
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(pSet.isComplete){
                         if(!availableActions.contains(new ChoosePropertySet(pSet)))
@@ -83,7 +80,6 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     }
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // TODO: Process the action that was taken.
         switch (actionState){
             case Target:
                 target = ((TargetPlayer) action).target;
@@ -108,25 +104,10 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
         MDGS.movePropertySetFromTo(setType,target,playerID);
         executed = true;
     }
-    /**
-     * @param state The current game state
-     * @return True if this extended sequence has now completed and there is nothing left to do.
-     */
     @Override
     public boolean executionComplete(AbstractGameState state) {
         return executed;
     }
-
-    /**
-     * <p>Executes this action, applying its effect to the given game state. Can access any component IDs stored
-     * through the {@link AbstractGameState#getComponentById(int)} method.</p>
-     * <p>In extended sequences, this function makes a call to the
-     * {@link AbstractGameState#setActionInProgress(IExtendedSequence)} method with the argument <code>`this`</code>
-     * to indicate that this action has multiple steps and is now in progress. This call could be wrapped in an <code>`if`</code>
-     * statement if sometimes the action simply executes an effect in one step, or all parameters have values associated.</p>
-     * @param gs - game state which should be modified by this action.
-     * @return - true if successfully executed, false otherwise.
-     */
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
@@ -135,17 +116,9 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
         gs.setActionInProgress(this);
         return true;
     }
-
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
-     * <p>If all variables in this class are final or effectively final (which they should be),
-     * then you can just return <code>`this`</code>.</p>
-     */
     @Override
     public DealBreakerAction copy() {
         DealBreakerAction action = new DealBreakerAction(playerID);
-
         action.target = target;
         action.setType = setType;
         action.actionState = actionState;
