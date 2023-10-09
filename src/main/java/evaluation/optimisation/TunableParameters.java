@@ -58,6 +58,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
             loadFromJSON(params, rawData);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
         }
     }
