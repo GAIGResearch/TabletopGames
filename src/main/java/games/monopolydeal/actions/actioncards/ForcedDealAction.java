@@ -18,14 +18,20 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <p>The extended actions framework supports 2 use-cases: <ol>
- *     <li>A sequence of decisions required to complete an action (e.g. play a card in a game area - which card? - which area?).
- *     This avoids very large action spaces in favour of more decisions throughout the game (alternative: all unit actions
- *     with parameters supplied at initialization, all combinations of parameters computed beforehand).</li>
- *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
- * </ol></p>
- * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions.</p>
+ * <p> ForcedDealAction is a single target action. It uses this EAS for collecting the required information and execution of the Forced Deal action card.
+ * <ol>
+ *     <li>Action card : Swap any property with another player</li>
+ *     <li>Execution description:
+ *     <ul>
+ *         <li>Initial 'execute' call : The action card is played onto the discard pile</li>
+ *         <li>actionState 'Target' : The targeted player is chosen and action state is forwarded to 'TakeCard'</li>
+ *         <li>actionState 'TakeCard' : Which property of said target is to be stolen is chosen and action state is forwarded to 'GiveCard'</li>
+ *         <li>actionState 'GiveCard' : Which property of self is to be given is chosen and action state is forwarded to 'GetReaction'</li>
+ *         <li>actionState 'GetReaction' : The targeted player has the option of denying the set by using JustSayNo. The action is either executed or action state is forwarded to 'ReactToReaction'</li>
+ *         <li>actionState 'ReactToReaction' : A JustSayNo can be played on top of a JustSayNo to force execution. The opponent can also play a JustSayNo on top of this JustSayNo, so a loop of GetReaction and ReactToReaction is formed until either the action is denied or executed.</li>
+ *     </ul></li>
+ * </ol>
+ * </p>
  */
 public class ForcedDealAction extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions

@@ -15,14 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <p>The extended actions framework supports 2 use-cases: <ol>
- *     <li>A sequence of decisions required to complete an action (e.g. play a card in a game area - which card? - which area?).
- *     This avoids very large action spaces in favour of more decisions throughout the game (alternative: all unit actions
- *     with parameters supplied at initialization, all combinations of parameters computed beforehand).</li>
- *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
- * </ol></p>
- * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions.</p>
+ * <p>An EAS for moving a wild card from one set to another.</p>
  */
 public class ModifyBoard extends AbstractAction implements IExtendedSequence {
 

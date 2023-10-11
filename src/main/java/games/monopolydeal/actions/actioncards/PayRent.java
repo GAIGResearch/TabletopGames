@@ -17,14 +17,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <p>The extended actions framework supports 2 use-cases: <ol>
- *     <li>A sequence of decisions required to complete an action (e.g. play a card in a game area - which card? - which area?).
- *     This avoids very large action spaces in favour of more decisions throughout the game (alternative: all unit actions
- *     with parameters supplied at initialization, all combinations of parameters computed beforehand).</li>
- *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
- * </ol></p>
- * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link MonopolyDealAction} apply here as well.</p>
+ * <p> PayRent uses EAS for the payment of rent in response to a played action card. This EAS calls upon itself recursively paying with a card in each iteration until either the rent has been completely paid or the player has no more cards to pay the rent with.
+ * </p>
  */
 public class PayRent extends AbstractAction implements IExtendedSequence {
 
@@ -44,7 +38,6 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     }
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         Deck<MonopolyDealCard> payerBank = MDGS.getPlayerBank(payer);
         List<PropertySet> payerPropertySets = MDGS.getPropertySets(payer);

@@ -15,14 +15,19 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * <p>The extended actions framework supports 2 use-cases: <ol>
- *     <li>A sequence of decisions required to complete an action (e.g. play a card in a game area - which card? - which area?).
- *     This avoids very large action spaces in favour of more decisions throughout the game (alternative: all unit actions
- *     with parameters supplied at initialization, all combinations of parameters computed beforehand).</li>
- *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
- * </ol></p>
- * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions.</p>
+ * <p> DebtCollectorAction is a single target rent action. It uses this EAS for collecting the required information and 'PayRent' EAS for final execution of the Debt Collector action card.
+ * <ol>
+ *     <li>Action card : Collect 5M from a chosen player</li>
+ *     <li>Execution description:
+ *     <ul>
+ *         <li>Initial 'execute' call : The action card is played onto the discard pile</li>
+ *         <li>actionState 'Target' : The targeted player is chosen and action state is forwarded to 'GetReaction'</li>
+ *         <li>actionState 'GetReaction' : The targeted player has the option of denying the action by using JustSayNo. The action state is forwarded to either 'CollectRent' or 'ReactToReaction'</li>
+ *         <li>actionState 'ReactToReaction' : A JustSayNo can be played on top of a JustSayNo to force execution. The opponent can also play a JustSayNo on top of this JustSayNo, so a loop of GetReaction and ReactToReaction is formed until either the action is denied or executed.</li>
+ *         <li>actionState 'CollectRent' : A 'PayRent' EAS is called for the execution of the rent.</li>
+ *     </ul></li>
+ * </ol>
+ * </p>
  */
 public class DebtCollectorAction extends AbstractAction implements IExtendedSequence {
 
@@ -69,7 +74,6 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     }
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        // TODO: Process the action that was taken.
         switch (actionState){
             case Target:
                 target = ((TargetPlayer) action).target;
@@ -91,7 +95,6 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     }
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        // TODO is execution of this sequence of actions complete?
         return executed;
     }
     @Override
