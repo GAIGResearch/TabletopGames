@@ -61,7 +61,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                     if(state.checkForActionCards(playerID))
                         availableActions.add(new PlayActionCard(playerID));
 
-                    availableActions.add(new AddToBoard(playerID));
+                    if(state.getPlayerHand(playerID).getSize()>0)
+                        availableActions.add(new AddToBoard(playerID));
 
                     if(state.canModifyBoard(playerID))
                         availableActions.add(new ModifyBoard(playerID));

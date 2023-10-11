@@ -137,7 +137,8 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
             if(pSet.hasHotel) rent = rent + 4;
         }
         else{
-            if(pSet.getPropertySetSize() == 0) rent = 0;
+            if(pSet.getPropertySetSize() == 0)
+                rent = 0;
             else rent = setType.rent[pSet.getPropertySetSize() - 1];
         }
         // Double the rent
