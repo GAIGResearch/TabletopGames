@@ -1,11 +1,14 @@
 {
   "game" : "SushiGo",
+  "budgetType" : "BUDGET TIME",
+  "budget" : "1000",
   "nPlayers" : 2,
   "mode" : "sequential",
   "matchups" : 500,
   "verbose" : true,
   "seed" : 740234,
-  "listener" : "json/listeners/tournamentlistener.json",
+  "listener" : "json/listeners/basiclistener.json",
+  "selfPlay" : false,
   "destDir" : "outputDir",
   "output" : "outputDir/Assignment1.log",
   "playerDirectory" : "tournamentPlayers"
