@@ -14,7 +14,7 @@ public class MCTSParams extends PlayerParameters {
     public int maxTreeDepth = 100; // effectively no limit
     public double epsilon = 1e-6;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
-    public MCTSEnums.ExporationStrategy exporationStrategy = MCTSEnums.ExporationStrategy.UCB1;
+    public MCTSEnums.ExplorationStrategy exporationStrategy = MCTSEnums.ExplorationStrategy.UCB1;
     public TreeNodeFactory treeNodeFactory;
 
     public MCTSParams() {
@@ -28,7 +28,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("maxTreeDepth", 100, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("explorationStrategy", MCTSEnums.ExporationStrategy.UCB1, Arrays.asList(MCTSEnums.ExporationStrategy.UCB1));
+        addTunableParameter("explorationStrategy", MCTSEnums.ExplorationStrategy.UCB1, Arrays.asList(MCTSEnums.ExplorationStrategy.UCB1));
         treeNodeFactory = new TreeNodeFactory(exporationStrategy);    
     }
 
@@ -40,7 +40,7 @@ public class MCTSParams extends PlayerParameters {
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        exporationStrategy = (MCTSEnums.ExporationStrategy) getParameterValue("explorationStrategy");
+        exporationStrategy = (MCTSEnums.ExplorationStrategy) getParameterValue("explorationStrategy");
         treeNodeFactory = new TreeNodeFactory(exporationStrategy);    
     }
 
