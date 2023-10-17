@@ -118,8 +118,8 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.MulticolorRent),playerID);
-        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
+        MDGS.discardCard(CardType.MulticolorRent,playerID);
+        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(CardType.DoubleTheRent,playerID);
         MDGS.useAction(1 + doubleTheRent);
         gs.setActionInProgress(this);
         return true;

@@ -3,6 +3,7 @@ package games.monopolydeal.actions.informationcontainer;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.SetType;
 
@@ -14,10 +15,10 @@ import java.util.Objects;
 public class MoveCardFromTo extends AbstractAction {
     final int player;
     public final SetType from,to;
-    public final MonopolyDealCard card;
-    public MoveCardFromTo(int playerId, MonopolyDealCard card, SetType from, SetType to){
+    public final CardType cardType;
+    public MoveCardFromTo(int playerId, CardType cardType, SetType from, SetType to){
         player = playerId;
-        this.card = card;
+        this.cardType = cardType;
         this.from = from;
         this.to = to;
     }
@@ -34,15 +35,15 @@ public class MoveCardFromTo extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MoveCardFromTo that = (MoveCardFromTo) o;
-        return player == that.player && from == that.from && to == that.to && Objects.equals(card, that.card);
+        return player == that.player && from == that.from && to == that.to && Objects.equals(cardType, that.cardType);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(player, from, to, card);
+        return Objects.hash(player, from, to, cardType);
     }
     @Override
     public String toString() {
-        return "Move "+ card.toString() + " from " + from.toString() + " to " + to.toString();
+        return "Move "+ cardType.toString() + " from " + from.toString() + " to " + to.toString();
     }
     @Override
     public String getString(AbstractGameState gameState) {

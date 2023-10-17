@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.actions.BoardType;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.SetType;
 
@@ -14,17 +15,17 @@ import java.util.Objects;
  */
 public class PayCardFrom extends AbstractAction {
 
-    public final MonopolyDealCard card;
+    public final CardType cardType;
     public SetType from;
     public BoardType type;
 
-    public PayCardFrom(MonopolyDealCard card, SetType from){
-        this.card = card;
+    public PayCardFrom(CardType cardType, SetType from){
+        this.cardType = cardType;
         this.from = from;
         this.type = BoardType.PropertySet;
     }
-    public PayCardFrom(MonopolyDealCard card){
-        this.card = card;
+    public PayCardFrom(CardType cardType){
+        this.cardType = cardType;
         this.type = BoardType.Bank;
     }
     @Override
@@ -33,7 +34,7 @@ public class PayCardFrom extends AbstractAction {
     }
     @Override
     public PayCardFrom copy() {
-        PayCardFrom action = new PayCardFrom(card);
+        PayCardFrom action = new PayCardFrom(cardType);
         action.type = type;
         action.from = from;
         return action;
@@ -43,15 +44,15 @@ public class PayCardFrom extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PayCardFrom that = (PayCardFrom) o;
-        return Objects.equals(card, that.card) && from == that.from && type == that.type;
+        return Objects.equals(cardType, that.cardType) && from == that.from && type == that.type;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(card, from, type);
+        return Objects.hash(cardType, from, type);
     }
     @Override
     public String toString() {
-        return "Pay with " + card;
+        return "Pay with " + cardType;
     }
     @Override
     public String getString(AbstractGameState gameState) {

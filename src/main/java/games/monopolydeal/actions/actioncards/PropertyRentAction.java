@@ -126,8 +126,8 @@ public class PropertyRentAction extends AbstractAction implements IExtendedSeque
         collectedRent[playerID] = true;
         // Discard card used
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(cardType),playerID);
-        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(MonopolyDealCard.create(CardType.DoubleTheRent),playerID);
+        MDGS.discardCard(cardType,playerID);
+        for(int i=0;i<doubleTheRent;i++) MDGS.discardCard(CardType.DoubleTheRent,playerID);
         MDGS.useAction(1 + doubleTheRent);
         // Calculate rent
         PropertySet pSet = MDGS.getPlayerPropertySet(playerID,setType);

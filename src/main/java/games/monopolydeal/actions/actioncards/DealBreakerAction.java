@@ -116,7 +116,7 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.DealBreaker),playerID);
+        MDGS.discardCard(CardType.DealBreaker,playerID);
         MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;

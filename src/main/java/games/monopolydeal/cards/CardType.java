@@ -76,4 +76,51 @@ public enum CardType {
     CardType(int moneyValue, boolean isProperty, boolean isPropertyWild){
         this(moneyValue,isProperty,false,isPropertyWild);
     }
+
+    public SetType getSetType(){
+        SetType sType;
+        switch (this){
+            case BrownProperty:
+            case BrownLightBlueWild:
+                sType = SetType.Brown;
+                break;
+            case BlueProperty:
+                sType = SetType.Blue;
+                break;
+            case GreenProperty:
+            case GreenBlueWild:
+                sType = SetType.Green;
+                break;
+            case LightBlueProperty:
+                sType = SetType.LightBlue;
+                break;
+            case OrangeProperty:
+                sType = SetType.Orange;
+                break;
+            case PinkProperty:
+            case PinkOrangeWild:
+                sType = SetType.Pink;
+                break;
+            case RailRoadProperty:
+            case RailRoadGreenWild:
+            case RailRoadLightBlueWild:
+            case RailRoadUtilityWild:
+                sType = SetType.RailRoad;
+                break;
+            case RedProperty:
+                sType = SetType.Red;
+                break;
+            case UtilityProperty:
+                sType = SetType.Utility;
+                break;
+            case YellowProperty:
+            case RedYellowWild:
+                sType = SetType.Yellow;
+                break;
+            default:
+                sType = SetType.UNDEFINED;
+                break;
+        }
+        return sType;
+    }
 }

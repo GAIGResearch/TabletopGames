@@ -3,6 +3,7 @@ package games.monopolydeal.actions.informationcontainer;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.SetType;
 
@@ -13,11 +14,11 @@ import java.util.Objects;
  */
 public class ChooseCardFrom extends AbstractAction {
 
-    public final MonopolyDealCard take;
+    public final CardType take;
     public final SetType from;
     final int actionType;
 
-    public ChooseCardFrom(MonopolyDealCard take, SetType from, int actionType){
+    public ChooseCardFrom(CardType take, SetType from, int actionType){
         this.take = take;
         this.from = from;
         this.actionType = actionType;

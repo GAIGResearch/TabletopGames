@@ -37,7 +37,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     int target;
-    MonopolyDealCard take;
+    CardType take;
     SetType from;
     ActionState actionState;
     boolean reaction = false;
@@ -63,8 +63,8 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(!pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0)))
-                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
+                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i).cardType(),pSet.getSetType(),0)))
+                                availableActions.add(new ChooseCardFrom(pSet.get(i).cardType(),pSet.getSetType(),0));
                         }
                     }
                 }
@@ -120,7 +120,7 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.SlyDeal),playerID);
+        MDGS.discardCard(CardType.SlyDeal,playerID);
         MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;

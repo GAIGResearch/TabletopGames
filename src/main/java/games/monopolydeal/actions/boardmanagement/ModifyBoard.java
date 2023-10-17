@@ -40,33 +40,33 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
                         SetType sType = card.getAlternateSetType(card);
                         if(sType==SetType.UNDEFINED){
                             for (PropertySet propSet:MDGS.getPropertySets(playerID)) {
-                                if(propSet.getSetType() != card.getUseAs() && !availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()))){
-                                    availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()));
+                                if(propSet.getSetType() != card.getUseAs() && !availableActions.contains(new MoveCardFromTo(playerID,card.cardType(),pSet.getSetType(),propSet.getSetType()))){
+                                    availableActions.add(new MoveCardFromTo(playerID,card.cardType(),pSet.getSetType(),propSet.getSetType()));
                                 }
                             }
                         }
-                        if(!availableActions.contains(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType)))
-                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,card.cardType(),pSet.getSetType(),sType)))
+                            availableActions.add(new MoveCardFromTo(playerID,card.cardType(),pSet.getSetType(),sType));
                     }
                 }
             } else if (pSet.hasHouse && !pSet.hasHotel) { // Moving House
                 for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
                     if(propSet!= pSet && propSet.isComplete && !propSet.hasHouse){
-                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType())))
-                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),propSet.getSetType()));
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,CardType.House,pSet.getSetType(),propSet.getSetType())))
+                            availableActions.add(new MoveCardFromTo(playerID,CardType.House,pSet.getSetType(),propSet.getSetType()));
                     }
                 }
-                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED)))
-                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.House),pSet.getSetType(),SetType.UNDEFINED));
+                if(!availableActions.contains(new MoveCardFromTo(playerID,CardType.House,pSet.getSetType(),SetType.UNDEFINED)))
+                    availableActions.add(new MoveCardFromTo(playerID,CardType.House,pSet.getSetType(),SetType.UNDEFINED));
             }else if (pSet.hasHotel){ // Moving Hotel
                 for (PropertySet propSet: MDGS.getPropertySets(playerID)) {
                     if(propSet!= pSet && propSet.isComplete && propSet.hasHouse && !propSet.hasHotel){
-                        if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType())))
-                            availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),propSet.getSetType()));
+                        if(!availableActions.contains(new MoveCardFromTo(playerID,CardType.Hotel,pSet.getSetType(),propSet.getSetType())))
+                            availableActions.add(new MoveCardFromTo(playerID,CardType.Hotel,pSet.getSetType(),propSet.getSetType()));
                     }
                 }
-                if(!availableActions.contains(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED)))
-                    availableActions.add(new MoveCardFromTo(playerID,MonopolyDealCard.create(CardType.Hotel),pSet.getSetType(),SetType.UNDEFINED));
+                if(!availableActions.contains(new MoveCardFromTo(playerID,CardType.Hotel,pSet.getSetType(),SetType.UNDEFINED)))
+                    availableActions.add(new MoveCardFromTo(playerID,CardType.Hotel,pSet.getSetType(),SetType.UNDEFINED));
             }
         }
         return availableActions;
@@ -78,10 +78,10 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         MoveCardFromTo actionTaken = (MoveCardFromTo) action;
-        MonopolyDealCard card = actionTaken.card;
+        CardType cardType = actionTaken.cardType;
 
         // Debugging
-        if(card.cardType()==CardType.House)
+        if(cardType==CardType.House)
         {
             int i=0;
         }
@@ -90,12 +90,12 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         SetType to = actionTaken.to;
 
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-        MDGS.removePropertyFrom(playerID,card,from);
-        MDGS.addPropertyToSet(playerID,card,to);
+        MDGS.removePropertyFrom(playerID,cardType,from);
+        MDGS.addPropertyToSet(playerID,cardType,to);
         MDGS.modifyBoard();
 
         // Debugging
-        if(card.cardType()==CardType.House)
+        if(cardType==CardType.House)
         {
             int i=0;
         }

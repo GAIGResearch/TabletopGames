@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.Objects;
@@ -13,37 +14,37 @@ import java.util.Objects;
  */
 public class AddMoney extends AbstractAction {
     final int player;
-    final MonopolyDealCard card;
-    public AddMoney(MonopolyDealCard card, int playerId) {
-        this.card = card;
+    final CardType cardType;
+    public AddMoney(CardType cardType, int playerId) {
+        this.cardType = cardType;
         player = playerId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
-        state.removeCardFromHand(player, card);
-        state.addMoney(player,card);
+        state.removeCardFromHand(player, cardType);
+        state.addMoney(player,cardType);
         state.useAction(1);
         return true;
     }
     @Override
     public AddMoney copy() {
-        return new AddMoney(card,player);
+        return new AddMoney(cardType,player);
     }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddMoney addMoney = (AddMoney) o;
-        return player == addMoney.player && Objects.equals(card, addMoney.card);
+        return player == addMoney.player && Objects.equals(cardType, addMoney.cardType);
     }
     @Override
     public int hashCode() {
-        return Objects.hash(player, card);
+        return Objects.hash(player, cardType);
     }
     @Override
     public String toString() {
-        return "Add " + card.toString() + " to Bank";
+        return "Add " + cardType.toString() + " to Bank";
     }
     @Override
     public String getString(AbstractGameState gameState) {

@@ -8,56 +8,10 @@ public class MonopolyDealCard extends Card{
 
     SetType useAs; // Used by property wild;
 
-    protected MonopolyDealCard(CardType type) {
+    public MonopolyDealCard(CardType type) {
         super(type.name());
         this.type = type;
-        this.useAs = getSetType(type);
-    }
-    public SetType getSetType(CardType type){
-        SetType sType;
-        switch (type){
-            case BrownProperty:
-            case BrownLightBlueWild:
-                sType = SetType.Brown;
-                break;
-            case BlueProperty:
-                sType = SetType.Blue;
-                break;
-            case GreenProperty:
-            case GreenBlueWild:
-                sType = SetType.Green;
-                break;
-            case LightBlueProperty:
-                sType = SetType.LightBlue;
-                break;
-            case OrangeProperty:
-                sType = SetType.Orange;
-                break;
-            case PinkProperty:
-            case PinkOrangeWild:
-                sType = SetType.Pink;
-                break;
-            case RailRoadProperty:
-            case RailRoadGreenWild:
-            case RailRoadLightBlueWild:
-            case RailRoadUtilityWild:
-                sType = SetType.RailRoad;
-                break;
-            case RedProperty:
-                sType = SetType.Red;
-                break;
-            case UtilityProperty:
-                sType = SetType.Utility;
-                break;
-            case YellowProperty:
-            case RedYellowWild:
-                sType = SetType.Yellow;
-                break;
-            default:
-                sType = SetType.UNDEFINED;
-                break;
-        }
-        return sType;
+        this.useAs = type.getSetType();
     }
     public static MonopolyDealCard create(CardType type) {
         switch (type) {

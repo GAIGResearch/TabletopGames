@@ -110,7 +110,7 @@ public class ItsMyBirthdayAction extends AbstractAction implements IExtendedSequ
         collectedRent[playerID] = true;
         // Discard card used
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.ItsMyBirthday),playerID);
+        MDGS.discardCard(CardType.ItsMyBirthday,playerID);
         MDGS.useAction(1);
         // Set first target
         getNextTarget();

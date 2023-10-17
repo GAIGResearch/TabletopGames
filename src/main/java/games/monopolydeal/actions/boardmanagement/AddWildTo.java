@@ -25,8 +25,8 @@ public class AddWildTo extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
-        state.removeCardFromHand(player, MonopolyDealCard.create(CardType.MulticolorWild));
-        state.addPropertyToSet(player,MonopolyDealCard.create(CardType.MulticolorWild),pSet.getSetType());
+        state.removeCardFromHand(player, CardType.MulticolorWild);
+        state.addPropertyToSet(player,CardType.MulticolorWild,pSet.getSetType());
         state.useAction(1);
         return true;
     }

@@ -15,7 +15,7 @@ public class PassGoAction extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
         MDGS.drawCard(MDGS.getCurrentPlayer(),2);
-        MDGS.discardCard(MonopolyDealCard.create(CardType.PassGo),MDGS.getCurrentPlayer());
+        MDGS.discardCard(CardType.PassGo,MDGS.getCurrentPlayer());
         MDGS.useAction(1);
         return true;
     }

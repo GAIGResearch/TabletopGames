@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.SetType;
 
@@ -14,43 +15,43 @@ import java.util.Objects;
  */
 public class AddBuilding extends AbstractAction {
     final int player;
-    final MonopolyDealCard card;
+    final CardType cardType;
     final SetType setType;
-    public AddBuilding(MonopolyDealCard card, int playerId, SetType setType) {
-        this.card = card;
+    public AddBuilding(CardType cardType, int playerId, SetType setType) {
+        this.cardType = cardType;
         this.setType = setType;
         player = playerId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
-        state.removeCardFromHand(player, card);
+        state.removeCardFromHand(player, cardType);
         // For debugging
         if(setType!=SetType.UNDEFINED){
             int i=0;
         }
-        state.addPropertyToSet(player,card,setType);
+        state.addPropertyToSet(player,cardType,setType);
         state.useAction(1);
         return true;
     }
     @Override
     public AddBuilding copy() {
-        return new AddBuilding(card,player,setType);
+        return new AddBuilding(cardType,player,setType);
     }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddBuilding that = (AddBuilding) o;
-        return player == that.player && Objects.equals(card, that.card) && setType == that.setType;
+        return player == that.player && Objects.equals(cardType, that.cardType) && setType == that.setType;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(player, card, setType);
+        return Objects.hash(player, cardType, setType);
     }
     @Override
     public String toString() {
-        return "Add " + card.toString() + " to " + setType;
+        return "Add " + cardType.toString() + " to " + setType;
     }
     @Override
     public String getString(AbstractGameState gameState) {

@@ -36,18 +36,18 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         List<AbstractAction> availableActions = MDGS.getPlayerHand(playerID).stream()
                 .filter(MonopolyDealCard::isPropertyCard)
                 .filter(MonopolyDealCard::isNotMulticolor)
-                .map(card-> new AddProperty(card,playerID))
+                .map(card-> new AddProperty(card.cardType(),playerID))
                 .collect(toList());
 
         // Adding money to bank
-        availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate()).map(card ->new AddMoney(card,playerID)).collect(toList()));
+        availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate()).map(card ->new AddMoney(card.cardType(),playerID)).collect(toList()));
 
         // Adding multicolor wild to existing sets
         MonopolyDealCard temp = MonopolyDealCard.create(CardType.MulticolorWild);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp)){
             availableActions.addAll(MDGS.getPropertySets(playerID).stream().filter(((Predicate<? super PropertySet>)PropertySet::getIsComplete).negate())
                     .map(propertySet -> new AddWildTo(propertySet,playerID)).collect(toList()));
-            availableActions.add(new AddProperty(temp,playerID));
+            availableActions.add(new AddProperty(temp.cardType(),playerID));
         }
 
         // Add house or hotel
@@ -55,17 +55,17 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp1)){
             List<PropertySet> playerProperties = MDGS.getPropertySets(playerID);
             for (PropertySet pSet: playerProperties) {
-                if(pSet.isComplete) availableActions.add(new AddBuilding(temp1, playerID, pSet.getSetType()));
+                if(pSet.isComplete) availableActions.add(new AddBuilding(temp1.cardType(), playerID, pSet.getSetType()));
             }
-            availableActions.add(new AddBuilding(temp1, playerID, SetType.UNDEFINED));
+            availableActions.add(new AddBuilding(temp1.cardType(), playerID, SetType.UNDEFINED));
         }
         MonopolyDealCard temp2 = MonopolyDealCard.create(CardType.Hotel);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp2)){
             List<PropertySet> playerProperties = MDGS.getPropertySets(playerID);
             for (PropertySet pSet: playerProperties) {
-                if(pSet.isComplete && pSet.hasHouse) availableActions.add(new AddBuilding(temp2, playerID, pSet.getSetType()));
+                if(pSet.isComplete && pSet.hasHouse) availableActions.add(new AddBuilding(temp2.cardType(), playerID, pSet.getSetType()));
             }
-            availableActions.add(new AddBuilding(temp2, playerID, SetType.UNDEFINED));
+            availableActions.add(new AddBuilding(temp2.cardType(), playerID, SetType.UNDEFINED));
         }
 
         // remove duplicate actions

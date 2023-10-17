@@ -37,7 +37,7 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     int target;
-    MonopolyDealCard take,give;
+    CardType take,give;
     SetType tFrom,gFrom;
     ActionState actionState;
     boolean reaction = false;
@@ -64,8 +64,8 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(!pSet.isComplete){
                         for(int i=0;i<pSet.getSize();i++){
-                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0)))
-                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),0));
+                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i).cardType(),pSet.getSetType(),0)))
+                                availableActions.add(new ChooseCardFrom(pSet.get(i).cardType(),pSet.getSetType(),0));
                         }
                     }
                 }
@@ -74,8 +74,8 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
                 for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
                     if((!pSet.hasHouse && !pSet.hasHotel)){
                         for(int i=0;i<pSet.getSize();i++){
-                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1)))
-                                availableActions.add(new ChooseCardFrom(pSet.get(i),pSet.getSetType(),1));
+                            if(!availableActions.contains(new ChooseCardFrom(pSet.get(i).cardType(),pSet.getSetType(),1)))
+                                availableActions.add(new ChooseCardFrom(pSet.get(i).cardType(),pSet.getSetType(),1));
                         }
                     }
                 }
@@ -138,7 +138,7 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.ForcedDeal),playerID);
+        MDGS.discardCard(CardType.ForcedDeal,playerID);
         MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;

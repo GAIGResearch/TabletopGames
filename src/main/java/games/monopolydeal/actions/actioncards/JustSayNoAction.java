@@ -14,7 +14,7 @@ public class JustSayNoAction extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.JustSayNo),MDGS.getCurrentPlayer());
+        MDGS.discardCard(CardType.JustSayNo,MDGS.getCurrentPlayer());
         return true;
     }
     @Override

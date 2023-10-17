@@ -100,7 +100,7 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
-        MDGS.discardCard(MonopolyDealCard.create(CardType.DebtCollector),playerID);
+        MDGS.discardCard(CardType.DebtCollector,playerID);
         MDGS.useAction(1);
         gs.setActionInProgress(this);
         return true;

@@ -27,7 +27,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     final int payee; // pays to
     int amtToPay;
     boolean boardEmpty;
-    MonopolyDealCard cardToPay;
+    CardType cardToPay;
     BoardType boardType;
 
 
@@ -48,13 +48,13 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
             // iterate through bank and add action
             // iterate through properties and add action
             for(int i=0;i<payerBank.getSize();i++){
-                if(!availableActions.contains(new PayCardFrom(payerBank.get(i))))
-                    availableActions.add(new PayCardFrom(payerBank.get(i)));
+                if(!availableActions.contains(new PayCardFrom(payerBank.get(i).cardType())))
+                    availableActions.add(new PayCardFrom(payerBank.get(i).cardType()));
             }
             for (PropertySet pSet: payerPropertySets) {
                 for(int i=0;i<pSet.getSize();i++)
-                    if(pSet.get(i)!= MonopolyDealCard.create(CardType.MulticolorWild) && !availableActions.contains(new PayCardFrom(pSet.get(i),pSet.getSetType())))
-                        availableActions.add(new PayCardFrom(pSet.get(i),pSet.getSetType()));
+                    if(pSet.get(i).cardType()!= (CardType.MulticolorWild) && !availableActions.contains(new PayCardFrom(pSet.get(i).cardType(),pSet.getSetType())))
+                        availableActions.add(new PayCardFrom(pSet.get(i).cardType(),pSet.getSetType()));
             }
         }
 
@@ -68,7 +68,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         if(!(action instanceof DoNothing)){
             MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
-            cardToPay = ((PayCardFrom) action).card;
+            cardToPay = ((PayCardFrom) action).cardType;
             boardType = ((PayCardFrom) action).type;
             switch (boardType){
                 case Bank:
@@ -80,7 +80,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
                     MDGS.addProperty(payee,cardToPay);
                     break;
             }
-            amtToPay = amtToPay - cardToPay.cardMoneyValue();
+            amtToPay = amtToPay - cardToPay.moneyValue;
             if(MDGS.isBoardEmpty(payer)) boardEmpty = true;
         }
 
