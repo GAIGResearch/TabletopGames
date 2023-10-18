@@ -101,6 +101,8 @@ public class Experiment {
         agentJson.put("K", 1);
         agentJson.put("rolloutLength", 0);
         agentJson.put("maxTreeDepth", 30);
+        agentJson.put("name", "Experiment MCTS " + i);
+
 
         JSONObject heuristic = new JSONObject();
         heuristic.put("class", "players.heuristics.ScoreHeuristic");
