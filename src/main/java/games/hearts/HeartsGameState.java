@@ -253,23 +253,6 @@ public class HeartsGameState extends AbstractGameState {
         return trickDecks;
     }
 
-    @Override
-    public int getOrdinalPosition(int playerId, Function<Integer, Double> scoreFunction, BiFunction<Integer, Integer, Double> tiebreakFunction) {
-        int ordinal = 1;
-        double playerScore = scoreFunction.apply(playerId);
-        for (int i = 0, n = getNPlayers(); i < n; i++) {
-            double otherScore = scoreFunction.apply(i);
-            if (otherScore < playerScore) // Changed to < because lower score is better
-                ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != Double.MAX_VALUE) {
-                if (getOrdinalPositionTiebreak(i, tiebreakFunction, 1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, 1))
-                    ordinal++;
-            }
-        }
-        return ordinal;
-    }
-
-
 }
 
 

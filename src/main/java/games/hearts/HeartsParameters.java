@@ -7,7 +7,7 @@ import core.components.FrenchCard;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -19,7 +19,7 @@ import java.util.Objects;
  * <p>The class can optionally extend from {@link evaluation.optimisation.TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
-public class HeartsParameters extends TunableParameters {
+public class HeartsParameters extends AbstractParameters {
     public String dataPath = "data/FrenchCards/";
     public final int shootTheMoon = 26;
     public final int heartCard = 1;
@@ -31,16 +31,20 @@ public class HeartsParameters extends TunableParameters {
     public int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
             17, 13, 10, 8, 7};
 
+    Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();
+
     public HeartsParameters(long seed) {
-
         super(seed);
-
-        _reset();
-    }
-
-    @Override
-    public void _reset() {
-
+        cardsToRemove.put(3, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
+        cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Spades, 2)));
+        cardsToRemove.put(6, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 3),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4)));
+        cardsToRemove.put(7, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 3),
+                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3)));
     }
 
     public String getDataPath() {
@@ -68,8 +72,4 @@ public class HeartsParameters extends TunableParameters {
         return Objects.hash(super.hashCode(), dataPath);
     }
 
-    @Override
-    public Game instantiate() {
-        return new Game(GameType.Hearts, new HeartsForwardModel(), new HeartsGameState(this, GameType.Hearts.getMinPlayers()));
-    }
 }

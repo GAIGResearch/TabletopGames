@@ -361,7 +361,7 @@ public class TestHearts {
         // Create a trick deck for a player with some cards
         Deck<FrenchCard> deck = new Deck<>(("Player " + 0 + " deck"), 0, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
         deck.add(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Hearts, 2)); // 1 point
-        deck.add(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Spades, 12)); // 13 points
+        deck.add(new FrenchCard(FrenchCard.FrenchCardType.Queen, FrenchCard.Suite.Spades)); // 13 points
 
         // Set the trick deck in the game state
         gameState.trickDecks.add(0, deck);

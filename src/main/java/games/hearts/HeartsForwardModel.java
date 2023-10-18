@@ -54,37 +54,11 @@ public class HeartsForwardModel extends StandardForwardModel {
 
         hgs.playerDecks = new ArrayList<>();
         hgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        hgs.drawDeck.shuffle(new Random(System.currentTimeMillis()));
 
         int numOfPlayers = hgs.getNPlayers();
 
-        Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();
-        cardsToRemove.put(3, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
-        cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
-                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Spades, 2)));
-        cardsToRemove.put(6, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
-                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 3),
-                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3),
-                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 4)));
-        cardsToRemove.put(7, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
-                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 3),
-                new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 3)));
-
-        if (cardsToRemove.containsKey(numOfPlayers)) {
-            for (FrenchCard removeCard : cardsToRemove.get(numOfPlayers)) {
-                int removeIndex = -1;
-                for (int i = 0; i < 52; i++) {
-                    FrenchCard card = hgs.drawDeck.get(i);
-                    if (card.suite == removeCard.suite && card.number == removeCard.number && card.type == removeCard.type) {
-                        removeIndex = i;
-                        break;
-                    }
-                }
-                if (removeIndex != -1) {
-                    hgs.drawDeck.remove(removeIndex);
-                }
-            }
-        }
+        hgs.drawDeck.removeAll(params.cardsToRemove.get(numOfPlayers));
+        hgs.drawDeck.shuffle(hgs.rnd);
 
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             Deck<FrenchCard> playerDeck = new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
