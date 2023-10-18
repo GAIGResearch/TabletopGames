@@ -1,4 +1,4 @@
-package utilities;
+package groupM.utils;
 
 import java.io.FileWriter;
 import java.io.IOException;
