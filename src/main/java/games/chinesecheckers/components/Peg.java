@@ -3,6 +3,7 @@ package games.chinesecheckers.components;
 import core.CoreConstants;
 import core.components.Component;
 
+import java.awt.*;
 import java.util.Objects;
 
 public class Peg extends Component {
@@ -15,6 +16,27 @@ public class Peg extends Component {
         orange,
         green,
         neutral;
+
+        public Color toGraphicsColor() {
+            switch (this) {
+                case purple:
+                    return Color.magenta;
+                case blue:
+                    return Color.blue;
+                case yellow:
+                    return Color.yellow;
+                case red:
+                    return Color.red;
+                case orange:
+                    return Color.orange;
+                case green:
+                    return Color.green;
+                case neutral:
+                    return Color.black;
+                default:
+                    throw new AssertionError("Unknown colour: " + this);
+            }
+        }
     }
 
     CCNode occupiedNode;
@@ -23,31 +45,26 @@ public class Peg extends Component {
 
     private boolean inDestination = false;
 
-    public Peg(){
+    public Peg() {
         super(CoreConstants.ComponentType.TOKEN, "PEG");
 
     }
-    public Peg(Colour team, CCNode occupiedNode){
+
+    public Peg(Colour team, CCNode occupiedNode) {
         super(CoreConstants.ComponentType.TOKEN, "PEG");
         this.team = team;
         this.occupiedNode = occupiedNode;
     }
 
-    public void setOccupiedNode(CCNode occupiedNode)
-    {
-        this.occupiedNode = occupiedNode;
+    public void setInDestination(boolean value) {
+        inDestination = value;
     }
 
-    public void setInDestination(boolean value) { inDestination = value; }
-
-    public CCNode getOccupiedNode()
-    {
-        if(occupiedNode == null) return null;
-        else return occupiedNode;
+    public boolean getInDestination() {
+        return inDestination;
     }
 
-    public boolean getInDestination() { return inDestination; }
-    public Colour getColour(){
+    public Colour getColour() {
         return team;
     }
 
