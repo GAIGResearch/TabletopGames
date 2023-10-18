@@ -24,14 +24,14 @@ abstract class TreeNode {
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     // Parameters guiding the search
-    protected MCTSPlayer player;
+    protected GroupMMCTSPlayer player;
     private Random rnd;
     private RandomPlayer randomPlayer = new RandomPlayer();
 
     // State in this node (closed loop)
     protected AbstractGameState state;
 
-    protected TreeNode(MCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
+    protected TreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
@@ -262,7 +262,7 @@ abstract class TreeNode {
      double bestValue = -Double.MAX_VALUE;
 
      for (AbstractAction action : children.keySet()) {
-        UCB1TreeNode child = (UCB1TreeNode) children.get(action);
+        TreeNode child = (TreeNode) children.get(action);
          if (child == null)
              throw new AssertionError("Should not be here");
          else if (bestAction == null)

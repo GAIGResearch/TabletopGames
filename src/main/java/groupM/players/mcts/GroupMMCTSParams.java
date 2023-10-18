@@ -7,7 +7,7 @@ import players.PlayerParameters;
 import java.util.Arrays;
 
 
-public class MCTSParams extends PlayerParameters {
+public class GroupMMCTSParams extends PlayerParameters {
 
     public double K = Math.sqrt(2);
     public int rolloutLength = 10; // assuming we have a good heuristic
@@ -16,12 +16,13 @@ public class MCTSParams extends PlayerParameters {
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public MCTSEnums.ExplorationStrategy exporationStrategy = MCTSEnums.ExplorationStrategy.UCB1;
     public TreeNodeFactory treeNodeFactory;
+    public String name = "GroupM MCTS";
 
-    public MCTSParams() {
+    public GroupMMCTSParams() {
         this(System.currentTimeMillis());
     }
 
-    public MCTSParams(long seed) {
+    public GroupMMCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
@@ -40,16 +41,17 @@ public class MCTSParams extends PlayerParameters {
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
+        name = (String) getParameterValue("name");
         exporationStrategy = (MCTSEnums.ExplorationStrategy) getParameterValue("explorationStrategy");
         treeNodeFactory = new TreeNodeFactory(exporationStrategy);    
     }
 
     @Override
-    protected MCTSParams _copy() {
+    protected GroupMMCTSParams _copy() {
         // All the copying is done in TunableParameters.copy()
         // Note that any *local* changes of parameters will not be copied
         // unless they have been 'registered' with setParameterValue("name", value)
-        return new MCTSParams(System.currentTimeMillis());
+        return new GroupMMCTSParams(System.currentTimeMillis());
     }
 
     public IStateHeuristic getHeuristic() {
@@ -57,8 +59,8 @@ public class MCTSParams extends PlayerParameters {
     }
 
     @Override
-    public MCTSPlayer instantiate() {
-        return new MCTSPlayer((MCTSParams) this.copy());
+    public GroupMMCTSPlayer instantiate() {
+        return new GroupMMCTSPlayer((GroupMMCTSParams) this.copy());
     }
 
 }

@@ -12,7 +12,7 @@ public class UCB1TreeNode extends TreeNode{
     // Number of visits
     protected int nVisits;
 
-    protected UCB1TreeNode(MCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
+    protected UCB1TreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         super(player, parent, state, rnd);
         totValue = 0.0;
     }
