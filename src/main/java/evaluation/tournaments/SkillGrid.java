@@ -42,7 +42,7 @@ public class SkillGrid {
                         (Integer) config.get(RunArg.nPlayers),
                         (Integer) config.get(RunArg.matchups),
                         AbstractTournament.TournamentMode.ONE_VS_ALL,
-                        params);
+                        params, (Boolean) config.get(byTeam));
 
                 // Add listeners
                 //noinspection unchecked

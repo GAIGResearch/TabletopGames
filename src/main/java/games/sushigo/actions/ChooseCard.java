@@ -95,6 +95,14 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         return "Choose card " + getCard(gameState).getComponentName() + " [" + cardIdx + "] " + (useChopsticks ? " (+chopsticks)" : "");
     }
 
+    @Override
+    public String getString(AbstractGameState gameState, int perspective) {
+        // Other players can only see that a card was chosen
+        if (perspective == playerId)
+            return getString(gameState);
+        return "Chooses card";
+    }
+
     public Card getCard(AbstractGameState gs) {
         SGGameState sggs = (SGGameState) gs;
         return sggs.getPlayerHands().get(playerId).get(cardIdx);
@@ -109,4 +117,5 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
                 ", chopstickChooseDone=" + chopstickChooseDone +
                 '}';
     }
+
 }

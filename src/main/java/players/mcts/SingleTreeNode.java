@@ -171,7 +171,7 @@ public class SingleTreeNode {
         // TODO: However this is complicated by MultiTree MCTS, for which this invariant only holds for the acting player
         // so check the MCTSParams as well
         openLoopState = actionState;
-        if (actionState.getCurrentPlayer() == this.decisionPlayer) {
+        if (actionState.getCurrentPlayer() == this.decisionPlayer && actionState.isNotTerminalForPlayer(decisionPlayer)) {
             actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
             //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
