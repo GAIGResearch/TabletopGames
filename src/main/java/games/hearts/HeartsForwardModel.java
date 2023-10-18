@@ -42,6 +42,7 @@ public class HeartsForwardModel extends StandardForwardModel {
     }
 
     public void _setupRound(HeartsGameState hgs) {
+        HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
         hgs.setGamePhase(HeartsGameState.Phase.PASSING);
         hgs.heartsBroken = false;
 
@@ -88,7 +89,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             Deck<FrenchCard> playerDeck = new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
             hgs.playerDecks.add(playerDeck);
-            int numberOfCards = getNumberOfCards(hgs);
+            int numberOfCards = params.numberOfCardsPerPlayer[hgs.getNPlayers()];
 
             for (int card = 0; card < numberOfCards; card++) {
                 playerDeck.add(hgs.drawDeck.draw());
@@ -96,23 +97,6 @@ public class HeartsForwardModel extends StandardForwardModel {
         }
     }
 
-    private static int getNumberOfCards(HeartsGameState hgs) {
-        int numberOfCards;
-        if (hgs.getNPlayers() == 3) {
-            numberOfCards = 17;
-        } else if (hgs.getNPlayers() == 4) {
-            numberOfCards = 13;
-        } else if (hgs.getNPlayers() == 5) {
-            numberOfCards = 10;
-        } else if (hgs.getNPlayers() == 6) {
-            numberOfCards = 8;
-        } else if (hgs.getNPlayers() == 7) {
-            numberOfCards = 7;
-        } else {
-            numberOfCards = 0;
-        }
-        return numberOfCards;
-    }
 
     public void _afterAction(AbstractGameState gameState, AbstractAction action) {
         HeartsGameState hgs = (HeartsGameState) gameState;

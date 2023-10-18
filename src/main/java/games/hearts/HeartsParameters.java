@@ -3,6 +3,7 @@ package games.hearts;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
+import core.components.FrenchCard;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
@@ -20,14 +21,15 @@ import java.util.Objects;
  */
 public class HeartsParameters extends TunableParameters {
     public String dataPath = "data/FrenchCards/";
-    public  final int shootTheMoon = 26;
-    public  final int heartCard = 1;
-    public  final int queenOfSpades = 13;
+    public final int shootTheMoon = 26;
+    public final int heartCard = 1;
+    // Could be expanded if needed to a whole sequence of 'special cards, with special scores'
+    public final FrenchCard qosCard = new FrenchCard(FrenchCard.FrenchCardType.Queen, FrenchCard.Suite.Spades);
+    public final int queenOfSpades = 13;
 
-    private static final double MAX_HIGH_VALUE_CARD_PASS_BONUS = 1.6;
-
-    private static final int HIGH_VALUE_THRESHOLD = 11;  // Jack or higher
-
+    // Number of cards per player - index to array is nPlayers
+    public int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
+            17, 13, 10, 8, 7};
 
     public HeartsParameters(long seed) {
 
@@ -41,7 +43,7 @@ public class HeartsParameters extends TunableParameters {
 
     }
 
-    public String getDataPath(){
+    public String getDataPath() {
         return dataPath;
     }
 

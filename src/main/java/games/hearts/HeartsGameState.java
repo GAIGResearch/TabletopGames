@@ -88,7 +88,7 @@ public class HeartsGameState extends AbstractGameState {
                         points += params.heartCard;
                     }
                     // The queen of spades is worth 13 points
-                    else if (card.suite == FrenchCard.Suite.Spades && card.number == 12) {
+                    else if (card.equals(params.qosCard)) {
                         points += params.queenOfSpades;
                     }
                 }
