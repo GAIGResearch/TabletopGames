@@ -19,6 +19,13 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
+
+        <dependency>
+            <groupId>ca.umontreal.iro.simul</groupId>
+            <artifactId>ssj</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
