@@ -6,6 +6,7 @@ import core.interfaces.IComponentContainer;
 import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.chinesecheckers.CCParameters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -48,7 +49,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         HashMap<Integer, CCNode> nodeCopies = new HashMap<>();
         // Copy board nodes
         for (CCNode bn: boardNodes) {
-            CCNode bnCopy = new CCNode(bn.getMaxNeighbours(), "", bn.getComponentID());
+            CCNode bnCopy = new CCNode(bn.getComponentID());
             bn.copyComponentTo(bnCopy);
             bnCopy.setColourNode(bn.getBaseColour());
             if(bn.isNodeOccupied()){
@@ -73,52 +74,12 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
     }
 
     /**
-     * Returns the node in the list which matches the given property
-     * @param prop_id - ID of the property to look for.
-     * @param p - Property that has the value to look for.
-     * @return - node matching property.
-     */
-    public CCNode getNodeByProperty(int prop_id, Property p) {
-        for (CCNode n : boardNodes) {
-            Property prop = n.getProperty(prop_id);
-            if(prop != null)
-            {
-                if(prop.equals(p))
-                    return n;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the node in the list which matches the given string property
-     * @param prop_id - ID of the property to look for.
-     * @param value - String value for the property.
-     * @return - node matching property
-     */
-    public CCNode getNodeByStringProperty(int prop_id, String value)
-    {
-        return getNodeByProperty(prop_id, new PropertyString(value));
-    }
-
-    /**
      * @return the list of board nodes
      */
     public List<CCNode> getBoardNodes() {
         return boardNodes;
     }
 
-    /**
-     * Returns the node in the list which matches the given ID
-     * @param id - ID of node to search for.
-     * @return - node matching ID.
-     */
-    protected CCNode getNodeByID(int id) {
-        for (CCNode n : boardNodes) {
-            if (n.getComponentID() == id) return n;
-        }
-        return null;
-    }
 
     /**
      * Sets the list of board nodes to the given list.
@@ -126,122 +87,6 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
      */
     public void setBoardNodes(List<CCNode> boardNodes) {
         this.boardNodes = boardNodes;
-    }
-
-    public void addBoardNode(CCNode bn) {
-        this.boardNodes.add(bn);
-    }
-
-    public void removeBoardNode(CCNode bn) {
-        this.boardNodes.remove(bn);
-    }
-
-    public void breakConnection(CCNode bn1, CCNode bn2) {
-        bn1.removeNeighbour(bn2);
-        bn2.removeNeighbour(bn1);
-
-        // Check if they have at least 1 more neighbour on this board. If not, remove node from this board
-        boolean inBoard = false;
-        for (CCNode n: bn1.getNeighbours()) {
-            if (boardNodes.contains(n)) {
-                inBoard = true;
-                break;
-            }
-        }
-        if (!inBoard) boardNodes.remove(bn1);
-
-        inBoard = false;
-        for (CCNode n: bn2.getNeighbours()) {
-            if (boardNodes.contains(n)) {
-                inBoard = true;
-                break;
-            }
-        }
-        if (!inBoard) boardNodes.remove(bn2);
-    }
-
-    public void addConnection(CCNode bn1, CCNode bn2) {
-        bn1.addNeighbour(bn2);
-        bn2.addNeighbour(bn1);
-        if (!boardNodes.contains(bn1)) {
-            boardNodes.add(bn1);
-        }
-        if (!boardNodes.contains(bn2)) {
-            boardNodes.add(bn2);
-        }
-    }
-
-    /**
-     * Loads all boards from a JSON file.
-     * @param filename - path to file.
-     * @return - List of Board objects.
-     */
-    public static List<StarBoard> loadBoards(String filename)
-    {
-        JSONParser jsonParser = new JSONParser();
-        ArrayList<StarBoard> graphBoards = new ArrayList<>();
-
-        try (FileReader reader = new FileReader(filename)) {
-
-            JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for(Object o : data) {
-                StarBoard newGraphBoard = new StarBoard();
-                newGraphBoard.loadBoard((JSONObject) o);
-                graphBoards.add(newGraphBoard);
-            }
-
-        }catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-
-        return graphBoards;
-    }
-
-    /**
-     * Loads board nodes from a JSON file.
-     * @param board - board to load in JSON format
-     */
-    public void loadBoard(JSONObject board) {
-        componentName = (String) board.get("id");
-        String boardType = (String) board.get("type");
-        String verticesKey = (String) board.get("verticesKey");
-        String neighboursKey = (String) board.get("neighboursKey");
-        int maxNeighbours = (int) (long) board.get("maxNeighbours");
-
-        properties.put(Hash.GetInstance().hash("boardType"), new PropertyString("boardType", boardType));
-        if (board.get("img") != null) {
-            properties.put(imgHash, new PropertyString("img", (String) board.get("img")));
-        }
-
-        JSONArray nodeList = (JSONArray) board.get("nodes");
-
-        for(Object o : nodeList)
-        {
-            // Add nodes to board nodes
-            JSONObject node = (JSONObject) o;
-            CCNode newBN = new CCNode();
-            newBN.loadBoardNode(node);
-            newBN.setComponentName(((PropertyString)newBN.getProperty(nameHash)).value);
-            newBN.setMaxNeighbours(maxNeighbours);
-            boardNodes.add(newBN);
-        }
-
-        int _hash_neighbours_ = Hash.GetInstance().hash(neighboursKey);
-        int _hash_vertices_ = Hash.GetInstance().hash(verticesKey);
-
-        for (CCNode bn : boardNodes) {
-            Property p = bn.getProperty(_hash_neighbours_);
-            if (p instanceof PropertyStringArray) {
-                PropertyStringArray psa = (PropertyStringArray) p;
-                for (String str : psa.getValues()) {
-                    CCNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
-                    if (neigh != null) {
-                        bn.addNeighbour(neigh);
-                        neigh.addNeighbour(bn);
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -269,57 +114,14 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
     }
 
     private void loadNodeBaseColours(){
+        // technically we would not have access to CCParameters here...but it prettifies the code
+        // enough to be warranted
+        CCParameters params = new CCParameters(0);
         // Load Purple Nodes
-        for(int i = 0; i <= 9; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.purple);
-        }
-        // Load Red Nodes
-        for(int i = 111; i <= 120; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.red);
-        }
-        // Load Green Nodes
-        for(int i = 10; i <= 13; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.green);
-        }
-        for(int i = 23; i <= 25; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.green);
-        }
-        for(int i = 35; i <= 36; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.green);
-        }
-        ((CCNode) this.getBoardNodes().get(46)).setColourNode(Peg.Colour.green);
-        // Load Blue Nodes
-        for(int i = 19; i <= 22; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.blue);
-        }
-        for(int i = 32; i <= 34; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.blue);
-        }
-        for(int i = 44; i <= 45; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.blue);
-        }
-        ((CCNode) this.getBoardNodes().get(55)).setColourNode(Peg.Colour.blue);
-        // Load Orange Nodes
-        ((CCNode) this.getBoardNodes().get(65)).setColourNode(Peg.Colour.orange);
-        for(int i = 75; i <= 76; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.orange);
-        }
-        for(int i = 86; i <= 88; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.orange);
-        }
-        for(int i = 98; i <= 101; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.orange);
-        }
-        // Load Yellow Nodes
-        ((CCNode) this.getBoardNodes().get(74)).setColourNode(Peg.Colour.yellow);
-        for(int i = 84; i <= 85; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.yellow);
-        }
-        for(int i = 95; i <= 97; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.yellow);
-        }
-        for(int i = 107; i <= 110; i++){
-            ((CCNode) this.getBoardNodes().get(i)).setColourNode(Peg.Colour.yellow);
+        for (Peg.Colour colour : params.colourIndices.keySet()) {
+            for (int i : params.colourIndices.get(colour)) {
+                this.getBoardNodes().get(i).setColourNode(colour);
+            }
         }
     }
     
@@ -1169,25 +971,25 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
         this.getBoardNodes().get(116).addNeighbour(this.getBoardNodes().get(115),4);
         this.getBoardNodes().get(116).addNeighbour(this.getBoardNodes().get(112),5);;
 
-        ((CCNode)this.getBoardNodes().get(117)).setCoordinates(7, 14);
+        this.getBoardNodes().get(117).setCoordinates(7, 14);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(114),0);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(119),3);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(116),4);
         this.getBoardNodes().get(117).addNeighbour(this.getBoardNodes().get(113),5);;
 
-        ((CCNode)this.getBoardNodes().get(118)).setCoordinates(5, 15);
+        this.getBoardNodes().get(118).setCoordinates(5, 15);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(116),0);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(119),1);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(120),2);
         this.getBoardNodes().get(118).addNeighbour(this.getBoardNodes().get(115),5);;
 
-        ((CCNode)this.getBoardNodes().get(119)).setCoordinates(6, 15);
+        this.getBoardNodes().get(119).setCoordinates(6, 15);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(117),0);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(120),3);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(118),4);
         this.getBoardNodes().get(119).addNeighbour(this.getBoardNodes().get(116),5);;
 
-        ((CCNode)this.getBoardNodes().get(120)).setCoordinates(6, 16);
+        this.getBoardNodes().get(120).setCoordinates(6, 16);
         this.getBoardNodes().get(120).addNeighbour(this.getBoardNodes().get(119),0);
         this.getBoardNodes().get(120).addNeighbour(this.getBoardNodes().get(118),5);;
     }

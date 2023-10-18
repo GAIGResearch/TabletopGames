@@ -13,11 +13,11 @@ import java.util.Objects;
 
 public class CCGameState extends AbstractGameState {
 
-    public int PLAYER_PEGS = 10;
     StarBoard starBoard;
 
     public CCGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+        // GameType only supports a min/max range of players...so special case for 5 players
         if (nPlayers == 5) {
             throw new AssertionError("Chinese Checkers does not support 5 players");
         }
@@ -44,7 +44,6 @@ public class CCGameState extends AbstractGameState {
     protected AbstractGameState _copy(int playerId) {
         CCGameState copy = new CCGameState(gameParameters, getNPlayers());
         copy.starBoard = starBoard.copy();
-        copy.PLAYER_PEGS = PLAYER_PEGS;
 
         return copy;
     }
@@ -70,12 +69,12 @@ public class CCGameState extends AbstractGameState {
         if (!(o instanceof CCGameState)) return false;
         if (!super.equals(o)) return false;
         CCGameState that = (CCGameState) o;
-        return PLAYER_PEGS == that.PLAYER_PEGS && Objects.equals(starBoard, that.starBoard);
+        return Objects.equals(starBoard, that.starBoard);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), starBoard, PLAYER_PEGS);
+        int result = Objects.hash(super.hashCode(), starBoard);
         result = 31 * result;
         return result;
     }
