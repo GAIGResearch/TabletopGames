@@ -11,10 +11,15 @@ public class TreeNodeFactory {
     }
 
     public TreeNode createNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd){
-        if(exporationStrategy == MCTSEnums.ExplorationStrategy.UCB1){
-            return new UCB1TreeNode(player, parent, state, rnd);
+        switch(exporationStrategy){
+            case UCB1: 
+                return new UCB1TreeNode(player, parent, state, rnd);
+            case Thompson:
+                return new ThompsonTreeNode(player, parent, state, rnd);
+            default:
+                return new UCB1TreeNode(player, parent, state, rnd);
         }
-        return new UCB1TreeNode(player, parent, state, rnd);
+
     }
 }
 
