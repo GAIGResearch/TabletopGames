@@ -17,7 +17,7 @@ public class StarboardTests {
         CCGameState state = (CCGameState) game.getGameState();
         // Check purple nodes
         for (int i = 0; i <= 9; i++) {
-            assertEquals("purple", state.getStarBoard().getBoardNodes().get(i).getBaseColour().name());
+            assertEquals("red", state.getStarBoard().getBoardNodes().get(i).getBaseColour().name());
         }
         // Check blue nodes
         int[] blueNodes = {19, 20, 21, 22, 32, 33, 34, 44, 45, 55};
@@ -31,7 +31,7 @@ public class StarboardTests {
         }
         // Check red nodes
         for (int i = 111; i <= 120; i++) {
-            assertEquals("red", state.getStarBoard().getBoardNodes().get(i).getBaseColour().name());
+            assertEquals("purple", state.getStarBoard().getBoardNodes().get(i).getBaseColour().name());
         }
         // Check orange nodes
         int[] orangeNodes = {65, 75, 76, 86, 87, 88, 98, 99, 100, 101};

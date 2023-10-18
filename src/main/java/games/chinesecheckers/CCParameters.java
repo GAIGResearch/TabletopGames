@@ -12,6 +12,7 @@ public class CCParameters extends AbstractParameters {
         super(seed);
     }
 
+    // These are the colours of the base nodes for each player (where they need to get to)
     public Map<Peg.Colour, int[]> colourIndices = new HashMap<>();
     {
         colourIndices.put(Peg.Colour.red, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
