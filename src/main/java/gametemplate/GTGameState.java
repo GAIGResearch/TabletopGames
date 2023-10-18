@@ -7,6 +7,8 @@ import games.GameType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -102,4 +104,28 @@ public class GTGameState extends AbstractGameState {
         // TODO: include the hash code of all variables
         return super.hashCode();
     }
+
+    // TODO: Consider the methods below for possible implementation
+    // TODO: These all have default implementations in AbstractGameState, so are not required to be implemented here.
+    // TODO: If the game has 'teams' that win/lose together, then implement the next two nethods.
+    /**
+     * Returns the number of teams in the game. The default is to have one team per player.
+     * If the game does not have 'teams' that win/lose together, then ignore these two methods.
+     */
+   // public int getNTeams();
+    /**
+     * Returns the team number the specified player is on.
+     */
+    //public int getTeam(int player);
+
+    // TODO: If your game has multiple special tiebreak options, then implement the next two methods.
+    // TODO: The default is to tie-break on the game score (if this is the case, ignore these)
+    // public double getTiebreak(int playerId, int tier);
+    // public int getTiebreakLevels();
+
+
+    // TODO: If your game does not have a score of any type, and is an 'insta-win' type game which ends
+    // TODO: as soon as a player achieves a winning condition, and has some bespoke method for determining 1st, 2nd, 3rd etc.
+    // TODO: Then you *may* want to implement:.
+    //public int getOrdinalPosition(int playerId);
 }

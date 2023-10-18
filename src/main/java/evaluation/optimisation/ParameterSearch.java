@@ -29,7 +29,7 @@ public class ParameterSearch {
 
 
         String setupFile = config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.equals("")) {
+        if (!setupFile.isEmpty()) {
             // Read from file instead
             try {
                 FileReader reader = new FileReader(setupFile);

@@ -1,10 +1,10 @@
 {
 	"class" : "players.mcts.MCTSParams",
 	"K" : 1.0,
-	"rolloutLength" : 0,
+	"rolloutLength" : 100,
 	"maxTreeDepth" : 30,
 	"treePolicy" : "UCB",
-	"opponentTreePolicy" : "SelfOnly",
+	"opponentTreePolicy" : "OneTree",
 	"selectionPolicy" : "SIMPLE",
 	"information" : "Open_Loop",
 	"rolloutType" : "RANDOM",
@@ -18,9 +18,5 @@
 	},
 	"opponentHeuristic" : {
 		"class" : "players.heuristics.ScoreHeuristic"
-	},
-	"expertIterationStateFeatures": "games.connect4.Connect4StateFeatures",
-	"maintainMasterState": true,
-	"gatherTreeRecorder": true,
-	"treeRecorderFolder": "test_01"
+	}
 }

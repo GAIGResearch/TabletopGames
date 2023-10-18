@@ -31,7 +31,7 @@ public class SGParameters extends AbstractParameters {
     public int valueMakiMost = 6;
     public int valueMakiSecond = 3;
     public int valueTempuraPair = 5;
-    public int valueSashimiTriss = 10;
+    public int valueSashimiTriple = 10;
     public int[] valueDumpling = new int[] {1, 3, 6, 10, 15};
     public int valueSquidNigiri = 3;
     public int valueSalmonNigiri = 2;
@@ -57,7 +57,7 @@ public class SGParameters extends AbstractParameters {
         sgp.valueMakiMost = valueMakiMost;
         sgp.valueMakiSecond = valueMakiSecond;
         sgp.valueTempuraPair = valueTempuraPair;
-        sgp.valueSashimiTriss = valueSashimiTriss;
+        sgp.valueSashimiTriple = valueSashimiTriple;
         sgp.valueDumpling = valueDumpling.clone();
         sgp.valueSquidNigiri = valueSquidNigiri;
         sgp.valueSalmonNigiri = valueSalmonNigiri;
@@ -77,12 +77,12 @@ public class SGParameters extends AbstractParameters {
         if (!(o instanceof SGParameters)) return false;
         if (!super.equals(o)) return false;
         SGParameters that = (SGParameters) o;
-        return nRounds == that.nRounds && valueMakiMost == that.valueMakiMost && valueMakiSecond == that.valueMakiSecond && valueTempuraPair == that.valueTempuraPair && valueSashimiTriss == that.valueSashimiTriss && valueSquidNigiri == that.valueSquidNigiri && valueSalmonNigiri == that.valueSalmonNigiri && valueEggNigiri == that.valueEggNigiri && multiplierWasabi == that.multiplierWasabi && valuePuddingMost == that.valuePuddingMost && valuePuddingLeast == that.valuePuddingLeast && nCards == that.nCards && Objects.equals(dataPath, that.dataPath) && Objects.equals(nCardsPerType, that.nCardsPerType) && Arrays.equals(valueDumpling, that.valueDumpling);
+        return nRounds == that.nRounds && valueMakiMost == that.valueMakiMost && valueMakiSecond == that.valueMakiSecond && valueTempuraPair == that.valueTempuraPair && valueSashimiTriple == that.valueSashimiTriple && valueSquidNigiri == that.valueSquidNigiri && valueSalmonNigiri == that.valueSalmonNigiri && valueEggNigiri == that.valueEggNigiri && multiplierWasabi == that.multiplierWasabi && valuePuddingMost == that.valuePuddingMost && valuePuddingLeast == that.valuePuddingLeast && nCards == that.nCards && Objects.equals(dataPath, that.dataPath) && Objects.equals(nCardsPerType, that.nCardsPerType) && Arrays.equals(valueDumpling, that.valueDumpling);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), dataPath, nRounds, nCardsPerType, valueMakiMost, valueMakiSecond, valueTempuraPair, valueSashimiTriss, valueSquidNigiri, valueSalmonNigiri, valueEggNigiri, multiplierWasabi, valuePuddingMost, valuePuddingLeast, nCards);
+        int result = Objects.hash(super.hashCode(), dataPath, nRounds, nCardsPerType, valueMakiMost, valueMakiSecond, valueTempuraPair, valueSashimiTriple, valueSquidNigiri, valueSalmonNigiri, valueEggNigiri, multiplierWasabi, valuePuddingMost, valuePuddingLeast, nCards);
         result = 31 * result + Arrays.hashCode(valueDumpling);
         return result;
     }

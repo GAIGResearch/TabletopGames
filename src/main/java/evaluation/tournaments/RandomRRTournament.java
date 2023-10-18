@@ -25,8 +25,8 @@ public class RandomRRTournament extends RoundRobinTournament {
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                               TournamentMode tournamentMode, int totalMatchUps, int reportPeriod, long seed,
-                              AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams);
+                              AbstractParameters gameParams, boolean byTeam) {
+        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams, byTeam);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
@@ -41,9 +41,10 @@ public class RandomRRTournament extends RoundRobinTournament {
      */
     @Override
     public void createAndRunMatchUp(List<Integer> ignored) {
+        int nTeams = game.getGameState().getNTeams();
         for (int i = 0; i < totalMatchups; i++) {
-            List<Integer> matchup = new ArrayList<>(this.nPlayers);
-            for (int j = 0; j < this.nPlayers; j++)
+            List<Integer> matchup = new ArrayList<>(nTeams);
+            for (int j = 0; j < nTeams; j++)
                 matchup.add(idStream.getAsInt());
             evaluateMatchUp(matchup);
             if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1) {

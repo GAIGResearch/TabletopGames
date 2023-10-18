@@ -12,9 +12,16 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSPlayer;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCParams;
+import players.rmhc.RMHCPlayer;
+import players.simple.FirstActionPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -26,6 +33,8 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static games.GameType.*;
 
 
 public class Game {
@@ -109,63 +118,60 @@ public class Game {
             AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
-        if (game != null) {
-
-            if (listeners != null) {
-                Set<String> agentNames = players.stream()
-                        //           .peek(a -> System.out.println(a.toString()))
-                        .map(AbstractPlayer::toString).collect(Collectors.toSet());
-
-                for (IGameListener gameTracker : listeners) {
-                    gameTracker.init(game, players.size(), agentNames);
-                    game.addListener(gameTracker);
-                }
-            }
-
-            // Randomize parameters
-            if (randomizeParameters) {
-                AbstractParameters gameParameters = game.getGameState().getGameParameters();
-                gameParameters.randomize();
-                System.out.println("Parameters: " + gameParameters);
-            }
-
-            // Reset game instance, passing the players for this game
-            game.reset(players);
-            game.setTurnPause(turnPause);
-
-            if (ac != null) {
-                // We spawn the GUI off in another thread
-
-                GUI frame = new GUI();
-                GamePanel gamePanel = new GamePanel();
-                frame.setContentPane(gamePanel);
-
-                AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
-
-                frame.setFrameProperties();
-                frame.validate();
-                frame.pack();
-
-                // Video recording setup
-                if (game.recordingVideo) {
-                    game.areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
-                }
-
-                Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
-                guiUpdater.start();
-
-                game.run();
-                guiUpdater.stop();
-                // and update GUI to final game state
-                game.updateGUI(gui, frame);
-
-            } else {
-
-                // Run!
-                game.run();
-            }
-        } else {
+        if (game == null)
             System.out.println("Error game: " + gameToPlay);
+
+        if (listeners != null) {
+            Set<String> agentNames = players.stream()
+                    //           .peek(a -> System.out.println(a.toString()))
+                    .map(AbstractPlayer::toString).collect(Collectors.toSet());
+
+            for (IGameListener gameTracker : listeners) {
+                gameTracker.init(game, players.size(), agentNames);
+                game.addListener(gameTracker);
+            }
+        }
+
+        // Randomize parameters
+        if (randomizeParameters) {
+            AbstractParameters gameParameters = game.getGameState().getGameParameters();
+            gameParameters.randomize();
+            System.out.println("Parameters: " + gameParameters);
+        }
+
+        // Reset game instance, passing the players for this game
+        game.reset(players);
+        game.setTurnPause(turnPause);
+
+        if (ac != null) {
+            // We spawn the GUI off in another thread
+
+            GUI frame = new GUI();
+            GamePanel gamePanel = new GamePanel();
+            frame.setContentPane(gamePanel);
+
+            AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+
+            frame.setFrameProperties();
+            frame.validate();
+            frame.pack();
+
+            // Video recording setup
+            if (game.recordingVideo) {
+                game.areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
+            }
+
+            Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
+            guiUpdater.start();
+
+            game.run();
+            guiUpdater.stop();
+            // and update GUI to final game state
+            game.updateGUI(gui, frame);
+
+        } else {
+            // Run!
+            game.run();
         }
 
         return game;
@@ -219,7 +225,7 @@ public class Game {
                 } else {
                     break;
                 }
-                // System.out.println("Game " + i + "/" + nRepetitions);
+//                System.out.println("Game " + i + "/" + nRepetitions);
             }
 
             if (game != null) {
@@ -359,6 +365,15 @@ public class Game {
             this.players = players;
         } else if (players.isEmpty()) {
             // keep existing players
+        } else if (players.size() == gameState.nTeams){
+            this.players = new ArrayList<>();
+            // In this case we use (copies of) each agent for all players on the team
+            // loop over each player; find out what team they are in; and add an agent copy
+            for (int i = 0; i < gameState.getNPlayers(); i++) {
+                int team = gameState.getTeam(i);
+                AbstractPlayer player = players.get(team);
+                this.players.add(player.copy());
+            }
         } else
             throw new IllegalArgumentException("PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
         int id = 0;
@@ -816,7 +831,14 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+
+//        RMHCParams params = new RMHCParams();
+//        params.horizon = 15;
+//        params.discountFactor = 0.99;
+//        params.heuristic = AbstractGameState::getHeuristicScore;
+//        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+//        players.add(rmhcPlayer);
 
 //        MCTSParams params = new MCTSParams();
 //        players.add(new MCTSPlayer(params));
@@ -834,12 +856,9 @@ public class Game {
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.add(GameType.Stratego);
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, true, null, turnPause);
+//        ArrayList<GameType> games = new ArrayList<>();
+//        games.add(Connect4);
+//        runMany(games, players, 100L, 5, false, false, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 
