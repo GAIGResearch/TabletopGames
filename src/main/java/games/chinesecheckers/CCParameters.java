@@ -12,15 +12,16 @@ public class CCParameters extends AbstractParameters {
         super(seed);
     }
 
-    // These are the colours of the base nodes for each player (where they need to get to)
+    // These are the colours of the base/target nodes for each player (where they need to get to)
+    // To find the starting nodes, look at the colour from boardOpposites
     public Map<Peg.Colour, int[]> colourIndices = new HashMap<>();
     {
         colourIndices.put(Peg.Colour.red, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         colourIndices.put(Peg.Colour.purple, new int[]{111, 112, 113, 114, 115, 116, 117, 118, 119, 120});
-        colourIndices.put(Peg.Colour.blue, new int[]{65, 75, 76, 86, 87, 88, 98, 99, 100, 101});
-        colourIndices.put(Peg.Colour.yellow, new int[]{10, 11, 12, 13, 23, 24, 25, 35, 36, 46});
-        colourIndices.put(Peg.Colour.orange, new int[]{19, 20, 21, 22, 32, 33, 34, 44, 45, 55});
-        colourIndices.put(Peg.Colour.green, new int[]{74, 84, 85, 95, 96, 97, 107, 108, 109, 110});
+        colourIndices.put(Peg.Colour.orange, new int[]{65, 75, 76, 86, 87, 88, 98, 99, 100, 101});
+        colourIndices.put(Peg.Colour.green, new int[]{10, 11, 12, 13, 23, 24, 25, 35, 36, 46});
+        colourIndices.put(Peg.Colour.blue, new int[]{19, 20, 21, 22, 32, 33, 34, 44, 45, 55});
+        colourIndices.put(Peg.Colour.yellow, new int[]{74, 84, 85, 95, 96, 97, 107, 108, 109, 110});
     }
 
     public Map<Peg.Colour, Peg.Colour> boardOpposites = new HashMap<>();

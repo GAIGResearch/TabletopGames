@@ -70,7 +70,6 @@ public class CCForwardModel extends StandardForwardModel {
     }
 
     private List<AbstractAction> loadPlayerActions(int player, CCGameState state) {
-        // Player Purple
         //player index to colour
         Peg.Colour playerCol = state.getPlayerColour(player);
         List<AbstractAction> actions = new ArrayList<>();
@@ -94,7 +93,7 @@ public class CCForwardModel extends StandardForwardModel {
         List<AbstractAction> actions = new ArrayList<>();
         for (CCNode nei_0 : node.getNeighbours()) {
             if (nei_0.isNodeOccupied()) {
-                repeatAction(node, actions, playerCol, state);
+                repeatAction(node, actions, playerCol);
             } else if (isColourInPlay(nei_0.getBaseColour(), state)) {
                 if (node.getOccupiedPeg().getInDestination()) {
                     if (nei_0.getBaseColour() != Peg.Colour.neutral) {
@@ -114,7 +113,7 @@ public class CCForwardModel extends StandardForwardModel {
         return actions;
     }
 
-    private static void repeatAction(CCNode node, List<AbstractAction> actions, Peg.Colour playerCol, CCGameState state) {
+    private static void repeatAction(CCNode node, List<AbstractAction> actions, Peg.Colour playerCol) {
         HashSet<CCNode> visited = new HashSet<>();
         HashSet<CCNode> toVisit = new HashSet<>();
         toVisit.add(node);

@@ -117,7 +117,7 @@ public class StarboardTests {
                         state.getStarBoard().getBoardNodes().get(i).getOccupiedPeg().getColour());
             }
             // Check for YELLOW pegs
-            int[] yellowIndices = {74, 84, 85, 95, 96, 97, 107, 108, 109, 110};
+            int[] yellowIndices = {10, 11, 12, 13, 23, 24, 25, 35, 36, 46};
             for (int index : yellowIndices) {
                 assertEquals("Peg at index " + index + " should be YELLOW for a six-player game",
                         Peg.Colour.yellow,
@@ -130,21 +130,21 @@ public class StarboardTests {
                         state.getStarBoard().getBoardNodes().get(i).getOccupiedPeg().getColour());
             }
             // Check for ORANGE pegs
-            int[] orangeIndices = {65, 75, 76, 86, 87, 88, 98, 99, 100, 101};
+            int[] orangeIndices = {19, 20, 21, 22, 32, 33, 34, 44, 45, 55};
             for (int index : orangeIndices) {
                 assertEquals("Peg at index " + index + " should be ORANGE for a six-player game",
                         Peg.Colour.orange,
                         state.getStarBoard().getBoardNodes().get(index).getOccupiedPeg().getColour());
             }
             // Check for GREEN pegs
-            int[] greenIndices = {10, 11, 12, 13, 23, 24, 25, 35, 36, 46};
+            int[] greenIndices = {74, 84, 85, 95, 96, 97, 107, 108, 109, 110};
             for (int index : greenIndices) {
                 assertEquals("Peg at index " + index + " should be GREEN for a six-player game",
                         Peg.Colour.green,
                         state.getStarBoard().getBoardNodes().get(index).getOccupiedPeg().getColour());
             }
             // Check for BLUE pegs
-            int[] blueIndices = {19, 20, 21, 22, 32, 33, 34, 44, 45, 55};
+            int[] blueIndices = {65, 75, 76, 86, 87, 88, 98, 99, 100, 101};
             for (int index : blueIndices) {
                 assertEquals("Peg at index " + index + " should be BLUE for a six-player game",
                         Peg.Colour.blue,
