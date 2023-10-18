@@ -24,14 +24,14 @@ abstract class TreeNode {
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     // Parameters guiding the search
-    protected MCTSPlayer player;
+    protected GroupMMCTSPlayer player;
     private Random rnd;
     private RandomPlayer randomPlayer = new RandomPlayer();
 
     // State in this node (closed loop)
     protected AbstractGameState state;
 
-    protected TreeNode(MCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
+    protected TreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
         this.parent = parent;
@@ -96,6 +96,51 @@ abstract class TreeNode {
             }
         }
     }
+
+    /**
+     * Calculates the best action from the root according to algorithm
+     *
+     * @return - the best AbstractAction
+     */
+    AbstractAction bestAction(){
+        double bestValue = -Double.MAX_VALUE;
+        AbstractAction bestAction = null;
+
+        for (AbstractAction action : children.keySet()) {
+            if (children.get(action) != null) {
+                TreeNode child = children.get(action);
+                double childValue = getChildValue(child, false);
+
+                // Save best value
+                if (childValue > bestValue) {
+                    bestValue = childValue;
+                    bestAction = action;
+                }
+            }
+        }
+
+        if (bestAction == null) {
+            throw new AssertionError("Unexpected - no selection made.");
+        }
+
+        return bestAction;
+    }
+    
+    /**
+     * Returns the value of the child node according to the tree policy
+     * @param child the child node to evaluate
+     * @param isExpanding true if evaluating during the expansion step, false if evaluating for the best action
+     * @return the value of the node according to the tree policy
+     */
+    abstract double getChildValue(TreeNode child, boolean isExpanding);
+
+    /**
+     * Back up the value of the child through all parents.
+     *
+     * @param result - value of rollout to backup
+     */
+    abstract void backUp(double result);
+
 
     /**
      * Selection + expansion steps.
@@ -212,25 +257,32 @@ abstract class TreeNode {
         return !rollerState.isNotTerminal();
     }
 
-    /**
-     * Selects the action to take from the current node.
-     * Must handle the explore/exploit dilemma
-     * @return the action
-     */
-    abstract AbstractAction selectAction();
+    private AbstractAction selectAction() {
+     AbstractAction bestAction = null;
+     double bestValue = -Double.MAX_VALUE;
 
-    /**
-     * Back up the value of the child through all parents.
-     *
-     * @param result - value of rollout to backup
-     */
-    abstract void backUp(double result);
+     for (AbstractAction action : children.keySet()) {
+        TreeNode child = (TreeNode) children.get(action);
+         if (child == null)
+             throw new AssertionError("Should not be here");
+         else if (bestAction == null)
+             bestAction = action;
 
-    /**
-     * Calculates the best action from the root according to algorithm
-     *
-     * @return - the best AbstractAction
-     */
-    abstract AbstractAction bestAction();
+         double childValue = getChildValue(child, true);
+
+         // Assign value
+         if (childValue > bestValue) {
+             bestAction = action;
+             bestValue = childValue;
+         }
+     }
+
+     if (bestAction == null)
+         throw new AssertionError("No action selected!");
+
+     root.fmCallsCount++;  // log one iteration complete
+     return bestAction;
+    }
+    
 
 }

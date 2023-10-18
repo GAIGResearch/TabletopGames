@@ -14,19 +14,19 @@ import java.util.Random;
  * It strips out some of the additional configuration of MCTSPlayer. It uses BasicTreeNode in place of
  * SingleTreeNode.
  */
-public class MCTSPlayer extends AbstractPlayer {
+public class GroupMMCTSPlayer extends AbstractPlayer {
 
     Random rnd;
-    MCTSParams params;
+    GroupMMCTSParams params;
 
-    public MCTSPlayer() {
+    public GroupMMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
-    public MCTSPlayer(long seed) {
-        this.params = new MCTSParams(seed);
+    public GroupMMCTSPlayer(long seed) {
+        this.params = new GroupMMCTSParams(seed);
         rnd = new Random(seed);
-        setName("Basic MCTS");
+        setName(this.params.name);
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
         this.params.K = Math.sqrt(2);
@@ -36,10 +36,10 @@ public class MCTSPlayer extends AbstractPlayer {
 
     }
 
-    public MCTSPlayer(MCTSParams params) {
+    public GroupMMCTSPlayer(GroupMMCTSParams params) {
         this.params = params;
         rnd = new Random(params.getRandomSeed());
-        setName("Basic MCTS");
+        setName(this.params.name);
     }
 
     @Override
@@ -62,11 +62,11 @@ public class MCTSPlayer extends AbstractPlayer {
 
     @Override
     public String toString() {
-        return "BasicMCTS";
+        return this.params.name;
     }
 
     @Override
-    public MCTSPlayer copy() {
+    public GroupMMCTSPlayer copy() {
         return this;
     }
 }

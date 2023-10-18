@@ -10,7 +10,7 @@ public class TreeNodeFactory {
         this.exporationStrategy= exporationStrategy;
     }
 
-    public TreeNode createNode(MCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd){
+    public TreeNode createNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd){
         if(exporationStrategy == MCTSEnums.ExplorationStrategy.UCB1){
             return new UCB1TreeNode(player, parent, state, rnd);
         }
