@@ -48,10 +48,16 @@ public class HeartsGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
-            addAll(playerDecks);
-            add(drawDeck);
-        }};
+
+        List<Component> retValue = new ArrayList<>(playerDecks);
+        playerDecks.stream().flatMap(e -> e.getComponents().stream()).forEach(retValue::add);
+        retValue.add(drawDeck);
+        retValue.addAll(drawDeck.getComponents());
+        retValue.addAll(trickDecks);
+        trickDecks.stream().flatMap(e -> e.getComponents().stream()).forEach(retValue::add);
+        currentPlayedCards.forEach(e -> retValue.add(e.getValue()));
+
+        return retValue;
     }
 
     public enum Phase implements IGamePhase {
@@ -190,6 +196,7 @@ public class HeartsGameState extends AbstractGameState {
 
     /**
      * For Hearts a lower score is better than a high one. So we return the negative of the player's score.
+     *
      * @param playerId - player observing the state.
      * @return
      */
@@ -207,13 +214,13 @@ public class HeartsGameState extends AbstractGameState {
     }
 
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            add(drawDeck.getComponentID());
-            for (Component c : drawDeck.getComponents()) {
-                add(c.getComponentID());
-            }
-        }};
+    protected List<Integer> _getUnknownComponentsIds(int playerId) {
+        List<Integer> retValue = new ArrayList<>();
+        retValue.add(drawDeck.getComponentID());
+        for (Component c : drawDeck.getComponents()) {
+            retValue.add(c.getComponentID());
+        }
+        return retValue;
     }
 
     @Override

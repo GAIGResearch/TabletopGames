@@ -195,14 +195,10 @@ public enum GameType {
     Resistance(5, 10,
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
-            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class);
-            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
-
+            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
     Hearts(3,6,Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class);
-
-
 
 
     // Core classes where the game is defined
