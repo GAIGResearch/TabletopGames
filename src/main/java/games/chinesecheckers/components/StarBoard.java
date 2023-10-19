@@ -3,22 +3,8 @@ package games.chinesecheckers.components;
 import core.CoreConstants;
 import core.components.Component;
 import core.interfaces.IComponentContainer;
-import core.properties.Property;
-import core.properties.PropertyString;
-import core.properties.PropertyStringArray;
 import games.chinesecheckers.CCParameters;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import utilities.Hash;
-
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
-
-import static core.CoreConstants.imgHash;
-import static core.CoreConstants.nameHash;
 
 public class StarBoard extends Component implements IComponentContainer<CCNode> {
 

@@ -64,7 +64,7 @@ public class CCForwardModel extends StandardForwardModel {
      * @param playerCol
      * @return
      */
-    private static boolean isPlayerPlacable(Peg.Colour col, Peg.Colour playerCol) {
+    private static boolean isPlayerPlaceable(Peg.Colour col, Peg.Colour playerCol) {
         return col == playerCol || col == Peg.Colour.neutral ||
                 col == Peg.Colour.values()[(playerCol.ordinal() + 3) % 6]; //opposite
     }
@@ -91,10 +91,9 @@ public class CCForwardModel extends StandardForwardModel {
     private static List<AbstractAction> exploreNodeAction(CCNode node, CCGameState state) {
         Peg.Colour playerCol = node.getOccupiedPeg().getColour();
         List<AbstractAction> actions = new ArrayList<>();
+        // first get the single directly adjacent moves
         for (CCNode nei_0 : node.getNeighbours()) {
-            if (nei_0.isNodeOccupied()) {
-                repeatAction(node, actions, playerCol);
-            } else if (isColourInPlay(nei_0.getBaseColour(), state)) {
+            if (!nei_0.isNodeOccupied() && isPlayerPlaceable(nei_0.getBaseColour(), playerCol)) {
                 if (node.getOccupiedPeg().getInDestination()) {
                     if (nei_0.getBaseColour() != Peg.Colour.neutral) {
                         MovePeg action = new MovePeg(node.getID(), nei_0.getID());
@@ -110,6 +109,8 @@ public class CCForwardModel extends StandardForwardModel {
                 }
             }
         }
+        // then get the jumping stuff
+        repeatAction(node, actions, playerCol);
         return actions;
     }
 
@@ -118,18 +119,22 @@ public class CCForwardModel extends StandardForwardModel {
         HashSet<CCNode> toVisit = new HashSet<>();
         toVisit.add(node);
 
-        Peg.Colour oppositeCol = Peg.Colour.values()[(playerCol.ordinal() + 3) % 6];
+        // This should be looking for a chain of moves, without revisiting previous nodes
+        // that starts at the given node. Hence (if true), it should only be called once per peg
+        // and not once per neighbouring peg
+
         while (!toVisit.isEmpty()) {
             CCNode expNode = toVisit.iterator().next();
             visited.add(expNode);
             toVisit.remove(expNode);
-            boolean canLeaveZone = expNode.getBaseColour() != oppositeCol;
+            // once in target zone, a peg may not leave it
+            boolean canLeaveZone = expNode.getBaseColour() != playerCol;
             for (CCNode neighbour : expNode.getNeighbours()) {
                 int side = expNode.getNeighbourSideMapping().get(neighbour);
                 if (neighbour.isNodeOccupied()) {
                     CCNode stride = neighbourInDirection(neighbour, side);
                     if (stride != null && !stride.isNodeOccupied() &&
-                            (canLeaveZone || stride.getBaseColour() == oppositeCol) &&
+                            (canLeaveZone || stride.getBaseColour() == playerCol) &&
                             !visited.contains(stride)) {
                         toVisit.add(stride);
                     }
@@ -137,7 +142,7 @@ public class CCForwardModel extends StandardForwardModel {
             }
         }
         visited.remove(node);
-        visited.removeIf(n -> (!isPlayerPlacable(n.getBaseColour(), playerCol)));
+        visited.removeIf(n -> (!isPlayerPlaceable(n.getBaseColour(), playerCol)));
         for (CCNode v : visited) {
             MovePeg action = new MovePeg(node.getID(), v.getID());
             if (!actions.contains(action)) {
