@@ -2,8 +2,10 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
+import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
 import utilities.Pair;
 
@@ -17,8 +19,8 @@ import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
 
 public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
-    public final TournamentMode tournamentMode;
-    private final int gamesPerMatchUp;
+    public TournamentMode tournamentMode;
+    private int gamesPerMatchUp;
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
     double[] pointsPerPlayer, winsPerPlayer;
@@ -33,11 +35,12 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> allAgentIds;
     private int totalGamesRun;
     protected boolean randomGameParams;
-    public final String name;
+    public String name;
     public boolean byTeam;
 
     protected long randomSeed = System.currentTimeMillis();
     private int[] gameSeeds;
+    boolean tournamentPerGameSeed = false;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -45,14 +48,13 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param agents          - players for the tournament.
      * @param gameToPlay      - game to play in this tournament.
      * @param playersPerGame  - number of players per game.
-     * @param gamesPerMatchUp - number of games for each combination of players.
-     * @param mode            - SELF_PLAY, NO_SELF_PLAY, or ONE_VS_ALL
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, TournamentMode mode, AbstractParameters gameParams, boolean byTeam) {
-        super(mode, agents, gameToPlay, playersPerGame, gameParams);
+                                AbstractParameters gameParams, TournamentMode tournamentMode,
+                                Map<RunArg, Object> config) {
+        super(tournamentMode, agents, gameToPlay, playersPerGame, gameParams);
         int nTeams = game.getGameState().getNTeams();
-        if (mode == NO_SELF_PLAY && nTeams > this.agents.size()) {
+        if (tournamentMode == NO_SELF_PLAY && nTeams > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or allow self-play.");
         }
@@ -61,8 +63,8 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.agents.size(); i++)
             this.allAgentIds.add(i);
 
-        this.gamesPerMatchUp = gamesPerMatchUp;
-        this.tournamentMode = mode;
+        this.gamesPerMatchUp = (int) config.get(RunArg.matchups);
+        this.tournamentMode = tournamentMode;
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
@@ -76,8 +78,10 @@ public class RoundRobinTournament extends AbstractTournament {
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
         this.gamesPerPlayer = new int[agents.size()];
-        this.byTeam = byTeam;
-        this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s", gameToPlay.name(), playersPerGame, gamesPerMatchUp, mode.name());
+        this.byTeam = (boolean) config.get(RunArg.byTeam);
+        this.tournamentPerGameSeed = (boolean) config.get(RunArg.distinctRandomSeeds);
+        this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s",
+                gameToPlay.name(), playersPerGame, gamesPerMatchUp, tournamentMode.name());
     }
 
     /**

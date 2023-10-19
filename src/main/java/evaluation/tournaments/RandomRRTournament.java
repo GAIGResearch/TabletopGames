@@ -2,6 +2,7 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 
@@ -24,11 +25,13 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param playersPerGame  - number of players per game.
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              TournamentMode tournamentMode, int totalMatchUps, int reportPeriod, long seed,
-                              AbstractParameters gameParams, boolean byTeam) {
-        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams, byTeam);
-        this.totalMatchups = totalMatchUps;
-        this.reportPeriod = reportPeriod;
+                              AbstractParameters gameParams, TournamentMode tournamentMode, Map<RunArg, Object> config) {
+
+                              // int totalMatchUps, int reportPeriod, long seed,                              , boolean byTeam) {
+        super(agents, gameToPlay, playersPerGame,  gameParams, tournamentMode, config);
+        this.totalMatchups = (int) config.get(RunArg.matchups);
+        this.reportPeriod = config.get(RunArg.reportPeriod) == null ? 0 : (int) config.get(RunArg.reportPeriod);
+        long seed = (long) config.get(RunArg.seed);
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
     }
 

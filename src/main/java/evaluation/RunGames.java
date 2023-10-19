@@ -42,9 +42,8 @@ public class RunGames implements IGameRunner {
     // Vars for running
     Map<GameType, int[]> gamesAndPlayerCounts;
     private LinkedList<AbstractPlayer> agents;
-    private AbstractPlayer focus;
-    private AbstractTournament.TournamentMode tournamentMode;
     private String timeDir;
+    AbstractTournament.TournamentMode tournamentMode;
 
     /**
      * Main function, creates and runs the tournament with the given settings and players.
@@ -94,16 +93,14 @@ public class RunGames implements IGameRunner {
         }
         runGames.agents = agents;
 
-        runGames.focus = null;
-        if (!runGames.config.get(focusPlayer).equals("")) {
-            runGames.config.put(mode, "exhaustive"); // this is irrelevant in this case
-            runGames.focus = PlayerFactory.createPlayer((String) runGames.config.get(focusPlayer));
-            agents.add(0, runGames.focus);  // convention is that they go first in the list of agents
-        }
-
         runGames.tournamentMode = ((boolean) runGames.config.get(selfPlay)) ? SELF_PLAY : NO_SELF_PLAY;
-        if (runGames.focus != null)
+        if (!runGames.config.get(focusPlayer).equals("")) {
+            // if a focus Player is provided, then this override some other settings
+            runGames.config.put(mode, "exhaustive"); // this is irrelevant in this case
+            AbstractPlayer fp = PlayerFactory.createPlayer((String) runGames.config.get(focusPlayer));
+            agents.add(0, fp);  // convention is that they go first in the list of agents
             runGames.tournamentMode = ONE_VS_ALL;
+        }
 
         runGames.timeDir = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
@@ -131,9 +128,8 @@ public class RunGames implements IGameRunner {
                 AbstractParameters params = config.get(gameParams).equals("") ? null : AbstractParameters.createFromFile(gameType, (String) config.get(gameParams));
 
                 RoundRobinTournament tournament = config.get(mode).equals("exhaustive") || tournamentMode == ONE_VS_ALL ?
-                        new RoundRobinTournament(agents, gameType, playerCount, (int) config.get(matchups), tournamentMode, params, (boolean) config.get(byTeam)) :
-                        new RandomRRTournament(agents, gameType, playerCount, tournamentMode, (int) config.get(matchups), (int) config.get(reportPeriod),
-                                System.currentTimeMillis(), params, (boolean) config.get(byTeam));
+                        new RoundRobinTournament(agents, gameType, playerCount, params, tournamentMode, config) :
+                        new RandomRRTournament(agents, gameType, playerCount, params, tournamentMode, config);
 
                 // Add listeners
                 //noinspection unchecked

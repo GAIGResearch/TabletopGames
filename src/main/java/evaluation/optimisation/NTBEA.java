@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RoundRobinTournament;
 import org.apache.commons.math3.util.CombinatoricsUtils;
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.byTeam;
+import static evaluation.RunArg.matchups;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
 import static java.util.stream.Collectors.joining;
 
@@ -150,14 +153,17 @@ public class NTBEA {
             // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
             // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
             //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
-            int nTeams = params.byTeam ?  game.createGameInstance(nPlayers).getGameState().getNTeams() : nPlayers;
+            int nTeams = params.byTeam ? game.createGameInstance(nPlayers).getGameState().getNTeams() : nPlayers;
             long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nTeams);
             int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
             if (params.verbose)
                 System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
                         gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
-
-            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams, params.byTeam);
+            Map<RunArg, Object> config = new HashMap<>();
+            config.put(matchups, gamesPerMatchup);
+            config.put(byTeam, false);
+            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
+                    NO_SELF_PLAY, config);
             tournament.verbose = false;
             createListeners().forEach(tournament::addListener);
             tournament.run();
@@ -192,7 +198,7 @@ public class NTBEA {
                 double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
                 double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
                 if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
-                   if (params.verbose)
+                    if (params.verbose)
                         System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
                     bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
                 }

@@ -90,7 +90,7 @@ public enum RunArg {
             "\t 'random' will have a random matchup, while ensuring no duplicates, and that all players get the\n" +
             "\t the same number of games in total.\n" +
             "\t 'sequential' will run tournament on a ONE_VS_ALL basis between each pair of agents.\n" +
-            "\t If a focusPlayer is provided, then this is ignored.",
+            "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
     nPlayers("The number of players in each game. Overrides playerRange.",
@@ -126,6 +126,10 @@ public enum RunArg {
     reportPeriod("(Optional) For random mode execution only, after how many games played results are reported.\n" +
             "\t Defaults to the end of the tournament (-1)",
             -1,
+            new Usage[]{Usage.RunGames}),
+    distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
+            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.",
+            0,
             new Usage[]{Usage.RunGames}),
     searchSpace("The json-format file of the search space to use. No default.",
             "",
