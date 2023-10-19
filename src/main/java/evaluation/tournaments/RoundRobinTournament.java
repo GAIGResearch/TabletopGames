@@ -40,14 +40,16 @@ public class RoundRobinTournament extends AbstractTournament {
 
     protected long randomSeed = System.currentTimeMillis();
     private int[] gameSeeds;
-    boolean tournamentPerGameSeed = false;
+    int tournamentSeeds;
+    Random seedRnd = new Random(randomSeed);
+
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
      *
-     * @param agents          - players for the tournament.
-     * @param gameToPlay      - game to play in this tournament.
-     * @param playersPerGame  - number of players per game.
+     * @param agents         - players for the tournament.
+     * @param gameToPlay     - game to play in this tournament.
+     * @param playersPerGame - number of players per game.
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 AbstractParameters gameParams, TournamentMode tournamentMode,
@@ -79,7 +81,7 @@ public class RoundRobinTournament extends AbstractTournament {
         this.rankPerPlayerSquared = new double[agents.size()];
         this.gamesPerPlayer = new int[agents.size()];
         this.byTeam = (boolean) config.get(RunArg.byTeam);
-        this.tournamentPerGameSeed = (boolean) config.get(RunArg.distinctRandomSeeds);
+        this.tournamentSeeds = (int) config.get(RunArg.distinctRandomSeeds);
         this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s",
                 gameToPlay.name(), playersPerGame, gamesPerMatchUp, tournamentMode.name());
     }
@@ -101,6 +103,8 @@ public class RoundRobinTournament extends AbstractTournament {
             gameTracker.init(game, nPlayers, agentNames);
             game.addListener(gameTracker);
         }
+        gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
+
         LinkedList<Integer> matchUp = new LinkedList<>();
         createAndRunMatchUp(matchUp);
         reportResults();
@@ -108,7 +112,6 @@ public class RoundRobinTournament extends AbstractTournament {
         for (IGameListener listener : listeners)
             listener.report();
     }
-
 
     public int getWinnerIndex() {
         if (finalWinRanking == null || finalWinRanking.isEmpty())
@@ -131,55 +134,57 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param matchUp - current combination of players, updated recursively.
      */
     public void createAndRunMatchUp(List<Integer> matchUp) {
-        Random seedRnd = new Random(randomSeed);
-        gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
+
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
-        if (tournamentMode == ONE_VS_ALL) {
-            // In this case agents.get(0) must always play
-            List<Integer> agentOrder = new ArrayList<>(this.allAgentIds);
-            agentOrder.remove(Integer.valueOf(0));
-            for (int p = 0; p < nTeams; p++) {
-                // we put the focus player at each position (p) in turn
-                if (agentOrder.size() == 1) {
-                    // to reduce variance in this case we can use the same set of seeds for each case
-                    List<Integer> matchup = new ArrayList<>(nTeams);
-                    for (int j = 0; j < nTeams; j++) {
-                        if (j == p)
-                            matchup.add(0); // focus player
-                        else {
-                            matchup.add(agentOrder.get(0));
-                        }
-                    }
-                    // We split the total budget equally across the possible positions the focus player can be in
-                    // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
-                    evaluateMatchUp(matchup, gamesPerMatchUp / nTeams);
-                } else {
-                    Random rnd = new Random(System.currentTimeMillis());
-                    gameSeeds = null;
-                    for (int m = 0; m < this.gamesPerMatchUp; m++) {
-                        Collections.shuffle(agentOrder, rnd);
+        // add outer loop if we have tournamentSeeds enabled; if not this will just run once
+        for (int iter = 0; iter < Math.max(1, tournamentSeeds); iter++) {
+            if (tournamentMode == ONE_VS_ALL) {
+                // In this case agents.get(0) must always play
+                List<Integer> agentOrder = new ArrayList<>(this.allAgentIds);
+                agentOrder.remove(Integer.valueOf(0));
+                for (int p = 0; p < nTeams; p++) {
+                    // we put the focus player at each position (p) in turn
+                    if (agentOrder.size() == 1) {
+                        // to reduce variance in this case we can use the same set of seeds for each case
                         List<Integer> matchup = new ArrayList<>(nTeams);
                         for (int j = 0; j < nTeams; j++) {
                             if (j == p)
                                 matchup.add(0); // focus player
                             else {
-                                matchup.add(agentOrder.get(j % agentOrder.size()));
+                                matchup.add(agentOrder.get(0));
                             }
                         }
-                        evaluateMatchUp(matchup, 1);
+                        // We split the total budget equally across the possible positions the focus player can be in
+                        // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
+                        evaluateMatchUp(matchup, gamesPerMatchUp / nTeams);
+                    } else {
+                        Random rnd = new Random(System.currentTimeMillis());
+                        gameSeeds = null;
+                        for (int m = 0; m < this.gamesPerMatchUp; m++) {
+                            Collections.shuffle(agentOrder, rnd);
+                            List<Integer> matchup = new ArrayList<>(nTeams);
+                            for (int j = 0; j < nTeams; j++) {
+                                if (j == p)
+                                    matchup.add(0); // focus player
+                                else {
+                                    matchup.add(agentOrder.get(j % agentOrder.size()));
+                                }
+                            }
+                            evaluateMatchUp(matchup, 1);
+                        }
                     }
                 }
-            }
-        } else {
-            // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
-            if (matchUp.size() == nTeams) {
-                evaluateMatchUp(matchUp);
             } else {
-                for (Integer agentID : this.allAgentIds) {
-                    if (tournamentMode == SELF_PLAY || !matchUp.contains(agentID)) {
-                        matchUp.add(agentID);
-                        createAndRunMatchUp(matchUp);
-                        matchUp.remove(agentID);
+                // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
+                if (matchUp.size() == nTeams) {
+                    evaluateMatchUp(matchUp);
+                } else {
+                    for (Integer agentID : this.allAgentIds) {
+                        if (tournamentMode == SELF_PLAY || !matchUp.contains(agentID)) {
+                            matchUp.add(agentID);
+                            createAndRunMatchUp(matchUp);
+                            matchUp.remove(agentID);
+                        }
                     }
                 }
             }
@@ -220,10 +225,14 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
 
+        long currentSeed = seedRnd.nextInt();
         // Run the game N = gamesPerMatchUp times with these players
         for (int i = 0; i < nGames; i++) {
-            // Use the same seeds for all games in each matchup (if gameSeeds specified)
-            long currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
+            // if tournamentSeeds > 0, then we are running this many tournaments, each with a different random seed fixed for the whole tournament
+            // otherwise (the lines below), we are running a single tournament with a different random seed for each game
+            if (tournamentSeeds == 0)
+                currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
+            // unless we are running a tournament for each individual random seed
             game.reset(matchUpPlayers, currentSeed);
 
             // Randomize parameters
