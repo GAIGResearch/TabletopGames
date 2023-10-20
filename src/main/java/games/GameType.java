@@ -23,6 +23,10 @@ import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
 import games.hanabi.gui.HanabiGUIManager;
+import games.hearts.HeartsForwardModel;
+import games.hearts.HeartsGameState;
+import games.hearts.HeartsParameters;
+import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
@@ -191,7 +195,10 @@ public enum GameType {
     Resistance(5, 10,
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
-            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class);
+            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
+    Hearts(3,7,Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class);
 
 
     // Core classes where the game is defined
