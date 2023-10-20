@@ -32,7 +32,7 @@ public class PlayerParameters extends TunableParameters {
         addTunableParameter("actionSpaceStructure", ActionSpace.Structure.Default, Arrays.asList(ActionSpace.Structure.values()));
         addTunableParameter("actionSpaceFlexibility", ActionSpace.Flexibility.Default, Arrays.asList(ActionSpace.Flexibility.values()));
         addTunableParameter("actionSpaceContext", ActionSpace.Context.Default, Arrays.asList(ActionSpace.Context.values()));
-        addTunableParameter("randomSeed", System.currentTimeMillis());
+        addTunableParameter("randomSeed", (int) System.currentTimeMillis());
         addTunableParameter("epsilon", 1e-6);
     }
 
@@ -50,7 +50,7 @@ public class PlayerParameters extends TunableParameters {
 
     @Override
     public void _reset() {
-        setRandomSeed((long) getParameterValue("randomSeed"));
+        setRandomSeed( (int) getParameterValue("randomSeed"));
         budget = (int) getParameterValue("budget");
         breakMS = (int) getParameterValue("breakMS");
         noiseEpsilon = (double) getParameterValue("epsilon");
