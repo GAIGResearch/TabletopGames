@@ -27,7 +27,6 @@ public class MCTSParams extends PlayerParameters {
     public double K = Math.sqrt(2);
     public int rolloutLength = 10; // assuming we have a good heuristic
     public int maxTreeDepth = 1000; // effectively no limit
-    public double epsilon = 1e-6;
     public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
@@ -74,7 +73,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("hedgeBoltzmann", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
-        addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
@@ -116,7 +114,6 @@ public class MCTSParams extends PlayerParameters {
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
-        epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");

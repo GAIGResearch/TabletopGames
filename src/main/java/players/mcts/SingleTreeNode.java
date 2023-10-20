@@ -628,7 +628,7 @@ public class SingleTreeNode {
             double hvVal = actionTotValue(action, decisionPlayer);
 
             int actionVisits = actionVisits(action);
-            double childValue = hvVal / (actionVisits + params.epsilon);
+            double childValue = hvVal / (actionVisits + params.noiseEpsilon);
 
             // consider OMA term
             if (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA) {
@@ -664,7 +664,7 @@ public class SingleTreeNode {
 
             // default to standard UCB
             int effectiveTotalVisits = validVisitsFor(action) + 1;
-            double explorationTerm = params.K * Math.sqrt(Math.log(effectiveTotalVisits) / (actionVisits + params.epsilon));
+            double explorationTerm = params.K * Math.sqrt(Math.log(effectiveTotalVisits) / (actionVisits + params.noiseEpsilon));
             // unless we are using a variant
             switch (params.treePolicy) {
                 case AlphaGo:
@@ -673,21 +673,21 @@ public class SingleTreeNode {
                 case UCB_Tuned:
                     double range = root.highReward - root.lowReward;
                     if (range < 1e-6) range = 1e-6;
-                    double meanSq = actionSquaredValue(action, decisionPlayer) / (actionVisits + params.epsilon);
+                    double meanSq = actionSquaredValue(action, decisionPlayer) / (actionVisits + params.noiseEpsilon);
                     double standardVar = 0.25;
                     if (params.normaliseRewards) {
                         // we also need to standardise the sum of squares to calculate the variance
                         meanSq = (meanSq
                                 + root.lowReward * root.lowReward
-                                - 2 * root.lowReward * actionTotValue(action, decisionPlayer) / (actionVisits + params.epsilon)
+                                - 2 * root.lowReward * actionTotValue(action, decisionPlayer) / (actionVisits + params.noiseEpsilon)
                         ) / (range * range);
                     } else {
                         // we need to modify the standard variance as it is not on a 0..1 basis (which is where 0.25 comes from)
                         standardVar = Math.sqrt(range / 2.0);
                     }
                     double variance = Math.max(0.0, meanSq - childValue * childValue);
-                    double minTerm = Math.min(standardVar, variance + Math.sqrt(2 * Math.log(effectiveTotalVisits) / (actionVisits + params.epsilon)));
-                    explorationTerm = params.K * Math.sqrt(Math.log(effectiveTotalVisits) / (actionVisits + params.epsilon) * minTerm);
+                    double minTerm = Math.min(standardVar, variance + Math.sqrt(2 * Math.log(effectiveTotalVisits) / (actionVisits + params.noiseEpsilon)));
+                    explorationTerm = params.K * Math.sqrt(Math.log(effectiveTotalVisits) / (actionVisits + params.noiseEpsilon) * minTerm);
                     break;
                 default:
                     // keep default
@@ -700,7 +700,7 @@ public class SingleTreeNode {
             uctValue = childValue + explorationTerm;
 
             // Apply small noise to break ties randomly
-            uctValue = noise(uctValue, params.epsilon, rnd.nextDouble());
+            uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
             if (Double.isNaN(uctValue))
                 throw new AssertionError("Numeric error calculating uctValue");
 
@@ -967,10 +967,10 @@ public class SingleTreeNode {
                 if (children.get(action) != null) {
                     double childValue = actionVisits(action); // if ROBUST
                     if (policy == SIMPLE)
-                        childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
+                        childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.noiseEpsilon);
 
                     // Apply small noise to break ties randomly
-                    childValue = noise(childValue, params.epsilon, rnd.nextDouble());
+                    childValue = noise(childValue, params.noiseEpsilon, rnd.nextDouble());
 
                     // Save best value
                     if (childValue > bestValue) {

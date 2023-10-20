@@ -59,7 +59,7 @@ public class MultiTreeNode extends SingleTreeNode {
             Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
             if (MAST.containsKey(a)) {
                 Pair<Integer, Double> stats = MAST.get(a);
-                return stats.b / (stats.a + params.epsilon);
+                return stats.b / (stats.a + params.noiseEpsilon);
             }
             return 0.0;
         };
