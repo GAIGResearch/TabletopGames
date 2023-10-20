@@ -25,16 +25,17 @@ import org.apache.hadoop.shaded.com.nimbusds.jose.shaded.json.JSONObject;
  */
 public class Experiment {
     // experiment config
-    public static String directory = "testing";
+    public static String directory = "amafVsFullMCTS";
     public static int nAgents = 2;
-    public static int matchups = 25;
+    public static int matchups = 100;
     public static long seed = 4567654;
 
     // Group M MCTS config
     public static String budgetType = "BUDGET_TIME";
-    public static long budget = 40;
-    public static String explorationStrategy = "UCB1";
-
+    public static long budget = 500;
+    public static String explorationStrategy = "Thompson";
+    public static boolean amaf = false;
+    public static int rolloutLength = 20;
     public static void main(String[] args){
         
         Path experimentDir = makeExperimentDir(directory);
@@ -82,7 +83,7 @@ public class Experiment {
         experimentJson.put("game", "SushiGo");
         experimentJson.put("nPlayers", 2);
         experimentJson.put("mode", "exhaustive");
-        experimentJson.put("verbose", false);
+        experimentJson.put("verbose", true);
         experimentJson.put("listener", "json/listeners/basiclistener.json");
         
         experimentJson.put("seed", seed);
@@ -92,14 +93,14 @@ public class Experiment {
         experimentJson.put("playerDirectory", experimentDir.toString()+"/agents");
 
         return writeToFile(experimentDir, "experiment.json", experimentJson);
-       
+        
     }
 
     private static boolean makeAgents(Path experimentDir, int i){
         JSONObject agentJson = new JSONObject();
         agentJson.put("class", "groupM.players.mcts.GroupMMCTSParams");
-        agentJson.put("K", 1);
-        agentJson.put("rolloutLength", 0);
+        agentJson.put("K", 1.414);
+        agentJson.put("rolloutLength", rolloutLength);
         agentJson.put("maxTreeDepth", 30);
         agentJson.put("name", "Experiment MCTS " + i);
 
@@ -108,6 +109,9 @@ public class Experiment {
         heuristic.put("class", "players.heuristics.ScoreHeuristic");
         agentJson.put("heuristic", heuristic);
         agentJson.put("explorationStrategy", explorationStrategy);
+        agentJson.put("budgetType", budgetType);
+        agentJson.put("budget", budget);
+        agentJson.put("amaf", amaf);
 
         return writeToFile(Paths.get(experimentDir+"/agents"), "agent"+i+".json", agentJson);
        
