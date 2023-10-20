@@ -103,7 +103,7 @@ public class TunableParametersTest {
 
     @Test
     public void loadSearchSpaceIncludesSubParams() {
-        String searchSpace = "src\\test\\java\\test\\evaluation\\MCTSSearch_MASTRollout.json";
+        String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_MASTRollout.json";
         ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
         assertEquals(9, itp.getSearchKeys().size());
         int MASTBoltzmannIndex = itp.getIndexOf("MASTBoltzmann");
