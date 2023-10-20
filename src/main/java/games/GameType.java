@@ -10,6 +10,10 @@ import games.cantstop.*;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.*;
 import games.catan.gui.CatanGUI;
+import games.chinesecheckers.CCForwardModel;
+import games.chinesecheckers.CCGameState;
+import games.chinesecheckers.CCParameters;
+import games.chinesecheckers.gui.CCGUIManager;
 import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
@@ -198,7 +202,11 @@ public enum GameType {
             ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
     Hearts(3,7,Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
-            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class);
+            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
+    ChineseCheckers(2, 6,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
 
 
     // Core classes where the game is defined
