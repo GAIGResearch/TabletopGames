@@ -73,9 +73,9 @@ abstract class TreeNode {
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
             TreeNode selected = treePolicy();
             // Monte carlo rollout: return value of MC rollout from the newly added node
-            double delta = selected.rollOut();
+            Rollout rollout = selected.rollOut();
             // Back up the value of the rollout through the tree
-            selected.backUp(delta);
+            rollout.backupRollout(selected);
             // Finished iteration
             numIters++;
 
@@ -96,6 +96,15 @@ abstract class TreeNode {
             }
         }
     }
+
+    /**
+     * Returns a new Rollout object that will be used to propagate values back up the tree
+     * @return Rollout
+     */
+    Rollout newRollout(){
+        return new Rollout();
+    }
+
 
     /**
      * Calculates the best action from the root according to algorithm
@@ -223,23 +232,31 @@ abstract class TreeNode {
      *
      * @return - value of rollout.
      */
-    private double rollOut() {
+    private Rollout rollOut() {
         int rolloutDepth = 0; // counting from end of tree
+        Rollout rollout = newRollout();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = state.copy();
+        boolean isMyTurn = false;
+
         if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
                 AbstractAction next = randomPlayer.getAction(rolloutState, randomPlayer.getForwardModel().computeAvailableActions(rolloutState, randomPlayer.parameters.actionSpace));
                 advance(rolloutState, next);
+                
+                // Only add action taken by us to rollout storage
+                if(isMyTurn) rollout.addAction(next);
                 rolloutDepth++;
+                isMyTurn = !isMyTurn;
             }
         }
         // Evaluate final state and return normalised score
         double value = player.params.getHeuristic().evaluateState(rolloutState, player.getPlayerID());
         if (Double.isNaN(value))
             throw new AssertionError("Illegal heuristic value - should be a number");
-        return value;
+        rollout.setResult(value);
+        return rollout;
     }
 
     /**
@@ -283,6 +300,4 @@ abstract class TreeNode {
      root.fmCallsCount++;  // log one iteration complete
      return bestAction;
     }
-    
-
 }
