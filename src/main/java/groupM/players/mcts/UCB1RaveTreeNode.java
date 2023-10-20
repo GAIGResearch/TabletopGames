@@ -34,7 +34,6 @@ public class UCB1RaveTreeNode extends UCB1TreeNode implements IAmafBackup{
         double raveValue = RAVE.getValue(this.player.params.amafV, this.nVisits, qValue, amafValue);
         
         boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
-        // TODO: this used to be done after
         raveValue = iAmMoving ? raveValue : - raveValue;
         
         return raveValue + explorationTerm;
