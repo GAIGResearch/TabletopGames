@@ -74,13 +74,14 @@ public class HeartsForwardModel extends StandardForwardModel {
 
     public void _afterAction(AbstractGameState gameState, AbstractAction action) {
         HeartsGameState hgs = (HeartsGameState) gameState;
+        HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
 
         if (hgs.getGamePhase() == HeartsGameState.Phase.PASSING) {
             if (action instanceof Pass) {
 
                 // Check if current player has passed 3 cards
                 int cardsPassed = hgs.pendingPasses.get(hgs.getCurrentPlayer()).size();
-                if (cardsPassed == 3) {
+                if (cardsPassed == params.cardsPassedPerRound) {
                     // Check if all players have passed their cards
                     if (hgs.pendingPasses.stream().allMatch(passes -> passes.size() == 3)) {
                         hgs.setGamePhase(HeartsGameState.Phase.PLAYING);
@@ -115,11 +116,9 @@ public class HeartsForwardModel extends StandardForwardModel {
                         // Set the first player of the PLAYING phase to be the player who has the 2 of clubs
                         for (int i = 0; i < hgs.getNPlayers(); i++) {
                             Deck<FrenchCard> playerDeck1 = hgs.playerDecks.get(i);
-                            for (FrenchCard card : playerDeck1.getComponents()) {
-                                if (card.suite == FrenchCard.Suite.Clubs && card.number == 2) {
-                                    hgs.setFirstPlayer(i);
-                                    return;
-                                }
+                            if (playerDeck1.contains(params.startingCard)) {
+                                hgs.setFirstPlayer(i);
+                                return;
                             }
                         }
                     }
@@ -201,6 +200,7 @@ public class HeartsForwardModel extends StandardForwardModel {
     }
 
     public void endTrick(HeartsGameState hgs) {
+        HeartsParameters params = (HeartsParameters) hgs.getGameParameters();
         int highestCardValue = -1;
         int winningPlayerID = -1;
         for (Map.Entry<Integer, FrenchCard> entry : hgs.currentPlayedCards) {
@@ -225,7 +225,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         // Check if all cards from player hands have been played
         if (hgs.playerDecks.stream().allMatch(deck -> deck.getSize() == 0)) {
             hgs.scorePointsAtEndOfRound();
-            boolean scoreAbove100 = hgs.playerPoints.values().stream().anyMatch(score -> score >= 100);
+            boolean scoreAbove100 = hgs.playerPoints.values().stream().anyMatch(score -> score >= params.matchScore);
 
             // If any player has reached 100 points or more, end the game
             if (scoreAbove100) {

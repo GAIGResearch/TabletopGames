@@ -25,7 +25,10 @@ public class HeartsParameters extends AbstractParameters {
     public final int heartCard = 1;
     // Could be expanded if needed to a whole sequence of 'special cards, with special scores'
     public final FrenchCard qosCard = new FrenchCard(FrenchCard.FrenchCardType.Queen, FrenchCard.Suite.Spades);
+    public final FrenchCard startingCard = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
     public final int queenOfSpades = 13;
+    public final int cardsPassedPerRound = 3;
+    public final int matchScore = 100;
 
     // Number of cards per player - index to array is nPlayers
     public int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
