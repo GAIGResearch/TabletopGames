@@ -5,21 +5,23 @@ import java.util.Random;
 import core.AbstractGameState;
 
 public class TreeNodeFactory {
-    MCTSEnums.ExplorationStrategy exporationStrategy;
-    public TreeNodeFactory(MCTSEnums.ExplorationStrategy exporationStrategy){
-        this.exporationStrategy= exporationStrategy;
+    GroupMMCTSParams params;
+    public TreeNodeFactory(GroupMMCTSParams params){
+        this.params= params;
     }
 
     public TreeNode createNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd){
-        switch(exporationStrategy){
+        boolean amaf = this.params.amaf;
+        
+        switch(this.params.exporationStrategy){
             case UCB1: 
-                return new UCB1TreeNode(player, parent, state, rnd);
+                return amaf ? new UCB1RaveTreeNode(player, parent, state, rnd) : new UCB1TreeNode(player, parent, state, rnd);
             case Thompson:
-                return new ThompsonTreeNode(player, parent, state, rnd);
+                return amaf? new RaveThompsonTreeNode(player, parent, state, rnd) : new ThompsonTreeNode(player, parent, state, rnd);
             default:
                 return new UCB1TreeNode(player, parent, state, rnd);
         }
-
     }
 }
+
 
