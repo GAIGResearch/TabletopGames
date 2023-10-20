@@ -17,6 +17,10 @@ public class PlayerParameters extends TunableParameters {
     // this is intended mainly for competition situations, in which overrunning the time limit leads to disqualification.
     // setting breakMS to some number greater than zero then adds a safety margin
     public int breakMS = 0;
+    // this is a dangerous parameter. If true then the random seed will be reset at the start of each game.
+    // otherwise the Random() object will be used from the old game, ensuring that we do not take exactly the same
+    // set of actions
+    public boolean resetSeedEachGame = false;
 
     // Heuristic
     public IStateHeuristic gameHeuristic;
@@ -33,18 +37,15 @@ public class PlayerParameters extends TunableParameters {
         addTunableParameter("actionSpaceFlexibility", ActionSpace.Flexibility.Default, Arrays.asList(ActionSpace.Flexibility.values()));
         addTunableParameter("actionSpaceContext", ActionSpace.Context.Default, Arrays.asList(ActionSpace.Context.values()));
         addTunableParameter("randomSeed", (int) System.currentTimeMillis());
+        addTunableParameter("resetSeedEachGame", false);
         addTunableParameter("epsilon", 1e-6);
     }
 
     @Override
     protected PlayerParameters _copy() {
         PlayerParameters params = new PlayerParameters(getRandomSeed());
-        params.noiseEpsilon = noiseEpsilon;
-        params.budgetType = budgetType;
-        params.budget = budget;
-        params.breakMS = breakMS;
+        // only need to copy fields that are not Tuned (those are done in the super class)
         params.gameHeuristic = gameHeuristic;
-        params.actionSpace = actionSpace;
         return params;
     }
 
@@ -52,6 +53,7 @@ public class PlayerParameters extends TunableParameters {
     public void _reset() {
         setRandomSeed( (int) getParameterValue("randomSeed"));
         budget = (int) getParameterValue("budget");
+        resetSeedEachGame = (boolean) getParameterValue("resetSeedEachGame");
         breakMS = (int) getParameterValue("breakMS");
         noiseEpsilon = (double) getParameterValue("epsilon");
         budgetType = (PlayerConstants) getParameterValue("budgetType");
@@ -77,4 +79,6 @@ public class PlayerParameters extends TunableParameters {
     public Object instantiate() {
         return null;
     }
+
+
 }

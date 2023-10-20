@@ -458,7 +458,7 @@ public class SingleTreeNode {
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
-        Collections.shuffle(notChosen);
+        Collections.shuffle(notChosen, rnd);
 
         AbstractAction chosen = null;
 
