@@ -1,8 +1,11 @@
 package groupM.players.mcts;
 
+import java.util.Comparator;
 import java.util.Random;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
+import org.apache.hadoop.io.Text;
 
 public class ThompsonTreeNode extends TreeNode {
     protected NormalGammaDistribution dist; 
@@ -10,6 +13,11 @@ public class ThompsonTreeNode extends TreeNode {
     protected ThompsonTreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         super(player, parent, state, rnd);
         this.dist = new NormalGammaDistribution();
+    }
+
+    @Override
+    Comparator<TreeNode> getPruningComparator() {
+        return Comparator.comparing(c->((ThompsonTreeNode)c).dist.getMean());
     }
 
     @Override

@@ -12,6 +12,7 @@ import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 
 abstract class TreeNode {
+    protected int nVisits;
     // Root node of tree
     TreeNode root;
     // Parent of this node
@@ -31,6 +32,8 @@ abstract class TreeNode {
     // State in this node (closed loop)
     protected AbstractGameState state;
 
+    protected boolean pruned;
+
     protected TreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         this.player = player;
         this.fmCallsCount = 0;
@@ -44,6 +47,7 @@ abstract class TreeNode {
         }
         this.rnd = rnd;
         randomPlayer.setForwardModel(player.getForwardModel());
+        pruned = false;
     }
 
     /**
@@ -79,6 +83,9 @@ abstract class TreeNode {
             // Finished iteration
             numIters++;
 
+            if(player.params.prune) {
+                pruneChildren();
+            }
             // Check stopping condition
             PlayerConstants budgetType = player.params.budgetType;
             if (budgetType == BUDGET_TIME) {
@@ -97,6 +104,29 @@ abstract class TreeNode {
         }
     }
 
+    abstract Comparator<TreeNode> getPruningComparator();
+
+    List<AbstractAction> unprunedActions() {
+        return children.keySet().stream().filter(a->(children.get(a) == null || !children.get(a).pruned)).collect(toList());
+    }
+
+    List<TreeNode> unprunedNodes() {
+        return children.values().stream().filter(a->!a.pruned).collect(toList());
+    }
+
+    private void pruneChildren() {
+        long childLog = Math.round(this.player.params.pruneAlpha*Math.log(children.size()));
+        long retainedChildren =
+                Math.max(childLog,this.player.params.minRetained);
+        List<TreeNode> childNodes = unprunedNodes();
+        childNodes.sort(getPruningComparator());
+        Iterator<TreeNode> childIt = childNodes.iterator();
+        while(unprunedActions().size() > retainedChildren) {
+            TreeNode node = childIt.next();
+            node.pruned = node.nVisits>=20;
+        }
+    }
+
     /**
      * Returns a new Rollout object that will be used to propagate values back up the tree
      * @return Rollout
@@ -104,7 +134,6 @@ abstract class TreeNode {
     Rollout newRollout(){
         return new Rollout();
     }
-
 
     /**
      * Calculates the best action from the root according to algorithm
@@ -278,7 +307,7 @@ abstract class TreeNode {
      AbstractAction bestAction = null;
      double bestValue = -Double.MAX_VALUE;
 
-     for (AbstractAction action : children.keySet()) {
+     for (AbstractAction action : unprunedActions()) {
         TreeNode child = (TreeNode) children.get(action);
          if (child == null)
              throw new AssertionError("Should not be here");

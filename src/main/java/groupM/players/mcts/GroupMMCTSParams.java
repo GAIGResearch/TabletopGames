@@ -19,6 +19,10 @@ public class GroupMMCTSParams extends PlayerParameters {
     public boolean amaf;
     public int amafV;
     public String name = "GroupM MCTS";
+    public float pruneAlpha;
+    public int minRetained;
+    public boolean prune;
+
 
     public GroupMMCTSParams() {
         this(System.currentTimeMillis());
@@ -37,6 +41,9 @@ public class GroupMMCTSParams extends PlayerParameters {
 
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("explorationStrategy", MCTSEnums.ExplorationStrategy.UCB1, Arrays.asList(MCTSEnums.ExplorationStrategy.UCB1));
+        addTunableParameter("pruneAlpha", 2);
+        addTunableParameter("minRetained", 4);
+        addTunableParameter("prune", false);
         treeNodeFactory = new TreeNodeFactory(this);    
     }
 
