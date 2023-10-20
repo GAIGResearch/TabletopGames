@@ -1,57 +1,54 @@
 package groupM.players.mcts;
 
 import java.util.Random;
+
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+
 import static utilities.Utils.noise;
 
 import core.AbstractGameState;
 
 public class UCB1TreeNode extends TreeNode{
-    
-    // Total value of this node
-    protected double totValue;
-    // Number of visits
     protected int nVisits;
+    protected Mean mean;
 
     protected UCB1TreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         super(player, parent, state, rnd);
-        totValue = 0.0;
+        mean = new Mean();
     }
 
     void backUp(double result) {
-
         UCB1TreeNode n = this;
         while (n != null) {
             n.nVisits++;
-            n.totValue += result;
+            n.mean.increment(result);
             n = (UCB1TreeNode) n.parent;
         }
     }
 
+
     @Override
     double getChildValue(TreeNode child, boolean isExpanding) {
-         return isExpanding ? ucb1(child) : nVisitsWithNoise(child);
+        if(!isExpanding){
+            return nVisitsWithNoise(child);
+        }
+        return ucb1(child);
     }
 
 
-    private double ucb1(TreeNode child) {
+    double ucb1(TreeNode child) {
         UCB1TreeNode ucbChild = (UCB1TreeNode) child;
 
-        double hvVal = ucbChild.totValue;
-        double childValue = hvVal / (ucbChild.nVisits + player.params.epsilon);
+        double qValue = ucbChild.mean.getResult();
         double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (ucbChild.nVisits + player.params.epsilon));
-
-        // Find 'UCB' value
-        // If 'we' are taking a turn we use classic UCB
-        // If it is an opponent's turn, then we assume they are trying to minimise our score (with exploration)
+        
         boolean iAmMoving = state.getCurrentPlayer() == player.getPlayerID();
-        double uctValue = iAmMoving ? childValue : -childValue;
-        uctValue += explorationTerm;
+        qValue = iAmMoving ? qValue : - qValue;
+        qValue += explorationTerm;
 
-        // Apply small noise to break ties randomly
-        uctValue = noise(uctValue, player.params.epsilon, player.rnd.nextDouble());
-
-        return uctValue;
+        return noise(qValue, player.params.epsilon, player.rnd.nextDouble());
     }
+
     
     private double nVisitsWithNoise(TreeNode child) {
         UCB1TreeNode ucbChild = (UCB1TreeNode) child;
@@ -62,10 +59,4 @@ public class UCB1TreeNode extends TreeNode{
         childValue = noise(childValue, player.params.epsilon, player.rnd.nextDouble());
         return childValue;
     }
-
-
-
-
-
-
 }

@@ -16,6 +16,8 @@ public class GroupMMCTSParams extends PlayerParameters {
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public MCTSEnums.ExplorationStrategy exporationStrategy = MCTSEnums.ExplorationStrategy.UCB1;
     public TreeNodeFactory treeNodeFactory;
+    public boolean amaf;
+    public int amafV;
     public String name = "GroupM MCTS";
 
     public GroupMMCTSParams() {
@@ -29,10 +31,13 @@ public class GroupMMCTSParams extends PlayerParameters {
         addTunableParameter("maxTreeDepth", 100, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("name", "Group M MCTS");
+        addTunableParameter("amaf", false);
+        addTunableParameter("amafV", 20);
+
 
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("explorationStrategy", MCTSEnums.ExplorationStrategy.UCB1, Arrays.asList(MCTSEnums.ExplorationStrategy.UCB1));
-        treeNodeFactory = new TreeNodeFactory(exporationStrategy);    
+        treeNodeFactory = new TreeNodeFactory(this);    
     }
 
     @Override
@@ -42,10 +47,12 @@ public class GroupMMCTSParams extends PlayerParameters {
         rolloutLength = (int) getParameterValue("rolloutLength");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
+        amaf = (boolean) getParameterValue("amaf");
+        amafV = (int) getParameterValue("amafV");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         name = (String) getParameterValue("name");
         exporationStrategy = (MCTSEnums.ExplorationStrategy) getParameterValue("explorationStrategy");
-        treeNodeFactory = new TreeNodeFactory(exporationStrategy);    
+        treeNodeFactory = new TreeNodeFactory(this);    
     }
 
     @Override
