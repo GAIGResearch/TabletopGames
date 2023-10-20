@@ -13,6 +13,7 @@ import games.poker.components.MoneyPot;
 import utilities.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static games.poker.PokerGameState.PokerGamePhase.*;
 import static core.CoreConstants.GameResult.LOSE_GAME;
@@ -83,8 +84,17 @@ public class PokerForwardModel extends StandardForwardModel {
         while ((pgs.playerFold[bigId] || pgs.getPlayerResults()[bigId] == LOSE_GAME)) {
             bigId = (pgs.getNPlayers() + bigId + 1) % pgs.getNPlayers();
         }
-        new Bet(smallId, params.smallBlind).execute(pgs);
-        new Bet(bigId, params.bigBlind).execute(pgs);
+        if (pgs.playerMoney[smallId].getValue() < params.smallBlind) {
+            new AllIn(smallId).execute(pgs);
+        } else {
+            new Bet(smallId, params.smallBlind).execute(pgs);
+        }
+
+        if (pgs.playerMoney[bigId].getValue() < params.bigBlind) {
+            new AllIn(bigId).execute(pgs);
+        } else {
+            new Bet(bigId, params.bigBlind).execute(pgs);
+        }
 
         pgs.setGamePhase(Preflop);
         pgs.setBet(false);
@@ -101,18 +111,20 @@ public class PokerForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         // Check end of street to add more community cards
+  //      System.out.println("Executed action " + action.getString(gameState));
         PokerGameState pgs = (PokerGameState) gameState;
         PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
+
+        checkMoney(pgs);
 
         if (action instanceof Fold) {
             fold(pgs, ((Fold) action).playerId);
         }
 
         pgs.playerActStreet[pgs.getCurrentPlayer()] = true;
-
+        boolean remainingDecisions = false;
+        int stillAlive = 0;
         if ((action instanceof Fold || action instanceof Check || action instanceof Call)) {
-            boolean remainingDecisions = false;
-            int stillAlive = 0;
             for (int i = 0; i < pgs.getNPlayers(); i++) {
                 if (pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i]) {
                     stillAlive++;
@@ -154,6 +166,8 @@ public class PokerForwardModel extends StandardForwardModel {
                 }
             }
         }
+        checkMoney(pgs);
+
         if (pgs.isNotTerminal())
             endPlayerTurn(pgs);
     }
@@ -166,16 +180,30 @@ public class PokerForwardModel extends StandardForwardModel {
     private void roundEnd(PokerGameState pgs) {
         // Calculate winner of round for each of the pots, they earn the money. Ties split money equally.
 
-        Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translated = translatePokerHands(pgs);
-        HashMap<Integer, Integer> ranks = translated.a;
-        HashMap<Integer, HashSet<Integer>> hands = translated.b;
+        Pair<Map<Integer, Integer>, Map<Integer, Set<Integer>>> translated = translatePokerHands(pgs);
+        Map<Integer, Integer> ranks = translated.a;
+        Map<Integer, Set<Integer>> hands = translated.b;
 
         for (MoneyPot pot : pgs.moneyPots) {
             // Calculate winners separately for each money pot
-            HashSet<Integer> winners = getWinner(pgs, pot, ranks, hands);
-            for (int i : winners) {
-                pgs.playerMoney[i].increment(pot.getValue() / winners.size());
+            Set<Integer> winners = getWinner(pgs, pot, ranks, hands);
+            if (winners.isEmpty()) {
+                // then we return to the participants their personal contribution
+                for (int i : pot.getPlayerContribution().keySet()) {
+                    pgs.playerMoney[i].increment(pot.getPlayerContribution(i));
+                }
+            } else {
+                for (int i : winners) {
+                    pgs.playerMoney[i].increment(pot.getValue() / winners.size());
+                }
+                // We may then have a rounding error, which we give to the first winner
+                if (winners.size() > 1) {
+                    int remaining = pot.getValue() % winners.size();
+                    pgs.playerMoney[winners.iterator().next()].increment(remaining);
+                }
             }
+            // Then set pot to zero as we have transferred money
+            pot.setValue(0);
         }
 
         for (int i = 0; i < pgs.getNPlayers(); i++) {
@@ -184,25 +212,40 @@ public class PokerForwardModel extends StandardForwardModel {
                 pgs.setPlayerResult(LOSE_GAME, i);
             }
         }
+        checkMoney(pgs);
 
         // Check if game is over
         if (checkGameEnd(pgs)) return;
 
         // End previous round
         endRound(pgs, (pgs.getCurrentPlayer() + 1) % pgs.getNPlayers());
+
         Arrays.fill(pgs.playerFold, false);
 
         // Reset cards for the new round
         setupRound(pgs);
     }
 
-    public Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translatePokerHands(PokerGameState pgs) {
-        HashMap<Integer, Integer> ranks = new HashMap<>();
-        HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
+    private void checkMoney(PokerGameState pgs) {
+        int personalMoney = Arrays.stream(pgs.playerMoney).mapToInt(Counter::getValue).sum();
+        int potMoney = pgs.moneyPots.stream().mapToInt(MoneyPot::getValue).sum();
+        int expectedTotal = pgs.getNPlayers() * ((PokerGameParameters) pgs.getGameParameters()).nStartingMoney;
+    //    String potDetails = pgs.moneyPots.stream().map(MoneyPot::toString).collect(Collectors.joining(", "));
+    //    String playerMoney = Arrays.stream(pgs.playerMoney).map(Counter::toString).collect(Collectors.joining(", "));
+    //    System.out.println(potDetails + "\t" + playerMoney);
+        if (personalMoney + potMoney != expectedTotal) {
+            throw new AssertionError(String.format("Money is not conserved! %d + %d != %d", personalMoney, potMoney, expectedTotal));
+        }
+    }
+
+    public Pair<Map<Integer, Integer>, Map<Integer, Set<Integer>>> translatePokerHands(PokerGameState pgs) {
+        Map<Integer, Integer> ranks = new HashMap<>();
+        Map<Integer, Set<Integer>> hands = new HashMap<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
-                pgs.playerDecks.get(i).add(pgs.communityCards.copy());
-                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
+                Deck<FrenchCard> cardsToEvaluate = pgs.playerDecks.get(i).copy();
+                cardsToEvaluate.add(pgs.communityCards.copy());
+                Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(cardsToEvaluate);
                 if (hand != null) {
                     ranks.put(i, hand.a.rank);
                     hands.put(i, hand.b);
@@ -213,10 +256,10 @@ public class PokerForwardModel extends StandardForwardModel {
     }
 
     @SuppressWarnings("unchecked")
-    public HashSet<Integer> getWinner(PokerGameState pgs, MoneyPot pot,
-                                      HashMap<Integer, Integer> ranks, HashMap<Integer, HashSet<Integer>> hands) {
+    public Set<Integer> getWinner(PokerGameState pgs, MoneyPot pot,
+                                  Map<Integer, Integer> ranks, Map<Integer, Set<Integer>> hands) {
         // Calculate winners separately for each money pot
-        HashSet<Integer> playersInPot = new HashSet<>(pot.getPlayerContribution().keySet());
+        Set<Integer> playersInPot = new HashSet<>(pot.getPlayerContribution().keySet());
 
         int smallestRank = 11;
         for (int i : playersInPot) {
@@ -224,7 +267,7 @@ public class PokerForwardModel extends StandardForwardModel {
                 smallestRank = ranks.get(i);
             }
         }
-        HashSet<Integer> winners = new HashSet<>();
+        Set<Integer> winners = new HashSet<>();
         for (int i : playersInPot) {
             if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
                 if (ranks.get(i) == smallestRank) winners.add(i);
