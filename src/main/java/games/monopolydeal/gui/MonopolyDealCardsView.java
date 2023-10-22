@@ -59,6 +59,6 @@ public class MonopolyDealCardsView extends JComponent {
         playerHandView.updateComponent(new Deck<MonopolyDealCard>("PropertySet", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
     }
     public void updateProperty(MonopolyDealGameState gameState, int playerId, int propertyIndex){
-        playerHandView.updateComponent(gameState.getPropertySets(playerId).get(propertyIndex));
+        playerHandView.updateComponent(gameState.getPropertySets(playerId)[propertyIndex]);
     }
 }

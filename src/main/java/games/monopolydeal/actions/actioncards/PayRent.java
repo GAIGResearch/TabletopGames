@@ -40,7 +40,7 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         Deck<MonopolyDealCard> payerBank = MDGS.getPlayerBank(payer);
-        List<PropertySet> payerPropertySets = MDGS.getPropertySets(payer);
+        PropertySet[] payerPropertySets = MDGS.getPropertySets(payer);
         List<AbstractAction> availableActions = new ArrayList<>();
 
         if(boardEmpty || amtToPay <= 0) availableActions.add(new DoNothing());

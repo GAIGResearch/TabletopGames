@@ -91,7 +91,7 @@ public class MonopolyDealHeuristic extends TunableParameters implements IStateHe
     }
     double playerHeuristicScore(MonopolyDealGameState MDGS, int playerID){
         Deck<MonopolyDealCard> playerBank = MDGS.getPlayerBank(playerID);
-        List<PropertySet> propertySets = MDGS.getPropertySets(playerID);
+        PropertySet[] propertySets = MDGS.getPropertySets(playerID);
 
         // split value for Sets and bank
         int propertyValue = 0, bankValue = 0;

@@ -10,6 +10,7 @@ import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -45,7 +46,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         // Adding multicolor wild to existing sets
         MonopolyDealCard temp = MonopolyDealCard.create(CardType.MulticolorWild);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp)){
-            availableActions.addAll(MDGS.getPropertySets(playerID).stream().filter(((Predicate<? super PropertySet>)PropertySet::getIsComplete).negate())
+            availableActions.addAll(Arrays.stream(MDGS.getPropertySets(playerID)).filter(((Predicate<? super PropertySet>)PropertySet::getIsComplete).negate())
                     .map(propertySet -> new AddWildTo(propertySet,playerID)).collect(toList()));
             availableActions.add(new AddProperty(temp.cardType(),playerID));
         }
@@ -53,7 +54,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         // Add house or hotel
         MonopolyDealCard temp1 = MonopolyDealCard.create(CardType.House);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp1)){
-            List<PropertySet> playerProperties = MDGS.getPropertySets(playerID);
+            PropertySet[] playerProperties = MDGS.getPropertySets(playerID);
             for (PropertySet pSet: playerProperties) {
                 if(pSet.isComplete) availableActions.add(new AddBuilding(temp1.cardType(), playerID, pSet.getSetType()));
             }
@@ -61,7 +62,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         }
         MonopolyDealCard temp2 = MonopolyDealCard.create(CardType.Hotel);
         if(MDGS.getPlayerHand(playerID).getComponents().contains(temp2)){
-            List<PropertySet> playerProperties = MDGS.getPropertySets(playerID);
+            PropertySet[] playerProperties = MDGS.getPropertySets(playerID);
             for (PropertySet pSet: playerProperties) {
                 if(pSet.isComplete && pSet.hasHouse) availableActions.add(new AddBuilding(temp2.cardType(), playerID, pSet.getSetType()));
             }

@@ -12,6 +12,7 @@ import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
+import org.apache.poi.ss.formula.atp.Switch;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
@@ -35,7 +36,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     // Player Data members
     PartialObservableDeck<MonopolyDealCard>[] playerHands;
     Deck<MonopolyDealCard>[] playerBanks;
-    List<PropertySet>[] playerPropertySets;
+    PropertySet[][] playerPropertySets;
 
     Deck<MonopolyDealCard> drawPile;
     Deck<MonopolyDealCard> discardPile;
@@ -59,7 +60,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     protected void _reset() {
         playerHands = new PartialObservableDeck[getNPlayers()];
         playerBanks = new Deck[getNPlayers()];
-        playerPropertySets = new List[getNPlayers()];
+        playerPropertySets = new PropertySet[getNPlayers()][11];
         drawPile = new Deck<>("Draw Pile",HIDDEN_TO_ALL);
         discardPile = new Deck<>("Discard Pile",VISIBLE_TO_ALL);
         for(int i=0;i<getNPlayers();i++){
@@ -67,7 +68,7 @@ public class MonopolyDealGameState extends AbstractGameState {
             handVisibility[i] = true;
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
             playerBanks[i] = new Deck<>("Bank of Player"+i+1,VISIBLE_TO_ALL);
-            playerPropertySets[i] = new ArrayList<>();
+            initPropertySets(i);
         }
     }
 
@@ -92,7 +93,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         components.addAll(Arrays.asList(playerHands));
         components.addAll(Arrays.asList(playerBanks));
         for(int i=0;i<getNPlayers();i++){
-            components.addAll(playerPropertySets[i]);
+            components.addAll(Arrays.asList(playerPropertySets[i]));
         }
         components.add(discardPile);
         components.add(drawPile);
@@ -147,9 +148,8 @@ public class MonopolyDealGameState extends AbstractGameState {
         // Completely visible values
         for(int i=0;i<getNPlayers();i++){
             retValue.playerBanks[i] = playerBanks[i].copy();
-            for (PropertySet propertySet:playerPropertySets[i]) {
-                retValue.playerPropertySets[i].add(propertySet.copy());
-            }
+            for(int j=0;j<11;j++)
+                retValue.playerPropertySets[i][j] = playerPropertySets[i][j].copy();
         }
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
@@ -221,6 +221,29 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return true;
     }
+    // initialize propertySet
+    public void initPropertySets(int playerID){
+        for(int i=0;i<11;i++) {
+            PropertySet pSet = new PropertySet(getSetType4Init(i).toString(), VISIBLE_TO_ALL, getSetType4Init(i));
+            playerPropertySets[playerID][i] = pSet;
+        }
+    }
+    public SetType getSetType4Init(int i){
+        switch (i){
+            case 0: return SetType.Brown;
+            case 1: return SetType.LightBlue;
+            case 2: return SetType.Pink;
+            case 3: return SetType.Orange;
+            case 4: return SetType.Red;
+            case 5: return SetType.Yellow;
+            case 6: return SetType.Green;
+            case 7: return SetType.Blue;
+            case 8: return SetType.RailRoad;
+            case 9: return SetType.Utility;
+            case 10: return SetType.UNDEFINED;
+            default: throw new AssertionError("Should not happen");
+        }
+    }
     // add property
     public void addProperty(int playerID, CardType cardType){
         SetType SType = cardType.getSetType();
@@ -231,35 +254,40 @@ public class MonopolyDealGameState extends AbstractGameState {
         card.setUseAs(SType);
         int indx = getSetIndx(playerID,SType);
         if(indx != 99){
-            playerPropertySets[playerID].get(indx).add(card);
+            playerPropertySets[playerID][indx].add(card);
         }
         else{
             PropertySet pSet = new PropertySet(SType.toString(),VISIBLE_TO_ALL,SType);
             pSet.add(card);
-            playerPropertySets[playerID].add(pSet);
+            playerPropertySets[playerID][getEmptyPropertySet(playerID)] = pSet;
         }
+    }
+    public int getEmptyPropertySet(int playerID){
+        for(int i=0;i<11;i++){
+            if(playerPropertySets[playerID][i]== null)
+                return i;
+        }
+        throw new AssertionError("Should not happen");
     }
     public void removePropertyFrom(int playerID, CardType cardType, SetType from){
         MonopolyDealCard card = new MonopolyDealCard(cardType);
         int indx = getSetIndx(playerID,from);
         if(indx == 99)
             throw new AssertionError("This should not be happening");
-        playerPropertySets[playerID].get(indx).remove(card);
-        if(playerPropertySets[playerID].get(indx).stream().count() == 0){
-            playerPropertySets[playerID].remove(indx);
-        }
+        playerPropertySets[playerID][indx].remove(card);
     }
     public void movePropertySetFromTo(SetType setType, int target, int playerID) {
         int indx = getSetIndx(target,setType);
-        PropertySet pSet = playerPropertySets[target].get(indx);
-        playerPropertySets[target].remove(indx);
-        playerPropertySets[playerID].add(pSet);
+        PropertySet pSet = playerPropertySets[target][indx].copy();
+        for(int i=0; i<pSet.getSize(); i++){
+            playerPropertySets[target][indx].remove(pSet.get(i));
+            playerPropertySets[playerID][indx].add(pSet.get(i));
+        }
     }
     public int getSetIndx(int playerID, SetType type){
-        for (PropertySet set: playerPropertySets[playerID]) {
-            if(set.getSetType() == type){
-                return playerPropertySets[playerID].indexOf(set);
-            }
+        for(int i=0;i<11;i++){
+            if(playerPropertySets[playerID][i].getSetType() == type)
+                return i;
         }
         return 99;
     }
@@ -374,7 +402,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         MonopolyDealCard card = new MonopolyDealCard(cardType);
         playerHands[playerID].remove(card);
     }
-    public List<PropertySet> getPropertySets(int playerID) {
+    public PropertySet[] getPropertySets(int playerID) {
         return playerPropertySets[playerID];
     }
     public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks[playerId]; }
@@ -409,7 +437,6 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        // TODO: What is this player's score (if any)?
         if(deckEmpty) return 0;
         int count = 0;
         for (PropertySet pSet:playerPropertySets[playerId]) {
@@ -433,14 +460,10 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), params, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
+        int result = Objects.hash(super.hashCode(), params, drawPile, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
         result = 31 * result + Arrays.hashCode(playerBanks);
-        result = 31 * result + Arrays.hashCode(playerHands);
-        for(int i =0;i<getNPlayers();i++){
-            for (PropertySet pSet: playerPropertySets[i]) {
-                result = result + pSet.hashCode();
-            }
-        }
+        result = 731 * result + Arrays.hashCode(playerHands);
+        result = 531 * result + Arrays.hashCode(playerPropertySets);
         return result;
     }
     public enum MonopolyDealGamePhase implements IGamePhase {

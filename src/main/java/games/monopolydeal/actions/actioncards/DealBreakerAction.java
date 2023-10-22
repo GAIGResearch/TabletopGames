@@ -7,10 +7,8 @@ import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.actions.ActionState;
 import games.monopolydeal.actions.informationcontainer.ChoosePropertySet;
-import games.monopolydeal.actions.informationcontainer.RentOf;
 import games.monopolydeal.actions.informationcontainer.TargetPlayer;
 import games.monopolydeal.cards.CardType;
-import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
