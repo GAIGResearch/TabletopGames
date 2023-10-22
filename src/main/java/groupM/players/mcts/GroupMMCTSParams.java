@@ -21,6 +21,7 @@ public class GroupMMCTSParams extends PlayerParameters {
     public String name = "GroupM MCTS";
     public float pruneAlpha;
     public int minRetained;
+    public int pruneThreshold;
     public boolean prune;
 
 
@@ -43,6 +44,7 @@ public class GroupMMCTSParams extends PlayerParameters {
         addTunableParameter("explorationStrategy", MCTSEnums.ExplorationStrategy.UCB1, Arrays.asList(MCTSEnums.ExplorationStrategy.UCB1));
         addTunableParameter("pruneAlpha", 2);
         addTunableParameter("minRetained", 4);
+        addTunableParameter("pruneThreshold", 20);
         addTunableParameter("prune", false);
         treeNodeFactory = new TreeNodeFactory(this);    
     }
@@ -78,5 +80,4 @@ public class GroupMMCTSParams extends PlayerParameters {
     public GroupMMCTSPlayer instantiate() {
         return new GroupMMCTSPlayer((GroupMMCTSParams) this.copy());
     }
-
 }

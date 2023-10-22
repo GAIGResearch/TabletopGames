@@ -32,6 +32,11 @@ public class UCB1TreeNode extends TreeNode{
         }
     }
 
+    @Override
+    int getNVisits() {
+        return this.nVisits;
+    }
+
 
     @Override
     double getChildValue(TreeNode child, boolean isExpanding) {

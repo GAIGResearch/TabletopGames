@@ -123,7 +123,7 @@ abstract class TreeNode {
         Iterator<TreeNode> childIt = childNodes.iterator();
         while(unprunedActions().size() > retainedChildren) {
             TreeNode node = childIt.next();
-            node.pruned = node.nVisits>=20;
+            node.pruned = this.getNVisits()>=this.player.params.pruneThreshold;
         }
     }
 
@@ -178,6 +178,8 @@ abstract class TreeNode {
      * @param result - value of rollout to backup
      */
     abstract void backUp(double result);
+
+    abstract int getNVisits();
 
 
     /**

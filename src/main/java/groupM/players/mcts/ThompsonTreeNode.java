@@ -44,6 +44,11 @@ public class ThompsonTreeNode extends TreeNode {
         }
     }
 
+    @Override
+    int getNVisits() {
+        return this.dist.getNVisits();
+    }
+
     double thompsonSample(ThompsonTreeNode child){
         return child.dist.sample(this.player.rnd);
     }
