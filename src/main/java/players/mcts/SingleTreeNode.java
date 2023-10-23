@@ -64,7 +64,7 @@ public class SingleTreeNode {
     // Children of this node. The value is an Array because we have to cater for the possibility that the next decision
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
-    Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
+    Map<AbstractAction, SingleTreeNode[]> children = new LinkedHashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
