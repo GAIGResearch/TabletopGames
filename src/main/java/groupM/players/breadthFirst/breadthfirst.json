@@ -1,0 +1,8 @@
+{
+  "class" : "groupM.players.breadthFirst.BreadthFirstParams",
+  "heuristic" : {
+    "class" : "players.heuristics.ScoreHeuristic"
+  },
+  "budgetType" : "BUDGET_TIME",
+  "budget" : 40
+}
