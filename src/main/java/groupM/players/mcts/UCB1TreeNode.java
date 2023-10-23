@@ -1,7 +1,9 @@
 package groupM.players.mcts;
 
+import java.util.Comparator;
 import java.util.Random;
 
+import core.actions.AbstractAction;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 import static utilities.Utils.noise;
@@ -9,12 +11,16 @@ import static utilities.Utils.noise;
 import core.AbstractGameState;
 
 public class UCB1TreeNode extends TreeNode{
-    protected int nVisits;
     protected Mean mean;
 
     protected UCB1TreeNode(GroupMMCTSPlayer player, TreeNode parent, AbstractGameState state, Random rnd) {
         super(player, parent, state, rnd);
         mean = new Mean();
+    }
+
+    @Override
+    Comparator<TreeNode> getPruningComparator() {
+        return Comparator.comparing(c->ucb1(c));
     }
 
     void backUp(double result) {
@@ -24,6 +30,11 @@ public class UCB1TreeNode extends TreeNode{
             n.mean.increment(result);
             n = (UCB1TreeNode) n.parent;
         }
+    }
+
+    @Override
+    int getNVisits() {
+        return this.nVisits;
     }
 
 
