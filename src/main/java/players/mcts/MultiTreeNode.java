@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import utilities.Pair;
+import utilities.RandomWrapper;
 import utilities.Utils;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public class MultiTreeNode extends SingleTreeNode {
     boolean[] maxDepthReached;
     MCTSPlayer mctsPlayer;
 
-    public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
+    public MultiTreeNode(MCTSPlayer player, AbstractGameState state, RandomWrapper rnd) {
         if (player.params.information == MCTSEnums.Information.Closed_Loop)
             player.params.information = MCTSEnums.Information.Open_Loop;
         // Closed Loop is not yet supported for MultiTree search
@@ -42,7 +43,7 @@ public class MultiTreeNode extends SingleTreeNode {
         this.params = player.params;
         this.forwardModel = player.getForwardModel();
         this.heuristic = player.heuristic;
-        this.rnd = rnd;
+        this.rndWrapper = rnd;
         this.opponentModels = new AbstractPlayer[state.getNPlayers()];
         mctsPlayer = player;
         for (int p = 0; p < opponentModels.length; p++) {
@@ -109,7 +110,7 @@ public class MultiTreeNode extends SingleTreeNode {
             int currentActor = currentState.getCurrentPlayer();
             if (roots[currentActor] == null) {
                 // their first action in search; set a root for their tree
-                SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rnd, mctsPlayer.getFactory());
+                SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rndWrapper, mctsPlayer.getFactory());
                 pseudoRoot.decisionPlayer = currentActor;
                 if (params.paranoid)
                     pseudoRoot.paranoidPlayer = decisionPlayer;

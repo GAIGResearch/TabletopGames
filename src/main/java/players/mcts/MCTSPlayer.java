@@ -9,8 +9,8 @@ import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import players.IAnyTimePlayer;
-import players.heuristics.CoarseTunableHeuristic;
 import utilities.Pair;
+import utilities.RandomWrapper;
 import utilities.Utils;
 
 import java.util.*;
@@ -23,7 +23,7 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     // Random object for this player
-    protected Random rnd;
+    protected RandomWrapper rnd;
     // Parameters for this player
     protected MCTSParams params;
     // Heuristics used for the agent
@@ -50,7 +50,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
         this.parameters = params;
-        rnd = new Random(this.params.getRandomSeed());
+        rnd = new RandomWrapper(new Random(this.params.getRandomSeed()));
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();

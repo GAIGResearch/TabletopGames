@@ -140,7 +140,7 @@ public class MetricsGameListener implements IGameListener {
                             eventMetrics.add(metric);
                         }
                     }
-                    if (eventMetrics.size() > 1) {
+                    if (!eventMetrics.isEmpty()) {
                         IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
                         dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
                     }
