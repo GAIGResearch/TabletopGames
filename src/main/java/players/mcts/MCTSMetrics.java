@@ -46,6 +46,8 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
+                records.put("rndCalls", mctsPlayer.root.rndWrapper.getCalls());
+                records.put("rndInt", mctsPlayer.root.rndWrapper.nextInt(10000));
                 return true;
             }
             return false;
@@ -74,6 +76,8 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("fmCalls", Integer.class);
             cols.put("copyCalls", Integer.class);
             cols.put("time", Double.class);
+            cols.put("rndCalls", Integer.class);
+            cols.put("rndInt", Integer.class);
             return cols;
         }
     }

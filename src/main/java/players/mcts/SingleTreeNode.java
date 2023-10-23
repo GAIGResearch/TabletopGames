@@ -30,7 +30,7 @@ public class SingleTreeNode {
     protected MCTSParams params;
     protected AbstractForwardModel forwardModel;
     protected AbstractPlayer[] opponentModels;
-    protected Random rnd;
+    protected RandomWrapper rndWrapper;
     protected IStateHeuristic heuristic;
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
@@ -81,14 +81,14 @@ public class SingleTreeNode {
     }
 
     // Called in tree expansion
-    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd, Supplier<? extends SingleTreeNode> factory) {
+    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, RandomWrapper rnd, Supplier<? extends SingleTreeNode> factory) {
         SingleTreeNode retValue = factory.get();
         retValue.factory = factory;
         retValue.decisionPlayer = state.getCurrentPlayer();
         retValue.params = player.params;
         retValue.forwardModel = player.getForwardModel();
         retValue.heuristic = player.heuristic;
-        retValue.rnd = rnd;
+        retValue.rndWrapper = rnd;
         retValue.opponentModels = new AbstractPlayer[state.getNPlayers()];
         for (int p = 0; p < retValue.opponentModels.length; p++) {
             if (p == retValue.decisionPlayer)
@@ -122,7 +122,7 @@ public class SingleTreeNode {
         this.heuristic = root.heuristic;
         this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
-        this.rnd = root.rnd;
+        this.rndWrapper = root.rndWrapper;
         this.round = state.getRoundCounter();
         this.turn = state.getTurnCounter();
         this.turnOwner = state.getCurrentPlayer();
@@ -458,7 +458,7 @@ public class SingleTreeNode {
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
-        Collections.shuffle(notChosen);
+        Collections.shuffle(notChosen, rndWrapper.getRND());
 
         AbstractAction chosen = null;
 
@@ -700,7 +700,7 @@ public class SingleTreeNode {
             uctValue = childValue + explorationTerm;
 
             // Apply small noise to break ties randomly
-            uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
+            uctValue = noise(uctValue, params.noiseEpsilon, rndWrapper.nextDouble());
             if (Double.isNaN(uctValue))
                 throw new AssertionError("Numeric error calculating uctValue");
 
@@ -782,7 +782,7 @@ public class SingleTreeNode {
         }
 
         Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
-        return Utils.sampleFrom(actionToValueMap, params.exploreEpsilon, rnd);
+        return Utils.sampleFrom(actionToValueMap, params.exploreEpsilon, rndWrapper.nextDouble());
     }
 
     /**
@@ -970,7 +970,7 @@ public class SingleTreeNode {
                         childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.noiseEpsilon);
 
                     // Apply small noise to break ties randomly
-                    childValue = noise(childValue, params.noiseEpsilon, rnd.nextDouble());
+                    childValue = noise(childValue, params.noiseEpsilon, rndWrapper.nextDouble());
 
                     // Save best value
                     if (childValue > bestValue) {

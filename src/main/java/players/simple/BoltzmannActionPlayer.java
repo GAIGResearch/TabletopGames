@@ -58,7 +58,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
         for (int i = 0; i < possibleActions.size(); i++) {
             actionToValueMap.put(possibleActions.get(i), actionValues[i]);
         }
-        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd);
+        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd.nextDouble());
     }
 
     @Override
