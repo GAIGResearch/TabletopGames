@@ -38,7 +38,8 @@ public class HeartsParameters extends AbstractParameters {
 
     public HeartsParameters(long seed) {
         super(seed);
-        cardsToRemove.put(3, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
+        cardsToRemove.put(3, Collections.singletonList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
+        cardsToRemove.put(4, Collections.emptyList());
         cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
                 new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Spades, 2)));
         cardsToRemove.put(6, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
