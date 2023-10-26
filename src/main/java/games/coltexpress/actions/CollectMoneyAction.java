@@ -10,7 +10,6 @@ import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 
 import java.util.Objects;
-import java.util.Random;
 
 import static core.CoreConstants.VisibilityMode;
 

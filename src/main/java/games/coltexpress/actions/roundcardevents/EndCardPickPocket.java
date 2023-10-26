@@ -6,10 +6,8 @@ import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
-import utilities.Utils;
 
 import java.util.LinkedList;
-import java.util.Random;
 
 public class EndCardPickPocket extends RoundEvent {
 

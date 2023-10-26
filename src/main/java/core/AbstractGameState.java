@@ -76,6 +76,7 @@ public abstract class AbstractGameState {
         // this is then overridden in the game-specific constructor if needed
         this.gameParameters = gameParameters;
         this.coreGameParameters = new CoreParameters();
+ //       rnd = new Random(gameParameters.randomSeed);
     }
 
     protected abstract GameType _getGameType();
@@ -290,6 +291,7 @@ public abstract class AbstractGameState {
         s.turnCounter = turnCounter;
         s.turnOwner = turnOwner;
         s.firstPlayer = firstPlayer;
+        s.rnd = rnd;
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);

@@ -338,7 +338,6 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
                     playerHand.add(playerDeck.draw());
                 }
             }
-
         }
     }
 
