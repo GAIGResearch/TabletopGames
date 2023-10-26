@@ -32,7 +32,7 @@ public class DominionForwardModel extends StandardForwardModel {
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
-            state.playerDrawPiles[i].shuffle(state.rnd);
+            state.playerDrawPiles[i].shuffle(state.getRnd());
             for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
         }
         state.actionsLeftForCurrentPlayer = 1;

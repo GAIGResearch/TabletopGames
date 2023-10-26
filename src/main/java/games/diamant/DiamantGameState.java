@@ -87,8 +87,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     @Override
     protected AbstractGameState _copy(int playerId)
     {
-        Random r = new Random(getGameParameters().getRandomSeed());
-
         DiamantGameState dgs = new DiamantGameState(gameParameters.copy(), getNPlayers());
 
         dgs.mainDeck    = mainDeck.copy();
@@ -127,7 +125,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         // mainDeck and is actionsPlayed are hidden.
         if (getCoreGameParameters().partialObservable && playerId != -1)
         {
-            dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
+            dgs.mainDeck.shuffle(rnd);
 
             dgs.actionsPlayed.clear();
 
