@@ -14,6 +14,7 @@ import games.battlelore.components.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class BattleloreForwardModel extends StandardForwardModel {
 
@@ -37,6 +38,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
         gameState.playerScores = new int[gameState.getNPlayers()];
+        gameState.rnd = new Random(gameParams.getRandomSeed());
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
@@ -111,7 +113,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
         int player = gameState.getCurrentPlayer();
         Unit.Faction playerFaction = player == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
-        ArrayList<AbstractAction> actions = new ArrayList<>();
+        List<AbstractAction> actions = new ArrayList<>();
 
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep) {
             if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.right)) {
@@ -125,7 +127,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
             }
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep) {
-            ArrayList<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
+            List<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
             int[][] possibleLocations;
 
             if (!moveableUnitTiles.isEmpty()) {

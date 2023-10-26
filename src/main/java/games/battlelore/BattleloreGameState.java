@@ -13,6 +13,7 @@ import java.util.*;
 
 public class BattleloreGameState extends AbstractGameState {
 
+
     public enum BattleloreGamePhase implements IGamePhase {
         CommandAndOrderStep, //Player Plays One Command Card
         MoveStep,
@@ -30,6 +31,7 @@ public class BattleloreGameState extends AbstractGameState {
     int[] playerScores;
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
+    Random rnd;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -175,6 +177,9 @@ public class BattleloreGameState extends AbstractGameState {
         return gameBoard;
     }
 
+    public Random getRandom() {
+        return rnd;
+    }
 
     @Override
     protected List<Component> _getAllComponents() {
@@ -185,7 +190,6 @@ public class BattleloreGameState extends AbstractGameState {
     protected AbstractGameState _copy(int playerId) {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
 
-
         state.gameBoard = gameBoard.copy();
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
@@ -195,6 +199,7 @@ public class BattleloreGameState extends AbstractGameState {
         }
         state.unitTypes = unitTypes; // immutable
         System.arraycopy(playerScores, 0, state.playerScores, 0, playerScores.length);
+        state.rnd = rnd;
 
         return state;
     }
