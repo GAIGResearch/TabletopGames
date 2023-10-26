@@ -193,7 +193,7 @@ public class MCTSParams extends PlayerParameters {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
             case MAST:
-                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, System.currentTimeMillis(), MASTDefaultValue);
+                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
             case CLASS:
                 // we have a bespoke Class to instantiate
                 return JSONUtils.loadClassFromString(details);

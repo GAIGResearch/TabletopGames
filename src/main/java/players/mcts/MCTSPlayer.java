@@ -60,15 +60,19 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     @Override
     public void initializePlayer(AbstractGameState state) {
-        rolloutStrategy.initializePlayer(state);
-        opponentModel.initializePlayer(state);
+        if (getParameters().resetSeedEachGame) {
+            rnd = new RandomWrapper(new Random(params.getRandomSeed()));
+            params.rolloutPolicy = null;
+            rolloutStrategy = params.getRolloutStrategy();
+            params.opponentModel = null;  // thi swill force reconstruction from random seed
+            opponentModel = params.getOpponentModel();
+     //       System.out.println("Resetting seed for MCTS player to " + params.getRandomSeed());
+        }
         if (advantageFunction instanceof AbstractPlayer)
             ((AbstractPlayer) advantageFunction).initializePlayer(state);
         MASTStats = null;
-        if (getParameters().resetSeedEachGame) {
-            rnd = new RandomWrapper(new Random(params.getRandomSeed()));
-     //       System.out.println("Resetting seed for MCTS player to " + params.getRandomSeed());
-        }
+        rolloutStrategy.initializePlayer(state);
+        opponentModel.initializePlayer(state);
     }
 
     /**

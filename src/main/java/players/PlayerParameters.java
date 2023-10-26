@@ -17,7 +17,7 @@ public class PlayerParameters extends TunableParameters {
     // this is intended mainly for competition situations, in which overrunning the time limit leads to disqualification.
     // setting breakMS to some number greater than zero then adds a safety margin
     public int breakMS = 0;
-    // this is a dangerous parameter. If true then the random seed will be reset at the start of each game.
+    // resetSeedEachGame is a dangerous parameter. If true then the random seed will be reset at the start of each game.
     // otherwise the Random() object will be used from the old game, ensuring that we do not take exactly the same
     // set of actions
     public boolean resetSeedEachGame = false;

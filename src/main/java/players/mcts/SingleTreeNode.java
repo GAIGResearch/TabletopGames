@@ -503,11 +503,11 @@ public class SingleTreeNode {
      * @param act - action to apply
      */
     protected void advance(AbstractGameState gs, AbstractAction act, boolean inRollout) {
-        // we execute a copy(), because this can change the action, so we then don't find the node later!
         if (inRollout) {
             rolloutDepth++;
             lastActorInRollout = gs.getCurrentPlayer();
         }
+        // we execute a copy(), because this can change the action, so we then don't find the node later!
         forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
         if (params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != decisionPlayer)
@@ -812,7 +812,7 @@ public class SingleTreeNode {
             while (!finishRollout(rolloutState)) {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState, params.actionSpace);
                 if (availableActions.isEmpty()) {
-                    throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next.toString() : ""));
+                    throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next : ""));
                 }
                 next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
