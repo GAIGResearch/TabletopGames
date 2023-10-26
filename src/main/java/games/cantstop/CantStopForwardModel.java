@@ -34,7 +34,6 @@ public class CantStopForwardModel extends StandardForwardModel {
         for (int i = 0; i < params.DICE_NUMBER; i++) {
             state.dice.add(new Dice(params.DICE_SIDES));
         }
-        state.rnd = new Random(params.getRandomSeed());
         firstState.setGamePhase(CantStopGamePhase.Decision);
     }
 

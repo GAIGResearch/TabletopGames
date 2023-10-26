@@ -65,6 +65,7 @@ public abstract class AbstractGameState {
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
     private int gameID;
+    protected Random rnd;
 
     /**
      * @param gameParameters - game parameters.
@@ -96,6 +97,7 @@ public abstract class AbstractGameState {
         roundCounter = 0;
         firstPlayer = 0;
         actionsInProgress.clear();
+        rnd = new Random(gameParameters.randomSeed);
     }
 
     /**
@@ -198,6 +200,9 @@ public abstract class AbstractGameState {
         turnOwner = newFirstPlayer;
     }
 
+    public Random getRnd() {
+        return rnd;
+    }
     public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
