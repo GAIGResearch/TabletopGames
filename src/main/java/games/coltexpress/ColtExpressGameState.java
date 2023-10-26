@@ -46,14 +46,11 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     // The round cards
     PartialObservableDeck<RoundCard> rounds;
 
-    Random rnd;
-
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
-        rnd = new Random(gameParameters.getRandomSeed());
     }
     @Override
     protected TurnOrder _createTurnOrder(int nPlayers) {

@@ -45,7 +45,7 @@ public class CollectMoneyAction extends DrawCard {
 
         // Choose random loot of type to collect
         if (possible.getSize() > 0) {
-            Loot available = possible.pick(new Random(gameState.getGameParameters().getRandomSeed()));
+            Loot available = possible.pick(gameState.getRnd());
             ColtExpressCard card = (ColtExpressCard) getCard(gameState);
             ((ColtExpressGameState) gameState).addLoot(card.playerID, available);
             availableLootDeck.remove(available);

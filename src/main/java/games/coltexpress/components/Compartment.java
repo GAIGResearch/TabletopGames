@@ -40,7 +40,7 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
         containsMarshal = false;
     }
 
-    public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
+    public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep, Random rnd){
         super(CoreConstants.ComponentType.BOARD_NODE);
         this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
         this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
@@ -66,13 +66,12 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
         HashMap<ColtExpressTypes.LootType, Integer> configuration = cep.trainCompartmentConfigurations.get(which);
         for (Map.Entry<ColtExpressTypes.LootType, Integer> e : configuration.entrySet()) {
             for (int i = 0; i < e.getValue(); i++) {
-                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), cep.getRandomSeed())));
+                lootInside.add(new Loot(e.getKey(), getRandomLootValue(cep, e.getKey(), rnd)));
             }
         }
     }
 
-    private int getRandomLootValue(ColtExpressParameters cep, ColtExpressTypes.LootType t, long seed) {
-        Random r = new Random(seed);
+    private int getRandomLootValue(ColtExpressParameters cep, ColtExpressTypes.LootType t, Random r) {
         if (stillAvailableIdx.get(t).size() > 0) {
             int idx = stillAvailableIdx.get(t).get(r.nextInt(stillAvailableIdx.get(t).size()));
             if (stillAvailableIdx.get(t).contains(idx)) {
@@ -86,9 +85,9 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
         return -1;
     }
 
-    public static Compartment createLocomotive(int nPlayers, ColtExpressParameters cep){
+    public static Compartment createLocomotive(int nPlayers, ColtExpressParameters cep, Random rnd){
         // Locomotive is always last in the list of compartment configurations
-        Compartment locomotive = new Compartment(nPlayers, nPlayers,cep.trainCompartmentConfigurations.size()-1, cep);
+        Compartment locomotive = new Compartment(nPlayers, nPlayers,cep.trainCompartmentConfigurations.size()-1, cep, rnd);
         locomotive.containsMarshal = true;
         return locomotive;
     }

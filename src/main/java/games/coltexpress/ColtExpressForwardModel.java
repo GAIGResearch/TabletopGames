@@ -25,7 +25,6 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     public void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
 
@@ -52,7 +51,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         Arrays.fill(cegs.bulletsLeft, cep.nBulletsPerPlayer);
 
         for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
-            CharacterType characterType = pickRandomCharacterType(rnd, characters);
+            CharacterType characterType = pickRandomCharacterType(cegs.getRnd(), characters);
             cegs.playerCharacters.put(playerIndex, characterType);
             if (characterType == CharacterType.Belle)
                 cegs.playerPlayingBelle = playerIndex;
@@ -64,7 +63,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
             cegs.playerDecks.add(playerCards);
-            playerCards.shuffle(new Random(cep.getRandomSeed() + playerIndex));
+            playerCards.shuffle(cegs.getRnd());
 
             Deck<ColtExpressCard> playerHand = new Deck<>("playerHand" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
 
@@ -102,8 +101,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         // Add random round cards
         ArrayList<ColtExpressTypes.RegularRoundCard> availableRounds = new ArrayList<>(Arrays.asList(cep.roundCards));
         for (int i = 0; i < cep.nMaxRounds - 1; i++) {
-            Random r = new Random(cep.getRandomSeed() + cegs.getTurnOrder().getRoundCounter() + i);
-            int choice = r.nextInt(availableRounds.size());
+            int choice = cegs.getRnd().nextInt(availableRounds.size());
             cegs.rounds.add(cegs.getRoundCard(availableRounds.get(choice), cegs.getNPlayers()));
             availableRounds.remove(availableRounds.get(choice));
         }
@@ -331,7 +329,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
-        HashSet<Integer> availableTargets = new HashSet<>();
+        Set<Integer> availableTargets = new HashSet<>();
 
         for (int i = 0; i < cegs.trainCompartments.size(); i++) {
             Compartment compartment = cegs.trainCompartments.get(i);
@@ -493,18 +491,17 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
     private void setupTrain(ColtExpressGameState cegs) {
         // Choose random compartment configurations
-        Random random = new Random(cegs.getGameParameters().getRandomSeed());
         ArrayList<Integer> availableCompartments = new ArrayList<>();
         for (int i = 0; i < ((ColtExpressParameters) cegs.getGameParameters()).trainCompartmentConfigurations.size() - 1; i++) {
             availableCompartments.add(i);
         }
         for (int i = 0; i < cegs.getNPlayers(); i++) {
-            int which = random.nextInt(availableCompartments.size());
-            cegs.trainCompartments.add(new Compartment(cegs.getNPlayers(), i, which, (ColtExpressParameters) cegs.getGameParameters()));
+            int which = cegs.getRnd().nextInt(availableCompartments.size());
+            cegs.trainCompartments.add(new Compartment(cegs.getNPlayers(), i, which, (ColtExpressParameters) cegs.getGameParameters(), cegs.getRnd()));
             availableCompartments.remove(Integer.valueOf(which));
         }
 
         // Add locomotive
-        cegs.trainCompartments.add(Compartment.createLocomotive(cegs.getNPlayers(), (ColtExpressParameters) cegs.getGameParameters()));
+        cegs.trainCompartments.add(Compartment.createLocomotive(cegs.getNPlayers(), (ColtExpressParameters) cegs.getGameParameters(), cegs.getRnd()));
     }
 }

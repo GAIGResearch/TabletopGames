@@ -391,7 +391,7 @@ public class CatanActionFactory {
      * @return list of actions to play a dev card in hand
      */
     public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
         Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
 
         for (CatanCard c : playerDevDeck.getComponents()) {

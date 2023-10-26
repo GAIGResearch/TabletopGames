@@ -239,8 +239,8 @@ public class CatanGameState extends AbstractGameState {
     public int getRoadDistance(int x, int y, int edgeIdx) {
         // As the settlements are the nodes, we expand them to find roads
         // calculates the distance length of the road
-        HashSet<Edge> roadSet = new HashSet<>();
-        HashSet<Edge> roadSet2 = new HashSet<>();
+        Set<Edge> roadSet = new LinkedHashSet<>();
+        Set<Edge> roadSet2 = new LinkedHashSet<>();
 
         ArrayList<Building> dir1 = new ArrayList<>();
         ArrayList<Building> dir2 = new ArrayList<>();
@@ -258,7 +258,7 @@ public class CatanGameState extends AbstractGameState {
         return roadSet.size();
     }
 
-    private HashSet<Edge> expandRoad(HashSet<Edge> roadSet, List<Building> unexpanded, List<Building> expanded) {
+    private Set<Edge> expandRoad(Set<Edge> roadSet, List<Building> unexpanded, List<Building> expanded) {
         // return length, makes it possible to compare segments
         // modify original set
         if (unexpanded.size() == 0) {
@@ -267,11 +267,11 @@ public class CatanGameState extends AbstractGameState {
         if (unexpanded.size() == 2) {
             // Handle branching
             int length = 0;
-            HashSet<Edge> longestSegment = new HashSet<>(roadSet);
+            Set<Edge> longestSegment = new LinkedHashSet<>(roadSet);
             for (Building settlement : unexpanded) {
                 ArrayList<Building> toExpand = new ArrayList<>();
                 toExpand.add(settlement);
-                HashSet<Edge> roadSetCopy = new HashSet<>(roadSet);
+                Set<Edge> roadSetCopy = new LinkedHashSet<>(roadSet);
                 roadSetCopy = expandRoad(roadSetCopy, toExpand, expanded);
                 if (roadSetCopy.size() >= length) {
                     length = roadSetCopy.size();
