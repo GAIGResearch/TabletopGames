@@ -24,8 +24,11 @@ public class TestTurnRoundProgression {
     public void testTurnOwnerProgressesInPlanningPhase() {
 
         state = new ColtExpressGameState(new ColtExpressParameters(6), 3);
+        ColtExpressParameters cep = (ColtExpressParameters) state.getGameParameters();
         turnOrder = (ColtExpressTurnOrder) state.getTurnOrder();
         fm.setup(state);
+        state.getRounds().draw();
+        state.getRounds().add(state.getRoundCard(ColtExpressTypes.RegularRoundCard.Bridge, 3));
 
         RoundCard card = state.getRounds().peek();
         assertEquals(NormalTurn, card.getTurnTypes()[0]);

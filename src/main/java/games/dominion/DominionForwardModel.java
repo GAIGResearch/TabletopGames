@@ -8,6 +8,7 @@ import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -150,10 +151,13 @@ public class DominionForwardModel extends StandardForwardModel {
         switch (state.getGamePhase().toString()) {
             case "Play":
                 if (state.actionsLeft() > 0) {
-                    Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
-                            .filter(DominionCard::isActionCard).collect(toSet());
-                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID))
-                            .distinct().collect(toList());
+                    List<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
+                            .filter(DominionCard::isActionCard).collect(toList());
+                    List<AbstractAction> availableActions = actionCards.stream()
+       //                     .sorted(Comparator.comparingInt(c -> c.cardType().cost))
+                            .map(dc -> dc.getAction(playerID))
+                            .distinct()
+                            .collect(toList());
                     availableActions.add(new EndPhase());
                     return availableActions;
                 }

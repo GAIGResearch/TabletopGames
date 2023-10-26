@@ -459,7 +459,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return getRoundCard(availableTypes.get(choice), getNPlayers());
     }
 
-    RoundCard getRoundCard(ColtExpressTypes.RegularRoundCard cardType, int nPlayers) {
+    public RoundCard getRoundCard(ColtExpressTypes.RegularRoundCard cardType, int nPlayers) {
         RoundCard.TurnType[] turnTypes = cardType.getTurnTypeSequence(nPlayers);
         RoundEvent event = cardType.getEndCardEvent();
         return new RoundCard(cardType.name(), turnTypes, event);
