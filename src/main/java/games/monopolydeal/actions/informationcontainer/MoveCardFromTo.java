@@ -28,7 +28,7 @@ public class MoveCardFromTo extends AbstractAction {
     }
     @Override
     public MoveCardFromTo copy() {
-        return this;
+        return new MoveCardFromTo(player,cardType,from,to);
     }
     @Override
     public boolean equals(Object o) {

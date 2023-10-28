@@ -43,7 +43,7 @@ public class DiscardCard extends AbstractAction {
      */
     @Override
     public AbstractAction copy() {
-        return this;
+        return new DiscardCard(type, player);
         // no state
     }
 

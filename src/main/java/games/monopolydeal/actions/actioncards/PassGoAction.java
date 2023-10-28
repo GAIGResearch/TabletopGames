@@ -21,7 +21,7 @@ public class PassGoAction extends AbstractAction {
     }
     @Override
     public PassGoAction copy() {
-        return this;
+        return new PassGoAction();
     }
     @Override
     public boolean equals(Object obj) {

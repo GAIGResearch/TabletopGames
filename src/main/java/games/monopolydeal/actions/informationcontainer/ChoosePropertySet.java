@@ -13,8 +13,8 @@ import java.util.Objects;
  */
 public class ChoosePropertySet extends AbstractAction {
     public final SetType setType;
-    public ChoosePropertySet(PropertySet pSet){
-        this.setType = pSet.getSetType();
+    public ChoosePropertySet(SetType setType){
+        this.setType = setType;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -22,7 +22,7 @@ public class ChoosePropertySet extends AbstractAction {
     }
     @Override
     public ChoosePropertySet copy() {
-        return this;
+        return new ChoosePropertySet(setType);
     }
     @Override
     public boolean equals(Object o) {

@@ -19,7 +19,7 @@ public class JustSayNoAction extends AbstractAction {
     }
     @Override
     public JustSayNoAction copy() {
-        return this;
+        return new JustSayNoAction();
     }
     @Override
     public boolean equals(Object obj) {

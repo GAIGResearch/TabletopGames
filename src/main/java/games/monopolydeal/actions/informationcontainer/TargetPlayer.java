@@ -20,7 +20,7 @@ public class TargetPlayer extends AbstractAction {
     }
     @Override
     public TargetPlayer copy() {
-        return this;
+        return new TargetPlayer(target);
     }
     @Override
     public boolean equals(Object o) {

@@ -3,6 +3,8 @@ package games.monopolydeal.cards;
 import core.components.Card;
 import games.monopolydeal.MonopolyDealGameState;
 
+import java.util.Objects;
+
 public class MonopolyDealCard extends Card{
     CardType type;
 
@@ -82,6 +84,11 @@ public class MonopolyDealCard extends Card{
             cardCopy.useAs = this.useAs;
             return cardCopy;
         }
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(super.hashCode(), type, useAs);
     }
 
     @Override

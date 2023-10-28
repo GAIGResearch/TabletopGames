@@ -60,8 +60,8 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
             case ChoosePropertySet:
                 for (PropertySet pSet: MDGS.getPropertySets(target)) {
                     if(pSet.isComplete){
-                        if(!availableActions.contains(new ChoosePropertySet(pSet)))
-                            availableActions.add(new ChoosePropertySet(pSet));
+                        if(!availableActions.contains(new ChoosePropertySet(pSet.getSetType())))
+                            availableActions.add(new ChoosePropertySet(pSet.getSetType()));
                     }
                 }
                 break;
