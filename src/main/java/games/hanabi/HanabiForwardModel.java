@@ -88,8 +88,7 @@ public class HanabiForwardModel extends StandardForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (checkGameEnd((HanabiGameState) currentState)) {
             return;
         }

@@ -12,7 +12,7 @@ import static evaluation.metrics.Event.GameEvent.*;
 public abstract class StandardForwardModel extends AbstractForwardModel {
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected final void _next(AbstractGameState currentState, AbstractAction action) {
         _beforeAction(currentState, action);
         if (action != null) {
             action.execute(currentState);
