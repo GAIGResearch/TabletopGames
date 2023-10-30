@@ -74,4 +74,21 @@ public class GTAction extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         return toString();
     }
+
+
+    /**
+     * This next one is optional.
+     *
+     *  May optionally be implemented if Actions are not fully visible
+     *  The only impact this has is in the GUI, to avoid this giving too much information to the human player.
+     *
+     *  An example is in Resistance or Sushi Go, in which all cards are technically revealed simultaneously,
+     *  but the game engine asks for the moves sequentially. In this case, the action should be able to
+     *  output something like "Player N plays card", without saying what the card is.
+     * @param gameState - game state to be used to generate the string.
+     * @param playerId - player to whom the action should be represented.
+     * @return
+     */
+   // @Override
+   // public String getString(AbstractGameState gameState, int playerId);
 }

@@ -165,7 +165,7 @@ public class SingleTreeNode {
 
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
-        if (actionState.getCurrentPlayer() == this.decisionPlayer) {
+        if (actionState.getCurrentPlayer() == this.decisionPlayer && actionState.isNotTerminalForPlayer(decisionPlayer)) {
             actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
             //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));

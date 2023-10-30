@@ -2,9 +2,7 @@ package players.simple;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-
 import core.AbstractPlayer;
-
 import java.util.List;
 
 public class FirstActionPlayer extends AbstractPlayer{

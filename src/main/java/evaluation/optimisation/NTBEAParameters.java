@@ -43,6 +43,7 @@ public class NTBEAParameters {
     public String destDir;
     public ITPSearchSpace searchSpace;
     public AbstractParameters gameParams;
+    public boolean byTeam;
 
     public NTBEAParameters(Map<RunArg, Object> args) {
         this(args, Function.identity());
@@ -52,16 +53,17 @@ public class NTBEAParameters {
         tuningGame = (boolean) args.get(RunArg.tuneGame);
         iterationsPerRun = (int) args.get(RunArg.iterations);
         repeats = (int) args.get(RunArg.repeats);
-        evalGames = (int) args.get(RunArg.evalGames);
-        if (evalGames == 0) evalGames = iterationsPerRun / 5;
-        kExplore = (double) args.get(RunArg.kExplore);
         tournamentGames = (int) args.get(RunArg.matchups);
+        evalGames = (int) args.get(RunArg.evalGames);
+        if (evalGames == -1) evalGames = iterationsPerRun / 5;
+        kExplore = (double) args.get(RunArg.kExplore);
         neighbourhoodSize = (int) args.get(RunArg.neighbourhood);
         opponentDescriptor = (String) args.get(RunArg.opponent);
         evalMethod = (String) args.get(RunArg.evalMethod);
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
-        seed = (long) args.get(RunArg.seed);
+        seed = args.get(RunArg.seed) instanceof Long ? ((Long)args.get(RunArg.seed)).intValue() : (int) args.get(RunArg.seed)  ;
+        byTeam = (boolean) args.get(RunArg.byTeam);
         GameType game = GameType.valueOf(args.get(RunArg.game).toString());
         gameParams = args.get(RunArg.gameParams).equals("") ? null :
                 AbstractParameters.createFromFile(game, (String) args.get(RunArg.gameParams));

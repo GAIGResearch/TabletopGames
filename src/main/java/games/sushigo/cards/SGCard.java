@@ -27,7 +27,7 @@ public class SGCard extends Card {
 
         static {
             Tempura.onReveal = (gs, p) -> {
-                // Adds points for pairs (/2)
+                // Adds points for pairs
                 Counter amount = gs.getPlayedCardTypes(Tempura, p);
                 if (amount.getValue() % 2 == 0) {
                     int value = ((SGParameters) gs.getGameParameters()).valueTempuraPair;
@@ -35,10 +35,10 @@ public class SGCard extends Card {
                 }
             };
             Sashimi.onReveal = (gs, p) -> {
-                // Adds points for triplets (/3)
+                // Adds points for triplets
                 Counter amount = gs.getPlayedCardTypes(Sashimi, p);
                 if (amount.getValue() % 3 == 0) {
-                    int value = ((SGParameters) gs.getGameParameters()).valueSashimiTriss;
+                    int value = ((SGParameters) gs.getGameParameters()).valueSashimiTriple;
                     gs.addPlayerScore(p, value, Sashimi);
                 }
             };

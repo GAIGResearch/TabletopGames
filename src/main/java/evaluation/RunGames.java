@@ -14,6 +14,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.PlayerFactory;
 import players.PlayerType;
+import players.basicMCTS.BasicMCTSPlayer;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
@@ -130,9 +131,9 @@ public class RunGames implements IGameRunner {
                 AbstractParameters params = config.get(gameParams).equals("") ? null : AbstractParameters.createFromFile(gameType, (String) config.get(gameParams));
 
                 RoundRobinTournament tournament = config.get(mode).equals("exhaustive") || tournamentMode == ONE_VS_ALL ?
-                        new RoundRobinTournament(agents, gameType, playerCount, (int) config.get(matchups), tournamentMode, params) :
+                        new RoundRobinTournament(agents, gameType, playerCount, (int) config.get(matchups), tournamentMode, params, (boolean) config.get(byTeam)) :
                         new RandomRRTournament(agents, gameType, playerCount, tournamentMode, (int) config.get(matchups), (int) config.get(reportPeriod),
-                                System.currentTimeMillis(), params);
+                                System.currentTimeMillis(), params, (boolean) config.get(byTeam));
 
                 // Add listeners
                 //noinspection unchecked

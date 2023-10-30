@@ -1,5 +1,7 @@
 package players.rmhc;
 
+import core.AbstractGameState;
+import core.interfaces.IStateHeuristic;
 import players.PlayerParameters;
 import java.util.*;
 
@@ -7,6 +9,7 @@ import java.util.*;
 public class RMHCParams extends PlayerParameters {
     public int horizon = 10;
     public double discountFactor = 0.9;
+    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
 
     public RMHCParams() {
         this(System.currentTimeMillis());
@@ -16,6 +19,7 @@ public class RMHCParams extends PlayerParameters {
         super(seed);
         addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
         addTunableParameter("discountFactor", 0.9, Arrays.asList(0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0));
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
     }
 
     @Override
@@ -23,6 +27,7 @@ public class RMHCParams extends PlayerParameters {
         super._reset();
         horizon = (int) getParameterValue("horizon");
         discountFactor = (double) getParameterValue("discountFactor");
+        heuristic = (IStateHeuristic) getParameterValue("heuristic");
     }
 
     @Override
@@ -33,6 +38,9 @@ public class RMHCParams extends PlayerParameters {
         return copy;
     }
 
+    public IStateHeuristic getHeuristic() {
+        return heuristic;
+    }
 
     @Override
     public RMHCPlayer instantiate() {

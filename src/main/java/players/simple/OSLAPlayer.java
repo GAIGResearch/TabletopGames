@@ -41,13 +41,12 @@ public class OSLAPlayer extends AbstractPlayer {
     public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
+        double[] valState = new double[actions.size()];
         int playerID = gs.getCurrentPlayer();
 
-        double[] valState = new double[actions.size()];
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
             AbstractAction action = actions.get(actionIndex);
             AbstractGameState gsCopy = gs.copy();
-
             getForwardModel().next(gsCopy, action);
 
             if (gs instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gsCopy).getTurnOrder() instanceof StandardTurnOrder) {

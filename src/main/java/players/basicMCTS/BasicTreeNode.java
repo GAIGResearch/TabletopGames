@@ -1,4 +1,4 @@
-package players.mcts;
+package players.basicMCTS;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -133,9 +133,10 @@ class BasicTreeNode {
 
     private void setState(AbstractGameState newState) {
         state = newState;
-        for (AbstractAction action : player.getForwardModel().computeAvailableActions(state, player.params.actionSpace)) {
-            children.put(action, null); // mark a new node to be expanded
-        }
+        if (newState.isNotTerminal())
+            for (AbstractAction action : player.getForwardModel().computeAvailableActions(state, player.params.actionSpace)) {
+                children.put(action, null); // mark a new node to be expanded
+            }
     }
 
     /**
