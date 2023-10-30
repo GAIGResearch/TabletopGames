@@ -79,7 +79,7 @@ public class HanabiForwardModel extends StandardForwardModel {
     }
 
     private void drawCardsToPlayers(HanabiGameState hgs) {
-        hgs.drawDeck.shuffle(new Random(hgs.getGameParameters().getRandomSeed()));
+        hgs.drawDeck.shuffle(hgs.getRnd());
         for (int player = 0; player < hgs.getNPlayers(); player++) {
             for (int card = 0; card < ((HanabiParameters) hgs.getGameParameters()).nHandCards; card++) {
                 hgs.playerDecks.get(player).add(hgs.drawDeck.draw());

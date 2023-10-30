@@ -43,7 +43,6 @@ public class ResForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         ResGameState resgs = (ResGameState) firstState;
-        resgs.rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ResParameters resp = (ResParameters) firstState.getGameParameters();
         resgs.votingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
         resgs.gameBoardValues = new ArrayList<>(5);
@@ -289,7 +288,7 @@ public class ResForwardModel extends StandardForwardModel {
                 boolean done = false;
 
                 while (!done) {
-                    int rndIndex = state.rnd.nextInt(total);
+                    int rndIndex = state.getRnd().nextInt(total);
                     if (!retValue[rndIndex] && rndIndex != playerID) {
                         retValue[rndIndex] = true;
                         done = true;
