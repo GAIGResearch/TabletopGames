@@ -52,8 +52,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
         // Shuffles wonder-boards
         createWonderDeck(wgs); // Adds Wonders into game
-        Random r = new Random(wgs.getGameParameters().getRandomSeed());
-        wgs.wonderBoardDeck.shuffle(r);
+        wgs.wonderBoardDeck.shuffle(wgs.getRnd());
 
         // Gives each player wonder board and manufactured goods from the wonder
         for (int player=0; player < wgs.getNPlayers(); player++) {
@@ -74,11 +73,10 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
     public void ageSetup(AbstractGameState state){
         Wonders7GameState wgs = (Wonders7GameState) state;
-        Random r = new Random(wgs.getGameParameters().getRandomSeed());
 
         // Sets up the age
         createAgeDeck(wgs); // Fills Age1 deck with cards
-        wgs.ageDeck.shuffle(r);
+        wgs.ageDeck.shuffle(wgs.getRnd());
         //System.out.println("ALL THE CARDS IN THE GAME: "+wgs.AgeDeck.getSize());
         // Give each player their 7 cards, wonderBoard and the manufactured goods from the wonder-board
         for (int player=0; player < wgs.getNPlayers(); player++){
