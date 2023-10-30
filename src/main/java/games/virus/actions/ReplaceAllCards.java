@@ -8,7 +8,6 @@ import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
 import java.util.Objects;
-import java.util.Random;
 
 public class ReplaceAllCards extends DrawComponents {
     protected int deckDraw;
@@ -59,7 +58,7 @@ public class ReplaceAllCards extends DrawComponents {
     public void discardToDraw(VirusGameState vgs) {
         vgs.getDrawDeck().add(vgs.getDiscardDeck());
         vgs.getDiscardDeck().clear();
-        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
+        vgs.getDrawDeck().shuffle(vgs.getRnd());
     }
 
     @Override

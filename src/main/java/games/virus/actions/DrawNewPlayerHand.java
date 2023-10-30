@@ -7,10 +7,8 @@ import core.interfaces.IPrintable;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
-import games.virus.components.VirusBody;
 
 import java.util.Objects;
-import java.util.Random;
 
 public class DrawNewPlayerHand extends AbstractAction implements IPrintable {
 
@@ -46,7 +44,7 @@ public class DrawNewPlayerHand extends AbstractAction implements IPrintable {
             VirusCard card = vgs.getDiscardDeck().draw();
             vgs.getDrawDeck().add(card);
         }
-        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
+        vgs.getDrawDeck().shuffle(vgs.getRnd());
     }
 
     @Override
