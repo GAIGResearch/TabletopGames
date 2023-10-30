@@ -58,7 +58,7 @@ public class HeartsForwardModel extends StandardForwardModel {
         int numOfPlayers = hgs.getNPlayers();
 
         hgs.drawDeck.removeAll(params.cardsToRemove.get(numOfPlayers));
-        hgs.drawDeck.shuffle(hgs.rnd);
+        hgs.drawDeck.shuffle(hgs.getRnd());
 
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             Deck<FrenchCard> playerDeck = new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);

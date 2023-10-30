@@ -57,7 +57,6 @@ public class PokerForwardModel extends StandardForwardModel {
      */
     private void setupRound(PokerGameState pgs) {
         PokerGameParameters params = (PokerGameParameters) pgs.getGameParameters();
-        Random r = new Random(params.getRandomSeed() + pgs.getRoundCounter());
 
         pgs.moneyPots.clear();
         pgs.moneyPots.add(new MoneyPot());
@@ -73,7 +72,7 @@ public class PokerForwardModel extends StandardForwardModel {
 
         // Refresh draw deck and shuffle
         pgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        pgs.drawDeck.shuffle(r);
+        pgs.drawDeck.shuffle(pgs.getRnd());
 
         // Draw new cards for players
         drawCardsToPlayers(pgs);
