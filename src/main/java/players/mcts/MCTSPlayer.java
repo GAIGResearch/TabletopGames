@@ -24,8 +24,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     // Random object for this player
     protected RandomWrapper rnd;
-    // Parameters for this player
-    protected MCTSParams params;
     // Heuristics used for the agent
     protected IStateHeuristic heuristic;
     protected AbstractPlayer rolloutStrategy;
@@ -41,8 +39,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     public MCTSPlayer(long seed) {
         this(new MCTSParams(), "MCTSPlayer");
-        this.params.setRandomSeed(seed);
-        rnd = new RandomWrapper(new Random(this.params.getRandomSeed()));
+        parameters.setRandomSeed(seed);
+        rnd = new RandomWrapper(new Random(parameters.getRandomSeed()));
     }
 
     public MCTSPlayer(MCTSParams params) {
@@ -50,9 +48,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     }
 
     public MCTSPlayer(MCTSParams params, String name) {
-        this.params = params;
         this.parameters = params;
-        rnd = new RandomWrapper(new Random(this.params.getRandomSeed()));
+        rnd = new RandomWrapper(new Random(parameters.getRandomSeed()));
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
@@ -61,13 +58,18 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     }
 
     @Override
+    public MCTSParams getParameters() {
+        return (MCTSParams) parameters;
+    }
+
+    @Override
     public void initializePlayer(AbstractGameState state) {
         if (getParameters().resetSeedEachGame) {
-            rnd = new RandomWrapper(new Random(params.getRandomSeed()));
-            params.rolloutPolicy = null;
-            rolloutStrategy = params.getRolloutStrategy();
-            params.opponentModel = null;  // thi swill force reconstruction from random seed
-            opponentModel = params.getOpponentModel();
+            rnd = new RandomWrapper(new Random(parameters.getRandomSeed()));
+            getParameters().rolloutPolicy = null;
+            rolloutStrategy = getParameters().getRolloutStrategy();
+            getParameters().opponentModel = null;  // thi swill force reconstruction from random seed
+            opponentModel = getParameters().getOpponentModel();
      //       System.out.println("Resetting seed for MCTS player to " + params.getRandomSeed());
         }
         if (advantageFunction instanceof AbstractPlayer)
@@ -84,7 +86,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
      */
     protected Supplier<? extends SingleTreeNode> getFactory() {
         return () -> {
-            if (params.opponentTreePolicy == OMA || params.opponentTreePolicy == OMA_All)
+            if (getParameters().opponentTreePolicy == OMA || getParameters().opponentTreePolicy == OMA_All)
                 return new OMATreeNode();
             else
                 return new SingleTreeNode();
@@ -94,14 +96,14 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        if (params.opponentTreePolicy == MultiTree)
+        if (getParameters().opponentTreePolicy == MultiTree)
             root = new MultiTreeNode(this, gameState, rnd);
         else
             root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
 
         if (MASTStats != null)
             root.MASTStatistics = MASTStats.stream()
-                    .map(m -> Utils.decay(m, params.MASTGamma))
+                    .map(m -> Utils.decay(m, getParameters().MASTGamma))
                     .collect(Collectors.toList());
 
         if (rolloutStrategy instanceof IMASTUser) {
@@ -126,7 +128,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 2 * actions.size() && !params.actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+        if (root.children.size() > 2 * actions.size() && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();
     }
@@ -149,7 +151,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     @Override
     public MCTSPlayer copy() {
-        return new MCTSPlayer((MCTSParams) params.copy());
+        return new MCTSPlayer((MCTSParams) getParameters().copy());
     }
 
     @Override
@@ -192,13 +194,13 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     @Override
     public void setBudget(int budget) {
-        params.budget = budget;
-        params.setParameterValue("budget", budget);
+        parameters.budget = budget;
+        parameters.setParameterValue("budget", budget);
     }
 
     @Override
     public int getBudget() {
-        return params.budget;
+        return parameters.budget;
     }
 
     @Override

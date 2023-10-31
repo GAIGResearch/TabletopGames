@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 
 public class StarboardTests {
     CCForwardModel fm = new CCForwardModel();
-    Game game = GameType.ChineseCheckers.createGameInstance(6, new CCParameters(0));
+    Game game = GameType.ChineseCheckers.createGameInstance(6, new CCParameters());
     CCGameState state = (CCGameState) game.getGameState();
 
     @Test

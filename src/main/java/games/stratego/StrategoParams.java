@@ -24,13 +24,9 @@ public class StrategoParams extends AbstractParameters {
         }
     }
 
-    public StrategoParams(long seed) {
-        super(seed);
-    }
-
     @Override
     protected AbstractParameters _copy() {
-        return new StrategoParams(System.currentTimeMillis());
+        return new StrategoParams();
     }
 
     @Override

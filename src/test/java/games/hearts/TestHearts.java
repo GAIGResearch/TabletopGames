@@ -25,7 +25,7 @@ public class TestHearts {
     private HeartsForwardModel forwardModel;
     private HeartsGameState gameState;
 
-    AbstractParameters gameParameters = new HeartsParameters(System.currentTimeMillis());
+    AbstractParameters gameParameters = new HeartsParameters();
 
     @Before
     public void setUp() {

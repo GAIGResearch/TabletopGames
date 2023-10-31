@@ -166,13 +166,11 @@ public class CatanParameters extends AbstractParameters {
         put(Resource.WILD, 4);
     }};
 
-    public CatanParameters(long seed){
-        super(seed);
+    public CatanParameters(){
         setMaxRounds(1000);
     }
 
-    public CatanParameters(String dataPath, long seed){
-        super(seed);
+    public CatanParameters(String dataPath){
         this.dataPath = dataPath;
     }
 
@@ -193,7 +191,7 @@ public class CatanParameters extends AbstractParameters {
     @Override
     public AbstractParameters copy() {
         // todo set all variables
-        CatanParameters copy = new CatanParameters(getRandomSeed());
+        CatanParameters copy = new CatanParameters();
         return copy;
     }
 }

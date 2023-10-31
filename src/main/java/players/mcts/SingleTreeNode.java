@@ -85,7 +85,7 @@ public class SingleTreeNode {
         SingleTreeNode retValue = factory.get();
         retValue.factory = factory;
         retValue.decisionPlayer = state.getCurrentPlayer();
-        retValue.params = player.params;
+        retValue.params = player.getParameters();
         retValue.forwardModel = player.getForwardModel();
         retValue.heuristic = player.heuristic;
         retValue.rndWrapper = rnd;
@@ -95,7 +95,7 @@ public class SingleTreeNode {
                 retValue.opponentModels[p] = player.rolloutStrategy;
             else
                 retValue.opponentModels[p] = player.getOpponentModel(p);
-            retValue.opponentModels[p].getParameters().actionSpace = player.params.actionSpace;  // TODO makes sense?
+            retValue.opponentModels[p].getParameters().actionSpace = player.getParameters().actionSpace;  // TODO makes sense?
         }
         // only root node maintains MAST statistics
         retValue.MASTStatistics = new ArrayList<>();

@@ -298,6 +298,10 @@ public enum GameType {
         try {
             if (dataPath != null) {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class, Long.class);
+                if (constructorGS == null) {
+                    constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class);
+                    return (AbstractParameters) constructorGS.newInstance(dataPath);
+                }
                 return (AbstractParameters) constructorGS.newInstance(dataPath, seed);
             } else {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);

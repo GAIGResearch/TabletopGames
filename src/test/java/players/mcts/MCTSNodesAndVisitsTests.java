@@ -28,7 +28,7 @@ public class MCTSNodesAndVisitsTests {
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
-        params.maxTreeDepth = 20;
+        params.maxTreeDepth = 50;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
@@ -45,7 +45,7 @@ public class MCTSNodesAndVisitsTests {
         players.add(new RandomPlayer(new Random(244)));
         DominionParameters dp = new DominionParameters();
         dp.setRandomSeed(330245);
-        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(params, players.size()));
+        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(dp, players.size()));
     }
 
     @Test

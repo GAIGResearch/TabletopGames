@@ -67,7 +67,7 @@ public class OMATests {
         players.add(new RandomPlayer(new Random(-36572)));
         LoveLetterParameters gameParams = new LoveLetterParameters();
         gameParams.setRandomSeed(68274);
-        Game game = GameType.LoveLetter.createGameInstance(players.size(), params);
+        Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
         game.reset(players);
         return game;
     }

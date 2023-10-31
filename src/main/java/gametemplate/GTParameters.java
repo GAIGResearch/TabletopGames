@@ -15,9 +15,6 @@ import evaluation.optimisation.TunableParameters;
  * automatic game parameter optimisation tools in the framework.</p>
  */
 public class GTParameters extends AbstractParameters {
-    public GTParameters(long seed) {
-        super(seed);
-    }
 
     @Override
     protected AbstractParameters _copy() {

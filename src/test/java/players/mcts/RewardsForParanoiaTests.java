@@ -78,7 +78,7 @@ public class RewardsForParanoiaTests {
         Map<Integer, Long> nodeCountByDecisionMaker = list.stream()
                 .map(SingleTreeNode::getActor)
                 .collect(groupingBy(Function.identity(), counting()));
-        // we then check that all players have som nodes in the tree
+        // we then check that all players have some nodes in the tree
         CoreConstants.GameResult[] results = mctsPlayer.getRoot(0).getState().getPlayerResults();
         System.out.println("Nodes by player: " + nodeCountByDecisionMaker);
         if (results[0] == CoreConstants.GameResult.GAME_ONGOING)
@@ -147,6 +147,7 @@ public class RewardsForParanoiaTests {
     public void virusParanoid() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.paranoid = true;
+        params.budget = 5000;
         Game game = createGame(params, GameType.Virus);
         runGame(game, 4, paranoidNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
@@ -154,6 +155,7 @@ public class RewardsForParanoiaTests {
     @Test
     public void virusMaxN() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        params.budget = 5000;
         Game game = createGame(params, GameType.Virus);
         runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }

@@ -35,12 +35,12 @@ public class MultiTreeNode extends SingleTreeNode {
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, RandomWrapper rnd) {
-        if (player.params.information == MCTSEnums.Information.Closed_Loop)
-            player.params.information = MCTSEnums.Information.Open_Loop;
+        if (player.getParameters().information == MCTSEnums.Information.Closed_Loop)
+            player.getParameters().information = MCTSEnums.Information.Open_Loop;
         // Closed Loop is not yet supported for MultiTree search
         // TODO: implement this (not too difficult, but some tricky bits as we shift from tree to rollout and back again)
         this.decisionPlayer = state.getCurrentPlayer();
-        this.params = player.params;
+        this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
         this.heuristic = player.heuristic;
         this.rndWrapper = rnd;
@@ -124,7 +124,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 // note that different players will enter rollout at different times, which is why
                 // we cannot have a simple rollout() method as in SingleTree search
                 AbstractPlayer agent = opponentModels[currentActor];
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.params.actionSpace);
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.getParameters().actionSpace);
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
 
