@@ -33,7 +33,8 @@ public class RMHCPlayer extends AbstractPlayer {
     }
 
     public RMHCPlayer(long seed) {
-        this(new RMHCParams(seed));
+        this(new RMHCParams());
+        params.setRandomSeed(seed);
     }
 
     public RMHCPlayer(IStateHeuristic heuristic) {
@@ -45,7 +46,8 @@ public class RMHCPlayer extends AbstractPlayer {
     }
 
     public RMHCPlayer(long seed, IStateHeuristic heuristic) {
-        this(new RMHCParams(seed));
+        this(new RMHCParams());
+        params.setRandomSeed(seed);
     }
 
     @Override

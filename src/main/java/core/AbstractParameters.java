@@ -25,6 +25,11 @@ public abstract class AbstractParameters {
     long incrementMilestoneS = 0;
 
 
+    public AbstractParameters() {
+        this(System.currentTimeMillis());
+    }
+
+
     public AbstractParameters(long seed) {
         randomSeed = seed;
     }

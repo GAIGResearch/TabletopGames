@@ -22,8 +22,7 @@ public class BlackjackParameters extends TunableParameters {
     public int dealerStand = 17;
     public int nDealerCardsHidden = 1;
 
-    public BlackjackParameters(long seed) {
-        super(seed);
+    public BlackjackParameters() {
         addTunableParameter("nCardsPerPlayer", 2, Arrays.asList(1,2,3,4,5));
         addTunableParameter("jackCard", 10, Arrays.asList(5, 10, 15, 20));
         addTunableParameter("queenCard", 10, Arrays.asList(5, 10, 15, 20));
@@ -57,26 +56,13 @@ public class BlackjackParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        BlackjackParameters bjgp = new BlackjackParameters(System.currentTimeMillis());
-        bjgp.dataPath = dataPath;
-        bjgp.nCardsPerPlayer = nCardsPerPlayer;
-        bjgp.jackCard = jackCard;
-        bjgp.queenCard = queenCard;
-        bjgp.kingCard = kingCard;
-        bjgp.aceCardBelowThreshold = aceCardBelowThreshold;
-        bjgp.aceCardAboveThreshold = aceCardAboveThreshold;
-        bjgp.pointThreshold = pointThreshold;
-        bjgp.winScore = winScore;
-        bjgp.dealerStand = dealerStand;
-        bjgp.nDealerCardsHidden = nDealerCardsHidden;
-        return bjgp;
+        return new BlackjackParameters();
     }
 
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BlackjackParameters)) return false;
-        if (!super.equals(o)) return false;
         BlackjackParameters that = (BlackjackParameters) o;
         return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold && winScore == that.winScore && dealerStand == that.dealerStand && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath);
     }

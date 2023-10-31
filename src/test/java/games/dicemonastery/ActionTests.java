@@ -11,6 +11,7 @@ import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryConstants.Season;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.*;
+import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -27,14 +28,27 @@ import static org.junit.Assert.*;
 
 public class ActionTests {
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
-    DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+
     RandomPlayer rnd = new RandomPlayer();
-    List<Treasure> allTreasures = state.availableTreasures();
-    Treasure cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))
-            .findFirst().orElseThrow( () -> new AssertionError("Cape not found"));
-    Treasure robe = allTreasures.stream().filter(t -> t.getComponentName().equals("Robe"))
-            .findFirst().orElseThrow( () -> new AssertionError("Robe not found"));
+    DiceMonasteryParams params;
+    Game game;
+    DiceMonasteryGameState state;
+    List<Treasure> allTreasures;
+    Treasure cape, robe;
+
+    @Before
+    public void setup() {
+        params = new DiceMonasteryParams();
+        params.setRandomSeed(3);
+        game = GameType.DiceMonastery.createGameInstance(4, params);
+        state = (DiceMonasteryGameState) game.getGameState();
+        allTreasures = state.availableTreasures();
+        cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))
+                .findFirst().orElseThrow( () -> new AssertionError("Cape not found"));
+        robe = allTreasures.stream().filter(t -> t.getComponentName().equals("Robe"))
+                .findFirst().orElseThrow( () -> new AssertionError("Robe not found"));
+
+    }
 
     private void startOfUseMonkPhaseForArea(ActionArea region, Season season, Map<Integer, ActionArea> overrides) {
         do {

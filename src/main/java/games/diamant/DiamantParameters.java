@@ -13,8 +13,7 @@ public class DiamantParameters extends TunableParameters {
     public int nHazardsToDead      = 2;
     public int[] treasures         = new int[]{1, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
-    public DiamantParameters(long seed) {
-        super(seed);
+    public DiamantParameters() {
         addTunableParameter("nCaves", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("nHazardCardsPerType", 3, Arrays.asList(1,3,4,7,10));
         addTunableParameter("nHazardsToDead", 2, Arrays.asList(1,2,3,4,5));
@@ -30,7 +29,7 @@ public class DiamantParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        DiamantParameters copy = new DiamantParameters(System.currentTimeMillis());
+        DiamantParameters copy = new DiamantParameters();
         copy.nCaves              = nCaves;
         copy.nHazardCardsPerType = nHazardCardsPerType;
         copy.nHazardsToDead      = nHazardsToDead;

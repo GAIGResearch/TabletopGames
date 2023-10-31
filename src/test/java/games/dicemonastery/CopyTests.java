@@ -8,6 +8,7 @@ import games.dicemonastery.actions.*;
 import games.dicemonastery.components.IlluminatedText;
 import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Treasure;
+import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -26,14 +27,26 @@ import static org.junit.Assert.*;
 public class CopyTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
     RandomPlayer rnd = new RandomPlayer();
-    DiceMonasteryGameState s1 = (DiceMonasteryGameState) game.getGameState();
-    List<Treasure> allTreasures = s1.availableTreasures();
-    Treasure cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))
-            .findFirst().orElseThrow( () -> new AssertionError("Cape not found"));
-    Treasure robe = allTreasures.stream().filter(t -> t.getComponentName().equals("Robe"))
-            .findFirst().orElseThrow( () -> new AssertionError("Robe not found"));
+    DiceMonasteryParams params;
+    Game game;
+    DiceMonasteryGameState state;
+    List<Treasure> allTreasures;
+    Treasure cape, robe;
+
+    @Before
+    public void setup() {
+        params = new DiceMonasteryParams();
+        params.setRandomSeed(3);
+        game = GameType.DiceMonastery.createGameInstance(4, params);
+        state = (DiceMonasteryGameState) game.getGameState();
+        allTreasures = state.availableTreasures();
+        cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))
+                .findFirst().orElseThrow( () -> new AssertionError("Cape not found"));
+        robe = allTreasures.stream().filter(t -> t.getComponentName().equals("Robe"))
+                .findFirst().orElseThrow( () -> new AssertionError("Robe not found"));
+
+    }
 
     @Test
     public void placeMonkActionsGeneratedCorrectly() {

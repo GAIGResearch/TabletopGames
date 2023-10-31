@@ -10,6 +10,7 @@ import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Treasure;
+import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -29,9 +30,15 @@ import static org.junit.Assert.*;
 public class CoreGameLoopTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
+    Game game;
     RandomPlayer rnd = new RandomPlayer();
 
+    @Before
+    public void setup() {
+        DiceMonasteryParams params = new DiceMonasteryParams();
+        params.setRandomSeed(3);
+        game = GameType.DiceMonastery.createGameInstance(4, params);
+    }
     @Test
     public void gameSetup() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();

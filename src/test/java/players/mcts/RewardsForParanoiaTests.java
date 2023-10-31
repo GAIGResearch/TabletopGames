@@ -22,7 +22,8 @@ public class RewardsForParanoiaTests {
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.information = MCTSEnums.Information.Information_Set;
         params.maxTreeDepth = 10;

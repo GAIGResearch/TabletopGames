@@ -28,8 +28,7 @@ public class PlayerParameters extends TunableParameters {
     // Action space type for this player
     public ActionSpace actionSpace = new ActionSpace();
 
-    public PlayerParameters(long seed) {
-        super(seed);
+    public PlayerParameters() {
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
         addTunableParameter("budget", 4000, Arrays.asList(100, 300, 1000, 3000, 10000, 30000, 100000));
         addTunableParameter("breakMS", 0);
@@ -43,7 +42,7 @@ public class PlayerParameters extends TunableParameters {
 
     @Override
     protected PlayerParameters _copy() {
-        PlayerParameters params = new PlayerParameters(getRandomSeed());
+        PlayerParameters params = new PlayerParameters();
         // only need to copy fields that are not Tuned (those are done in the super class)
         params.gameHeuristic = gameHeuristic;
         return params;

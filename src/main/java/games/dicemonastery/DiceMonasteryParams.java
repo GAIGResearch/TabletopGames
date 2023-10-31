@@ -7,11 +7,6 @@ import java.util.Objects;
 
 public class DiceMonasteryParams extends TunableParameters {
     public DiceMonasteryParams() {
-        this(System.currentTimeMillis());
-    }
-
-    public DiceMonasteryParams(long seed) {
-        super(seed);
         addTunableParameter("YEARS", 4);
         addTunableParameter("dataPath", "data/dicemonastery/");
         addTunableParameter("mandateTreasureLoss", false);
@@ -69,23 +64,8 @@ public class DiceMonasteryParams extends TunableParameters {
 
     @Override
     protected DiceMonasteryParams _copy() {
-        DiceMonasteryParams retValue = new DiceMonasteryParams(System.currentTimeMillis());
-        retValue.YEARS = YEARS;
-        retValue.dataPath = dataPath;
+        DiceMonasteryParams retValue = new DiceMonasteryParams();
         retValue.BONUS_TOKENS_PER_PLAYER = BONUS_TOKENS_PER_PLAYER.clone();
-        retValue.mandateTreasureLoss = mandateTreasureLoss;
-        retValue.calfSkinsRotInWinter = calfSkinsRotInWinter;
-        retValue.libraryWritingSets = libraryWritingSets;
-        retValue.brewBeerCost = brewBeerCost;
-        retValue.brewMeadCost = brewMeadCost;
-        retValue.bakeBreadCost = bakeBreadCost;
-        retValue.bakeBreadYield = bakeBreadYield;
-        retValue.prepareInkCost = prepareInkCost;
-        retValue.prepareVellumCost = prepareVellumCost;
-        retValue.takePigmentCost = takePigmentCost;
-        retValue.makeCandleCost = makeCandleCost;
-        retValue.waxPerCandle = waxPerCandle;
-        retValue.hireNoviceCost = hireNoviceCost;
         return retValue;
     }
 

@@ -5,6 +5,7 @@ import games.GameType;
 import games.dicemonastery.*;
 import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Pilgrimage;
+import org.junit.Before;
 import org.junit.Test;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
@@ -15,8 +16,16 @@ import static org.junit.Assert.*;
 public class PilgrimageTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
-    DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+    Game game;
+    DiceMonasteryGameState state;
+
+    @Before
+    public void setup() {
+        DiceMonasteryParams params = new DiceMonasteryParams();
+        params.setRandomSeed(3);
+        game = GameType.DiceMonastery.createGameInstance(4, params);
+        state = (DiceMonasteryGameState) game.getGameState();
+    }
 
     @Test
     public void basicFunctionalityShort() {

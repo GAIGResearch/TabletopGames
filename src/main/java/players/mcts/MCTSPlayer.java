@@ -40,7 +40,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     }
 
     public MCTSPlayer(long seed) {
-        this(new MCTSParams(seed), "MCTSPlayer");
+        this(new MCTSParams(), "MCTSPlayer");
+        this.params.setRandomSeed(seed);
+        rnd = new RandomWrapper(new Random(this.params.getRandomSeed()));
     }
 
     public MCTSPlayer(MCTSParams params) {

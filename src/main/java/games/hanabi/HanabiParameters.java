@@ -23,7 +23,6 @@ public class HanabiParameters extends TunableParameters {
 
     public String dataPath = "data/hanabi/";
     public HanabiParameters(){
-        super(System.currentTimeMillis());
         addTunableParameter("nHandCards", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("hintCounter", 8, Arrays.asList(3,5,8,10));
         addTunableParameter("failCounter", 3, Arrays.asList(3,5,7,10));
@@ -32,18 +31,6 @@ public class HanabiParameters extends TunableParameters {
         addTunableParameter("nCards3", 2, Arrays.asList(1,2,3,5,7,10));
         addTunableParameter("nCards4", 2, Arrays.asList(1,2,3,5,7,10));
         addTunableParameter("nCards5", 1, Arrays.asList(1,2,3,5,7,10));
-    }
-
-    public HanabiParameters(long seed) {
-        super(seed);
-        addTunableParameter("nHandCards", 5, Arrays.asList(3,5,7,10));
-        addTunableParameter("hintCounter", 8, Arrays.asList(3,5,8,10));
-        addTunableParameter("failCounter", 3, Arrays.asList(3,5,7,10));
-        addTunableParameter("nCards1", 3, Arrays.asList(1,2,3,5,4,5));
-        addTunableParameter("nCards2", 2, Arrays.asList(1,2,3,5,4,5));
-        addTunableParameter("nCards3", 2, Arrays.asList(1,2,3,5,4,5));
-        addTunableParameter("nCards4", 2, Arrays.asList(1,2,3,5,4,5));
-        addTunableParameter("nCards5", 1, Arrays.asList(1,2,3,5,4,5));
     }
 
     @Override
@@ -61,7 +48,7 @@ public class HanabiParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        HanabiParameters copy = new HanabiParameters(System.currentTimeMillis());
+        HanabiParameters copy = new HanabiParameters();
         copy.dataPath = dataPath;
         copy.hintCounter = hintCounter;
         copy.failCounter = failCounter;

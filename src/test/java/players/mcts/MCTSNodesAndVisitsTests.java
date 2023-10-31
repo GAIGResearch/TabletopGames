@@ -6,6 +6,7 @@ import games.GameType;
 import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
+import games.dominion.DominionParameters;
 import org.junit.*;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
@@ -22,7 +23,8 @@ public class MCTSNodesAndVisitsTests {
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
@@ -41,7 +43,9 @@ public class MCTSNodesAndVisitsTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(244)));
-        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(330245), players.size()));
+        DominionParameters dp = new DominionParameters();
+        dp.setRandomSeed(330245);
+        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(params, players.size()));
     }
 
     @Test

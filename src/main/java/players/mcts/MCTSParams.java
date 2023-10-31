@@ -62,11 +62,6 @@ public class MCTSParams extends PlayerParameters {
     public double MASTDefaultValue = 0.0;
 
     public MCTSParams() {
-        this(System.currentTimeMillis());
-    }
-
-    public MCTSParams(long seed) {
-        super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 0.1);
@@ -166,7 +161,7 @@ public class MCTSParams extends PlayerParameters {
         // All the copying is done in TunableParameters.copy()
         // Note that any *local* changes of parameters will not be copied
         // unless they have been 'registered' with setParameterValue("name", value)
-        return new MCTSParams(System.currentTimeMillis());
+        return new MCTSParams();
     }
 
     public AbstractPlayer getOpponentModel() {

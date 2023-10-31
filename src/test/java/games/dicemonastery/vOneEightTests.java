@@ -6,6 +6,7 @@ import games.GameType;
 import games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.PlaceMonk;
+import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -20,15 +21,23 @@ import static org.junit.Assert.assertEquals;
 public class vOneEightTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
+    Game game;
     RandomPlayer rnd = new RandomPlayer();
+
+    @Before
+    public void setup() {
+        DiceMonasteryParams params = new DiceMonasteryParams();
+        params.setRandomSeed(3);
+        game = GameType.DiceMonastery.createGameInstance(4, params);
+    }
 
     @Test
     public void bonusTokenDistribution() {
         for (int np = 2; np <= 4; np++) {
-            Game game = GameType.DiceMonastery.createGameInstance(np, new DiceMonasteryParams(3));
+            DiceMonasteryParams params = new DiceMonasteryParams();
+            params.setRandomSeed(3);
+            Game game = GameType.DiceMonastery.createGameInstance(np, params);
             DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-            DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
             for (ActionArea area : ActionArea.values()) {
                 int expectedTokens = area.dieMinimum == 0 ? 0 : params.BONUS_TOKENS_PER_PLAYER[np];
                 assertEquals(expectedTokens, state.availableBonusTokens(area).size());

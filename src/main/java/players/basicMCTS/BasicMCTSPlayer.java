@@ -24,7 +24,8 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     public BasicMCTSPlayer(long seed) {
-        this.params = new BasicMCTSParams(seed);
+        this.params = new BasicMCTSParams();
+        params.setRandomSeed(seed);
         rnd = new Random(seed);
         setName("Basic MCTS");
 

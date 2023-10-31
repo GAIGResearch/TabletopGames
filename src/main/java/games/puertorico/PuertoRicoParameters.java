@@ -55,9 +55,8 @@ public class PuertoRicoParameters extends TunableParameters {
     };
 
 
-    public PuertoRicoParameters(long seed) {
-        super(seed);
-        // TODO: Once we decide which parameters we want to tune
+    public PuertoRicoParameters() {
+       // TODO: Once we decide which parameters we want to tune
     }
 
     @Override

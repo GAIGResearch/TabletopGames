@@ -23,8 +23,9 @@ public class TestTurnRoundProgression {
     @Test
     public void testTurnOwnerProgressesInPlanningPhase() {
 
-        state = new ColtExpressGameState(new ColtExpressParameters(6), 3);
-        ColtExpressParameters cep = (ColtExpressParameters) state.getGameParameters();
+        ColtExpressParameters params = new ColtExpressParameters();
+        params.setRandomSeed(6);
+        state = new ColtExpressGameState(params, 3);
         turnOrder = (ColtExpressTurnOrder) state.getTurnOrder();
         fm.setup(state);
         state.getRounds().draw();

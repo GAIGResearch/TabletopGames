@@ -27,10 +27,6 @@ public class RHEAPlayer extends AbstractPlayer {
     protected int repairCount, nonRepairCount;
     private MASTPlayer mastPlayer;
 
-    public RHEAPlayer() {
-        this(System.currentTimeMillis());
-    }
-
     public RHEAPlayer(RHEAParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
@@ -39,7 +35,8 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     public RHEAPlayer(long seed) {
-        this(new RHEAParams(seed));
+        this(new RHEAParams());
+        this.params.setRandomSeed(seed);
     }
 
     @Override
