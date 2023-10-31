@@ -124,7 +124,7 @@ public class MonopolyDealGameState extends AbstractGameState {
             if (playerId == -1) {
                 // No hidden information
                 retValue.playerHands[p] = playerHands[p].copy();
-                
+
             } else if (playerId == p) {
                 // Current players hand is visible information
                 retValue.playerHands[p] = playerHands[p].copy();
@@ -152,6 +152,7 @@ public class MonopolyDealGameState extends AbstractGameState {
             for(int j=0;j<11;j++)
                 retValue.playerPropertySets[i][j] = playerPropertySets[i][j].copy();
         }
+//        retValue.playerPropertySets = playerPropertySets.clone();
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
         retValue.deckEmpty = deckEmpty;
@@ -441,11 +442,11 @@ public class MonopolyDealGameState extends AbstractGameState {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         MonopolyDealGameState state = (MonopolyDealGameState) o;
-        return actionsLeft == state.actionsLeft && boardModificationsLeft == state.boardModificationsLeft && deckEmpty == state.deckEmpty && Objects.equals(params, state.params) && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
+        return actionsLeft == state.actionsLeft && boardModificationsLeft == state.boardModificationsLeft && deckEmpty == state.deckEmpty && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
     }
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), params, drawPile, gamePhase, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
+        int result = Objects.hash(super.hashCode(), drawPile, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
         result = 31 * result + Arrays.hashCode(playerHands);
         result = 31 * result + Arrays.hashCode(playerBanks);
         result = 31 * result + Arrays.hashCode(playerPropertySets);

@@ -802,7 +802,7 @@ public class Game {
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "MonopolyDeal");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
+        int turnPause = Utils.getArg(args, "turnPause", 1000);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
