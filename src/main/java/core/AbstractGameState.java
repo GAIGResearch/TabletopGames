@@ -76,7 +76,6 @@ public abstract class AbstractGameState {
         // this is then overridden in the game-specific constructor if needed
         this.gameParameters = gameParameters;
         this.coreGameParameters = new CoreParameters();
- //       rnd = new Random(gameParameters.randomSeed);
     }
 
     protected abstract GameType _getGameType();

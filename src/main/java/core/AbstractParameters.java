@@ -26,12 +26,7 @@ public abstract class AbstractParameters {
 
 
     public AbstractParameters() {
-        this(System.currentTimeMillis());
-    }
-
-
-    public AbstractParameters(long seed) {
-        randomSeed = seed;
+        this.setRandomSeed(System.currentTimeMillis());
     }
 
     /**
