@@ -119,7 +119,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         // Placeholder to know how many cards each player had for redrawing cards
         int[] playerHandSize = new int[getNPlayers()];
         retValue.drawPile = drawPile.copy();
-
         // Hidden values
         for (int p = 0; p < getNPlayers(); p++) {
             if (playerId == -1) {
@@ -442,20 +441,17 @@ public class MonopolyDealGameState extends AbstractGameState {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         MonopolyDealGameState state = (MonopolyDealGameState) o;
-        return actionsLeft == state.actionsLeft && Objects.equals(params, state.params) &&
-                Objects.equals(rnd, state.rnd) && Arrays.equals(playerHands, state.playerHands) &&
-                Arrays.equals(playerBanks, state.playerBanks) && boardModificationsLeft == state.boardModificationsLeft &&
-                Arrays.equals(playerPropertySets, state.playerPropertySets) &&
-                Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
+        return actionsLeft == state.actionsLeft && boardModificationsLeft == state.boardModificationsLeft && deckEmpty == state.deckEmpty && Objects.equals(params, state.params) && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
     }
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), params, drawPile, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
+        int result = Objects.hash(super.hashCode(), params, drawPile, gamePhase, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
+        result = 31 * result + Arrays.hashCode(playerHands);
         result = 31 * result + Arrays.hashCode(playerBanks);
-        result = 731 * result + Arrays.hashCode(playerHands);
-        result = 531 * result + Arrays.hashCode(playerPropertySets);
+        result = 31 * result + Arrays.hashCode(playerPropertySets);
         return result;
     }
+
     public enum MonopolyDealGamePhase implements IGamePhase {
         Play,
         Discard
