@@ -44,8 +44,8 @@ public class Wonder7Card extends Card {
 
     // Card has prerequisite cards
     public Wonder7Card(String name, Type type,
-                       Map<Wonders7Constants.Resource,Long> constructionCost,
-                       Map<Wonders7Constants.Resource,Long> resourcesProduced, String prerequisiteCard) {
+                       Map<Wonders7Constants.Resource, Long> constructionCost,
+                       Map<Wonders7Constants.Resource, Long> resourcesProduced, String prerequisiteCard) {
         super(name);
         this.cardName = name;
         this.type = type;
@@ -55,7 +55,7 @@ public class Wonder7Card extends Card {
     }
 
     // A free card (no construction cost)
-    public Wonder7Card(String name, Type type, Map<Wonders7Constants.Resource,Long> resourcesProduced){
+    public Wonder7Card(String name, Type type, Map<Wonders7Constants.Resource, Long> resourcesProduced) {
         super(name);
         this.cardName = name;
         this.type = type;
@@ -65,8 +65,8 @@ public class Wonder7Card extends Card {
     }
 
     protected Wonder7Card(String name, Type type,
-                          Map<Wonders7Constants.Resource,Long> constructionCost,
-                          Map<Wonders7Constants.Resource,Long> resourcesProduced, String prerequisiteCard, int componentID){
+                          Map<Wonders7Constants.Resource, Long> constructionCost,
+                          Map<Wonders7Constants.Resource, Long> resourcesProduced, String prerequisiteCard, int componentID) {
         super(name, componentID);
         this.cardName = name;
         this.type = type;
@@ -78,6 +78,7 @@ public class Wonder7Card extends Card {
     public int getNProduced(Wonders7Constants.Resource resource) {
         return resourcesProduced.get(resource).intValue();
     }
+
     public int getNCost(Wonders7Constants.Resource resource) {
         return constructionCost.get(resource).intValue();
     }
@@ -94,7 +95,7 @@ public class Wonder7Card extends Card {
 
     private String mapToStr(Map<Wonders7Constants.Resource, Long> m) {
         StringBuilder s = new StringBuilder();
-        for (Map.Entry<Wonders7Constants.Resource, Long> e: m.entrySet()) {
+        for (Map.Entry<Wonders7Constants.Resource, Long> e : m.entrySet()) {
             if (e.getValue() > 0) s.append(e.getValue()).append(" ").append(e.getKey()).append(",");
         }
         s.append("]");
@@ -102,10 +103,10 @@ public class Wonder7Card extends Card {
         return s.toString().replace(",]", "");
     }
 
-    public boolean isFree(int player, Wonders7GameState wgs){
+    public boolean isFree(int player, Wonders7GameState wgs) {
         // Checks if the player has prerequisite cards and can play for free
-        for (Wonder7Card card: wgs.getPlayedCards(player).getComponents()){
-            if (prerequisiteCard.equals(card.cardName)){
+        for (Wonder7Card card : wgs.getPlayedCards(player).getComponents()) {
+            if (prerequisiteCard.equals(card.cardName)) {
                 return true;
             }
         }
@@ -113,8 +114,8 @@ public class Wonder7Card extends Card {
     }
 
     public boolean isAlreadyPlayed(int player, Wonders7GameState wgs) {
-        for (Wonder7Card card: wgs.getPlayedCards(player).getComponents()){
-            if(Objects.equals(card.cardName, cardName)){
+        for (Wonder7Card card : wgs.getPlayedCards(player).getComponents()) {
+            if (Objects.equals(card.cardName, cardName)) {
                 // Player already has an identical structure, can't play another
                 return true;
             }
@@ -123,42 +124,49 @@ public class Wonder7Card extends Card {
     }
 
     // Checks if the player can play the card, several conditions must be met
-    public boolean isPlayable(int player, Wonders7GameState wgs){
-        if (isAlreadyPlayed(player, wgs)) return false; // If player already has an identical structure (can't play another
+    public boolean isPlayable(int player, Wonders7GameState wgs) {
+        if (isAlreadyPlayed(player, wgs))
+            return false; // If player already has an identical structure (can't play another
         if (isFree(player, wgs)) return true; // If player can play for free (has prerequisite card
+
+        Wonders7GameParameters params = (Wonders7GameParameters) wgs.getGameParameters();
 
         // Collects the resources player does not have
         HashMap<Wonders7Constants.Resource, Long> neededResources = new HashMap<>();
         for (Wonders7Constants.Resource resource : constructionCost.keySet()) { // Goes through every resource the player needs
             if ((wgs.getPlayerResources(player).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
-                neededResources.put(resource, constructionCost.get(resource)-wgs.getPlayerResources(player).get(resource));
+                if (resource == Coin)
+                    return false; // If player can't afford the card (not enough coins)
+                neededResources.put(resource, constructionCost.get(resource) - wgs.getPlayerResources(player).get(resource));
             }
         }
         if (neededResources.isEmpty()) return true; // If player can afford the card (no resources needed)
 
         // Calculates the cost of resources
-        int coinCost = 0;
+        int coinCost = constructionCost.getOrDefault(Coin, 0L).intValue();
+        int resourceCost = params.nCostNeighbourResource;
         for (Wonders7Constants.Resource resource : neededResources.keySet())
-            coinCost += (int) (((Wonders7GameParameters)wgs.getGameParameters()).nCostNeighbourResource * neededResources.get(resource)); // For each unit of the resource needed
-        if (coinCost > wgs.getPlayerResources(player).get(Coin))
+            coinCost += (int) (resourceCost * neededResources.get(resource)); // For each unit of the resource needed
+        if (coinCost > wgs.getPlayerResources(player).get(Coin) )
             return false; // If player can't pay the neighbours for the resources needed
 
-        HashMap<Wonders7Constants.Resource, Integer> neighbourLResources = wgs.getPlayerResources((wgs.getNPlayers()+player-1)%wgs.getNPlayers()); // Resources available to the neighbour on left
-        HashMap<Wonders7Constants.Resource, Integer> neighbourRResources = wgs.getPlayerResources((player+1)%wgs.getNPlayers()); // Resources available to the neighbour on right
+        HashMap<Wonders7Constants.Resource, Integer> neighbourLResources = wgs.getPlayerResources((wgs.getNPlayers() + player - 1) % wgs.getNPlayers()); // Resources available to the neighbour on left
+        HashMap<Wonders7Constants.Resource, Integer> neighbourRResources = wgs.getPlayerResources((player + 1) % wgs.getNPlayers()); // Resources available to the neighbour on right
 
         // Calculates combined resources of neighbour and player
         for (Wonders7Constants.Resource resource : constructionCost.keySet()) { // Goes through every resource provided by the neighbour
             int combined = wgs.getPlayerResources(player).get(resource)
                     + neighbourLResources.get(resource)
                     + neighbourRResources.get(resource);
-            if (combined < constructionCost.get(resource)) return false; // Player can't afford card with bought resources
+            if (combined < constructionCost.get(resource))
+                return false; // Player can't afford card with bought resources
         }
 
         return true;
     }
 
     @Override
-    public Card copy(){
+    public Card copy() {
         return new Wonder7Card(cardName, type, constructionCost, resourcesProduced, prerequisiteCard, componentID);
     }
 
@@ -166,17 +174,20 @@ public class Wonder7Card extends Card {
     public boolean equals(Object o) {
         if (o instanceof Wonder7Card) {
             Wonder7Card card = (Wonder7Card) o;
-            return card.cardName.equals(cardName) &&
-                    card.type == type;}
+            return super.equals(o) && card.cardName.equals(cardName) &&
+                    card.type == type;
+        }
         return false;
     }
 
-    public Type getCardType(){
+    public Type getCardType() {
         return type;
     }
 
 
     @Override
-    public int hashCode(){return Objects.hash(super.hashCode(), cardName); }
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), cardName);
+    }
 }
 

@@ -23,6 +23,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
     public void _setup(AbstractGameState state) {
         Wonders7GameState wgs = (Wonders7GameState) state;
+        Wonders7GameParameters params = (Wonders7GameParameters) wgs.getGameParameters();
 
         // Sets game in Age 1
         wgs.currentAge = 1;
@@ -66,10 +67,11 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                 int playerValue = wgs.getPlayerResources(player).get(resource); // Number of resource the player owns
                 wgs.getPlayerResources(player).put(resource, stageValue + playerValue); // Adds the resources provided by the stage to the players resource count
             }
+            // add coins
+            wgs.getPlayerResources(player).put(Coin, params.startingCoins);
         }
 
         ageSetup(wgs); // Shuffles deck and fills player hands, sets the turn owner
-        //System.out.println(wgs.AgeDeck.toString());
     }
 
     public void ageSetup(AbstractGameState state) {
@@ -99,8 +101,8 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         if (checkActionRound(wgs)) {
             for (int i = 0; i < wgs.getNPlayers(); i++) {
                 wgs.setTurnOwner(i); // PLAYER i DOES THE ACTION THEY SELECTED, NOT ANOTHER PLAYERS ACTION
-                wgs.getTurnAction(wgs.getCurrentPlayer()).execute(wgs); // EXECUTE THE ACTION
-                wgs.setTurnAction(wgs.getCurrentPlayer(), null); // REMOVE EXECUTED ACTION
+                wgs.getTurnAction(i).execute(wgs); // EXECUTE THE ACTION
+                wgs.setTurnAction(i, null); // REMOVE EXECUTED ACTION
             }
             wgs.setTurnOwner(0);
 
@@ -131,6 +133,13 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         } else {
             // we are still choosing cards for each player
             // this is covered by the code below
+        }
+        // We now check that all players have the same number of cards in hand
+        int cardsExpected = wgs.getPlayerHand(0).getSize();
+        for (int p = 1; p < wgs.getNPlayers(); p++)  {
+            if (wgs.getPlayerHand(p).getSize() != cardsExpected) {
+                throw new AssertionError("Player " + p + " has " + wgs.getPlayerHand(p).getSize() + " cards in hand, but player 0 has " + cardsExpected);
+            }
         }
 
         // the next player is whoever still has something to choose
@@ -308,22 +317,12 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         }
     }
 
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-//        Wonders7GameState wgs = (Wonders7GameState) gameState;
-        //System.out.println("");
-        //for (int i = 0; i < wgs.getNPlayers(); i++) {
-        //System.out.println(wgs.getPlayerWonderBoard(i).wonderName+" ["+(wgs.getPlayerWonderBoard(i).wonderStage-1) +"] "+ i + " --> " + wgs.getPlayerResources(i) + " --PLAYED CARDS--> " + wgs.getPlayedCards(i));
-        //}
-        // You may override the endGame() method if your game requires any extra end of game computation (e.g. to update the status of players still in the game to winners).
-        // !!!
-        // Note: Forward model classes can instead extend from the core.rules.AbstractRuleBasedForwardModel.java abstract class instead, if they wish to use the rule-based system instead; this class provides basic functionality and documentation for using rules and an already implemented _next() function.
-        // !!!
-    }
-
     protected void createAgeDeck(Wonders7GameState wgs) {
         // This method will create the deck for the current Era and
         // All the hashmaps containing different number of resources
+
+        // TODO: Implement missing commercial cards (which will also involve updating the code to for buying resources)
+
         switch (wgs.currentAge) {
             // ALL THE CARDS IN DECK 1
             case 1:
