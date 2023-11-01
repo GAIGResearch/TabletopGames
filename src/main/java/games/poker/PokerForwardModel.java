@@ -217,7 +217,7 @@ public class PokerForwardModel extends StandardForwardModel {
         if (checkGameEnd(pgs)) return;
 
         // End previous round
-        endRound(pgs, (pgs.getCurrentPlayer() + 1) % pgs.getNPlayers());
+        endRound(pgs, (pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
 
         Arrays.fill(pgs.playerFold, false);
 
