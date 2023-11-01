@@ -23,15 +23,11 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     // Random object for this player
-    protected RandomWrapper rnd;
+    protected Random rnd;
     // Heuristics used for the agent
-    protected IStateHeuristic heuristic;
-    protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
     protected SingleTreeNode root;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
-    private AbstractPlayer opponentModel;
-    private IActionHeuristic advantageFunction;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -40,7 +36,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     public MCTSPlayer(long seed) {
         this(new MCTSParams(), "MCTSPlayer");
         parameters.setRandomSeed(seed);
-        rnd = new RandomWrapper(new Random(parameters.getRandomSeed()));
+        rnd = new Random(parameters.getRandomSeed());
     }
 
     public MCTSPlayer(MCTSParams params) {
@@ -49,11 +45,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     public MCTSPlayer(MCTSParams params, String name) {
         this.parameters = params;
-        rnd = new RandomWrapper(new Random(parameters.getRandomSeed()));
-        rolloutStrategy = params.getRolloutStrategy();
-        opponentModel = params.getOpponentModel();
-        heuristic = params.getHeuristic();
-        advantageFunction = params.advantageFunction;
+        rnd = new Random(parameters.getRandomSeed());
         setName(name);
     }
 
@@ -65,18 +57,18 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public void initializePlayer(AbstractGameState state) {
         if (getParameters().resetSeedEachGame) {
-            rnd = new RandomWrapper(new Random(parameters.getRandomSeed()));
+            rnd = new Random(parameters.getRandomSeed());
             getParameters().rolloutPolicy = null;
-            rolloutStrategy = getParameters().getRolloutStrategy();
+            getParameters().getRolloutStrategy();
             getParameters().opponentModel = null;  // thi swill force reconstruction from random seed
-            opponentModel = getParameters().getOpponentModel();
+            getParameters().getOpponentModel();
      //       System.out.println("Resetting seed for MCTS player to " + params.getRandomSeed());
         }
-        if (advantageFunction instanceof AbstractPlayer)
-            ((AbstractPlayer) advantageFunction).initializePlayer(state);
+        if (getParameters().advantageFunction instanceof AbstractPlayer)
+            ((AbstractPlayer) getParameters().advantageFunction).initializePlayer(state);
         MASTStats = null;
-        rolloutStrategy.initializePlayer(state);
-        opponentModel.initializePlayer(state);
+        getParameters().getRolloutStrategy().initializePlayer(state);
+        getParameters().getOpponentModel().initializePlayer(state);
     }
 
     /**
@@ -106,22 +98,22 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                     .map(m -> Utils.decay(m, getParameters().MASTGamma))
                     .collect(Collectors.toList());
 
-        if (rolloutStrategy instanceof IMASTUser) {
-            ((IMASTUser) rolloutStrategy).setStats(root.MASTStatistics);
+        if (getParameters().getRolloutStrategy() instanceof IMASTUser) {
+            ((IMASTUser) getParameters().getRolloutStrategy()).setStats(root.MASTStatistics);
         }
-        if (opponentModel instanceof IMASTUser) {
-            ((IMASTUser) opponentModel).setStats(root.MASTStatistics);
+        if (getParameters().getOpponentModel() instanceof IMASTUser) {
+            ((IMASTUser) getParameters().getOpponentModel()).setStats(root.MASTStatistics);
         }
         root.mctsSearch();
 
-        if (advantageFunction instanceof ITreeProcessor)
-            ((ITreeProcessor) advantageFunction).process(root);
-        if (rolloutStrategy instanceof ITreeProcessor)
-            ((ITreeProcessor) rolloutStrategy).process(root);
-        if (heuristic instanceof ITreeProcessor)
-            ((ITreeProcessor) heuristic).process(root);
-        if (opponentModel instanceof ITreeProcessor)
-            ((ITreeProcessor) opponentModel).process(root);
+        if (getParameters().advantageFunction instanceof ITreeProcessor)
+            ((ITreeProcessor) getParameters().advantageFunction).process(root);
+        if (getParameters().getRolloutStrategy() instanceof ITreeProcessor)
+            ((ITreeProcessor) getParameters().getRolloutStrategy()).process(root);
+        if (getParameters().heuristic instanceof ITreeProcessor)
+            ((ITreeProcessor) getParameters().heuristic).process(root);
+        if (getParameters().getOpponentModel() instanceof ITreeProcessor)
+            ((ITreeProcessor) getParameters().getOpponentModel()).process(root);
 
         if (debug)
             System.out.println(root.toString());
@@ -133,19 +125,14 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         return root.bestAction();
     }
 
-
-    public AbstractPlayer getOpponentModel(int playerID) {
-        return opponentModel;
-    }
-
     @Override
     public void finalizePlayer(AbstractGameState state) {
-        rolloutStrategy.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
-        opponentModel.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
-        if (heuristic instanceof IGameListener)
-            ((IGameListener) heuristic).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
-        if (advantageFunction instanceof IGameListener)
-            ((IGameListener) advantageFunction).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        getParameters().getRolloutStrategy().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        getParameters().getOpponentModel().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        if (getParameters().heuristic instanceof IGameListener)
+            ((IGameListener) getParameters().heuristic).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        if (getParameters().advantageFunction instanceof IGameListener)
+            ((IGameListener) getParameters().advantageFunction).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
 
     }
 
@@ -157,14 +144,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public void setForwardModel(AbstractForwardModel model) {
         super.setForwardModel(model);
-        if (rolloutStrategy != null)
-            rolloutStrategy.setForwardModel(model);
-        if (opponentModel != null)
-            opponentModel.setForwardModel(model);
-    }
-
-    public void setStateHeuristic(IStateHeuristic heuristic) {
-        this.heuristic = heuristic;
+        if (getParameters().getRolloutStrategy() != null)
+            getParameters().getRolloutStrategy().setForwardModel(model);
+        if (getParameters().getOpponentModel() != null)
+            getParameters().getOpponentModel().setForwardModel(model);
     }
 
     @Override
@@ -176,8 +159,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 int visits = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToInt(SingleTreeNode::getVisits).sum();
                 double visitProportion = visits / (double) root.getVisits();
                 double meanValue =  Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum()/ visits;
-                double heuristicValue = heuristic != null ? heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
-                double advantageValue = advantageFunction != null ? advantageFunction.evaluateAction(action, root.state) : 0.0;
+                double heuristicValue = getParameters().heuristic != null ? getParameters().heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
+                double advantageValue = getParameters().advantageFunction != null ? getParameters().advantageFunction.evaluateAction(action, root.state) : 0.0;
 
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);

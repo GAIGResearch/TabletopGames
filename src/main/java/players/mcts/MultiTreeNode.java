@@ -34,7 +34,7 @@ public class MultiTreeNode extends SingleTreeNode {
     boolean[] maxDepthReached;
     MCTSPlayer mctsPlayer;
 
-    public MultiTreeNode(MCTSPlayer player, AbstractGameState state, RandomWrapper rnd) {
+    public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
         if (player.getParameters().information == MCTSEnums.Information.Closed_Loop)
             player.getParameters().information = MCTSEnums.Information.Open_Loop;
         // Closed Loop is not yet supported for MultiTree search
@@ -42,16 +42,8 @@ public class MultiTreeNode extends SingleTreeNode {
         this.decisionPlayer = state.getCurrentPlayer();
         this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
-        this.heuristic = player.heuristic;
-        this.rndWrapper = rnd;
-        this.opponentModels = new AbstractPlayer[state.getNPlayers()];
+        this.rnd = rnd;
         mctsPlayer = player;
-        for (int p = 0; p < opponentModels.length; p++) {
-            if (p == decisionPlayer)
-                opponentModels[p] = player.rolloutStrategy;
-            else
-                opponentModels[p] = player.getOpponentModel(p);
-        }
         // only root node maintains MAST statistics
         MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
@@ -87,7 +79,7 @@ public class MultiTreeNode extends SingleTreeNode {
         SingleTreeNode currentNode;
 
         double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                .mapToDouble(i -> heuristic.evaluateState(currentState, i)).toArray();
+                .mapToDouble(i -> params.heuristic.evaluateState(currentState, i)).toArray();
 
         if (!currentState.isNotTerminal())
             return;
@@ -110,7 +102,7 @@ public class MultiTreeNode extends SingleTreeNode {
             int currentActor = currentState.getCurrentPlayer();
             if (roots[currentActor] == null) {
                 // their first action in search; set a root for their tree
-                SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rndWrapper, mctsPlayer.getFactory());
+                SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rnd, mctsPlayer.getFactory());
                 pseudoRoot.decisionPlayer = currentActor;
                 if (params.paranoid)
                     pseudoRoot.paranoidPlayer = decisionPlayer;
@@ -123,7 +115,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 // all actions after the expansion for a player are rollout actions
                 // note that different players will enter rollout at different times, which is why
                 // we cannot have a simple rollout() method as in SingleTree search
-                AbstractPlayer agent = opponentModels[currentActor];
+                AbstractPlayer agent = currentActor == decisionPlayer ? params.getRolloutStrategy() : params.getOpponentModel();
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.getParameters().actionSpace);
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
@@ -176,7 +168,7 @@ public class MultiTreeNode extends SingleTreeNode {
         double[] finalValues = new double[state.getNPlayers()];
 
         for (int i = 0; i < finalValues.length; i++) {
-            finalValues[i] = heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
+            finalValues[i] = params.heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
         }
         for (SingleTreeNode singleTreeNode : currentLocation) {
             if (singleTreeNode != null)

@@ -29,9 +29,7 @@ public class SingleTreeNode {
     // Parameters guiding the search
     protected MCTSParams params;
     protected AbstractForwardModel forwardModel;
-    protected AbstractPlayer[] opponentModels;
-    protected RandomWrapper rndWrapper;
-    protected IStateHeuristic heuristic;
+    protected Random rnd;
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     protected int copyCount;
@@ -81,22 +79,14 @@ public class SingleTreeNode {
     }
 
     // Called in tree expansion
-    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, RandomWrapper rnd, Supplier<? extends SingleTreeNode> factory) {
+    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd, Supplier<? extends SingleTreeNode> factory) {
         SingleTreeNode retValue = factory.get();
+        MCTSParams mctsParams = player.getParameters();
         retValue.factory = factory;
         retValue.decisionPlayer = state.getCurrentPlayer();
         retValue.params = player.getParameters();
         retValue.forwardModel = player.getForwardModel();
-        retValue.heuristic = player.heuristic;
-        retValue.rndWrapper = rnd;
-        retValue.opponentModels = new AbstractPlayer[state.getNPlayers()];
-        for (int p = 0; p < retValue.opponentModels.length; p++) {
-            if (p == retValue.decisionPlayer)
-                retValue.opponentModels[p] = player.rolloutStrategy;
-            else
-                retValue.opponentModels[p] = player.getOpponentModel(p);
-            retValue.opponentModels[p].getParameters().actionSpace = player.getParameters().actionSpace;  // TODO makes sense?
-        }
+        retValue.rnd = rnd;
         // only root node maintains MAST statistics
         retValue.MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
@@ -119,10 +109,8 @@ public class SingleTreeNode {
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
         this.params = root.params;
-        this.heuristic = root.heuristic;
-        this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
-        this.rndWrapper = root.rndWrapper;
+        this.rnd = root.rnd;
         this.round = state.getRoundCounter();
         this.turn = state.getTurnCounter();
         this.turnOwner = state.getCurrentPlayer();
@@ -274,7 +262,7 @@ public class SingleTreeNode {
      */
     protected void oneSearchIteration() {
         double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                .mapToDouble(i -> heuristic.evaluateState(openLoopState, i)).toArray();
+                .mapToDouble(i -> params.heuristic.evaluateState(openLoopState, i)).toArray();
 
         actionsInTree = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
@@ -458,7 +446,7 @@ public class SingleTreeNode {
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
-        Collections.shuffle(notChosen, rndWrapper.getRND());
+        Collections.shuffle(notChosen, rnd);
 
         AbstractAction chosen = null;
 
@@ -525,7 +513,7 @@ public class SingleTreeNode {
         AbstractAction action = null;
         while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id) && !(inRollout && finishRollout(gs))) {
             //       AbstractGameState preGS = gs.copy();
-            AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
+            AbstractPlayer oppModel = params.getOpponentModel();
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpace);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible..." + (action != null? " Last action: " + action : ""));
@@ -700,7 +688,7 @@ public class SingleTreeNode {
             uctValue = childValue + explorationTerm;
 
             // Apply small noise to break ties randomly
-            uctValue = noise(uctValue, params.noiseEpsilon, rndWrapper.nextDouble());
+            uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
             if (Double.isNaN(uctValue))
                 throw new AssertionError("Numeric error calculating uctValue");
 
@@ -782,7 +770,7 @@ public class SingleTreeNode {
         }
 
         Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
-        return Utils.sampleFrom(actionToValueMap, params.exploreEpsilon, rndWrapper.nextDouble());
+        return Utils.sampleFrom(actionToValueMap, params.exploreEpsilon, rnd.nextDouble());
     }
 
     /**
@@ -814,7 +802,8 @@ public class SingleTreeNode {
                 if (availableActions.isEmpty()) {
                     throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next : ""));
                 }
-                next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
+                AbstractPlayer agent = rolloutState.getCurrentPlayer() == root.decisionPlayer ? params.getRolloutStrategy() : params.getOpponentModel();
+                next = agent.getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
@@ -824,7 +813,7 @@ public class SingleTreeNode {
         double[] retValue = new double[rolloutState.getNPlayers()];
 
         for (int i = 0; i < retValue.length; i++) {
-            retValue[i] = heuristic.evaluateState(rolloutState, i) - startingValues[i];
+            retValue[i] = params.heuristic.evaluateState(rolloutState, i) - startingValues[i];
             if (Double.isNaN(retValue[i]))
                 throw new AssertionError("Illegal heuristic value - should be a number");
         }
@@ -970,7 +959,7 @@ public class SingleTreeNode {
                         childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.noiseEpsilon);
 
                     // Apply small noise to break ties randomly
-                    childValue = noise(childValue, params.noiseEpsilon, rndWrapper.nextDouble());
+                    childValue = noise(childValue, params.noiseEpsilon, rnd.nextDouble());
 
                     // Save best value
                     if (childValue > bestValue) {

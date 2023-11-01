@@ -165,21 +165,27 @@ public class MCTSParams extends PlayerParameters {
     }
 
     public AbstractPlayer getOpponentModel() {
-        if (opponentModel != null)
-            return opponentModel;
-        if (oppModelType == PARAMS)
-            return (AbstractPlayer) opponentModelParams.instantiate();
-        if (oppModelType == MCTSEnums.Strategies.DEFAULT)
-            return getRolloutStrategy();
-        return constructStrategy(oppModelType, oppModelClass);
+        if (opponentModel == null) {
+            if (oppModelType == PARAMS)
+                opponentModel = (AbstractPlayer) opponentModelParams.instantiate();
+            else if (oppModelType == MCTSEnums.Strategies.DEFAULT)
+                opponentModel = getRolloutStrategy();
+            else
+                opponentModel = constructStrategy(oppModelType, oppModelClass);
+            opponentModel.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+        }
+        return opponentModel;
     }
 
     public AbstractPlayer getRolloutStrategy() {
-        if (rolloutPolicy != null)
-            return rolloutPolicy;
-        if (rolloutType == PARAMS)
-            return (AbstractPlayer) rolloutPolicyParams.instantiate();
-        return constructStrategy(rolloutType, rolloutClass);
+        if (rolloutPolicy == null) {
+            if (rolloutType == PARAMS)
+                rolloutPolicy = (AbstractPlayer) rolloutPolicyParams.instantiate();
+            else
+                rolloutPolicy = constructStrategy(rolloutType, rolloutClass);
+            rolloutPolicy.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+        }
+        return rolloutPolicy;
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
