@@ -8,6 +8,7 @@ import core.interfaces.ITreeActionSpace;
 import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.diamant.DiamantFeatures;
+import games.dotsboxes.DBFeatures;
 import games.loveletter.LLStateFeaturesReduced;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
@@ -38,7 +39,8 @@ enum FeatureExtractors {
     Stratego(StrategoFeatures.class, null),
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
-    Diamant(DiamantFeatures.class, DiamantFeatures.class);
+    Diamant(DiamantFeatures.class, DiamantFeatures.class),
+    DotsAndBoxes(DBFeatures.class, null);
     Class<? extends IStateFeatureVector> stateFeatureVector;
     Class<? extends IStateFeatureJSON> stateFeatureJSON;
     FeatureExtractors(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {
@@ -382,6 +384,7 @@ public class PyTAG {
         // set up players
 //        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
+        //players.add(new RandomPlayer(rnd));
         players.add(new RandomPlayer(rnd));
 //        players.add(new PythonAgent());
 
@@ -393,11 +396,11 @@ public class PyTAG {
         boolean done = false;
         int MAX_EPISODES = 100;
         int steps = 0;
-        String obsType = "json";
+        String obsType = "vector";
 
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("TicTacToe"), null, players, 343, true);
+            PyTAG env = new PyTAG(GameType.valueOf("DotsAndBoxes"), null, players, 343, true);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
@@ -409,13 +412,13 @@ public class PyTAG {
                     // get action mask and sample random action
                     int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
 
-                    // get observation vector
-                    if (obsType.equals("vector")){
-                        double[] obs = env.getObservationVector();
-                    } else if (obsType.equals("json")){
-                        String json = env.getObservationJson();
-                    }
-//                    double[] obs = env.getObservationVector();
+//                    // get observation vector
+//                    if (obsType.equals("vector")){
+//                        double[] obs = env.getObservationVector();
+//                    } else if (obsType.equals("json")){
+//                        String json = env.getObservationJson();
+//                    }
+                    double[] obs = env.getObservationVector();
 //                    String json = env.getObservationJson();
                     double reward = env.getReward();
 //                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
