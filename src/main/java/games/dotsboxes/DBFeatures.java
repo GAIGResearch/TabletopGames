@@ -3,6 +3,8 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 
+import java.util.*;
+
 public class DBFeatures implements IStateFeatureVector {
 
     /*
@@ -17,9 +19,12 @@ public class DBFeatures implements IStateFeatureVector {
         // Create a feature vector for each edge and no. players
         double[] featureVector = new double[dbState.edges.size()]; // * no_players];
 
+        // Order the edges so that the feature vector is consistent
+        TreeSet<DBEdge> sortedEdges = new TreeSet<>(dbState.edges);
+
         // For edge in game, check its owner (if it has one) and add it to the feature vector
         int currentEdge = 0;
-        for (DBEdge edge : dbState.edges) {
+        for (DBEdge edge : sortedEdges) {
 
             // Find owner of edge
             int owner = dbState.edgeToOwnerMap.getOrDefault(edge, -1);
