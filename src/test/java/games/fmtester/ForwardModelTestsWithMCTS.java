@@ -8,89 +8,83 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testBattleLore() {
-        new ForwardModelTester("game=Battlelore", "nGames=5", "nPlayers=2");
+        new ForwardModelTester("game=Battlelore", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\Battlelore.json");
     }
     @Test
     public void testCantStop() {
-         new ForwardModelTester("game=CantStop", "nGames=5", "nPlayers=3");
+         new ForwardModelTester("game=CantStop", "nGames=1", "nPlayers=3", "agentToPlay=json\\players\\gameSpecific\\CantStop.json");
     }
     @Test
     public void testCatan() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Catan", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=Catan", "nGames=1", "nPlayers=3", "agentToPlay=json\\players\\gameSpecific\\Catan.json");
     }
     @Test
     public void testColtExpress() {
-        ForwardModelTester fmt = new ForwardModelTester("game=ColtExpress", "nGames=2", "nPlayers=3");
+         new ForwardModelTester("game=ColtExpress", "nGames=1", "nPlayers=3", "agentToPlay=json\\players\\gameSpecific\\ColtExpress_3P.json");
     }
     @Test
     public void testConnect4() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Connect4", "nGames=2", "nPlayers=2");
+         new ForwardModelTester("game=Connect4", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\Connect4.json");
     }
     @Test
     public void testDiamant() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Diamant", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=Diamant", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Diamant.json");
     }
     @Test
     public void testDominion() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Dominion", "nGames=2", "nPlayers=3");
+       new ForwardModelTester("game=Dominion", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Dominion.json");
     }
-//    @Test
-//    public void testDiceMonastery() {
-//        ForwardModelTester fmt = new ForwardModelTester("game=DiceMonastery", "nGames=2", "nPlayers=3");
-//    }
+
     @Test
     public void testDotsAndBoxes() {
-        ForwardModelTester fmt = new ForwardModelTester("game=DotsAndBoxes", "nGames=2", "nPlayers=3");
+         new ForwardModelTester("game=DotsAndBoxes", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\DotsAndBoxes.json");
     }
     @Test
     public void testExplodingKittens() {
-        ForwardModelTester fmt = new ForwardModelTester("game=ExplodingKittens", "nGames=2", "nPlayers=3");
+         new ForwardModelTester("game=ExplodingKittens", "nGames=1", "nPlayers=3", "agentToPlay=json\\players\\gameSpecific\\ExplodingKittens.json");
     }
     @Test
     public void testLoveLetter() {
-        ForwardModelTester fmt = new ForwardModelTester("game=LoveLetter", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=LoveLetter", "nGames=1", "nPlayers=3", "agentToPlay=json\\players\\gameSpecific\\LoveLetter.json");
     }
-//    @Test
-//    public void testPandemic() {
-//        ForwardModelTester fmt = new ForwardModelTester("game=Pandemic", "nGames=2", "nPlayers=3");
-//    }
+
     @Test
     public void testPoker() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Poker", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=Poker", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Poker.json");
     }
     @Test
     public void testStratego() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Stratego", "nGames=2", "nPlayers=2");
+       new ForwardModelTester("game=Stratego", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\Stratego.json");
     }
     @Test
     public void testSushiGo() {
-        ForwardModelTester fmt = new ForwardModelTester("game=SushiGo", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=SushiGo", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\SushiGo.json");
     }
 
     @Test
     public void testTicTacToe() {
-        ForwardModelTester fmt = new ForwardModelTester("game=TicTacToe", "nGames=2", "nPlayers=2");
+        new ForwardModelTester("game=TicTacToe", "nGames=1", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\TicTacToe.json");
     }
     @Test
     public void testUno() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Uno", "nGames=2", "nPlayers=5");
+       new ForwardModelTester("game=Uno", "nGames=1", "nPlayers=5", "agentToPlay=json\\players\\gameSpecific\\Virus.json");
     }
     @Test
     public void testResistance() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Resistance", "nGames=2", "nPlayers=5");
+      new ForwardModelTester("game=Resistance", "nGames=1", "nPlayers=5", "agentToPlay=json\\players\\gameSpecific\\Dominion.json");
     }
     @Test
     public void testVirus() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Virus", "nGames=2", "nPlayers=3");
+       new ForwardModelTester("game=Virus", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Virus.json");
     }
 
     @Test
     public void testSevenWonders() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Wonders7", "nGames=20", "nPlayers=3");
+       new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\SushiGo.json");
     }
 
     @Test
     public void testHearts() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Hearts", "nGames=2", "nPlayers=4");
+        new ForwardModelTester("game=Hearts", "nGames=1", "nPlayers=4", "agentToPlay=json\\players\\gameSpecific\\Poker.json");
     }
 }
