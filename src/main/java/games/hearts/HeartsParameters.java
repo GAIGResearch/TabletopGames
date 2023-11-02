@@ -31,7 +31,7 @@ public class HeartsParameters extends AbstractParameters {
     public final int matchScore = 100;
 
     // Number of cards per player - index to array is nPlayers
-    public int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
+    public final int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
             17, 13, 10, 8, 7};
 
     Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();

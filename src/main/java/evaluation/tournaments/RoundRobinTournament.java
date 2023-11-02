@@ -233,7 +233,7 @@ public class RoundRobinTournament extends AbstractTournament {
             // if tournamentSeeds > 0, then we are running this many tournaments, each with a different random seed fixed for the whole tournament
             // otherwise (the lines below), we are running a single tournament with a different random seed for each game
             if (tournamentSeeds == 0) {
-                currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
+                currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + (i * 255) : gameSeeds[i];
             }
             // unless we are running a tournament for each individual random seed
             game.reset(matchUpPlayers, currentSeed);

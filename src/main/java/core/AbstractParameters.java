@@ -31,6 +31,8 @@ public abstract class AbstractParameters {
 
     /**
      * Return a copy of this game parameters object, with the same parameters as in the original.
+     * It is important that this return a new object. As the super-class will amend the randomSeed
+     * of the value returned.
      *
      * @return - new game parameters object.
      */

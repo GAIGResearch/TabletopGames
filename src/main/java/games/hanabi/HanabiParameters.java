@@ -49,15 +49,6 @@ public class HanabiParameters extends TunableParameters {
     @Override
     protected AbstractParameters _copy() {
         HanabiParameters copy = new HanabiParameters();
-        copy.dataPath = dataPath;
-        copy.hintCounter = hintCounter;
-        copy.failCounter = failCounter;
-        copy.nHandCards = nHandCards;
-        copy.nCards1 = nCards1;
-        copy.nCards2= nCards2;
-        copy.nCards3 = nCards3;
-        copy.nCards4 = nCards4;
-        copy.nCards5 = nCards5;
         copy.nNumberCards = nNumberCards;
         return copy;
     }
@@ -66,7 +57,6 @@ public class HanabiParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HanabiParameters)) return false;
-        if(!super.equals(o)) return false;
         HanabiParameters that = (HanabiParameters) o;
 
         return nNumberCards == that.nNumberCards &&

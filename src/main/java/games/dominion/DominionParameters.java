@@ -102,8 +102,20 @@ public class DominionParameters extends TunableParameters {
      */
     @Override
     protected AbstractParameters _copy() {
-        return this;
-        // currently parameters are immutable
+        DominionParameters retValue = new DominionParameters();
+        retValue.cardsUsed = new ArrayList<>(cardsUsed);
+        retValue.dataPath = dataPath;
+        retValue.HAND_SIZE = HAND_SIZE;
+        retValue.PILES_EXHAUSTED_FOR_GAME_END = PILES_EXHAUSTED_FOR_GAME_END;
+        retValue.KINGDOM_CARDS_OF_EACH_TYPE = KINGDOM_CARDS_OF_EACH_TYPE;
+        retValue.CURSE_CARDS_PER_PLAYER = CURSE_CARDS_PER_PLAYER;
+        retValue.STARTING_COPPER = STARTING_COPPER;
+        retValue.STARTING_ESTATES = STARTING_ESTATES;
+        retValue.COPPER_SUPPLY = COPPER_SUPPLY;
+        retValue.SILVER_SUPPLY = SILVER_SUPPLY;
+        retValue.GOLD_SUPPLY = GOLD_SUPPLY;
+        retValue.VICTORY_CARDS_PER_PLAYER = VICTORY_CARDS_PER_PLAYER.clone();
+        return retValue;
     }
 
     /**

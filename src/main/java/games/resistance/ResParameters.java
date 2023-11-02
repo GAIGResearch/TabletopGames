@@ -39,7 +39,11 @@ public class ResParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return new ResParameters();
+        ResParameters retValue = new ResParameters();
+        retValue.dataPath = dataPath;
+        retValue.playersPerMission = playersPerMission.clone();
+        retValue.spiesByPlayerCount = spiesByPlayerCount.clone();
+        return retValue;
     }
 
     @Override

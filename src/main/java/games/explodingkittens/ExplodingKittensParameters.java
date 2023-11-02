@@ -61,12 +61,7 @@ public class ExplodingKittensParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        ExplodingKittensParameters ekp = new ExplodingKittensParameters();
-        ekp.cardCounts = new HashMap<>(cardCounts);
-        ekp.nCardsPerPlayer = nCardsPerPlayer;
-        ekp.nDefuseCards = nDefuseCards;
-        ekp.nSeeFutureCards = nSeeFutureCards;
-        return ekp;
+        return new ExplodingKittensParameters();
     }
 
     @Override

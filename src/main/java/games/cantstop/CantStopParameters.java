@@ -62,7 +62,7 @@ public class CantStopParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return this; // immutable currently
+        return new CantStopParameters();
     }
 
     @Override

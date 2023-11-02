@@ -41,12 +41,12 @@ public class CCParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return this;
+        return new CCParameters();
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return o instanceof GTParameters;
+        return o instanceof CCParameters;
     }
 
     @Override

@@ -66,7 +66,8 @@ public class PuertoRicoParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return this;
+        return new PuertoRicoParameters();
+        // TODO: Once we decide which parameters we want to tune
     }
 
     @Override
