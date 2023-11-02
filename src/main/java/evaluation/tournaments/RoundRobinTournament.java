@@ -66,7 +66,7 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.agents.size(); i++)
             this.allAgentIds.add(i);
 
-        this.gamesPerMatchUp = (int) config.get(RunArg.matchups);
+        this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
         this.tournamentMode = tournamentMode;
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
@@ -81,8 +81,8 @@ public class RoundRobinTournament extends AbstractTournament {
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
         this.gamesPerPlayer = new int[agents.size()];
-        this.byTeam = (boolean) config.get(RunArg.byTeam);
-        this.tournamentSeeds = (int) config.get(RunArg.distinctRandomSeeds);
+        this.byTeam = (boolean) config.getOrDefault(RunArg.byTeam, false);
+        this.tournamentSeeds = (int) config.getOrDefault(RunArg.distinctRandomSeeds, 0);
         this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s",
                 gameToPlay.name(), playersPerGame, gamesPerMatchUp, tournamentMode.name());
     }

@@ -65,4 +65,12 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
     public AbstractPlayer copy() {
         return this; // stateless (except for rnd)
     }
+
+    public IActionHeuristic getActionHeuristic() {
+        return actionHeuristic;
+    }
+
+    public void setActionHeuristic(IActionHeuristic actionHeuristic) {
+        this.actionHeuristic = actionHeuristic;
+    }
 }

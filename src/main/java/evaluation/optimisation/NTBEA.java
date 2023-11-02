@@ -166,6 +166,7 @@ public class NTBEA {
                 Map<RunArg, Object> config = new HashMap<>();
                 config.put(matchups, gamesPerMatchup);
                 config.put(byTeam, false);
+                config.put(RunArg.distinctRandomSeeds, 0);
                 RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
                         NO_SELF_PLAY, config);
                 tournament.verbose = false;
