@@ -6,19 +6,16 @@ import core.interfaces.IStateFeatureVector;
 public class DBFeatures implements IStateFeatureVector {
 
     /*
-    Gets the observation vector for Dots and Boxes
-    Vector length = no. edges * no. players
-    Each edge will be one hot encoded for the player that owns it
-    (e.g. if player 1 owns the edge, the vector will be [1, 0, 0, 0, 0, 0]) for a 6 player game with one edge)
-    example vector for 2 players and 3 edges: [1, 0, 0, 1, 0, 1] (player 1 owns edge 1 and player 2 owns edge 2 and 3)
+    Gets the observation vector for Dots and Boxes encoded as a vector of size of the number of edges
+    The value 1 means that edge belongs to the current player, -1 belongs to opponent and 0 is empty
      */
     @Override
     public double[] featureVector(AbstractGameState state, int playerID) {
         DBGameState dbState = (DBGameState) state;
-        int no_players = state.getNPlayers();
-
+//        int no_players = state.getNPlayers();
+        int currentPlayer = state.getCurrentPlayer();
         // Create a feature vector for each edge and no. players
-        double[] featureVector = new double[dbState.edges.size() * no_players];
+        double[] featureVector = new double[dbState.edges.size()]; // * no_players];
 
         // For edge in game, check its owner (if it has one) and add it to the feature vector
         int currentEdge = 0;
@@ -28,11 +25,17 @@ public class DBFeatures implements IStateFeatureVector {
             int owner = dbState.edgeToOwnerMap.getOrDefault(edge, -1);
 
             // If edge is owned by a player, one hot encode it to the feature vector, else leave empty
-            if (owner != -1) {
-                featureVector[currentEdge + owner] = 1;
+            if (owner == currentPlayer) {
+                featureVector[currentEdge] = 1;
+            } else if (owner == -1){
+                // empty edge
+                featureVector[currentEdge] = 0;
+            } else {
+                // edge owned by opponent
+                featureVector[currentEdge] = -1;
             }
             // Increment to next edge
-            currentEdge += no_players;
+            currentEdge += 1;
         }
         return featureVector;
     }
