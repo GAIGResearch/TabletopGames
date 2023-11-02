@@ -153,7 +153,9 @@ public class MCTSParams extends PlayerParameters {
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
-
+        // we then null those elements of params which are constructed (lazily) from the above
+        opponentModel = null;
+        rolloutPolicy = null;
     }
 
     @Override

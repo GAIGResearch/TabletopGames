@@ -3,7 +3,7 @@ package test.games.fmtester;
 import evaluation.ForwardModelTester;
 import org.junit.Test;
 
-public class ForwardModelTests {
+public class ForwardModelTestsWithRandom {
 
     @Test
     public void testBattleLore() {
