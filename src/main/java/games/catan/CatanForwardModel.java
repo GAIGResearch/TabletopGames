@@ -10,6 +10,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
 import core.components.GraphBoardWithEdges;
+import core.interfaces.ITreeActionSpace;
 import evaluation.metrics.Event;
 import games.catan.actions.build.BuyAction;
 import games.catan.actions.discard.DiscardResourcesPhase;
@@ -18,6 +19,7 @@ import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 import games.catan.stats.CatanMetrics;
+import utilities.ActionTreeNode;
 
 import java.util.*;
 
@@ -29,7 +31,7 @@ import static games.catan.stats.CatanMetrics.CatanEvent.RobberRoll;
 import static games.catan.stats.CatanMetrics.CatanEvent.SevenOut;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
-public class CatanForwardModel extends StandardForwardModel {
+public class CatanForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -426,5 +428,16 @@ public class CatanForwardModel extends StandardForwardModel {
                 counter++;
             }
         }
+    }
+
+    @Override
+    public ActionTreeNode initActionTree(AbstractGameState gameState) {
+        root = new ActionTreeNode(0, "root");
+        return root;
+    }
+
+    @Override
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+        return root;
     }
 }

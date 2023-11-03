@@ -385,6 +385,7 @@ public class PyTAG {
 //        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
         players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
 //        players.add(new PythonAgent());
 
         boolean usePyTAG = true;
@@ -399,7 +400,7 @@ public class PyTAG {
 
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("TicTacToe"), null, players, 343, true);
+            PyTAG env = new PyTAG(GameType.valueOf("Catan"), null, players, 343, true);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
@@ -409,16 +410,17 @@ public class PyTAG {
                 if (usePyTAG){
 
                     // get action mask and sample random action
-                    int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
+                    int randomAction = 0;
+                    //int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
 
                     // get observation vector
-                    if (obsType.equals("vector")){
-                        double[] obs = env.getObservationVector();
-                    } else if (obsType.equals("json")){
-                        String json = env.getObservationJson();
-                    }
+//                    if (obsType.equals("vector")){
+//                        double[] obs = env.getObservationVector();
+//                    } else if (obsType.equals("json")){
+//                        String json = env.getObservationJson();
+//                    }
 //                    double[] obs = env.getObservationVector();
-//                    String json = env.getObservationJson();
+                    String json = env.getObservationJson();
                     double reward = env.getReward();
 //                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
 
