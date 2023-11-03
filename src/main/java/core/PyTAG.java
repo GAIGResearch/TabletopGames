@@ -7,6 +7,7 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.ITreeActionSpace;
 import core.interfaces.IStateFeatureJSON;
 import games.GameType;
+import games.catan.CatanFeatures;
 import games.diamant.DiamantFeatures;
 import games.loveletter.LLStateFeaturesReduced;
 import games.stratego.StrategoFeatures;
@@ -38,7 +39,8 @@ enum FeatureExtractors {
     Stratego(StrategoFeatures.class, null),
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
-    Diamant(DiamantFeatures.class, DiamantFeatures.class);
+    Diamant(DiamantFeatures.class, DiamantFeatures.class),
+    Catan(null, CatanFeatures.class);
     Class<? extends IStateFeatureVector> stateFeatureVector;
     Class<? extends IStateFeatureJSON> stateFeatureJSON;
     FeatureExtractors(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {
