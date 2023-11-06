@@ -33,12 +33,11 @@ public class CatanFeatures implements IStateFeatureJSON {
         // Convert the board / tiles to json
         JSONObject board_json = new JSONObject();
         JSONObject tiles_json = new JSONObject();
-        JSONObject tile_json = new JSONObject();
         for (int i = 0; i < catanGameState.board.length; i++) {
             for (int j = 0; j < catanGameState.board[i].length; j++) {
 
                 // Encode all information contained in the tile
-                tile_json.clear();
+                JSONObject tile_json = new JSONObject();
                 CatanTile tile = catanGameState.board[i][j];
 
                 // Top level information about the tile
@@ -109,11 +108,6 @@ public class CatanFeatures implements IStateFeatureJSON {
         // Roads (Edges) are stored in the buildings (I think) so need to extract them
         Map<Integer, Edge> roads = new HashMap<>();
 
-        // TODO Must be a better way of doing this
-        // A map of the ordered node ID to the json object,
-        // so that we can order the nodes in the json
-        Map<Integer, JSONObject> jsonNodeMap = new HashMap<>();
-
         // Get ID, Node Pair
         for (Map.Entry<Integer, BoardNodeWithEdges> pair : catanGameState.catanGraph.getBoardNodeMap().entrySet()) {
 
@@ -138,13 +132,9 @@ public class CatanFeatures implements IStateFeatureJSON {
                 roads.put(e.getComponentID(), e);
             }
 
-            // nodes_json.put("Node " + orderedID, node_json);
-            jsonNodeMap.put(orderedID, node_json);
+            nodes_json.put("Node " + orderedID, node_json);
         }
 
-        for (int i = 0; i < jsonNodeMap.size(); i++) {
-            nodes_json.put("Node " + i, jsonNodeMap.get(i));
-        }
 
 
 //        JSONObject edges_jason = new JSONObject();
