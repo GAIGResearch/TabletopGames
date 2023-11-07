@@ -32,7 +32,6 @@ public class CatanFeatures implements IStateFeatureJSON {
 
         // Convert the board / tiles to json
         JSONObject board_json = new JSONObject();
-        JSONObject tiles_json = new JSONObject();
         for (int i = 0; i < catanGameState.board.length; i++) {
             for (int j = 0; j < catanGameState.board[i].length; j++) {
 
@@ -41,118 +40,70 @@ public class CatanFeatures implements IStateFeatureJSON {
                 CatanTile tile = catanGameState.board[i][j];
 
                 // Top level information about the tile
-                tile_json.put("X Position", tile.x);
-                tile_json.put("Y Position", tile.y);
+
+                //tile_json.put("X Position", tile.x);
+                //tile_json.put("Y Position", tile.y);
                 tile_json.put("Type", tile.getTileType().toString());
                 tile_json.put("Number", tile.getNumber());
                 tile_json.put("Robber", tile.hasRobber());
 
-                //TODO these are duplicates - turn into function?
 
-                int[] edges = new int[tile.getEdgeIDs().length];
+                // Edges (Roads)
+                Edge[] edges = catanGameState.getRoads(tile);
+                int[] roads = new int[edges.length];
 
-                // Register the edges
-                for (int n = 0; n < tile.getEdgeIDs().length; n++) {
-
-                    // Get the edge ID
-                    int edgeID = tile.getEdgeIDs()[n];
-
-                    // If Edge Exists
-                    if (edgeID != -1) {
-
-                        // If the edge has not been registered yet
-                        // Register it
-                        if (!orderedEdges.containsKey(edgeID)) {
-                            orderedEdges.put(edgeID, edgeCounter);
-                            edgeCounter++;
-                        }
-
-                        // Assign edge to the ordered value
-                        edges[n] = orderedEdges.get(edgeID);
-                    }
-                }
-                tile_json.put("Edges", edges);
-                int[] nodes = new int[tile.getVerticesBoardNodeIDs().length];
-
-                // Register the nodes
-                for (int n = 0; n < tile.getVerticesBoardNodeIDs().length; n++) {
-
-                    // Get the node ID
-                    int nodeID = tile.getVerticesBoardNodeIDs()[n];
-
-                    // If Node Exists
-                    if (nodeID != -1) {
-
-                        // If the node has not been registered yet
-                        // Register it
-                        if (!orderedNodes.containsKey(nodeID)) {
-                            orderedNodes.put(nodeID, nodeCounter);
-                            nodeCounter++;
-                        }
-
-                        // Assign node to the ordered value
-                        nodes[n] = orderedNodes.get(nodeID);
+                // If edge is null then there is no road
+                // Otherwise ownerID is the owner of the road
+                for (int n = 0; n < edges.length; n++) {
+                    if (edges[n] != null) {
+                        roads[n] = edges[n].getOwnerId();
+                    } else {
+                        roads[n] = -1;
                     }
                 }
 
-                tile_json.put("Nodes", nodes);
-                tiles_json.put("Tile " + i + ", " + j, tile_json);
+                // Node (Settlements Harbours and Cities)
+                Building[] nodes = catanGameState.getBuildings(tile);
+                int[] settlements = new int[nodes.length];
+                int[] harbours = new int[nodes.length];
+                int[] cities = new int[nodes.length];
+
+                for (int n =0; n < nodes.length; n++) {
+                    Building node = nodes[n];
+
+                    // Check for settlements
+                    if (node.getBuildingType() == Building.Type.Settlement) {
+                        settlements[n] = node.getOwnerId();
+                    }
+                    else {
+                        settlements[n] = -1;
+                    }
+
+                    // Check for cities
+                    if (node.getBuildingType() == Building.Type.City) {
+                        cities[n] = node.getOwnerId();
+                    }
+                    else {
+                        cities[n] = -1;
+                    }
+
+                    // Check for harbours
+                    if (node.getHarbour() != null) {
+                        harbours[n] = node.getHarbour().ordinal();
+                    }
+                    else {
+                        harbours[n] = -1;
+                    }
+                }
+
+                tile_json.put("Roads", roads);
+                tile_json.put("Settlements", settlements);
+                tile_json.put("Cities", cities);
+                tile_json.put("Harbours", harbours);
+                board_json.put("Tile " + i + ", " + j, tile_json);
             }
         }
-
-        board_json.put("Tiles", tiles_json);
-
-        // Nodes
-        JSONObject nodes_json = new JSONObject();
-
-        // Roads (Edges) are stored in the buildings (I think) so need to extract them
-        Map<Integer, Edge> roads = new HashMap<>();
-
-        // Get ID, Node Pair
-        for (Map.Entry<Integer, BoardNodeWithEdges> pair : catanGameState.catanGraph.getBoardNodeMap().entrySet()) {
-
-            JSONObject node_json = new JSONObject();
-
-            int id = pair.getKey();
-            Building node = (Building) pair.getValue();
-            int orderedID = orderedNodes.get(id);
-
-            node_json.put("Owner", node.getOwnerId());
-            node_json.put("Type", node.getBuildingType().toString());
-            if (node.getHarbour() != null) {
-                node_json.put("Harbour", node.getHarbour().toString());
-            }
-            else {
-                node_json.put("Harbour", "None");
-            }
-
-
-            // Get the edges and put them in a map (using their component ID as key)
-            for (Edge e : node.getEdges()) {
-                roads.put(e.getComponentID(), e);
-            }
-
-            nodes_json.put("Node " + orderedID, node_json);
-        }
-
-
-
-//        JSONObject edges_jason = new JSONObject();
-
-//        // For Edges
-//        for (Map.Entry<Integer, Edge> pair : roads.entrySet()) {
-//            JSONObject edge_json = new JSONObject();
-//            int id = pair.getKey();
-//            Edge edge = pair.getValue();
-//            int orderedID = orderedEdges.get(id);
-//            edge_json.put("Owner", String.valueOf(edge.getOwnerId()));
-//            edges_jason.put("Edge " + orderedID, edge_json);
-//        }
-//
-        board_json.put("Nodes", nodes_json);
         json.put("Board", board_json);
-//        board_json.put("Edges", edges_jason);
-        // json.put("Board", board_json);
         return json.toJSONString();
     }
 }
