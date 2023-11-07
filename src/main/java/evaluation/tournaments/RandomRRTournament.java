@@ -49,7 +49,7 @@ public class RandomRRTournament extends RoundRobinTournament {
             List<Integer> matchup = new ArrayList<>(nTeams);
             for (int j = 0; j < nTeams; j++)
                 matchup.add(idStream.getAsInt());
-            evaluateMatchUp(matchup);
+            evaluateMatchUp(matchup, 1);
             if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1) {
                 reportResults();
             }

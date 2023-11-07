@@ -181,7 +181,7 @@ public class RoundRobinTournament extends AbstractTournament {
         } else {
             // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
             if (matchUp.size() == nTeams) {
-                evaluateMatchUp(matchUp);
+                evaluateMatchUp(matchUp, gamesPerMatchUp);
             } else {
                 for (Integer agentID : this.allAgentIds) {
                     if (tournamentMode == SELF_PLAY || !matchUp.contains(agentID)) {
@@ -192,10 +192,6 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
             }
         }
-    }
-
-    protected void evaluateMatchUp(List<Integer> agentIDs) {
-        evaluateMatchUp(agentIDs, gamesPerMatchUp);
     }
 
     /**
