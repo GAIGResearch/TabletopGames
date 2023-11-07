@@ -31,11 +31,19 @@ public class CatanFeatures implements IStateFeatureJSON {
         json.put("Current Player", catanGameState.getCurrentPlayer());
 
         // Catan Game State Encodings
-        json.put("Longest Road Owner", catanGameState.getLongestRoadOwner());
-        json.put("Longest Road Length", catanGameState.getLongestRoadLength());
+
         json.put("Dice Roll", catanGameState.rollValue);
         json.put("Scores", catanGameState.getScores());
         json.put("Victory Points", catanGameState.getVictoryPoints());
+
+        // Longest Road
+        json.put("Longest Road Owner", catanGameState.getLongestRoadOwner());
+        json.put("Longest Road Length", catanGameState.getLongestRoadLength());
+
+        // Kingdom
+        json.put("Largest Kingdom Owner", catanGameState.getLargestArmyOwner());
+        json.put("Largest Kingdom Size", catanGameState.getLargestArmySize());
+
 
         // Cards
 
