@@ -44,13 +44,24 @@ public class CatanFeatures implements IStateFeatureJSON {
         json.put("Largest Kingdom Owner", catanGameState.getLargestArmyOwner());
         json.put("Largest Kingdom Size", catanGameState.getLargestArmySize());
 
+        // Opponent Information
+
+        // How many cards each player has in their hand
+        int[] playerHands = new int[catanGameState.getNPlayers()];
+        for (int i = 0; i < catanGameState.getNPlayers(); i++) {
+            int totalCards = 0;
+            totalCards += catanGameState.getPlayerDevCards(i).getSize();
+            totalCards += catanGameState.getNResourcesInHand(i);
+            playerHands[i] = totalCards;
+        }
+        json.put("Player Hands Size", playerHands);
+
+
+        //TODO - Is there a way to see which dev cards have been played?
 
         // Cards
 
-        //json.put("Development Cards", catanGameState.getDevCards());
-
-        // Opponent Information
-
+        json.put("Development Cards", catanGameState.getDevCards().getSize());
 
         // Encode Resources
         JSONObject resources_json = new JSONObject();
