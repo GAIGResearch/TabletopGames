@@ -2,6 +2,7 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.components.BoardNodeWithEdges;
+import core.components.Counter;
 import core.components.Edge;
 import core.interfaces.IStateFeatureJSON;
 import games.catan.components.Building;
@@ -21,28 +22,60 @@ public class CatanFeatures implements IStateFeatureJSON {
     // Long function ahead
     @Override
     public String getObservationJson(AbstractGameState gameState, int playerId) {
+
         CatanGameState catanGameState = (CatanGameState) gameState;
         JSONObject json = new JSONObject();
 
-        // Maps for ordering nodes and edgesS
-        Map<Integer, Integer> orderedEdges = new HashMap<>();
-        Map<Integer, Integer> orderedNodes = new HashMap<>();
-        int edgeCounter = 0;
-        int nodeCounter = 0;
+        // Game State Encodings
+        json.put("Game Phase", catanGameState.getGamePhase());
+        json.put("Current Player", catanGameState.getCurrentPlayer());
+
+        // Catan Game State Encodings
+        json.put("Longest Road Owner", catanGameState.getLongestRoadOwner());
+        json.put("Longest Road Length", catanGameState.getLongestRoadLength());
+        json.put("Dice Roll", catanGameState.rollValue);
+        json.put("Scores", catanGameState.getScores());
+        json.put("Victory Points", catanGameState.getVictoryPoints());
+
+        // Cards
+
+        //json.put("Development Cards", catanGameState.getDevCards());
+
+        // Opponent Information
+
+
+        // Encode Resources
+        JSONObject resources_json = new JSONObject();
+        HashMap<CatanParameters.Resource, Counter> resources = catanGameState.getResourcePool();
+        for (CatanParameters.Resource resource : resources.keySet()) {
+            resources_json.put(resource.toString(), resources.get(resource).getValue());
+        }
+
+        json.put("Resources", resources_json);
+
+
+
 
         // Convert the board / tiles to json
         JSONObject board_json = new JSONObject();
         for (int i = 0; i < catanGameState.board.length; i++) {
             for (int j = 0; j < catanGameState.board[i].length; j++) {
 
+                // Tile:
+                // - Type (enum)
+                // - Number (int)
+                // - Robber (boolean)
+                // - Roads (array of ints)
+                // - Settlements (array of ints)
+                // - Cities (array of ints)
+                // - Harbours (array of ints)
+
+                // For the array based fields, the value in the array is the ownerID of that component
+                // on the tile position (so all have a size of 6 because hexagons)
+
                 // Encode all information contained in the tile
                 JSONObject tile_json = new JSONObject();
                 CatanTile tile = catanGameState.board[i][j];
-
-                // Top level information about the tile
-
-                //tile_json.put("X Position", tile.x);
-                //tile_json.put("Y Position", tile.y);
                 tile_json.put("Type", tile.getTileType().toString());
                 tile_json.put("Number", tile.getNumber());
                 tile_json.put("Robber", tile.hasRobber());
