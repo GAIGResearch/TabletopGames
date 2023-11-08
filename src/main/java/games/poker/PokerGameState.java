@@ -32,6 +32,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
 
     boolean[] playerNeedsToCall;  // True if player needs to call (can't just check)
     boolean[] playerFold;  // True if player folded
+    boolean[] playerAllIn; // True if player is all-in
     boolean[] playerActStreet;  // true if player acted this street, false otherwise
     boolean bet;  // True if a bet was made this street
     protected int bigId; // Stores the id of the previous big blind
@@ -157,6 +158,9 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     public boolean[] getPlayerNeedsToCall() {
         return playerNeedsToCall;
     }
+    public boolean[] getPlayerAllIn() {
+        return playerAllIn;
+    }
 
     public boolean[] getPlayerFold() {
         return playerFold;
@@ -186,13 +190,30 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
      * @return the id of the player with small blind
      */
     public int getSmallId() {
-        return getNextPlayer(getBigId(), -1);
+        return getNextNonBankruptPlayer(getBigId(), -1);
     }
 
-    public int getNextPlayer(int fromPlayer, int direction) {
+    public int getNextActingPlayer(int fromPlayer, int direction) {
         int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        int nTries = 0;
+        while ((playerFold[next] || playerAllIn[next] || getPlayerResults()[next] == LOSE_GAME)) {
+            next = (nPlayers + next + direction) % nPlayers;
+            nTries++;
+            if (nTries > getNPlayers()) {
+                return -1;
+            }
+        }
+        return next;
+    }
+    public int getNextNonBankruptPlayer(int fromPlayer, int direction) {
+        int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        int nTries = 0;
         while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME)) {
             next = (nPlayers + next + direction) % nPlayers;
+            nTries++;
+            if (nTries > getNPlayers()) {
+                return -1;
+            }
         }
         return next;
     }
@@ -232,6 +253,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         }
         copy.playerNeedsToCall = playerNeedsToCall.clone();
         copy.playerFold = playerFold.clone();
+        copy.playerAllIn = playerAllIn.clone();
         copy.playerActStreet = playerActStreet.clone();
         copy.bet = bet;
         return copy;
@@ -271,7 +293,15 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Arrays.equals(playerMoney, that.playerMoney) && Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Objects.equals(moneyPots, that.moneyPots) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet);
+        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) &&
+                Arrays.equals(playerMoney, that.playerMoney) &&
+                Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck)
+                && Objects.equals(communityCards, that.communityCards) &&
+                Objects.equals(moneyPots, that.moneyPots) &&
+                Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) &&
+                Arrays.equals(playerFold, that.playerFold) &&
+                Arrays.equals(playerActStreet, that.playerActStreet) &&
+                Arrays.equals(playerAllIn, that.playerAllIn);
     }
 
     @Override
