@@ -46,10 +46,6 @@ public class PokerForwardModel extends StandardForwardModel {
         // Player 0 starts the game
         pgs.setFirstPlayer(0);
 
-        // Player to the right of first player is big blind
-        // Assuming player 0 starts the game
-        pgs.setBigId(pgs.getNPlayers() - 1);
-
         // Set up first round
         setupRound(pgs);
     }
@@ -60,8 +56,6 @@ public class PokerForwardModel extends StandardForwardModel {
      * @param pgs - current game state.
      */
     private void setupRound(PokerGameState pgs) {
-        if (pgs.getRoundCounter() != 0) pgs.resetTurnOwner();
-
         PokerGameParameters params = (PokerGameParameters) pgs.getGameParameters();
 
         pgs.moneyPots.clear();
@@ -83,8 +77,11 @@ public class PokerForwardModel extends StandardForwardModel {
         // Draw new cards for players
         drawCardsToPlayers(pgs);
 
-        // Blinds
-        int bigId = pgs.getBigId();
+        // Blinds;
+        // player to right of first player is BigBlind
+        // The 'first player' is the first player to bid (don't confuse with the dealer)
+        // in the pre-flop round. In later phases the small blind will bid first.
+        pgs.bigId = pgs.getNextPlayer(pgs.getFirstPlayer(), -1);
         int smallId = pgs.getSmallId();
 
         if (pgs.playerMoney[smallId].getValue() < params.smallBlind) {
@@ -93,10 +90,10 @@ public class PokerForwardModel extends StandardForwardModel {
             new Bet(smallId, params.smallBlind).execute(pgs);
         }
 
-        if (pgs.playerMoney[bigId].getValue() < params.bigBlind) {
-            new AllIn(bigId).execute(pgs);
+        if (pgs.playerMoney[pgs.bigId].getValue() < params.bigBlind) {
+            new AllIn(pgs.bigId).execute(pgs);
         } else {
-            new Bet(bigId, params.bigBlind).execute(pgs);
+            new Bet(pgs.bigId, params.bigBlind).execute(pgs);
         }
 
         pgs.setGamePhase(Preflop);
@@ -139,15 +136,13 @@ public class PokerForwardModel extends StandardForwardModel {
             if (stillAlive == 1) {
                 // Round is over
                 roundEnd(pgs);
+                return;
             } else if (!remainingDecisions) {
                 // Add community cards
-                pgs.setTurnOwner(pgs.getFirstPlayer());
                 pgs.setBet(false);
                 Arrays.fill(pgs.playerActStreet, false);
 
                 if (pgs.getGamePhase() == Preflop) {
-                    // The small blind is the new first player
-                    pgs.setFirstPlayer(pgs.getSmallId());
                     // Add flop
                     for (int i = 0; i < pgp.nFlopCards; i++) {
                         pgs.communityCards.add(pgs.drawDeck.draw());
@@ -168,9 +163,12 @@ public class PokerForwardModel extends StandardForwardModel {
                 } else if (pgs.getGamePhase() == River) {
                     // Round is over
                     roundEnd(pgs);
+                    return;
                 }
-
-                pgs.resetTurnOwner();
+                // who starts the bidding in the next phase?
+                endPlayerTurn(pgs, pgs.getSmallId());
+                checkMoney(pgs);
+                return;
             }
         }
         checkMoney(pgs);
@@ -224,14 +222,10 @@ public class PokerForwardModel extends StandardForwardModel {
         // Check if game is over
         if (checkGameEnd(pgs)) return;
 
-        // End previous round
-        endRound(pgs, (pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
+        // End previous round, and move first player round clockwise
+        endRound(pgs, (pgs.getNextPlayer(pgs.getTurnOwner(), 1)));
 
         Arrays.fill(pgs.playerFold, false);
-
-        // Set new bigId and firstPlayer
-        pgs.incBigId();
-        pgs.setPreFlopFirstPlayer();
 
         // Reset cards for the new round
         setupRound(pgs);

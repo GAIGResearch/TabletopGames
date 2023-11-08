@@ -34,7 +34,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     boolean[] playerFold;  // True if player folded
     boolean[] playerActStreet;  // true if player acted this street, false otherwise
     boolean bet;  // True if a bet was made this street
-    private int bigId; // Stores the id of the previous big blind
+    protected int bigId; // Stores the id of the previous big blind
 
     enum PokerGamePhase implements IGamePhase {
         Preflop,
@@ -69,19 +69,6 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             this.addAll(Arrays.asList(playerMoney));
             this.addAll(Arrays.asList(playerBet));
         }};
-    }
-
-    public int getNextPlayer() {
-        int next = (nPlayers + turnOwner + 1) % nPlayers;
-        int nTries = 1;
-        while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME) && nTries <= getNPlayers()) {
-            next = (nPlayers + next + 1) % nPlayers;
-            nTries++;
-        }
-//        if (nTries > getNPlayers()) {
-//            endGame(gameState);
-//        }
-        return next;
     }
 
     public void placeBet(int amount, int player) {
@@ -193,52 +180,21 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
 
     public int getBigId() { return bigId; }
 
-    public void setBigId(int bigId) { this.bigId = bigId; }
-
-    /***
-     * Increments bigId to the next available player
-     */
-    public void incBigId() {
-        bigId = (getBigId() + 1) % getNPlayers();
-        while (getPlayerResults()[bigId] == LOSE_GAME) {
-            bigId = (bigId + 1) % getNPlayers();
-        }
-    }
-
     /***
      * Player to the right of big blind is small blind
      *
      * @return the id of the player with small blind
      */
     public int getSmallId() {
-        int smallId = (getBigId() + getNPlayers() - 1) % getNPlayers();
-        while (getPlayerResults()[smallId] == LOSE_GAME) {
-            smallId = (smallId + getNPlayers() - 1) % getNPlayers();
-        }
-        return smallId;
+        return getNextPlayer(getBigId(), -1);
     }
 
-    /***
-     * This is called during PreFlop
-     * Sets firstPlayer to the left of big blind
-     */
-    public void setPreFlopFirstPlayer() {
-        int firstPlayer = (getBigId() + 1) % getNPlayers();
-        while (getPlayerResults()[firstPlayer] == LOSE_GAME) {
-            firstPlayer = (firstPlayer + 1) % getNPlayers();
+    public int getNextPlayer(int fromPlayer, int direction) {
+        int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME)) {
+            next = (nPlayers + next + direction) % nPlayers;
         }
-        setFirstPlayer(firstPlayer);
-    }
-
-    /***
-     * Resets turnOwner to the right of firstPlayer
-     */
-    public void resetTurnOwner() {
-        int turnOwner = (getFirstPlayer() + getNPlayers() - 1) % getNPlayers();
-        while (getPlayerResults()[turnOwner] == LOSE_GAME) {
-            turnOwner = (turnOwner + getNPlayers() - 1) % getNPlayers();
-        }
-        setTurnOwner(turnOwner);
+        return next;
     }
 
     @Override
