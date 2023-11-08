@@ -722,8 +722,10 @@ public class SingleTreeNode {
         else
             meanActionValue = meanActionValue - (totValue[decisionPlayer] / nVisits);
         double retValue = Math.exp(meanActionValue / params.exp3Boltzmann);
-        if (Double.isNaN(retValue))
-            throw new AssertionError("We have a non-number in EXP3 somewhere");
+        if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
+            System.out.println("We have a non-number in EXP3 somewhere : " + retValue);
+            retValue = 1e6;  // to avoid numeric issues later
+        }
         return retValue;
     }
 
