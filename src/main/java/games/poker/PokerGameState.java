@@ -218,6 +218,15 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         return next;
     }
 
+    public void otherPlayerMustCall(int playerId) {
+        // Others can't check
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (i != playerId && !playerFold[i] && !playerAllIn[i]) {
+                playerNeedsToCall[i] = true;
+            }
+        }
+    }
+
     @Override
     protected AbstractGameState _copy(int playerId) {
         PokerGameState copy = new PokerGameState(gameParameters.copy(), getNPlayers());

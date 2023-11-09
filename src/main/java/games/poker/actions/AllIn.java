@@ -22,11 +22,7 @@ public class AllIn extends AbstractAction implements IPrintable {
         pgs.getPlayerAllIn()[playerId] = true;
 
         // Others can't check, unless all in
-        for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (i != playerId && !pgs.getPlayerFold()[i] && !pgs.getPlayerMoney()[i].isMinimum()) {
-                pgs.getPlayerNeedsToCall()[i] = true;
-            }
-        }
+        pgs.otherPlayerMustCall(playerId);
 
         return true;
     }

@@ -112,21 +112,20 @@ public class PokerForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         // Check end of street to add more community cards
-        //      System.out.println("Executed action " + action.getString(gameState));
         PokerGameState pgs = (PokerGameState) gameState;
         PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
 
         checkMoney(pgs);
 
-//        if (action instanceof Fold) {
-//            fold(pgs, ((Fold) action).playerId);
-//        }
+        // So - playerNeedsToCall means that they still have a decision to make
+        // playerActStreet means that they have acted at least once
+        // a player is only out of the phase if they have acted, and do not need to call
 
         pgs.playerActStreet[pgs.getCurrentPlayer()] = true;
         boolean remainingDecisions = false;
         int stillAlive = 0;
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i]) {
+            if (pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i] && !pgs.playerAllIn[i]) {
                 stillAlive++;
                 if (pgs.playerNeedsToCall[i] || !pgs.playerActStreet[i]) {
                     remainingDecisions = true;
@@ -140,9 +139,11 @@ public class PokerForwardModel extends StandardForwardModel {
             roundEnd(pgs);
             return;
         } else if (!remainingDecisions) {
-            // Add community cards
+            // Phase over, move to next phase
             pgs.setBet(false);
+            // reset all players to act (Fold and AllIn unchanged)
             Arrays.fill(pgs.playerActStreet, false);
+            Arrays.fill(pgs.playerNeedsToCall, false);
 
             if (pgs.getGamePhase() == Preflop) {
                 // Add flop
@@ -167,20 +168,23 @@ public class PokerForwardModel extends StandardForwardModel {
                 roundEnd(pgs);
                 return;
             }
-            // who starts the bidding in the next phase?
-            // This is the small blind, or the next person round if they have Folded
-            int nextPlayer = pgs.getNextNonBankruptPlayer((pgs.getSmallId() - 1) % pgs.getNPlayers(), 1);
-            endPlayerTurn(pgs, nextPlayer);
-            checkMoney(pgs);
+            if (pgs.isNotTerminal()) {
+                // who starts the bidding in the next phase?
+                // This is the small blind, or the next person round if they have Folded / are AllIn
+                int nextPlayer = pgs.getNextActingPlayer((pgs.getSmallId() - 1) % pgs.getNPlayers(), 1);
+                if (nextPlayer == -1) {
+                    throw new AssertionError("No Player to act next!");
+                }
+                endPlayerTurn(pgs, nextPlayer);
+                checkMoney(pgs);
+            }
             return;
         }
         checkMoney(pgs);
 
-        if (pgs.isNotTerminal()) {
-            // next player round (who is still in the game and has not folded)
-            int nextPlayer = pgs.getNextActingPlayer(pgs.getCurrentPlayer() % pgs.getNPlayers(), 1);
-            endPlayerTurn(pgs, nextPlayer);
-        }
+        // next player round (who is still in the game and has not folded)
+        int nextPlayer = pgs.getNextActingPlayer(pgs.getCurrentPlayer() % pgs.getNPlayers(), 1);
+        endPlayerTurn(pgs, nextPlayer);
     }
 
     /**
@@ -352,21 +356,6 @@ public class PokerForwardModel extends StandardForwardModel {
         return false;
     }
 
-    public void fold(PokerGameState pgs, int player) {
-        if (player == pgs.getFirstPlayer()) {
-            // Move first player to next one
-            pgs.setFirstPlayer((pgs.getNPlayers() + pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
-            int nTries = 1;
-            while ((pgs.playerFold[pgs.getFirstPlayer()] || pgs.getPlayerResults()[pgs.getFirstPlayer()] == LOSE_GAME) && nTries <= pgs.getNPlayers()) {
-                pgs.setFirstPlayer((pgs.getNPlayers() + pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
-                nTries++;
-            }
-            if (nTries > pgs.getNPlayers()) {
-                endGame(pgs);
-            }
-        }
-    }
-
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
@@ -381,11 +370,15 @@ public class PokerForwardModel extends StandardForwardModel {
         boolean othersAllIn = true;  // True if all others are all in / out of the game, false otherwise
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             if (pgs.getPlayerBet()[i].getValue() > biggestBet) biggestBet = pgs.getPlayerBet()[i].getValue();
-            if (i != player && pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i] && !pgs.playerMoney[i].isMinimum())
+            if (i != player && pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i] && !pgs.playerAllIn[i])
                 othersAllIn = false;
         }
 
-        if (pgs.playerNeedsToCall[player] && !pgs.getPlayerMoney()[player].isMinimum()) {
+        if (pgs.playerFold[player] || pgs.getPlayerResults()[player] == LOSE_GAME || pgs.playerAllIn[player]) {
+            throw new AssertionError("Player should not be able to act if they have Folded / are AllIn / out of the game");
+        }
+
+        if (pgs.playerNeedsToCall[player]) {
             int diff = biggestBet - pgs.getPlayerBet()[player].getValue();
 
             if (pgs.playerMoney[player].getValue() >= diff) {
@@ -411,7 +404,7 @@ public class PokerForwardModel extends StandardForwardModel {
             }
         }
         actions.add(new Fold(player));
-        if (!pgs.playerMoney[player].isMinimum()) {
+        if (!pgs.playerAllIn[player]) {
             actions.add(new AllIn(player));
         }
 

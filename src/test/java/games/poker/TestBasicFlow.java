@@ -82,15 +82,17 @@ public class TestBasicFlow {
         assertEquals(1, state.getCurrentPlayer());
         fm.next(state, new Call(1));
         assertEquals(2, state.getCurrentPlayer());
-        fm.next(state, new AllIn(2));
+        fm.next(state, new AllIn(2)); // this requires player 1 to call again
         assertEquals(3, state.getCurrentPlayer());
         fm.next(state, new Call(3));
         assertEquals(1, state.getCurrentPlayer());
+        assertEquals(PokerGameState.PokerGamePhase.Preflop, state.getGamePhase());
+        fm.next(state, new Call(1));
         assertEquals(PokerGameState.PokerGamePhase.Flop, state.getGamePhase());
-        fm.next(state, new Check(1));
         assertEquals(3, state.getCurrentPlayer());
-        fm.next(state, new Check(3));
+        fm.next(state, new Call(3));
         assertEquals(1, state.getCurrentPlayer());
+        fm.next(state, new Call(1));
         assertEquals(PokerGameState.PokerGamePhase.Turn, state.getGamePhase());
     }
 
@@ -99,6 +101,6 @@ public class TestBasicFlow {
         do {
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             fm.next(state, actions.get(rnd.nextInt(actions.size())));
-        } while (state.getGamePhase() != PokerGameState.PokerGamePhase.Turn);
+        } while (state.isNotTerminal());
     }
 }
