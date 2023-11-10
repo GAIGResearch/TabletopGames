@@ -158,6 +158,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     public boolean[] getPlayerNeedsToCall() {
         return playerNeedsToCall;
     }
+
     public boolean[] getPlayerAllIn() {
         return playerAllIn;
     }
@@ -182,7 +183,9 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         this.bet = bet;
     }
 
-    public int getBigId() { return bigId; }
+    public int getBigId() {
+        return bigId;
+    }
 
     /***
      * Player to the right of big blind is small blind
@@ -191,6 +194,29 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
      */
     public int getSmallId() {
         return getNextNonBankruptPlayer(getBigId(), -1);
+    }
+
+    public boolean playersLeftToAct() {
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (playerFold[p] || playerAllIn[p] || getPlayerResults()[p] == LOSE_GAME)
+                continue;
+            if (playerNeedsToCall[p] || !playerActStreet[p])
+                return true;
+        }
+        return false;
+    }
+
+    public boolean checkRoundOver() {
+        int stillAlive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (getPlayerResults()[i] != LOSE_GAME && !playerFold[i] && !playerAllIn[i]) {
+                stillAlive++;
+            }
+        }
+        if (stillAlive <= 1) {
+            return true;
+        }
+        return false;
     }
 
     public int getNextActingPlayer(int fromPlayer, int direction) {
@@ -205,15 +231,11 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         }
         return next;
     }
+
     public int getNextNonBankruptPlayer(int fromPlayer, int direction) {
         int next = (nPlayers + fromPlayer + direction) % nPlayers;
-        int nTries = 0;
-        while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME)) {
+        while (getPlayerResults()[next] == LOSE_GAME) {
             next = (nPlayers + next + direction) % nPlayers;
-            nTries++;
-            if (nTries > getNPlayers()) {
-                return -1;
-            }
         }
         return next;
     }
@@ -221,7 +243,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     public void otherPlayerMustCall(int playerId) {
         // Others can't check
         for (int i = 0; i < getNPlayers(); i++) {
-            if (i != playerId && !playerFold[i] && !playerAllIn[i]) {
+            if (i != playerId && !playerFold[i] && !playerAllIn[i] && getPlayerResults()[i] != LOSE_GAME) {
                 playerNeedsToCall[i] = true;
             }
         }

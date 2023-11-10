@@ -96,6 +96,11 @@ public class PokerForwardModel extends StandardForwardModel {
         } else {
             new Bet(pgs.bigId, params.bigBlind).execute(pgs);
         }
+        // It is then possible that the round (and game) ends immediately
+        // if there are 2 players left, and one went AllIn on the blind
+        if (pgs.checkRoundOver()) {
+            roundEnd(pgs);
+        }
 
         pgs.setGamePhase(Preflop);
         pgs.setBet(false);
@@ -122,23 +127,11 @@ public class PokerForwardModel extends StandardForwardModel {
         // a player is only out of the phase if they have acted, and do not need to call
 
         pgs.playerActStreet[pgs.getCurrentPlayer()] = true;
-        boolean remainingDecisions = false;
-        int stillAlive = 0;
-        for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i] && !pgs.playerAllIn[i]) {
-                stillAlive++;
-                if (pgs.playerNeedsToCall[i] || !pgs.playerActStreet[i]) {
-                    remainingDecisions = true;
-                }
-            }
-        }
-        if (stillAlive == 0) {
-            throw new AssertionError("No players left in the game!");
-        } else if (stillAlive == 1) {
-            // Round is over
+        if (pgs.checkRoundOver()) {
             roundEnd(pgs);
             return;
-        } else if (!remainingDecisions) {
+        }
+        if (!pgs.playersLeftToAct()) {
             // Phase over, move to next phase
             pgs.setBet(false);
             // reset all players to act (Fold and AllIn unchanged)
@@ -233,7 +226,7 @@ public class PokerForwardModel extends StandardForwardModel {
         if (checkGameEnd(pgs)) return;
 
         // End previous round, and move first player round clockwise
-        endRound(pgs, (pgs.getNextActingPlayer(pgs.getTurnOwner(), 1)));
+        endRound(pgs, (pgs.getNextNonBankruptPlayer(pgs.getFirstPlayer(), 1)));
 
         // Reset cards for the new round
         setupRound(pgs);
@@ -363,6 +356,8 @@ public class PokerForwardModel extends StandardForwardModel {
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = pgs.getCurrentPlayer();
+        if (player == -1)
+            throw new AssertionError("Player should not be -1 at this point");
 
         // Check if player can afford to: Bet, Call, Raise. Can also Check, Fold.
 
