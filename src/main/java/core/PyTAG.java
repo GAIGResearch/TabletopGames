@@ -410,8 +410,8 @@ public class PyTAG {
                 if (usePyTAG){
 
                     // get action mask and sample random action
-                    int randomAction = 0;
-                    //int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
+                    //int randomAction = 0;
+                    int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
 
                     // get observation vector
 //                    if (obsType.equals("vector")){

@@ -430,14 +430,16 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
         }
     }
 
+    // Calls the CatanActionTree to initialise the action tree
+    // (The Tree is very big so keeps the forward model clean)
     @Override
     public ActionTreeNode initActionTree(AbstractGameState gameState) {
-        root = new ActionTreeNode(0, "root");
-        return root;
+        return CatanActionTree.initActionTree(gameState);
     }
 
+    // Calls the CatanActionTree to update the action tree
     @Override
     public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
-        return root;
+        return CatanActionTree.updateActionTree(root, gameState);
     }
 }
