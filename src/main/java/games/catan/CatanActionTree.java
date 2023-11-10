@@ -4,6 +4,10 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
+import games.catan.actions.build.BuildCity;
+import games.catan.actions.build.BuildRoad;
+import games.catan.actions.build.BuildSettlement;
+import games.catan.actions.build.BuyDevelopmentCard;
 import games.catan.actions.robber.MoveRobberAndSteal;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
 import games.catan.components.CatanTile;
@@ -45,7 +49,7 @@ public class CatanActionTree {
             }
         }
 
-        // Setup Robber / Knight Branch
+        // Robber / Knight Branch
         // 0 - Robber / Knight
         // 1 - Tile X
         // 2 - Tile Y
@@ -78,6 +82,50 @@ public class CatanActionTree {
             }
         }
 
+        // Build Branch
+        // 0 - Build Road / City / Settlement
+        // 1 - Tile X
+        // 2 - Tile Y
+        // 3 - Edge
+        // 4 - PlayerID
+        // 5 - Free (Not for build city)
+
+        ActionTreeNode buildRoad = root.addChild(0, "Build Road");
+        ActionTreeNode buildCity = root.addChild(0, "Build City");
+        ActionTreeNode buildSettlement = root.addChild(0, "Build Settlement");
+        ActionTreeNode[] buildBranches = {buildRoad, buildCity, buildSettlement};
+        for (ActionTreeNode parentNode : buildBranches) {
+            for (int x = 0; x < board.length; x++) {
+                ActionTreeNode tileX = parentNode.addChild(0, "Tile " + x);
+                for (int y = 0; y < board[x].length; y++) {
+                    ActionTreeNode tileY = tileX.addChild(0, "Tile " + y);
+                    for (int e = 0; e < 6; e++) {
+                        ActionTreeNode edge = tileY.addChild(0, "N " + e);
+                        for (int n = 0; n < noPlayers; n++) {
+                            ActionTreeNode playerID = edge.addChild(0, "Player " + n);
+                            // Free flag only for road and settlement
+                            if (parentNode != buildCity) {
+                                playerID.addChild(0, "Free");
+                                playerID.addChild(0, "Not Free");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Buy Dev Card Branch
+        // 0 - Buy Dev Card
+        // 1 - PlayerID
+        ActionTreeNode buyDevCard = root.addChild(0, "Buy Development Card");
+        for (int n = 0; n < noPlayers; n++) {
+            buyDevCard.addChild(0, "Player " + n);
+        }
+
+        // Discard Resources Branch (Extended Action)
+        // 0 - Discard Resources
+
+
 
         return root;
     }
@@ -108,6 +156,7 @@ public class CatanActionTree {
             List<AbstractAction> actions = CatanActionFactory.getRobberActions(catanGameState, ActionSpace.Default,
                     playerID, false);
 
+            // Get the actions created by the factory and validate the leaf nodes they correspond to
             for (AbstractAction action : actions) {
                 MoveRobberAndSteal mrAction = (MoveRobberAndSteal) action;
                 ActionTreeNode robber = root.findChildrenByName("Robber", true);
@@ -125,8 +174,90 @@ public class CatanActionTree {
             // Do nothing action is always valid in the main phase
             ActionTreeNode doNothing = root.findChildrenByName("Do Nothing", true);
             doNothing.setAction(new DoNothing());
+
+            // This Section follows computeAvailableActions in CatanForwardModel
+
+            // TODO - PORT / BANK Trade
+            // TODO - Player Trade
+
+            // Update Build Branch
+            List<AbstractAction> actions = CatanActionFactory.getBuyActions(catanGameState, ActionSpace.Default, playerID);
+            ActionTreeNode buildNode = null;
+            for (AbstractAction action : actions) {
+
+                // Get Action paramemters
+                int x ;
+                int y;
+                int n;
+                int player;
+                boolean free = false;
+
+                // If its a development card tree is much simpler
+                if (action instanceof BuyDevelopmentCard) {
+                    ActionTreeNode devNode = root.findChildrenByName("Buy Development Card", true);
+                    ActionTreeNode playerNode = devNode.findChildrenByName("Player " + playerID, true);
+                    playerNode.setAction(action);
+                }
+                else {
+                    // Find out what action it is
+                    if (action instanceof BuildCity) {
+                        BuildCity buildAction = (BuildCity) action;
+                        buildNode = root.findChildrenByName("Build City", true);
+                        x = buildAction.row;
+                        y = buildAction.col;
+                        n = buildAction.vertex;
+                        player = buildAction.playerID;
+                    }
+                    else if (action instanceof BuildSettlement) {
+                        BuildSettlement buildAction = (BuildSettlement) action;
+                        buildNode = root.findChildrenByName("Build Settlement", true);
+                        x = buildAction.x;
+                        y = buildAction.y;
+                        n = buildAction.vertex;
+                        player = buildAction.playerID;
+                        free = buildAction.free;
+                    }
+                    else if (action instanceof BuildRoad) {
+                        BuildRoad buildAction = (BuildRoad) action;
+                        buildNode = root.findChildrenByName("Build Road", true);
+                        x = buildAction.x;
+                        y = buildAction.y;
+                        n = buildAction.edge;
+                        player = buildAction.playerID;
+                        free = buildAction.free;
+                    }
+                    else {
+                        throw new AssertionError("Invalid Build Action");
+                    }
+
+                    // Get the actions created by the factory and validate the leaf nodes they correspond to
+                    ActionTreeNode tileX = buildNode.findChildrenByName("Tile " + x, true);
+                    ActionTreeNode tileY = tileX.findChildrenByName("Tile " + y, true);
+                    ActionTreeNode nNode = tileY.findChildrenByName("N " + n, true);
+                    ActionTreeNode playerNode = nNode.findChildrenByName("Player " + player, true);
+                    if (action instanceof BuildRoad || action instanceof BuildSettlement) {
+                        if (free) {
+                            ActionTreeNode freeNode = playerNode.findChildrenByName("Free", true);
+                            freeNode.setAction(action);
+                        }
+                        else {
+                            ActionTreeNode notFreeNode = playerNode.findChildrenByName("Not Free", true);
+                            notFreeNode.setAction(action);
+                        }
+                    }
+                    else {
+                        playerNode.setAction(action);
+                    }
+                }
+
+
+
+            }
+
+            // TODO - Buy Development Card
         }
 
+        List<ActionTreeNode> test = root.getValidLeaves();
         return root;
     }
 }
