@@ -437,7 +437,7 @@ public class MonopolyDealGameState extends AbstractGameState {
                 count++;
             }
         }
-        return count/params.SETS_TO_WIN;
+        return count/(params.SETS_TO_WIN*1.0);
     }
     @Override
     public boolean _equals(Object o) {
