@@ -497,7 +497,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
             // Get Monster Unique Actions
-            if (actingFigure instanceof Monster)
+            // Monster Actions can only be taken once per turn, if they haven't already attacked yet
+            if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
             {
                 actions.addAll(monsterActions(dgs, (Monster) actingFigure));
             }
@@ -692,14 +693,30 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 case "HOWL":
 
                     List<Hero> heroes = dgs.getHeroes();
-                    List<Hero> targets = new ArrayList<>();
-                    Vector2D position = actingFigure.getPosition();
-                    for (Hero h : heroes) {
-                        Vector2D other = h.getPosition();
-                        //System.out.println("Comparing " + position + " to " + other);
-                        if (inRange(position, other, 3)) {
-                            targets.add(h);
+                    List<Integer> targets = new ArrayList<>();
+
+                    Pair<Integer, Integer> size = actingFigure.getSize();
+                    List<BoardNode> attackingTiles = new ArrayList<>();
+
+                    Vector2D currentLocation = actingFigure.getPosition();
+                    BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+
+                    if (size.a > 1 || size.b > 1)
+                    {
+                        attackingTiles.addAll(getAttackingTiles(actingFigure.getComponentID(), anchorTile, attackingTiles));
+                    }
+                    else {
+                        attackingTiles.add(anchorTile);
+                    }
+
+                    for (BoardNode currentTile : attackingTiles) {
+                        for (Hero h : heroes) {
+                            if (targets.contains(h.getComponentID()))   continue;
+                            Vector2D other = h.getPosition();
+                            if (inRange(((PropertyVector2D) currentTile.getProperty("coordinates")).values, other, 3)) {
+                                targets.add(h.getComponentID());
                         }
+                    }
                     }
 
                     if (!targets.isEmpty()) {
@@ -1373,6 +1390,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd, int nActionsPerFigure) {
         dgs.monsters = new ArrayList<>();
+        dgs.monstersOriginal = new ArrayList<>();
+        dgs.monstersPerGroup = new ArrayList<>();
+        dgs.monsterGroups = new ArrayList<>();
         List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
