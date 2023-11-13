@@ -46,6 +46,8 @@ public class MonopolyDealGameState extends AbstractGameState {
     int boardModificationsLeft;
     boolean deckEmpty = false;
 
+    MonopolyDealHeuristic heuristic;
+
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
@@ -54,6 +56,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
         params = (MonopolyDealParameters) gameParameters;
+        heuristic = new MonopolyDealHeuristic();
         this._reset();
     }
 
@@ -415,7 +418,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
-            return getGameScore(playerId);
+            return heuristic.evaluateState(this,playerId);
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;

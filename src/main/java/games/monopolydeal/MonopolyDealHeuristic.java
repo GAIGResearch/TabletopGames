@@ -95,10 +95,10 @@ public class MonopolyDealHeuristic extends TunableParameters implements IStateHe
 
         // split value for Sets and bank
         int propertyValue = 0, bankValue = 0;
-        for(int i=0;i<playerBank.getSize();i++) bankValue = bankValue + cardValue.get(playerBank.get(i));
+        for(int i=0;i<playerBank.getSize();i++) bankValue = bankValue + cardValue.get(playerBank.get(i).cardType());
         for (PropertySet pSet: propertySets) propertyValue = propertyValue + (setValue.get(pSet.getSetType()) * pSet.getSize());
 
-        return bankValue/MDGS.getRoundCounter() + propertyValue;
+        return bankValue/(1.0 *(MDGS.getRoundCounter()+1)) + propertyValue;
     }
     private void insertValues(){
         // Money values
