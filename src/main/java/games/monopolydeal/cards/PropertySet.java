@@ -22,11 +22,24 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         hasHotel = false;
         hasWild = false;
     }
-    // Copy constructor???
+
+    private PropertySet(String name, CoreConstants.VisibilityMode visibility, SetType type, int ownerId, int id) {
+        super(name, ownerId, id, visibility);
+        this.type = type;
+        isComplete = false;
+        hasHouse = false;
+        hasHotel = false;
+        hasWild = false;
+    }
+    @Override
     public PropertySet copy(){
-//        Deck<MonopolyDealCard> cardDeck = super.copy();
-        PropertySet newSet = new PropertySet(type.toString(),VISIBLE_TO_ALL,type);
+        Deck<MonopolyDealCard> cardDeck = super.copy();
+        SetType sType = getSetType();
+        PropertySet newSet = new PropertySet(sType.toString(),VISIBLE_TO_ALL,sType, ownerId, componentID);
         copyTo(newSet);
+//        for (int i=0; i<cardDeck.getSize();i++) {
+//            newSet.add(cardDeck.get(i));
+//        }
         newSet.isComplete = isComplete;
         newSet.hasWild = hasWild;
         newSet.hasHouse = hasHouse;

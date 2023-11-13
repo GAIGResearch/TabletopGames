@@ -15,6 +15,11 @@ public class MonopolyDealCard extends Card{
         this.type = type;
         this.useAs = type.getSetType();
     }
+    private MonopolyDealCard(CardType type, int id) {
+        super(type.name(), id);
+        this.type = type;
+        this.useAs = type.getSetType();
+    }
     public static MonopolyDealCard create(CardType type) {
         switch (type) {
             case Money10:
@@ -72,15 +77,13 @@ public class MonopolyDealCard extends Card{
     public void setUseAs(SetType sType) {  useAs = sType;}
     public CardType cardType() { return type; }
     public boolean isDoubleTheRent(){ return type == CardType.DoubleTheRent; }
-    public boolean isJustSayNo(){ return type == CardType.JustSayNo; }
-
     @Override
     public MonopolyDealCard copy() {
         // Only property cards need to keep reference of their useAs other cards are immutable
-        if(!(isPropertyCard()|| cardType()==CardType.House || cardType()==CardType.Hotel))
+        if(!(isPropertyCard()))
             return this;
         else {
-            MonopolyDealCard cardCopy = new MonopolyDealCard(this.cardType());
+            MonopolyDealCard cardCopy = new MonopolyDealCard(this.cardType(), componentID);
             cardCopy.useAs = this.useAs;
             return cardCopy;
         }

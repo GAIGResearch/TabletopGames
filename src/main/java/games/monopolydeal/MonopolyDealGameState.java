@@ -449,7 +449,8 @@ public class MonopolyDealGameState extends AbstractGameState {
         int result = Objects.hash(super.hashCode(), drawPile, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
         result = 31 * result + Arrays.hashCode(playerHands);
         result = 31 * result + Arrays.hashCode(playerBanks);
-        result = 31 * result + Arrays.hashCode(playerPropertySets);
+        for(int i=0;i<getNPlayers();i++)
+            result = 31 * result + Arrays.hashCode(playerPropertySets[i]);
         return result;
     }
 

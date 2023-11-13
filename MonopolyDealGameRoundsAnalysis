@@ -1,0 +1,243 @@
+Game: MonopolyDeal, Players: 2, GamesPerMatchup: 1, Mode: SELF_PLAY
+MCTSPlayer got 27.00 points. MCTSPlayer won 27.0% of the 100 games of the tournament. MCTSPlayer won 54.0% of the 50 games it played during the tournament.
+MCTSPlayer won 83.3% of the 18 games against Random.
+MCTSPlayer won 80.0% of the 10 games against RMHC.
+MCTSPlayer won 18.2% of the 22 games against OSLA.
+
+Random got 11.00 points. Random won 11.0% of the 100 games of the tournament. Random won 22.0% of the 50 games it played during the tournament.
+Random won 16.7% of the 18 games against MCTSPlayer.
+Random won 36.4% of the 22 games against RMHC.
+Random won 0.0% of the 10 games against OSLA.
+
+RMHC got 17.00 points. RMHC won 17.0% of the 100 games of the tournament. RMHC won 34.0% of the 50 games it played during the tournament.
+RMHC won 20.0% of the 10 games against MCTSPlayer.
+RMHC won 63.6% of the 22 games against Random.
+RMHC won 5.6% of the 18 games against OSLA.
+
+OSLA got 45.00 points. OSLA won 45.0% of the 100 games of the tournament. OSLA won 90.0% of the 50 games it played during the tournament.
+OSLA won 81.8% of the 22 games against MCTSPlayer.
+OSLA won 100.0% of the 10 games against Random.
+OSLA won 94.4% of the 18 games against RMHC.
+
+---- Ranking ---- 
+OSLA: Win rate 0.90 +/- 0.01	Mean Ordinal 1.10 +/- 0.01
+MCTSPlayer: Win rate 0.54 +/- 0.04	Mean Ordinal 1.46 +/- 0.04
+RMHC: Win rate 0.34 +/- 0.03	Mean Ordinal 1.66 +/- 0.03
+Random: Win rate 0.22 +/- 0.02	Mean Ordinal 1.78 +/- 0.02
+
+Game: MonopolyDeal, Players: 2, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 50.0% of the 200 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.50 +/- 0.02	Mean Ordinal 1.50 +/- 0.02
+
+Game: MonopolyDeal, Players: 3, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 33.3% of the 300 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.33 +/- 0.01	Mean Ordinal 1.67 +/- 0.01
+
+Game: MonopolyDeal, Players: 3, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 33.3% of the 300 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.33 +/- 0.01	Mean Ordinal 1.67 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 25.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.75 +/- 0.01
+
+Game: MonopolyDeal, Players: 5, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 99.0% of the 100 games of the tournament. OSLA won 19.8% of the 500 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.20 +/- 0.01	Mean Ordinal 1.79 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 25.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.75 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 11.0% of the 100 games of the tournament. OSLA won 2.8% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.08 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 24.0% of the 100 games of the tournament. OSLA won 6.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.18 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 25.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.75 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 51.0% of the 100 games of the tournament. OSLA won 12.8% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.38 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 61.0% of the 100 games of the tournament. OSLA won 15.3% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.46 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 25.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.75 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 25.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.75 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 100.0% of the 100 games of the tournament. OSLA won 25.0% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.01	Mean Ordinal 1.75 +/- 0.01
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 100.00 points. OSLA won 15.0% of the 100 games of the tournament. OSLA won 3.8% of the 400 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.11 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 99.9% of the 1000 games of the tournament. OSLA won 25.0% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.75 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 99.9% of the 1000 games of the tournament. OSLA won 25.0% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.75 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 12.5% of the 1000 games of the tournament. OSLA won 3.1% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.09 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 21.2% of the 1000 games of the tournament. OSLA won 5.3% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.16 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 98.2% of the 1000 games of the tournament. OSLA won 24.6% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.74 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 55.7% of the 1000 games of the tournament. OSLA won 13.9% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.42 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 62.0% of the 1000 games of the tournament. OSLA won 15.5% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.47 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 54.6% of the 1000 games of the tournament. OSLA won 13.7% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.41 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 99.0% of the 1000 games of the tournament. OSLA won 24.8% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.74 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 72.2% of the 1000 games of the tournament. OSLA won 18.1% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.54 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 34.0% of the 1000 games of the tournament. OSLA won 8.5% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.26 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: SELF_PLAY
+OSLA got 1000.00 points. OSLA won 59.5% of the 1000 games of the tournament. OSLA won 14.9% of the 4000 games it played during the tournament.
+
+---- Ranking ---- 
+OSLA: Win rate 0.25 +/- 0.00	Mean Ordinal 1.45 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: NO_SELF_PLAY
+MCTSPlayer got 1.25 points. MCTSPlayer won 1.0% of the 100 games of the tournament. MCTSPlayer won 1.0% of the 100 games it played during the tournament.
+MCTSPlayer won 1.0% of the 100 games against OSLA.
+MCTSPlayer won 1.0% of the 100 games against OSLA.
+MCTSPlayer won 1.0% of the 100 games against OSLA.
+
+OSLA got 32.25 points. OSLA won 32.0% of the 100 games of the tournament. OSLA won 32.0% of the 100 games it played during the tournament.
+OSLA won 32.0% of the 100 games against MCTSPlayer.
+OSLA won 32.0% of the 100 games against OSLA.
+OSLA won 32.0% of the 100 games against OSLA.
+
+OSLA got 32.25 points. OSLA won 32.0% of the 100 games of the tournament. OSLA won 32.0% of the 100 games it played during the tournament.
+OSLA won 32.0% of the 100 games against MCTSPlayer.
+OSLA won 32.0% of the 100 games against OSLA.
+OSLA won 32.0% of the 100 games against OSLA.
+
+OSLA got 34.25 points. OSLA won 34.0% of the 100 games of the tournament. OSLA won 34.0% of the 100 games it played during the tournament.
+OSLA won 34.0% of the 100 games against MCTSPlayer.
+OSLA won 34.0% of the 100 games against OSLA.
+OSLA won 34.0% of the 100 games against OSLA.
+
+---- Ranking ---- 
+OSLA: Win rate 0.34 +/- 0.02	Mean Ordinal 1.65 +/- 0.02
+OSLA: Win rate 0.32 +/- 0.02	Mean Ordinal 1.67 +/- 0.02
+OSLA: Win rate 0.32 +/- 0.02	Mean Ordinal 1.67 +/- 0.02
+MCTSPlayer: Win rate 0.01 +/- 0.00	Mean Ordinal 1.98 +/- 0.00
+
+Game: MonopolyDeal, Players: 4, GamesPerMatchup: 1, Mode: NO_SELF_PLAY
+Random got 1.00 points. Random won 1.0% of the 100 games of the tournament. Random won 1.0% of the 100 games it played during the tournament.
+Random won 1.0% of the 100 games against RMHC.
+Random won 1.0% of the 100 games against MCTSPlayer.
+Random won 1.0% of the 100 games against OSLA.
+
+RMHC got 3.00 points. RMHC won 3.0% of the 100 games of the tournament. RMHC won 3.0% of the 100 games it played during the tournament.
+RMHC won 3.0% of the 100 games against Random.
+RMHC won 3.0% of the 100 games against MCTSPlayer.
+RMHC won 3.0% of the 100 games against OSLA.
+
+MCTSPlayer got 15.00 points. MCTSPlayer won 15.0% of the 100 games of the tournament. MCTSPlayer won 15.0% of the 100 games it played during the tournament.
+MCTSPlayer won 15.0% of the 100 games against Random.
+MCTSPlayer won 15.0% of the 100 games against RMHC.
+MCTSPlayer won 15.0% of the 100 games against OSLA.
+
+OSLA got 81.00 points. OSLA won 81.0% of the 100 games of the tournament. OSLA won 81.0% of the 100 games it played during the tournament.
+OSLA won 81.0% of the 100 games against Random.
+OSLA won 81.0% of the 100 games against RMHC.
+OSLA won 81.0% of the 100 games against MCTSPlayer.
+
+---- Ranking ---- 
+OSLA: Win rate 0.81 +/- 0.02	Mean Ordinal 1.19 +/- 0.02
+MCTSPlayer: Win rate 0.15 +/- 0.01	Mean Ordinal 1.85 +/- 0.01
+RMHC: Win rate 0.03 +/- 0.00	Mean Ordinal 1.97 +/- 0.00
+Random: Win rate 0.01 +/- 0.00	Mean Ordinal 1.99 +/- 0.00
+

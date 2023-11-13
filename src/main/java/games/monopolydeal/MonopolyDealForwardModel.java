@@ -81,6 +81,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                     }
                     return availableActions;
                 }
+                else throw new AssertionError("Already discarded required no of cards. Should not happen");
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
