@@ -4,23 +4,54 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.catan.actions.build.BuildCity;
 import games.catan.actions.build.BuildRoad;
 import games.catan.actions.build.BuildSettlement;
 import games.catan.actions.build.BuyDevelopmentCard;
+import games.catan.actions.dev.PlayKnightCard;
+import games.catan.actions.dev.PlayMonopoly;
+import games.catan.actions.dev.PlayRoadBuilding;
+import games.catan.actions.dev.PlayYearOfPlenty;
 import games.catan.actions.discard.DiscardResources;
 import games.catan.actions.discard.DiscardResourcesPhase;
 import games.catan.actions.robber.MoveRobberAndSteal;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
 import games.catan.actions.trade.DefaultTrade;
+import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
+import org.apache.commons.lang3.tuple.Triple;
 import utilities.ActionTreeNode;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
 public class CatanActionTree {
+
+
+    // Helper Function for ordering Roads
+    public static HashMap<Triple<Integer, Integer, Integer>, Integer> orderRoads(CatanGameState cgs) {
+        Triple<Integer, Integer, Integer> road;
+        HashMap<Triple<Integer, Integer, Integer>, Integer> roadMap = new HashMap<>();
+        int edgeCounter = 0;
+        CatanTile[][] board = cgs.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                // for every edge on tile
+                for (int e = 0; e < 6; e++) {
+                    if (tile.getEdgeIDs()[e] == -1) {
+                        road = Triple.of(x, y, e);
+                        roadMap.put(road, edgeCounter);
+                        edgeCounter++;
+                    }
+                }
+            }
+        }
+        return roadMap;
+    }
 
     // Big Tree Ahead
     public static ActionTreeNode initActionTree(AbstractGameState gameState) {
@@ -61,7 +92,7 @@ public class CatanActionTree {
         // 3 - PlayerID
         // 4 - Target PlayerID
         ActionTreeNode robber = root.addChild(0, "Robber");
-        ActionTreeNode knight = root.addChild(0, "Knight");
+        ActionTreeNode knight = root.addChild(0, "Play Knight");
         for (int x = 0; x < board.length; x++) {
             ActionTreeNode tileX = robber.addChild(0, "Tile " + x);
             ActionTreeNode knightX = knight.addChild(0, "Tile " + x);
@@ -175,6 +206,74 @@ public class CatanActionTree {
             }
         }
 
+        // Monopoly Branch
+        // 0 - Monopoly
+        // 1 - Resource
+        // 2 - PlayerID
+        ActionTreeNode monopoly = root.addChild(0, "Play Monopoly");
+        for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
+
+            // Check for wildcard
+            if (resource != CatanParameters.Resource.WILD) {
+                ActionTreeNode resourceNode = monopoly.addChild(0, resource.toString());
+                for (int n = 0; n < noPlayers; n++) {
+                    resourceNode.addChild(0, "Player " + n);
+                }
+            }
+        }
+
+        // Year of Plenty Branch
+        // 0 - Year of Plenty
+        // 1 - Resource 1
+        // 2 - Resource 2
+        // 3 - PlayerID
+        ActionTreeNode yop = root.addChild(0, "Play Year of Plenty");
+        for (CatanParameters.Resource resource1 : CatanParameters.Resource.values()) {
+
+            // Check for wildcard
+            if (resource1 != CatanParameters.Resource.WILD) {
+                ActionTreeNode resource1Node = yop.addChild(0, resource1.toString());
+                for (CatanParameters.Resource resource2 : CatanParameters.Resource.values()) {
+                    // Check for wildcard
+                    if (resource2 != CatanParameters.Resource.WILD) {
+                        ActionTreeNode resource2Node = resource1Node.addChild(0, resource2.toString());
+                        for (int n = 0; n < noPlayers; n++) {
+                            resource2Node.addChild(0, "Player " + n);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Road Building (Dev Card) Branch
+        // 0 - Road Building
+        // 2 - Road 1
+        // 3 - Road 2
+
+        HashMap<Triple<Integer, Integer, Integer>, Integer> roadMap = orderRoads(catanGameState);
+        ActionTreeNode roadBuilding = root.addChild(0, "Play Road Building");
+        for (int i : roadMap.values()) {
+            ActionTreeNode road1Node = roadBuilding.addChild(0, "Road " + i);
+            for (int j : roadMap.values()) {
+                if (j != i) {
+                    road1Node.addChild(0, "Road " + j);
+                }
+            }
+        }
+//        for (int n = 0; n < catanGameState.getNPlayers(); n++) {
+//            ActionTreeNode playerNode = roadBuilding.addChild(0, "Player " + n);
+//
+//            // Ordered ID's of roads
+//            for (int i : roadMap.values()) {
+//                playerNode.addChild(0, "Road " + i);
+//                for (int j : roadMap.values()) {
+//                    if (j != i) {
+//                        playerNode.addChild(0, "Road " + j);
+//                    }
+//                }
+//            }
+//        }
+
         return root;
     }
 
@@ -225,7 +324,7 @@ public class CatanActionTree {
                 }
             }
 
-            // In Robber Phase, Update Robber / Knight Branch
+            // In Robber Phase, Update Robber Branch
             else if (catanGameState.getGamePhase() == CatanGameState.CatanGamePhase.Robber) {
                 List<AbstractAction> actions = CatanActionFactory.getRobberActions(catanGameState, ActionSpace.Default,
                         playerID, false);
@@ -341,7 +440,74 @@ public class CatanActionTree {
 
                 }
 
-                // TODO - Buy Development Card
+                // Play Development Cards
+                // Need to check if they actually have the card in hand
+
+                Deck<CatanCard> playerDevCards = catanGameState.getPlayerDevCards(playerID);
+
+
+                // Monopoly
+                if (playerDevCards.contains(new CatanCard(CatanCard.CardType.MONOPOLY))) {
+                    List<AbstractAction> monopolyActions = CatanActionFactory.getDevCardActions(catanGameState, ActionSpace.Default, playerID, CatanCard.CardType.MONOPOLY);
+                    for (AbstractAction action : monopolyActions) {
+                        PlayMonopoly monopolyAction = (PlayMonopoly) action;
+                        ActionTreeNode monopolyNode = root.findChildrenByName("Play Monopoly", true);
+                        ActionTreeNode resourceNode = monopolyNode.findChildrenByName(monopolyAction.resource.toString(), true);
+                        ActionTreeNode playerNode = resourceNode.findChildrenByName("Player " + playerID, true);
+                        playerNode.setAction(action);
+                    }
+                }
+
+                // Knight
+                if (playerDevCards.contains(new CatanCard(CatanCard.CardType.KNIGHT_CARD))) {
+                    List<AbstractAction> knightActions = CatanActionFactory.getRobberActions(catanGameState, ActionSpace.Default, playerID, true);
+                    for (AbstractAction action : knightActions) {
+                        PlayKnightCard knightAction = (PlayKnightCard) action;
+                        ActionTreeNode knight = root.findChildrenByName("Play Knight", true);
+                        ActionTreeNode tileX = knight.findChildrenByName("Tile " + knightAction.x, true);
+                        ActionTreeNode tileY = tileX.findChildrenByName("Tile " + knightAction.y, true);
+                        ActionTreeNode playerIDNode = tileY.findChildrenByName("Player " + knightAction.player, true);
+                        ActionTreeNode targetPlayerID = playerIDNode.findChildrenByName("Target Player " + knightAction.targetPlayer, true);
+                        targetPlayerID.setAction(action);
+                    }
+                }
+
+                // Year of Plenty
+                if (playerDevCards.contains(new CatanCard(CatanCard.CardType.YEAR_OF_PLENTY))) {
+                    List<AbstractAction> yopActions = CatanActionFactory.getDevCardActions(catanGameState, ActionSpace.Default, playerID, CatanCard.CardType.YEAR_OF_PLENTY);
+                    for (AbstractAction action : yopActions) {
+                        PlayYearOfPlenty yopAction = (PlayYearOfPlenty) action;
+                        ActionTreeNode yopNode = root.findChildrenByName("Play Year of Plenty", true);
+                        ActionTreeNode resource1Node = yopNode.findChildrenByName(yopAction.resources[0].toString(), true);
+                        ActionTreeNode resource2Node = resource1Node.findChildrenByName(yopAction.resources[1].toString(), true);
+                        ActionTreeNode playerNode = resource2Node.findChildrenByName("Player " + playerID, true);
+                        playerNode.setAction(action);
+                    }
+                }
+
+                // Road Building (Dev Card)
+                if (playerDevCards.contains(new CatanCard(CatanCard.CardType.ROAD_BUILDING))) {
+                    List<AbstractAction> roadBuildingActions = CatanActionFactory.getDevCardActions(catanGameState, ActionSpace.Default, playerID, CatanCard.CardType.ROAD_BUILDING);
+
+                    // No point calculating road map if no actions
+                    if (!roadBuildingActions.isEmpty()) {
+                        HashMap<Triple<Integer, Integer, Integer>, Integer> roadMap = orderRoads(catanGameState);
+
+                        for (AbstractAction action : roadBuildingActions) {
+                            PlayRoadBuilding roadDevAction = (PlayRoadBuilding) action;
+                            ActionTreeNode roadBuildingNode = root.findChildrenByName("Play Road Building", true);
+
+                            // Work out the ID's of valid roads
+                            BuildRoad roadAction1 = (BuildRoad) roadDevAction.roadsToBuild[0];
+                            BuildRoad roadAction2 = (BuildRoad) roadDevAction.roadsToBuild[1];
+                            int roadID1 = roadMap.get(Triple.of(roadAction1.x, roadAction1.y, roadAction1.edge));
+                            int roadID2 = roadMap.get(Triple.of(roadAction2.x, roadAction2.y, roadAction2.edge));
+                            ActionTreeNode roadNode1 = roadBuildingNode.findChildrenByName("Road " + roadID1, true);
+                            ActionTreeNode roadNode2 = roadNode1.findChildrenByName("Road " + roadID2, true);
+                            roadNode2.setAction(roadDevAction);
+                        }
+                    }
+                }
             }
         }
 

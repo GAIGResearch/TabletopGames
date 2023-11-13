@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class PlayRoadBuilding extends AbstractAction {
     public final int playerID;
-    final AbstractAction[] roadsToBuild;
+    public final AbstractAction[] roadsToBuild;
 
     public PlayRoadBuilding(int playerID, AbstractAction[] roadsToBuild) {
         this.playerID = playerID;
