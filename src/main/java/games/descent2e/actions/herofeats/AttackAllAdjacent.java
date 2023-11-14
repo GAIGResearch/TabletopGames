@@ -18,7 +18,7 @@ public class AttackAllAdjacent extends MultiAttack {
         // TODO: current acting figure is doing this, find it
         // TODO: find all adjacent enemies next to the figure and attack them as in super class
         dgs.setActionInProgress(this);
-        ((Hero) dgs.getActingFigure()).setFeatAvailable(false);
+        if (dgs.getActingFigure() instanceof Hero) {((Hero) dgs.getActingFigure()).setFeatAvailable(false); }
         super.execute(dgs);
         return true;
     }

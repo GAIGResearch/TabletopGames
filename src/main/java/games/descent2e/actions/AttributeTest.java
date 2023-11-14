@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static games.descent2e.actions.AttributeTest.TestPhase.*;
-import static games.descent2e.actions.Triggers.FORCED;
+import static games.descent2e.actions.Triggers.*;
+import static games.descent2e.actions.AttributeTest.Interrupters.*;
 
 // TODO: perform an attribute test
 public class AttributeTest extends DescentAction implements IExtendedSequence {
@@ -24,8 +25,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
     public enum TestPhase {
         NOT_STARTED,
-        PRE_TEST_ROLL,
-        POST_TEST_ROLL,
+        PRE_TEST_ROLL (FORCED, TESTER),
+        POST_TEST_ROLL (ROLL_OWN_DICE, TESTER),
         ALL_DONE;
 
         public final Triggers interrupt;

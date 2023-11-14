@@ -23,9 +23,6 @@ import static games.descent2e.actions.herofeats.DoubleMoveAttack.Interrupters.*;
 
 public class DoubleMoveAttack extends DescentAction implements IExtendedSequence {
 
-    // Jain Fairwood Heroic Feat
-    String heroName = "Jain Fairwood";
-
     enum Interrupters {
         HERO, OTHERS, ALL
     }
@@ -53,18 +50,17 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     DoubleMoveAttackPhase phase = NOT_STARTED;
     int heroPlayer;
     int interruptPlayer;
-    Hero hero;
+    Figure hero;
     int oldMovePoints;
     boolean oldFreeAttack;
 
-    public DoubleMoveAttack(Hero hero) {
-        super(Triggers.HEROIC_FEAT);
-        this.hero = hero;
+    public DoubleMoveAttack() {
+        super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Heroic Feat: " + heroName + " moves twice her speed and can attack anytime during it.";
+        return "Moves twice your speed, and can attack anytime during it.";
     }
 
     @Override
@@ -73,10 +69,12 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
             throw new AssertionError("Should not be reachable");
         DescentGameState dgs = (DescentGameState) state;
         List<AbstractAction> retVal = new ArrayList<>();
-        List<AbstractAction> moveActions = new ArrayList<>();
+        List<AbstractAction> moveActions;
         List<RangedAttack> attacks = new ArrayList<>();;
 
         //System.out.println("Jain has attacked yet: " + hero.hasUsedHeroAbility());
+        hero = dgs.getActingFigure();
+
         if (!hero.hasUsedExtraAction())
         {
             List<Integer> targets = DescentHelper.getRangedTargets(dgs, hero);
@@ -123,6 +121,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     public boolean execute(DescentGameState dgs) {
         dgs.setActionInProgress(this);
         heroPlayer = dgs.getCurrentPlayer();
+        hero = dgs.getActingFigure();
         interruptPlayer = heroPlayer;
         oldMovePoints = hero.getAttribute(Figure.Attribute.MovePoints).getValue();
         oldFreeAttack = hero.hasUsedExtraAction();
@@ -192,7 +191,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
             case POST_HERO_ACTION:
                 hero.setAttribute(Figure.Attribute.MovePoints, oldMovePoints);
                 hero.setUsedExtraAction(oldFreeAttack);
-                hero.setFeatAvailable(false);
+                if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
                 hero.getNActionsExecuted().increment();
                 phase = ALL_DONE;
                 break;
@@ -202,7 +201,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
     @Override
     public DoubleMoveAttack copy() {
-        DoubleMoveAttack retValue = new DoubleMoveAttack(hero);
+        DoubleMoveAttack retValue = new DoubleMoveAttack();
         retValue.phase = phase;
         retValue.heroPlayer = heroPlayer;
         retValue.interruptPlayer = interruptPlayer;
@@ -213,6 +212,8 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return hero.getName().contains(heroName) && hero.isFeatAvailable() && !hero.getNActionsExecuted().isMaximum();
+        hero = dgs.getActingFigure();
+        if (hero instanceof Hero && !((Hero) hero).isFeatAvailable()) return false;
+        return !hero.getNActionsExecuted().isMaximum();
     }
 }

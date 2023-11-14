@@ -10,7 +10,7 @@ public enum HeroicFeat {
     StunMonsters (new StunAllInMonsterGroup()),
     FreeMoveFriend (new HeroicFeatExtraMovement()),
     ExtraAttack (new HeroicFeatExtraAttack()),
-    Teleport (new RemoveFromMap()),
+    Vanish (new RemoveFromMap()),
     RunAttack (new DoubleMoveAttack());
 
     public final DescentAction action;

@@ -11,7 +11,7 @@ import static games.descent2e.DescentHelper.getMeleeTargets;
 
 public class MagicAttackAll extends DescentAction {
     public MagicAttackAll() {
-        super(Triggers.ANYTIME);
+        super(Triggers.HEROIC_FEAT);
     }
 
     @Override
@@ -52,6 +52,6 @@ public class MagicAttackAll extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Magic attack all adjacent monsters";
+        return "Magic attack all adjacent monsters.";
     }
 }
