@@ -48,23 +48,23 @@ public class MonopolyDealMetrics implements IMetricsCollection {
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             if (ACTION_CHOSEN.equals(e.type)) {
                 if (e.action instanceof PassGoAction)
-                    counters[0][e.playerID]++;
+                    counters[0][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof SlyDealAction)
-                    counters[1][e.playerID]++;
+                    counters[1][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof ForcedDealAction)
-                    counters[2][e.playerID]++;
+                    counters[2][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof DebtCollectorAction)
-                    counters[3][e.playerID]++;
+                    counters[3][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof ItsMyBirthdayAction)
-                    counters[4][e.playerID]++;
+                    counters[4][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof MulticolorRentAction)
-                    counters[5][e.playerID]++;
+                    counters[5][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof PropertyRentAction)
-                    counters[6][e.playerID]++;
+                    counters[6][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof DealBreakerAction)
-                    counters[7][e.playerID]++;
+                    counters[7][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof JustSayNoAction)
-                    counters[8][e.playerID]++;
+                    counters[8][e.state.getCurrentPlayer()]++;
                 return true;
             } else if (GAME_OVER.equals(e.type)) {
                 records.put("PassGoByWinner", counters[0][e.state.getFirstPlayer()]);
@@ -77,14 +77,14 @@ public class MonopolyDealMetrics implements IMetricsCollection {
                 records.put("DealBreakerByWinner", counters[7][e.state.getFirstPlayer()]);
                 records.put("JustSayNoByWinner", counters[8][e.state.getFirstPlayer()]);
                 records.put("PassGoUsed", Arrays.stream(counters[0]).sum());
-                records.put("SlyDealUsed", Arrays.stream(counters[0]).sum());
-                records.put("ForcedDealUsed", Arrays.stream(counters[0]).sum());
-                records.put("DebtCollectorUsed", Arrays.stream(counters[0]).sum());
-                records.put("ItsMyBirthdayUsed", Arrays.stream(counters[0]).sum());
-                records.put("MulticolorRentUsed", Arrays.stream(counters[0]).sum());
-                records.put("PropertyRentUsed", Arrays.stream(counters[0]).sum());
-                records.put("DealBreakerUsed", Arrays.stream(counters[0]).sum());
-                records.put("JustSayNoUsed", Arrays.stream(counters[0]).sum());
+                records.put("SlyDealUsed", Arrays.stream(counters[1]).sum());
+                records.put("ForcedDealUsed", Arrays.stream(counters[2]).sum());
+                records.put("DebtCollectorUsed", Arrays.stream(counters[3]).sum());
+                records.put("ItsMyBirthdayUsed", Arrays.stream(counters[4]).sum());
+                records.put("MulticolorRentUsed", Arrays.stream(counters[5]).sum());
+                records.put("PropertyRentUsed", Arrays.stream(counters[6]).sum());
+                records.put("DealBreakerUsed", Arrays.stream(counters[7]).sum());
+                records.put("JustSayNoUsed", Arrays.stream(counters[8]).sum());
                 return true;
             }
             return false;
