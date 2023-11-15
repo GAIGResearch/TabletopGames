@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.ITreeActionSpace;
 import core.interfaces.IStateFeatureJSON;
 import games.GameType;
@@ -16,6 +17,10 @@ import games.tictactoe.TTTFeatures;
 import games.tictactoe.TicTacToeStateVector;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONObject;
+import players.heuristics.LeaderHeuristic;
+import players.heuristics.OrdinalPosition;
+import players.heuristics.PureScoreHeuristic;
+import players.heuristics.WinOnlyHeuristic;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
@@ -27,9 +32,20 @@ import games.explodingkittens.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
+
+enum RewardType {
+    // Enum for choosing different types of rewards for the agent
+    DEFAULT, // The reward function previously used in pyTAG (maybe change name)
+    SCORE, // Uses PureScoreHeuristic
+    ORDINAl, // Uses OrdinalPosition Heuristic
+    LEADER, // Uses LeaderHeuristic
+    TERMINAL, // Uses WinOnlyHeuristic
+
+}
 
 enum FeatureExtractors {
     /* Every game implementing the RL interfaces should be registered here, PyTAG uses this to reference the correct features extractors and action spaces
@@ -95,6 +111,13 @@ public class PyTAG {
     private Random seedRandom; // Random used for setting the seed for each episode
     private long lastSeed;
 
+    //Enum for reward type
+    private RewardType rewardType;
+
+    // Heursitic for rewards that require it
+    private IStateHeuristic heuristic;
+
+
     public static String getSupportedGames(){
         /* returns the supported games with the corresponding feature extractors */
         String supportedGames = "";
@@ -119,7 +142,8 @@ public class PyTAG {
     }
 
 
-    public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
+    public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
+                 boolean isNormalized, RewardType rewardType) throws Exception {
 
         // boolean randomizeParameters, List<IGameListener> listeners
         this.seedRandom = new Random(seed);
@@ -135,6 +159,25 @@ public class PyTAG {
         } else game = gameToPlay.createGameInstance(players.size(), seed);
 
         assert game != null;
+
+        // Assign the reward type (use default if null)
+        this.rewardType = rewardType == null ? RewardType.DEFAULT : rewardType;
+
+        // Assign the heuristic for getting reward based on RewardType (if they use it)
+        switch(this.rewardType) {
+            case SCORE:
+                this.heuristic = new PureScoreHeuristic();
+                break;
+            case ORDINAl:
+                this.heuristic = new OrdinalPosition();
+                break;
+            case LEADER:
+                this.heuristic = new LeaderHeuristic();
+                break;
+            case TERMINAL:
+                this.heuristic = new WinOnlyHeuristic();
+                break;
+        }
 
         if (this.stateVectoriser == null && this.stateJSONiser == null){
             throw new Exception("Game does not implement the state feature vector or JSON interface");
@@ -260,7 +303,12 @@ public class PyTAG {
     }
 
     public double getReward(){
-        return gameState.getGameScore(gameState.getCurrentPlayer());
+        if (this.rewardType == RewardType.DEFAULT) {
+            return gameState.getGameScore(gameState.getCurrentPlayer());
+        }
+        else {
+            return this.heuristic.evaluateState(gameState, gameState.getCurrentPlayer());
+        }
     }
 
     public List<AbstractAction> getActions(){
@@ -398,9 +446,12 @@ public class PyTAG {
         int steps = 0;
         String obsType = "json";
 
+        List<Double> rewards = new ArrayList<>();
+
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("Catan"), null, players, 343, true);
+            PyTAG env = new PyTAG(GameType.valueOf("Catan"), null, players, 343,
+                    true, RewardType.TERMINAL);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
@@ -422,6 +473,7 @@ public class PyTAG {
 //                    double[] obs = env.getObservationVector();
                     String json = env.getObservationJson();
                     double reward = env.getReward();
+                    rewards.add(reward);
 //                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
 
                     // step the environment
@@ -445,6 +497,8 @@ public class PyTAG {
                 if (done){
                     episodes += 1;
                     System.out.println("episodes " + episodes + " is done in " + steps + " ; outcome:  " + env.getPlayerResults()[0].value);
+                    System.out.println("Max Reward " + Collections.max(rewards));
+                    System.out.println("Average Reward " + rewards.stream().mapToDouble(a -> a).average());
                     if (env.getPlayerResults()[0] == CoreConstants.GameResult.WIN_GAME)wins += 1;
                     if (episodes == MAX_EPISODES)break;
                     env.reset();
