@@ -19,7 +19,6 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class StrategoForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
@@ -34,11 +33,10 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
         StrategoParams params = (StrategoParams) firstState.getGameParameters();
         StrategoGameState state = (StrategoGameState) firstState;
         state.gridBoard = new GridBoard<>(params.gridSize, params.gridSize);
-        Random random = new Random(params.getRandomSeed());
 
         StrategoConstants.PieceSetups[] setups = StrategoConstants.PieceSetups.values();
-        StrategoConstants.PieceSetups RedSetup = setups[random.nextInt(setups.length)];
-        StrategoConstants.PieceSetups BlueSetup = setups[random.nextInt(setups.length)];
+        StrategoConstants.PieceSetups RedSetup = setups[state.getRnd().nextInt(setups.length)];
+        StrategoConstants.PieceSetups BlueSetup = setups[state.getRnd().nextInt(setups.length)];
 
         ArrayList<Piece> RedPieces = RedSetup.getRedSetup();
         ArrayList<Piece> BluePieces = BlueSetup.getBlueSetup();

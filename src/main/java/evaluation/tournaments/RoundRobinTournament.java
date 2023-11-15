@@ -2,8 +2,10 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
+import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
 import utilities.Pair;
 
@@ -17,8 +19,8 @@ import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
 
 public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
-    public final TournamentMode tournamentMode;
-    private final int gamesPerMatchUp;
+    public TournamentMode tournamentMode;
+    private int gamesPerMatchUp;
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
     double[] pointsPerPlayer, winsPerPlayer;
@@ -33,26 +35,29 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> allAgentIds;
     private int totalGamesRun;
     protected boolean randomGameParams;
-    public final String name;
+    public String name;
     public boolean byTeam;
 
     protected long randomSeed = System.currentTimeMillis();
     private int[] gameSeeds;
+    long currentSeed;
+    int tournamentSeeds;
+    Random seedRnd = new Random(randomSeed);
+
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
      *
-     * @param agents          - players for the tournament.
-     * @param gameToPlay      - game to play in this tournament.
-     * @param playersPerGame  - number of players per game.
-     * @param gamesPerMatchUp - number of games for each combination of players.
-     * @param mode            - SELF_PLAY, NO_SELF_PLAY, or ONE_VS_ALL
+     * @param agents         - players for the tournament.
+     * @param gameToPlay     - game to play in this tournament.
+     * @param playersPerGame - number of players per game.
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, TournamentMode mode, AbstractParameters gameParams, boolean byTeam) {
-        super(mode, agents, gameToPlay, playersPerGame, gameParams);
+                                AbstractParameters gameParams, TournamentMode tournamentMode,
+                                Map<RunArg, Object> config) {
+        super(tournamentMode, agents, gameToPlay, playersPerGame, gameParams);
         int nTeams = game.getGameState().getNTeams();
-        if (mode == NO_SELF_PLAY && nTeams > this.agents.size()) {
+        if (tournamentMode == NO_SELF_PLAY && nTeams > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or allow self-play.");
         }
@@ -61,8 +66,8 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.agents.size(); i++)
             this.allAgentIds.add(i);
 
-        this.gamesPerMatchUp = gamesPerMatchUp;
-        this.tournamentMode = mode;
+        this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
+        this.tournamentMode = tournamentMode;
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
@@ -76,8 +81,10 @@ public class RoundRobinTournament extends AbstractTournament {
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
         this.gamesPerPlayer = new int[agents.size()];
-        this.byTeam = byTeam;
-        this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s", gameToPlay.name(), playersPerGame, gamesPerMatchUp, mode.name());
+        this.byTeam = (boolean) config.getOrDefault(RunArg.byTeam, false);
+        this.tournamentSeeds = (int) config.getOrDefault(RunArg.distinctRandomSeeds, 0);
+        this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s",
+                gameToPlay.name(), playersPerGame, gamesPerMatchUp, tournamentMode.name());
     }
 
     /**
@@ -97,14 +104,19 @@ public class RoundRobinTournament extends AbstractTournament {
             gameTracker.init(game, nPlayers, agentNames);
             game.addListener(gameTracker);
         }
+        gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
+
         LinkedList<Integer> matchUp = new LinkedList<>();
-        createAndRunMatchUp(matchUp);
+        // add outer loop if we have tournamentSeeds enabled; if not this will just run once
+        for (int iter = 0; iter < Math.max(1, tournamentSeeds); iter++) {
+            currentSeed = seedRnd.nextInt();
+            createAndRunMatchUp(matchUp);
+        }
         reportResults();
 
         for (IGameListener listener : listeners)
             listener.report();
     }
-
 
     public int getWinnerIndex() {
         if (finalWinRanking == null || finalWinRanking.isEmpty())
@@ -127,9 +139,9 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param matchUp - current combination of players, updated recursively.
      */
     public void createAndRunMatchUp(List<Integer> matchUp) {
-        Random seedRnd = new Random(randomSeed);
-        gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
+
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
+
         if (tournamentMode == ONE_VS_ALL) {
             // In this case agents.get(0) must always play
             List<Integer> agentOrder = new ArrayList<>(this.allAgentIds);
@@ -169,7 +181,7 @@ public class RoundRobinTournament extends AbstractTournament {
         } else {
             // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
             if (matchUp.size() == nTeams) {
-                evaluateMatchUp(matchUp);
+                evaluateMatchUp(matchUp, gamesPerMatchUp);
             } else {
                 for (Integer agentID : this.allAgentIds) {
                     if (tournamentMode == SELF_PLAY || !matchUp.contains(agentID)) {
@@ -180,10 +192,6 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
             }
         }
-    }
-
-    protected void evaluateMatchUp(List<Integer> agentIDs) {
-        evaluateMatchUp(agentIDs, gamesPerMatchUp);
     }
 
     /**
@@ -218,8 +226,12 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // Run the game N = gamesPerMatchUp times with these players
         for (int i = 0; i < nGames; i++) {
-            // Use the same seeds for all games in each matchup (if gameSeeds specified)
-            long currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
+            // if tournamentSeeds > 0, then we are running this many tournaments, each with a different random seed fixed for the whole tournament
+            // otherwise (the lines below), we are running a single tournament with a different random seed for each game
+            if (tournamentSeeds == 0) {
+                currentSeed = gameSeeds == null ? game.getGameState().getGameParameters().getRandomSeed() + (i * 255) : gameSeeds[i];
+            }
+            // unless we are running a tournament for each individual random seed
             game.reset(matchUpPlayers, currentSeed);
 
             // Randomize parameters

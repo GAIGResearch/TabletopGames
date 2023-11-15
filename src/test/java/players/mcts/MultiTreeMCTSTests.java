@@ -49,7 +49,8 @@ public class MultiTreeMCTSTests {
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
@@ -68,7 +69,7 @@ public class MultiTreeMCTSTests {
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
-        TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
+        TicTacToeGameParameters gameParams = new TicTacToeGameParameters();
         gameParams.gridSize = gridSize;
         Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
         game.reset(players);
@@ -82,7 +83,8 @@ public class MultiTreeMCTSTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(3024)));
-        LoveLetterParameters gameParams = new LoveLetterParameters(3812);
+        LoveLetterParameters gameParams = new LoveLetterParameters();
+        gameParams.setRandomSeed(3812);
         Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
         game.reset(players);
         return game;

@@ -12,7 +12,7 @@ import static evaluation.metrics.Event.GameEvent.*;
 public abstract class StandardForwardModel extends AbstractForwardModel {
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected final void _next(AbstractGameState currentState, AbstractAction action) {
         _beforeAction(currentState, action);
         if (action != null) {
             action.execute(currentState);
@@ -106,7 +106,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
     /**
      * <p>Method executed at the end of a Round (however that is defined in a game).
      * It increments player timers and publishes a ROUND_OVER event.
-     * It resets the turn counter to 0, sets the currentPlayer to the one specified (0 in default method),
+     * It resets the turn counter to 0, sets the firstPlayer and currentPlayer to the one specified (0 in default method),
      * and increments the Round counter.
      * If maximum number of rounds is set, and it is reached, the game ends.
      * If there are no players still playing, the game ends and method returns.</p>

@@ -42,15 +42,11 @@ public class SGParameters extends AbstractParameters {
 
     public int nCards = 10;  // for 2 players
 
-    public SGParameters(long seed) {
-        super(seed);
-    }
-
     public String getDataPath() { return dataPath; }
 
     @Override
     protected AbstractParameters _copy() {
-        SGParameters sgp = new SGParameters(System.currentTimeMillis());
+        SGParameters sgp = new SGParameters();
         sgp.dataPath = dataPath;
         sgp.nCardsPerType = new HashMap<>(nCardsPerType);
 

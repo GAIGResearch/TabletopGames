@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RoundRobinTournament;
 import org.apache.commons.math3.util.CombinatoricsUtils;
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.byTeam;
+import static evaluation.RunArg.matchups;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
 import static java.util.stream.Collectors.joining;
 
@@ -160,8 +163,12 @@ public class NTBEA {
                 if (params.verbose)
                     System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
                             gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
-
-                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams, params.byTeam);
+                Map<RunArg, Object> config = new HashMap<>();
+                config.put(matchups, gamesPerMatchup);
+                config.put(byTeam, false);
+                config.put(RunArg.distinctRandomSeeds, 0);
+                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
+                        NO_SELF_PLAY, config);
                 tournament.verbose = false;
                 createListeners().forEach(tournament::addListener);
                 tournament.run();
@@ -189,17 +196,16 @@ public class NTBEA {
                         new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
                         new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
 
-                // We then want to check the win rate against the elite agent (if one was provided)
-                // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
-                if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
-                    // The elite agent is always the last one (and if the elite won fair and square, then we skip this
-                    double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
-                    double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                    if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
-                        if (params.verbose)
-                            System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
-                        bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
-                    }
+            // We then want to check the win rate against the elite agent (if one was provided)
+            // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
+            if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
+                // The elite agent is always the last one (and if the elite won fair and square, then we skip this
+                double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
+                double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
+                    if (params.verbose)
+                        System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
+                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));}
                 }
             }
         }

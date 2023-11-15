@@ -124,9 +124,9 @@ public class PlayerFactory {
 //                return new MCTSPlayer(new MCTSParams(System.currentTimeMillis()));
                 return new BasicMCTSPlayer();
             case "rmhc":
-                return new RMHCPlayer(new RMHCParams(System.currentTimeMillis()));
+                return new RMHCPlayer(new RMHCParams());
             case "rhea":
-                return new RHEAPlayer(new RHEAParams(System.currentTimeMillis()));
+                return new RHEAPlayer(new RHEAParams());
             default:
                 throw new AssertionError("Unknown file or player key : " + input);
         }

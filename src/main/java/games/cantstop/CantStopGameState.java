@@ -21,7 +21,6 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     protected int[][] playerMarkerPositions;
     protected Map<Integer, Integer> temporaryMarkerPositions;
     protected List<Dice> dice;
-    protected Random rnd;
 
     private CantStopGameState(CantStopGameState copyFrom) {
         // used by copy method only
@@ -34,11 +33,6 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
         temporaryMarkerPositions = new HashMap<>();
         temporaryMarkerPositions.putAll(copyFrom.temporaryMarkerPositions);
         dice = copyFrom.dice.stream().map(Dice::copy).collect(toList());
-        if (rnd == null) {
-            rnd = new Random(System.currentTimeMillis());
-        } else {
-            rnd = new Random(rnd.nextLong());
-        }
     }
 
     public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {

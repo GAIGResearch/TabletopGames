@@ -65,6 +65,7 @@ public abstract class AbstractGameState {
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
     private int gameID;
+    protected Random rnd;
 
     /**
      * @param gameParameters - game parameters.
@@ -96,6 +97,7 @@ public abstract class AbstractGameState {
         roundCounter = 0;
         firstPlayer = 0;
         actionsInProgress.clear();
+        rnd = new Random(gameParameters.randomSeed);
     }
 
     /**
@@ -198,6 +200,9 @@ public abstract class AbstractGameState {
         turnOwner = newFirstPlayer;
     }
 
+    public Random getRnd() {
+        return rnd;
+    }
     public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
@@ -232,7 +237,6 @@ public abstract class AbstractGameState {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
         return allComponents;
     }
-    public double[] getFeatureVector() {return null;} //Gets a feature vector for games that have it, otherwise returns null
 
     /**
      * While getAllComponents() returns an Area containing every component, this method
@@ -285,6 +289,7 @@ public abstract class AbstractGameState {
         s.turnCounter = turnCounter;
         s.turnOwner = turnOwner;
         s.firstPlayer = firstPlayer;
+        s.rnd = rnd;
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);

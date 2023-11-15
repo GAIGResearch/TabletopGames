@@ -166,13 +166,11 @@ public class CatanParameters extends AbstractParameters {
         put(Resource.WILD, 4);
     }};
 
-    public CatanParameters(long seed){
-        super(seed);
+    public CatanParameters(){
         setMaxRounds(1000);
     }
 
-    public CatanParameters(String dataPath, long seed){
-        super(seed);
+    public CatanParameters(String dataPath){
         this.dataPath = dataPath;
     }
 
@@ -182,18 +180,44 @@ public class CatanParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return null;
+        CatanParameters retValue =  new CatanParameters();
+        retValue.dataPath = dataPath;
+        retValue.maxRounds = maxRounds;
+        retValue.n_resource_cards = n_resource_cards;
+        retValue.n_tiles_per_row = n_tiles_per_row;
+        retValue.dieType = dieType;
+        retValue.nDice = nDice;
+        retValue.robber_die_roll = robber_die_roll;
+        retValue.max_negotiation_count = max_negotiation_count;
+        retValue.default_exchange_rate = default_exchange_rate;
+        retValue.max_resources_request_trade = max_resources_request_trade;
+        retValue.max_cards_without_discard = max_cards_without_discard;
+        retValue.max_trade_actions_allowed = max_trade_actions_allowed;
+        retValue.perc_discard_robber = perc_discard_robber;
+        retValue.min_army_size = min_army_size;
+        retValue.min_longest_road = min_longest_road;
+        retValue.longest_road_value = longest_road_value;
+        retValue.largest_army_value = largest_army_value;
+        retValue.points_to_win = points_to_win;
+        retValue.harbour_exchange_rate = harbour_exchange_rate;
+        retValue.harbour_wild_exchange_rate = harbour_wild_exchange_rate;
+        retValue.n_settlements_setup = n_settlements_setup;
+        retValue.nResourcesYoP = nResourcesYoP;
+        retValue.nRoadsRB = nRoadsRB;
+        retValue.buildingValue = new HashMap<>(buildingValue);
+        retValue.nProduction = new HashMap<>(nProduction);
+        retValue.tileCounts = new HashMap<>(tileCounts);
+        retValue.numberTokens = new HashMap<>(numberTokens);
+        retValue.productMapping = new HashMap<>(productMapping);
+        retValue.costMapping = new HashMap<>(costMapping);
+        retValue.tokenCounts = new HashMap<>(tokenCounts);
+        retValue.developmentCardCount = new HashMap<>(developmentCardCount);
+        retValue.harborCount = new HashMap<>(harborCount);
+        return retValue;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return false;
-    }
-
-    @Override
-    public AbstractParameters copy() {
-        // todo set all variables
-        CatanParameters copy = new CatanParameters(getRandomSeed());
-        return copy;
+        return o instanceof CatanParameters;
     }
 }

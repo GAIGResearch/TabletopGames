@@ -31,13 +31,12 @@ public class HeartsParameters extends AbstractParameters {
     public final int matchScore = 100;
 
     // Number of cards per player - index to array is nPlayers
-    public int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
+    public final int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,
             17, 13, 10, 8, 7};
 
     Map<Integer, List<FrenchCard>> cardsToRemove = new HashMap<>();
 
-    public HeartsParameters(long seed) {
-        super(seed);
+    public HeartsParameters() {
         cardsToRemove.put(3, Collections.singletonList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2)));
         cardsToRemove.put(4, Collections.emptyList());
         cardsToRemove.put(5, Arrays.asList(new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Diamonds, 2),
@@ -57,7 +56,7 @@ public class HeartsParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        HeartsParameters hgp = new HeartsParameters(System.currentTimeMillis());
+        HeartsParameters hgp = new HeartsParameters();
         hgp.dataPath = dataPath;
         return hgp;
     }

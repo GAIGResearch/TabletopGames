@@ -2,20 +2,16 @@ package games.hanabi.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.hanabi.CardType;
 import games.hanabi.HanabiCard;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
-import games.uno.actions.NoCards;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 public class Play extends AbstractAction implements IPrintable {
     protected int playerId;
@@ -45,14 +41,12 @@ public class Play extends AbstractAction implements IPrintable {
         // set the card if correct;
 
         for(HanabiCard cd: currentCard){
-            Random random = new Random(hbgs.getGameParameters().getRandomSeed());
-
             if(!(playCard.numberVisibility)){
-                int nnumber = cd.possibleNumber.get(random.nextInt(cd.possibleNumber.size())) ;
+                int nnumber = cd.possibleNumber.get(hbgs.getRnd().nextInt(cd.possibleNumber.size())) ;
                 playCard.setNumber(nnumber);
             }
             if(!(playCard.colorVisibility)){
-                CardType cnumber = cd.possibleColour.get(random.nextInt(cd.possibleColour.size()));
+                CardType cnumber = cd.possibleColour.get(hbgs.getRnd().nextInt(cd.possibleColour.size()));
                 playCard.setColor(cnumber);
             }
 

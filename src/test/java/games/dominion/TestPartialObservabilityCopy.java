@@ -31,7 +31,7 @@ public class TestPartialObservabilityCopy {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(), players.size()));
     DominionGameState state = (DominionGameState) game.getGameState();
     DominionForwardModel fm = new DominionForwardModel();
 
