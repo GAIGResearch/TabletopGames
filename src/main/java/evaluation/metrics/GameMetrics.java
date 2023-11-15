@@ -119,24 +119,6 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-    public static class GameDuration extends AbstractMetric {
-        @Override
-        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            records.put("Rounds", e.state.getRoundCounter());
-            return true;
-        }
-        @Override
-        public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(GAME_OVER);
-        }
-        @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
-            Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("Rounds", Integer.class);
-            return columns;
-        }
-    }
-
     public static class PlayerType extends AbstractMetric {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
