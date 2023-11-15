@@ -80,7 +80,9 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer copy() {
         RMHCParams newParams = (RMHCParams) parameters.copy();
         newParams.setRandomSeed(randomGenerator.nextInt());
-        return new RMHCPlayer(newParams);
+        RMHCPlayer retValue = new RMHCPlayer(newParams);
+        retValue.setForwardModel(getForwardModel().copy());
+        return retValue;
     }
 
     /**

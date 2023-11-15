@@ -73,7 +73,9 @@ public class OSLAPlayer extends AbstractPlayer {
 
     @Override
     public OSLAPlayer copy() {
-        return new OSLAPlayer(heuristic, new Random(rnd.nextInt()));
+        OSLAPlayer retValue = new OSLAPlayer(heuristic, new Random(rnd.nextInt()));
+        retValue.setForwardModel(getForwardModel().copy());
+        return retValue;
     }
 
     private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy, int startingPlayer) {
