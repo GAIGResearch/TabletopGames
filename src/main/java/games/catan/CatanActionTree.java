@@ -476,19 +476,29 @@ public class CatanActionTree {
 
 
             // Road Buidling (Done Deeply)
-            // TODO - THIS CAN ONLY HAPPEN IF THEY HAVE THE CARD!!!
-            ActionSpace roadBuildingSpace = new ActionSpace(ActionSpace.Structure.Deep);
-            List<AbstractAction> roadBuildingActions = CatanActionFactory.getDevCardActions(catanGameState, roadBuildingSpace, playerID, CatanCard.CardType.ROAD_BUILDING);
+            //THIS CAN ONLY HAPPEN IF THEY HAVE THE CARD!!!
+            // Maybe it should break if card found?
 
-            // Roads to build
-            if (!roadBuildingActions.isEmpty()) {
-                HashMap<Triple<Integer, Integer, Integer>, Integer> orderedRoads = orderRoads(catanGameState);
-                for (AbstractAction action : roadBuildingActions) {
-                    DeepRoadBuilding roadBuildingAction = (DeepRoadBuilding) action;
-                    ActionTreeNode roadBuildingNode = root.findChildrenByName("Play Road Building", true);
-                    BuildRoad firstRoad = (BuildRoad) roadBuildingAction.road;
-                    ActionTreeNode road1Node = roadBuildingNode.findChildrenByName("Road " + orderedRoads.get(Triple.of(firstRoad.x, firstRoad.y, firstRoad.edge)), true);
-                    road1Node.setAction(action);
+            Deck<CatanCard> playerDevDeck = catanGameState.playerDevCards.get(playerID);
+            for (CatanCard card : playerDevDeck.getComponents()) {
+
+                // If it's a roadbuilding card, and it wasn't bought on the same turn it was played
+                if (card.cardType == CatanCard.CardType.ROAD_BUILDING && card.roundCardWasBought != catanGameState.getTurnCounter()) {
+
+                    ActionSpace roadBuildingSpace = new ActionSpace(ActionSpace.Structure.Deep);
+                    List<AbstractAction> roadBuildingActions = CatanActionFactory.getDevCardActions(catanGameState, roadBuildingSpace, playerID, CatanCard.CardType.ROAD_BUILDING);
+
+                    // Roads to build
+                    if (!roadBuildingActions.isEmpty()) {
+                        HashMap<Triple<Integer, Integer, Integer>, Integer> orderedRoads = orderRoads(catanGameState);
+                        for (AbstractAction action : roadBuildingActions) {
+                            DeepRoadBuilding roadBuildingAction = (DeepRoadBuilding) action;
+                            ActionTreeNode roadBuildingNode = root.findChildrenByName("Play Road Building", true);
+                            BuildRoad firstRoad = (BuildRoad) roadBuildingAction.road;
+                            ActionTreeNode road1Node = roadBuildingNode.findChildrenByName("Road " + orderedRoads.get(Triple.of(firstRoad.x, firstRoad.y, firstRoad.edge)), true);
+                            road1Node.setAction(action);
+                        }
+                    }
                 }
             }
         }
