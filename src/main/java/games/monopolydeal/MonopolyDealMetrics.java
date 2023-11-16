@@ -42,7 +42,7 @@ public class MonopolyDealMetrics implements IMetricsCollection {
         }
 
         // Counters
-        int counters[][];
+        int[][] counters;
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -67,15 +67,16 @@ public class MonopolyDealMetrics implements IMetricsCollection {
                     counters[8][e.state.getCurrentPlayer()]++;
                 return true;
             } else if (GAME_OVER.equals(e.type)) {
-                records.put("PassGoByWinner", counters[0][e.state.getFirstPlayer()]);
-                records.put("SlyDealByWinner", counters[1][e.state.getFirstPlayer()]);
-                records.put("ForcedDealByWinner", counters[2][e.state.getFirstPlayer()]);
-                records.put("DebtCollectorByWinner", counters[3][e.state.getFirstPlayer()]);
-                records.put("ItsMyBirthdayByWinner", counters[4][e.state.getFirstPlayer()]);
-                records.put("MulticolorRentByWinner", counters[5][e.state.getFirstPlayer()]);
-                records.put("PropertyRentByWinner", counters[6][e.state.getFirstPlayer()]);
-                records.put("DealBreakerByWinner", counters[7][e.state.getFirstPlayer()]);
-                records.put("JustSayNoByWinner", counters[8][e.state.getFirstPlayer()]);
+                int winner = e.state.getWinners().iterator().next();
+                records.put("PassGoByWinner", counters[0][winner]);
+                records.put("SlyDealByWinner", counters[1][winner]);
+                records.put("ForcedDealByWinner", counters[2][winner]);
+                records.put("DebtCollectorByWinner", counters[3][winner]);
+                records.put("ItsMyBirthdayByWinner", counters[4][winner]);
+                records.put("MulticolorRentByWinner", counters[5][winner]);
+                records.put("PropertyRentByWinner", counters[6][winner]);
+                records.put("DealBreakerByWinner", counters[7][winner]);
+                records.put("JustSayNoByWinner", counters[8][winner]);
                 records.put("PassGoUsed", Arrays.stream(counters[0]).sum());
                 records.put("SlyDealUsed", Arrays.stream(counters[1]).sum());
                 records.put("ForcedDealUsed", Arrays.stream(counters[2]).sum());
