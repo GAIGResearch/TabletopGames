@@ -1,5 +1,6 @@
 package core;
 
+import com.google.common.base.Stopwatch;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
@@ -454,6 +455,9 @@ public class PyTAG {
                     true, RewardType.TERMINAL);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
+            //Stopwatch
+            Stopwatch stopwatch = Stopwatch.createStarted();
+
             // reset is always required before starting a new episode
             env.reset();
             while (!done){
@@ -499,11 +503,14 @@ public class PyTAG {
                     System.out.println("episodes " + episodes + " is done in " + steps + " ; outcome:  " + env.getPlayerResults()[0].value);
                     System.out.println("Max Reward " + Collections.max(rewards));
                     System.out.println("Average Reward " + rewards.stream().mapToDouble(a -> a).average());
+                    System.out.println("time elapsed: " + stopwatch.elapsed());
                     if (env.getPlayerResults()[0] == CoreConstants.GameResult.WIN_GAME)wins += 1;
                     if (episodes == MAX_EPISODES)break;
                     env.reset();
                     done = false;
                     steps = 0;
+                    stopwatch.reset();
+                    stopwatch.start();
                 }
             }
         } catch (Exception e){
