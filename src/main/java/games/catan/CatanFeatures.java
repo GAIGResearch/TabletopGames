@@ -56,6 +56,19 @@ public class CatanFeatures implements IStateFeatureJSON {
         json.put("Player Resource Hand Size", resourceHands);
         json.put("Player Dev Hand Size", devHands);
 
+        // Phase information
+        json.put("Phase", catanGameState.getGamePhase());
+
+        // Check if in extended action
+        String extendedAction;
+        if (catanGameState.isActionInProgress()) {
+            extendedAction = catanGameState.getActionsInProgress().peek().getClass().getSimpleName();
+        }
+        else {
+            extendedAction = "Null";
+        }
+        json.put("Extended Action", extendedAction);
+
 
         //TODO - Is there a way to see which dev cards have been played?
 
