@@ -15,7 +15,9 @@ import games.catan.actions.discard.DiscardResources;
 import games.catan.actions.discard.DiscardResourcesPhase;
 import games.catan.actions.robber.MoveRobberAndSteal;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
+import games.catan.actions.trade.AcceptTrade;
 import games.catan.actions.trade.DefaultTrade;
+import games.catan.actions.trade.EndNegotiation;
 import games.catan.actions.trade.OfferPlayerTrade;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.Stack;
 
 public class CatanActionTree {
+
+    static int nMaxResources = 4; // Maximum number of resources a player can trade either way
 
 
     // Helper Function for ordering Roads
@@ -250,7 +254,7 @@ public class CatanActionTree {
         HashMap<Triple<Integer, Integer, Integer>, Integer> roadMap = orderRoads(catanGameState);
         ActionTreeNode roadBuilding = root.addChild(0, "Play Road Building");
         for (int i : roadMap.values()) {
-            ActionTreeNode road1Node = roadBuilding.addChild(0, "Road " + i);
+            roadBuilding.addChild(0, "Road " + i);
         }
 
         // Player Trade Offer
@@ -275,7 +279,7 @@ public class CatanActionTree {
                     ActionTreeNode resourceOfferedNode = stageNode.addChild(0, resourceOffered.toString());
 
                     // For each amount offered
-                    for (int nOffered = 1; nOffered <= 4; nOffered++) {
+                    for (int nOffered = 1; nOffered <= nMaxResources; nOffered++) {
                         ActionTreeNode nOfferedNode = resourceOfferedNode.addChild(0, "Amount Offered " + nOffered);
 
                         // For each resource requested
@@ -285,15 +289,18 @@ public class CatanActionTree {
                                 ActionTreeNode resourceRequestedNode = nOfferedNode.addChild(0, resourceRequested.toString());
 
                                 // For each amount requested
-                                for (int nRequested = 1; nRequested <= 4; nRequested++) {
+                                for (int nRequested = 1; nRequested <= nMaxResources; nRequested++) {
                                     ActionTreeNode nRequestedNode = resourceRequestedNode.addChild(0, "Amount Requested " + nRequested);
 
                                     // For possible player combinations
                                     for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
                                         ActionTreeNode offeringPlayerIDNode = nRequestedNode.addChild(0, "Offering Player " + offeringPlayerID);
                                         for (int targetPlayerID = 0; targetPlayerID < noPlayers; targetPlayerID++) {
-                                            // TODO - See if this can be pruned if offering player is the same as target player
-                                            offeringPlayerIDNode.addChild(0, "Target Player " + targetPlayerID);
+
+                                            // Can't trade with yourself
+                                            if (offeringPlayerID != targetPlayerID) {
+                                                offeringPlayerIDNode.addChild(0, "Target Player " + targetPlayerID);
+                                            }
                                         }
                                     }
                                 }
@@ -306,20 +313,14 @@ public class CatanActionTree {
 
         // End Trade Branch
         // 0 - End Trade
-        // 1 - PlayerID
-        // 2 - Offering PlayerID
+        // 1 - Offering PlayerID
         ActionTreeNode endTradeNode = root.addChild(0, "End Trade");
-        for (int playerID = 0; playerID < noPlayers; playerID++) {
-            ActionTreeNode playerIDNode = endTradeNode.addChild(0, "Player " + playerID);
-            for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
-                // TODO - See if this can be pruned if offering player is the same as target player
-                playerIDNode.addChild(0, "Offering Player " + offeringPlayerID);
-            }
+        for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
+            endTradeNode.addChild(0, "Offering Player " + offeringPlayerID);
         }
 
         // Accept Trade Branch
         // 0 - Accept Trade
-        // 1 - PlayerID
         // 2 - Offering PlayerID
         // 3 - Other PlayerID
         // 3 - Resource Requested
@@ -328,13 +329,12 @@ public class CatanActionTree {
         // 6 - Amount Offered
         ActionTreeNode acceptTradeNode = root.addChild(0, "Accept Trade");
 
-        // For all player combinations
-        for (int playerID = 0; playerID < noPlayers; playerID++) {
-            // TODO - See if this can be pruned if offering player is the same as target player
-            ActionTreeNode playerIDNode = acceptTradeNode.addChild(0, "Player " + playerID);
-            for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
-                ActionTreeNode offeringPlayerIDNode = playerIDNode.addChild(0, "Offering Player " + offeringPlayerID);
-                for (int otherPlayerID = 0; otherPlayerID < noPlayers; otherPlayerID++) {
+        for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
+            ActionTreeNode offeringPlayerIDNode = acceptTradeNode.addChild(0, "Offering Player " + offeringPlayerID);
+            for (int otherPlayerID = 0; otherPlayerID < noPlayers; otherPlayerID++) {
+
+                // Can't trade with yourself
+                if (offeringPlayerID != otherPlayerID) {
                     ActionTreeNode otherPlayerIDNode = offeringPlayerIDNode.addChild(0, "Other Player " + otherPlayerID);
 
                     // For resources requested
@@ -342,7 +342,7 @@ public class CatanActionTree {
                         // Check for wildcard
                         if (resourceRequested != CatanParameters.Resource.WILD) {
                             ActionTreeNode resourceRequestedNode = otherPlayerIDNode.addChild(0, resourceRequested.toString());
-                            for (int nRequested = 1; nRequested <= 4; nRequested++) {
+                            for (int nRequested = 1; nRequested <= nMaxResources; nRequested++) {
                                 ActionTreeNode nRequestedNode = resourceRequestedNode.addChild(0, "Amount Requested " + nRequested);
 
                                 // For resources offered
@@ -350,7 +350,7 @@ public class CatanActionTree {
                                     // Check for wildcard and make sure its not the same resource
                                     if (resourceOffered != CatanParameters.Resource.WILD && resourceOffered != resourceRequested) {
                                         ActionTreeNode resourceOfferedNode = nRequestedNode.addChild(0, resourceOffered.toString());
-                                        for (int nOffered = 1; nOffered <= 4; nOffered++) {
+                                        for (int nOffered = 1; nOffered <= nMaxResources; nOffered++) {
                                             resourceOfferedNode.addChild(0, "Amount Offered " + nOffered);
                                         }
                                     }
@@ -369,6 +369,7 @@ public class CatanActionTree {
         boolean reached = false;
         root.resetTree();
         CatanGameState catanGameState = (CatanGameState) gameState;
+        CatanParameters catanParameters = (CatanParameters) gameState.getGameParameters();
         int playerID = catanGameState.getCurrentPlayer();
 
         // If in extended action sequence
@@ -446,6 +447,55 @@ public class CatanActionTree {
                 }
             }
 
+            // If there's trade offer have to respond to it
+            else if (catanGameState.tradeOffer != null) {
+
+                // Get trading actions
+                List<AbstractAction> tradeActions = CatanActionFactory.getPlayerTradeActions(catanGameState, ActionSpace.Default, playerID);
+                for (AbstractAction action : tradeActions) {
+
+                    // Add RejectOffer action to tree
+                    if (action instanceof EndNegotiation) {
+                        EndNegotiation endNegotiation = (EndNegotiation) action;
+                        ActionTreeNode endTradeNode = root.findChildrenByName("End Trade", true);
+                        ActionTreeNode offeringPlayerIDNode = endTradeNode.findChildrenByName("Offering Player " + endNegotiation.offeringPlayerID, true);
+                        offeringPlayerIDNode.setAction(action);
+                    }
+
+                    // Add AcceptOffer action to tree (as long offer does not go above max resources)
+                    else if (action instanceof AcceptTrade) {
+                        AcceptTrade acceptTrade = (AcceptTrade) action;
+                        if (acceptTrade.nOffered < nMaxResources && acceptTrade.nRequested < nMaxResources) {
+                            ActionTreeNode acceptTradeNode = root.findChildrenByName("Accept Trade", true);
+                            ActionTreeNode offeringPlayerIDNode = acceptTradeNode.findChildrenByName("Offering Player " + acceptTrade.offeringPlayer, true);
+                            ActionTreeNode otherPlayerIDNode = offeringPlayerIDNode.findChildrenByName("Other Player " + acceptTrade.otherPlayer, true);
+                            ActionTreeNode resourceRequestedNode = otherPlayerIDNode.findChildrenByName(acceptTrade.resourceRequested.toString(), true);
+                            ActionTreeNode nRequestedNode = resourceRequestedNode.findChildrenByName("Amount Requested " + acceptTrade.nRequested, true);
+                            ActionTreeNode resourceOfferedNode = nRequestedNode.findChildrenByName(acceptTrade.resourceOffered.toString(), true);
+                            ActionTreeNode amountOfferedNode = resourceOfferedNode.findChildrenByName("Amount Offered " + acceptTrade.nOffered, true);
+                            amountOfferedNode.setAction(action);
+                        }
+                    }
+
+                    // Add CounterOffer action (same action as normal trade offer) to tree
+                    // (as long offer does not go above max resources)
+                    else if (action instanceof OfferPlayerTrade) {
+                        OfferPlayerTrade offerPlayerTrade = (OfferPlayerTrade) action;
+                        if (offerPlayerTrade.nOffered < nMaxResources && offerPlayerTrade.nRequested < nMaxResources) {
+                            ActionTreeNode offerPlayerTradeNode = root.findChildrenByName("OfferPlayerTrade", true);
+                            ActionTreeNode stageNode = offerPlayerTradeNode.findChildrenByName(offerPlayerTrade.stage.toString(), true);
+                            ActionTreeNode resourceOfferedNode = stageNode.findChildrenByName(offerPlayerTrade.resourceOffered.toString(), true);
+                            ActionTreeNode nOfferedNode = resourceOfferedNode.findChildrenByName("Amount Offered " + offerPlayerTrade.nOffered, true);
+                            ActionTreeNode resourceRequestedNode = nOfferedNode.findChildrenByName(offerPlayerTrade.resourceRequested.toString(), true);
+                            ActionTreeNode nRequestedNode = resourceRequestedNode.findChildrenByName("Amount Requested " + offerPlayerTrade.nRequested, true);
+                            ActionTreeNode offeringPlayerIDNode = nRequestedNode.findChildrenByName("Offering Player " + offerPlayerTrade.offeringPlayerID, true);
+                            ActionTreeNode targetPlayerIDNode = offeringPlayerIDNode.findChildrenByName("Target Player " + offerPlayerTrade.otherPlayerID, true);
+                            targetPlayerIDNode.setAction(action);
+                        }
+                    }
+                }
+            }
+
             // All other actions happen in the main phase?
             else {
 
@@ -455,9 +505,9 @@ public class CatanActionTree {
 
                 // This Section follows computeAvailableActions in CatanForwardModel
 
-                // PORT / BANK (Default) Trade
+                // Update PORT / BANK (Default) Trade Offer Branch
                 List<AbstractAction> defaultTradeActions = CatanActionFactory.getDefaultTradeActions(catanGameState, ActionSpace.Default, playerID);
-                if (defaultTradeActions.size() > 2) reached = true;
+                //if (defaultTradeActions.size() > 2) reached = true;
                 for (AbstractAction action : defaultTradeActions) {
                     DefaultTrade defaultTradeAction = (DefaultTrade) action;
                     ActionTreeNode defaultTradeNode = root.findChildrenByName("Default Trade", true);
@@ -469,11 +519,37 @@ public class CatanActionTree {
                 }
 
 
-                // TODO - Player Trade
+                // Update Trade Offer Branch
+
+                // Get Trading Actions if trades can still be made this turn
+                if (catanGameState.nTradesThisTurn < catanParameters.max_trade_actions_allowed) {
+                    List<AbstractAction> tradeActions = CatanActionFactory.getPlayerTradeActions(catanGameState, ActionSpace.Default, playerID);
+
+                    // Since only offers can be created in the main phase, only need to add offer actions to tree
+                    for (AbstractAction action : tradeActions) {
+
+                        // Add Offer action to tree (as long offer does not go above max resources)
+                        if (action instanceof OfferPlayerTrade) {
+                            OfferPlayerTrade offerPlayerTrade = (OfferPlayerTrade) action;
+                            if (offerPlayerTrade.nOffered < nMaxResources && offerPlayerTrade.nRequested < nMaxResources) {
+                                ActionTreeNode offerPlayerTradeNode = root.findChildrenByName("OfferPlayerTrade", true);
+                                ActionTreeNode stageNode = offerPlayerTradeNode.findChildrenByName(offerPlayerTrade.stage.toString(), true);
+                                ActionTreeNode resourceOfferedNode = stageNode.findChildrenByName(offerPlayerTrade.resourceOffered.toString(), true);
+                                ActionTreeNode nOfferedNode = resourceOfferedNode.findChildrenByName("Amount Offered " + offerPlayerTrade.nOffered, true);
+                                ActionTreeNode resourceRequestedNode = nOfferedNode.findChildrenByName(offerPlayerTrade.resourceRequested.toString(), true);
+                                ActionTreeNode nRequestedNode = resourceRequestedNode.findChildrenByName("Amount Requested " + offerPlayerTrade.nRequested, true);
+                                ActionTreeNode offeringPlayerIDNode = nRequestedNode.findChildrenByName("Offering Player " + offerPlayerTrade.offeringPlayerID, true);
+                                ActionTreeNode targetPlayerIDNode = offeringPlayerIDNode.findChildrenByName("Target Player " + offerPlayerTrade.otherPlayerID, true);
+                                targetPlayerIDNode.setAction(action);
+                                reached = true;
+                            }
+                        }
+                    }
+                }
 
                 // Update Build Branch
                 List<AbstractAction> actions = CatanActionFactory.getBuyActions(catanGameState, ActionSpace.Default, playerID);
-                ActionTreeNode buildNode = null;
+                ActionTreeNode buildNode;
                 for (AbstractAction action : actions) {
 
                     // Get Action paramemters
@@ -545,68 +621,71 @@ public class CatanActionTree {
 
                 }
 
-                // Play Development Cards (APART FROM ROAD BUILDING)
+                // Play Development Cards (APART FROM ROAD BUILDING) if no card has been played this turn
+                if (catanGameState.noDevelopmentCardPlayed()) {
+                    List<AbstractAction> devCardActions = CatanActionFactory.getDevCardActions(catanGameState, ActionSpace.Default, playerID);
 
-                List<AbstractAction> devCardActions = CatanActionFactory.getDevCardActions(catanGameState, ActionSpace.Default, playerID);
+                    // Get the actions created by the factory and validate the leaf nodes they correspond to
+                    for (AbstractAction action : devCardActions) {
 
-                // Get the actions created by the factory and validate the leaf nodes they correspond to
-                for (AbstractAction action : devCardActions) {
+                        // Monopoly
+                        if (action instanceof PlayMonopoly) {
+                            PlayMonopoly monopolyAction = (PlayMonopoly) action;
+                            ActionTreeNode monopolyNode = root.findChildrenByName("Play Monopoly", true);
+                            ActionTreeNode resourceNode = monopolyNode.findChildrenByName(monopolyAction.resource.toString(), true);
+                            ActionTreeNode playerNode = resourceNode.findChildrenByName("Player " + playerID, true);
+                            playerNode.setAction(action);
+                        }
 
-                    // Monopoly
-                    if (action instanceof PlayMonopoly) {
-                        PlayMonopoly monopolyAction = (PlayMonopoly) action;
-                        ActionTreeNode monopolyNode = root.findChildrenByName("Play Monopoly", true);
-                        ActionTreeNode resourceNode = monopolyNode.findChildrenByName(monopolyAction.resource.toString(), true);
-                        ActionTreeNode playerNode = resourceNode.findChildrenByName("Player " + playerID, true);
-                        playerNode.setAction(action);
-                    }
+                        // Knight
+                        if (action instanceof PlayKnightCard) {
+                            PlayKnightCard knightAction = (PlayKnightCard) action;
+                            ActionTreeNode knight = root.findChildrenByName("Play Knight", true);
+                            ActionTreeNode tileX = knight.findChildrenByName("Tile " + knightAction.x, true);
+                            ActionTreeNode tileY = tileX.findChildrenByName("Tile " + knightAction.y, true);
+                            ActionTreeNode playerIDNode = tileY.findChildrenByName("Player " + knightAction.player, true);
+                            ActionTreeNode targetPlayerID = playerIDNode.findChildrenByName("Target Player " + knightAction.targetPlayer, true);
+                            targetPlayerID.setAction(action);
+                        }
 
-                    // Knight
-                    if (action instanceof PlayKnightCard) {
-                        PlayKnightCard knightAction = (PlayKnightCard) action;
-                        ActionTreeNode knight = root.findChildrenByName("Play Knight", true);
-                        ActionTreeNode tileX = knight.findChildrenByName("Tile " + knightAction.x, true);
-                        ActionTreeNode tileY = tileX.findChildrenByName("Tile " + knightAction.y, true);
-                        ActionTreeNode playerIDNode = tileY.findChildrenByName("Player " + knightAction.player, true);
-                        ActionTreeNode targetPlayerID = playerIDNode.findChildrenByName("Target Player " + knightAction.targetPlayer, true);
-                        targetPlayerID.setAction(action);
-                    }
-
-                    // Year of Plenty
-                    if (action instanceof PlayYearOfPlenty) {
-                        PlayYearOfPlenty yopAction = (PlayYearOfPlenty) action;
-                        ActionTreeNode yopNode = root.findChildrenByName("Play Year of Plenty", true);
-                        ActionTreeNode resource1Node = yopNode.findChildrenByName(yopAction.resources[0].toString(), true);
-                        ActionTreeNode resource2Node = resource1Node.findChildrenByName(yopAction.resources[1].toString(), true);
-                        ActionTreeNode playerNode = resource2Node.findChildrenByName("Player " + playerID, true);
-                        playerNode.setAction(action);
+                        // Year of Plenty
+                        if (action instanceof PlayYearOfPlenty) {
+                            PlayYearOfPlenty yopAction = (PlayYearOfPlenty) action;
+                            ActionTreeNode yopNode = root.findChildrenByName("Play Year of Plenty", true);
+                            ActionTreeNode resource1Node = yopNode.findChildrenByName(yopAction.resources[0].toString(), true);
+                            ActionTreeNode resource2Node = resource1Node.findChildrenByName(yopAction.resources[1].toString(), true);
+                            ActionTreeNode playerNode = resource2Node.findChildrenByName("Player " + playerID, true);
+                            playerNode.setAction(action);
+                        }
                     }
                 }
             }
 
 
-            // Road Buidling (Done Deeply)
+            // Road Buidling (Done Deeply) if they have not played a dev card this turn
             //THIS CAN ONLY HAPPEN IF THEY HAVE THE CARD!!!
             // Maybe it should break if card found?
 
-            Deck<CatanCard> playerDevDeck = catanGameState.playerDevCards.get(playerID);
-            for (CatanCard card : playerDevDeck.getComponents()) {
+            if (catanGameState.noDevelopmentCardPlayed()) {
+                Deck<CatanCard> playerDevDeck = catanGameState.playerDevCards.get(playerID);
+                for (CatanCard card : playerDevDeck.getComponents()) {
 
-                // If it's a roadbuilding card, and it wasn't bought on the same turn it was played
-                if (card.cardType == CatanCard.CardType.ROAD_BUILDING && card.roundCardWasBought != catanGameState.getTurnCounter()) {
+                    // If it's a roadbuilding card, and it wasn't bought on the same turn it was played
+                    if (card.cardType == CatanCard.CardType.ROAD_BUILDING && card.roundCardWasBought != catanGameState.getTurnCounter()) {
 
-                    ActionSpace roadBuildingSpace = new ActionSpace(ActionSpace.Structure.Deep);
-                    List<AbstractAction> roadBuildingActions = CatanActionFactory.getDevCardActions(catanGameState, roadBuildingSpace, playerID, CatanCard.CardType.ROAD_BUILDING);
+                        ActionSpace roadBuildingSpace = new ActionSpace(ActionSpace.Structure.Deep);
+                        List<AbstractAction> roadBuildingActions = CatanActionFactory.getDevCardActions(catanGameState, roadBuildingSpace, playerID, CatanCard.CardType.ROAD_BUILDING);
 
-                    // Roads to build
-                    if (!roadBuildingActions.isEmpty()) {
-                        HashMap<Triple<Integer, Integer, Integer>, Integer> orderedRoads = orderRoads(catanGameState);
-                        for (AbstractAction action : roadBuildingActions) {
-                            DeepRoadBuilding roadBuildingAction = (DeepRoadBuilding) action;
-                            ActionTreeNode roadBuildingNode = root.findChildrenByName("Play Road Building", true);
-                            BuildRoad firstRoad = (BuildRoad) roadBuildingAction.road;
-                            ActionTreeNode road1Node = roadBuildingNode.findChildrenByName("Road " + orderedRoads.get(Triple.of(firstRoad.x, firstRoad.y, firstRoad.edge)), true);
-                            road1Node.setAction(action);
+                        // Roads to build
+                        if (!roadBuildingActions.isEmpty()) {
+                            HashMap<Triple<Integer, Integer, Integer>, Integer> orderedRoads = orderRoads(catanGameState);
+                            for (AbstractAction action : roadBuildingActions) {
+                                DeepRoadBuilding roadBuildingAction = (DeepRoadBuilding) action;
+                                ActionTreeNode roadBuildingNode = root.findChildrenByName("Play Road Building", true);
+                                BuildRoad firstRoad = (BuildRoad) roadBuildingAction.road;
+                                ActionTreeNode road1Node = roadBuildingNode.findChildrenByName("Road " + orderedRoads.get(Triple.of(firstRoad.x, firstRoad.y, firstRoad.edge)), true);
+                                road1Node.setAction(action);
+                            }
                         }
                     }
                 }
@@ -614,7 +693,7 @@ public class CatanActionTree {
         }
 
 
-        List<ActionTreeNode> test = root.getValidLeaves();
+        //List<ActionTreeNode> test = root.getValidLeaves();
         return root;
     }
 }
