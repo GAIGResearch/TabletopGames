@@ -16,6 +16,7 @@ import games.catan.actions.discard.DiscardResourcesPhase;
 import games.catan.actions.robber.MoveRobberAndSteal;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
 import games.catan.actions.trade.DefaultTrade;
+import games.catan.actions.trade.OfferPlayerTrade;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 import org.apache.commons.lang3.tuple.Triple;
@@ -250,6 +251,115 @@ public class CatanActionTree {
         ActionTreeNode roadBuilding = root.addChild(0, "Play Road Building");
         for (int i : roadMap.values()) {
             ActionTreeNode road1Node = roadBuilding.addChild(0, "Road " + i);
+        }
+
+        // Player Trade Offer
+        // 0 - OfferPlayerTrade
+        // 1 - Stage
+        // 2 - Resource Offered
+        // 3 - Amount Offered (set at 1 - 4 for now, can be changed)
+        // 4 - Resource Requested
+        // 5 - Amount Requested (set at 1 - 4 for now, can be changed)
+        // 6 - Offering Player
+        // 7 - Target Player
+        ActionTreeNode offerPlayerTradeNode = root.addChild(0, "OfferPlayerTrade");
+
+        // For each trading stage
+        for (OfferPlayerTrade.Stage stage : OfferPlayerTrade.Stage.values()) {
+            ActionTreeNode stageNode = offerPlayerTradeNode.addChild(0, stage.toString());
+
+            // For each resource offered
+            for (CatanParameters.Resource resourceOffered : CatanParameters.Resource.values()) {
+                // Check for wildcard
+                if (resourceOffered != CatanParameters.Resource.WILD) {
+                    ActionTreeNode resourceOfferedNode = stageNode.addChild(0, resourceOffered.toString());
+
+                    // For each amount offered
+                    for (int nOffered = 1; nOffered <= 4; nOffered++) {
+                        ActionTreeNode nOfferedNode = resourceOfferedNode.addChild(0, "Amount Offered " + nOffered);
+
+                        // For each resource requested
+                        for (CatanParameters.Resource resourceRequested : CatanParameters.Resource.values()) {
+                            // Check for wildcard and make sure its not the same resource
+                            if (resourceRequested != CatanParameters.Resource.WILD && resourceRequested != resourceOffered) {
+                                ActionTreeNode resourceRequestedNode = nOfferedNode.addChild(0, resourceRequested.toString());
+
+                                // For each amount requested
+                                for (int nRequested = 1; nRequested <= 4; nRequested++) {
+                                    ActionTreeNode nRequestedNode = resourceRequestedNode.addChild(0, "Amount Requested " + nRequested);
+
+                                    // For possible player combinations
+                                    for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
+                                        ActionTreeNode offeringPlayerIDNode = nRequestedNode.addChild(0, "Offering Player " + offeringPlayerID);
+                                        for (int targetPlayerID = 0; targetPlayerID < noPlayers; targetPlayerID++) {
+                                            // TODO - See if this can be pruned if offering player is the same as target player
+                                            offeringPlayerIDNode.addChild(0, "Target Player " + targetPlayerID);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // End Trade Branch
+        // 0 - End Trade
+        // 1 - PlayerID
+        // 2 - Offering PlayerID
+        ActionTreeNode endTradeNode = root.addChild(0, "End Trade");
+        for (int playerID = 0; playerID < noPlayers; playerID++) {
+            ActionTreeNode playerIDNode = endTradeNode.addChild(0, "Player " + playerID);
+            for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
+                // TODO - See if this can be pruned if offering player is the same as target player
+                playerIDNode.addChild(0, "Offering Player " + offeringPlayerID);
+            }
+        }
+
+        // Accept Trade Branch
+        // 0 - Accept Trade
+        // 1 - PlayerID
+        // 2 - Offering PlayerID
+        // 3 - Other PlayerID
+        // 3 - Resource Requested
+        // 4 - Amount Requested
+        // 5 - Resource Offered
+        // 6 - Amount Offered
+        ActionTreeNode acceptTradeNode = root.addChild(0, "Accept Trade");
+
+        // For all player combinations
+        for (int playerID = 0; playerID < noPlayers; playerID++) {
+            // TODO - See if this can be pruned if offering player is the same as target player
+            ActionTreeNode playerIDNode = acceptTradeNode.addChild(0, "Player " + playerID);
+            for (int offeringPlayerID = 0; offeringPlayerID < noPlayers; offeringPlayerID++) {
+                ActionTreeNode offeringPlayerIDNode = playerIDNode.addChild(0, "Offering Player " + offeringPlayerID);
+                for (int otherPlayerID = 0; otherPlayerID < noPlayers; otherPlayerID++) {
+                    ActionTreeNode otherPlayerIDNode = offeringPlayerIDNode.addChild(0, "Other Player " + otherPlayerID);
+
+                    // For resources requested
+                    for (CatanParameters.Resource resourceRequested : CatanParameters.Resource.values()) {
+                        // Check for wildcard
+                        if (resourceRequested != CatanParameters.Resource.WILD) {
+                            ActionTreeNode resourceRequestedNode = otherPlayerIDNode.addChild(0, resourceRequested.toString());
+                            for (int nRequested = 1; nRequested <= 4; nRequested++) {
+                                ActionTreeNode nRequestedNode = resourceRequestedNode.addChild(0, "Amount Requested " + nRequested);
+
+                                // For resources offered
+                                for (CatanParameters.Resource resourceOffered : CatanParameters.Resource.values()) {
+                                    // Check for wildcard and make sure its not the same resource
+                                    if (resourceOffered != CatanParameters.Resource.WILD && resourceOffered != resourceRequested) {
+                                        ActionTreeNode resourceOfferedNode = nRequestedNode.addChild(0, resourceOffered.toString());
+                                        for (int nOffered = 1; nOffered <= 4; nOffered++) {
+                                            resourceOfferedNode.addChild(0, "Amount Offered " + nOffered);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return root;
