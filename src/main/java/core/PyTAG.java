@@ -16,8 +16,6 @@ import games.loveletter.LLStateFeaturesReduced;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
-import games.tictactoe.TicTacToeStateVector;
-import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONObject;
 import players.heuristics.LeaderHeuristic;
 import players.heuristics.OrdinalPosition;
@@ -31,19 +29,16 @@ import utilities.ActionTreeNode;
 import games.explodingkittens.*;
 
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 enum RewardType {
     // Enum for choosing different types of rewards for the agent
     DEFAULT, // The reward function previously used in pyTAG (maybe change name)
     SCORE, // Uses PureScoreHeuristic
-    ORDINAl, // Uses OrdinalPosition Heuristic
+    ORDINAL, // Uses OrdinalPosition Heuristic
     LEADER, // Uses LeaderHeuristic
     TERMINAL, // Uses WinOnlyHeuristic
 
@@ -131,6 +126,16 @@ public class PyTAG {
         return supportedGames;
     }
 
+    public static List<String> listRewardTypes(){
+        // returns the list of reward types as strings
+        return Stream.of(RewardType.values()).map(Enum::name).collect(Collectors.toList());
+    }
+
+    public static RewardType getRewardType(String type){
+        // takes a string and converts it into a reward type
+        return RewardType.valueOf(type);
+    }
+
     public static String getSupportedGamesJSON(){
         /* returns the supported games with the corresponding feature extractors */
         JSONObject json = new JSONObject();
@@ -143,7 +148,11 @@ public class PyTAG {
         }
         return json.toJSONString();
     }
-
+    // contructor using the default reward type
+    public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
+                 boolean isNormalized) throws Exception {
+        this(gameToPlay, parameterConfigFile, players, seed, isNormalized, null);
+    }
 
     public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
                  boolean isNormalized, RewardType rewardType) throws Exception {
@@ -171,7 +180,7 @@ public class PyTAG {
             case SCORE:
                 this.heuristic = new PureScoreHeuristic();
                 break;
-            case ORDINAl:
+            case ORDINAL:
                 this.heuristic = new OrdinalPosition();
                 break;
             case LEADER:
@@ -305,13 +314,17 @@ public class PyTAG {
         return !gameState.isNotTerminal();
     }
 
-    public double getReward(){
+    public double getReward(int playerID){
         if (this.rewardType == RewardType.DEFAULT) {
-            return gameState.getGameScore(gameState.getCurrentPlayer());
+            return gameState.getGameScore(playerID);
         }
         else {
-            return this.heuristic.evaluateState(gameState, gameState.getCurrentPlayer());
+            return this.heuristic.evaluateState(gameState, playerID);
         }
+    }
+
+    public double getReward(){
+        return getReward(gameState.getCurrentPlayer());
     }
 
     public List<AbstractAction> getActions(){
@@ -431,10 +444,12 @@ public class PyTAG {
         Random rnd = new Random(seed);
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         String availableGames = PyTAG.getSupportedGamesJSON();
+        List<String> rewardTypes = PyTAG.listRewardTypes();
 
         // set up players
 //        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
+        players.add(new RandomPlayer(rnd));
         players.add(new RandomPlayer(rnd));
 //        players.add(new PythonAgent());
 
@@ -453,7 +468,7 @@ public class PyTAG {
         try {
             // Initialise the game
             PyTAG env = new PyTAG(GameType.valueOf("Catan"), null, players, 343,
-                    true, RewardType.TERMINAL);
+                    true, RewardType.SCORE);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             //Stopwatch
