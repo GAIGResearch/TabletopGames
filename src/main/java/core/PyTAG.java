@@ -11,6 +11,7 @@ import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.catan.CatanFeatures;
 import games.diamant.DiamantFeatures;
+import games.dotsboxes.DBFeatures;
 import games.loveletter.LLStateFeaturesReduced;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
@@ -57,7 +58,8 @@ enum FeatureExtractors {
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
     Diamant(DiamantFeatures.class, DiamantFeatures.class),
-    Catan(null, CatanFeatures.class);
+    Catan(null, CatanFeatures.class),
+    DotsAndBoxes(DBFeatures.class, null);
     Class<? extends IStateFeatureVector> stateFeatureVector;
     Class<? extends IStateFeatureJSON> stateFeatureJSON;
     FeatureExtractors(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {
@@ -434,7 +436,6 @@ public class PyTAG {
 //        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
         players.add(new RandomPlayer(rnd));
-        players.add(new RandomPlayer(rnd));
 //        players.add(new PythonAgent());
 
         boolean usePyTAG = true;
@@ -465,17 +466,16 @@ public class PyTAG {
                 if (usePyTAG){
 
                     // get action mask and sample random action
-                    //int randomAction = 0;
                     int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
 
                     // get observation vector
-//                    if (obsType.equals("vector")){
-//                        double[] obs = env.getObservationVector();
-//                    } else if (obsType.equals("json")){
-//                        String json = env.getObservationJson();
-//                    }
+                    if (obsType.equals("vector")){
+                        double[] obs = env.getObservationVector();
+                    } else if (obsType.equals("json")){
+                        String json = env.getObservationJson();
+                    }
 //                    double[] obs = env.getObservationVector();
-                    String json = env.getObservationJson();
+//                    String json = env.getObservationJson();
                     double reward = env.getReward();
                     rewards.add(reward);
 //                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());

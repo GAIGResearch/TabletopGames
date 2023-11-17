@@ -3,6 +3,8 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.interfaces.ITreeActionSpace;
+import utilities.ActionTreeNode;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class DBForwardModel extends StandardForwardModel {
+public class DBForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -79,5 +81,48 @@ public class DBForwardModel extends StandardForwardModel {
         }
 
         return new ArrayList<>(actions);
+    }
+
+    @Override
+    public ActionTreeNode initActionTree(AbstractGameState gameState) {
+        /*
+        Action tree is simple as only one action in the game
+
+        Tree Structure
+        0 - Root
+        1 - AddGridCellEdge (0 - noEdges)
+         */
+
+        DBGameState dbgs = (DBGameState) gameState;
+        root = new ActionTreeNode(0, "root");
+
+        // Add all possible actions (edges) to the root
+        for (DBEdge edge : dbgs.edges) {
+            root.addChild(0, "AddGridCellEdge: " + edge.toString());
+        }
+        return root;
+    }
+
+
+    @Override
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+        root.resetTree();
+        DBGameState dbgs = (DBGameState) gameState;
+
+        // Check which actions are valid (i.e., Which edges have no owners)
+        for (DBEdge edge : dbgs.edges) {
+
+            // get which child node this edge corresponds to
+            ActionTreeNode edgeNode = root.findChildrenByName("AddGridCellEdge: " + edge.toString());
+
+            if (!dbgs.edgeToOwnerMap.containsKey(edge)) {
+
+                // Edge is not owned, so it is a valid action
+                edgeNode.setValue(1);
+                edgeNode.setAction(new AddGridCellEdge(edge));
+
+            }
+        }
+        return root;
     }
 }
