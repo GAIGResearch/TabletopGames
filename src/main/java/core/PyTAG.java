@@ -430,6 +430,18 @@ public class PyTAG {
         return this.gameState.getPlayerResults();
     }
 
+    public double getScore(int playerID){
+        return this.gameState.getGameScore(playerID);
+    }
+
+    public double[] getScores(){
+        double[] results = new double[this.gameState.getNPlayers()];
+        for (int i = 0; i < this.gameState.getNPlayers(); i++){
+            results[i] = this.gameState.getGameScore(i);
+        }
+        return results;
+    }
+
     public int sampleRNDAction(int[] mask, Random rnd){
         /* take the action mask and sample a valid random action */
         int[] trueIdx = IntStream.range(0, mask.length)

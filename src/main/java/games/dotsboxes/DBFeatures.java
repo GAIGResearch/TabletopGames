@@ -47,6 +47,6 @@ public class DBFeatures implements IStateFeatureVector {
 
     @Override
     public String[] names() {
-        return new String[0];
+        return new String[82];
     }
 }
