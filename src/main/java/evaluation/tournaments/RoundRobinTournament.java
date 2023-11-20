@@ -436,6 +436,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
     public void setRandomSeed(Number randomSeed) {
         this.randomSeed = randomSeed.longValue();
+        seedRnd = new Random(this.randomSeed);
     }
 
     public void setRandomGameParams(boolean randomGameParams) {
