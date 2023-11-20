@@ -22,7 +22,6 @@ import static games.descent2e.actions.herofeats.HeroicFeatExtraMovement.Interrup
 public class HeroicFeatExtraMovement extends DescentAction implements IExtendedSequence {
 
     // Syndrael Heroic Feat
-    String heroName = "Syndrael";
 
     enum Interrupters {
         HERO, ALLY, OTHERS, ALL
@@ -57,18 +56,23 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     int interruptPlayer;
     Figure hero;
     Figure targetAlly;
+    int heroID;
+    int allyID;
     boolean swapped, swapOption = false;
     int oldHeroMovePoints;
     int oldAllyMovePoints;
-    public HeroicFeatExtraMovement(Figure hero, Figure targetAlly) {
+    public HeroicFeatExtraMovement(Figure hero, Figure ally) {
         super(Triggers.HEROIC_FEAT);
         this.hero = hero;
-        this.targetAlly = targetAlly;
+        this.targetAlly = ally;
+        this.heroID = hero.getComponentID();
+        this.allyID = ally.getComponentID();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
 
+        String heroName = hero.getName().replace("Hero: ", "");
         String allyName = targetAlly.getName().replace("Hero: ", "");
 
         return String.format("Heroic Feat: " + heroName + " and " + allyName + " make a free move action");
@@ -135,6 +139,9 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
         heroPlayer = hero.getOwnerId();
         allyPlayer = targetAlly.getOwnerId();
+
+        hero = (Figure) dgs.getComponentById(heroID);
+        targetAlly = (Figure) dgs.getComponentById(allyID);
 
         phase = SWAP;
         interruptPlayer = heroPlayer;
@@ -243,6 +250,8 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     @Override
     public HeroicFeatExtraMovement copy() {
         HeroicFeatExtraMovement retVal = new HeroicFeatExtraMovement(hero, targetAlly);
+        retVal.heroID = heroID;
+        retVal.allyID = allyID;
         retVal.phase = phase;
         retVal.interruptPlayer = interruptPlayer;
         retVal.heroPlayer = heroPlayer;
@@ -259,6 +268,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         if (obj instanceof HeroicFeatExtraMovement) {
             HeroicFeatExtraMovement other = (HeroicFeatExtraMovement) obj;
             return other.hero.equals(hero) && other.targetAlly.equals(targetAlly) &&
+                    other.heroID == heroID && other.allyID == allyID &&
                     other.phase == phase && other.interruptPlayer == interruptPlayer &&
                     other.heroPlayer == heroPlayer && other.allyPlayer == allyPlayer &&
                     other.swapOption == swapOption && other.swapped == swapped &&

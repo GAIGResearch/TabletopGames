@@ -15,12 +15,12 @@ import java.util.Objects;
 
 public class HealAllInRange extends DescentAction {
 
-    public HealAllInRange() {
-        super(Triggers.ACTION_POINT_SPEND);
-    }
-
     // TODO: Allow customised ranges
-    int range = 3;
+    int range;
+    public HealAllInRange(int range) {
+        super(Triggers.ACTION_POINT_SPEND);
+        this.range = range;
+    }
 
     @Override
     public boolean execute(DescentGameState dgs) {
@@ -45,7 +45,7 @@ public class HealAllInRange extends DescentAction {
 
     @Override
     public HealAllInRange copy() {
-        return new HealAllInRange();
+        return new HealAllInRange(range);
     }
 
     boolean canHealHeroes(DescentGameState dgs) {
@@ -86,12 +86,14 @@ public class HealAllInRange extends DescentAction {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof HealAllInRange && super.equals(o);
+        return o instanceof HealAllInRange
+                && ((HealAllInRange) o).range == range
+                && super.equals(o);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
+        return "Heroic Feat: Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
     }
 
     @Override

@@ -10,11 +10,26 @@ import games.descent2e.actions.conditions.RemoveCondition;
 import games.descent2e.components.*;
 import utilities.Vector2D;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static games.descent2e.abilities.HeroAbilities.HeroAbility.*;
+
 public class HeroAbilities {
+
+    public enum HeroAbility {
+        CopyAllyDefense,
+        DamageMinusOne,
+        DamageToFatigue,
+        HealCondition,
+        HealFatigueOnWait,
+        RerollOnce,
+        StunAdjacent,
+        SurgeRecoverOneHeart;
+    }
 
     // Self-Contained Class for all Hero Abilities
 
@@ -22,15 +37,17 @@ public class HeroAbilities {
 
     // Ashrian's Hero Ability
     // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
-    public static void ashrian(DescentGameState dgs, Monster actingFigure) {
+    public static void ashrian(DescentGameState dgs) {
+        Figure actingFigure = dgs.getActingFigure();
         if (actingFigure.getNActionsExecuted().isMinimum()) {
-            Hero ashrian = dgs.getHeroByName("Ashrian");
-            if (ashrian != null) {
-                Vector2D position = actingFigure.getPosition();
-                Vector2D other = ashrian.getPosition();
-                if (DescentHelper.inRange(position, other, 1)) {
-                    ashrian.setUsedHeroAbility(true);
-                    actingFigure.addCondition(DescentTypes.DescentCondition.Stun);
+            for (Hero hero : dgs.getHeroes()) {
+                if (hero.getAbility().equals(StunAdjacent)) {
+                    Vector2D position = actingFigure.getPosition();
+                    Vector2D other = hero.getPosition();
+                    if (DescentHelper.inRange(position, other, 1)) {
+                        hero.setUsedHeroAbility(true);
+                        actingFigure.addCondition(DescentTypes.DescentCondition.Stun);
+                    }
                 }
             }
         }
@@ -38,23 +55,23 @@ public class HeroAbilities {
 
     // Avric Albright's Hero Ability
     // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
-    public static void avric(DescentGameState dgs, Hero actingFigure) {
-        Hero avric = dgs.getHeroByName("Avric Albright");
-        if (avric != null) {
-            Vector2D position = actingFigure.getPosition();
-            Vector2D other = avric.getPosition();
-            SurgeAttackAction surge = new SurgeAttackAction(Surge.RECOVER_1_HEART, actingFigure.getComponentID());
-            if (actingFigure.equals(avric) ||
-                    (DescentHelper.inRange(position, other, 3))) {
-                avric.setUsedHeroAbility(true);
-                if (!actingFigure.getAbilities().contains(surge)) {
-                    actingFigure.addAbility(surge);
-                }
-            }
-            else
-            {
-                if (actingFigure.getAbilities().contains(surge)) {
-                    actingFigure.removeAbility(surge);
+    public static void avric(DescentGameState dgs) {
+        Hero actingFigure = (Hero) dgs.getActingFigure();
+        for (Hero hero : dgs.getHeroes()) {
+            if (hero.getAbility().equals(SurgeRecoverOneHeart)) {
+                Vector2D position = actingFigure.getPosition();
+                Vector2D other = hero.getPosition();
+                SurgeAttackAction surge = new SurgeAttackAction(Surge.RECOVER_1_HEART, actingFigure.getComponentID());
+                if (actingFigure.equals(hero) || (DescentHelper.inRange(position, other, 3)))
+                {
+                    hero.setUsedHeroAbility(true);
+                    if (!actingFigure.getAbilities().contains(surge)) {
+                        actingFigure.addAbility(surge);
+                    }
+                } else {
+                    if (actingFigure.getAbilities().contains(surge)) {
+                        actingFigure.removeAbility(surge);
+                    }
                 }
             }
         }
@@ -65,15 +82,16 @@ public class HeroAbilities {
     // Leoric of the Book's Hero Ability
     // If a Monster is within 3 spaces of Leoric, its attacks deal -1 Heart (to a minimum of 1)
     public static int leoric(DescentGameState dgs, Figure actingFigure, int damage) {
-        Hero leoric = dgs.getHeroByName("Leoric");
-        if (leoric != null) {
-            Vector2D position = actingFigure.getPosition();
-            Vector2D other = leoric.getPosition();
-            if (DescentHelper.inRange(position, other, 3)) {
-                leoric.setUsedHeroAbility(true);
-                // Leoric can only reduce damage to a minimum of 1
-                if (damage > 1)
-                    return damage - 1;
+        for (Hero hero : dgs.getHeroes()) {
+            if (hero.getAbility().equals(DamageMinusOne)) {
+                Vector2D position = actingFigure.getPosition();
+                Vector2D other = hero.getPosition();
+                if (DescentHelper.inRange(position, other, 3)) {
+                    hero.setUsedHeroAbility(true);
+                    // Leoric can only reduce damage to a minimum of 1
+                    if (damage > 1)
+                        return damage - 1;
+                }
             }
         }
         return damage;
@@ -83,21 +101,21 @@ public class HeroAbilities {
     // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
     public static int tarha(DescentGameState dgs, DescentDice dice) {
         int face = dice.getFace();
-        Hero tarha = dgs.getHeroByName("Widow Tarha");
+        Hero f = (Hero) dgs.getActingFigure();
         // We can only do this once per round
-        if (!tarha.hasUsedHeroAbility()) {
+        if (f.getAbility().equals(RerollOnce) && !f.hasUsedHeroAbility()) {
             DiceType type = dice.getColour();
-            System.out.println("Widow Tarha rerolls the " + type + " die");
+            //System.out.println("Widow Tarha rerolls the " + type + " die");
             DicePool reroll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
                 put(type, 1);
             }});
             reroll.roll((dgs.getRandom()));
 
-            System.out.println("Old Result: " + face + " (Range: " + dice.getRange() + ", Surge: " + dice.getSurge() + ", Damage: " + dice.getDamage() +")");
+            //System.out.println("Old Result: " + face + " (Range: " + dice.getRange() + ", Surge: " + dice.getSurge() + ", Damage: " + dice.getDamage() +")");
             face = reroll.getDice(0).getFace();
-            System.out.println("New Result: " + face + " (Range: " + reroll.getDice(0).getRange() + ", Surge: " + reroll.getDice(0).getSurge() + ", Damage: " + reroll.getDice(0).getDamage() + ")");
-            tarha.setUsedHeroAbility(true);
-            tarha.setRerolled(true);
+            //System.out.println("New Result: " + face + " (Range: " + reroll.getDice(0).getRange() + ", Surge: " + reroll.getDice(0).getSurge() + ", Damage: " + reroll.getDice(0).getDamage() + ")");
+            f.setUsedHeroAbility(true);
+            f.setRerolled(true);
         }
         return face;
     }
@@ -106,9 +124,10 @@ public class HeroAbilities {
 
     // Jain Fairwood's Hero Ability
     // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
-    public static int jain(DescentGameState dgs, Figure actingFigure, int reduce)
+    public static int jain(DescentGameState dgs, int reduce)
     {
-        if (actingFigure.equals(dgs.getHeroByName("Jain")))
+        Hero actingFigure = (Hero) dgs.getActingFigure();
+        if (actingFigure.getAbility().equals(DamageToFatigue))
         {
             int maxFatigue = actingFigure.getAttributeMax(Figure.Attribute.Fatigue);
             int currentFatigue = actingFigure.getAttributeValue(Figure.Attribute.Fatigue);
@@ -128,15 +147,15 @@ public class HeroAbilities {
     // Tomble Burrowell's Hero Ability
     // If we are targeted by an attack, and we are adjacent to an ally
     // We can add their defense pool to our own defense pool before we roll
-    public static DicePool tomble (DescentGameState dgs, Figure actingFigure, Figure other)
+    public static DicePool tomble (DescentGameState dgs, Figure other)
     {
-        Hero tomble = dgs.getHeroByName("Tomble Burrowell");
+        Hero actingFigure = (Hero) dgs.getActingFigure();
         DicePool defensePool = actingFigure.getDefenceDice().copy();
-        if (actingFigure.equals(tomble)) {
+        if (actingFigure.getAbility().equals(CopyAllyDefense)) {
             Vector2D position = actingFigure.getPosition();
             Vector2D otherPosition = other.getPosition();
             if (DescentHelper.inRange(position, otherPosition, 1)) {
-                tomble.setUsedHeroAbility(true);
+                actingFigure.setUsedHeroAbility(true);
                 DicePool allyDefensePool = other.getDefenceDice();
                 List<DescentDice> allDice = new ArrayList<>(defensePool.getComponents());
                 allDice.addAll(allyDefensePool.getComponents());
@@ -150,7 +169,8 @@ public class HeroAbilities {
 
     // Grisban the Thirsty's Hero Ability
     // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
-    public static List<AbstractAction> grisban(DescentGameState dgs, Hero actingFigure) {
+    public static List<AbstractAction> grisban(DescentGameState dgs) {
+        Hero actingFigure = (Hero) dgs.getActingFigure();
         List<AbstractAction> removeConditions = new ArrayList<>();
         if (grisbanCanAct(dgs, actingFigure)) {
             for (DescentTypes.DescentCondition condition : actingFigure.getConditions()) {
@@ -166,17 +186,18 @@ public class HeroAbilities {
 
     // Ensures that Grisban's turn isn't ended before he can use his Hero Ability
     public static boolean grisbanCanAct(DescentGameState dgs, Hero actingFigure) {
-        if (actingFigure.equals(dgs.getHeroByName("Grisban")))
+        if (actingFigure.getAbility().equals(HealCondition))
             return actingFigure.hasRested() && (actingFigure.getConditions().size() > 0) && !actingFigure.hasRemovedConditionThisTurn();
         return false;
     }
 
     // Syndrael's Hero Ability
     // If Syndrael has not moved this turn, recover 2 Fatigue
-    public static void syndrael(DescentGameState dgs, Figure actingFigure) {
-        if (actingFigure.equals(dgs.getHeroByName("Syndrael")) && !actingFigure.hasMoved()) {
+    public static void syndrael(DescentGameState dgs) {
+        Hero actingFigure = (Hero) dgs.getActingFigure();
+        if (actingFigure.getAbility().equals(HealFatigueOnWait) && !actingFigure.hasMoved()) {
             actingFigure.decrementAttribute(Figure.Attribute.Fatigue, 2);
-            ((Hero) actingFigure).setUsedHeroAbility(true);
+            actingFigure.setUsedHeroAbility(true);
         }
     }
 }

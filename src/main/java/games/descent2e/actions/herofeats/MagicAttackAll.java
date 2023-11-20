@@ -1,10 +1,17 @@
 package games.descent2e.actions.herofeats;
 
+import breeze.util.ArrayUtil;
 import core.AbstractGameState;
+import core.components.Deck;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.components.DescentCard;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static games.descent2e.DescentHelper.getMeleeTargets;
@@ -41,6 +48,15 @@ public class MagicAttackAll extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        Figure f = dgs.getActingFigure();
+        // We can only use this if we attack with a Magic weapon
+        if (f instanceof Hero) {
+            Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
+            if (hand == null) return false;
+            String[] equipmentType = ((PropertyStringArray) hand.getProperty("equipmentType")).getValues();
+            if (equipmentType == null) return false;
+            if (Arrays.stream(equipmentType).noneMatch(s -> s.equals("Magic"))) return false;
+        }
         DescentAction heroicFeat = constructHeroicFeat(dgs);
         return heroicFeat != null;
     }
@@ -52,6 +68,6 @@ public class MagicAttackAll extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Magic attack all adjacent monsters.";
+        return "Heroic Feat: Magic attack all adjacent monsters.";
     }
 }

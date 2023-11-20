@@ -29,12 +29,12 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        int reduction = HeroAbilities.jain(dgs, jain, reduce);
+        int reduction = HeroAbilities.jain(dgs, reduce);
         if (reduction > 0) {
             MeleeAttack currentAttack = (MeleeAttack) dgs.currentActionInProgress();
             currentAttack.reduceDamage(reduction);
         }
-        System.out.println("Jain Fairwood reduced the damage by " + reduction + " and turned it into Fatigue!");
+        System.out.println("Reduced the damage by " + reduction + " and turned it into Fatigue!");
         return true;
     }
 

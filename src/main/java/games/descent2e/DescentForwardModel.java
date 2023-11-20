@@ -20,6 +20,7 @@ import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
+import games.descent2e.concepts.HeroicFeat;
 import games.descent2e.concepts.Quest;
 import utilities.LineOfSight;
 import utilities.Pair;
@@ -152,46 +153,45 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             dgs.heroes.add(figure);
         }
 
-        // Widow Tarha's Hero Ability
-        // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
-        if (dgs.getHeroByName("Widow Tarha") != null)
-        {
-            Hero tarha = dgs.getHeroByName("Widow Tarha");
-            for (int i = 0; i < (tarha.getAttackDice().getSize()); i++) {
-                TarhaAbilityReroll reroll = new TarhaAbilityReroll(i);
-                if (!tarha.getAbilities().contains(reroll)) {
-                    tarha.addAbility(reroll);
+        // Add in Hero Abilities as potential actions we can take where appropriate
+        for (Hero hero: dgs.getHeroes()) {
+            // Widow Tarha's Hero Ability
+            // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.RerollOnce)) {
+                for (int i = 0; i < (hero.getAttackDice().getSize()); i++) {
+                    TarhaAbilityReroll reroll = new TarhaAbilityReroll(i);
+                    if (!hero.getAbilities().contains(reroll)) {
+                        hero.addAbility(reroll);
+                    }
                 }
             }
-        }
 
-        // Jain Fairwood's Hero Ability
-        // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
-        if (dgs.getHeroByName("Jain") != null)
-        {
-            Hero jain = dgs.getHeroByName("Jain");
-            for (int i = 0; i < (jain.getAttribute(Figure.Attribute.Fatigue).getMaximum()); i++) {
-                JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(jain, (i + 1));
-                if (!jain.getAbilities().contains(reduce)) {
-                    jain.addAbility(reduce);
+            // Jain Fairwood's Hero Ability
+            // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.DamageToFatigue))
+            {
+                for (int i = 0; i < (hero.getAttribute(Figure.Attribute.Fatigue).getMaximum()); i++) {
+                    JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(hero, (i + 1));
+                    if (!hero.getAbilities().contains(reduce)) {
+                        hero.addAbility(reduce);
+                    }
                 }
             }
-        }
 
-        // Tomble Burrowell's Hero Ability
-        // If we are targeted by an attack, and we are adjacent to an ally
-        // We can add their defense pool to our own defense pool before we roll
-        if (dgs.getHeroByName("Tomble Burrowell") != null)
-        {
-            Hero tomble = dgs.getHeroByName("Tomble Burrowell");
-            for (int i = 0; i < dgs.heroes.size(); i++) {
-                // Prevent Tomble to targeting himself
-                if (dgs.heroes.get(i).equals(tomble)) {
-                    continue;
-                }
-                TombleCopyDefence copyDefence = new TombleCopyDefence(tomble, dgs.heroes.get(i));
-                if (!tomble.getAbilities().contains(copyDefence)) {
-                    tomble.addAbility(copyDefence);
+            // Tomble Burrowell's Hero Ability
+            // If we are targeted by an attack, and we are adjacent to an ally
+            // We can add their defense pool to our own defense pool before we roll
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.CopyAllyDefense))
+            {
+                for (int i = 0; i < dgs.heroes.size(); i++) {
+                    // Prevent Tomble to targeting himself
+                    if (dgs.heroes.get(i).equals(hero)) {
+                        continue;
+                    }
+                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero, dgs.heroes.get(i));
+                    if (!hero.getAbilities().contains(copyDefence)) {
+                        hero.addAbility(copyDefence);
+                    }
                 }
             }
         }
@@ -283,14 +283,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         Boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
 
         // and, for Heroes only, cannot spend any more Fatigue for movement points
-        // We also need to check a special case for Grisban's Hero Ability after resting
         Boolean noMoreFatigueMovement = true;
         if (actingFigure instanceof Hero) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 noMoreFatigueMovement = false;
             }
 
-            if (actingFigure.equals(dgs.getHeroByName("Grisban")))
+            // We also need to check a special case for Grisban's Hero Ability after resting
+            if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition))
                 noMoreActions = noMoreActions && !(HeroAbilities.grisbanCanAct(dgs, (Hero) actingFigure));
         }
 
@@ -398,7 +398,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
         if (actingFigure instanceof Monster)
         {
-            HeroAbilities.ashrian(dgs, (Monster) actingFigure);
+            HeroAbilities.ashrian(dgs);
         }
 
         // If we are stunned, we can only take the 'Stunned' action
@@ -411,7 +411,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Grisban the Thirsty's Hero Ability
         // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
         if (actingFigure instanceof Hero && ((Hero) actingFigure).hasRested())
-            actions.addAll(HeroAbilities.grisban(dgs, (Hero) actingFigure));
+            if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition))
+            {
+                actions.addAll(HeroAbilities.grisban(dgs));
+            }
 
         // If we have made all our Attribute Tests, then we can take our other actions
         // If we have movement points to spend, and not immobilized, add move actions
@@ -493,7 +496,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
                 // Avric Albright's Hero Ability
                 // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
-                HeroAbilities.avric(dgs, (Hero) actingFigure);
+                HeroAbilities.avric(dgs);
             }
 
             // Get Monster Unique Actions
@@ -519,7 +522,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Heroic Feat
         if (actingFigure instanceof Hero && (((Hero) actingFigure).isFeatAvailable()))
         {
-            List<AbstractAction> heroicFeats = heroicFeatAction(dgs, (Hero) actingFigure);
+            List<DescentAction> heroicFeats = heroicFeatAction(dgs);
             if(!heroicFeats.isEmpty())
                 actions.addAll(heroicFeats);
 
@@ -571,16 +574,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         return actions;
     }
 
-    private List<AbstractAction> heroicFeatAction(DescentGameState dgs, Hero actingFigure)
+    private List<DescentAction> heroicFeatAction(DescentGameState dgs)
     {
-        List<AbstractAction> heroicFeats = new ArrayList<>();
-        List<DescentAction> myFeats = actingFigure.getHeroicFeat().actions;
-        for (DescentAction myFeat : myFeats) {
-            if (myFeat.canExecute(dgs)) {
-                heroicFeats.add(myFeat);
-            }
-        }
-        return heroicFeats;
+        List<DescentAction> myFeats = HeroicFeat.getHeroicFeatActions(dgs);
+        if (myFeats != null)
+            return myFeats;
+        return new ArrayList<>();
 
 //        switch (actingFigure.getName().replace("Hero: ", ""))
 //        {
@@ -771,33 +770,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
         return actions;
-    }
-
-    private AttackType getAttackType(Figure actingFigure)
-    {
-        AttackType attackType = AttackType.NONE;
-        if (actingFigure instanceof Hero) {
-            // Examines the Hero's equipment to see what their weapon's range is
-            Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
-            int length = myEquipment.getComponents().size();
-            for (int i = 0; i < length; i++) {
-                AttackType temp = myEquipment.get(i).getAttackType();
-
-                // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
-                if (temp != AttackType.NONE) {
-                    if (attackType == AttackType.NONE) {
-                        attackType = temp;
-                    } else if (attackType != temp) {
-                        attackType = AttackType.BOTH;
-                    }
-                }
-            }
-        }
-        if (actingFigure instanceof Monster) {
-            // TODO Check if Monster is melee or ranged (current method could do with improving)
-            attackType = ((Monster) actingFigure).getAttackType();
-        }
-        return attackType;
     }
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {

@@ -61,8 +61,8 @@ public class EndTurn extends DescentAction{
 
             // Syndrael's Hero Ability
             // If Syndrael has not moved this turn, recover 2 Fatigue
-            if (f.getName().contains("Syndrael"))
-                HeroAbilities.syndrael(dgs, (Hero) f);
+            if (((Hero) f).getAbility().equals(HeroAbilities.HeroAbility.HealFatigueOnWait))
+                HeroAbilities.syndrael(dgs);
 
             // Some Heroes can only use their Hero Ability once per turn
             // If they have used their Hero Ability this turn, refresh it

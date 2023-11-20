@@ -14,12 +14,10 @@ import java.util.Objects;
 public class TarhaAbilityReroll extends DescentAction {
 
     // Widow Tarha Hero Ability
-    String heroName = "Widow Tarha";
     int dice;
     public TarhaAbilityReroll(int dice) {
         super(Triggers.ROLL_OWN_DICE);
         this.dice = dice;
-
     }
 
     @Override
@@ -43,8 +41,8 @@ public class TarhaAbilityReroll extends DescentAction {
             IExtendedSequence action = dgs.currentActionInProgress();
             // Ranged Attacks are instances of Melee Attacks, so both types are covered
             if (action instanceof MeleeAttack) {
-                Hero tarha = dgs.getHeroByName(heroName);
-                return !tarha.hasUsedHeroAbility() && !tarha.hasRerolled() && dgs.getActingFigure().equals(tarha);
+                Hero f = (Hero) dgs.getActingFigure();
+                return f.getAbility().equals(HeroAbilities.HeroAbility.RerollOnce) && !f.hasUsedHeroAbility() && !f.hasRerolled();
             }
         }
         return false;

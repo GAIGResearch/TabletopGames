@@ -7,6 +7,7 @@ import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Move;
 import games.descent2e.concepts.HeroicFeat;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +35,10 @@ public class Hero extends Figure {
     // TODO: reset fatigue every quest to max fatigue
 
     String heroicFeatStr;
-    HeroicFeat heroicFeat;
+    HeroicFeat.HeroFeat heroicFeat;
     boolean usedHeroAbility, featAvailable, rested, defeated;
 
+    HeroAbilities.HeroAbility heroAbility;
     String abilityStr;
 
     public Hero(String name, int nActionsPossible) {
@@ -107,12 +109,15 @@ public class Hero extends Figure {
         return heroicFeatStr;
     }
 
-    public HeroicFeat getHeroicFeat() {
+    public HeroicFeat.HeroFeat getHeroicFeat() {
         return heroicFeat;
     }
 
     public void setHeroicFeatStr(String heroicFeatStr) {
         this.heroicFeatStr = heroicFeatStr;
+    }
+    public void setHeroicFeat(HeroicFeat.HeroFeat heroicFeat) {
+        this.heroicFeat = heroicFeat;
     }
 
     public boolean isFeatAvailable() {
@@ -123,8 +128,14 @@ public class Hero extends Figure {
         this.featAvailable = featAvailable;
     }
 
+    public HeroAbilities.HeroAbility getAbility() {
+        return heroAbility;
+    }
     public String getAbilityStr() {
         return abilityStr;
+    }
+    public void setAbility(HeroAbilities.HeroAbility heroAbility) {
+        this.heroAbility = heroAbility;;
     }
 
     public void setAbilityStr(String abilityStr) {
@@ -230,14 +241,15 @@ public class Hero extends Figure {
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment)
                 && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment)
                 && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) &&
-                Objects.equals(heroicFeatStr, hero.heroicFeatStr) && Objects.equals(usedHeroAbility, hero.usedHeroAbility) &&
-                Objects.equals(abilityStr, hero.abilityStr);
+                Objects.equals(heroicFeatStr, hero.heroicFeatStr) && Objects.equals(heroicFeat, hero.heroicFeat) &&
+                Objects.equals(usedHeroAbility, hero.usedHeroAbility) &&
+                Objects.equals(abilityStr, hero.abilityStr) && Objects.equals(heroAbility, hero.heroAbility);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
-                equipSlotsAvailable, heroicFeatStr, usedHeroAbility, featAvailable, rested, abilityStr);
+                equipSlotsAvailable, heroicFeatStr, heroicFeat, usedHeroAbility, featAvailable, rested, abilityStr, heroAbility);
         result = 31 * result;
         return result;
     }
@@ -265,9 +277,11 @@ public class Hero extends Figure {
             copy.armor = armor.copy();
         }
         copy.heroicFeatStr = this.heroicFeatStr;
+        copy.heroicFeat = this.heroicFeat;
         copy.usedHeroAbility = this.usedHeroAbility;
         copy.featAvailable = this.featAvailable;
         copy.abilityStr = this.abilityStr;
+        copy.heroAbility = this.heroAbility;
         copy.rested = rested;
         super.copyComponentTo(copy);
         return copy;
@@ -283,9 +297,12 @@ public class Hero extends Figure {
         String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
         defenceDice = DicePool.constructDicePool(defence);
         this.featAvailable = true;
-        this.heroicFeatStr = ((PropertyString) getProperty(heroicFeatHash)).value;
-        this.heroicFeat = HeroicFeat.valueOf(heroicFeatStr.split(":")[0]);
-        this.abilityStr = ((PropertyString) getProperty(abilityHash)).value;
+        String heroicFeatStrFull = ((PropertyString) getProperty(heroicFeatHash)).value;
+        this.heroicFeatStr = heroicFeatStrFull.split(":", 2)[1];
+        this.heroicFeat = HeroicFeat.HeroFeat.valueOf(heroicFeatStrFull.split(":")[0]);
+        String abilityStrFull = ((PropertyString) getProperty(abilityHash)).value;
+        this.abilityStr = abilityStrFull.split(":", 2)[1];
+        this.heroAbility = HeroAbilities.HeroAbility.valueOf(abilityStrFull.split(":", 2)[0]);
     }
 
     /**

@@ -44,6 +44,7 @@ public class DoubleAttack extends MultiAttack {
 
         String defenderName1 = defender1.getComponentName();
         String defenderName2 = defender2.getComponentName();
+        String attackerName = attacker.getComponentName().replace("Hero: ", "");
 
         String distance1 = Double.toString(getDistanceFromFigures(attacker, defender1));
         String distance2 = Double.toString(getDistanceFromFigures(attacker, defender2));

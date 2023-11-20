@@ -2,11 +2,13 @@ package games.descent2e;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.Deck;
 import core.components.GridBoard;
 import core.properties.PropertyInt;
 import core.properties.PropertyVector2D;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -462,6 +464,32 @@ public class DescentHelper {
 
     public static boolean inRange(Vector2D origin, Vector2D target, int range) {
         return (Math.abs(origin.getX() - target.getX()) <= range) && (Math.abs(origin.getY() - target.getY()) <= range);
+    }
+
+    public static DescentTypes.AttackType getAttackType(Figure f)
+    {
+        DescentTypes.AttackType attackType = DescentTypes.AttackType.NONE;
+        if (f instanceof Hero) {
+            // Examines the Hero's equipment to see what their weapon's range is
+            Deck<DescentCard> myEquipment = ((Hero) f).getHandEquipment();
+            int length = myEquipment.getComponents().size();
+            for (int i = 0; i < length; i++) {
+                DescentTypes.AttackType temp = myEquipment.get(i).getAttackType();
+
+                // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
+                if (temp != DescentTypes.AttackType.NONE) {
+                    if (attackType == DescentTypes.AttackType.NONE) {
+                        attackType = temp;
+                    } else if (attackType != temp) {
+                        attackType = DescentTypes.AttackType.BOTH;
+                    }
+                }
+            }
+        }
+        if (f instanceof Monster) {
+            attackType = ((Monster) f).getAttackType();
+        }
+        return attackType;
     }
 
 }

@@ -41,7 +41,7 @@
     "Knowledge": ["Integer", 3],
     "Awareness": ["Integer", 2],
     "defence": ["String[]", ["grey"]],
-    "ability": ["String", "SurgeRecoverOne: Each hero within 3 spaces of you (including yourself) gains \"Surge: Recover 1 Heart\" on all attack rolls."],
+    "ability": ["String", "SurgeRecoverOneHeart: Each hero within 3 spaces of you (including yourself) gains \"Surge: Recover 1 Heart\" on all attack rolls."],
     "heroicFeat": ["String", "HealAll: Roll 2 red power dice. Each hero within 3 spaces of you (including yourself) may recover Heart equal to the Heart rolled."]
   },
   {
@@ -56,7 +56,7 @@
     "Knowledge": ["Integer", 2],
     "Awareness": ["Integer", 4],
     "defence": ["String[]", ["grey"]],
-    "ability": ["String", "StunAdjacentMonsters: When a minion monster begins its activation adjacent to you, it is Stunned."],
+    "ability": ["String", "StunAdjacent: When a minion monster begins its activation adjacent to you, it is Stunned."],
     "heroicFeat": ["String", "StunMonsters: Choose a monster within 3 spaces of you. Each monster in that monster group is Stunned."]
   },
   {
@@ -71,7 +71,7 @@
     "Knowledge": ["Integer", 3],
     "Awareness": ["Integer", 2],
     "defence": ["String[]", ["grey"]],
-    "ability": ["String", "HealFatigueOnStill: If you have not moved during this turn, you recover 2 Fatigue at the end of your turn."],
+    "ability": ["String", "HealFatigueOnWait: If you have not moved during this turn, you recover 2 Fatigue at the end of your turn."],
     "heroicFeat": ["String", "FreeMoveFriend: Use during your turn to choose a hero within 3 spaces of you. You and that hero may each immediately perform a move action. This is in addition to the 2 actions each hero receives on his turn."]
   },
   {
@@ -116,7 +116,7 @@
     "Knowledge": ["Integer", 3],
     "Awareness": ["Integer", 4],
     "defence": ["String[]", ["grey"]],
-    "ability": ["String", "DamageIntoFatigue: When you suffer any amount of damage from an attack, you may choose to suffer some or all of that amount as Fatigue instead; you cannot suffer Fatigue in excess of your stamina."],
+    "ability": ["String", "DamageToFatigue: When you suffer any amount of damage from an attack, you may choose to suffer some or all of that amount as Fatigue instead; you cannot suffer Fatigue in excess of your stamina."],
     "heroicFeat": ["String", "RunAttack: You may move double your Speed and perform an attack. This attack may be performed before, after, or during this movement."]
   }
 ]

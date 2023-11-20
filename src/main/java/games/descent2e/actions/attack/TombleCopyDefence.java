@@ -32,7 +32,7 @@ public class TombleCopyDefence extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        DicePool newDice = HeroAbilities.tomble(dgs, tomble, ally);
+        DicePool newDice = HeroAbilities.tomble(dgs, ally);
         dgs.setDefenceDicePool(newDice);
         return true;
     }
