@@ -211,6 +211,11 @@ public class Figure extends Token {
         if (conditions.contains(condition))
             conditions.remove(condition);
     }
+    public void removeAllConditions() {
+        if (!conditions.isEmpty()) {
+            conditions.clear();
+        }
+    }
 
     public boolean hasCondition(DescentTypes.DescentCondition condition) {
         return conditions.contains(condition);

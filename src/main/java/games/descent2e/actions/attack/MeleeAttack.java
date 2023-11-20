@@ -244,13 +244,16 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
+
+            // All conditions are removed when a figure is defeated
+            defender.removeAllConditions();
             // Death
             if (defender instanceof Hero) {
                 ((Hero)defender).setDefeated(state,true);
                 // Overlord may draw a card TODO
             } else {
                 // A monster
-                Monster m = (Monster)defender;
+                Monster m = (Monster) defender;
 
                 // Remove from board
                 Move.remove(state, m);
