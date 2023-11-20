@@ -574,8 +574,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     private List<AbstractAction> heroicFeatAction(DescentGameState dgs, Hero actingFigure)
     {
         List<AbstractAction> heroicFeats = new ArrayList<>();
-        DescentAction heroicFeat = actingFigure.getHeroicFeat().action;
-        if (heroicFeat.canExecute(dgs)) heroicFeats.add(heroicFeat);
+        List<DescentAction> myFeats = actingFigure.getHeroicFeat().actions;
+        for (DescentAction myFeat : myFeats) {
+            if (myFeat.canExecute(dgs)) {
+                heroicFeats.add(myFeat);
+            }
+        }
+        return heroicFeats;
+
 //        switch (actingFigure.getName().replace("Hero: ", ""))
 //        {
 //            // Healer
@@ -683,7 +689,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 //            default:
 //                break;
 //        }
-        return heroicFeats;
+//        return heroicFeats;
     }
     private ArrayList<AbstractAction> monsterActions(DescentGameState dgs, Monster actingFigure)
     {

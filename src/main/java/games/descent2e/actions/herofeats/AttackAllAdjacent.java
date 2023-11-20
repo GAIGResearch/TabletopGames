@@ -3,6 +3,7 @@ package games.descent2e.actions.herofeats;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.attack.MultiAttack;
+import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
 import java.util.List;
@@ -25,9 +26,10 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
+        Figure f = dgs.getActingFigure();
+        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
         // TODO: Can only use if wielding a Magic weapon
-        return  f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum();
+        return !f.getNActionsExecuted().isMaximum();
     }
 
     public AttackAllAdjacent copy() {

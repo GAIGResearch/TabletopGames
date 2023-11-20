@@ -11,7 +11,6 @@ import java.util.List;
 public class DoubleAttack extends MultiAttack {
 
     // Widow Tarha's Heroic Feat
-    String heroName = "Widow Tarha";
     public DoubleAttack(int attackingFigure, List<Integer> defendingFigures) {
         super(attackingFigure, defendingFigures);
     }
@@ -26,8 +25,9 @@ public class DoubleAttack extends MultiAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
-        return  f.getName().contains(heroName) && f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum() && super.defendingFigures.size() == 2;
+        Figure f = dgs.getActingFigure();
+        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
+        return  !f.getNActionsExecuted().isMaximum() && super.defendingFigures.size() == 2;
     }
 
     public DoubleAttack copy() {
@@ -48,12 +48,12 @@ public class DoubleAttack extends MultiAttack {
         String distance1 = Double.toString(getDistanceFromFigures(attacker, defender1));
         String distance2 = Double.toString(getDistanceFromFigures(attacker, defender2));
 
-        return String.format("Heroic Feat: Double Attack by " + heroName + " on " + defenderName1 + " (Range: " + distance1 + ") and " + defenderName2 + " (Range: " + distance2 + ")");
+        return String.format("Heroic Feat: Double Attack by " + attackerName + " on " + defenderName1 + " (Range: " + distance1 + ") and " + defenderName2 + " (Range: " + distance2 + ")");
     }
 
     @Override
     public String toString() {
-        return String.format("Heroic Feat: Widow Tarha - Attack %d and %d", super.defendingFigures.get(0), super.defendingFigures.get(1));
+        return String.format("Heroic Feat: Double Attack both %d and %d", super.defendingFigures.get(0), super.defendingFigures.get(1));
     }
 
 }

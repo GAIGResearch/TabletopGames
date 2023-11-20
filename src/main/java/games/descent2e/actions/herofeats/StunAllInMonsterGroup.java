@@ -6,6 +6,7 @@ import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Vector2D;
@@ -29,11 +30,11 @@ public class StunAllInMonsterGroup extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
+        Figure f = dgs.getActingFigure();
         for (Monster monster : monsters) {
             monster.addCondition(DescentTypes.DescentCondition.Stun);
         }
-        f.setFeatAvailable(false);
+        if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         f.getNActionsExecuted().increment();
         return true;
     }
@@ -59,9 +60,10 @@ public class StunAllInMonsterGroup extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
+        Figure f = dgs.getActingFigure();
+        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
         boolean canStunMonsters = canStunMonsters(dgs);
-        return  f.getName().contains(heroName) && f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum() && canStunMonsters;
+        return  !f.getNActionsExecuted().isMaximum() && canStunMonsters;
     }
 
     @Override
@@ -87,6 +89,6 @@ public class StunAllInMonsterGroup extends DescentAction {
     }
     @Override
     public String toString() {
-        return "Heroic Feat: Ashrian - Group Stun";
+        return "Heroic Feat: Stun Monster Group";
     }
 }

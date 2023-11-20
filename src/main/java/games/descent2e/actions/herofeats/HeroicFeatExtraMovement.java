@@ -55,12 +55,12 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     int heroPlayer;
     int allyPlayer;
     int interruptPlayer;
-    Hero hero;
-    Hero targetAlly;
+    Figure hero;
+    Figure targetAlly;
     boolean swapped, swapOption = false;
     int oldHeroMovePoints;
     int oldAllyMovePoints;
-    public HeroicFeatExtraMovement(Hero hero, Hero targetAlly) {
+    public HeroicFeatExtraMovement(Figure hero, Figure targetAlly) {
         super(Triggers.HEROIC_FEAT);
         this.hero = hero;
         this.targetAlly = targetAlly;
@@ -217,7 +217,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 if (!swapped)
                     phase = PRE_ALLY_MOVE;
                 else {
-                    hero.setFeatAvailable(false);
+                    if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
                     hero.setAttribute(Figure.Attribute.MovePoints, oldHeroMovePoints);
                     targetAlly.setAttribute(Figure.Attribute.MovePoints, oldAllyMovePoints);
                     phase = ALL_DONE;
@@ -228,7 +228,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 break;
             case POST_ALLY_MOVE:
                 if (!swapped) {
-                    hero.setFeatAvailable(false);
+                    if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
                     hero.setAttribute(Figure.Attribute.MovePoints, oldHeroMovePoints);
                     targetAlly.setAttribute(Figure.Attribute.MovePoints, oldAllyMovePoints);
                     phase = ALL_DONE;
@@ -269,7 +269,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return hero.getName().contains(heroName) && hero.isFeatAvailable();
+        return !(hero instanceof Hero) || ((Hero) hero).isFeatAvailable();
     }
 
     // Allows us to choose if we should swap the order of the Syndrael and the chosen ally

@@ -12,18 +12,17 @@ public class ReturnToMapPlace extends DescentAction {
 
     // Tomble Burrowell Heroic Feat
     // Part 3 of 3
-    String heroName = "Tomble Burrowell";
     public ReturnToMapPlace() {
         super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
+        Figure f = dgs.getActingFigure();
         Move.replace(dgs, f);
-        f.setFeatAvailable(false);
+        if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         f.setCanIgnoreEnemies(false);
-        System.out.println("Tomble reappeared on the map!");
+        //System.out.println("Tomble reappeared on the map!");
         return true;
     }
 
@@ -34,9 +33,9 @@ public class ReturnToMapPlace extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
-        return  f.getName().contains(heroName) && f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum() &&
-                (f.getAttributeValue(Figure.Attribute.MovePoints) > 0 || f.hasMoved()) && f.isOffMap();
+        Figure f = dgs.getActingFigure();
+        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
+        return  !f.getNActionsExecuted().isMaximum() && (f.getAttributeValue(Figure.Attribute.MovePoints) > 0 || f.hasMoved()) && f.isOffMap();
     }
 
     @Override

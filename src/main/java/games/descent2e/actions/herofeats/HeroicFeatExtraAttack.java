@@ -14,7 +14,6 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_
 public class HeroicFeatExtraAttack extends FreeAttack {
 
     // Grisban the Thirsty's Heroic Feat
-    String heroName = "Grisban";
 
     public HeroicFeatExtraAttack(int attackingFigure, int defendingFigure, boolean isMelee) {
         super(attackingFigure, defendingFigure, isMelee);
@@ -23,10 +22,10 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     @Override
     public boolean execute(DescentGameState state) {
         state.setActionInProgress(this);
-        Hero f = (Hero) state.getActingFigure();
+        Figure f = state.getActingFigure();
         boolean hasExtraAction = f.hasUsedExtraAction();
         f.setUsedExtraAction(false);
-        f.setFeatAvailable(false);
+        if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         super.execute(state);
 
         // Restore the extra action if it was previously available
@@ -37,8 +36,8 @@ public class HeroicFeatExtraAttack extends FreeAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
-        return f.getName().contains(heroName) && f.isFeatAvailable();
+        Figure f = dgs.getActingFigure();
+        return !(f instanceof Hero) || ((Hero) f).isFeatAvailable();
     }
 
     public HeroicFeatExtraAttack copy() {

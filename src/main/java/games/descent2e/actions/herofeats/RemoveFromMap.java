@@ -12,18 +12,17 @@ public class RemoveFromMap extends DescentAction {
 
     // Tomble Burrowell Heroic Feat
     // Part 1 of 3
-    String heroName = "Tomble Burrowell";
     public RemoveFromMap() {
         super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
+        Figure f = dgs.getActingFigure();
         Move.remove(dgs, f);
         f.setOffMap(true);
 
-        System.out.println("Tomble vanished from the map!");
+        //System.out.println("Tomble vanished from the map!");
 
         // TODO: Need to clarify rules regarding if Tomble can act after using his Heroic Feat
         // But by the wording of the rules, it seems like he ends turn immediately after using it
@@ -40,8 +39,9 @@ public class RemoveFromMap extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        Hero f = (Hero) dgs.getActingFigure();
-        return  f.getName().contains(heroName) && f.isFeatAvailable() && !f.getNActionsExecuted().isMaximum() && !f.isOffMap();
+        Figure f = dgs.getActingFigure();
+        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
+        return !f.getNActionsExecuted().isMaximum() && !f.isOffMap();
     }
 
     @Override

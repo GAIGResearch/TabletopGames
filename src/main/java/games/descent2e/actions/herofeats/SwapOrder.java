@@ -4,14 +4,14 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.Hero;
+import games.descent2e.components.Figure;
 
 public class SwapOrder extends DescentAction {
 
     HeroicFeatExtraMovement action;
-    Hero first, second;
+    Figure first, second;
     boolean swap;
-    public SwapOrder(HeroicFeatExtraMovement action, Hero first, Hero second, boolean swap) {
+    public SwapOrder(HeroicFeatExtraMovement action, Figure first, Figure second, boolean swap) {
         super(Triggers.ANYTIME);
         this.action = action;
         this.first = first;
