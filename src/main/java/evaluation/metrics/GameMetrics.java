@@ -319,6 +319,53 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
+
+    public static class Actions2 extends AbstractMetric {
+        public Actions2() {
+            super();
+        }
+
+        public Actions2(Event.GameEvent... args) {
+            super(args);
+        }
+
+        @Override
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            Game g = listener.getGame();
+            AbstractForwardModel fm = g.getForwardModel();
+            AbstractPlayer currentPlayer = g.getPlayers().get(e.playerID);
+            int size = fm.computeAvailableActions(e.state, currentPlayer.getParameters().actionSpace).size();
+
+            records.put("Player", e.playerID);
+            records.put("PlayerType", currentPlayer.toString());
+            records.put("Size", size);
+
+            records.put("Action", e.action == null ? null : e.action.toString());
+            records.put("ActionClass", e.action.getClass().getSimpleName());
+            records.put("ActionDescription", e.action == null ? null : e.action.getString(e.state));
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(ACTION_CHOSEN);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("Player", Integer.class);
+            columns.put("PlayerType", String.class);
+            columns.put("Size", Integer.class);
+            columns.put("Action", String.class);
+            columns.put("ActionClass", String.class);
+            columns.put("ActionDescription", String.class);
+            return columns;
+        }
+    }
+
+
+
     public static class Winner extends AbstractMetric {
         public Winner() {
             super();
