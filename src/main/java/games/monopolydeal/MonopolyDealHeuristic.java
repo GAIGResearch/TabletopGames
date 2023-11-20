@@ -175,7 +175,7 @@ public class MonopolyDealHeuristic extends TunableParameters implements IStateHe
 
             }
         }
-        return bankValue/(Math.sqrt(MDGS.getRoundCounter()+1))
+        return bankValue/(Math.sqrt((MDGS.getRoundCounter()+1)*1.0))
                 + propertyValue + pHandValue;
     }
     private void insertValues(){

@@ -6,8 +6,6 @@
       {"class": "evaluation.metrics.GameMetrics$Winner" },
       {"class": "games.monopolydeal.MonopolyDealMetrics$GameDuration" },
       {"class": "games.monopolydeal.MonopolyDealMetrics$FinalHeuristicScore"},
-      {"class": "games.monopolydeal.MonopolyDealMetrics$CardsUsed",
-        "args": [4]
-      }
+      {"class": "games.monopolydeal.MonopolyDealMetrics$CardsUsed"}
     ]]
 }

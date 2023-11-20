@@ -32,18 +32,17 @@ public class MonopolyDealMetrics implements IMetricsCollection {
     }
 
     public static class CardsUsed extends AbstractMetric {
-        public CardsUsed(int nPlayers) {
+        public CardsUsed() {
             super();
-            counters = new int[9][nPlayers];
+            counters = new int[9][5];
         }
 
         public CardsUsed(Event.GameEvent... args) {
             super(args);
+            counters = new int[9][5];
         }
-
         // Counters
         int[][] counters;
-
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             if (ACTION_CHOSEN.equals(e.type)) {
