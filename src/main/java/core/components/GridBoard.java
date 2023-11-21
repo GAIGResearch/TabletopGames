@@ -161,6 +161,10 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         return null;
     }
 
+    public BoardNode getElement(Vector2D pos) {
+        return getElement(pos.getX(), pos.getY());
+    }
+
     /**
      * Retrieves the grid.
      *

@@ -1,45 +1,103 @@
 package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.components.DicePool;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class HealAllInRange extends DescentAction {
 
-    public HealAllInRange(String figureType, int amount, int range) {
+    // TODO: Allow customised ranges
+    int range;
+    public HealAllInRange(int range) {
         super(Triggers.ACTION_POINT_SPEND);
-        // TODO: heal all figures of given type in given range with given amount
+        this.range = range;
     }
 
     @Override
-    public boolean execute(DescentGameState gs) {
-        return false;
+    public boolean execute(DescentGameState dgs) {
+        Figure f = dgs.getActingFigure();
+
+        // Health recovery: roll 2 red dice
+        DicePool.revive.roll(dgs.getRandom());
+        List<Hero> heroesInRange = HeroesInRange(dgs);
+        if (heroesInRange != null) {
+            for (Hero hero : heroesInRange) {
+                hero.incrementAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
+                if (hero.isDefeated())
+                    hero.setDefeated(dgs, false);
+            }
+            if (dgs.getActingFigure() instanceof Hero) {
+                ((Hero) dgs.getActingFigure()).setFeatAvailable(false);
+            }
+            f.getNActionsExecuted().increment();
+        }
+        return true;
     }
 
     @Override
     public HealAllInRange copy() {
-        return null;
+        return new HealAllInRange(range);
+    }
+
+    boolean canHealHeroes(DescentGameState dgs) {
+        // Check all heroes in range
+        // If at least one of them is not at full HP, we can heal them
+        List<Hero> heroesInRange = HeroesInRange(dgs);
+        if (heroesInRange == null) return false;
+        for(Hero hero : heroesInRange) {
+            if(hero.getAttributeValue(Figure.Attribute.Health) < hero.getAttributeMax(Figure.Attribute.Health)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Hero> HeroesInRange(DescentGameState dgs)
+    {
+        Figure f = dgs.getActingFigure();
+        List<Hero> heroesInRange = new ArrayList<>();
+        for(Hero hero : dgs.getHeroes())
+        {
+            if (DescentHelper.inRange(f.getPosition(), hero.getPosition(), range)) {
+            heroesInRange.add(hero);
+            }
+        }
+        if (heroesInRange.isEmpty())
+            return null;
+        else
+            return heroesInRange;
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return false;
+        Figure f = dgs.getActingFigure();
+        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
+        return !f.getNActionsExecuted().isMaximum() && canHealHeroes(dgs);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return 0;
+    public boolean equals(Object o) {
+        return o instanceof HealAllInRange
+                && ((HealAllInRange) o).range == range
+                && super.equals(o);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return "Heroic Feat: Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
+    }
+
+    @Override
+    public String toString() {
+        return "Heroic Feat: Avric Albright - Group Heal";
     }
 }

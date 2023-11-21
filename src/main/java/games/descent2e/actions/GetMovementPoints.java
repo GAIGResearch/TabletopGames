@@ -28,6 +28,11 @@ public class GetMovementPoints extends DescentAction {
     }
 
     @Override
+    public int hashCode() {
+        return 111500;
+    }
+
+    @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
 

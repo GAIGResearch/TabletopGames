@@ -10,11 +10,12 @@ import gui.IScreenHighlight;
 import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;
 
-    public BattleloreGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public BattleloreGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
 
         if (game == null) {
@@ -30,7 +31,7 @@ public class BattleloreGUI extends AbstractGUIManager {
 
 
         JPanel infoPanel = createGameStateInfoPanel("Battlelore", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);

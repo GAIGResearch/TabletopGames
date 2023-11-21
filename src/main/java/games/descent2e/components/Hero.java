@@ -6,7 +6,10 @@ import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.DescentGameState;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.Move;
+import games.descent2e.concepts.HeroicFeat;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -31,10 +34,12 @@ public class Hero extends Figure {
 
     // TODO: reset fatigue every quest to max fatigue
 
-    String heroicFeat;
-    boolean featAvailable, rested, defeated;
+    String heroicFeatStr;
+    HeroicFeat.HeroFeat heroicFeat;
+    boolean usedHeroAbility, featAvailable, rested, defeated;
 
-    String ability;
+    HeroAbilities.HeroAbility heroAbility;
+    String abilityStr;
 
     public Hero(String name, int nActionsPossible) {
         super(name, nActionsPossible);
@@ -54,8 +59,6 @@ public class Hero extends Figure {
     @Override
     public void resetRound() {
         super.resetRound();
-        if (rested) attributes.get(Attribute.Fatigue).setValue(0);
-        rested = false;
     }
 
     protected Hero(String name, Counter actions, int ID) {
@@ -102,11 +105,18 @@ public class Hero extends Figure {
         this.equipSlotsAvailable = equipSlotsAvailable;
     }
 
-    public String getHeroicFeat() {
+    public String getHeroicFeatStr() {
+        return heroicFeatStr;
+    }
+
+    public HeroicFeat.HeroFeat getHeroicFeat() {
         return heroicFeat;
     }
 
-    public void setHeroicFeat(String heroicFeat) {
+    public void setHeroicFeatStr(String heroicFeatStr) {
+        this.heroicFeatStr = heroicFeatStr;
+    }
+    public void setHeroicFeat(HeroicFeat.HeroFeat heroicFeat) {
         this.heroicFeat = heroicFeat;
     }
 
@@ -118,12 +128,18 @@ public class Hero extends Figure {
         this.featAvailable = featAvailable;
     }
 
-    public String getAbility() {
-        return ability;
+    public HeroAbilities.HeroAbility getAbility() {
+        return heroAbility;
+    }
+    public String getAbilityStr() {
+        return abilityStr;
+    }
+    public void setAbility(HeroAbilities.HeroAbility heroAbility) {
+        this.heroAbility = heroAbility;;
     }
 
-    public void setAbility(String ability) {
-        this.ability = ability;
+    public void setAbilityStr(String abilityStr) {
+        this.abilityStr = abilityStr;
     }
 
     public boolean hasRested() {
@@ -134,7 +150,14 @@ public class Hero extends Figure {
         this.rested = rested;
     }
 
-    public void setDefeated(boolean defeated) {
+    public boolean hasUsedHeroAbility() {
+        return usedHeroAbility;
+    }
+    public void setUsedHeroAbility(boolean usedHeroAbility) {
+        this.usedHeroAbility = usedHeroAbility;
+    }
+
+    public void setDefeated(DescentGameState dgs, boolean defeated) {
         this.defeated = defeated;
 
         if (defeated) {
@@ -144,6 +167,12 @@ public class Hero extends Figure {
             setAttributeToMax(Figure.Attribute.Fatigue);
             // Discard conditions
             getConditions().clear();
+            // Remove from map
+            Move.remove(dgs, this);
+            setOffMap(true);
+        }
+        else {
+            Move.replace(dgs, this);
         }
     }
 
@@ -212,14 +241,15 @@ public class Hero extends Figure {
                 Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment)
                 && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment)
                 && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) &&
-                Objects.equals(heroicFeat, hero.heroicFeat) &&
-                Objects.equals(ability, hero.ability);
+                Objects.equals(heroicFeatStr, hero.heroicFeatStr) && Objects.equals(heroicFeat, hero.heroicFeat) &&
+                Objects.equals(usedHeroAbility, hero.usedHeroAbility) &&
+                Objects.equals(abilityStr, hero.abilityStr) && Objects.equals(heroAbility, hero.heroAbility);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
-                equipSlotsAvailable, heroicFeat, featAvailable, rested, ability);
+                equipSlotsAvailable, heroicFeatStr, heroicFeat, usedHeroAbility, featAvailable, rested, abilityStr, heroAbility);
         result = 31 * result;
         return result;
     }
@@ -246,9 +276,12 @@ public class Hero extends Figure {
         if (armor != null) {
             copy.armor = armor.copy();
         }
+        copy.heroicFeatStr = this.heroicFeatStr;
         copy.heroicFeat = this.heroicFeat;
+        copy.usedHeroAbility = this.usedHeroAbility;
         copy.featAvailable = this.featAvailable;
-        copy.ability = this.ability;
+        copy.abilityStr = this.abilityStr;
+        copy.heroAbility = this.heroAbility;
         copy.rested = rested;
         super.copyComponentTo(copy);
         return copy;
@@ -264,8 +297,32 @@ public class Hero extends Figure {
         String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
         defenceDice = DicePool.constructDicePool(defence);
         this.featAvailable = true;
-        this.heroicFeat = ((PropertyString) getProperty(heroicFeatHash)).value;
-        this.ability = ((PropertyString) getProperty(abilityHash)).value;
+        String heroicFeatStrFull = ((PropertyString) getProperty(heroicFeatHash)).value;
+        this.heroicFeatStr = heroicFeatStrFull.split(":", 2)[1];
+        String abilityStrFull = ((PropertyString) getProperty(abilityHash)).value;
+        this.abilityStr = abilityStrFull.split(":", 2)[1];
+
+        // Ensures that, if there is a problem with the json name, a default NONE value is assigned
+        this.heroicFeat = HeroicFeat.HeroFeat.NONE;
+        this.heroAbility = HeroAbilities.HeroAbility.NONE;
+        String tempFeat = heroicFeatStrFull.split(":")[0];
+        String tempAbility = abilityStrFull.split(":")[0];
+        for (HeroicFeat.HeroFeat feat : HeroicFeat.HeroFeat.values())
+        {
+            if (feat.name().equals(tempFeat))
+            {
+                this.heroicFeat = feat;
+                break;
+            }
+        }
+        for (HeroAbilities.HeroAbility ability : HeroAbilities.HeroAbility.values())
+        {
+            if (ability.name().equals(tempAbility))
+            {
+                this.heroAbility = ability;
+                break;
+            }
+        }
     }
 
     /**

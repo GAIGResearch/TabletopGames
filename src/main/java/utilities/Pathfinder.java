@@ -64,11 +64,11 @@ public class Pathfinder {
      */
     private void initShortestPaths(BoardNode origin)
     {
-        HashMap<Integer, Double> nodeNeighbours = origin.getNeighbours();
+        HashMap<BoardNode, Double> nodeNeighbours = origin.getNeighbours();
         int originID = origin.getComponentID();
 
-        for(int nodeID : nodeNeighbours.keySet()) {
-            assignCost(originID, nodeID, nodeNeighbours.get(nodeID));
+        for(BoardNode node : nodeNeighbours.keySet()) {
+            assignCost(originID, node.getComponentID(), nodeNeighbours.get(node));
         }
 
         //Default one, to itself
@@ -223,26 +223,23 @@ public class Pathfinder {
             }
 
             //For all connections from the current node...
-            HashMap<Integer, Double> conn = currentNode.getNeighbours();
-            for(int connectedID : conn.keySet())
+            HashMap<BoardNode, Double> conn = currentNode.getNeighbours();
+            for(BoardNode connected : conn.keySet())
             {
-                //Take the neighbour node.
-                BoardNode connected = (BoardNode) gState.getComponentById(connectedID);
-
                 //If it has not been evaluated yet.
                 if(!evaluatedSet.contains(connected.getComponentID()))
                 {
                     // Cost from origin to 'connected' stored
-                    Path D1 = getShortestPath(path.originID,connectedID);
+                    Path D1 = getShortestPath(path.originID,connected.getComponentID());
                     // Cost from origin to current node stored
                     Path DA = getShortestPath(path.originID,currentNodeId);
                     // Cost from current to connected (edge cost)
-                    double dA1 = conn.get(connectedID);
+                    double dA1 = conn.get(connected);
 
                     //Path to this node
                     PathCH pc = new PathCH();
                     pc.p = D1;
-                    pc.destID = connectedID;
+                    pc.destID = connected.getComponentID();
 
                     //If the new cost is smaller.
                     double newCost = DA.cost + dA1;
@@ -250,17 +247,17 @@ public class Pathfinder {
                     {
                         //update cost
                         Path newD1 = new Path(DA);
-                        newD1.destinationID = connectedID;
+                        newD1.destinationID = connected.getComponentID();
                         newD1.cost += dA1;
                         //update path
                         pc.p = newD1;
-                        newD1.points.add(connectedID);
+                        newD1.points.add(connected.getComponentID());
                         setShortestPath(newD1);
                     }
 
                     //Set cost, used by priority queue to navigate more efficiently
-                    nodeComparator.nodeGCosts.put(connectedID, pc.p.cost);
-                    nodeComparator.nodeHCosts.put(connectedID, heuristic(connected, destinationNode));
+                    nodeComparator.nodeGCosts.put(connected.getComponentID(), pc.p.cost);
+                    nodeComparator.nodeHCosts.put(connected.getComponentID(), heuristic(connected, destinationNode));
 
                     //connected.m_g = pc.p.cost;
                     //connected.m_f = pc.heuristicCost = pc.p.cost + heuristic(currentNode, destinationNode);

@@ -3,9 +3,12 @@ package games.sushigo;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import org.json.simple.JSONObject;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -96,24 +99,14 @@ public class SGGameState extends AbstractGameState {
 
         if (playerId == -1) {
             for (int i = 0; i < getNPlayers(); i++) {
-                copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
+                List<ChooseCard> copiedItems = new ArrayList<>();
+                for (ChooseCard cc : cardChoices.get(i)) {
+                    copiedItems.add(cc.copy());
+                }
+                copy.cardChoices.add(copiedItems);
             }
         } else {
             // Now we need to redeterminise
-            // We don't know what other players have chosen for this round, hide card choices
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i == playerId) {
-                    copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
-                } else {
-                    // Replace others with hidden choices
-                    ArrayList<ChooseCard> hiddenChoice = new ArrayList<>();
-                    for (ChooseCard c : cardChoices.get(i)) {
-                        hiddenChoice.add(c.getHiddenChoice());
-                    }
-                    copy.cardChoices.add(hiddenChoice);
-                }
-            }
-
             // We need to shuffle the hands of other players with the draw deck and then redraw
 
             // Add player hands unseen back to the draw pile
@@ -135,13 +128,24 @@ public class SGGameState extends AbstractGameState {
                     }
                 }
             }
+
+            // We don't know what other players have chosen for this round, hide card choices
+            turnOwner = playerId;
+            for (int i = 0; i < getNPlayers(); i++) {
+                copy.cardChoices.add(new ArrayList<>());
+                if (i == playerId) {
+                    for (ChooseCard cc : cardChoices.get(i)) {
+                        copy.cardChoices.get(i).add(cc.copy());
+                    }
+                }
+            }
         }
 
         return copy;
     }
 
     /**
-     * we do know the contents of the hands of players to our T to our left, where T is the number of player turns
+     * we do know the contents of the hands of players up to T to our left, where T is the number of player turns
      * so far, as we saw that hand on its way through our own
      *
      * @param playerId   - id of player whose vision we're checking
@@ -189,7 +193,7 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    public double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId, int tier) {
         // Tie-break is number of puddings
         return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
     }
@@ -273,4 +277,5 @@ public class SGGameState extends AbstractGameState {
                 Arrays.hashCode(playedCardTypesAllGame) + "|" +
                 super.hashCode() + "|";
     }
+
 }

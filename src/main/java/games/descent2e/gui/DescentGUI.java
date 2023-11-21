@@ -6,6 +6,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTurnOrder;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.Hero;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -21,6 +22,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static games.descent2e.gui.DescentHeroView.labelFont;
@@ -38,7 +40,7 @@ public class DescentGUI extends AbstractGUIManager {
     static boolean prettyVersion = true;  // Turn off to not draw images
     static Color foregroundColor = Color.black;
 
-    public DescentGUI(GamePanel panel, Game game, ActionController ac, int human) {
+    public DescentGUI(GamePanel panel, Game game, ActionController ac, Set<Integer> human) {
         super(panel, game, ac, human);
 
         DescentGameState dgs = (DescentGameState) game.getGameState();
@@ -106,9 +108,13 @@ public class DescentGUI extends AbstractGUIManager {
         if (ab.getButtonAction() instanceof Move) {
             view.actionHighlights.addAll(((Move) ab.getButtonAction()).getPositionsTraveled());
         }
+        if (ab.getButtonAction() instanceof MeleeAttack) {
+            view.attackTarget = ((MeleeAttack) ab.getButtonAction()).getDefendingFigure();
+        }
     }
     private void onMouseExit(ActionButton ab) {
         view.actionHighlights.clear();
+        view.attackTarget = -1;
     }
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
@@ -250,17 +256,8 @@ public class DescentGUI extends AbstractGUIManager {
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel() {
-            @Override
-            public Dimension getMaximumSize() {
-                return new Dimension(width, super.getMaximumSize().height);
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(width, super.getPreferredSize().height);
-            }
-        };
+        JPanel actionPanel = new JPanel();
+        actionPanel.setPreferredSize(new Dimension(width, height*100));
         actionPanel.setOpaque(false);
 
         actionButtons = new ActionButton[maxActionSpace];
@@ -279,9 +276,9 @@ public class DescentGUI extends AbstractGUIManager {
         pane.getViewport().setOpaque(false);
         pane.setPreferredSize(new Dimension(width, height));
         pane.setMaximumSize(new Dimension(width, height));
-        if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        }
+        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        pane.getVerticalScrollBar().setUnitIncrement(16);
         return pane;
     }
 

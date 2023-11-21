@@ -59,7 +59,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null || ac == null) return;
 
@@ -461,7 +461,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         for (AbstractAction action : actions) {
             if (action instanceof MovePlayer) {
                 int pIdx = ((MovePlayer) action).getPlayerToMove();
-                Card c = action.getCard(gameState);
+                Card c = (action instanceof MovePlayerWithCard) ? ((MovePlayerWithCard) action).getCard(gameState) : null;
                 if (action instanceof MovePlayerWithCard && isCardHighlighted(c, pIdx)) {
                     if (c.getProperty(effectHash) == null || bnHighlights.contains(((MovePlayer) action).getDestination()) &&
                                 (pIdx == id || playerTokenHighlights.contains(pIdx))) {
@@ -482,7 +482,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                     if (action instanceof AddResearchStationFrom) {
                         if (bnHighlights.contains(((AddResearchStationFrom) action).getFromCity())) {
                             if (!(action instanceof AddResearchStationWithCardFrom) ||
-                                    isCardHighlighted(action.getCard(gameState), id)) {
+                                    isCardHighlighted(((AddResearchStationWithCardFrom)action).getCard(gameState), id)) {
                                 actionButtons[k].setVisible(true);
                                 actionButtons[k++].setButtonAction(action, gameState);
                             }
@@ -512,7 +512,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 actionButtons[k].setVisible(true);
                 actionButtons[k++].setButtonAction(action, gameState);
             } else if (action instanceof RearrangeDeckOfCards) {  // Event
-                Card eventCard = action.getCard(gameState);
+                Card eventCard = ((RearrangeDeckOfCards)action).getCard(gameState);
                 int[] cardOrder = ((RearrangeDeckOfCards) action).getNewCardOrder();
                 int nCards = cardOrder.length;
                 Deck<Card> deckFrom = (Deck<Card>) gameState.getComponentById(((RearrangeDeckOfCards) action).getDeckFrom());
@@ -534,7 +534,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                 }
 
             } else if (action instanceof RemoveComponentFromDeck) {  // Event
-                Card eventCard = action.getCard(gameState);
+                Card eventCard = ((RemoveComponentFromDeck)action).getCard(gameState);
                 int infectionCard = ((RemoveComponentFromDeck) action).getComponentIdx();
                 Deck<Card> deck = (Deck<Card>) gameState.getComponentById(((RemoveComponentFromDeck) action).getDeck());
                 fillBufferDeck(deck);
@@ -584,7 +584,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
                         // Share knowledge
                         int giverID = ((ShareKnowledge) action).getGiver();
                         int receiverID = ((ShareKnowledge) action).getReceiver();
-                        if (isCardHighlighted(action.getCard(gameState), giverID)) {
+                        if (isCardHighlighted(((ShareKnowledge) action).getCard(gameState), giverID)) {
                             if (id == giverID && playerHighlights.contains(receiverID)) {
                                 // Give card
                                 // card in hand selected and other player, show this action as available

@@ -2,6 +2,7 @@ package gametemplate;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import evaluation.optimisation.TunableParameters;
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -10,7 +11,7 @@ import core.AbstractParameters;
  *
  * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
  *
- * <p>The class can optionally extend from {@link evaluation.TunableParameters} instead, which allows to use
+ * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
 public class GTParameters extends AbstractParameters {

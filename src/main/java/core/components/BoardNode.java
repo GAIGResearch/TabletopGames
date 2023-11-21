@@ -10,10 +10,9 @@ import java.util.HashMap;
 public class BoardNode extends Component {
 
     final static double defaultCost = 1.0;
-    private HashMap<Integer, Double> neighbours;  // Neighbours of this board node, <component IDs, cost to traverse>
-    private HashMap<Integer, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
+    private HashMap<BoardNode, Double> neighbours;  // Neighbours of this board node, <component IDs, cost to traverse>
+    private HashMap<BoardNode, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
     private int maxNeighbours;  // Maximum number of neighbours for this board node
-
 
     public BoardNode(int maxNeighbours, String name) {
         super(CoreConstants.ComponentType.BOARD_NODE, name);
@@ -49,7 +48,7 @@ public class BoardNode extends Component {
      */
     public void addNeighbourWithCost(BoardNode neighbour, double cost) {
         if (neighbours.size() <= maxNeighbours || maxNeighbours == -1) {
-            neighbours.put(neighbour.componentID, cost);
+            neighbours.put(neighbour, cost);
         }
     }
 
@@ -59,9 +58,9 @@ public class BoardNode extends Component {
      * @return - true if removed successfully, false otherwise. may fail if neighbour didn't exist in the first place.
      */
     public boolean removeNeighbour(BoardNode neighbour) {
-        if (neighbours.containsKey(neighbour.componentID)) {
-            neighbours.remove(neighbour.componentID);
-            neighbourSideMapping.remove(neighbour.componentID);
+        if (neighbours.containsKey(neighbour)) {
+            neighbours.remove(neighbour);
+            neighbourSideMapping.remove(neighbour);
             return true;
         }
         return false;
@@ -86,9 +85,9 @@ public class BoardNode extends Component {
      */
     public boolean addNeighbourOnSideWithCost(BoardNode neighbour, int side, double cost) {
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
-            if (!(neighbours.containsKey(neighbour.componentID)) && !(neighbourSideMapping.containsKey(neighbour.componentID))) {
-                neighbours.put(neighbour.componentID, cost);
-                neighbourSideMapping.put(neighbour.componentID, side);
+            if (!(neighbours.containsKey(neighbour)) && !(neighbourSideMapping.containsKey(neighbour))) {
+                neighbours.put(neighbour, cost);
+                neighbourSideMapping.put(neighbour, side);
                 return true;
             }
         }
@@ -118,7 +117,7 @@ public class BoardNode extends Component {
     /**
      * @return the neighbours of this node.
      */
-    public HashMap<Integer, Double> getNeighbours() {
+    public HashMap<BoardNode, Double> getNeighbours() {
         return neighbours;
     }
 
@@ -134,20 +133,15 @@ public class BoardNode extends Component {
      */
     public double getNeighbourCost(BoardNode neighbour)
     {
-        if(neighbours.containsKey(neighbour.componentID))
-            return neighbours.get(neighbour.componentID);
-        throw new RuntimeException("BoardNode.getNeighbourCost(): Accessing cost of a non-neighbour");
-    }
-    public double getNeighbourCost(int neighbourID) {
-        if(neighbours.containsKey(neighbourID))
-            return neighbours.get(neighbourID);
+        if(neighbours.containsKey(neighbour))
+            return neighbours.get(neighbour);
         throw new RuntimeException("BoardNode.getNeighbourCost(): Accessing cost of a non-neighbour");
     }
 
     /**
      * @return the neighbours mapping to sides of this node.
      */
-    public HashMap<Integer, Integer> getNeighbourSideMapping() {
+    public HashMap<BoardNode, Integer> getNeighbourSideMapping() {
         return neighbourSideMapping;
     }
 

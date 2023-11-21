@@ -5,7 +5,9 @@ import core.components.Token;
 import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.AttributeTest;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.attack.MeleeAttack;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,6 +15,7 @@ import org.json.simple.parser.ParseException;
 import utilities.Pair;
 import utilities.Vector2D;
 
+import javax.management.ObjectName;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -64,12 +67,18 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    boolean removedConditionThisTurn = false;
+    Set<AttributeTest> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
+    MeleeAttack currentAttack;
+    boolean hasMoved, hasAttacked, hasRerolled;
+    boolean isOffMap, canIgnoreEnemies, extraAction = false;
 
     public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
+        attributeTests = new HashSet<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         attributes.put(Gold, new Counter(0, 0, -1, "Gold"));
@@ -118,6 +127,10 @@ public class Figure extends Token {
         attributes.get(a).increment(increment);
     }
 
+    public void decrementAttribute(Attribute a, int decrement) {
+        attributes.get(a).decrement(decrement);
+    }
+
     public void setAttributeToMax(Attribute a) {
         attributes.get(a).setToMax();
     }
@@ -132,6 +145,42 @@ public class Figure extends Token {
 
     public void setPosition(Vector2D position) {
         this.position = position;
+    }
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
+    public boolean hasAttacked() {
+        return hasAttacked;
+    }
+    public void setHasAttacked(boolean hasAttacked) {
+        this.hasAttacked = hasAttacked;
+    }
+    public boolean hasRerolled() {
+        return hasRerolled;
+    }
+    public void setRerolled(boolean hasRerolled) {
+        this.hasRerolled = hasRerolled;
+    }
+    public boolean isOffMap() {
+        return isOffMap;
+    }
+    public void setOffMap(boolean offMap) {
+        isOffMap = offMap;
+    }
+    public boolean canIgnoreEnemies() {
+        return canIgnoreEnemies;
+    }
+    public void setCanIgnoreEnemies(boolean canIgnoreEnemies) {
+        this.canIgnoreEnemies = canIgnoreEnemies;
+    }
+    public void setUsedExtraAction(boolean extraAction) {
+        this.extraAction = extraAction;
+    }
+    public boolean hasUsedExtraAction() {
+        return extraAction;
     }
 
     public Counter getNActionsExecuted() {
@@ -151,15 +200,63 @@ public class Figure extends Token {
     }
 
     public void addCondition(DescentTypes.DescentCondition condition) {
-        conditions.add(condition);
+        // A Figure can only be affected by a condition once - they do not stack
+        // Therefore we can only add the condition if it is not already on the list
+        if (!conditions.contains(condition)) {
+            conditions.add(condition);
+        }
     }
 
     public void removeCondition(DescentTypes.DescentCondition condition) {
-        conditions.remove(condition);
+        if (conditions.contains(condition))
+            conditions.remove(condition);
+    }
+    public void removeAllConditions() {
+        if (!conditions.isEmpty()) {
+            conditions.clear();
+        }
     }
 
     public boolean hasCondition(DescentTypes.DescentCondition condition) {
         return conditions.contains(condition);
+    }
+
+    public boolean hasRemovedConditionThisTurn() {
+        return removedConditionThisTurn;
+    }
+
+    public void setRemovedConditionThisTurn(boolean removedConditionThisTurn) {
+        this.removedConditionThisTurn = removedConditionThisTurn;
+    }
+
+    public Set<AttributeTest> getAttributeTests() {
+        return attributeTests;
+    }
+
+    public void addAttributeTest(AttributeTest attributeTest) {
+        attributeTests.add(attributeTest);
+    }
+
+    public void removeAttributeTest(AttributeTest attributeTest) {
+        attributeTests.remove(attributeTest);
+    }
+    public void clearAttributeTest() {
+        if (!(attributeTests).isEmpty()) {
+            attributeTests.clear();
+        }
+    }
+
+    public boolean hasAttributeTest(AttributeTest attributeTest) {
+        if (attributeTests == null) {
+            return false;
+        }
+
+        for (AttributeTest test : attributeTests) {
+            if (attributeTest.getAttributeTestName().equals(test.getAttributeTestName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void addAbility(DescentAction ability) {
@@ -174,6 +271,10 @@ public class Figure extends Token {
     public DicePool getAttackDice() { return attackDice;}
 
     public DicePool getDefenceDice() {return defenceDice;}
+
+    public String getName() { return componentName;}
+    public MeleeAttack getCurrentAttack() { return currentAttack;}
+    public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack;}
 
     @Override
     public Figure copy() {
@@ -199,9 +300,10 @@ public class Figure extends Token {
         if (position != null) {
             copyTo.position = position.copy();
         }
-        copyTo.nActionsExecuted = nActionsExecuted;
+        copyTo.nActionsExecuted = nActionsExecuted.copy();
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
+        copyTo.attributeTests = new HashSet<>(attributeTests);
         copyTo.abilities = new ArrayList<>();
         if (abilities != null) {
             for (DescentAction ability : abilities) {
@@ -210,6 +312,12 @@ public class Figure extends Token {
         }
         copyTo.attackDice = getAttackDice().copy();
         copyTo.defenceDice = getDefenceDice().copy();
+        copyTo.hasMoved = hasMoved;
+        copyTo.hasRerolled = hasRerolled;
+        copyTo.isOffMap = isOffMap;
+        copyTo.canIgnoreEnemies = canIgnoreEnemies;
+        copyTo.extraAction = extraAction;
+        copyTo.currentAttack = currentAttack;
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
@@ -254,11 +362,11 @@ public class Figure extends Token {
         if (!(o instanceof Figure)) return false;
         if (!super.equals(o)) return false;
         Figure figure = (Figure) o;
-        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities);
+        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(componentName, figure.componentName) && Objects.equals(hasMoved, figure.hasMoved) && Objects.equals(hasRerolled, figure.hasRerolled) && Objects.equals(isOffMap, figure.isOffMap) && Objects.equals(canIgnoreEnemies, figure.canIgnoreEnemies) && Objects.equals(extraAction, figure.extraAction);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities);
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities, currentAttack, componentName, hasMoved, hasRerolled, isOffMap, canIgnoreEnemies, extraAction);
     }
 }

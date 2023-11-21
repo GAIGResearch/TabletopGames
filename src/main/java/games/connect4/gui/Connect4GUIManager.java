@@ -17,12 +17,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class Connect4GUIManager extends AbstractGUIManager {
 
     Connect4BoardView view;
 
-    public Connect4GUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public Connect4GUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
 

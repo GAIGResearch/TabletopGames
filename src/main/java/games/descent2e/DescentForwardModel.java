@@ -1,36 +1,38 @@
 package games.descent2e;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.*;
+import games.descent2e.DescentTypes.*;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
-import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.actions.Move;
-import games.descent2e.actions.attack.SurgeAttackAction;
+import games.descent2e.actions.attack.*;
+import games.descent2e.actions.conditions.Diseased;
+import games.descent2e.actions.conditions.Poisoned;
+import games.descent2e.actions.conditions.Stunned;
+import games.descent2e.actions.herofeats.*;
+import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
+import games.descent2e.concepts.HeroicFeat;
 import games.descent2e.concepts.Quest;
 import utilities.LineOfSight;
 import utilities.Pair;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import games.descent2e.DescentTypes.*;
+import java.util.*;
 
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
+import static games.descent2e.DescentHelper.*;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static utilities.Utils.getNeighbourhood;
 
@@ -63,6 +65,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Set up first board of first quest
         setupBoard(dgs, _data, firstBoard);
 
+        // Create a Heroes Side figure for tracking stats relevant to everyone in the heroes' party
+        // Some encounters use Fatigue in the Heroes Side pool to act as a turn timer, so we can track it here
+        dgs.heroesSide = new Figure("Heroes Side", -1);
+        dgs.heroesSide.setTokenType("Heroes Side");
+        dgs.heroesSide.setAttribute(Figure.Attribute.Fatigue, new Counter(0, 0, 8, "Heroes Side Fatigue"));
+
         // Overlord setup
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
@@ -70,7 +78,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // TODO: read the following from quest setup
         dgs.overlord.setAttribute(Figure.Attribute.Fatigue, new Counter(0, 0, 7, "Overlord Fatigue"));
         dgs.overlord.setTokenType("Overlord");
-        // OVerlord is player 0, first hero is player 1
+        // Overlord is player 0, first hero is player 1
         dgs.getTurnOrder().setStartingPlayer(1);
 
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
@@ -122,9 +130,12 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     figure.equip(new DescentCard(c));
                 }
             }
-            // after equipping, set up abilities
+            // After equipping, set up abilities
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+
+            // Enable the Heroic Feat
+            figure.setFeatAvailable(true);
 
             // Place hero on the board in random starting position out of those available
             choice = rnd.nextInt(heroStartingPositions.size());
@@ -140,6 +151,50 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Inform game of this hero figure
             dgs.heroes.add(figure);
+        }
+
+        // Add in Hero Abilities as potential actions we can take where appropriate
+        for (Hero hero: dgs.getHeroes()) {
+            // Widow Tarha's Hero Ability
+            // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.RerollOnce)) {
+                for (int i = 0; i < (hero.getAttackDice().getSize()); i++) {
+                    TarhaAbilityReroll reroll = new TarhaAbilityReroll(i);
+                    if (!hero.getAbilities().contains(reroll)) {
+                        hero.addAbility(reroll);
+                    }
+                }
+            }
+
+            // Jain Fairwood's Hero Ability
+            // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.DamageToFatigue))
+            {
+                for (int i = 0; i < (hero.getAttribute(Figure.Attribute.Fatigue).getMaximum()); i++) {
+                    JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(hero.getComponentID(), (i + 1));
+                    if (!hero.getAbilities().contains(reduce)) {
+                        hero.addAbility(reduce);
+                    }
+                }
+            }
+
+            // Tomble Burrowell's Hero Ability
+            // If we are targeted by an attack, and we are adjacent to an ally
+            // We can add their defense pool to our own defense pool before we roll
+            if (hero.getAbility().equals(HeroAbilities.HeroAbility.CopyAllyDefense))
+            {
+                for (int i = 0; i < dgs.heroes.size(); i++) {
+                    // Prevent Tomble to targeting himself
+                    if (dgs.heroes.get(i).equals(hero)) {
+                        continue;
+                    }
+                    List<DescentDice> defenceDice = hero.getDefenceDice().getComponents();
+                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero.getComponentID(), dgs.heroes.get(i).getComponentID(), defenceDice);
+                    if (!hero.getAbilities().contains(copyDefence)) {
+                        hero.addAbility(copyDefence);
+                    }
+                }
+            }
         }
 
         // Overlord chooses monster groups // TODO, for now randomly selected
@@ -220,20 +275,28 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
         // TODO: may still be able to play cards/skills/free effects - just add more Booleans into the if check when more are added
-        // Turn ends for figure if they executed the number of actions available,
-        Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum();
+        // Turn ends for figure if they executed the number of actions available and have no more actions available,
+        List<AbstractAction> actions = _computeAvailableActions(dgs);
+        actions.remove(new EndTurn());
+        Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum() && actions.isEmpty();
+
         // have no more movement points available,
         Boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
+
         // and, for Heroes only, cannot spend any more Fatigue for movement points
         Boolean noMoreFatigueMovement = true;
         if (actingFigure instanceof Hero) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 noMoreFatigueMovement = false;
             }
+
+            // We also need to check a special case for Grisban's Hero Ability after resting
+            if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition))
+                noMoreActions = noMoreActions && !(HeroAbilities.grisbanCanAct(dgs, (Hero) actingFigure));
         }
 
         if (!(action instanceof EndTurn) && noMoreActions && noMoreMovement && noMoreFatigueMovement) {
-            dgs.getTurnOrder().endPlayerTurn(dgs);
+            EndTurn.endOfTurn(dgs, actingFigure);
         }
 
         /*
@@ -293,17 +356,76 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
 
-        // End turn is always possible
-        actions.add(new EndTurn());
+        // End turn is (almost) always possible
+        // Certain scenarios will need to prevent it from being taken
+        // But they will remove it from the list when required, instead of preventing it here
+        EndTurn endTurn = new EndTurn();
+        actions.add(endTurn);
 
-        // If we have movement points to spend, add move actions
-        if (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0) {
+        // First, we must check if our Figure is a defeated Hero
+        // Defeated Heroes can only perform the StandUp action
+
+        if (actingFigure instanceof Hero && ((Hero) actingFigure).isDefeated())
+        {
+            StandUp standUp = new StandUp();
+            if (standUp.canExecute(dgs)) {
+                actions.add(standUp);
+            }
+            return actions;
+        }
+
+        // Next, we check if we can make a Poisoned or Diseased attribute test
+        // We cannot make any actions before we have taken our attribute tests against these conditions
+        if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease)) {
+            boolean tested = false;
+
+            Diseased diseased = new Diseased(actingFigure.getComponentID(), Figure.Attribute.Willpower);
+            if (diseased.canExecute(dgs)) {
+                actions.add(diseased);
+                tested = true;
+            }
+
+            Poisoned poisoned = new Poisoned(actingFigure.getComponentID(), Figure.Attribute.Might);
+            if (poisoned.canExecute(dgs)) {
+                actions.add(poisoned);
+                tested = true;
+            }
+
+            if (tested)
+                return actions;
+        }
+
+        // Ashrian's Hero Ability
+        // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
+        if (actingFigure instanceof Monster)
+        {
+            HeroAbilities.ashrian(dgs);
+        }
+
+        // If we are stunned, we can only take the 'Stunned' action
+        if (actingFigure.hasCondition(DescentCondition.Stun)) {
+            Stunned stunned = new Stunned();
+            if (stunned.canExecute(dgs)) actions.add(stunned);
+            return actions;
+        }
+
+        // Grisban the Thirsty's Hero Ability
+        // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
+        if (actingFigure instanceof Hero && ((Hero) actingFigure).hasRested())
+            if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition))
+            {
+                actions.addAll(HeroAbilities.grisban(dgs));
+            }
+
+        // If we have made all our Attribute Tests, then we can take our other actions
+        // If we have movement points to spend, and not immobilized, add move actions
+        if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
+                && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
             actions.addAll(moveActions(dgs, actingFigure));
         }
 
-        // TODO: stamina move, not an "action", but same rules for move apply [DONE - Toby]
         // If a hero has stamina to spare, add move actions that cost fatigue
-        if (actingFigure instanceof Hero) {
+        if (actingFigure instanceof Hero && !actingFigure.isOffMap()) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
                 if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
@@ -311,45 +433,79 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // Add actions that cost action points
-        if (!actingFigure.getNActionsExecuted().isMaximum()) {
+        // These can only be taken if we have not already taken 2 actions
+        // Also, the acting figure must be on the map to take them
+        if (!actingFigure.getNActionsExecuted().isMaximum() && !actingFigure.isOffMap()) {
             // Get movement points action
             GetMovementPoints movePoints = new GetMovementPoints();
             if (movePoints.canExecute(dgs)) actions.add(movePoints);
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-            //if (actingFigure.getAttribute())
-            actions.addAll(attackActions(dgs, actingFigure));
 
-            // - Rest
-            if (actingFigure instanceof Hero) {
-                // Only heroes can rest
-                Rest act = new Rest();
-                if (act.canExecute(dgs)) {
-                    actions.add(act);
+            AttackType attackType = getAttackType(actingFigure);
+
+            // Monsters may only perform one attack per activation, so we must check if we have already attacked this turn
+            if (!(actingFigure instanceof Monster && actingFigure.hasAttacked())) {
+                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                    actions.addAll(meleeAttackActions(dgs, actingFigure));
+                }
+                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                    actions.addAll(rangedAttackActions(dgs, actingFigure));
                 }
             }
 
             // - Open/close a door TODO
-            // - Revive hero TODO
 
-            // - Search
+            // Hero Only Actions
+            // Rest
+            // Revive
+            // Search
+            // Heroic Abilities and Feats
             if (actingFigure instanceof Hero) {
-                // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of)
+
+                // Rest
+                Rest act = new Rest();
+                if (act.canExecute(dgs)) {
+                    actions.add(act);
+                }
+
+                // Revive
                 Vector2D loc = actingFigure.getPosition();
                 GridBoard board = dgs.getMasterBoard();
                 List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-                for (DToken token: dgs.tokens) {
+                for (Hero hero : dgs.heroes) {
+                    if (actingFigure.equals(hero)) continue;
+                    if (hero.isDefeated() && hero.getPosition() != null
+                            && (neighbours.contains(hero.getPosition()) || hero.getPosition().equals(loc))) {
+                        Revive revive = new Revive(hero.getComponentID());
+                        if (revive.canExecute(dgs)) {
+                            actions.add(revive);
+                        }
+                    }
+                }
+
+                // Search for adjacent Search tokens (or ones they're sitting on top of)
+                for (DToken token : dgs.tokens) {
                     if (token.getDescentTokenType() == DescentToken.Search
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
-                        for (DescentAction da: token.getEffects()) {
+                        for (DescentAction da : token.getEffects()) {
                             actions.add(da.copy());
                         }
                     }
                 }
+
+                // Avric Albright's Hero Ability
+                // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
+                HeroAbilities.avric(dgs);
             }
 
-            // - Stand up TODO
+            // Get Monster Unique Actions
+            // Monster Actions can only be taken once per turn, if they haven't already attacked yet
+            if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
+            {
+                actions.addAll(monsterActions(dgs, (Monster) actingFigure));
+            }
 
             // - Special (specified by quest)
             if (actingFigure.getAbilities() != null) {
@@ -360,246 +516,293 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     }
                 }
             }
-        }
 
         // TODO: exhaust a card for an action/modifier/effect "free" action
+        }
+
+        // Heroic Feat
+        if (actingFigure instanceof Hero && (((Hero) actingFigure).isFeatAvailable()))
+        {
+            List<DescentAction> heroicFeats = heroicFeatAction(dgs);
+            if(!heroicFeats.isEmpty())
+                actions.addAll(heroicFeats);
+
+            // Tomble Burrowell's Heroic Feat
+            // Prevents End Turn from being taken, to stop him from being stuck as a Token
+            if(actions.contains(new ReturnToMapMove(4)) || actions.contains(new ReturnToMapPlace()))
+                actions.remove(endTurn);
+        }
+
+        // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
+        // This does not cost any action points to take
+        // This action may be used as a free attack, or to Restore 2 Hearts
+        if (dgs.getHeroes().size() == 2) {
+            if (actingFigure instanceof Hero && !actingFigure.hasUsedExtraAction())
+            {
+                Restore restore = new Restore(2);
+                if (restore.canExecute(dgs)) {
+                    actions.add(restore);
+                }
+
+                // TODO: Fix this
+
+                // Free Attack
+                AttackType attackType = getAttackType(actingFigure);
+
+                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                    List<Integer> targets = getMeleeTargets(dgs, actingFigure);
+                    for (Integer target : targets) {
+                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
+                        if (freeAttack.canExecute(dgs)) {
+                            actions.add(freeAttack);
+                        }
+                    }
+                }
+
+                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                    List<Integer> targets = getRangedTargets(dgs, actingFigure);
+                    for (Integer target : targets) {
+                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
+                        if (freeAttack.canExecute(dgs)) {
+                            actions.add(freeAttack);
+                        }
+                    }
+                }
+
+            }
+        }
 
         return actions;
     }
 
-    private HashMap<Vector2D, Pair<Double,List<Vector2D>>> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
-        Vector2D figureLocation = figure.getPosition();
-        BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
-        String figureType = figure.getTokenType();
+    private List<DescentAction> heroicFeatAction(DescentGameState dgs)
+    {
+        List<DescentAction> myFeats = HeroicFeat.getHeroicFeatActions(dgs);
+        if (myFeats != null)
+            return myFeats;
+        return new ArrayList<>();
 
-        //<Board Node, Cost to get there>
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> expandedBoardNodes = new HashMap<>();
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> nodesToBeExpanded = new HashMap<>();
-        HashMap<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = new HashMap<>();
-
-        nodesToBeExpanded.put(figureNode, new Pair<>(0.0, new ArrayList<>()));
-        while (!nodesToBeExpanded.isEmpty()){
-            // Pick a node to expand, and remove it from the map
-            Map.Entry<BoardNode,Pair<Double,List<Vector2D>>> entry = nodesToBeExpanded.entrySet().iterator().next();
-            BoardNode expandingNode = entry.getKey();
-            double expandingNodeCost = entry.getValue().a;
-            List<Vector2D> expandingNodePath = entry.getValue().b;
-            nodesToBeExpanded.remove(expandingNode);
-
-            // Go through all the neighbour nodes
-            HashMap<Integer, Double> neighbours = expandingNode.getNeighbours();
-            for (Integer neighbourID : neighbours.keySet()){
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
-                Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-
-                double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
-                double totalCost = expandingNodeCost + costToMoveToNeighbour;
-                List<Vector2D> totalPath = new ArrayList<>(expandingNodePath);
-                totalPath.add(loc);
-                boolean isFriendly = false;
-                boolean isEmpty = TerrainType.isWalkableTerrain(neighbour.getComponentName());
-
-                PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
-                if (figureOnLocation.value != -1) {
-                    isEmpty = false;
-                    Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
-                    if (figureType.equals(neighbourFigure.getTokenType())) {
-                        isFriendly = true;
-                    }
-                }
-
-                if (isFriendly){
-                    //if the node is friendly and not expanded - add it to the expansion list
-                    if(!expandedBoardNodes.containsKey(neighbour)){
-                        nodesToBeExpanded.put(neighbour, new Pair<>(totalCost, totalPath));
-                    //if the node is friendly and expanded but the cost was higher - add it to the expansion list
-                    } else if (expandedBoardNodes.containsKey(neighbour) && expandedBoardNodes.get(neighbour).a > totalCost){
-                        expandedBoardNodes.remove(neighbour);
-                        nodesToBeExpanded.put(neighbour, new Pair<>(totalCost, totalPath));
-                    }
-                } else if (isEmpty) {
-                    //if the node is empty - add it to adjacentNodeList
-                    if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour).a > totalCost){
-                        allAdjacentNodes.put(neighbour, new Pair<>(totalCost, totalPath));
-                    }
-                }
-                expandedBoardNodes.put(neighbour, new Pair<>(totalCost, totalPath));
-            }
-        }
-
-        //Return list of coordinates
-        HashMap<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentLocations = new HashMap<>();
-        for (BoardNode boardNode : allAdjacentNodes.keySet()){
-            Vector2D loc = ((PropertyVector2D) boardNode.getProperty(coordinateHash)).values;
-            allAdjacentLocations.put(loc, allAdjacentNodes.get(boardNode));
-        }
-
-        return allAdjacentLocations;
+//        switch (actingFigure.getName().replace("Hero: ", ""))
+//        {
+//            // Healer
+//            case "Ashrian":
+//                // Ashrian can choose which Monster Group to target
+//                for (List<Monster> monsters : dgs.getMonsters()) {
+//                    heroicFeat = new StunAllInMonsterGroup(monsters, 3);
+//                    if (heroicFeat.canExecute(dgs))
+//                        heroicFeats.add(heroicFeat);
+//                }
+//                break;
+//            case "Avric Albright":
+//                // Avric heals all allies within 3 spaces
+//                Vector2D position = dgs.getActingFigure().getPosition();
+//                int range = 3;
+//                List<Hero> heroesInRange = new ArrayList<>();
+//                for(Hero hero : dgs.getHeroes()) {
+//                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
+//                        heroesInRange.add(hero);
+//                    }
+//                }
+//                heroicFeat = new HealAllInRange(heroesInRange, 3);
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                break;
+//
+//            // Mage
+//            case "Leoric of the Book":
+//                // Leoric attacks all adjacent monsters with a magic weapon
+//                List<Integer> monsters = getMeleeTargets(dgs, actingFigure);
+//                if (!monsters.isEmpty()) {
+//                    heroicFeat = new AttackAllAdjacent(dgs.getActingFigure().getComponentID(), monsters);
+//                    if (heroicFeat.canExecute(dgs))
+//                        heroicFeats.add(heroicFeat);
+//                }
+//                break;
+//            case "Widow Tarha":
+//                // Tarha attacks two targets with only one attack roll
+//                monsters = getRangedTargets(dgs, actingFigure);
+//                // Get all possible monster pairs available
+//                for (int i = 0; i < monsters.size(); i++) {
+//                    for (int j = i + 1; j < monsters.size(); j++) {
+//                        List<Integer> monsterPair = new ArrayList<>();
+//                        monsterPair.add(monsters.get(i));
+//                        monsterPair.add(monsters.get(j));
+//
+//                        heroicFeat = new DoubleAttack(dgs.getActingFigure().getComponentID(), monsterPair);
+//                        if (heroicFeat.canExecute(dgs))
+//                            heroicFeats.add(heroicFeat);
+//                    }
+//                }
+//                break;
+//
+//            // Scout
+//            case "Jain Fairwood":
+//                // Jain can move double her speed and make an attack at any point during that movement (before, during and after)
+//                heroicFeat = new DoubleMoveAttack((Hero) dgs.getActingFigure());
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                break;
+//            case "Tomble Burrowell":
+//                // Tomble's Heroic Feat comes in three parts
+//                // Remove from Map
+//                heroicFeat = new RemoveFromMap();
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                // Choose where to return to Map (by up to 4 spaces away)
+//                heroicFeat = new ReturnToMapMove(4);
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//
+//                // Return to Map
+//                heroicFeat = new ReturnToMapPlace();
+//                if (heroicFeat.canExecute(dgs))
+//                    heroicFeats.add(heroicFeat);
+//                break;
+//
+//            // Warrior
+//            case "Grisban the Thirsty":
+//                // Grisban can make a free extra attack
+//                monsters = getMeleeTargets(dgs, actingFigure);
+//                for (int monster : monsters) {
+//                    // TODO: Enable check to see if Grisban can used Ranged Attacks (by default he is Melee)
+//                    heroicFeat = new HeroicFeatExtraAttack(dgs.getActingFigure().getComponentID(), monster, true);
+//                    if (heroicFeat.canExecute(dgs))
+//                        heroicFeats.add(heroicFeat);
+//                }
+//                break;
+//            case "Syndrael":
+//                // Syndrael allows her and any ally of her choice within 3 spaces to immediately make a Move action
+//                List<Hero> heroes = dgs.getHeroes();
+//                for (Hero hero : heroes) {
+//                    if (hero == actingFigure)
+//                        continue;
+//                    position = dgs.getActingFigure().getPosition();
+//                    range = 3;
+//                    if (DescentHelper.inRange(position, hero.getPosition(), range)) {
+//                        heroicFeat = new HeroicFeatExtraMovement(actingFigure, hero);
+//                        if (heroicFeat.canExecute(dgs))
+//                            heroicFeats.add(heroicFeat);
+//                    }
+//
+//                }
+//                break;
+//            default:
+//                break;
+//        }
+//        return heroicFeats;
     }
+    private ArrayList<AbstractAction> monsterActions(DescentGameState dgs, Monster actingFigure)
+    {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        for (String action : actingFigure.getActions()) {
+            switch (action.toUpperCase(Locale.ROOT)) {
+                case "HOWL":
 
-    // Pair<final position, final orientation> -> pair<movement cost to get there, list of positions to travel through to get there>
-    private Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> getPossibleRotationsForMoveActions(Map<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentNodes, DescentGameState dgs, Figure figure){
+                    List<Hero> heroes = dgs.getHeroes();
+                    List<Integer> targets = new ArrayList<>();
 
-        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> possibleRotations = new HashMap<>();
+                    Pair<Integer, Integer> size = actingFigure.getSize();
+                    List<BoardNode> attackingTiles = new ArrayList<>();
 
-        // Go through all adjacent nodes
-        for (Map.Entry<Vector2D, Pair<Double,List<Vector2D>>> e : allAdjacentNodes.entrySet()) {
-            Vector2D nodeLoc = e.getKey();
+                    Vector2D currentLocation = actingFigure.getPosition();
+                    BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
-            if (figure.getSize().a > 1 || figure.getSize().b > 1) {
-                // Only monsters can have a size bigger than 1x1
-                Monster m = (Monster) figure;
-                Pair<Integer, Integer> monsterSize = m.getSize();
+                    if (size.a > 1 || size.b > 1)
+                    {
+                        attackingTiles.addAll(getAttackingTiles(actingFigure.getComponentID(), anchorTile, attackingTiles));
+                    }
+                    else {
+                        attackingTiles.add(anchorTile);
+                    }
 
-                // Check all possible orientations with this position as the anchor if figure is bigger than 1x1
-                // If all spaces occupied are legal, then keep valid options
-                for (Monster.Direction d: Monster.Direction.values()) {
-                    Vector2D topLeftCorner = m.applyAnchorModifier(nodeLoc.copy(), d);
-                    Pair<Integer, Integer> mSize = monsterSize.copy();
-                    if (d.ordinal() % 2 == 1) mSize.swap();
-
-                    boolean legal = true;
-                    for (int j = 0; j < mSize.a; j++) {
-                        for (int i = 0; i < mSize.b; i++) {
-                            BoardNode spaceOccupied = dgs.masterBoard.getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
-                            if (spaceOccupied != null) {
-                                PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
-                                if (!TerrainType.isWalkableTerrain(spaceOccupied.getComponentName()) ||
-                                        figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID()) {
-                                    legal = false;
-                                    break;
-                                }
-                            } else {
-                                legal = false;
-                                break;
-                            }
+                    for (BoardNode currentTile : attackingTiles) {
+                        for (Hero h : heroes) {
+                            if (targets.contains(h.getComponentID()))   continue;
+                            Vector2D other = h.getPosition();
+                            if (inRange(((PropertyVector2D) currentTile.getProperty("coordinates")).values, other, 3)) {
+                                targets.add(h.getComponentID());
                         }
                     }
-                    if (legal) {
-                        possibleRotations.put(new Pair<>(nodeLoc, d), e.getValue());
                     }
-                }
-            } else {
-                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.getDefault()), e.getValue());
+
+                    if (!targets.isEmpty()) {
+                        DescentAction howl = new Howl(actingFigure.getComponentID(), targets);
+                        if (howl.canExecute(dgs))
+                            actions.add(howl);
+                    }
+                    break;
+                case "GRAB":
+                    /*DescentAction grab = new Grab();
+                    if (grab.canExecute(dgs))
+                        actions.add(new Grab());
+                    break;
+                case "HEAL":
+                    DescentAction heal = new Heal();
+                    if (heal.canExecute(dgs))
+                        actions.add(new Heal());
+                    break;
+                case "THROW":
+                    DescentAction throwAction = new Throw();
+                    if (throwAction.canExecute(dgs))
+                        actions.add(new Throw());
+                    break;
+                case "AIR":
+                    DescentAction air = new Air();
+                    if (air.canExecute(dgs))
+                        actions.add(new Air());
+                    break;
+                case "EARTH":
+                    DescentAction earth = new Earth();
+                    if (earth.canExecute(dgs))
+                        actions.add(new Earth());
+                    break;
+                case "FIRE":
+                    DescentAction fire = new Fire();
+                    if (fire.canExecute(dgs))
+                        actions.add(new Fire());
+                    break;
+                case "WATER":
+                    DescentAction water = new Water();
+                    if (water.canExecute(dgs))
+                        actions.add(new Water());*/
+                    break;
+                default:
+                    break;
             }
         }
-
-        return possibleRotations;
+        return actions;
     }
 
-    private Map<Vector2D, Pair<Double,List<Vector2D>>> getAllPointOfInterests(DescentGameState dgs, Figure figure){
+    private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {
 
-        ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
-        Map<Vector2D, Pair<Double,List<Vector2D>>> movePointOfInterest = new HashMap<>();
-        if (figure.getTokenType().equals("Monster")) {
-            for (Hero h : dgs.heroes) {
-                pointsOfInterest.add(h.getPosition());
-            }
+        List<Integer> targets = getMeleeTargets(dgs, f);
+        List<MeleeAttack> actions = new ArrayList<>();
 
-        } else if (figure.getTokenType().equals("Hero")) {
-            for (List<Monster> monsterGroup : dgs.monsters) {
-                for (Monster m : monsterGroup) {
-                    pointsOfInterest.add(m.getPosition());
-                }
-            }
-
-            for (DToken dToken : dgs.tokens){
-                if (dToken.getPosition() != null){
-                    pointsOfInterest.add(dToken.getPosition());
-                }
-            }
+        for (Integer target : targets) {
+            actions.add(new MeleeAttack(f.getComponentID(), target));
         }
 
-        //For every point of interest find neighbours that are empty and add then as potential move spots
-        for (Vector2D point : pointsOfInterest){
-            BoardNode figureNode = dgs.masterBoard.getElement(point.getX(), point.getY());
-            Set<Integer> neighbourIDs = figureNode.getNeighbours().keySet();
-            for (Integer neighbourID : neighbourIDs){
-                BoardNode neighbourNode =  (BoardNode) dgs.getComponentById(neighbourID);
-                PropertyInt figureOnLocation = (PropertyInt) neighbourNode.getProperty(playersHash);
-                if (figureOnLocation.value == -1){
-                    Vector2D loc = ((PropertyVector2D) neighbourNode.getProperty(coordinateHash)).values;
-
-                    // TODO: use actual A* instead of 0
-                    //Double movementCost =  a_star_distance(figureNode, neighboutNode)
-                    Double movementCost = 1.0;
-                    List<Vector2D> path = new ArrayList<Vector2D>() {{add(loc);}};  // TODO full path
-                    movePointOfInterest.put(loc, new Pair<>(movementCost, path));
-                }
-            }
-        }
-
-        return movePointOfInterest;
-    }
-
-    private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
-
-        Map<Vector2D, Pair<Double, List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
-        Map<Vector2D, Pair<Double, List<Vector2D>>> allPointOfInterests = getAllPointOfInterests(dgs, f);
-
-//        allAdjacentNodes.putAll(allPointOfInterests);
-
-        // get all potential rotations for the figure
-        Map<Pair<Vector2D, Monster.Direction>, Pair<Double, List<Vector2D>>> allPossibleRotations = getPossibleRotationsForMoveActions(allAdjacentNodes, dgs, f);
-        List<Move> actions = new ArrayList<>();
-        for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()) {
-            if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
-                Move myMoveAction = new Move(allPossibleRotations.get(loc).b, loc.b);
-                myMoveAction.updateDirectionID(dgs);
-                actions.add(myMoveAction);
-            }
-        }
-
-        // Sorts the movement actions to always be in the same order (Clockwise NW to W, One Space then Multiple Spaces)
-        Collections.sort(actions, Comparator.comparingInt(Move::getDirectionID));
+        Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
 
         List<AbstractAction> sortedActions = new ArrayList<>();
+
         sortedActions.addAll(actions);
 
         return sortedActions;
     }
 
-    private List<AbstractAction> attackActions(DescentGameState dgs, Figure f) {
-        List<MeleeAttack> actions = new ArrayList<>();
-        Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-        // Find valid neighbours in master graph - used for melee attacks
-        for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
-            BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
-            if (neighbour == null) continue;
-            Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if ( neighbourID != -1 ) {
-                Figure other = (Figure)dgs.getComponentById(neighbourID);
-                if (f instanceof Monster && other instanceof Hero) {
-                    // Monster attacks a hero
-                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
-                }
-                else if (f instanceof Hero && other instanceof Monster)
-                {
-                    // Player attacks a monster
 
-                    // Make sure that the Player only gets one instance of attacking the monster
-                    // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                    boolean canAdd = true;
-                    for (MeleeAttack action : actions)
-                    {
-                        if (other.getComponentID() == action.getDefendingFigure())
-                        {
-                            // If an attack action on the same enemy already exists, this prevents a duplicate from being added
-                            canAdd = false;
-                        }
-                    }
 
-                    if (canAdd)
-                    {
-                        actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
-                    }
-                }
-            }
+    private List<AbstractAction> rangedAttackActions(DescentGameState dgs, Figure f) {
+
+        List<Integer> targets = getRangedTargets(dgs, f);
+        List<RangedAttack> actions = new ArrayList<>();
+
+        for (Integer target : targets) {
+            actions.add(new RangedAttack(f.getComponentID(), target));
         }
 
-        Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
+        Collections.sort(actions, Comparator.comparingInt(RangedAttack::getDefendingFigure));
 
         List<AbstractAction> sortedActions = new ArrayList<>();
 
@@ -620,7 +823,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
-                System.out.println("Victory!");
+                if (condition.getString(dgs).contains("Heroes: WIN_GAME"))
+                    System.out.println("Victory! The Heroes win!");
+                else
+                    System.out.println("Defeat! The Overlord wins!");
                 List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
                 List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
                 List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
@@ -700,7 +906,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board
-        BoardNode firstTile = config.getBoardNodes().get(0);
+        BoardNode firstTile = config.getBoardNodes().iterator().next();
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = tileConfigs.get(firstTile.getComponentID());
@@ -842,8 +1048,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             drawn.put(parentTile, tileToAdd);
 
             // Draw neighbours
-            for (int neighbourCompId: tileToAdd.getNeighbours().keySet()) {
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompId);
+            for (BoardNode neighbour: tileToAdd.getNeighbours().keySet()) {
 
                 // Find location to start drawing neighbour
                 Pair<String, Vector2D> connectionToNeighbour = findConnection(tileToAdd, neighbour, findOpenings(tileGrid));
@@ -1164,6 +1369,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd, int nActionsPerFigure) {
         dgs.monsters = new ArrayList<>();
+        dgs.monstersOriginal = new ArrayList<>();
+        dgs.monstersPerGroup = new ArrayList<>();
+        dgs.monsterGroups = new ArrayList<>();
         List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
@@ -1179,7 +1387,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // TODO: this could be adding/removing abilities too
             // Check attribute modifiers
-            // Map from who (all/minion/master) -> list of modifiers in pairs (Atribute, howMuch)
+            // Map from who (all/minion/master) -> list of modifiers in pairs (Attribute, howMuch)
             HashMap<String, ArrayList<Pair<Figure.Attribute, Integer>>> attributeModifiers = new HashMap<>();
             if (mDef.length > 2) {
                 String mod = mDef[2];
@@ -1197,11 +1405,31 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
 
-            // Always 1 master
+            // When playing with only 2 Heroes, some stronger monsters only spawn 1 Minion, with no Master
+            // These are arrayed as [1, 0, 1] in the monster definition
+            // So we check if there are only 2 Heroes (minimum 3 players - 2 Hero players and Overlord player)
+            // If that is the case, we do not spawn a Master
+            // Otherwise, there is always 1 Master
+
+            boolean spawnMaster = true;
+
+            if ((dgs.getNPlayers() <= 3 && monsterSetup[1] == 0)) {
+                spawnMaster = false;
+            }
             Monster master = monsterDef.get(act + "-master").copyNewID();
             master.getNActionsExecuted().setMaximum(nActionsPerFigure);
             master.setProperties(monsterDef.get(act + "-master").getProperties());
             master.setComponentName(name + " master");
+
+            PropertyStringArray passives = (PropertyStringArray) master.getProperty("passive");
+            if(passives != null)
+                master.setPassivesAndSurges(passives.getValues());
+
+            PropertyStringArray actions = ((PropertyStringArray) master.getProperty("action"));
+            if (actions != null) {
+                master.setActions(actions.getValues());
+            }
+
             if (attributeModifiers.containsKey("master")) {
                 for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("master")) {
                     master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
@@ -1212,9 +1440,20 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
                 }
             }
-            placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
-            master.setOwnerId(dgs.overlordPlayer);
-            monsterGroup.add(master);
+
+            for (Surge surge: master.getSurges())
+            {
+                master.addAbility(new SurgeAttackAction(surge, master.getComponentID()));
+            }
+
+
+            // Don't spawn the Master monster if we're only supposed to spawn 1 Minion only
+            if (spawnMaster)
+            {
+                placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
+                master.setOwnerId(dgs.overlordPlayer);
+                monsterGroup.add(master);
+            }
 
             // How many minions?
             int nMinions;
@@ -1236,24 +1475,44 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 Monster minion = monsterDef.get(act + "-minion").copyNewID();
                 minion.setProperties(monsterDef.get(act + "-minion").getProperties());
                 minion.setComponentName(name + " minion");
+
+                passives = (PropertyStringArray) minion.getProperty("passive");
+                if(passives != null)
+                    minion.setPassivesAndSurges(passives.getValues());
+
+                actions = ((PropertyStringArray) minion.getProperty("action"));
+                if (actions != null)
+                    minion.setActions(actions.getValues());
+
+                for (Surge surge: minion.getSurges())
+                {
+                    minion.addAbility(new SurgeAttackAction(surge, minion.getComponentID()));
+                }
+
                 placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
                 minion.setOwnerId(dgs.overlordPlayer);
                 minion.getNActionsExecuted().setMaximum(nActionsPerFigure);
-                monsterGroup.add(minion);
                 if (attributeModifiers.containsKey("minion")) {
                     for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("minion")) {
-                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
                 if (attributeModifiers.containsKey("all")) {
                     for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
-                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                        minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
+                monsterGroup.add(minion);
             }
-
             dgs.monsters.add(monsterGroup);
+            dgs.monstersOriginal.add(monsterGroup);
+            dgs.monstersPerGroup.add(monsterGroup.size());
+            dgs.monsterGroups.add(name);
         }
+
+        //System.out.println(dgs.monsters.get(0).get(1).getSurges());
+        //System.out.println(dgs.monstersOriginal);
+        //System.out.println(dgs.monstersPerGroup);
     }
 
     /**
@@ -1306,46 +1565,5 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
         }
-    }
-
-    private boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
-
-        boolean hasLineOfSight = true;
-        ArrayList<Vector2D> containedPoints = LineOfSight.bresenhamsLineAlgorithm(startPoint, endPoint);
-
-
-        // For each coordinate in the line, check:
-        // 1) Does the coordinate have it's board node
-        // 2) Is the board node empty (no character on location)
-        // 3) Is the board node connected to previously checked board node
-        // If any of these are false, then there is no LOS
-        for (int i = 1; i < containedPoints.size(); i++){
-
-            Vector2D previousPoint = containedPoints.get(i - 1);
-            Vector2D point = containedPoints.get(i);
-
-            // Check 1) Does the board node exist at this coordinate
-            BoardNode currentTile = dgs.masterBoard.getElement(point.getX(), point.getY());
-            if (currentTile == null){
-                hasLineOfSight = false;
-                break;
-            }
-
-            // Check 2) Is the board node empty
-            Integer owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
-            if (owner != -1 && i != containedPoints.size() - 1){
-                hasLineOfSight = false;
-                break;
-            }
-
-            // Check 3) Is the board node connected to previous board node
-            BoardNode previousTile = dgs.masterBoard.getElement(previousPoint.getX(), previousPoint.getY());
-            if (!previousTile.getNeighbours().keySet().contains(currentTile.getComponentID())){
-                hasLineOfSight = false;
-                break;
-            }
-        }
-
-        return hasLineOfSight;
     }
 }

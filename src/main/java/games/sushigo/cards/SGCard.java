@@ -2,6 +2,7 @@ package games.sushigo.cards;
 
 import core.components.Card;
 import core.components.Counter;
+import evaluation.metrics.Event;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 
@@ -110,7 +111,7 @@ public class SGCard extends Card {
                     for (Integer mostPlayer : mostPlayers) {
                         gs.addPlayerScore(mostPlayer, mostScore, Maki);
                         if (gs.getCoreGameParameters().recordEventHistory) {
-                            gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
+                            gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
                         }
                     }
                 }
@@ -120,7 +121,7 @@ public class SGCard extends Card {
                     for (Integer secondPlayer : secondPlayers) {
                         gs.addPlayerScore(secondPlayer, secondScore, Maki);
                         if (gs.getCoreGameParameters().recordEventHistory) {
-                            gs.logEvent("Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
+                            gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
                         }
                     }
                 }
@@ -161,7 +162,7 @@ public class SGCard extends Card {
                         for (Integer mostPlayer : mostPlayers) {
                             gs.addPlayerScore(mostPlayer, mostScore, Pudding);
                             if (gs.getCoreGameParameters().recordEventHistory) {
-                                gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
+                                gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
                             }
                         }
                     }
@@ -171,7 +172,7 @@ public class SGCard extends Card {
                         for (Integer leastPlayer : leastPlayers) {
                             gs.addPlayerScore(leastPlayer, leastScore, Pudding);
                             if (gs.getCoreGameParameters().recordEventHistory) {
-                                gs.logEvent("Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
+                                gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
                             }
                         }
                     }

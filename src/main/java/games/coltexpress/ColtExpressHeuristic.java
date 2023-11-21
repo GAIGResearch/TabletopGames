@@ -2,10 +2,9 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
-import utilities.Utils;
 
 public class ColtExpressHeuristic extends TunableParameters implements IStateHeuristic {
 

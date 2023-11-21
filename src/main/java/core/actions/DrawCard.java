@@ -64,7 +64,6 @@ public class DrawCard extends AbstractAction {
         return false;
     }
 
-    @Override
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
             if (fromIndex == -1) return null;

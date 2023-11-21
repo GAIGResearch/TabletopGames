@@ -107,25 +107,42 @@ public class DBGameState extends AbstractGameState {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        int result = Objects.hash(gameParameters);
-        sb.append(result).append("|");
-        result = Objects.hash(getAllComponents());
-        sb.append(result).append("|");
-        result = Objects.hash(gameStatus);
-        sb.append(result).append("|");
-        result = Objects.hash(gamePhase);
-        sb.append(result).append("|");
-        result = Arrays.hashCode(playerResults);
-        sb.append(result).append("|*|");
-        result = Arrays.hashCode(nCellsPerPlayer);
-        sb.append(result).append("|");
-        result = Objects.hashCode(cellToOwnerMap);
-        sb.append(result).append("|");
-        result = Objects.hashCode(edgeToOwnerMap);
-        sb.append(result).append("|");
-        result = Objects.hashCode(lastActionScored);
-        sb.append(result).append("|");
+        sb.append("{");
 
+        int i = 0;
+
+        for (DBEdge e: edges) {
+            if (i++ != 0) {
+                sb.append(",");
+            }
+            int owner = -1;
+            if (edgeToOwnerMap.get(e) != null) {
+                owner = edgeToOwnerMap.get(e);
+            }
+            sb.append("\"").append("Edge_Owner_").append(e.from.getX()).append("_").append(e.from.getY()).
+                    append(e.to.getX()).append(e.to.getY()).append("\":").append(owner);
+        }
+
+        for (DBCell c: cells) {
+            sb.append(",");
+            int owner = -1;
+            if (cellToOwnerMap.get(c) != null) {
+                owner = cellToOwnerMap.get(c);
+            }
+            sb.append("\"").append("Cell_Owner_").append(c.position.getX()).append("_").append(c.position.getY()).append("\":").append(owner);
+            sb.append(",");
+
+            int edgeCount = 0;
+
+            for (DBEdge e : cellToEdgesMap.get(c)) {
+                if (edgeToOwnerMap.get(e) != null) {
+                    edgeCount++;
+                }
+            }
+            sb.append("\"").append("Cell_Edge_Count_").append(c.position.getX()).append("_").append(c.position.getY()).append("\":").append(edgeCount);
+        }
+
+        sb.append("}");
         return sb.toString();
     }
 

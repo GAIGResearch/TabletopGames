@@ -3,6 +3,7 @@ package games.descent2e.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.GridBoard;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
@@ -19,30 +20,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static utilities.Utils.getNeighbourhood;
+
 public class Move extends AbstractAction {
     final List<Vector2D> positionsTraveled;
     final Monster.Direction orientation;
     private Vector2D startPosition;
 
+    private Figure f;
+
     public int directionID;
 
-    public Move(List<Vector2D> whereTo) {
+    public Move(Figure f, List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
         this.orientation = Monster.Direction.DOWN;
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
+        this.f = f;
     }
-    public Move(List<Vector2D> whereTo, Monster.Direction finalOrientation) {
+    public Move(Figure f, List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
+        this.f = f;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
-        Figure f = ((DescentGameState) gs).getActingFigure();
+        //Figure f = ((DescentGameState) gs).getActingFigure();
         startPosition = f.getPosition();
         // Remove from old position
         remove(dgs, f);
@@ -54,6 +61,7 @@ public class Move extends AbstractAction {
             moveThrough(dgs, f, positionsTraveled.get(i), place, orientation);
         }
 
+        f.setHasMoved(true);
 
         return true;
     }
@@ -92,7 +100,13 @@ public class Move extends AbstractAction {
             DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
             if (terrain != null) {
                 for (Map.Entry<Figure.Attribute, Integer> e : terrain.getMoveCosts().entrySet()) {
-                    f.incrementAttribute(e.getKey(), -e.getValue());
+                    // If, for whatever reason, our MovePoints are higher than our max (e.g. Heroic Feat), we simply subtract the cost
+                    // Rather than decrement their value, which instead clamps it between the Min and the Max values
+                    if (f.getAttribute(e.getKey()).getValue() > f.getAttributeMax(e.getKey())) {
+                        f.setAttribute(e.getKey(), f.getAttribute(e.getKey()).getValue() - e.getValue());
+                    }
+                    else
+                        f.decrementAttribute(e.getKey(), e.getValue());
                 }
             }
         }
@@ -139,6 +153,72 @@ public class Move extends AbstractAction {
         }
     }
 
+    public static void replace (DescentGameState dgs, Figure f)
+    {
+        f.setOffMap(false);
+
+        Monster.Direction orientation = Monster.Direction.DOWN;
+        if (f instanceof Monster)
+            orientation = ((Monster) f).getOrientation();
+
+        Vector2D position = f.getPosition();
+
+        BoardNode baseSpace = dgs.getMasterBoard().getElement(position.getX(), position.getY());
+        // If the original space is empty, or is occupied by this figure, we can just place the figure there
+        int player = ((PropertyInt) baseSpace.getProperty("players")).value;
+
+        if (player == -1 || player == f.getComponentID()) {
+            place(dgs, f, position, orientation);
+            return;
+        }
+
+        List<Vector2D> possibilities = new ArrayList<>();
+        // Otherwise, we need to find the nearest adjacent space that is empty
+        GridBoard board = dgs.getMasterBoard();
+        List<Vector2D> neighbours = getNeighbourhood(position.getX(), position.getY(), board.getWidth(), board.getHeight(), true);
+        for (Vector2D neighbour : neighbours) {
+            BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
+            if (node != null) {
+                // Check if there are no figures on the space, and that it is walkable
+                if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && ((PropertyInt) node.getProperty("players")).value == -1) {
+                    possibilities.add(neighbour);
+                }
+            }
+        }
+        if (possibilities.isEmpty())
+        {
+            List<Vector2D> neighboursOfNeighbours = new ArrayList<>();
+            for (Vector2D neighbour : neighbours) {
+                List<Vector2D> uniqueNeighbours = getNeighbourhood(neighbour.getX(), neighbour.getY(), board.getWidth(), board.getHeight(), true);
+                uniqueNeighbours.removeIf(neighboursOfNeighbours::contains);
+                neighboursOfNeighbours.addAll(uniqueNeighbours);
+            }
+            neighboursOfNeighbours.removeIf(neighbours::contains);
+            for (Vector2D neighbour : neighboursOfNeighbours)
+            {
+                BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
+                // Check if there are no figures on the space, and that it is walkable
+                if (node != null) {
+                    if (((PropertyInt) node.getProperty("players")).value == -1 && DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName())) {
+                        possibilities.add(neighbour);
+                    }
+                }
+            }
+        }
+
+        // TODO The game should check more than just two spaces away for possibilities, but this is just a proof of concept for now
+        if (possibilities.isEmpty())
+        {
+            throw new AssertionError("No empty spaces found to place figure!");
+        }
+        else
+        {
+            // TODO The player should be allowed to choose which position they place themselves on
+            // But for now, we'll just place them on the first available space
+            place(dgs, f, possibilities.get(0), orientation);
+        }
+    }
+
     /**
      * Moves to final destination space, where all spaces need to be occupied correctly.
      * @param dgs - game state
@@ -181,7 +261,13 @@ public class Move extends AbstractAction {
         // Large monsters pay the minimum cost only, other figures are 1 tile wide, looking at min terrain only
         if (minTerrain != null) {
             for (Map.Entry<Figure.Attribute, Integer> e : minTerrain.getMoveCosts().entrySet()) {
-                f.incrementAttribute(e.getKey(), -e.getValue());
+                // If, for whatever reason, our MovePoints are higher than our max (e.g. Heroic Feat), we simply subtract the cost
+                // Rather than decrement their value, which instead clamps it between the Min and the Max values
+                if (f.getAttribute(e.getKey()).getValue() > f.getAttributeMax(e.getKey())) {
+                    f.setAttribute(e.getKey(), f.getAttribute(e.getKey()).getValue() - e.getValue());
+                }
+                else
+                    f.decrementAttribute(e.getKey(), e.getValue());
             }
         }
     }
@@ -192,7 +278,7 @@ public class Move extends AbstractAction {
         for (Vector2D pos: positionsTraveled) {
             posTraveledCopy.add(pos.copy());
         }
-        return new Move(posTraveledCopy, orientation);
+        return new Move(f, posTraveledCopy, orientation);
     }
 
     @Override
@@ -200,17 +286,17 @@ public class Move extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof Move)) return false;
         Move move = (Move) o;
-        return orientation == move.orientation && Objects.equals(positionsTraveled, move.positionsTraveled);
+        return f == move.f && orientation == move.orientation && Objects.equals(positionsTraveled, move.positionsTraveled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(positionsTraveled, orientation);
+        return Objects.hash(f, positionsTraveled, orientation);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Figure f = ((DescentGameState) gameState).getActingFigure();
+        //Figure f = ((DescentGameState) gameState).getActingFigure();
         List<Vector2D> move = positionsTraveled;
 
         if (startPosition.equals(new Vector2D(0,0)))
@@ -301,7 +387,7 @@ public class Move extends AbstractAction {
         // If directionID is unset, update it
         if (directionID == -1)
         {
-            Figure f = ((DescentGameState) gameState).getActingFigure();
+            //Figure f = ((DescentGameState) gameState).getActingFigure();
             List<Vector2D> move = positionsTraveled;
 
             if (startPosition.equals(new Vector2D(0,0)))

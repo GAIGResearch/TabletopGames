@@ -7,6 +7,7 @@ import games.sushigo.cards.SGCard;
 import javax.swing.*;
 
 import java.awt.*;
+import java.util.Set;
 
 import static games.sushigo.gui.SGGUIManager.*;
 
@@ -27,13 +28,13 @@ public class SGPlayerView extends JComponent {
 
     SGGameState gs;
 
-    public SGPlayerView(Deck<SGCard> deck, Deck<SGCard> playDeck, int playerId, int humanId, String dataPath)
+    public SGPlayerView(Deck<SGCard> deck, Deck<SGCard> playDeck, int playerId, Set<Integer> humanId, String dataPath)
     {
         this.width = playerAreaWidth + border*20;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
-        this.playerHandView = new SGDeckView(humanId, deck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
-        this.playedCardsView = new SGDeckView(humanId, playDeck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
+        this.playerHandView = new SGDeckView(playerId, deck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
+        this.playedCardsView = new SGDeckView(playerId, playDeck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
         this.pointsText = new JLabel(0 + " points");
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         add(playerHandView);

@@ -3,7 +3,7 @@ package games.dicemonastery;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.dicemonastery.components.Monk;
 
 import java.util.Arrays;

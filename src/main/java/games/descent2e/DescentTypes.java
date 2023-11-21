@@ -187,6 +187,7 @@ public class DescentTypes {
         }
     }
 
+    // TODO: Necromancer, Spiritspeaker, Knight and Wildlander are all included in the base game
     public enum HeroClass {
         Runemaster (Archetype.Mage),
 //        Necromancer (Archetype.Mage),
@@ -245,7 +246,7 @@ public class DescentTypes {
     }
 
     public enum AttackType {
-        NONE, MELEE, RANGED, BLAST;
+        NONE, MELEE, RANGED, BLAST, BOTH;
     }
 
 }

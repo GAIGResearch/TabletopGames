@@ -15,7 +15,6 @@ public class RMHCPlayer extends AbstractPlayer {
     RMHCParams params;
     private Individual bestIndividual;
     private final Random randomGenerator;
-    IStateHeuristic heuristic;
 
     // Budgets
     private double avgTimeTaken = 0, acumTimeTaken = 0;
@@ -30,7 +29,6 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer(RMHCParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
-        heuristic = params.gameHeuristic;
         setName("RMHC");
     }
 
@@ -40,21 +38,18 @@ public class RMHCPlayer extends AbstractPlayer {
 
     public RMHCPlayer(IStateHeuristic heuristic) {
         this(System.currentTimeMillis());
-        this.heuristic = heuristic;
     }
 
     public RMHCPlayer(RMHCParams params, IStateHeuristic heuristic) {
         this(params);
-        this.heuristic = heuristic;
     }
 
     public RMHCPlayer(long seed, IStateHeuristic heuristic) {
         this(new RMHCParams(seed));
-        this.heuristic = heuristic;
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> possibleActions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         avgTimeTaken = 0;
         acumTimeTaken = 0;
@@ -63,7 +58,7 @@ public class RMHCPlayer extends AbstractPlayer {
         copyCalls = 0;
 
         // Initialise individual
-        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic);
+        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, params.getHeuristic());
         fmCalls += bestIndividual.length;
 
         // Run evolution

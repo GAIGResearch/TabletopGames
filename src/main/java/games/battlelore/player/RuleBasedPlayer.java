@@ -6,11 +6,11 @@ import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.actions.AttackUnitsAction;
-import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
+
 import java.util.List;
 import java.util.Random;
 
@@ -65,7 +65,6 @@ public class RuleBasedPlayer extends AbstractPlayer
         }
 
         AbstractAction selectedAction;
-
             for (AbstractAction action : actions) {
                 if (action instanceof AttackUnitsAction) {
                     //Aggressive Gameplay

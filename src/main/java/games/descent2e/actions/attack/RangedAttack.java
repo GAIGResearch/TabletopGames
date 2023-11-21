@@ -2,17 +2,61 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.abilities.NightStalker;
+import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import utilities.Distance;
-import utilities.Vector2D;
+
+import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
  *   This works in exactly the same way as a Melee Attack
  *   Except that there is a different definition of 'missed' that takes into account the range rolled on the dice
  */
 public class RangedAttack extends MeleeAttack {
+
+    // How many tiles we check at maximum for Ranged Attacks
+    public static final int MAX_RANGE = 10;
+
     public RangedAttack(int attackingFigure, int defendingFigure) {
         super(attackingFigure, defendingFigure);
+    }
+
+    @Override
+    public boolean execute(DescentGameState state) {
+        state.setActionInProgress(this);
+        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
+        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
+
+        phase = PRE_ATTACK_ROLL;
+        interruptPlayer = attackingPlayer;
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        DicePool attackPool = attacker.getAttackDice();
+        DicePool defencePool = defender.getDefenceDice();
+
+        state.setAttackDicePool(attackPool);
+        state.setDefenceDicePool(defencePool);
+
+        if (defender instanceof Monster) {
+            if (((Monster) defender).hasPassive("NightStalker"))
+            {
+                NightStalker.addNightStalker(state, attacker, defender);
+            }
+        }
+
+        super.movePhaseForward(state);
+
+        attacker.getNActionsExecuted().increment();
+        attacker.setHasAttacked(true);
+
+        return true;
+    }
+
+    @Override
+    void executePhase(DescentGameState state) {
+        super.executePhase(state);
     }
 
     @Override
@@ -52,7 +96,19 @@ public class RangedAttack extends MeleeAttack {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RangedAttack) {
+            return super.equals(obj);
+        }
+        return false;
+    }
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
     public String toString() {
-        return String.format("Ranged Attack (Wpn: %d on %d", attackingPlayer, attackingFigure);
+        return String.format("Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }
 }

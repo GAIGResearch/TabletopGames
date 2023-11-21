@@ -29,11 +29,11 @@ public abstract class StandardForwardModelWithTurnOrder extends AbstractForwardM
         if (currentState.actionsInProgress.size() > 0) {
             IExtendedSequence topOfStack = currentState.actionsInProgress.pop();
             if (topOfStack != action) {
-                topOfStack.registerActionTaken(currentState, action);
+                topOfStack._afterAction(currentState, action);
             } else {
                 if (currentState.actionsInProgress.size() > 0) {
                     IExtendedSequence nextOnStack = currentState.actionsInProgress.peek();
-                    nextOnStack.registerActionTaken(currentState, action);
+                    nextOnStack._afterAction(currentState, action);
                 }
             }
             currentState.actionsInProgress.push(topOfStack);

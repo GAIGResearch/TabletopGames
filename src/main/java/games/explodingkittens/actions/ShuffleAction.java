@@ -48,6 +48,18 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
     }
 
     @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof ShuffleAction)) return false;
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + 293792;
+    }
+
+    @Override
     public void printToConsole(AbstractGameState gameState) {
         System.out.println(this.toString());
     }

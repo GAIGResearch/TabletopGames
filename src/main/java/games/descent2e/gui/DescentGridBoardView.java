@@ -54,6 +54,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
     int panX, panY;
     double scale;
     Set<Vector2D> actionHighlights;
+    int attackTarget = -1;
     Color highlightColor = Color.green; //new Color(207, 75, 220);
     Stroke highlightStroke = new BasicStroke(3);
     int maxHighlights = 3;
@@ -124,6 +125,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                 updateScale(scale + amount);
             }
             actionHighlights.clear();
+            attackTarget = -1;
             cellHighlight = null;
         });
         addMouseListener(new MouseAdapter() {
@@ -147,6 +149,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                     panY += (int)(scale * (end.y - start.y));
                     start = null;
                     actionHighlights.clear();
+                    attackTarget = -1;
                     cellHighlight = null;
                 }
             }
@@ -155,6 +158,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3 || actionHighlights.size() >= maxHighlights) {
                     actionHighlights.clear();
+                    attackTarget = -1;
                     cellHighlight = null;
                 }
                 if (e.getButton() == MouseEvent.BUTTON1) {
@@ -259,6 +263,21 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                     BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
                     g.drawImage(imgToDraw, offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, null);
 
+                    if (gameState.getActingFigure().equals(m)) {
+                        g.setStroke(highlightStroke);
+                        g.setColor(highlightColor);
+                        // Check if facing Up/Down or Left/Right to draw correctly
+                        if (m.getOrientation().ordinal() % 2 == 0) {
+                            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.a, size.b);
+                        }
+                        else {
+                            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, size.b, size.a);
+                        }
+                    } else {
+                        g.setColor(Color.black);
+                    }
+                    g.setStroke(s);
+
                     int health = m.getAttributeValue(Figure.Attribute.Health);
                     int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
                     g.setColor(Color.red);
@@ -277,6 +296,28 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
             g.fillRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
             g.setColor(Color.black);
             g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
+        }
+
+        // Draw attack target
+        if (attackTarget != -1) {
+
+            Figure target = (Figure) gameState.getComponentById(attackTarget);
+
+            int xC = offset + panX + target.getPosition().getX() * descentItemSize;
+            int yC = offset + panY + target.getPosition().getY() * descentItemSize;
+
+            // Get the size of the monster, and scale according to item size
+            Pair<Integer, Integer> size = target.getSize().copy();
+            size.a *= descentItemSize;
+            size.b *= descentItemSize;
+
+            g.setColor(Color.red);
+            if (target instanceof Monster && ((Monster) target).getOrientation().ordinal() % 2 == 1) {
+                g.drawOval(xC, yC, size.b, size.a);
+            }
+            else {
+                g.drawOval(xC, yC, size.a, size.b);
+            }
         }
 
         // Draw selected cell highlight
@@ -370,8 +411,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
 
                     // Check if this node is a connected neighbour
                     boolean connected = false;
-                    for (int nnid : bn.getNeighbours().keySet()) {
-                        BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+                    for (BoardNode nn : bn.getNeighbours().keySet()) {
                         if (nn == null) continue;
                         Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
                         if (location.equals(n)) {
@@ -426,14 +466,13 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         // Draw underlying graph
         g.setColor(Color.green);
         Stroke s = g.getStroke();
-        for (int nnid : bn.getNeighbours().keySet()) {
-            BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+        for (BoardNode nn : bn.getNeighbours().keySet()) {
             if (nn == null) continue;
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
             int xC2 = offsetX + location.getX() * descentItemSize;
             int yC2 = offsetY + location.getY() * descentItemSize;
 
-            g.setStroke(new BasicStroke((float) bn.getNeighbourCost(nnid)));
+            g.setStroke(new BasicStroke((float) bn.getNeighbourCost(nn)));
             g.drawLine(xC + descentItemSize /2, yC + descentItemSize /2, xC2 + descentItemSize /2, yC2 + descentItemSize /2);
         }
         g.setColor(Color.black);
@@ -454,7 +493,12 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
     @Override
     public void clearHighlights() {
         actionHighlights.clear();
+        attackTarget = -1;
         cellHighlight = null;
+    }
+
+    public int getAttackTarget() {
+        return attackTarget;
     }
 
     public Vector2D getCellHighlight() {

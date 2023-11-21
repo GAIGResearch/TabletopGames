@@ -64,7 +64,7 @@ public class GTExtendedSequenceAction extends AbstractAction implements IExtende
      * @param action The action about to be taken (so the game state has not yet been updated with it)
      */
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
     }
 

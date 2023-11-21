@@ -78,7 +78,7 @@ public class Bandit extends DominionAttackAction {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (action instanceof TrashCard && ((TrashCard) action).player == currentTarget)
             cardTrashed = true;
     }

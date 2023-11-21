@@ -52,13 +52,6 @@ public class Distance {
         return ret;
     }
 
-    public static double manhattan_distance(Vector2D x, Vector2D y) {
-        return manhattan_distance(
-                new int[]{x.getX(), x.getY()},
-                new int[]{y.getX(), y.getY()}
-        );
-    }
-
     public static double manhattan_distance(int[] x, int[] y) {
         if (x.length != y.length)
             throw new IllegalArgumentException(String.format("Arrays have different length: x[%d], y[%d]", x.length, y.length));
@@ -68,6 +61,9 @@ public class Distance {
             ret += Math.abs(x[i] - y[i]);
         }
         return ret;
+    }
+    public static double manhattan_distance(Vector2D x, Vector2D y) {
+        return Math.abs(x.getX()-y.getX()) + Math.abs(x.getY()-y.getY());
     }
 
     /**

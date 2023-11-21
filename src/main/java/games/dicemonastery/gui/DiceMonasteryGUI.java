@@ -16,6 +16,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -36,9 +37,8 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
     List<PlayerBoard> playerBoards;
     MainBoard mainBoard;
 
-    public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, int humanID) {
+    public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, Set<Integer> humanID) {
         super(p, game, ac, humanID);
-        this.humanId = humanID;
 
         if (game != null && game.getGameState() != null) {
             AbstractGameState gameState = game.getGameState();
@@ -89,7 +89,7 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dice Monastery", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+            JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
             // Add all views to frame
             parent.add(mainGameArea, BorderLayout.CENTER);

@@ -85,7 +85,7 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
 
     }
 

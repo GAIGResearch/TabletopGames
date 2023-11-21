@@ -3,7 +3,7 @@ package gui;
 import core.*;
 import core.actions.AbstractAction;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;
 import gui.models.AITableModel;
@@ -437,6 +437,9 @@ public class Frontend extends GUI {
         wrapper.add(gamePanel);
 
         getContentPane().add(wrapper, BorderLayout.CENTER);
+        gamePanel.revalidate();
+        gamePanel.setVisible(true);
+        gamePanel.repaint();
 
         // Frame properties
         setFrameProperties();
@@ -504,7 +507,7 @@ public class Frontend extends GUI {
         if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            nextPlayer.getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
+            nextPlayer.getAction(state, nextPlayer.getForwardModel().computeAvailableActions(state, nextPlayer.getParameters().actionSpace));
 
             JFrame AI_debug = new JFrame();
             AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",
@@ -517,7 +520,7 @@ public class Frontend extends GUI {
                 AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());
                 JTable table = new JTable(AIDecisions);
                 table.setAutoCreateRowSorter(true);
-                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel(String.format("%.2f", value)));
+                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel(String.format("%.2f", (Double) value)));
                 JScrollPane scrollPane = new JScrollPane(table);
                 table.setFillsViewportHeight(true);
                 AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -554,6 +557,7 @@ public class Frontend extends GUI {
             }
             if (!gameRunning.isHumanToMove())
                 humanInputQueue.reset(); // clear out any actions clicked before their turn
+            frame.revalidate();
             frame.repaint();
         }
     }

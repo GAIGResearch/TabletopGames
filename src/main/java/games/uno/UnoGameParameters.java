@@ -2,7 +2,7 @@ package games.uno;
 
 import core.AbstractParameters;
 import core.Game;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.Arrays;
@@ -42,6 +42,7 @@ public class UnoGameParameters extends TunableParameters {
     public int nWildPoints = 50;
     public int nWildDrawPoints = 50;
     public int nWinPoints = 500;
+    public int maxTurnsPerRound = 300;
 
     public UnoGameParameters(long seed) {
         super(seed);

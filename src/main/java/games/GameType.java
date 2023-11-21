@@ -23,10 +23,20 @@ import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
 import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.hanabi.HanabiForwardModel;
+import games.hanabi.HanabiGameState;
+import games.hanabi.HanabiParameters;
+import games.hanabi.gui.HanabiGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
+import games.puertorico.*;
+import games.puertorico.gui.PuertoRicoGUI;
+import games.resistance.ResForwardModel;
+import games.resistance.ResGameState;
+import games.resistance.ResParameters;
+import games.resistance.gui.ResGUIManager;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -43,6 +53,10 @@ import games.uno.gui.*;
 import games.virus.*;
 import games.dicemonastery.*;
 import games.dominion.*;
+import games.wonders7.Wonders7ForwardModel;
+import games.wonders7.Wonders7GameParameters;
+import games.wonders7.Wonders7GameState;
+import games.wonders7.gui.Wonders7GUI;
 import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
@@ -135,15 +149,15 @@ public enum GameType {
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
-            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+            DominionGameState.class, DominionForwardModel.class, DominionFGParameters.class, DominionGUIManager.class),
     DominionSizeDistortion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
-            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+            DominionGameState.class, DominionForwardModel.class, DominionSDParameters.class, DominionGUIManager.class),
     DominionImprovements(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
-            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
+            DominionGameState.class, DominionForwardModel.class, DominionIParameters.class, DominionGUIManager.class),
     Battlelore(2, 2,
             Arrays.asList(Fantasy, Miniatures, Wargame),
             Arrays.asList(Campaign, BattleCardDriven, CommandCards, DiceRolling, GridMovement, ModularBoard, VariablePlayerPowers),
@@ -169,11 +183,23 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
-
-    Descent2e(2,4,
+    Descent2e(2,5,
             new ArrayList<>(),
             new ArrayList<>(),
-                    DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class);
+            DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class),
+    Hanabi(2, 5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
+    PuertoRico(3, 5,
+            Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
+            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+    Wonders7(3, 7,
+            Arrays.asList(Strategy, Civilization, Ancient, Cards, CityBuilding, Economic),
+            Arrays.asList(ClosedDrafting, HandManagement, NeighbourScope, SetCollection, SimultaneousActionSelection, VariablePlayerPowers),
+            Wonders7GameState.class, Wonders7ForwardModel.class, Wonders7GameParameters.class, Wonders7GUI.class),
+    Resistance(5, 10,
+            Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
+            Arrays.asList(Memory, GridMovement),
+            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -290,18 +316,18 @@ public enum GameType {
         if (guiManagerClass == null) throw new AssertionError("No GUI manager class declared for the game: " + this);
 
         // Find ID of human player, if any (-1 if none)
-        int human = -1;
+        Set<Integer> human = new HashSet<>();
         if (game != null && game.getPlayers() != null) {
             for (int i = 0; i < game.getPlayers().size(); i++) {
                 if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
-                    human = i;
+                    human.add(i);
                     break;
                 }
             }
         }
 
         try {
-            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(guiManagerClass, GamePanel.class, Game.class, ActionController.class, Integer.class);
+            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(guiManagerClass, GamePanel.class, Game.class, ActionController.class, Set.class);
             return (AbstractGUIManager) constructorGS.newInstance(parent, game, ac, human);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -400,7 +426,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame;
+        Wargame, Civilization, Ancient;
 
         /**
          * @return a list of all games within this category.
@@ -472,7 +498,9 @@ public enum GameType {
         TableauBuilding,
         BattleCardDriven,
         CommandCards,
-        MoveThroughDeck;
+        MoveThroughDeck,
+        TrickTaking,
+        RoleSelection, ClosedDrafting, NeighbourScope;
 
         /**
          * @return a list of all games using this mechanic.
