@@ -64,7 +64,7 @@ public class MonopolyDealMetrics implements IMetricsCollection {
                     counters[7][e.state.getCurrentPlayer()]++;
                 else if (e.action instanceof JustSayNoAction)
                     counters[8][e.state.getCurrentPlayer()]++;
-                return true;
+                return false;
             } else if (GAME_OVER.equals(e.type)) {
                 int winner = e.state.getWinners().iterator().next();
                 records.put("PassGoByWinner", counters[0][winner]);
@@ -111,7 +111,7 @@ public class MonopolyDealMetrics implements IMetricsCollection {
             columns.put("SlyDealUsed", Integer.class);
             columns.put("ForcedDealUsed", Integer.class);
             columns.put("DebtCollectorUsed", Integer.class);
-            columns.put("ItsMyBirthDayUsed", Integer.class);
+            columns.put("ItsMyBirthdayUsed", Integer.class);
             columns.put("MulticolorRentUsed", Integer.class);
             columns.put("PropertyRentUsed", Integer.class);
             columns.put("DealBreakerUsed", Integer.class);
