@@ -9,6 +9,7 @@ import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
 import utilities.Pair;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,6 +43,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private int[] gameSeeds;
     long currentSeed;
     int tournamentSeeds;
+    String seedFile;
     Random seedRnd = new Random(randomSeed);
 
 
@@ -83,6 +85,14 @@ public class RoundRobinTournament extends AbstractTournament {
         this.gamesPerPlayer = new int[agents.size()];
         this.byTeam = (boolean) config.getOrDefault(RunArg.byTeam, false);
         this.tournamentSeeds = (int) config.getOrDefault(RunArg.distinctRandomSeeds, 0);
+        this.seedFile = (String) config.getOrDefault(RunArg.seedFile, "");
+        if (!seedFile.isEmpty()) {
+            this.gameSeeds = loadSeedsFromFile();
+            if (gameSeeds.length == 0) {
+                throw new AssertionError("No seeds found in file " + seedFile);
+            }
+            this.tournamentSeeds = gameSeeds.length;
+        }
         this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s",
                 gameToPlay.name(), playersPerGame, gamesPerMatchUp, tournamentMode.name());
     }
@@ -104,18 +114,40 @@ public class RoundRobinTournament extends AbstractTournament {
             gameTracker.init(game, nPlayers, agentNames);
             game.addListener(gameTracker);
         }
-        gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
+        if (tournamentSeeds > 0) {
+            // we run a tournament for each seed
+            if (gameSeeds == null)
+                gameSeeds = IntStream.range(0, tournamentSeeds).map(i -> seedRnd.nextInt()).toArray();
+        } else {
+            gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
+        }
 
         LinkedList<Integer> matchUp = new LinkedList<>();
         // add outer loop if we have tournamentSeeds enabled; if not this will just run once
         for (int iter = 0; iter < Math.max(1, tournamentSeeds); iter++) {
-            currentSeed = seedRnd.nextInt();
+            currentSeed =  gameSeeds[iter]; // this is ignored unless tournamentSeeds > 0
             createAndRunMatchUp(matchUp);
         }
         reportResults();
 
         for (IGameListener listener : listeners)
             listener.report();
+    }
+
+    protected int[] loadSeedsFromFile() {
+        // we open seedFile, and read in the comma-delimited list of seeds, and put this in an array
+        try {
+            Scanner scanner = new Scanner(new File(seedFile)).useDelimiter("\\s*,\\s*");
+            List<Integer> seeds = new ArrayList<>();
+            while (scanner.hasNextInt()) {
+                seeds.add(scanner.nextInt());
+            }
+            return seeds.stream().mapToInt(i -> i).toArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Could not load seeds from file " + seedFile);
+        }
+
     }
 
     public int getWinnerIndex() {
@@ -162,10 +194,12 @@ public class RoundRobinTournament extends AbstractTournament {
                     // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
                     evaluateMatchUp(matchup, gamesPerMatchUp / nTeams);
                 } else {
-                    Random rnd = new Random(System.currentTimeMillis());
+                    // we set the gameSeeds to null in this case (ONE_VS_ALL, with a focusPlayer and more than one opponent)
+                    // this is to avoid the same game seed being used for all games (we override the exhaustive/random set up
+                    // and just run one game per random shuffle of the player order)
                     gameSeeds = null;
                     for (int m = 0; m < this.gamesPerMatchUp; m++) {
-                        Collections.shuffle(agentOrder, rnd);
+                        Collections.shuffle(agentOrder, seedRnd);
                         List<Integer> matchup = new ArrayList<>(nTeams);
                         for (int j = 0; j < nTeams; j++) {
                             if (j == p)
