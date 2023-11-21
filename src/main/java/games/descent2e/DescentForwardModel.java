@@ -171,7 +171,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (hero.getAbility().equals(HeroAbilities.HeroAbility.DamageToFatigue))
             {
                 for (int i = 0; i < (hero.getAttribute(Figure.Attribute.Fatigue).getMaximum()); i++) {
-                    JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(hero, (i + 1));
+                    JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(hero.getComponentID(), (i + 1));
                     if (!hero.getAbilities().contains(reduce)) {
                         hero.addAbility(reduce);
                     }
@@ -188,7 +188,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     if (dgs.heroes.get(i).equals(hero)) {
                         continue;
                     }
-                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero, dgs.heroes.get(i));
+                    List<DescentDice> defenceDice = hero.getDefenceDice().getComponents();
+                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero.getComponentID(), dgs.heroes.get(i).getComponentID(), defenceDice);
                     if (!hero.getAbilities().contains(copyDefence)) {
                         hero.addAbility(copyDefence);
                     }

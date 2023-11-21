@@ -28,7 +28,8 @@ public class HeroAbilities {
         HealFatigueOnWait,
         RerollOnce,
         StunAdjacent,
-        SurgeRecoverOneHeart;
+        SurgeRecoverOneHeart,
+        NONE;
     }
 
     // Self-Contained Class for all Hero Abilities
@@ -147,15 +148,16 @@ public class HeroAbilities {
     // Tomble Burrowell's Hero Ability
     // If we are targeted by an attack, and we are adjacent to an ally
     // We can add their defense pool to our own defense pool before we roll
-    public static DicePool tomble (DescentGameState dgs, Figure other)
+    public static DicePool tomble (DescentGameState dgs, int tomble, int ally)
     {
-        Hero actingFigure = (Hero) dgs.getActingFigure();
-        DicePool defensePool = actingFigure.getDefenceDice().copy();
-        if (actingFigure.getAbility().equals(CopyAllyDefense)) {
-            Vector2D position = actingFigure.getPosition();
+        Hero hero = (Hero) dgs.getComponentById(tomble);
+        Figure other = (Figure) dgs.getComponentById(ally);
+        DicePool defensePool = hero.getDefenceDice().copy();
+        if (hero.getAbility().equals(CopyAllyDefense)) {
+            Vector2D position = hero.getPosition();
             Vector2D otherPosition = other.getPosition();
             if (DescentHelper.inRange(position, otherPosition, 1)) {
-                actingFigure.setUsedHeroAbility(true);
+                hero.setUsedHeroAbility(true);
                 DicePool allyDefensePool = other.getDefenceDice();
                 List<DescentDice> allDice = new ArrayList<>(defensePool.getComponents());
                 allDice.addAll(allyDefensePool.getComponents());

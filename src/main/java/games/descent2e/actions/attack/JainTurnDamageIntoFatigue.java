@@ -16,10 +16,10 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     // Jain Fairwood Hero Ability
     String heroName = "Jain Fairwood";
-    Hero jain;
+    int jain;
     int reduce;
     int damage;
-    public JainTurnDamageIntoFatigue(Hero hero, int reduce) {
+    public JainTurnDamageIntoFatigue(int hero, int reduce) {
         super(Triggers.TAKE_DAMAGE);
         this.jain = hero;
         this.reduce = reduce;
@@ -54,14 +54,15 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
         // Prevents us from increasing our Fatigue more than the damage we took
         if (damage - reduce < 0)
             return false;
-        return (reduce + jain.getAttributeValue(Figure.Attribute.Fatigue)) <= jain.getAttributeMax(Figure.Attribute.Fatigue);
+        Figure f = (Figure) dgs.getComponentById(jain);
+        return (reduce + f.getAttributeValue(Figure.Attribute.Fatigue)) <= f.getAttributeMax(Figure.Attribute.Fatigue);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof JainTurnDamageIntoFatigue) {
             JainTurnDamageIntoFatigue other = (JainTurnDamageIntoFatigue) obj;
-            return other.jain.equals(jain) && other.reduce == reduce && other.damage == damage;
+            return other.jain == jain && other.reduce == reduce && other.damage == damage;
         }
         return false;
     }
@@ -77,6 +78,6 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
     }
 
     public String toString() {
-        return "CONVERT_" + reduce + "_DAMAGE_TO_FATIGUE : " + jain.getComponentID();
+        return "CONVERT_" + reduce + "_DAMAGE_TO_FATIGUE : " + jain;
     }
 }

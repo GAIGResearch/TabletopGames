@@ -299,10 +299,30 @@ public class Hero extends Figure {
         this.featAvailable = true;
         String heroicFeatStrFull = ((PropertyString) getProperty(heroicFeatHash)).value;
         this.heroicFeatStr = heroicFeatStrFull.split(":", 2)[1];
-        this.heroicFeat = HeroicFeat.HeroFeat.valueOf(heroicFeatStrFull.split(":")[0]);
         String abilityStrFull = ((PropertyString) getProperty(abilityHash)).value;
         this.abilityStr = abilityStrFull.split(":", 2)[1];
-        this.heroAbility = HeroAbilities.HeroAbility.valueOf(abilityStrFull.split(":", 2)[0]);
+
+        // Ensures that, if there is a problem with the json name, a default NONE value is assigned
+        this.heroicFeat = HeroicFeat.HeroFeat.NONE;
+        this.heroAbility = HeroAbilities.HeroAbility.NONE;
+        String tempFeat = heroicFeatStrFull.split(":")[0];
+        String tempAbility = abilityStrFull.split(":")[0];
+        for (HeroicFeat.HeroFeat feat : HeroicFeat.HeroFeat.values())
+        {
+            if (feat.name().equals(tempFeat))
+            {
+                this.heroicFeat = feat;
+                break;
+            }
+        }
+        for (HeroAbilities.HeroAbility ability : HeroAbilities.HeroAbility.values())
+        {
+            if (ability.name().equals(tempAbility))
+            {
+                this.heroAbility = ability;
+                break;
+            }
+        }
     }
 
     /**

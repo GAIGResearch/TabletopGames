@@ -24,7 +24,8 @@ public class HeroicFeat {
         MagicAttackAll,
         RunAttack,
         StunMonsters,
-        Vanish;
+        Vanish,
+        NONE;
     }
 
     public static List<DescentAction> getHeroicFeatActions(DescentGameState dgs) {
@@ -34,6 +35,7 @@ public class HeroicFeat {
         }
 
         HeroFeat heroFeat = ((Hero) f).getHeroicFeat();
+        if (heroFeat == null || heroFeat == NONE) return null;
         List<DescentAction> myFeats = new ArrayList<>();
         DescentAction feat;
         switch (heroFeat) {

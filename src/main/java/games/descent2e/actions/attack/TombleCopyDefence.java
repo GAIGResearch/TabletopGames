@@ -3,13 +3,14 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.DiceType;
-import games.descent2e.components.Hero;
+import games.descent2e.components.Figure;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
@@ -20,34 +21,36 @@ public class TombleCopyDefence extends DescentAction {
 
     // Tomble Burrowell Hero Ability
     String heroName = "Tomble Burrowell";
-    Hero tomble, ally;
+    int tomble, ally;
     List<DescentDice> defenceDice;
-    public TombleCopyDefence(Hero hero, Hero ally) {
+    public TombleCopyDefence(int hero, int ally, List<DescentDice> defenceDice) {
         super(Triggers.ROLL_OTHER_DICE);
         this.tomble = hero;
         this.ally = ally;
-        this.defenceDice = hero.getDefenceDice().getComponents();
+        this.defenceDice = defenceDice;
 
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        DicePool newDice = HeroAbilities.tomble(dgs, ally);
+        DicePool newDice = HeroAbilities.tomble(dgs, tomble, ally);
         dgs.setDefenceDicePool(newDice);
         return true;
     }
 
     @Override
     public TombleCopyDefence copy() {
-        return new TombleCopyDefence(tomble, ally);
+        return new TombleCopyDefence(tomble, ally, defenceDice);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         // We can only copy an ally's Defence Pool if they are adjacent to us
+        Figure tomble = (Figure) dgs.getComponentById(this.tomble);
+        Figure ally = (Figure) dgs.getComponentById(this.ally);
         Vector2D position = tomble.getPosition();
         Vector2D otherPosition = ally.getPosition();
-        if (Math.abs(position.getX() - otherPosition.getX()) <= 1 && Math.abs(position.getY() - otherPosition.getY()) <= 1) {
+        if (DescentHelper.inRange(position, otherPosition, 1)) {
 
             // This is to check if any new dice have been added yet, to ensure we only copy one ally's pool per attack
             // On the first attempt, the current Defence Pool should be identical to Tomble's personal Defence Pool
@@ -70,7 +73,7 @@ public class TombleCopyDefence extends DescentAction {
     public boolean equals(Object obj) {
         if (obj instanceof TombleCopyDefence) {
             TombleCopyDefence other = (TombleCopyDefence) obj;
-            return other.tomble.equals(tomble) && other.ally.equals(ally) && other.defenceDice.equals(defenceDice);
+            return other.tomble == tomble && other.ally == ally && other.defenceDice.equals(defenceDice);
         }
         return false;
     }
@@ -82,6 +85,7 @@ public class TombleCopyDefence extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        Figure ally = (Figure) gameState.getComponentById(this.ally);
         String allyName = ally.getName().replace("Hero: ", "");
         List<DiceType> diceTypes = new ArrayList<>();
         for (DescentDice dice : ally.getDefenceDice().getComponents()) {
@@ -91,6 +95,6 @@ public class TombleCopyDefence extends DescentAction {
     }
 
     public String toString() {
-        return "COPY_DEFENSE_DICE_FROM_" + ally.getComponentID() + " : " + tomble.getComponentID();
+        return "COPY_DEFENSE_DICE_FROM_" + ally + " : " + tomble;
     }
 }
