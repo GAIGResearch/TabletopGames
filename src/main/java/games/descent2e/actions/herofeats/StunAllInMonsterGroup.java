@@ -17,7 +17,6 @@ import java.util.Objects;
 public class StunAllInMonsterGroup extends DescentAction {
 
     // Ashrian Heroic Feat
-    String heroName = "Ashrian";
     List<Monster> monsters;
     String monsterName;
     int range;

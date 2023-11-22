@@ -15,6 +15,7 @@ import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
 import games.descent2e.actions.monsterfeats.Howl;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -33,6 +34,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
 import static games.descent2e.DescentHelper.*;
+import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static utilities.Utils.getNeighbourhood;
 
@@ -504,7 +506,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // Monster Actions can only be taken once per turn, if they haven't already attacked yet
             if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
             {
-                actions.addAll(monsterActions(dgs, (Monster) actingFigure));
+                actions.addAll(monsterActions(dgs));
             }
 
             // - Special (specified by quest)
@@ -691,86 +693,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 //        }
 //        return heroicFeats;
     }
-    private ArrayList<AbstractAction> monsterActions(DescentGameState dgs, Monster actingFigure)
+    private ArrayList<AbstractAction> monsterActions(DescentGameState dgs)
     {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        for (String action : actingFigure.getActions()) {
-            switch (action.toUpperCase(Locale.ROOT)) {
-                case "HOWL":
-
-                    List<Hero> heroes = dgs.getHeroes();
-                    List<Integer> targets = new ArrayList<>();
-
-                    Pair<Integer, Integer> size = actingFigure.getSize();
-                    List<BoardNode> attackingTiles = new ArrayList<>();
-
-                    Vector2D currentLocation = actingFigure.getPosition();
-                    BoardNode anchorTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-
-                    if (size.a > 1 || size.b > 1)
-                    {
-                        attackingTiles.addAll(getAttackingTiles(actingFigure.getComponentID(), anchorTile, attackingTiles));
-                    }
-                    else {
-                        attackingTiles.add(anchorTile);
-                    }
-
-                    for (BoardNode currentTile : attackingTiles) {
-                        for (Hero h : heroes) {
-                            if (targets.contains(h.getComponentID()))   continue;
-                            Vector2D other = h.getPosition();
-                            if (inRange(((PropertyVector2D) currentTile.getProperty("coordinates")).values, other, 3)) {
-                                targets.add(h.getComponentID());
-                        }
-                    }
-                    }
-
-                    if (!targets.isEmpty()) {
-                        DescentAction howl = new Howl(actingFigure.getComponentID(), targets);
-                        if (howl.canExecute(dgs))
-                            actions.add(howl);
-                    }
-                    break;
-                case "GRAB":
-                    /*DescentAction grab = new Grab();
-                    if (grab.canExecute(dgs))
-                        actions.add(new Grab());
-                    break;
-                case "HEAL":
-                    DescentAction heal = new Heal();
-                    if (heal.canExecute(dgs))
-                        actions.add(new Heal());
-                    break;
-                case "THROW":
-                    DescentAction throwAction = new Throw();
-                    if (throwAction.canExecute(dgs))
-                        actions.add(new Throw());
-                    break;
-                case "AIR":
-                    DescentAction air = new Air();
-                    if (air.canExecute(dgs))
-                        actions.add(new Air());
-                    break;
-                case "EARTH":
-                    DescentAction earth = new Earth();
-                    if (earth.canExecute(dgs))
-                        actions.add(new Earth());
-                    break;
-                case "FIRE":
-                    DescentAction fire = new Fire();
-                    if (fire.canExecute(dgs))
-                        actions.add(new Fire());
-                    break;
-                case "WATER":
-                    DescentAction water = new Water();
-                    if (water.canExecute(dgs))
-                        actions.add(new Water());*/
-                    break;
-                default:
-                    break;
-            }
-        }
-        return actions;
+        return getMonsterActions(dgs);
     }
 
     private List<AbstractAction> meleeAttackActions(DescentGameState dgs, Figure f) {

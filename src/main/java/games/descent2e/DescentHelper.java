@@ -8,6 +8,7 @@ import core.properties.PropertyInt;
 import core.properties.PropertyVector2D;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -34,7 +35,7 @@ public class DescentHelper {
         // TODO: Check for Reach weapons, so far only affects monsters with Reach passive
         // If the figure has the Reach passive, they can attack up to two spaces away
         boolean reach = false;
-        if (f instanceof Monster && ((Monster) f).hasPassive("Reach"))
+        if (f instanceof Monster && ((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.REACH))
         {
             reach = true;
         }
@@ -357,7 +358,7 @@ public class DescentHelper {
                     // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
                     else if (figureType == "Monster")
                     {
-                        if ((((Monster) figure).hasPassive("Scamper")) && neighbourFigure.getTokenType().equals("Hero"))
+                        if ((((Monster) figure).hasPassive(MonsterAbilities.MonsterPassive.SCAMPER)) && neighbourFigure.getTokenType().equals("Hero"))
                             isFriendly = true;
                     }
                     // If, for whatever reason, our Heroes are allowed to ignore enemies entirely when moving

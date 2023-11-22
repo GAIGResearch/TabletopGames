@@ -6,6 +6,7 @@ import games.descent2e.DescentTypes;
 import games.descent2e.abilities.Cowardly;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
@@ -61,7 +62,7 @@ public class SurgeAttackAction extends DescentAction {
         if (f instanceof Monster)
         {
             // If the figure has the Cowardly passive, they can only surge if they are near a master or lieutenant monster
-            if (((Monster) f).hasPassive("Cowardly"))
+            if (((Monster) f).hasPassive(MonsterAbilities.MonsterPassive.COWARDLY))
                 return Cowardly.isNearMasterOrLieutenant(dgs, f);
         }
 

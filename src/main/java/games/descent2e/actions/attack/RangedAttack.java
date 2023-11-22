@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.NightStalker;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -40,7 +41,7 @@ public class RangedAttack extends MeleeAttack {
         state.setDefenceDicePool(defencePool);
 
         if (defender instanceof Monster) {
-            if (((Monster) defender).hasPassive("NightStalker"))
+            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
             {
                 NightStalker.addNightStalker(state, attacker, defender);
             }

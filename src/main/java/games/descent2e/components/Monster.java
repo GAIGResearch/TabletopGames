@@ -3,8 +3,9 @@ package games.descent2e.components;
 import core.components.Counter;
 import core.properties.Property;
 import games.descent2e.DescentTypes.AttackType;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.attack.Surge;
-import games.descent2e.actions.attack.SurgeAttackAction;
+import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -40,8 +41,8 @@ public class Monster extends Figure {
     Direction orientation = Direction.getDefault();
 
     protected List<Surge> surges = new ArrayList<>();
-    protected List<String> passives = new ArrayList<>();
-    protected List<String> actions = new ArrayList<>();
+    protected List<MonsterAbilities.MonsterPassive> passives = new ArrayList<>();
+    protected List<MonsterAbilities.MonsterAbility> actions = new ArrayList<>();
 
     public Monster() {
         super("Monster", -1);
@@ -127,14 +128,28 @@ public class Monster extends Figure {
             if (ability.contains("Surge")) {
                 addSurge(ability);
             } else {
-                addPassive(ability);
+                for (MonsterAbilities.MonsterPassive passive : MonsterAbilities.MonsterPassive.values())
+                {
+                    if (passive.name().equals(ability.toUpperCase()))
+                    {
+                        addPassive(passive);
+                        break;
+                    }
+                }
             }
         }
 
     }
     public void setActions(String[] abilities) {
         for (String ability : abilities) {
-            addAction(ability);
+            for (MonsterAbilities.MonsterAbility action : MonsterAbilities.MonsterAbility.values())
+            {
+                if (action.name().equals(ability.toUpperCase()))
+                {
+                    addAction(action);
+                    break;
+                }
+            }
         }
     }
 
@@ -201,27 +216,27 @@ public class Monster extends Figure {
             surges.remove(surge);
         }
     }
-    public void addPassive(String ability)
+    public void addPassive(MonsterAbilities.MonsterPassive ability)
     {
         if (passives == null) {
             passives = new ArrayList<>();
         }
         passives.add(ability);
     }
-    public void removePassive(String ability)
+    public void removePassive(MonsterAbilities.MonsterPassive ability)
     {
         if (passives.contains(ability)) {
             passives.remove(ability);
         }
     }
-    public void addAction(String action)
+    public void addAction(MonsterAbilities.MonsterAbility action)
     {
         if (actions == null) {
             actions = new ArrayList<>();
         }
         actions.add(action);
     }
-    public void removeAction(String action)
+    public void removeAction(MonsterAbilities.MonsterAbility action)
     {
         if (actions.contains(action)) {
             actions.remove(action);
@@ -230,14 +245,14 @@ public class Monster extends Figure {
     public List<Surge> getSurges() {
         return surges;
     }
-    public List<String> getPassives() {
+    public List<MonsterAbilities.MonsterPassive> getPassives() {
         return passives;
     }
-    public List<String> getActions() {
+    public List<MonsterAbilities.MonsterAbility> getActions() {
         return actions;
     }
 
-    public boolean hasPassive(String ability)
+    public boolean hasPassive(MonsterAbilities.MonsterPassive ability)
     {
         if (passives != null) {
             return passives.contains(ability);
@@ -251,7 +266,7 @@ public class Monster extends Figure {
         }
         return false;
     }
-    public boolean hasAction(String action)
+    public boolean hasAction(MonsterAbilities.MonsterAbility action)
     {
         if (actions != null) {
             return actions.contains(action);

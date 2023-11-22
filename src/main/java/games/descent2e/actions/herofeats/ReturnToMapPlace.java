@@ -50,6 +50,6 @@ public class ReturnToMapPlace extends DescentAction {
 
     @Override
     public String toString() {
-        return "Heroic Feat: Tomble Burrowell - Reappear";
+        return "Heroic Feat: Reappear";
     }
 }

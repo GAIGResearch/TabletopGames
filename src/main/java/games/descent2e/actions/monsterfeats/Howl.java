@@ -139,6 +139,6 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(attackingFigure);
-        return f instanceof Monster && (((Monster) f).hasAction("Howl"));
+        return f instanceof Monster && (((Monster) f).hasAction(MonsterAbilities.MonsterAbility.HOWL));
     }
 }
