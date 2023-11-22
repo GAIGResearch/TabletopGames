@@ -54,26 +54,22 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     int heroPlayer;
     int allyPlayer;
     int interruptPlayer;
-    Figure hero;
-    Figure targetAlly;
     int heroID;
     int allyID;
     boolean swapped, swapOption = false;
     int oldHeroMovePoints;
     int oldAllyMovePoints;
-    public HeroicFeatExtraMovement(Figure hero, Figure ally) {
+    public HeroicFeatExtraMovement(int hero, int ally) {
         super(Triggers.HEROIC_FEAT);
-        this.hero = hero;
-        this.targetAlly = ally;
-        this.heroID = hero.getComponentID();
-        this.allyID = ally.getComponentID();
+        this.heroID = hero;
+        this.allyID = ally;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
 
-        String heroName = hero.getName().replace("Hero: ", "");
-        String allyName = targetAlly.getName().replace("Hero: ", "");
+        String heroName = ((Hero) gameState.getComponentById(heroID)).getName().replace("Hero: ", "");
+        String allyName = ((Hero) gameState.getComponentById(allyID)).getName().replace("Hero: ", "");
 
         return String.format("Heroic Feat: " + heroName + " and " + allyName + " make a free move action");
     }
@@ -83,6 +79,8 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         if (phase.interrupt == null)
             throw new AssertionError("Should not be reachable");
         DescentGameState dgs = (DescentGameState) state;
+        Figure hero = (Figure) dgs.getComponentById(heroID);
+        Figure targetAlly = (Figure) dgs.getComponentById(allyID);
         List<AbstractAction> retVal = new ArrayList<>();
         List<AbstractAction> moveActions = new ArrayList<>();
         switch (phase) {
@@ -137,11 +135,11 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     public boolean execute(DescentGameState dgs) {
         dgs.setActionInProgress(this);
 
+        Figure hero = (Figure) dgs.getComponentById(heroID);
+        Figure targetAlly = (Figure) dgs.getComponentById(allyID);
+
         heroPlayer = hero.getOwnerId();
         allyPlayer = targetAlly.getOwnerId();
-
-        hero = (Figure) dgs.getComponentById(heroID);
-        targetAlly = (Figure) dgs.getComponentById(allyID);
 
         phase = SWAP;
         interruptPlayer = heroPlayer;
@@ -204,6 +202,8 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
     private void executePhase(DescentGameState state) {
         //System.out.println("Executing phase " + phase);
+        Figure hero = (Figure) state.getComponentById(heroID);
+        Figure targetAlly = (Figure) state.getComponentById(allyID);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
@@ -249,7 +249,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
     @Override
     public HeroicFeatExtraMovement copy() {
-        HeroicFeatExtraMovement retVal = new HeroicFeatExtraMovement(hero, targetAlly);
+        HeroicFeatExtraMovement retVal = new HeroicFeatExtraMovement(heroID, allyID);
         retVal.heroID = heroID;
         retVal.allyID = allyID;
         retVal.phase = phase;
@@ -267,8 +267,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
         if (obj instanceof HeroicFeatExtraMovement) {
             HeroicFeatExtraMovement other = (HeroicFeatExtraMovement) obj;
-            return other.hero.equals(hero) && other.targetAlly.equals(targetAlly) &&
-                    other.heroID == heroID && other.allyID == allyID &&
+            return other.heroID == heroID && other.allyID == allyID &&
                     other.phase == phase && other.interruptPlayer == interruptPlayer &&
                     other.heroPlayer == heroPlayer && other.allyPlayer == allyPlayer &&
                     other.swapOption == swapOption && other.swapped == swapped &&
@@ -279,6 +278,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        Figure hero = (Figure) dgs.getComponentById(heroID);
         return !(hero instanceof Hero) || ((Hero) hero).isFeatAvailable();
     }
 

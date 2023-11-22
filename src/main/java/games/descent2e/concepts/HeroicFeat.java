@@ -100,7 +100,7 @@ public class HeroicFeat {
                     if (ally.getComponentID() == f.getComponentID())
                         continue;
                     if (DescentHelper.inRange(f.getPosition(), ally.getPosition(), 3)) {
-                        feat = new HeroicFeatExtraMovement(f, ally);
+                        feat = new HeroicFeatExtraMovement(f.getComponentID(), ally.getComponentID());
                         if (feat.canExecute(dgs)) myFeats.add(feat);
                     }
                 }
