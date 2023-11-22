@@ -249,9 +249,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 token.setAttributeModifiers(def.getAttributeModifiers());
                 if (location == null) {
                     // Make a hero owner of it TODO: players choose?
-                    int idx = r.nextInt(dgs.getNPlayers()-1);
-                    if (idx == dgs.overlordPlayer) idx++;
-                    token.setOwnerId(idx, dgs);
+                    int idx = r.nextInt(dgs.getHeroes().size()-1);
+                    token.setOwnerId(dgs.getHeroes().get(idx).getComponentID(), dgs);
                 }
                 dgs.tokens.add(token);
             }

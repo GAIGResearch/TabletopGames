@@ -49,10 +49,9 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         DescentGameState dgs = (DescentGameState) state;
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         int heroIdx = acolyte.getOwnerId();
-        Hero hero = dgs.getHeroes().get(heroIdx);
-        if (hero.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
+        if (heroIdx == dgs.getActingFigure().getComponentID()) {
             HashSet<Hero> adjacentHeroes = new HashSet<>();
-            Vector2D loc = hero.getPosition();
+            Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
@@ -68,10 +67,10 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
                 }
             }
             if (adjacentHeroes.size() > 0) {
-                for (int i = 0; i < dgs.getHeroes().size(); i++) {
-                    if (i != heroIdx && adjacentHeroes.contains(dgs.getHeroes().get(i))) {
+                for (Hero h : adjacentHeroes) {
+                    if (h.getComponentID() != heroIdx && adjacentHeroes.contains(h)) {
                         // Check if adjacent
-                        actions.add(new TradeAcolyteAction(tokenID, i));
+                        actions.add(new TradeAcolyteAction(tokenID, h.getComponentID()));
                     }
                 }
             }
@@ -109,9 +108,8 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         // Can only execute if player adjacent to another hero
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         int heroIdx = acolyte.getOwnerId();
-        Hero hero = dgs.getHeroes().get(heroIdx);
-        if (hero.getOwnerId() == dgs.getActingFigure().getOwnerId()) {
-            Vector2D loc = hero.getPosition();
+        if (heroIdx == dgs.getActingFigure().getComponentID()) {
+            Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
@@ -144,7 +142,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return receivingHeroIdx != -1? "Give acolyte to " + receivingHeroIdx : "Trade acolyte";
+        return receivingHeroIdx != -1? "Give acolyte to " + ((Figure) gameState.getComponentById(receivingHeroIdx)).getName().replace("Hero: ", "") : "Trade acolyte";
     }
 
     @Override

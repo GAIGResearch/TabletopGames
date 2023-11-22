@@ -42,7 +42,7 @@ public class DToken extends Token {
 
     public void setOwnerId(int ownerId, DescentGameState dgs) {
         if (this.ownerId != -1) {
-            Hero hero = dgs.getHeroes().get(this.ownerId);
+            Hero hero = (Hero) dgs.getComponentById(this.ownerId);
             // Revert attribute modifiers
             for (Figure.Attribute a: attributeModifiers.keySet()) {
                 int curMax = hero.getAttribute(a).getMaximum();
@@ -55,7 +55,7 @@ public class DToken extends Token {
         }
         super.setOwnerId(ownerId);
         if (this.ownerId != -1) {
-            Hero hero = dgs.getHeroes().get(this.ownerId);
+            Hero hero = (Hero) dgs.getComponentById(this.ownerId);
             // Add attribute modifiers
             for (Figure.Attribute a: attributeModifiers.keySet()) {
                 int curMax = hero.getAttribute(a).getMaximum();
