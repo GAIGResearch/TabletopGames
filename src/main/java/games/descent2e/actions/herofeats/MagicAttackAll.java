@@ -53,9 +53,17 @@ public class MagicAttackAll extends DescentAction {
         if (f instanceof Hero) {
             Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
             if (hand == null) return false;
-            String[] equipmentType = ((PropertyStringArray) hand.getProperty("equipmentType")).getValues();
-            if (equipmentType == null) return false;
-            if (Arrays.stream(equipmentType).noneMatch(s -> s.equals("Magic"))) return false;
+            boolean hasMagicItem = false;
+            for (DescentCard item: hand.getComponents())
+            {
+                String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                if (equipmentType == null) continue;
+                if (Arrays.asList(equipmentType).contains("Magic")) {
+                    hasMagicItem = true;
+                    break;
+                }
+            }
+            if (!hasMagicItem) return false;
         }
         DescentAction heroicFeat = constructHeroicFeat(dgs);
         return heroicFeat != null;
