@@ -1,7 +1,6 @@
 package games.descent2e.actions;
 
 import core.AbstractGameState;
-import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
@@ -9,7 +8,6 @@ import games.descent2e.components.Figure;
 
 // TODO REMOVE WHEN NOT DEBUGGING
 import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
 
 import java.util.Random;
 

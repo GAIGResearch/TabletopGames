@@ -2,7 +2,6 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentTypes;
 import games.descent2e.abilities.Cowardly;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;

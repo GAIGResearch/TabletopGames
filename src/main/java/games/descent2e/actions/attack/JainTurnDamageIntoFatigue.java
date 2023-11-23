@@ -1,14 +1,11 @@
 package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
-import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
 
 import java.util.Objects;
 

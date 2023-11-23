@@ -52,13 +52,13 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     protected final int attackingFigure;
-    int attackingPlayer;
+    protected int attackingPlayer;
     protected String attackerName;
     protected int defendingFigure;
-    int defendingPlayer;
+    protected int defendingPlayer;
     protected String defenderName;
-    AttackPhase phase = NOT_STARTED;
-    int interruptPlayer;
+    protected AttackPhase phase = NOT_STARTED;
+    protected int interruptPlayer;
     int surgesToSpend;
     int extraRange, pierce, extraDamage, mending;
     boolean isDiseasing;
@@ -109,7 +109,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return true;
     }
 
-    void movePhaseForward(DescentGameState state) {
+    protected void movePhaseForward(DescentGameState state) {
         // The goal here is to work out which player may have an interrupt for the phase we are in
         // If none do, then we can move forward to the next phase directly.
         // If one (or more) does, then we stop, and go back to the main game loop for this

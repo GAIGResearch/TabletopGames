@@ -10,9 +10,7 @@ import games.descent2e.actions.conditions.RemoveCondition;
 import games.descent2e.components.*;
 import utilities.Vector2D;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 

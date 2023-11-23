@@ -1,7 +1,6 @@
 package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
-import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
 import games.descent2e.abilities.HeroAbilities;

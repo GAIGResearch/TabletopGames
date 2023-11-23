@@ -1,9 +1,7 @@
 package games.descent2e.components;
 
 import core.components.Counter;
-import core.properties.Property;
 import games.descent2e.DescentTypes.AttackType;
-import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.attack.Surge;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import utilities.Pair;

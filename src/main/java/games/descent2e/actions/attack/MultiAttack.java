@@ -3,12 +3,10 @@ package games.descent2e.actions.attack;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.NightStalker;
-import games.descent2e.actions.Triggers;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
-import utilities.Distance;
 
 import java.util.List;
 

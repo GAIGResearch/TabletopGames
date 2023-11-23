@@ -2,14 +2,9 @@ package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.abilities.NightStalker;
 import games.descent2e.actions.attack.FreeAttack;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
-
-import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
 public class HeroicFeatExtraAttack extends FreeAttack {
 

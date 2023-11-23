@@ -14,8 +14,6 @@ import games.descent2e.actions.conditions.Diseased;
 import games.descent2e.actions.conditions.Poisoned;
 import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.herofeats.*;
-import games.descent2e.actions.monsterfeats.Howl;
-import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -23,7 +21,6 @@ import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.HeroicFeat;
 import games.descent2e.concepts.Quest;
-import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -34,6 +31,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
 import static games.descent2e.DescentHelper.*;
+import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static utilities.Utils.getNeighbourhood;
@@ -458,11 +456,16 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // - Open/close a door TODO
 
             // Hero Only Actions
+            // Archetype Skills
             // Rest
             // Revive
             // Search
             // Heroic Abilities and Feats
             if (actingFigure instanceof Hero) {
+
+                // Archetype Skills
+                List <AbstractAction> archetypeSkills = getArchetypeSkillActions(dgs, actingFigure.getComponentID());
+                if (!archetypeSkills.isEmpty()) actions.addAll(archetypeSkills);
 
                 // Rest
                 Rest act = new Rest();
