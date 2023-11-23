@@ -8,7 +8,7 @@
     ],
     "tokens": [
       ["Villager", "Wounded clergy", "nHeroes", ["8A"], ""],
-      ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], "Effect:SearchAction"],
+      ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], "Effect:SearchAction; Effect:GreedyAction"],
       ["WhiteObjective", "Acolyte", "1", ["player"], "AttributeModifier:MovePoints:-1;Effect:AcolyteAction;Effect:TradeAcolyteAction"]
     ],
     "rules": [

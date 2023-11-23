@@ -3,16 +3,19 @@ package games.descent2e.actions.archetypeskills;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
+import games.descent2e.actions.DescentAction;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
+import games.descent2e.components.tokens.DToken;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static games.descent2e.DescentHelper.getMeleeTargets;
+import static games.descent2e.DescentHelper.*;
 
 public class ArchetypeSkills {
 
@@ -43,6 +46,17 @@ public class ArchetypeSkills {
 
                     // Thief
                 case "Greedy":
+                    // Search for Search tokens within 3 spaces that we can see
+                    for (DToken token : dgs.getTokens()) {
+                        if (token.getDescentTokenType() == DescentTypes.DescentToken.Search
+                                && token.getPosition() != null
+                                && (inRange(f.getPosition(), token.getPosition(), 3))
+                                && hasLineOfSight(dgs, f.getPosition(), token.getPosition())) {
+                            for (DescentAction da : token.getEffects()) {
+                                if(da.canExecute(dgs)) actions.add(da.copy());
+                            }
+                        }
+                    }
                     break;
             }
 
