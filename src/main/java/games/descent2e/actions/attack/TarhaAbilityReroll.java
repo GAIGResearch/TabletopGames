@@ -7,6 +7,7 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.DescentDice;
+import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
 import java.util.Objects;
@@ -41,8 +42,8 @@ public class TarhaAbilityReroll extends DescentAction {
             IExtendedSequence action = dgs.currentActionInProgress();
             // Ranged Attacks are instances of Melee Attacks, so both types are covered
             if (action instanceof MeleeAttack) {
-                Hero f = (Hero) dgs.getActingFigure();
-                return f.getAbility().equals(HeroAbilities.HeroAbility.RerollOnce) && !f.hasUsedHeroAbility() && !f.hasRerolled();
+                Figure f = dgs.getActingFigure();
+                if (f instanceof Hero) return ((Hero) f).getAbility().equals(HeroAbilities.HeroAbility.RerollOnce) && !((Hero) f).hasUsedHeroAbility() && !f.hasRerolled();
             }
         }
         return false;
