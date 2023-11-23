@@ -68,7 +68,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
             }
             if (adjacentHeroes.size() > 0) {
                 for (Hero h : adjacentHeroes) {
-                    if (h.getComponentID() != heroIdx && adjacentHeroes.contains(h)) {
+                    if (h.getComponentID() != heroIdx) {
                         // Check if adjacent
                         actions.add(new TradeAcolyteAction(tokenID, h.getComponentID()));
                     }
