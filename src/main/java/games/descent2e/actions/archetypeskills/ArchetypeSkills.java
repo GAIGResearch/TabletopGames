@@ -29,6 +29,9 @@ public class ArchetypeSkills {
 
         for (DescentCard skill : (f.getSkills().getComponents())) {
 
+            // If the skill is exhausted, skip it
+            if(f.isExhausted(skill)) continue;
+
             switch(skill.getProperty("name").toString())
             {
                 // Berserker
@@ -38,6 +41,11 @@ public class ArchetypeSkills {
 
                 // Disciple
                 case "Prayer of Healing":
+                    for (Hero hero : dgs.getHeroes())
+                    {
+                        Heal heal = new Heal(hero.getComponentID(), skill);
+                        if (heal.canExecute(dgs)) actions.add(heal);
+                    }
                     break;
 
                     // Runemaster

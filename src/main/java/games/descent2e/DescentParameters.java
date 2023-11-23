@@ -18,6 +18,9 @@ public class DescentParameters extends AbstractParameters {
     public HashMap<DiceType, Integer> reviveDice = new HashMap<DiceType, Integer>() {{
         put(RED, 2);
     }};
+    public HashMap<DiceType, Integer> healDice = new HashMap<DiceType, Integer>() {{
+        put(RED, 1);
+    }};
 
     public DescentParameters(long seed) {
         super(seed);

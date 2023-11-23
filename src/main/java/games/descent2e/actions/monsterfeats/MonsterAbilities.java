@@ -5,6 +5,7 @@ import core.components.BoardNode;
 import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.archetypeskills.Heal;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Pair;
@@ -82,17 +83,27 @@ public class MonsterAbilities {
                             actions.add(howl);
                     }
                     break;
-                case GRAB:
+//                case GRAB:
                     /*DescentAction grab = new Grab();
                     if (grab.canExecute(dgs))
                         actions.add(new Grab());
-                    break;
+                    break;*/
                 case HEAL:
-                    DescentAction heal = new Heal();
-                    if (heal.canExecute(dgs))
-                        actions.add(new Heal());
+                    int range = 3;
+                    for (List<Monster> monsters : dgs.getMonsters())
+                    {
+                        for (Monster monster : monsters)
+                        {
+                            if (monster.getComponentID() == actingFigure.getComponentID() || inRange(actingFigure.getPosition(), monster.getPosition(), range))
+                            {
+                                DescentAction heal = new Heal(monster.getComponentID(), range, true);
+                                if (heal.canExecute(dgs))
+                                    actions.add(heal);
+                            }
+                        }
+                    }
                     break;
-                case THROW:
+                /*case THROW:
                     DescentAction throwAction = new Throw();
                     if (throwAction.canExecute(dgs))
                         actions.add(new Throw());
@@ -115,8 +126,8 @@ public class MonsterAbilities {
                 case WATER:
                     DescentAction water = new Water();
                     if (water.canExecute(dgs))
-                        actions.add(new Water());*/
-                    break;
+                        actions.add(new Water());
+                    break;*/
                 default:
                     break;
             }

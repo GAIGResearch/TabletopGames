@@ -15,6 +15,7 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
 
     public static DicePool empty = new DicePool(Collections.emptyList());
     public static DicePool revive;
+    public static DicePool heal;
 
     List<DescentDice> dice;
     boolean rolled = false;

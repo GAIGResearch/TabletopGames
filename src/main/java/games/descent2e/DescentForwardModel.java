@@ -50,6 +50,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // Set up revive dice pool: 2 red dice
         DicePool.revive = constructDicePool(descentParameters.reviveDice);
+        DicePool.heal = constructDicePool(descentParameters.healDice);
 
         // TODO: epic play options (pg 19)
 
@@ -1373,6 +1374,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 master.addAbility(new SurgeAttackAction(surge, master.getComponentID()));
             }
 
+            // If our Health was just modified, set it to the new maximum
+            if (!master.getAttribute(Figure.Attribute.Health).isMaximum())
+            {
+                master.setAttributeToMax(Figure.Attribute.Health);
+            }
 
             // Don't spawn the Master monster if we're only supposed to spawn 1 Minion only
             if (spawnMaster)
@@ -1429,6 +1435,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         minion.getAttribute(modifier.a).setMaximum(minion.getAttribute(modifier.a).getMaximum() + modifier.b);
                     }
                 }
+
+                // If our Health was just modified, set it to the new maximum
+                if (!minion.getAttribute(Figure.Attribute.Health).isMaximum())
+                {
+                    minion.setAttributeToMax(Figure.Attribute.Health);
+                }
+
                 monsterGroup.add(minion);
             }
             dgs.monsters.add(monsterGroup);

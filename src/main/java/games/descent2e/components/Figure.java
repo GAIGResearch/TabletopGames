@@ -1,6 +1,8 @@
 package games.descent2e.components;
 
+import core.CoreConstants;
 import core.components.Counter;
+import core.components.Deck;
 import core.components.Token;
 import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
@@ -74,6 +76,8 @@ public class Figure extends Token {
     boolean hasMoved, hasAttacked, hasRerolled;
     boolean isOffMap, canIgnoreEnemies, extraAction = false;
 
+    Deck<DescentCard> exhausted = new Deck<>("Exhausted", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);;
+
     public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
@@ -97,6 +101,8 @@ public class Figure extends Token {
             this.attributes.get(MovePoints).setToMin();
         }
         this.nActionsExecuted.setToMin();
+        // We unexhaust any exhausted cards at the start of the turn, refreshing them to use this turn
+        refreshAllCards();
     }
 
     public Counter getAttribute(Attribute attribute) {
@@ -276,6 +282,24 @@ public class Figure extends Token {
     public MeleeAttack getCurrentAttack() { return currentAttack;}
     public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack;}
 
+    public void exhaustCard (DescentCard card)
+    {
+        exhausted.add(card);
+    }
+    public void unexhaustCard (DescentCard card)
+    {
+        exhausted.remove(card);
+    }
+    public void refreshAllCards()
+    {
+        exhausted.clear();
+    }
+    public Deck<DescentCard> getExhausted() { return exhausted;}
+    public boolean isExhausted(DescentCard card)
+    {
+        return exhausted.contains(card);
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, nActionsExecuted.copy(), componentID);
@@ -318,6 +342,7 @@ public class Figure extends Token {
         copyTo.canIgnoreEnemies = canIgnoreEnemies;
         copyTo.extraAction = extraAction;
         copyTo.currentAttack = currentAttack;
+        copyTo.exhausted = exhausted.copy();
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
@@ -362,11 +387,11 @@ public class Figure extends Token {
         if (!(o instanceof Figure)) return false;
         if (!super.equals(o)) return false;
         Figure figure = (Figure) o;
-        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(componentName, figure.componentName) && Objects.equals(hasMoved, figure.hasMoved) && Objects.equals(hasRerolled, figure.hasRerolled) && Objects.equals(isOffMap, figure.isOffMap) && Objects.equals(canIgnoreEnemies, figure.canIgnoreEnemies) && Objects.equals(extraAction, figure.extraAction);
+        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(componentName, figure.componentName) && Objects.equals(hasMoved, figure.hasMoved) && Objects.equals(hasRerolled, figure.hasRerolled) && Objects.equals(isOffMap, figure.isOffMap) && Objects.equals(canIgnoreEnemies, figure.canIgnoreEnemies) && Objects.equals(extraAction, figure.extraAction) && Objects.equals(exhausted, figure.exhausted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities, currentAttack, componentName, hasMoved, hasRerolled, isOffMap, canIgnoreEnemies, extraAction);
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities, currentAttack, componentName, hasMoved, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted);
     }
 }
