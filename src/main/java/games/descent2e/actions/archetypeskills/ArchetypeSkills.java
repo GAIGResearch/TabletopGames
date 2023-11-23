@@ -2,18 +2,19 @@ package games.descent2e.actions.archetypeskills;
 
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.attack.Surge;
+import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static games.descent2e.DescentHelper.*;
 
@@ -50,6 +51,30 @@ public class ArchetypeSkills {
 
                     // Runemaster
                 case "Runic Knowledge":
+                    SurgeAttackAction surge = new SurgeAttackAction(Surge.RUNIC_KNOWLEDGE, f.getComponentID());
+                    // Can only use the surge if we have the Fatigue to spare
+                    // and we have a Magic or Rune item equipped
+                    if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+                        Deck<DescentCard> hand = f.getHandEquipment();
+                        if (hand != null) {
+                            boolean hasMagicOrRuneItem = false;
+                            for (DescentCard item : hand.getComponents()) {
+                                String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                                if (equipmentType == null) continue;
+                                if (Arrays.asList(equipmentType).contains("Magic") || Arrays.asList(equipmentType).contains("Rune")) {
+                                    hasMagicOrRuneItem = true;
+                                    break;
+                                }
+                            }
+                            if (hasMagicOrRuneItem) {
+                                if (!f.getAbilities().contains(surge)) {
+                                    f.addAbility(surge);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    f.removeAbility(surge);
                     break;
 
                     // Thief
