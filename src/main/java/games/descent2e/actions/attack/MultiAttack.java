@@ -51,7 +51,7 @@ public class MultiAttack extends RangedAttack {
         if (defender instanceof Monster) {
             if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
             {
-                NightStalker.addNightStalker(state, attacker, defender);
+                NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
             }
         }
 

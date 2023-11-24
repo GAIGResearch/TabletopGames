@@ -23,7 +23,9 @@ public class NightStalker {
         return nightStalkerDicePool;
     }
 
-    public static void addNightStalker(DescentGameState state, Figure attacker, Figure defender) {
+    public static void addNightStalker(DescentGameState state, int attackerID, int defenderID) {
+        Figure attacker = (Figure) state.getComponentById(attackerID);
+        Figure defender = (Figure) state.getComponentById(defenderID);
         Vector2D position = attacker.getPosition();
         Vector2D other = defender.getPosition();
         if (Math.abs(position.getX() - other.getX()) > 1 || Math.abs(position.getY() - other.getY()) > 1) {
@@ -32,7 +34,7 @@ public class NightStalker {
             DicePool newPool = state.getDefenceDicePool().copy();
             newPool.setDice(dice);
             state.setDefenceDicePool(newPool);
-            System.out.println("Night Stalker is active! Barghest gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
+            System.out.println("Night Stalker is active!" + defender.getComponentName() + " gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
         }
     }
 }
