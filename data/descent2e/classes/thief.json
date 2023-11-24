@@ -22,7 +22,7 @@
         "weaponSurges": ["String[]", ["RANGE_PLUS_1"]],
         "equipSlots": ["String[]", ["hand"]],
         "cost": ["Integer", 25],
-        "action": ["String", "Attack. When Attacking an adjacent monster, gain +1 damage; Effect:AdjacentFoeDamage:1; Effect:Range:3"]
+        "action": ["String", "Attack. When Attacking an adjacent monster, gain +1 damage;Effect:AdjacentFoeDamage:1"]
       },
       {
         "name": ["String","Lucky Charm"],
