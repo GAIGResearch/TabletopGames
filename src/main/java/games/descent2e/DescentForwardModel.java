@@ -457,16 +457,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // - Open/close a door TODO
 
             // Hero Only Actions
-            // Archetype Skills
             // Rest
             // Revive
             // Search
             // Heroic Abilities and Feats
             if (actingFigure instanceof Hero) {
-
-                // Archetype Skills
-                List <AbstractAction> archetypeSkills = getArchetypeSkillActions(dgs, actingFigure.getComponentID());
-                if (!archetypeSkills.isEmpty()) actions.addAll(archetypeSkills);
 
                 // Rest
                 Rest act = new Rest();
@@ -525,17 +520,24 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // TODO: exhaust a card for an action/modifier/effect "free" action
         }
 
-        // Heroic Feat
-        if (actingFigure instanceof Hero && (((Hero) actingFigure).isFeatAvailable()))
+        if (actingFigure instanceof Hero)
         {
-            List<DescentAction> heroicFeats = heroicFeatAction(dgs);
-            if(!heroicFeats.isEmpty())
-                actions.addAll(heroicFeats);
+            // Archetype Skills
+            List <AbstractAction> archetypeSkills = getArchetypeSkillActions(dgs, actingFigure.getComponentID());
+            if (!archetypeSkills.isEmpty()) actions.addAll(archetypeSkills);
 
-            // Tomble Burrowell's Heroic Feat
-            // Prevents End Turn from being taken, to stop him from being stuck as a Token
-            if(actions.contains(new ReturnToMapMove(4)) || actions.contains(new ReturnToMapPlace()))
-                actions.remove(endTurn);
+            // Heroic Feat
+            if (((Hero) actingFigure).isFeatAvailable())
+            {
+                List<DescentAction> heroicFeats = heroicFeatAction(dgs);
+                if(!heroicFeats.isEmpty())
+                    actions.addAll(heroicFeats);
+
+                // Tomble Burrowell's Heroic Feat
+                // Prevents End Turn from being taken, to stop him from being stuck as a Token
+                if(actions.contains(new ReturnToMapMove(4)) || actions.contains(new ReturnToMapPlace()))
+                    actions.remove(endTurn);
+            }
         }
 
         // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
