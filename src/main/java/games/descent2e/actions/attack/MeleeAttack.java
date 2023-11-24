@@ -2,8 +2,10 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
@@ -13,6 +15,7 @@ import games.descent2e.components.*;
 
 import java.util.*;
 
+import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 import static games.descent2e.actions.attack.MeleeAttack.Interrupters.*;
@@ -60,7 +63,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     protected AttackPhase phase = NOT_STARTED;
     protected int interruptPlayer;
     int surgesToSpend;
-    int extraRange, pierce, extraDamage, mending;
+    int extraRange, pierce, extraDamage, extraDefence, mending;
     boolean isDiseasing;
     boolean isImmobilizing;
     boolean isPoisoning;
@@ -165,7 +168,18 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 break;
                 //throw new AssertionError("Should never be executed");
             case PRE_ATTACK_ROLL:
-                // roll dice
+                // Get the weapon's stats, if they have any modifiers
+                // Only Heroes and Lieutenants can have weapons
+                Figure attacker = (Figure) state.getComponentById(attackingFigure);
+                Figure defender = (Figure) state.getComponentById(defendingFigure);
+
+                if (attacker instanceof Hero) getWeaponBonuses(state, attackingFigure, true, true);
+                if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
+
+                // if (attacker instanceof Monster && ((Monster) attacker).isLieutenant()) getWeaponBonuses(state, attackingFigure, false, true);
+                // if (defender instanceof Monster && ((Monster) defender).isLieutenant()) getWeaponBonuses(state, defendingFigure, false, false);
+
+                // Roll dice
                 damageRoll(state);
                 state.getActingFigure().setRerolled(false);
                 phase = POST_ATTACK_ROLL;
@@ -184,7 +198,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case PRE_DEFENCE_ROLL:
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
-                    Figure attacker = (Figure) state.getComponentById(attackingFigure);
                     //System.out.println("Attack missed!");
                     phase = ALL_DONE;
                 }
@@ -216,12 +229,67 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.getAttackDicePool().roll(state.getRandom());
     }
 
+    protected void getWeaponBonuses(DescentGameState state, int figure, boolean hero, boolean isAttacker)
+    {
+        if (hero)
+        {
+            Hero f = (Hero) state.getComponentById(figure);
+            Deck<DescentCard> myEquipment = f.getHandEquipment();
+            int length = myEquipment.getComponents().size();
+            for (int i = 0; i < length; i++)
+            {
+                String action = String.valueOf(myEquipment.get(i).getProperty("action"));
+                if(action.contains(";"))
+                {
+                    String[] actions = action.split(";");
+                    for (String s : actions)
+                    {
+                        if (s.contains("Effect:"))
+                        {
+                            String[] effect = s.split(":");
+                            switch(effect[1])
+                            {
+                                case "AdjacentFoeDamage":
+                                    if(isAttacker)
+                                        if (inRange(f.getPosition(), ((Figure) state.getComponentById(defendingFigure)).getPosition(), 1))
+                                            addDamage(Integer.parseInt(effect[2]));
+                                    break;
+                                case "Damage":
+                                    if(isAttacker)
+                                        addDamage(Integer.parseInt(effect[2]));
+                                    break;
+                                case "Range":
+                                    if(isAttacker)
+                                        addRange(Integer.parseInt(effect[2]));
+                                    break;
+                                case "Pierce":
+                                    if(isAttacker)
+                                        addPierce(Integer.parseInt(effect[2]));
+                                    break;
+
+                                case "Shield":
+                                    if(!isAttacker)
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Monster f = (Monster) state.getComponentById(attackingFigure);
+            return;
+        }
+
+    }
+
     protected void calculateDamage(DescentGameState state) {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
 
         damage = state.getAttackDicePool().getDamage() + extraDamage;
-        int defence = state.getDefenceDicePool().getShields() - pierce;
+        int defence = state.getDefenceDicePool().getShields() + extraDefence - pierce;
 
         // Leoric of the Book's Hero Ability
         // If a Monster is within 3 spaces of Leoric, its attacks deal -1 Heart (to a minimum of 1)
@@ -311,6 +379,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.surgesToSpend = surgesToSpend;
         retValue.extraRange = extraRange;
         retValue.extraDamage = extraDamage;
+        retValue.extraDefence = extraDefence;
         retValue.mending = mending;
         retValue.surgesUsed = new HashSet<>(surgesUsed);
         retValue.pierce = pierce;
@@ -332,6 +401,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             MeleeAttack other = (MeleeAttack) obj;
             return other.attackingFigure == attackingFigure &&
                     other.surgesToSpend == surgesToSpend && other.extraDamage == extraDamage &&
+                    other.extraDefence == extraDefence &&
                     other.isDiseasing == isDiseasing && other.isImmobilizing == isImmobilizing &&
                     other.isPoisoning == isPoisoning && other.isStunning == isStunning &&
                     other.extraRange == extraRange && other.pierce == pierce && other.mending == mending &&
@@ -345,7 +415,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, pierce,
-                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, mending,
+                extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
     }
 
@@ -448,6 +518,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public void reduceDamage (int damageReduction) {
         damage = Math.max(0, damage - damageReduction);
     }
+    public void addDefence(int defenceBonus) {
+        extraDefence += defenceBonus;
+    }
     public int getDamage() {
         return damage;
     }
@@ -457,4 +530,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return defendingFigure;
     }
 
+    public AttackPhase getPhase() {
+        return phase;
+    }
 }

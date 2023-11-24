@@ -274,6 +274,9 @@ public class Figure extends Token {
     public List<DescentAction> getAbilities() {
         return abilities;
     }
+    public boolean hasAbility(DescentAction ability) {
+        return abilities.contains(ability);
+    }
     public DicePool getAttackDice() { return attackDice;}
 
     public DicePool getDefenceDice() {return defenceDice;}
