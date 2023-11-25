@@ -473,9 +473,8 @@ public class DescentHelper {
         if (f instanceof Hero) {
             // Examines the Hero's equipment to see what their weapon's range is
             Deck<DescentCard> myEquipment = ((Hero) f).getHandEquipment();
-            int length = myEquipment.getComponents().size();
-            for (int i = 0; i < length; i++) {
-                DescentTypes.AttackType temp = myEquipment.get(i).getAttackType();
+            for (DescentCard equipment : myEquipment.getComponents()) {
+                DescentTypes.AttackType temp = equipment.getAttackType();
 
                 // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
                 if (temp != DescentTypes.AttackType.NONE) {

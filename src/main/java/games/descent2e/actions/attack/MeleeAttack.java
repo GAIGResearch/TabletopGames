@@ -11,6 +11,7 @@ import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.items.Shield;
 import games.descent2e.components.*;
 
 import java.util.*;
@@ -235,10 +236,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         {
             Hero f = (Hero) state.getComponentById(figure);
             Deck<DescentCard> myEquipment = f.getHandEquipment();
-            int length = myEquipment.getComponents().size();
-            for (int i = 0; i < length; i++)
+            for (DescentCard equipment : myEquipment.getComponents())
             {
-                String action = String.valueOf(myEquipment.get(i).getProperty("action"));
+                String action = String.valueOf(equipment.getProperty("action"));
                 if(action.contains(";"))
                 {
                     String[] actions = action.split(";");
@@ -269,6 +269,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
                                 case "Shield":
                                     if(!isAttacker)
+                                    {
+                                        DescentAction shield = new Shield(figure, equipment, Integer.parseInt(effect[2]));
+                                        if (!f.hasAbility(shield))
+                                            f.addAbility(shield);
+                                    }
                                     break;
                             }
                         }
@@ -468,7 +473,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             if (!retValue.isEmpty())
                 retValue.add(new EndRerollPhase());
         }
-        if (phase == PRE_DAMAGE) {
+        if (phase == POST_DEFENCE_ROLL || phase == PRE_DAMAGE) {
             if (!retValue.isEmpty())
                 retValue.add(new EndCurrentPhase());
         }
@@ -483,6 +488,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -525,6 +531,16 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         return damage;
     }
 
+    public int getExtraDamage() {
+        return extraDamage;
+    }
+    public int getExtraDefence() {
+        return extraDefence;
+    }
+    public int getPierce() {
+        return pierce;
+    }
+
     public int getDefendingFigure()
     {
         return defendingFigure;
@@ -532,5 +548,15 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     public AttackPhase getPhase() {
         return phase;
+    }
+
+    public boolean getSkip()
+    {
+        return skip;
+    }
+
+    public void setSkip(boolean s)
+    {
+        skip = s;
     }
 }
