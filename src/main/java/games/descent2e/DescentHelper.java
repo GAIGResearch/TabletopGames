@@ -3,16 +3,15 @@ package games.descent2e;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Deck;
-import core.components.GridBoard;
+import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyVector2D;
+import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
-import games.descent2e.components.DescentCard;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
+import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import utilities.LineOfSight;
 import utilities.Pair;
@@ -22,7 +21,6 @@ import java.util.*;
 
 import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
-import static utilities.Utils.getNeighbourhood;
 
 public class DescentHelper {
 
@@ -492,4 +490,44 @@ public class DescentHelper {
         return attackType;
     }
 
+    public static int reroll(DescentGameState dgs, DescentDice dice) {
+        DiceType type = dice.getColour();
+        DicePool roll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
+            put(type, 1);
+        }});
+        roll.roll((dgs.getRandom()));
+        return roll.getDice(0).getFace();
+    }
+
+    public static List<DescentAction> getOtherEquipmentActions(Hero figure) {
+        List<DescentAction> actions = new ArrayList<>();
+        for (DescentCard equipment : figure.getOtherEquipment().getComponents()) {
+            Property passive = equipment.getProperty("passive");
+            if (passive != null) {
+                String pass = String.valueOf(equipment.getProperty("passive"));
+                if (pass.contains(";")) {
+                    String[] passives = pass.split(";");
+                    for (String s : passives) {
+                        if (s.contains("Effect:")) {
+                            String[] effect = s.split(":");
+                            switch (effect[1]) {
+                                case "Reroll":
+                                    switch (effect[2]) {
+                                        case "AttributeTest":
+                                            actions.add(new RerollAttributeTest(figure.getComponentID(), equipment));
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return actions;
+    }
 }

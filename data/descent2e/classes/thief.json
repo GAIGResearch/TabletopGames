@@ -32,7 +32,7 @@
         "equipmentType": ["String[]", ["Trinket"]],
         "equipSlots": ["String[]", ["other"]],
         "cost": ["Integer", 25],
-        "passive": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results."]
+        "passive": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results;Effect:Reroll:AttributeTest"]
       },
       {
         "name": ["String","Appraisal"],

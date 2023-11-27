@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.attack.EndCurrentPhase;
+import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -57,6 +59,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     protected int penaltyToRoll = 0;
     protected boolean result = false;
 
+    boolean skip = false;
+
 
 
     public AttributeTest(int testingFigure, Figure.Attribute attribute) {
@@ -107,9 +111,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 //       System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
+                skip = false;
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
                 if (phase.interrupt == null || interruptPlayer == testingPlayer) {
-                    // we have completed the loop, and start again with the attacking player
+                    // we have completed the loop, and start again with the testing player
                     executePhase(state);
                     interruptPlayer = testingPlayer;
                 }
@@ -164,7 +169,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
         // Only Heroes and Lieutenant Monsters can make Attribute Tests
 
-        if (f instanceof Monster || !(f instanceof Hero))
+        if (!(f instanceof Hero))
         {
             // By default, regular Monsters will always fail, as they have no attributes
             if (!((Monster) f).isLieutenant())
@@ -181,15 +186,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         int roll = dgs.getAttributeDicePool().getShields();
 
         // Normally, both penalties remain at 0, however the Overlord can influence either
-        if ((roll + penaltyToRoll) <= (attributeValue - penaltyToAttribute))
-        {
-            result = true;
-        }
-
-        else
-        {
-            result = false;
-        }
+        result = (roll + penaltyToRoll) <= (attributeValue - penaltyToAttribute);
     }
 
     public void resolveTest(DescentGameState dgs, Figure f, boolean result)
@@ -205,6 +202,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         }
         DescentGameState state = (DescentGameState) gs;
         List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
+        if (phase == POST_TEST_ROLL) {
+            if (!retValue.isEmpty())
+                retValue.add(new EndCurrentPhase());
+        }
         return retValue;
     }
 
@@ -216,6 +217,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -357,5 +359,17 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public TestPhase getPhase() {
+        return phase;
+    }
+    public boolean getSkip()
+    {
+        return skip;
+    }
+    public void setSkip(boolean s)
+    {
+        skip = s;
     }
 }

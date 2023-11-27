@@ -48,7 +48,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         dgs.addAllComponents();
         DescentGameData _data = dgs.getData();
 
-        // Set up revive dice pool: 2 red dice
+        // Set up dice pools
+        // Revive: 2 red dice
+        // Heal: 1 red die
         DicePool.revive = constructDicePool(descentParameters.reviveDice);
         DicePool.heal = constructDicePool(descentParameters.healDice);
 
@@ -134,6 +136,15 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // After equipping, set up abilities
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+
+            // Set up abilities from other equipment
+            List<DescentAction> passiveActions = getOtherEquipmentActions(figure);
+            if (!passiveActions.isEmpty())
+            {
+                for (DescentAction act : passiveActions) {
+                    figure.addAbility(act);
+                }
+            }
 
             // Enable the Heroic Feat
             figure.setFeatAvailable(true);

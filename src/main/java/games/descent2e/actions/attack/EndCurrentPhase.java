@@ -2,15 +2,22 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.AttributeTest;
+
+import javax.management.Attribute;
+import java.util.Objects;
 
 public class EndCurrentPhase extends AbstractAction {
 
-    MeleeAttack currentAction;
-
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((MeleeAttack) gs.currentActionInProgress()).skip = true;
+        IExtendedSequence action = Objects.requireNonNull(gs.currentActionInProgress());
+        if (action instanceof MeleeAttack)
+            ((MeleeAttack) action).setSkip(true);
+        if (action instanceof AttributeTest)
+            ((AttributeTest) action).setSkip(true);
         System.out.println("Skipping current phase");
         return true;
     }
