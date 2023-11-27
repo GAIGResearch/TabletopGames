@@ -278,7 +278,10 @@ public class Move extends AbstractAction {
         for (Vector2D pos: positionsTraveled) {
             posTraveledCopy.add(pos.copy());
         }
-        return new Move(f, posTraveledCopy, orientation);
+        Move retval = new Move(f, posTraveledCopy, orientation);
+        retval.startPosition = startPosition.copy();
+        retval.directionID = directionID;
+        return retval;
     }
 
     @Override
@@ -286,12 +289,14 @@ public class Move extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof Move)) return false;
         Move move = (Move) o;
-        return f == move.f && orientation == move.orientation && Objects.equals(positionsTraveled, move.positionsTraveled);
+        return f == move.f && orientation == move.orientation &&
+                Objects.equals(positionsTraveled, move.positionsTraveled) && Objects.equals(startPosition, move.startPosition) &&
+                directionID == move.directionID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(f, positionsTraveled, orientation);
+        return Objects.hash(f, positionsTraveled, orientation, startPosition, directionID);
     }
 
     @Override
