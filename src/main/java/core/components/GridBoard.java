@@ -273,7 +273,11 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
                 BoardNode t = getElement(x, y);
-                s += t.toString() + " ";
+                if (t != null) {
+                    s += t.toString() + " ";
+                } else {
+                    s += " ";
+                }
             }
             s += "\n";
         }

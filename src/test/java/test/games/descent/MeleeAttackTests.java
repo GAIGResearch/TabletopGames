@@ -201,7 +201,7 @@ public class MeleeAttackTests {
         assertEquals(new EndSurgePhase(), actions.get(1));
 
         actions.get(0).execute(state);
-        attack.registerActionTaken(state, actions.get(0));
+        attack._afterAction(state, actions.get(0));
         assertTrue(attack.executionComplete(state));
     }
 
@@ -232,7 +232,7 @@ public class MeleeAttackTests {
         assertEquals(new EndSurgePhase(), actions.get(1));
 
         actions.get(1).execute(state);
-        attack.registerActionTaken(state, actions.get(1));
+        attack._afterAction(state, actions.get(1));
         assertTrue(attack.executionComplete(state));
     }
 
@@ -253,7 +253,7 @@ public class MeleeAttackTests {
         assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
 
         actions.get(0).execute(state);
-        attack.registerActionTaken(state, actions.get(0));
+        attack._afterAction(state, actions.get(0));
         assertTrue(attack.executionComplete(state));
     }
 

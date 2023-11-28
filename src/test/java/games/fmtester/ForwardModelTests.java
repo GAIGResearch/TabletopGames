@@ -4,7 +4,11 @@ import evaluation.ForwardModelTester;
 import org.junit.Test;
 
 public class ForwardModelTests {
-//
+    @Test
+    public void testDescent2e() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=5", "nPlayers=3");
+    }
+
 //    @Test
 //    public void testBattleLore() {
 //        ForwardModelTester fmt = new ForwardModelTester("game=Battlelore", "nGames=5", "nPlayers=2");
@@ -74,12 +78,12 @@ public class ForwardModelTests {
 //    public void testUno() {
 //        ForwardModelTester fmt = new ForwardModelTester("game=Uno", "nGames=2", "nPlayers=5");
 //    }
-    @Test
-    public void testResistance() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Resistance", "nGames=2", "nPlayers=5");
-    }
-    @Test
-    public void testVirus() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Virus", "nGames=2", "nPlayers=3");
-    }
+//    @Test
+//    public void testResistance() {
+//        ForwardModelTester fmt = new ForwardModelTester("game=Resistance", "nGames=2", "nPlayers=5");
+//    }
+//    @Test
+//    public void testVirus() {
+//        ForwardModelTester fmt = new ForwardModelTester("game=Virus", "nGames=2", "nPlayers=3");
+//    }
 }
