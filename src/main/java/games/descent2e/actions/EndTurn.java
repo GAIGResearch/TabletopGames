@@ -73,7 +73,18 @@ public class EndTurn extends DescentAction{
         f.setUsedExtraAction(false);
 
         System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ")");
+
+        int currentPlayer = dgs.getTurnOrder().getCurrentPlayer(dgs);
         dgs.getTurnOrder().endPlayerTurn(dgs);
+        int nextPlayer = dgs.getTurnOrder().getCurrentPlayer(dgs);
+
+        // The Overlord draws a new card at the start of their turn
+        if (nextPlayer == dgs.getOverlordPlayer() && currentPlayer != dgs.getOverlordPlayer()) {
+            dgs.clearPlayedOverlordCards();
+            System.out.println("Clearing list of played Overlord cards this round.");
+            dgs.drawOverlordCard();
+            System.out.println(dgs.getOverlordHand());
+        }
     }
 
     // TODO Delete after debugging, don't include in the final version

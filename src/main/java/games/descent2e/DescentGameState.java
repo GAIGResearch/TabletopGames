@@ -13,6 +13,7 @@ import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
 import games.descent2e.concepts.Quest;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -42,6 +43,11 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Random rnd;
 
     Deck<Card> searchCards;
+    Deck<Card> overlordCards;
+    Deck<Card> overlordHand;
+    Deck<Card> overlordDiscard;
+    List<Pair<String, Integer>> overlordPlayedThisTurn = new ArrayList<>();
+    int overlordDeckSizeMinimum = 15;
     GridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
@@ -109,6 +115,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
             components.addAll(tokens);
         }
         components.add(searchCards);
+        components.add(overlordCards);
+        components.add(overlordHand);
+        components.add(overlordDiscard);
         components.addAll(heroes);
         monsters.forEach(components::addAll);
         monstersOriginal.forEach(components::addAll);
@@ -160,6 +169,12 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
             copy.tokens.add(t.copy());
         }
         copy.searchCards = searchCards.copy();
+        copy.overlordCards = overlordCards.copy();
+        copy.overlordHand = overlordHand.copy();
+        copy.overlordDiscard = overlordDiscard.copy();
+        for(Pair<String, Integer> cardPlayed : overlordPlayedThisTurn) {
+            copy.overlordPlayedThisTurn.add(new Pair<>(cardPlayed.a, cardPlayed.b));
+        }
         copy.currentQuest = currentQuest;  // TODO does this need to be deep? it (should be) read-only after data parsing
         // TODO
         return copy;
@@ -198,6 +213,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 Arrays.equals(tileReferences, that.tileReferences) &&
                 Objects.equals(gridReferences, that.gridReferences) &&
                 Objects.equals(searchCards, that.searchCards) &&
+                Objects.equals(overlordCards, that.overlordCards) &&
+                Objects.equals(overlordHand, that.overlordHand) &&
+                Objects.equals(overlordDiscard, that.overlordDiscard) &&
+                Objects.equals(overlordPlayedThisTurn, that.overlordPlayedThisTurn) &&
                 Objects.equals(masterBoard, that.masterBoard) &&
                 Objects.equals(attackDicePool, that.attackDicePool) &&
                 Objects.equals(defenceDicePool, that.defenceDicePool) &&
@@ -211,7 +230,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards, overlordCards, overlordHand, overlordDiscard, overlordPlayedThisTurn,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, monsters, overlordPlayer, tokens);
         result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
@@ -261,6 +280,58 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     public Deck<Card> getSearchCards() {
         return searchCards;
+    }
+    public Deck<Card> getOverlordCards() {
+        return overlordCards;
+    }
+    public Deck<Card> getOverlordHand() {
+        return overlordHand;
+    }
+    public Deck<Card> getOverlordDiscard() {
+        return overlordDiscard;
+    }
+    public void addOverlordHand(Card card) {
+        overlordHand.add(card);
+    }
+    public void addOverlordDiscard(Card card) {
+        overlordDiscard.add(card);
+    }
+    public void drawOverlordCard() {
+        if (overlordCards.getSize() == 0) {
+            // Can't draw a new card if we already have all available cards in our hand
+            if (overlordDiscard.getSize() == 0) {
+                return;
+            }
+            refreshOverlordCards();
+        }
+        Card card = overlordCards.draw();
+        addOverlordHand(card);
+    }
+    public void playOverlordCard(Card card, int playerId) {
+        overlordHand.remove(card);
+        Pair<String, Integer> cardPlayed = new Pair<>(card.getProperty("name").toString(), playerId);
+        overlordPlayedThisTurn.add(cardPlayed);
+        addOverlordDiscard(card);
+    }
+    public void refreshOverlordCards() {
+        overlordCards = overlordDiscard;
+        overlordCards.shuffle(new Random(gameParameters.getRandomSeed()));
+        overlordDiscard.clear();
+    }
+    public boolean isOverlordDeckBigEnough() {
+        return overlordCards.getSize() >= overlordDeckSizeMinimum;
+    }
+    public boolean hasPlayedCardOnTrigger(Card card, int playerId) {
+        String cardName = card.getProperty("name").toString();
+        for (Pair<String, Integer> cardPlayed : overlordPlayedThisTurn) {
+            if (cardPlayed.a.equals(cardName) && cardPlayed.b == playerId) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public void clearPlayedOverlordCards() {
+        overlordPlayedThisTurn.clear();
     }
 
     /*

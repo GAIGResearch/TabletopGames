@@ -35,6 +35,7 @@ public class DescentGameData extends AbstractGameData {
     List<Hero> heroes;
     List<Deck<Card>> decks;
     Deck<Card> searchCards;
+    Deck<Card> overlordCards;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Monster>> monsters;
@@ -52,6 +53,17 @@ public class DescentGameData extends AbstractGameData {
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
 
         searchCards = SearchCard.loadCards(dataPath + "searchCards.json");
+
+        // Load Overlord cards
+        JSONParser jsonParser = new JSONParser();
+        try (FileReader reader = new FileReader(dataPath + "overlordCards.json")) {
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+            for (Object o : data) {
+                overlordCards = Deck.loadDeckOfCards((JSONObject) o);
+            }
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
 
         decks = new ArrayList<>();
         // Read all class decks

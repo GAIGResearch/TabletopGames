@@ -170,6 +170,8 @@ public class Hero extends Figure {
             // Remove from map
             Move.remove(dgs, this);
             setOffMap(true);
+            // And the Overlord may draw a card
+            dgs.drawOverlordCard();
         }
         else {
             Move.replace(dgs, this);

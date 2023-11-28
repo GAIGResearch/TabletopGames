@@ -275,6 +275,32 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         dgs.searchCards = _data.searchCards;
         dgs.searchCards.shuffle(r);
 
+        // Set up Overlord cards deck
+        dgs.overlordCards = new Deck<>("Overlord Cards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        dgs.overlordHand = new Deck<>("Overlord Hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+        dgs.overlordDiscard = new Deck<>("Overlord Discard", VisibilityMode.VISIBLE_TO_ALL);
+        for (Card c: _data.overlordCards.getComponents()) {
+            if (((PropertyInt)c.getProperty(xpHash)).value <= dgs.overlord.getAttribute(Figure.Attribute.XP).getValue()) {
+                for (int i = 0; i < ((PropertyInt) c.getProperty("count")).value; i++)
+                {
+                    Card copy = c.copy();
+                    dgs.overlordCards.add(copy);
+                }
+            }
+        }
+
+        // The Overlord must always have a minimum of 15 cards in their starting deck
+        // There is no maximum to how big their deck is, just as many cards as they have XP for
+        if (dgs.isOverlordDeckBigEnough())
+        {
+            System.out.println("Overlord deck is big enough: " + dgs.overlordCards.getSize() + "Cards / 15 Minimum");
+        }
+
+        dgs.overlordCards.shuffle(r);
+        // We draw one Overlord card per Hero at the start of the game (i.e. 4 Heroes -> 4 cards in the Overlord's hand)
+        for (int i = 0; i < dgs.getHeroes().size(); i++)
+            dgs.drawOverlordCard();
+
         // Ready to start playing!
     }
 

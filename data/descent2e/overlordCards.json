@@ -1,0 +1,236 @@
+[
+  {
+    "name": ["String","Overlord"],
+    "visibility" : "VISIBLE_TO_ALL",
+    "cards":
+    [
+      {
+        "name": ["String","Critical Blow"],
+        "class": ["String","Basic"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a monster attacks a hero, after rolling dice. The attack gains: Surge: +3 Heart."],
+        "effect": ["String", "SURGE:DAMAGE_PLUS_3"]
+      },
+      {
+        "name": ["String","Dark Charm"],
+        "class": ["String","Basic"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card on a hero at the start of your turn. The hero tests Willpower. If he passes, draw 1 Overlord Card. If he fails, you may perform a move or attack action with that hero as if he were one of your monsters this turn. You cannot force him to suffer Fatigue or use a Potion, but you may force him to attack himself."],
+        "effect": ["String", "DARK_CHARM"]
+      },
+      {
+        "name": ["String","Dark Fortune"],
+        "class": ["String","Basic"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 2],
+        "action": ["String", " Play this card after you roll dice. You may reroll 1 die. "],
+        "effect": ["String", "REROLL_ONE_DIE"]
+      },
+      {
+        "name": ["String","Dark Might"],
+        "class": ["String","Basic"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card after you roll dice for an attack. Add 1 Surge to the results."],
+        "effect": ["String", "SURGE_PLUS_1"]
+      },
+      {
+        "name": ["String","Dash"],
+        "class": ["String","Basic"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card when activating a monster during your turn. That monster may perform an additional move action this turn in addition to its normal 2 actions."],
+        "effect": ["String", "DASH"]
+      },
+      {
+        "name": ["String","Frenzy"],
+        "class": ["String","Basic"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card when activating a monster during your turn. That monster may perform an additional attack action this turn in addition to its normal 2 actions."],
+        "effect": ["String", "FREE_ATTACK"]
+      },
+      {
+        "name": ["String","Pit Trap"],
+        "class": ["String","Basic"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a hero enters an empty space. He tests Awareness. If he fails, he suffers 1 Heart and loses 1 movement point. If he has no movement points to lose (such as if he suffered fatigue to move), he is Stunned."],
+        "effect": ["String", "PIT_TRAP"]
+      },
+      {
+        "name": ["String","Poison Dart"],
+        "class": ["String","Basic"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a hero opens a door or searches. He tests Awareness or Might (your choice). If he passes, draw 1 Overlord Card. If he fails, he suffers 1 Heart, 1 Fatigue, and he is Poisoned."],
+        "effect": ["String", "POISON_DART"]
+      },
+      {
+        "name": ["String","Tripwire"],
+        "class": ["String","Basic"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card when a hero enters an empty space during a move action. He tests Awareness. If he fails, he must end his move action (he can still suffer Fatigue to move further, or perform a second move action if this was his first action)."],
+        "effect": ["String", "TRIPWIRE"]
+      },
+      {
+        "name": ["String","Word of Misery"],
+        "class": ["String","Basic"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 0],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card at the start of your turn. During this turn, each time a hero suffers any Heart, he also suffers 1 Fatigue in addition to the Heart suffered."],
+        "effect": ["String", "WORD_OF_MISERY"]
+      },
+      {
+        "name": ["String","Blood Rage"],
+        "class": ["String","Warlord"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 1],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card at the end of your turn and choose a monster. That monster immediately performs 2 attack actions, and is then defeated."],
+        "effect": ["String", "BLOOD_RAGE"]
+      },
+      {
+        "name": ["String","Dark Fortitude"],
+        "class": ["String","Warlord"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 1],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card after rolling defense dice. Add 2 Shield to the results."],
+        "effect": ["String", "SHIELD:2"]
+      },
+      {
+        "name": ["String","Bloodlust"],
+        "class": ["String","Warlord"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 2],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a hero is knocked out. Draw 2 Overlord cards. This is in addition to your normal 1 Overlord card drawn for defeating a hero."],
+        "effect": ["String", "BLOODLUST"]
+      },
+      {
+        "name": ["String","Expert Blow"],
+        "class": ["String","Warlord"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 2],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a monster attacks a hero, before rolling dice. The attack gains +2 Heart and Surge: Return this card to your hand."],
+        "effect": ["String", "EXPERT_BLOW"]
+      },
+      {
+        "name": ["String","Reinforce"],
+        "class": ["String","Warlord"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 3],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card at the end of your turn and choose a master monster on the map. Place minion monsters of that monster’s group in empty spaces adjacent to that monster, up to the group limit. These monsters may not be placed within 3 spaces of any hero, but may otherwise be placed in any empty space."],
+        "effect": ["String", "REINFORCE"]
+      },
+      {
+        "name": ["String","Unholy Ritual"],
+        "class": ["String","Magus"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 1],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card at the start of your turn. Choose one of your monster groups and draw Overlord cards equal to the number of figures from that group on the map. Choose and keep 2 cards and discard the rest. Each monster in that group performs 1 less action during this turn."],
+        "effect": ["String", "UNHOLY_RITUAL"]
+      }
+    ,
+      {
+        "name": ["String","Word of Pain"],
+        "class": ["String","Magus"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 1],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card at the end of your turn. Each hero tests Might. Each hero who fails suffers 1 Heart."],
+        "effect": ["String", "WORD_OF_PAIN"]
+      },
+      {
+        "name": ["String","Rise Again"],
+        "class": ["String","Magus"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 2],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a minion or master monster is defeated to place a fatigue token on the map in that monster's space. At the start of your next turn, place that monster on the map within 5 spaces of where it was defeated. At the end of your next turn, remove that monster (and the token) from the map."],
+        "effect": ["String", "RISE_AGAIN"]
+      },
+      {
+        "name": ["String","Word of Despair"],
+        "class": ["String","Magus"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 2],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card at the end of your turn. Each hero tests Willpower. Each hero who fails suffers 1 Fatigue each time he performs an action during his next turn. This Fatigue is suffered after the hero completely resolves the action. (He may perform actions even if his Fatigue equals his Stamina; excess Fatigue is converted to Heart as usual.)"],
+        "effect": ["String", "WORD_OF_DESPAIR"]
+      },
+      {
+        "name": ["String","Diabolic Power"],
+        "class": ["String","Magus"],
+        "type": ["String","Magic"],
+        "XP": ["Integer", 3],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card during your turn. Search your deck and discard pile for the card of your choice, reveal it, and place it in your hand, then shuffle your deck. If the chosen card is an Event, every hero tests Willpower. If it is a Trap, every hero tests Awareness. If it is Magic, every hero tests Knowledge. Each hero who fails suffers 2 Heart."],
+        "effect": ["String", "DIABOLIC_POWER"]
+      },
+      {
+        "name": ["String","Explosive Runes"],
+        "class": ["String","Saboteur"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 1],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card after a hero opens a door or searches. That hero, and each hero within 2 spaces of him tests Awareness. Each hero who fails suffers 1 Heart for each Shield rolled in excess of his Awareness."],
+        "effect": ["String", "EXPLOSIVE_RUNES"]
+      }
+    ,
+      {
+        "name": ["String","Web Trap"],
+        "class": ["String","Saboteur"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 1],
+        "count": ["Integer", 2],
+        "action": ["String", "Play this card when a hero enters an empty space. That hero and each hero adjacent to him tests Might. Each hero who fails is Immobilized."],
+        "effect": ["String", "WEB_TRAP"]
+      },
+      {
+        "name": ["String","Curse of the Monkey God"],
+        "class": ["String","Saboteur"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 2],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card after a hero searches. That hero tests Knowledge. If he passes, draw 1 Overlord card. If he fails, he becomes a monkey until the end of his next turn. Take 1 of his hero tokens as a reminder. Monkeys cannot roll defense dice (except to test an attribute), have a Speed of 5, and cannot attack for any reason."],
+        "effect": ["String", "MONKEY_GOD"]
+      },
+      {
+        "name": ["String","Wicked Laughter"],
+        "class": ["String","Saboteur"],
+        "type": ["String","Event"],
+        "XP": ["Integer", 2],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card when a hero passes an attribute test. The hero must take the test again, this time treating his attribute as if it were 1 lower. If the hero passes this new attribute test, draw 1 Overlord card."],
+        "effect": ["String", "WICKED_LAUGHTER"]
+      },
+      {
+        "name": ["String","Uthuk Demon Trap"],
+        "class": ["String","Saboteur"],
+        "type": ["String","Trap"],
+        "XP": ["Integer", 3],
+        "count": ["Integer", 1],
+        "action": ["String", "Play this card after a hero opens a door or searches. He tests Awareness or Might (his choice). If he passes, he suffers Heart equal to the attribute tested. If he fails, he is defeated."],
+        "effect": ["String", "DEMON_TRAP"]
+      }
+    ]
+  }
+]
