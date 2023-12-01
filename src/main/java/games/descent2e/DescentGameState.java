@@ -217,6 +217,27 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return result;
     }
 
+    @Override
+    public int[] hashCodeArray() {
+        return new int[] {
+                data.hashCode(),
+                tiles.hashCode(),
+                gridReferences.hashCode(),
+                initData ? 1 : 0,
+                searchCards.hashCode(),
+                masterBoard.hashCode(),
+                attackDicePool.hashCode(),
+                defenceDicePool.hashCode(),
+                attributeDicePool.hashCode(),
+                heroes.hashCode(),
+                overlord.hashCode(),
+                monsters.hashCode(),
+                overlordPlayer,
+                tokens.hashCode(),
+                Arrays.deepHashCode(tileReferences)
+        };
+    }
+
     DescentGameData getData() {
         return data;
     }

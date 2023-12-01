@@ -633,4 +633,24 @@ public abstract class AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }
+
+    public int[] hashCodeArray() {
+        return new int[0];
+    }
+
+    public final int[] superHashCodeArray() {
+        return new int[] {
+                Objects.hash(gameParameters),
+                Objects.hash(gameStatus),
+                Objects.hash(gamePhase),
+                Objects.hash(actionsInProgress),
+                Objects.hash(tick),
+                Objects.hash(nPlayers),
+                Objects.hash(roundCounter),
+                Objects.hash(turnCounter),
+                Objects.hash(turnOwner),
+                Objects.hash(firstPlayer),
+                Arrays.hashCode(playerResults)
+        };
+    }
 }
