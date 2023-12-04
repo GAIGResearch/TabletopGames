@@ -451,7 +451,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                 }
             }
             root.findChildrenByName("NOPE").findChildrenByName("PASS").setAction(new PassAction());
-            System.out.println("got boht nope actions");
+//            System.out.println("got boht nope actions");
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
             Deck<ExplodingKittensCard> receiverDeck = ekgs.playerHandCards.get(ekgs.playerGettingAFavor);
             // this requires mapping the card type to indices
