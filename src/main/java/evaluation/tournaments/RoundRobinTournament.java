@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toList;
 public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
     public TournamentMode tournamentMode;
-    private final int gamesPerMatchUp;
+    final int gamesPerMatchUp;
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
     double[] pointsPerPlayer, winsPerPlayer;
@@ -205,9 +205,7 @@ public class RoundRobinTournament extends AbstractTournament {
                                 matchup.add(agentOrder.get(j % agentOrder.size()));
                             }
                         }
-                        // in pure random mode we don't use the gameSeed List. That is when we
-                        // need to control randomness across multiple runs of the same game with permuted players
-                        evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
+                        evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(m)));
                     }
                 }
             }
