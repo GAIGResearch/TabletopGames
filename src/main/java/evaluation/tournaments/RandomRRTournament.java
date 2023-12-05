@@ -13,7 +13,6 @@ import java.util.stream.IntStream;
 
 public class RandomRRTournament extends RoundRobinTournament {
 
-    private int totalMatchups;
     private IntSupplier idStream;
     private int reportPeriod;
 
@@ -29,10 +28,8 @@ public class RandomRRTournament extends RoundRobinTournament {
 
                               // int totalMatchUps, int reportPeriod, long seed,                              , boolean byTeam) {
         super(agents, gameToPlay, playersPerGame,  gameParams, tournamentMode, config);
-        this.totalMatchups = (int) config.get(RunArg.matchups);
         this.reportPeriod = config.get(RunArg.reportPeriod) == null ? 0 : (int) config.get(RunArg.reportPeriod);
-        long seed = (long) config.get(RunArg.seed);
-        idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
+        idStream = new PermutationCycler(agents.size(), seedRnd, playersPerGame);
     }
 
     /**
@@ -45,12 +42,12 @@ public class RandomRRTournament extends RoundRobinTournament {
     @Override
     public void createAndRunMatchUp(List<Integer> ignored) {
         int nTeams = game.getGameState().getNTeams();
-        for (int i = 0; i < totalMatchups; i++) {
+        for (int i = 0; i < gamesPerMatchUp; i++) {
             List<Integer> matchup = new ArrayList<>(nTeams);
             for (int j = 0; j < nTeams; j++)
                 matchup.add(idStream.getAsInt());
-            evaluateMatchUp(matchup, 1);
-            if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1) {
+            evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(i)));
+            if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != gamesPerMatchUp - 1) {
                 reportResults();
             }
         }
@@ -68,7 +65,8 @@ public class RandomRRTournament extends RoundRobinTournament {
         int nPlayers;
         Random rnd;
 
-        public PermutationCycler(int maxNumberExclusive, long seed, int nPlayers) {
+        public PermutationCycler(int maxNumberExclusive, Random rnd, int nPlayers) {
+            this.rnd = rnd;
             if (maxNumberExclusive >= nPlayers)
                 currentPermutation = IntStream.range(0, maxNumberExclusive).toArray();
             else {
@@ -79,7 +77,6 @@ public class RandomRRTournament extends RoundRobinTournament {
                 }
             }
             currentPosition = -1;
-            rnd = new Random(seed);
             this.nPlayers = nPlayers;
             shuffle();
         }

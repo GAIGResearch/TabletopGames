@@ -149,4 +149,12 @@ public class TunableParametersTest {
         assertEquals(0.01, rollout.temperature, 0.001);
         assertEquals(new PuertoRicoActionHeuristic001(), rollout.getActionHeuristic());
     }
+
+    @Test
+    public void copyingParamsChangesRandomSeedOnChildButNotParent() {
+        long startingSeed = params.getRandomSeed();
+        MCTSParams copy = (MCTSParams) params.copy();
+        assertNotEquals(startingSeed, copy.getRandomSeed());
+        assertEquals(startingSeed, params.getRandomSeed());
+    }
 }
