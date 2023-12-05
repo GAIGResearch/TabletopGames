@@ -129,7 +129,9 @@ public class RHEAPlayer extends AbstractPlayer {
     public RHEAPlayer copy() {
         RHEAParams newParams = (RHEAParams) parameters.copy();
         newParams.setRandomSeed(randomGenerator.nextInt());
-        return new RHEAPlayer(newParams);
+        RHEAPlayer retValue = new RHEAPlayer(newParams);
+        retValue.setForwardModel(getForwardModel().copy());
+        return retValue;
     }
 
     private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2) {

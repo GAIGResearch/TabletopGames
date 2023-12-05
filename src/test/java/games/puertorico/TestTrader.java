@@ -110,7 +110,7 @@ public class TestTrader {
         assertTrue(state.isActionInProgress());
         assertEquals(2, fm.computeAvailableActions(state).size());
         assertEquals(new Sell(COFFEE, 4), fm.computeAvailableActions(state).get(0));
-        assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(1));
+        assertEquals(new Sell(null, 0), fm.computeAvailableActions(state).get(1));
         fm.next(state, fm.computeAvailableActions(state).get(0));
 
         assertEquals(3, state.getMarket().size());

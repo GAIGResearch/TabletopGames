@@ -461,29 +461,23 @@ public abstract class AbstractGameState {
             if (otherScore > playerScore)
                 ordinal++;
             else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != Double.MAX_VALUE) {
-                if (getOrdinalPositionTiebreak(i, tiebreakFunction, 1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, 1))
-                    ordinal++;
+                int tier = 1;
+                while (tier <= getTiebreakLevels()) {
+                    double otherTiebreak = tiebreakFunction.apply(i, tier);
+                    double playerTiebreak = tiebreakFunction.apply(playerId, tier);
+                    if (otherTiebreak == playerTiebreak) {
+                        tier++;
+                    } else {
+                        if (otherTiebreak > playerTiebreak)
+                            ordinal++;
+                        break;
+                    }
+                }
             }
         }
         return ordinal;
     }
 
-    public int getOrdinalPositionTiebreak(int playerId, BiFunction<Integer, Integer, Double> tiebreakFunction, int tier) {
-        int ordinal = 1;
-        Double playerScore = tiebreakFunction.apply(playerId, tier);
-        if (playerScore == null) return ordinal;
-
-        for (int i = 0, n = getNPlayers(); i < n; i++) {
-            double otherScore = tiebreakFunction.apply(i, tier);
-            if (otherScore > playerScore)
-                ordinal++;
-            else if (otherScore == playerScore && tier < getTiebreakLevels() && tiebreakFunction.apply(i, tier+1) != null) {
-                if (getOrdinalPositionTiebreak(i, tiebreakFunction, tier+1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, tier+1))
-                    ordinal++;
-            }
-        }
-        return ordinal;
-    }
     public int getOrdinalPosition(int playerId) {
         return getOrdinalPosition(playerId, this::getGameScore, this::getTiebreak);
     }

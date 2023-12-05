@@ -138,7 +138,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     @Override
     public MCTSPlayer copy() {
-        return new MCTSPlayer((MCTSParams) getParameters().copy());
+        MCTSPlayer retValue = new MCTSPlayer((MCTSParams) getParameters().copy());
+        retValue.setForwardModel(getForwardModel().copy());
+        return retValue;
     }
 
     @Override
