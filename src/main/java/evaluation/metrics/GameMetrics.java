@@ -320,12 +320,19 @@ public class GameMetrics implements IMetricsCollection {
     }
 
 
-    public static class Actions2 extends AbstractMetric {
-        public Actions2() {
+    /**
+     * Records the actions taken during the game
+     * This is 'Reduced' compared to the Actions metric in that it does not have separate columns for each player
+     * Instead of having separate columns for 'Player-2', 'Player-3' etc, it has a single column 'Player' with
+     * the player ID taking the action. (And similarly for PlayerName)
+     * This simplifies data analysis in some circumstances (in others the Actions metric is more useful)
+     */
+    public static class ActionsReduced extends AbstractMetric {
+        public ActionsReduced() {
             super();
         }
 
-        public Actions2(Event.GameEvent... args) {
+        public ActionsReduced(Event.GameEvent... args) {
             super(args);
         }
 
