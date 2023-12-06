@@ -293,7 +293,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // There is no maximum to how big their deck is, just as many cards as they have XP for
         if (dgs.isOverlordDeckBigEnough())
         {
-            System.out.println("Overlord deck is big enough: " + dgs.overlordCards.getSize() + "Cards / 15 Minimum");
+            System.out.println("Overlord deck is big enough: " + dgs.overlordCards.getSize() + " Cards / 15 Minimum");
         }
 
         dgs.overlordCards.shuffle(r);
@@ -307,6 +307,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) currentState;
+        if (dgs.getActionsInProgress().size() > 0) return;
         Figure actingFigure = dgs.getActingFigure();
 
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
@@ -397,7 +398,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Certain scenarios will need to prevent it from being taken
         // But they will remove it from the list when required, instead of preventing it here
         EndTurn endTurn = new EndTurn();
-        actions.add(endTurn);
+        if (!actions.contains(endTurn)) actions.add(endTurn);
 
         // First, we must check if our Figure is a defeated Hero
         // Defeated Heroes can only perform the StandUp action

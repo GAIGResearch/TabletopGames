@@ -2,6 +2,7 @@ package games.descent2e;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.Card;
 import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyInt;
@@ -9,6 +10,8 @@ import core.properties.PropertyVector2D;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.attack.Surge;
+import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
@@ -529,5 +532,28 @@ public class DescentHelper {
             }
         }
         return actions;
+    }
+
+    public static List<DescentAction> getOverlordCardActions(DescentGameState dgs)
+    {
+        List<DescentAction> overlordActions = new ArrayList<>();
+        Figure f = dgs.getActingFigure();
+        for (Card card : dgs.overlordHand.getComponents())
+        {
+            switch(card.getProperty("effect").toString())
+            {
+                // ----- BASIC -----
+                case "SURGE:DAMAGE_PLUS_3":
+                    SurgeAttackAction surge = new SurgeAttackAction(Surge.DAMAGE_PLUS_3, f.getComponentID(), card);
+                    overlordActions.add(surge);
+                    break;
+                case "DARK_CHARM":
+                    break;
+                case "REROLL_ONE_DIE":
+                    break;
+
+            }
+        }
+        return overlordActions;
     }
 }

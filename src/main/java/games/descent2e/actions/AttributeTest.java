@@ -217,6 +217,9 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        /*List<IExtendedSequence> list = state.getActionsInProgress();
+        System.out.println(list);
+        System.out.println(list.size());*/
         state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }

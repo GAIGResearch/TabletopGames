@@ -2,6 +2,7 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.attack.TriggerAttributeTest;
 import games.descent2e.components.Figure;
@@ -117,6 +118,9 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        /*List<IExtendedSequence> list = state.getActionsInProgress();
+        System.out.println(list);
+        System.out.println(list.size());*/
         state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }

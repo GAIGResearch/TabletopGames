@@ -378,6 +378,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
             descentActions = monsters.stream().flatMap(List::stream)
                     .flatMap(m -> m.getAbilities().stream())
                     .collect(Collectors.toList());
+            // and add in overlord cards
+            List<DescentAction> overlordActions = DescentHelper.getOverlordCardActions(this);
+            if (!overlordActions.isEmpty()) descentActions.addAll(overlordActions);
         } else {
             // else we just look at heroes that belong to the acting Figure
             // TODO: Add in effects from cards in the player's hand

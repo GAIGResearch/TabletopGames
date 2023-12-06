@@ -1,6 +1,7 @@
 package games.descent2e.components;
 
 import core.CoreConstants;
+import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.Token;
@@ -76,7 +77,7 @@ public class Figure extends Token {
     boolean hasMoved, hasAttacked, hasRerolled;
     boolean isOffMap, canIgnoreEnemies, extraAction = false;
 
-    Deck<DescentCard> exhausted = new Deck<>("Exhausted", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);;
+    Deck<Card> exhausted = new Deck<>("Exhausted", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);;
 
     public Figure(String name, int nActionsPossible) {
         super(name);
@@ -285,7 +286,7 @@ public class Figure extends Token {
     public MeleeAttack getCurrentAttack() { return currentAttack;}
     public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack;}
 
-    public void exhaustCard (DescentCard card)
+    public void exhaustCard (Card card)
     {
         exhausted.add(card);
     }
@@ -297,8 +298,8 @@ public class Figure extends Token {
     {
         exhausted.clear();
     }
-    public Deck<DescentCard> getExhausted() { return exhausted;}
-    public boolean isExhausted(DescentCard card)
+    public Deck<Card> getExhausted() { return exhausted;}
+    public boolean isExhausted(Card card)
     {
         return exhausted.contains(card);
     }
