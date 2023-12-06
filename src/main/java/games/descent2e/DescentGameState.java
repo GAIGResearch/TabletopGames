@@ -121,8 +121,15 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     @Override
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
-        copy.tiles = new HashMap<>(tiles);  // TODO: deep copy
+        copy.rnd = getRandom();
+        copy.tiles = new HashMap<>();
+        for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
+            copy.tiles.put(e.getKey(), e.getValue().copy());
+        }
         copy.masterBoard = masterBoard.copy();
+        copy.attackDicePool = attackDicePool.copy();
+        copy.defenceDicePool = defenceDicePool.copy();
+        copy.attributeDicePool = attributeDicePool.copy();
         copy.overlord = overlord.copy();
         copy.heroesSide = heroesSide.copy();
         copy.heroes = new ArrayList<>();
@@ -145,15 +152,15 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
             copy.monstersOriginal.add(maC);
         }
         copy.monstersPerGroup = new ArrayList<>();
-        for (Integer i : monstersPerGroup) {
-            copy.monstersPerGroup.add(i);
-        }
+        copy.monstersPerGroup.addAll(monstersPerGroup);
         copy.monsterGroups = new ArrayList<>();
-        for (String s : monsterGroups) {
-            copy.monsterGroups.add(s);
+        copy.monsterGroups.addAll(monsterGroups);
+        copy.tileReferences = tileReferences.clone();
+        copy.gridReferences = new HashMap<>();
+        for (Map.Entry<String, Map<Vector2D, Vector2D>> e : gridReferences.entrySet()) {
+            HashMap<Vector2D, Vector2D> map = new HashMap<>(e.getValue());
+            copy.gridReferences.put(e.getKey(), map);
         }
-        copy.tileReferences = tileReferences.clone();  // TODO deep
-        copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
         copy.initData = initData;
         copy.tokens = new ArrayList<>();
         for (DToken t : tokens) {
@@ -211,9 +218,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
-                masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, monsters, overlordPlayer, tokens);
-        result = 31 * result + Arrays.deepHashCode(tileReferences);
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, rnd, searchCards,
+                masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
+                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest);
+        result = 31 * result + Arrays.hashCode(tileReferences);
         return result;
     }
 
@@ -224,6 +232,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 tiles.hashCode(),
                 gridReferences.hashCode(),
                 initData ? 1 : 0,
+                rnd.hashCode(),
                 searchCards.hashCode(),
                 masterBoard.hashCode(),
                 attackDicePool.hashCode(),
@@ -231,9 +240,14 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 attributeDicePool.hashCode(),
                 heroes.hashCode(),
                 overlord.hashCode(),
+                heroesSide.hashCode(),
                 monsters.hashCode(),
+                monstersOriginal.hashCode(),
+                monstersPerGroup.hashCode(),
+                monsterGroups.hashCode(),
                 overlordPlayer,
                 tokens.hashCode(),
+                currentQuest.hashCode(),
                 Arrays.deepHashCode(tileReferences)
         };
     }

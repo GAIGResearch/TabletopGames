@@ -1,4 +1,4 @@
-package test.games.fmtester;
+package games.fmtester;
 
 import evaluation.ForwardModelTester;
 import org.junit.Test;
