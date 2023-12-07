@@ -25,7 +25,7 @@ public class MeleeAttackTests {
         int seed = 234;
         do {
             seed += 1001;
-            state = new DescentGameState(new DescentParameters(seed), 2);
+            state = new DescentGameState(new DescentParameters(), 2);
             fm.setup(state);
      //       System.out.println("Class: "  + state.getHeroes().get(0).getProperty("class"));
         } while (state.getHeroes().get(0).getAbilities().stream()

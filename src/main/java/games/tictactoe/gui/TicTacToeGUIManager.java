@@ -6,6 +6,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import gui.IScreenHighlight;
@@ -35,7 +36,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[]{view},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
                 width, defaultActionPanelHeight, true);
 
         parent.setLayout(new BorderLayout());
@@ -68,7 +69,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
             if (highlight.size() > 0) {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
-                    SetGridValueAction action = (SetGridValueAction) abstractAction;
+                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
                     if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
                         actionButtons[0].setButtonAction(action, "Play " + TicTacToeConstants.playerMapping.get(player.getPlayerID()));

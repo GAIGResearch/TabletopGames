@@ -52,7 +52,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             HashSet<Hero> adjacentHeroes = new HashSet<>();
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            GridBoard board = dgs.getMasterBoard();
+            GridBoard<BoardNode> board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());
@@ -110,7 +110,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         int heroIdx = acolyte.getOwnerId();
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            GridBoard board = dgs.getMasterBoard();
+            GridBoard<BoardNode> board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());

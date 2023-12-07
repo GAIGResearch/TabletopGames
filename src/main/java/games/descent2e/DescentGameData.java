@@ -30,7 +30,7 @@ import static core.components.Component.parseComponent;
 import static games.descent2e.DescentConstants.archetypeHash;
 
 public class DescentGameData extends AbstractGameData {
-    List<GridBoard> tiles;
+    List<GridBoard<BoardNode>> tiles;
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
@@ -65,8 +65,8 @@ public class DescentGameData extends AbstractGameData {
     }
 
     @Override
-    public GridBoard findGridBoard(String name) {
-        for (GridBoard gb: tiles) {
+    public GridBoard<BoardNode> findGridBoard(String name) {
+        for (GridBoard<BoardNode> gb: tiles) {
             if (gb.getComponentName().equalsIgnoreCase(name)) {
                 return gb;
             }

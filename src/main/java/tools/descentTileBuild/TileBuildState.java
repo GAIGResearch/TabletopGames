@@ -2,6 +2,7 @@ package tools.descentTileBuild;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 import games.GameType;
@@ -13,7 +14,7 @@ import java.util.Objects;
 
 public class TileBuildState extends AbstractGameState {
 
-    GridBoard tile;
+    GridBoard<BoardNode> tile;
 
     Pathfinder pathfinder;
 

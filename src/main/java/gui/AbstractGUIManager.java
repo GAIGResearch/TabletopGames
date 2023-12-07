@@ -122,6 +122,10 @@ public abstract class AbstractGUIManager {
         return createActionPanel(highlights, width, height, true, true, onActionSelected, null, null);
     }
 
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
+        return createActionPanel(highlights, width, height, boxLayout, true, null, null, null);
+    }
+
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque, Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {

@@ -6,15 +6,12 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.BoardNode;
+import core.components.Token;
 import games.GameType;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
-import games.tictactoe.TicTacToeConstants;
-import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
-import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.*;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
@@ -31,8 +28,8 @@ public class MultiTreeMCTSTests {
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
-    BoardNode x = TicTacToeConstants.playerMapping.get(0);
-    BoardNode o = TicTacToeConstants.playerMapping.get(1);
+    Token x = TicTacToeConstants.playerMapping.get(0);
+    Token o = TicTacToeConstants.playerMapping.get(1);
 
     AbstractForwardModel fm = new TicTacToeForwardModel();
     private Predicate<SingleTreeNode> childrenVisitsAddUp = node ->

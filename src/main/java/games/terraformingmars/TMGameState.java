@@ -34,7 +34,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     // General state info
     int generation;
-    GridBoard board;
+    GridBoard<TMMapTile> board;
     HashSet<TMMapTile> extraTiles;
     HashMap<TMTypes.GlobalParameter, GlobalParameter> globalParameters;
     HashSet<Bonus> bonuses;

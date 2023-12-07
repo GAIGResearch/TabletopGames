@@ -42,7 +42,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Random rnd;
 
     Deck<Card> searchCards;
-    GridBoard masterBoard;
+    GridBoard<BoardNode> masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
     DicePool attributeDicePool;
@@ -254,7 +254,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return data;
     }
 
-    public GridBoard getMasterBoard() {
+    public GridBoard<BoardNode> getMasterBoard() {
         return masterBoard;
     }
 

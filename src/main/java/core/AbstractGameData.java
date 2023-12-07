@@ -12,7 +12,7 @@ import java.util.Objects;
 public class AbstractGameData {
 
     private List<GraphBoard> graphBoards = new ArrayList<>();
-    private List<GridBoard> gridBoards = new ArrayList<>();
+    private List<GridBoard<BoardNode>> gridBoards = new ArrayList<>();
     private List<Deck<Card>> decks = new ArrayList<>();
     private List<Counter> counters = new ArrayList<>();
     private List<Token> tokens = new ArrayList<>();

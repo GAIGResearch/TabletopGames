@@ -345,7 +345,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         }
     }
 
-    public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
+    public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard<BoardNode> gridBoard, int x, int y,
                                                           Map<String, Map<Vector2D,Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         // Draw cells

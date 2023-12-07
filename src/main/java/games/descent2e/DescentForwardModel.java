@@ -796,7 +796,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
-        HashMap<Integer, GridBoard> tileConfigs = new HashMap<>();
+        HashMap<Integer, GridBoard<BoardNode>> tileConfigs = new HashMap<>();
         dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
@@ -804,7 +804,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard tile = _data.findGridBoard(tileName).copyNewID();
+            GridBoard<BoardNode> tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
                 tile = tile.copyNewID();
                 tile.setProperty(bn.getProperty(orientationHash));
@@ -821,7 +821,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         int height = 0;
         for (BoardNode bn : config.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard tile = tileConfigs.get(bn.getComponentID());
+            GridBoard<BoardNode> tile = tileConfigs.get(bn.getComponentID());
             if (tile != null) {
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
@@ -850,9 +850,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         BoardNode firstTile = config.getBoardNodes().iterator().next();
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard tile = tileConfigs.get(firstTile.getComponentID());
+            GridBoard<BoardNode> tile = tileConfigs.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
-            BoardNode[][] rotated = tile.rotate(orientation);
+            BoardNode[][] rotated = (BoardNode[][]) tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
@@ -923,7 +923,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
-                                 Map<Integer, GridBoard> tiles,
+                                 Map<Integer, GridBoard<BoardNode>> tiles,
                                  int[][] tileReferences,  Map<String, Map<Vector2D, Vector2D>> gridReferences,
                                  Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
@@ -932,7 +932,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(tileToAdd.getComponentID());
-            BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
+            BoardNode[][] originalTileGrid = (BoardNode[][]) tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
             }
@@ -999,7 +999,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
                     GridBoard tileN = tiles.get(neighbour.getComponentID());
                     if (tileN != null) {
-                        BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
+                        BoardNode[][] tileGridN = (BoardNode[][]) tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
                         // Find location to start drawing neighbour
                         Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));

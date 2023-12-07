@@ -174,7 +174,7 @@ public class Move extends AbstractAction {
 
         List<Vector2D> possibilities = new ArrayList<>();
         // Otherwise, we need to find the nearest adjacent space that is empty
-        GridBoard board = dgs.getMasterBoard();
+        GridBoard<BoardNode> board = dgs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(position.getX(), position.getY(), board.getWidth(), board.getHeight(), true);
         for (Vector2D neighbour : neighbours) {
             BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());

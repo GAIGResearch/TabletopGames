@@ -61,7 +61,7 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
         // Get Neighbours
         if (executer.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
             Vector2D loc = executer.getPosition();
-            GridBoard board = dgs.getMasterBoard();
+            GridBoard<BoardNode> board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());
