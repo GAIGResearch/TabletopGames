@@ -3,23 +3,13 @@ package games.hanabi.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
-import core.components.Card;
 import core.components.Deck;
 import core.components.Counter;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.hanabi.HanabiParameters;
 
-
-import utilities.Utils;
 import games.hanabi.HanabiGameState;
 import games.hanabi.*;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-
-import static games.uno.UnoGameParameters.UnoScoring.CHALLENGE;
 
 public class Discard extends DrawCard implements IPrintable {
     public Discard(int deckFrom, int deckTo, int cardToBePlayed) {

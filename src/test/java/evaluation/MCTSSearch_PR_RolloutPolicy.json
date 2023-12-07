@@ -1,0 +1,59 @@
+{
+  "class": "players.mcts.MCTSParams",
+  "K": 1.0,
+  "rolloutLength": [
+    0,
+    3,
+    10,
+    30,
+    100,
+    300,
+    1000
+  ],
+  "maxTreeDepth": 100,
+  "expansionPolicy": "RANDOM",
+  "rolloutType": "PARAMS",
+  "rolloutPolicyParams": {
+    "class": "players.simple.BoltzmannActionParams",
+    "temperature": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "epsilon": [
+      0.0,
+      0.01,
+      0.10,
+      0.30
+    ],
+    "actionHeuristic": {
+      "class": "games.puertorico.PuertoRicoActionHeuristic001"
+    }
+  },
+  "rolloutTermination": [
+    "DEFAULT",
+    "END_ROUND",
+    "END_TURN"
+  ],
+  "MAST": "Tree",
+  "budgetType": "BUDGET_TIME",
+  "information": "Information_Set",
+  "selectionPolicy": "SIMPLE",
+  "treePolicy": "UCB_Tuned",
+  "opponentTreePolicy": [
+    "OneTree",
+    "MultiTree",
+    "OMA",
+    "SelfOnly"
+  ],
+  "budget": 40,
+  "epsilon": 1e-6,
+  "breakMS": 0,
+  "exploreEpsilon": 0.3,
+  "maintainMasterState": false,
+  "heuristic": {
+    "class": "players.heuristics.LeaderHeuristic"
+  }
+}

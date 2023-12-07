@@ -175,13 +175,12 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Other player cards and the draw deck are unknown.
             // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
-            Random r = new Random(copy.gameParameters.getRandomSeed());
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     copy.drawDeck.add(copy.playerDecks.get(i));
                 }
             }
-            copy.drawDeck.shuffle(r);
+            copy.drawDeck.shuffle(rnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     Deck<UnoCard> d = copy.playerDecks.get(i);

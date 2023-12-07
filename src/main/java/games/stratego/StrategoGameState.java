@@ -2,19 +2,16 @@ package games.stratego;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 import games.GameType;
 import games.stratego.components.Piece;
-import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class StrategoGameState extends AbstractGameState {
-    GridBoard gridBoard;
+public class StrategoGameState extends AbstractGameState{
+    GridBoard<Piece> gridBoard;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -46,27 +43,23 @@ public class StrategoGameState extends AbstractGameState {
         if (playerId != -1 && getCoreGameParameters().partialObservable){
             playerAlliance = StrategoConstants.playerMapping.get(playerId);
 
-            for (BoardNode bn: gridBoard.getComponents()) {
-                Piece p = (Piece) bn;
+            for (Piece p: gridBoard.getComponents()) {
                 if (p != null && p.getPieceAlliance() != playerAlliance && !p.isPieceKnown()) {
                     pieceTypesHidden.add(p.getPieceType());
                 }
             }
         }
 
-        Random random = new Random(gameParameters.getRandomSeed());
-        for (BoardNode bn : gridBoard.getComponents()){
-            Piece piece = (Piece) bn;
+        for (Piece piece : gridBoard.getComponents()){
             if (piece != null) {
-                Vector2D pos = piece.getPiecePosition();
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
-                    int typeIdx = random.nextInt(pieceTypesHidden.size());
+                    int typeIdx = rnd.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
-                    s.gridBoard.setElement(pos.getX(), pos.getY(), piece.partialCopy(hiddenPieceType));
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));
                 } else{
-                    s.gridBoard.setElement(pos.getX(), pos.getY(), piece.copy());
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.copy());
                 }
             }
         }
@@ -100,7 +93,7 @@ public class StrategoGameState extends AbstractGameState {
         return gridBoard.hashCode();
     }
 
-    public GridBoard getGridBoard() {
+    public GridBoard<Piece> getGridBoard() {
         return gridBoard;
     }
 
@@ -108,8 +101,7 @@ public class StrategoGameState extends AbstractGameState {
     protected List<Integer> _getUnknownComponentsIds(int playerId) {
         ArrayList<Integer> pieceList = new ArrayList<>();
 
-        for (BoardNode bn : gridBoard.getComponents()){
-            Piece piece = (Piece) bn;
+        for (Piece piece : gridBoard.getComponents()){
             if (piece != null){
                 if (playerId != -1){
                     Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);

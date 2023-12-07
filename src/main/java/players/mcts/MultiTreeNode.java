@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import utilities.Pair;
+import utilities.RandomWrapper;
 import utilities.Utils;
 
 import java.util.*;
@@ -34,23 +35,15 @@ public class MultiTreeNode extends SingleTreeNode {
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        if (player.params.information == MCTSEnums.Information.Closed_Loop)
-            player.params.information = MCTSEnums.Information.Open_Loop;
+        if (player.getParameters().information == MCTSEnums.Information.Closed_Loop)
+            player.getParameters().information = MCTSEnums.Information.Open_Loop;
         // Closed Loop is not yet supported for MultiTree search
         // TODO: implement this (not too difficult, but some tricky bits as we shift from tree to rollout and back again)
         this.decisionPlayer = state.getCurrentPlayer();
-        this.params = player.params;
+        this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
-        this.heuristic = player.heuristic;
         this.rnd = rnd;
-        this.opponentModels = new AbstractPlayer[state.getNPlayers()];
         mctsPlayer = player;
-        for (int p = 0; p < opponentModels.length; p++) {
-            if (p == decisionPlayer)
-                opponentModels[p] = player.rolloutStrategy;
-            else
-                opponentModels[p] = player.getOpponentModel(p);
-        }
         // only root node maintains MAST statistics
         MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
@@ -59,7 +52,7 @@ public class MultiTreeNode extends SingleTreeNode {
             Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
             if (MAST.containsKey(a)) {
                 Pair<Integer, Double> stats = MAST.get(a);
-                return stats.b / (stats.a + params.epsilon);
+                return stats.b / (stats.a + params.noiseEpsilon);
             }
             return 0.0;
         };
@@ -86,7 +79,7 @@ public class MultiTreeNode extends SingleTreeNode {
         SingleTreeNode currentNode;
 
         double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                .mapToDouble(i -> heuristic.evaluateState(currentState, i)).toArray();
+                .mapToDouble(i -> params.heuristic.evaluateState(currentState, i)).toArray();
 
         if (!currentState.isNotTerminal())
             return;
@@ -122,8 +115,8 @@ public class MultiTreeNode extends SingleTreeNode {
                 // all actions after the expansion for a player are rollout actions
                 // note that different players will enter rollout at different times, which is why
                 // we cannot have a simple rollout() method as in SingleTree search
-                AbstractPlayer agent = opponentModels[currentActor];
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.params.actionSpace);
+                AbstractPlayer agent = currentActor == decisionPlayer ? params.getRolloutStrategy() : params.getOpponentModel();
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.getParameters().actionSpace);
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
 
@@ -175,7 +168,7 @@ public class MultiTreeNode extends SingleTreeNode {
         double[] finalValues = new double[state.getNPlayers()];
 
         for (int i = 0; i < finalValues.length; i++) {
-            finalValues[i] = heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
+            finalValues[i] = params.heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
         }
         for (SingleTreeNode singleTreeNode : currentLocation) {
             if (singleTreeNode != null)

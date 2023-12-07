@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class TestCraftsman {
 
     PuertoRicoForwardModel fm = new PuertoRicoForwardModel();
-    PuertoRicoGameState state = new PuertoRicoGameState(new PuertoRicoParameters(1), 4);
+    PuertoRicoGameState state = new PuertoRicoGameState(new PuertoRicoParameters(), 4);
 
     @Before
     public void setup() {

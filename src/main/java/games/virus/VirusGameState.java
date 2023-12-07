@@ -57,7 +57,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
                     vgs.playerDecks.get(i).clear();
                 }
             }
-            vgs.drawDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
+            vgs.drawDeck.shuffle(rnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (playerId != i) {
                     for (int j = 0; j < playerDecks.get(i).getSize(); j++) {

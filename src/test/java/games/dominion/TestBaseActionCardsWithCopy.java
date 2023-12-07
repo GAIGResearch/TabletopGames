@@ -27,8 +27,8 @@ public class TestBaseActionCardsWithCopy {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
-    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(System.currentTimeMillis()), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(), players.size()));
+    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test

@@ -93,4 +93,14 @@ public class PuertoRicoActionHeuristic001 implements IActionHeuristic {
         }
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PuertoRicoActionHeuristic001;
+    }
+
+    @Override
+    public int hashCode() {
+        return 1;
+    }
 }

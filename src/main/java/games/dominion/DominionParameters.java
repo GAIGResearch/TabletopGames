@@ -24,8 +24,7 @@ public class DominionParameters extends TunableParameters {
     public int[] VICTORY_CARDS_PER_PLAYER = {-1, -1, 8, 12, 12}; // 2-4 players only
 
 
-    public DominionParameters(long seed) {
-        super(seed);
+    public DominionParameters() {
         addTunableParameter("HAND_SIZE", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("PILES_EXHAUSTED_FOR_GAME_END", 3, Arrays.asList(1, 3,5,7,10));
         addTunableParameter("KINGDOM_CARDS_OF_EACH_TYPE", 10, Arrays.asList(5, 10, 15, 20));
@@ -51,8 +50,7 @@ public class DominionParameters extends TunableParameters {
         GOLD_SUPPLY = (int) getParameterValue("GOLD_SUPPLY");
     }
 
-    public DominionParameters(long seed, String[] cards) {
-        super(seed);
+    public DominionParameters(String[] cards) {
         for (String cardName : cards) {
             try {
                 cardsUsed.add(CardType.valueOf(cardName));
@@ -63,8 +61,8 @@ public class DominionParameters extends TunableParameters {
         }
     }
 
-    public static DominionParameters sizeDistortion(long seed) {
-        DominionParameters retValue = new DominionParameters(seed);
+    public static DominionParameters sizeDistortion() {
+        DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
         retValue.cardsUsed.add(CardType.BANDIT);
         retValue.cardsUsed.add(CardType.BUREAUCRAT);
@@ -79,8 +77,8 @@ public class DominionParameters extends TunableParameters {
         return retValue;
     }
 
-    public static DominionParameters improvements(long seed) {
-        DominionParameters retValue = new DominionParameters(seed);
+    public static DominionParameters improvements() {
+        DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
         retValue.cardsUsed.add(CardType.CELLAR);
         retValue.cardsUsed.add(CardType.MARKET);
@@ -104,8 +102,20 @@ public class DominionParameters extends TunableParameters {
      */
     @Override
     protected AbstractParameters _copy() {
-        return this;
-        // currently parameters are immutable
+        DominionParameters retValue = new DominionParameters();
+        retValue.cardsUsed = new ArrayList<>(cardsUsed);
+        retValue.dataPath = dataPath;
+        retValue.HAND_SIZE = HAND_SIZE;
+        retValue.PILES_EXHAUSTED_FOR_GAME_END = PILES_EXHAUSTED_FOR_GAME_END;
+        retValue.KINGDOM_CARDS_OF_EACH_TYPE = KINGDOM_CARDS_OF_EACH_TYPE;
+        retValue.CURSE_CARDS_PER_PLAYER = CURSE_CARDS_PER_PLAYER;
+        retValue.STARTING_COPPER = STARTING_COPPER;
+        retValue.STARTING_ESTATES = STARTING_ESTATES;
+        retValue.COPPER_SUPPLY = COPPER_SUPPLY;
+        retValue.SILVER_SUPPLY = SILVER_SUPPLY;
+        retValue.GOLD_SUPPLY = GOLD_SUPPLY;
+        retValue.VICTORY_CARDS_PER_PLAYER = VICTORY_CARDS_PER_PLAYER.clone();
+        return retValue;
     }
 
     /**

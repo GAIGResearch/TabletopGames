@@ -150,8 +150,12 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
-                finalMatchups, System.currentTimeMillis(), params, false);
+        Map<RunArg, Object> config = new HashMap<>();
+        config.put(RunArg.matchups, finalMatchups);
+        config.put(RunArg.seed, System.currentTimeMillis());
+        config.put(RunArg.byTeam, false);
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, params, SELF_PLAY,
+                config);
 
         tournament.setListeners(new ArrayList<>());
         tournament.run();
@@ -225,9 +229,12 @@ public class ProgressiveLearner {
             currentElite = IntStream.range(0, agents.size()).boxed().collect(Collectors.toList());
         }
         List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
-
-        RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, SELF_PLAY, matchups,
-                matchups, System.currentTimeMillis(), params, false);
+        Map<RunArg, Object> config = new HashMap<>();
+        config.put(RunArg.matchups, finalMatchups);
+        config.put(RunArg.seed, System.currentTimeMillis());
+        config.put(RunArg.byTeam, false);
+        RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, params, SELF_PLAY,
+                config);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);

@@ -16,8 +16,6 @@ public class Bet extends AbstractAction implements IPrintable {
         this.playerId = id;
         this.amount = amount;
     }
-
-
     @Override
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
@@ -26,11 +24,7 @@ public class Bet extends AbstractAction implements IPrintable {
         pgs.getPlayerNeedsToCall()[playerId] = false;
 
         // Others can't check
-        for (int i = 0; i < gameState.getNPlayers(); i++) {
-            if (i != playerId && !pgs.getPlayerFold()[i] && !pgs.getPlayerMoney()[i].isMinimum()) {
-                pgs.getPlayerNeedsToCall()[i] = true;
-            }
-        }
+        pgs.otherPlayerMustCall(playerId);
 
         return true;
     }

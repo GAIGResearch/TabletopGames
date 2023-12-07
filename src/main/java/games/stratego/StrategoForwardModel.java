@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.components.BoardNode;
 import core.actions.ActionSpace;
 import core.components.GridBoard;
 import core.interfaces.ITreeActionSpace;
@@ -20,7 +19,6 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class StrategoForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
@@ -34,12 +32,11 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
     protected void _setup(AbstractGameState firstState) {
         StrategoParams params = (StrategoParams) firstState.getGameParameters();
         StrategoGameState state = (StrategoGameState) firstState;
-        state.gridBoard = new GridBoard(params.gridSize, params.gridSize);
-        Random random = new Random(params.getRandomSeed());
+        state.gridBoard = new GridBoard<>(params.gridSize, params.gridSize);
 
         StrategoConstants.PieceSetups[] setups = StrategoConstants.PieceSetups.values();
-        StrategoConstants.PieceSetups RedSetup = setups[random.nextInt(setups.length)];
-        StrategoConstants.PieceSetups BlueSetup = setups[random.nextInt(setups.length)];
+        StrategoConstants.PieceSetups RedSetup = setups[state.getRnd().nextInt(setups.length)];
+        StrategoConstants.PieceSetups BlueSetup = setups[state.getRnd().nextInt(setups.length)];
 
         ArrayList<Piece> RedPieces = RedSetup.getRedSetup();
         ArrayList<Piece> BluePieces = BlueSetup.getBlueSetup();
@@ -62,7 +59,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
-        List<BoardNode> pieces = state.gridBoard.getComponents();
+        List<Piece> pieces = state.gridBoard.getComponents();
 
         if (pieces.isEmpty()){
             throw new AssertionError("Error: No Pieces Found");
@@ -70,8 +67,7 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
             //           return actions;
         }
 
-        for (BoardNode bn : pieces){
-            Piece piece = (Piece) bn;
+        for (Piece piece : pieces){
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
 
@@ -148,11 +144,10 @@ public class StrategoForwardModel extends StandardForwardModel implements ITreeA
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = state.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
-        List<BoardNode> pieces = state.gridBoard.getComponents();
+        List<Piece> pieces = state.gridBoard.getComponents();
         int c = 0;
-        for (BoardNode bn : pieces){
-            if (bn != null){
-                Piece piece = (Piece) bn;
+        for (Piece piece : pieces){
+            if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
                     List<AbstractAction> moves = piece.calculateMoves(state, ActionSpace.Default);
 //                    List<AbstractAction> moves = piece.calculateMoves(state, state.getCoreGameParameters().actionSpace);

@@ -66,7 +66,7 @@ public enum RunArg {
             "\tFor scores with larger ranges, we recommend scaling kExplore appropriately.",
             1.0,
             new Usage[]{Usage.ParameterSearch}),
-    listener("The full class name of an IGameListener implementation. Or the location\n" +
+    listener("The full class name of an IGameListener implementation. Or, better, the location\n" +
             "\t of a json file from which a listener can be instantiated.\n" +
             "\t Defaults to evaluation.metrics.MetricsGameListener. \n" +
             "\t A pipe-delimited string can be provided to gather many types of statistics \n" +
@@ -90,7 +90,7 @@ public enum RunArg {
             "\t 'random' will have a random matchup, while ensuring no duplicates, and that all players get the\n" +
             "\t the same number of games in total.\n" +
             "\t 'sequential' will run tournament on a ONE_VS_ALL basis between each pair of agents.\n" +
-            "\t If a focusPlayer is provided, then this is ignored.",
+            "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
     nPlayers("The number of players in each game. Overrides playerRange.",
@@ -127,12 +127,23 @@ public enum RunArg {
             "\t Defaults to the end of the tournament (-1)",
             -1,
             new Usage[]{Usage.RunGames}),
+    distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
+            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
+            "\t If a seedFile is specified, then this is ignored.",
+            0,
+            new Usage[]{Usage.RunGames}),
     searchSpace("The json-format file of the search space to use. No default.",
             "",
             new Usage[]{Usage.ParameterSearch}),
-    seed("(Optional) Random seed to use for process",
+    seed("(Optional) Random seed to use for process. This is not the seed used for games, but the seed of \n" +
+            "\t the random number generator used to generate these.",
             System.currentTimeMillis(),
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    seedFile("(Optional) A file containing a list of random seeds to use for individual games. \n" +
+            "\t If this is specified, then the 'seed' and `distinctRandomSeed` arguments are ignored. \n"+
+            "\t Each seed will be used in turn for a full tournament run, as defined by the other parameters.",
+            "",
+            new Usage[]{Usage.RunGames}),
     selfPlay("(Optional) If true, then multiple copies of the same agent can be in one game.\n" +
             "\t Defaults to false",
             false,

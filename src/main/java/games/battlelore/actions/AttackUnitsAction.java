@@ -48,13 +48,13 @@ public class AttackUnitsAction extends AbstractAction {
             BattleloreGameParameters parameters = (BattleloreGameParameters) state.getGameParameters();
 
             for (int i = 0; i < parameters.troopCountInSquad; i++) {
-                CombatDice.Result result = dice.getResult();
-                if (result == CombatDice.Result.Strike) {
+                CombatDice.Result result = dice.getResult(state.getRnd());
+                if (result == CombatDice.Result.Cleave) {
                     if (!parameters.isWeakAttacker(attackerUnits.size())) {
                         defeatedEnemyCount++;
                     }
                 }
-                else if (result == CombatDice.Result.Cleave) {
+                else if (result == CombatDice.Result.Strike) {
                     defeatedEnemyCount++;
                 }
             }

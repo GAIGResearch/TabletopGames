@@ -8,10 +8,7 @@ import games.catan.CatanGameState;
 import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static core.CoreConstants.DefaultGamePhase.Main;
 
@@ -61,7 +58,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
         CatanGameState gs = (CatanGameState) state;
         CatanTile[][] board = gs.getBoard();
         CatanTile tile = board[x][y];
-        HashSet<Integer> targets = new HashSet<>();
+        Set<Integer> targets = new LinkedHashSet<>();
         Building[] settlements = gs.getBuildings(tile);
         for (Building settlement : settlements) {
             if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {

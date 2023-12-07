@@ -3,8 +3,7 @@ package games.dominion;
 import games.dominion.cards.CardType;
 
 public class DominionIParameters extends DominionParameters {
-    public DominionIParameters(long seed) {
-        super(seed);
+    public DominionIParameters() {
         cardsUsed.add(CardType.ARTISAN);
         cardsUsed.add(CardType.CELLAR);
         cardsUsed.add(CardType.MARKET);

@@ -62,7 +62,7 @@ public class NTBEAParameters {
         evalMethod = (String) args.get(RunArg.evalMethod);
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
-        seed = (long) args.get(RunArg.seed);
+        seed = args.get(RunArg.seed) instanceof Long ? ((Long)args.get(RunArg.seed)).intValue() : (int) args.get(RunArg.seed)  ;
         byTeam = (boolean) args.get(RunArg.byTeam);
         GameType game = GameType.valueOf(args.get(RunArg.game).toString());
         gameParams = args.get(RunArg.gameParams).equals("") ? null :

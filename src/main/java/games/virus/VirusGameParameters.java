@@ -26,8 +26,7 @@ public class VirusGameParameters extends TunableParameters {
     public int nCardsPerTreatmentLatexGlove = 1;
     public int nCardsPerTreatmentMedicalError = 1;
 
-    public VirusGameParameters(long seed) {
-        super(seed);
+    public VirusGameParameters() {
         setTimeoutRounds(100);
         addTunableParameter("nCardsPlayerHand", 3, Arrays.asList(2, 3, 4, 5));
         addTunableParameter("nCardsDiscardLatexGlove", 3, Arrays.asList(2, 3, 4, 5));
@@ -66,33 +65,13 @@ public class VirusGameParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        VirusGameParameters vgp = new VirusGameParameters(System.currentTimeMillis());
-        vgp.nCardsPlayerHand = nCardsPlayerHand;
-        vgp.nCardsDiscardLatexGlove = nCardsDiscardLatexGlove;
-
-        vgp.nCardsPerOrgan = nCardsPerOrgan;
-        vgp.nCardsPerVirus = nCardsPerVirus;
-        vgp.nCardsPerMedicine = nCardsPerMedicine;
-        vgp.maxCardsDiscard = maxCardsDiscard;
-
-        vgp.nCardsPerWildOrgan = nCardsPerWildOrgan;
-        vgp.nCardsPerWildVirus = nCardsPerWildVirus;
-        vgp.nCardsPerWildMedicine = nCardsPerWildMedicine;
-
-        vgp.nCardsPerTreatmentSpreading = nCardsPerTreatmentSpreading;
-        vgp.nCardsPerTreatmentTransplant = nCardsPerTreatmentTransplant;
-        vgp.nCardsPerTreatmentOrganThief = nCardsPerTreatmentOrganThief;
-        vgp.nCardsPerTreatmentLatexGlove = nCardsPerTreatmentLatexGlove;
-        vgp.nCardsPerTreatmentMedicalError = nCardsPerTreatmentMedicalError;
-
-        return vgp;
+        return new VirusGameParameters();
     }
 
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VirusGameParameters)) return false;
-        if (!super.equals(o)) return false;
         VirusGameParameters that = (VirusGameParameters) o;
         return nCardsPerOrgan == that.nCardsPerOrgan &&
                 nCardsDiscardLatexGlove == that.nCardsDiscardLatexGlove &&
@@ -108,15 +87,6 @@ public class VirusGameParameters extends TunableParameters {
                 nCardsPerTreatmentOrganThief == that.nCardsPerTreatmentOrganThief &&
                 nCardsPerTreatmentLatexGlove == that.nCardsPerTreatmentLatexGlove &&
                 nCardsPerTreatmentMedicalError == that.nCardsPerTreatmentMedicalError;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), nCardsDiscardLatexGlove, nCardsPlayerHand, nCardsPerOrgan, nCardsPerVirus,
-                nCardsPerMedicine, maxCardsDiscard,
-                nCardsPerWildOrgan, nCardsPerWildVirus, nCardsPerWildMedicine, nCardsPerTreatmentSpreading,
-                nCardsPerTreatmentTransplant, nCardsPerTreatmentOrganThief, nCardsPerTreatmentLatexGlove,
-                nCardsPerTreatmentMedicalError);
     }
 
     @Override

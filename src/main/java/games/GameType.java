@@ -10,6 +10,10 @@ import games.cantstop.*;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.*;
 import games.catan.gui.CatanGUI;
+import games.chinesecheckers.CCForwardModel;
+import games.chinesecheckers.CCGameState;
+import games.chinesecheckers.CCParameters;
+import games.chinesecheckers.gui.CCGUIManager;
 import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
@@ -27,6 +31,10 @@ import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
 import games.hanabi.gui.HanabiGUIManager;
+import games.hearts.HeartsForwardModel;
+import games.hearts.HeartsGameState;
+import games.hearts.HeartsParameters;
+import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
@@ -41,7 +49,6 @@ import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
 import games.poker.gui.*;
-import games.dicemonastery.gui.*;
 import games.stratego.*;
 import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.*;
@@ -51,7 +58,6 @@ import games.tictactoe.gui.*;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
-import games.dicemonastery.*;
 import games.dominion.*;
 import games.wonders7.Wonders7ForwardModel;
 import games.wonders7.Wonders7GameParameters;
@@ -142,10 +148,6 @@ public enum GameType {
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
             DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, null),
-    DiceMonastery(2, 4,
-            Arrays.asList(Strategy, Medieval),
-            Arrays.asList(SetCollection, WorkerPlacement, EngineBuilding),
-            DiceMonasteryGameState.class, DiceMonasteryForwardModel.class, DiceMonasteryParams.class, DiceMonasteryGUI.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -199,7 +201,14 @@ public enum GameType {
     Resistance(5, 10,
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
-            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class);
+            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
+    Hearts(3,7,Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
+    ChineseCheckers(2, 6,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -291,6 +300,10 @@ public enum GameType {
         try {
             if (dataPath != null) {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class, Long.class);
+                if (constructorGS == null) {
+                    constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class);
+                    return (AbstractParameters) constructorGS.newInstance(dataPath);
+                }
                 return (AbstractParameters) constructorGS.newInstance(dataPath, seed);
             } else {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);

@@ -25,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
-    Random rnd;
     int playerCount;
     DominionParameters params;
     // Counts of cards on the table should be fine
@@ -53,7 +52,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
         defenceStatus = new boolean[nPlayers];  // defaults to false
         params = (DominionParameters) gameParameters;
@@ -155,8 +153,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
     public int availableSpend(int playerID) {
         if (playerID != turnOwner) {
-            System.out.println(this);
-            throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
+            return 0;
         }
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;

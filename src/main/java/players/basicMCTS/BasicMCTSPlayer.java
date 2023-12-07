@@ -17,27 +17,27 @@ import java.util.Random;
 public class BasicMCTSPlayer extends AbstractPlayer {
 
     Random rnd;
-    BasicMCTSParams params;
-
     public BasicMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
     public BasicMCTSPlayer(long seed) {
-        this.params = new BasicMCTSParams(seed);
+        parameters = new BasicMCTSParams();
+        parameters.setRandomSeed(seed);
         rnd = new Random(seed);
         setName("Basic MCTS");
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
-        this.params.K = Math.sqrt(2);
-        this.params.rolloutLength = 10;
-        this.params.maxTreeDepth = 5;
-        this.params.epsilon = 1e-6;
+        BasicMCTSParams params = getParameters();
+        params.K = Math.sqrt(2);
+        params.rolloutLength = 10;
+        params.maxTreeDepth = 5;
+        params.epsilon = 1e-6;
 
     }
 
     public BasicMCTSPlayer(BasicMCTSParams params) {
-        this.params = params;
+        parameters = params;
         rnd = new Random(params.getRandomSeed());
         setName("Basic MCTS");
     }
@@ -54,9 +54,13 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         return root.bestAction();
     }
 
+    @Override
+    public BasicMCTSParams getParameters() {
+        return (BasicMCTSParams) parameters;
+    }
 
     public void setStateHeuristic(IStateHeuristic heuristic) {
-        this.params.heuristic = heuristic;
+        getParameters().heuristic = heuristic;
     }
 
 

@@ -63,7 +63,11 @@ public class Wonders7GameState extends AbstractGameState {
         copy.playerHands = new ArrayList<>();
         copy.playedCards = new ArrayList<>();
         copy.playerWonderBoard = new Wonder7Board[getNPlayers()];
-        copy.turnActions = new AbstractAction[getNPlayers()]; // Player actions are not visible
+        copy.turnActions = new AbstractAction[getNPlayers()];
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (turnActions[i] != null)
+                copy.turnActions[i] = turnActions[i].copy();
+        }
 
         for (HashMap<Wonders7Constants.Resource, Integer> map : playerResources) {
             copy.playerResources.add(new HashMap<>(map));
@@ -81,18 +85,18 @@ public class Wonders7GameState extends AbstractGameState {
         copy.discardPile = discardPile.copy();
         copy.currentAge = currentAge;
         copy.direction = direction;
+        copy.wonderBoardDeck = wonderBoardDeck.copy();
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Player does not know the other players hands and discard pile (except for next players hadn)
             // All the cards of other players and discard pile are shuffled
-            Random r = new Random(copy.gameParameters.getRandomSeed());
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     copy.ageDeck.add(copy.playerHands.get(i)); // Groups other players cards (except for next players hand) into the ageDeck (along with any cards that were not in the game at that age)
                 }
             }
             copy.ageDeck.add(copy.discardPile); // Groups the discard pile into the ageDeck
-            copy.ageDeck.shuffle(r); // Shuffle all the cards
+            copy.ageDeck.shuffle(rnd); // Shuffle all the cards
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     Deck<Wonder7Card> hand = copy.playerHands.get(i);
@@ -106,9 +110,13 @@ public class Wonders7GameState extends AbstractGameState {
             Deck<Wonder7Card> discPile = copy.discardPile;
             int nDisc = discPile.getSize();
             discPile.clear(); // Empties the accurate pile
-            for (int i=0;i<nDisc;i++){
+            for (int i = 0; i < nDisc; i++) {
                 discPile.add(copy.ageDeck.draw()); // Fills the pile with the remaining shuffled cards in the ageDeck
             }
+            copy.turnActions = new AbstractAction[getNPlayers()];
+            if (turnActions[playerId] != null)
+                copy.turnActions[playerId] = turnActions[playerId].copy();
+            // we know our action (if one has been chosen, but no one elses
         }
         return copy;
     }
@@ -132,25 +140,24 @@ public class Wonders7GameState extends AbstractGameState {
             playerResourcesCopy.add(new HashMap<>(map));
         }
         // Evaluate military conflicts
-        int nextplayer = (playerId +1)% getNPlayers();
-        if(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)){ // IF PLAYER i WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory)+(2*currentAge-1)); // 2N-1 POINTS FOR PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory)-1); // -1 FOR THE PLAYER i+1
-        }
-        else if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)){ // IF PLAYER i+1 WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory)-1);// -1 POINT FOR THE PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory)+(2*currentAge-1));// 2N-1 POINTS FOR PLAYER i+1
+        int nextplayer = (playerId + 1) % getNPlayers();
+        if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)) { // IF PLAYER i WINS
+            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory) + (2 * currentAge - 1)); // 2N-1 POINTS FOR PLAYER i
+            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory) - 1); // -1 FOR THE PLAYER i+1
+        } else if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)) { // IF PLAYER i+1 WINS
+            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory) - 1);// -1 POINT FOR THE PLAYER i
+            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory) + (2 * currentAge - 1));// 2N-1 POINTS FOR PLAYER i+1
         }
 
         int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
         // Treasury
-        vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Coin)/3;
+        vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
         // Scientific
-        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog),2);
-        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass),2);
-        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet),2);
+        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog), 2);
+        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass), 2);
+        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet), 2);
         // Sets of different science symbols
-        vp += 7*Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass)),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet));
+        vp += 7 * Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog), playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass)), playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet));
 
         playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, vp);
         return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
@@ -160,7 +167,7 @@ public class Wonders7GameState extends AbstractGameState {
     public int cardsOfType(Wonder7Card.Type type) {
         Deck<Wonder7Card> allCards;
         allCards = new Deck<>("temp", VISIBLE_TO_ALL);
-        for (int i=0;i<getNPlayers();i++) allCards.add(getPlayedCards(i));
+        for (int i = 0; i < getNPlayers(); i++) allCards.add(getPlayedCards(i));
         return (int) allCards.stream().filter(c -> c.getCardType() == type).count();
     }
 
@@ -213,7 +220,7 @@ public class Wonders7GameState extends AbstractGameState {
         return playerResources.get(index);
     } // Return players resource hashmap
 
-    public int getResource(int player, Wonders7Constants.Resource resource){
+    public int getResource(int player, Wonders7Constants.Resource resource) {
         return playerResources.get(player).get(resource);
     }
 
@@ -223,7 +230,11 @@ public class Wonders7GameState extends AbstractGameState {
         if (!(o instanceof Wonders7GameState)) return false;
         if (!super.equals(o)) return false;
         Wonders7GameState that = (Wonders7GameState) o;
-        return currentAge == that.currentAge && direction == that.direction && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerHands, that.playerHands) && Objects.equals(playedCards, that.playedCards) && Objects.equals(ageDeck, that.ageDeck) && Objects.equals(discardPile, that.discardPile) && Objects.equals(wonderBoardDeck, that.wonderBoardDeck) && Arrays.equals(playerWonderBoard, that.playerWonderBoard) && Arrays.equals(turnActions, that.turnActions);
+        return currentAge == that.currentAge && direction == that.direction && Objects.equals(playerResources, that.playerResources) &&
+                Objects.equals(playerHands, that.playerHands) && Objects.equals(playedCards, that.playedCards) &&
+                Objects.equals(ageDeck, that.ageDeck) &&
+                Objects.equals(discardPile, that.discardPile) && Objects.equals(wonderBoardDeck, that.wonderBoardDeck) &&
+                Arrays.equals(playerWonderBoard, that.playerWonderBoard) && Arrays.equals(turnActions, that.turnActions);
     }
 
     @Override
@@ -240,5 +251,23 @@ public class Wonders7GameState extends AbstractGameState {
 
     public void reverse() {
         direction = -direction;
+    }
+
+    @Override
+    public String toString() {
+        return gameParameters.hashCode() + "|" +
+                gameStatus.hashCode() + "|" +
+                gamePhase.hashCode() + "|" +
+                Arrays.hashCode(playerResults) + "|*|" +
+                playerResources.hashCode() + "|" +
+                playerHands.hashCode() + "|" +
+                playedCards.hashCode() + "|" +
+                ageDeck.hashCode() + "|" +
+                discardPile.hashCode() + "|" +
+                wonderBoardDeck.hashCode() + "|" +
+                Arrays.hashCode(playerWonderBoard) + "|" +
+                Arrays.hashCode(turnActions) + "|" +
+                currentAge + "|" +
+                direction + "|";
     }
 }

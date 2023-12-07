@@ -14,7 +14,6 @@ import games.uno.UnoGameState;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 import static games.uno.UnoGameParameters.UnoScoring.CHALLENGE;
 
@@ -36,8 +35,6 @@ public class PlayCard extends DrawCard implements IPrintable {
         UnoGameState ugs = (UnoGameState) gameState;
         UnoGameParameters ugp = (UnoGameParameters) gameState.getGameParameters();
         super.execute(gameState);
-
-        Random r = new Random(ugp.getRandomSeed() + ugs.getRoundCounter());
 
         UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
         ugs.updateCurrentCard(cardToBePlayed);
@@ -77,7 +74,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                         drawDeck.remove(ugs.getCurrentCard());
                         discardDeck.add(ugs.getCurrentCard());
 
-                        drawDeck.shuffle(r);
+                        drawDeck.shuffle(ugs.getRnd());
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }
@@ -95,7 +92,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                         drawDeck.remove(ugs.getCurrentCard());
                         discardDeck.add(ugs.getCurrentCard());
 
-                        drawDeck.shuffle(r);
+                        drawDeck.shuffle(ugs.getRnd());
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }

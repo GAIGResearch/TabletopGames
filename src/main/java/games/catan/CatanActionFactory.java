@@ -239,7 +239,7 @@ public class CatanActionFactory {
                 CatanTile tile = board[x][y];
                 if (!(tile.getTileType().equals(CatanTile.TileType.SEA))) {
                     if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
-                        HashSet<Integer> targets = new HashSet<>();
+                        Set<Integer> targets = new LinkedHashSet<>();
                         Building[] settlements = gs.getBuildings(tile);
                         for (Building settlement : settlements) {
                             if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
@@ -250,7 +250,7 @@ public class CatanActionFactory {
                             if (knight) actions.add(new PlayKnightCard(x, y, player, target));
                             else actions.add(new MoveRobberAndSteal(x, y, player, target));
                         }
-                        if (targets.size() == 0) {
+                        if (targets.isEmpty()) {
                             if (knight) actions.add(new PlayKnightCard(x, y, player, -1));
                             else actions.add(new MoveRobberAndSteal(x, y, player, -1));
                         }
@@ -310,7 +310,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
-            HashSet<Integer> roadsAdded = new HashSet<>();
+            Set<Integer> roadsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
@@ -338,7 +338,7 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Settlement), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Settlement).isMaximum()) {
-            HashSet<Integer> settlementsAdded = new HashSet<>();
+            Set<Integer> settlementsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
@@ -365,7 +365,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.City), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum()) {
-            HashSet<Integer> settlementsAdded = new HashSet<>();
+            Set<Integer> settlementsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
@@ -391,7 +391,7 @@ public class CatanActionFactory {
      * @return list of actions to play a dev card in hand
      */
     public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        Set<AbstractAction> actions = new HashSet<>();
+        Set<AbstractAction> actions = new LinkedHashSet<>();
         Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
 
         for (CatanCard c : playerDevDeck.getComponents()) {
