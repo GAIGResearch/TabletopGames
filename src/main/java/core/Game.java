@@ -16,6 +16,11 @@ import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCParams;
+import players.rmhc.RMHCPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -823,23 +828,33 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-//        RMHCParams params = new RMHCParams();
-//        params.horizon = 15;
-//        params.discountFactor = 0.99;
-//        params.heuristic = AbstractGameState::getHeuristicScore;
-//        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+        RMHCParams params = new RMHCParams();
+        params.horizon = 15;
+        params.discountFactor = 0.99;
+        params.heuristic = AbstractGameState::getHeuristicScore;
+        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+//        players.add(rmhcPlayer);
 //        players.add(rmhcPlayer);
 
-//        MCTSParams params = new MCTSParams();
-//        players.add(new MCTSPlayer(params));
+        MCTSParams mcts_params = new MCTSParams();
+//        players.add(new MCTSPlayer(mcts_params));
+//        players.add(new MCTSPlayer(mcts_params));
+//        players.add(new MCTSPlayer(mcts_params));
 
 //        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+//        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */

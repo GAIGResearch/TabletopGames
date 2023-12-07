@@ -234,24 +234,22 @@ public class Hero extends Figure {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Hero)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Hero hero = (Hero) o;
-        return featAvailable == hero.featAvailable && rested == hero.rested &&
-                Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment)
-                && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment)
-                && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) &&
-                Objects.equals(heroicFeatStr, hero.heroicFeatStr) && Objects.equals(heroicFeat, hero.heroicFeat) &&
-                Objects.equals(usedHeroAbility, hero.usedHeroAbility) &&
-                Objects.equals(abilityStr, hero.abilityStr) && Objects.equals(heroAbility, hero.heroAbility);
+        return usedHeroAbility == hero.usedHeroAbility && featAvailable == hero.featAvailable &&
+                rested == hero.rested && defeated == hero.defeated &&
+                Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) &&
+                Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) &&
+                Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Objects.equals(heroicFeatStr, hero.heroicFeatStr) &&
+                heroicFeat == hero.heroicFeat && heroAbility == hero.heroAbility && Objects.equals(abilityStr, hero.abilityStr);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
-                equipSlotsAvailable, heroicFeatStr, heroicFeat, usedHeroAbility, featAvailable, rested, abilityStr, heroAbility);
-        result = 31 * result;
-        return result;
+        return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
+                equipSlotsAvailable, heroicFeatStr, heroicFeat, usedHeroAbility, featAvailable,
+                rested, defeated, heroAbility, abilityStr);
     }
 
     @Override
@@ -270,19 +268,18 @@ public class Hero extends Figure {
     private Hero copyTo(Hero copy) {
         copy.equipSlotsAvailable = new HashMap<>();
         copy.equipSlotsAvailable.putAll(equipSlotsAvailable);
-        copy.skills = skills.copy();
-        copy.handEquipment = handEquipment.copy();
-        copy.otherEquipment = otherEquipment.copy();
-        if (armor != null) {
-            copy.armor = armor.copy();
-        }
+        if (skills != null) copy.skills = skills.copy();
+        if (handEquipment != null) copy.handEquipment = handEquipment.copy();
+        if (otherEquipment != null) copy.otherEquipment = otherEquipment.copy();
+        if (armor != null) copy.armor = armor.copy();
         copy.heroicFeatStr = this.heroicFeatStr;
         copy.heroicFeat = this.heroicFeat;
         copy.usedHeroAbility = this.usedHeroAbility;
         copy.featAvailable = this.featAvailable;
         copy.abilityStr = this.abilityStr;
         copy.heroAbility = this.heroAbility;
-        copy.rested = rested;
+        copy.rested = this.rested;
+        copy.defeated = this.defeated;
         super.copyComponentTo(copy);
         return copy;
     }

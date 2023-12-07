@@ -35,7 +35,13 @@ public class DescentCard extends Card {
                     .map(d -> Surge.valueOf(d.toUpperCase(Locale.ROOT)))
                     .collect(Collectors.toList());
         }
+    }
 
+    public DescentCard(AttackType attackType, DicePool dicePool, List<Surge> weaponSurges, int componentID, String componentName) {
+        super(componentName, componentID);
+        this.attackType = attackType;
+        this.dicePool = dicePool.copy();
+        this.weaponSurges = new ArrayList<>(weaponSurges);
     }
 
     public AttackType getAttackType() {
@@ -66,6 +72,22 @@ public class DescentCard extends Card {
 
     @Override
     public DescentCard copy() {
-        return this;
+        DescentCard copy = new DescentCard(attackType, dicePool.copy(), weaponSurges, componentID, componentName);
+        copyComponentTo(copy);
+        return copy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DescentCard that = (DescentCard) o;
+        return attackType == that.attackType && Objects.equals(dicePool, that.dicePool) && Objects.equals(weaponSurges, that.weaponSurges);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), attackType, dicePool, weaponSurges);
     }
 }

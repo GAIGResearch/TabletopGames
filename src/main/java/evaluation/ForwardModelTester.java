@@ -80,6 +80,7 @@ public class ForwardModelTester {
                     Set<Integer> diffsup = new HashSet<>();
                     for (int i = 0; i < origArr.length; i++) {
                         if (origArr[i] != copyArr[i]) {
+                            System.out.println(i + ": " + origArr[i] + " != " + copyArr[i]);
                             if (i == 0) {
                                 for (int j = 0; j < origSupArr.length; j++) {
                                     if (origSupArr[j] != copySupArr[j]) {
