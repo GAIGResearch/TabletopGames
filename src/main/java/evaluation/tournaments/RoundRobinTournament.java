@@ -118,10 +118,12 @@ public class RoundRobinTournament extends AbstractTournament {
 
         LinkedList<Integer> matchUp = new LinkedList<>();
         // add outer loop if we have tournamentSeeds enabled; if not this will just run once
+        List<Integer> allSeeds = new ArrayList<>(gameSeeds);
         for (int iter = 0; iter < Math.max(1, tournamentSeeds); iter++) {
             if (tournamentSeeds > 0) {
                 // use the same seed for each game in the tournament
-                int nextRnd = seedRnd.nextInt();
+                // allSeeds contains the ones loaded from file - if empty then use a random one
+                int nextRnd =  allSeeds.isEmpty() ? seedRnd.nextInt() : allSeeds.get(iter);
                 gameSeeds = IntStream.range(0, gamesPerMatchUp).mapToObj(i -> nextRnd).collect(toList());
             } else {
                 // use a seed per matchup
