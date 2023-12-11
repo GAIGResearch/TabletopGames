@@ -187,6 +187,19 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         return emptyCells;
     }
 
+    // TODO: This is a hack, fix it
+    public BoardNode[][] convertToBoardNode (Component[][] grid) {
+        int height = grid.length;
+        int width = grid[0].length;
+        BoardNode[][] boardNodes = new BoardNode[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j< width; j++) {
+                boardNodes[i][j] = (BoardNode) grid[i][j];
+            }
+        }
+        return boardNodes;
+    }
+
     /**
      * Returns a new grid, copy of this one, with given orientation.
      *
@@ -330,7 +343,12 @@ public class GridBoard<T extends Component> extends Component implements ICompon
                     JSONArray row = (JSONArray) o;
                     int x = 0;
                     for (Object o1 : row) {
-                        setElement(x, y, (T) o1);
+                        // TODO FIX THIS
+                        if (o1 instanceof String) {
+                            BoardNode bn = new BoardNode(-1, (String) o1);
+                            setElement(x, y, (T) bn);
+                        }
+                        else setElement(x, y, (T) o1);
                         x++;
                     }
                     y++;
@@ -340,7 +358,11 @@ public class GridBoard<T extends Component> extends Component implements ICompon
                 int x = 0;
                 for (Object o1 : row) {
                     // TODO FIX THIS
-                    setElement(x, y, (T) o1);
+                    if (o1 instanceof String) {
+                        BoardNode bn = new BoardNode(-1, (String) o1);
+                        setElement(x, y, (T) bn);
+                    }
+                    else setElement(x, y, (T) o1);
                     x++;
                 }
                 y++;

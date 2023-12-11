@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.*;
+import core.components.Component;
 import core.properties.*;
 import games.descent2e.DescentTypes.*;
 import games.descent2e.abilities.HeroAbilities;
@@ -852,7 +853,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard<BoardNode> tile = tileConfigs.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
-            BoardNode[][] rotated = (BoardNode[][]) tile.rotate(orientation);
+            Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
@@ -932,7 +933,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(tileToAdd.getComponentID());
-            BoardNode[][] originalTileGrid = (BoardNode[][]) tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
+            BoardNode[][] originalTileGrid = tile.convertToBoardNode(tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value));
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
             }
@@ -999,7 +1000,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
                     GridBoard tileN = tiles.get(neighbour.getComponentID());
                     if (tileN != null) {
-                        BoardNode[][] tileGridN = (BoardNode[][]) tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
+                        BoardNode[][] tileGridN = tileN.convertToBoardNode(tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value));
 
                         // Find location to start drawing neighbour
                         Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));
