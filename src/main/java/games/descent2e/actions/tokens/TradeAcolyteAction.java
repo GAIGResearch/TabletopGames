@@ -31,7 +31,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     public TradeAcolyteAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
-        receivingHeroIdx = -1;
+        this.receivingHeroIdx = -1;
     }
     public TradeAcolyteAction(int acolyteComponentID) {
         super(acolyteComponentID, Triggers.ACTION_POINT_SPEND);

@@ -352,4 +352,57 @@ public class DescentGameData extends AbstractGameData {
 
         return monsters;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DescentGameData that = (DescentGameData) o;
+        return Objects.equals(tiles, that.tiles) && Objects.equals(boardConfigurations, that.boardConfigurations) && Objects.equals(heroes, that.heroes) && Objects.equals(decks, that.decks) && Objects.equals(searchCards, that.searchCards) && Objects.equals(quests, that.quests) && Objects.equals(sideQuests, that.sideQuests) && Objects.equals(monsters, that.monsters);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tiles, boardConfigurations, heroes, decks, searchCards, quests, sideQuests, monsters);
+    }
+
+    public DescentGameData copy() {
+        DescentGameData copy = new DescentGameData();
+        copy.tiles = new ArrayList<>();
+        for (GridBoard<BoardNode> gb: tiles) {
+            copy.tiles.add(gb.copy());
+        }
+        copy.boardConfigurations = new ArrayList<>();
+        for (GraphBoard gb: boardConfigurations) {
+            copy.boardConfigurations.add(gb.copy());
+        }
+        copy.heroes = new ArrayList<>();
+        for (Hero h: heroes) {
+            copy.heroes.add(h.copy());
+        }
+        copy.decks = new ArrayList<>();
+        for (Deck<Card> d: decks) {
+            copy.decks.add(d.copy());
+        }
+        copy.searchCards = searchCards.copy();
+        copy.quests = new ArrayList<>();
+        for (Quest q: quests) {
+            copy.quests.add(q.copy());
+        }
+        if (sideQuests != null) {
+            copy.sideQuests = new ArrayList<>();
+            for (Quest q : sideQuests) {
+                copy.sideQuests.add(q.copy());
+            }
+        }
+        copy.monsters = new HashMap<>();
+        for (String k: monsters.keySet()) {
+            HashMap<String, Monster> monsterDef = new HashMap<>();
+            for (String k2: monsters.get(k).keySet()) {
+                monsterDef.put(k2, monsters.get(k).get(k2).copy());
+            }
+            copy.monsters.put(k, monsterDef);
+        }
+        return copy;
+    }
 }

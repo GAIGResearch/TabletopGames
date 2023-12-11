@@ -3,9 +3,7 @@ package games.descent2e.concepts;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 // TODO: figure out how this works
 public class Quest {
@@ -107,19 +105,90 @@ public class Quest {
 
     public Quest copy() {
         Quest q = new Quest();
-        q.boards = new ArrayList<>(boards);
-        q.startingLocations = new HashMap<>();
-        for (Map.Entry<String, ArrayList<Vector2D>> e: startingLocations.entrySet()) {
-            q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
+        if (boards != null) q.boards = new ArrayList<>(boards);
+        if (startingLocations != null) {
+            q.startingLocations = new HashMap<>();
+            for (Map.Entry<String, ArrayList<Vector2D>> e : startingLocations.entrySet()) {
+                q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
+            }
         }
         q.name = name;
-        q.monsters = new ArrayList<>();
-        for (String[] s: monsters) {
-            q.monsters.add(s.clone());
+        if (monsters != null) {
+            q.monsters = new ArrayList<>(Collections.nCopies(monsters.size(), null));
+            Collections.copy(q.monsters, monsters);
         }
         q.act = act;
-        q.tokens = new ArrayList<>(tokens);  // todo deep?
-        q.gameOverConditions = new ArrayList<>(gameOverConditions);
+        if (tokens != null)
+        {
+            q.tokens = new ArrayList<>();
+            for (DToken.DTokenDef d : tokens) {
+                q.tokens.add(d.copy());
+            }
+        }
+        if (gameOverConditions != null)
+        {
+            q.gameOverConditions = new ArrayList<>();
+            for (GameOverCondition g : gameOverConditions) {
+                q.gameOverConditions.add(g.copy());
+            }
+        }
+
+        if (overlordRewards != null)
+        {
+            q.overlordRewards = new ArrayList<>();
+            for (DescentReward d : overlordRewards) {
+                q.overlordRewards.add(d.copy());
+            }
+        }
+        if (heroRewards != null)
+        {
+            q.heroRewards = new ArrayList<>();
+            for (DescentReward d : heroRewards) {
+                q.heroRewards.add(d.copy());
+            }
+        }
+        if (commonRewards != null)
+        {
+            q.commonRewards = new ArrayList<>();
+            for (DescentReward d : commonRewards) {
+                q.commonRewards.add(d.copy());
+            }
+        }
+
+        if (nextMainQuests != null)
+        {
+            q.nextMainQuests = new ArrayList<>();
+            for (Quest d : nextMainQuests) {
+                q.nextMainQuests.add(d.copy());
+            }
+        }
+        if (nextSideQuests != null)
+        {
+            q.nextSideQuests = new ArrayList<>();
+            for (Quest d : nextSideQuests) {
+                q.nextSideQuests.add(d.copy());
+            }
+        }
+
         return q; // TODO
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Quest quest = (Quest) o;
+        return act == quest.act && Objects.equals(name, quest.name) &&
+                Objects.equals(monsters, quest.monsters) && Objects.equals(tokens, quest.tokens) &&
+                Objects.equals(gameOverConditions, quest.gameOverConditions) &&
+                Objects.equals(overlordRewards, quest.overlordRewards) && Objects.equals(heroRewards, quest.heroRewards) &&
+                Objects.equals(commonRewards, quest.commonRewards) && Objects.equals(boards, quest.boards) &&
+                Objects.equals(startingLocations, quest.startingLocations) && Objects.equals(nextMainQuests, quest.nextMainQuests) &&
+                Objects.equals(nextSideQuests, quest.nextSideQuests);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, monsters, tokens, gameOverConditions, overlordRewards, heroRewards, commonRewards, boards, startingLocations, nextMainQuests, nextSideQuests, act);
     }
 }

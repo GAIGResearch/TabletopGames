@@ -283,7 +283,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
                 T t = getElement(x, y);
-                s += t.toString() + " ";
+                if (t != null) s += t + " ";
             }
             s += "\n";
         }

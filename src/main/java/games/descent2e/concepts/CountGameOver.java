@@ -5,6 +5,8 @@ import games.descent2e.DescentGameState;
 import org.json.simple.JSONObject;
 import utilities.Utils;
 
+import java.util.Objects;
+
 public class CountGameOver extends GameOverCondition {
     // IMPORTANT: All values are effectively final and should not be changed after parsing initialisation
     CountGameFeature countFeature;
@@ -50,6 +52,30 @@ public class CountGameOver extends GameOverCondition {
             else gs.setPlayerResult(resultHeroes, i);
         }
         return CoreConstants.GameResult.GAME_END;
+    }
+
+    @Override
+    public CountGameOver copy() {
+        CountGameOver cgo = new CountGameOver();
+        cgo.countFeature = countFeature.copy();
+        cgo.comparisonType = comparisonType;
+        cgo.target = target;
+        cgo.resultHeroes = resultHeroes;
+        cgo.resultOverlord = resultOverlord;
+        return cgo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CountGameOver that = (CountGameOver) o;
+        return target == that.target && Objects.equals(countFeature, that.countFeature) && comparisonType == that.comparisonType && resultOverlord == that.resultOverlord && resultHeroes == that.resultHeroes;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(countFeature, comparisonType, target, resultOverlord, resultHeroes);
     }
 
     enum ComparisonType {

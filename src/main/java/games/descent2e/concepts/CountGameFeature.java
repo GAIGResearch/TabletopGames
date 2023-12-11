@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class CountGameFeature {
     CountType countingWhat;
@@ -63,6 +64,26 @@ public class CountGameFeature {
         else if (cgf.countingWhat == CountType.Token) cgf.countingWhat.tokenType = DescentTypes.DescentToken.valueOf((String) jsonObject.get("token"));
         cgf.figureNameContains = (String) jsonObject.get("figureNameContains");
         return cgf;
+    }
+
+    public CountGameFeature copy() {
+        CountGameFeature cgf = new CountGameFeature();
+        cgf.countingWhat = countingWhat;
+        cgf.figureNameContains = figureNameContains;
+        return cgf;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CountGameFeature that = (CountGameFeature) o;
+        return countingWhat == that.countingWhat && Objects.equals(figureNameContains, that.figureNameContains);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(countingWhat, figureNameContains);
     }
 
     enum CountType {

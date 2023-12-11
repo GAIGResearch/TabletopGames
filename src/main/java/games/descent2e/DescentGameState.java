@@ -121,6 +121,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     @Override
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
+        copy.data = data.copy();
         copy.tiles = new HashMap<>();
         for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
