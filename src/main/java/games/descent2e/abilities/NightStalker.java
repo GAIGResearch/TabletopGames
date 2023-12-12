@@ -34,7 +34,7 @@ public class NightStalker {
             DicePool newPool = state.getDefenceDicePool().copy();
             newPool.setDice(dice);
             state.setDefenceDicePool(newPool);
-            System.out.println("Night Stalker is active!" + defender.getComponentName() + " gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
+            System.out.println("Night Stalker is active! " + defender.getComponentName() + " gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
         }
     }
 }

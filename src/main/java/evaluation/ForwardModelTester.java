@@ -81,14 +81,18 @@ public class ForwardModelTester {
                     for (int i = 0; i < origArr.length; i++) {
                         if (origArr[i] != copyArr[i]) {
                             System.out.println(i + ": " + origArr[i] + " != " + copyArr[i]);
-                            if (i == 0) {
-                                for (int j = 0; j < origSupArr.length; j++) {
-                                    if (origSupArr[j] != copySupArr[j]) {
-                                        diffsup.add(j);
-                                    }
-                                }
-                            } else {
-                                diffs.add(i);
+                            diffs.add(i);
+                            }
+                        }
+
+                    for (int j = 0; j < origSupArr.length; j++) {
+                        if (origSupArr[j] != copySupArr[j]) {
+                            System.out.println("SuperHash: " + j + ": " + origSupArr[j] + " != " + copySupArr[j]);
+                            diffsup.add(j);
+                            if (j == 3)
+                            {
+                                System.out.println("Orig: " + stateCopy.getActionsInProgress().toString());
+                                System.out.println("Copy: " + game.getGameState().getActionsInProgress().toString());
                             }
                         }
                     }

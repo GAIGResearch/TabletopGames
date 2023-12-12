@@ -111,6 +111,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 overlordEndTurn((DescentGameState)gameState);
             }
             endRound(gameState);
+            System.out.println("Round " + roundCounter);
         }
         else {
 

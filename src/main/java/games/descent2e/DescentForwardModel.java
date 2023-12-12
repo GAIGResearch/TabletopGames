@@ -277,6 +277,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         dgs.searchCards.shuffle(r);
 
         // Ready to start playing!
+        System.out.println("Game begin! Round " + dgs.getTurnOrder().getRoundCounter());
     }
 
     @Override
