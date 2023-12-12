@@ -6,6 +6,8 @@ import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
 
+import java.util.Objects;
+
 public class Diseased extends AttributeTest {
 
     String attributeTestName = "Diseased";
@@ -56,5 +58,19 @@ public class Diseased extends AttributeTest {
         Figure f = dgs.getActingFigure();
         // We can only make one Diseased attribute test per turn - if we have already taken it, we can't make another attempt
         return f.hasCondition(DescentTypes.DescentCondition.Disease) && !f.hasAttributeTest(this) && f.getNActionsExecuted().isMinimum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Diseased diseased = (Diseased) o;
+        return Objects.equals(attributeTestName, diseased.attributeTestName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), attributeTestName);
     }
 }

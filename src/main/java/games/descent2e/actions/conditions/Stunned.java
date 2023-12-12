@@ -41,4 +41,8 @@ public class Stunned extends DescentAction {
         Figure f = dgs.getActingFigure();
         return f.hasCondition(DescentTypes.DescentCondition.Stun) && !f.getNActionsExecuted().isMaximum();
     }
+
+    public int hashCode() {
+        return 55555;
+    }
 }

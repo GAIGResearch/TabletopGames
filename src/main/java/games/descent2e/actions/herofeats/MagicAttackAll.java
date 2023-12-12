@@ -78,4 +78,9 @@ public class MagicAttackAll extends DescentAction {
     public String getString(AbstractGameState gameState) {
         return "Heroic Feat: Magic attack all adjacent monsters.";
     }
+
+    @Override
+    public int hashCode() {
+        return 112002;
+    }
 }

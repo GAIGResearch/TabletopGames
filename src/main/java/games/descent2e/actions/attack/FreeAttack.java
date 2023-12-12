@@ -9,6 +9,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
@@ -111,5 +112,10 @@ public class FreeAttack extends RangedAttack{
     public String toString() {
         if (isMelee) return String.format("Free Attack (Melee) by %d on %d", attackingFigure, defendingFigure);
         return String.format("Free Attack (Ranged) by %d on %d", attackingFigure, defendingFigure);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), isMelee);
     }
 }

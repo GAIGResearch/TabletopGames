@@ -131,13 +131,15 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TradeAcolyteAction)) return false;
-        return super.equals(o);
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TradeAcolyteAction that = (TradeAcolyteAction) o;
+        return receivingHeroIdx == that.receivingHeroIdx && complete == that.complete;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode());
+        return Objects.hash(super.hashCode(), receivingHeroIdx, complete);
     }
 
     @Override

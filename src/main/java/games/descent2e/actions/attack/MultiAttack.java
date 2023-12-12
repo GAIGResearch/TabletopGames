@@ -9,6 +9,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
@@ -144,5 +145,19 @@ public class MultiAttack extends RangedAttack {
             }
         }
         return string;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MultiAttack that = (MultiAttack) o;
+        return defendingFigure == that.defendingFigure && index == that.index && Objects.equals(defendingFigures, that.defendingFigures);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), defendingFigure, defendingFigures, index);
     }
 }

@@ -10,6 +10,7 @@ import games.descent2e.components.Monster;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTests.*;
 
@@ -117,7 +118,6 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -141,5 +141,19 @@ public class Howl extends TriggerAttributeTest {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(attackingFigure);
         return f instanceof Monster && (((Monster) f).hasAction(MonsterAbilities.MonsterAbility.HOWL));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Howl howl = (Howl) o;
+        return heroIndex == howl.heroIndex && Objects.equals(heroes, howl.heroes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), heroes, heroIndex);
     }
 }

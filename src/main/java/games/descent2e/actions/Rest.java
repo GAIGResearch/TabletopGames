@@ -33,4 +33,9 @@ public class Rest extends DescentAction{
         Figure f = dgs.getActingFigure();
         return f instanceof Hero && f.getAttributeValue(Figure.Attribute.Fatigue) > 0 && !f.getNActionsExecuted().isMaximum() && !(((Hero) f).hasRested());
     }
+
+    @Override
+    public int hashCode() {
+        return 111777;
+    }
 }

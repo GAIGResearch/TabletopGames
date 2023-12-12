@@ -41,22 +41,25 @@ public class ReturnToMapMove extends DescentAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ReturnToMapMove)
-            return ((ReturnToMapMove) obj).distance == distance;
-        return false;
-    }
-
-    public int hashCode() {
-        return Objects.hash(distance);
-    }
-
-    @Override
     public String getString(AbstractGameState gameState) {
         return "Heroic Feat: Move up to 4 spaces away before reappearing";
     }
     @Override
     public String toString() {
         return "Heroic Feat: Tomble Burrowell - Move (2/3)";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ReturnToMapMove that = (ReturnToMapMove) o;
+        return distance == that.distance;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), distance);
     }
 }

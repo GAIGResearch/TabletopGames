@@ -116,4 +116,20 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public String toString() {
         return String.format("Range: %d, Damage: %d, Surge: %d, Shields: %d", getRange(), getDamage(), getSurge(), getShields());
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DicePool dicePool = (DicePool) o;
+        return rolled == dicePool.rolled && Objects.equals(dice, dicePool.dice) && Arrays.equals(rerolls, dicePool.rerolls);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), dice, rolled);
+        result = 31 * result + Arrays.hashCode(rerolls);
+        return result;
+    }
 }

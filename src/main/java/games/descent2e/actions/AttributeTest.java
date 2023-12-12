@@ -217,7 +217,6 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -247,34 +246,6 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         return true;  // TODO
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof AttributeTest)
-        {
-            AttributeTest other = (AttributeTest) obj;
-            return  other.testingPlayer == testingPlayer &&
-                    other.phase == phase &&
-                    other.interruptPlayer == interruptPlayer &&
-                    other.attribute == attribute &&
-                    other.attributeValue == attributeValue &&
-                    other.attributeTestName == attributeTestName &&
-                    other.penaltyToAttribute == penaltyToAttribute &&
-                    other.penaltyToRoll == penaltyToRoll &&
-                    other.result == result &&
-                    other.testCount == testCount &&
-                    other.testingName == testingName &&
-                    other.sourceFigure == sourceFigure;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(testingFigure, testingPlayer, phase.ordinal(), interruptPlayer,
-                attribute, attributeValue, attributeTestName, penaltyToAttribute, penaltyToRoll,
-                result, testCount, testingName, sourceFigure);
     }
 
     public Figure.Attribute getAttribute()
@@ -371,5 +342,19 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     public void setSkip(boolean s)
     {
         skip = s;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AttributeTest that = (AttributeTest) o;
+        return testingFigure == that.testingFigure && testingPlayer == that.testingPlayer && testCount == that.testCount && sourceFigure == that.sourceFigure && interruptPlayer == that.interruptPlayer && attributeValue == that.attributeValue && penaltyToAttribute == that.penaltyToAttribute && penaltyToRoll == that.penaltyToRoll && result == that.result && skip == that.skip && Objects.equals(testingName, that.testingName) && Objects.equals(attributeTestName, that.attributeTestName) && phase == that.phase && attribute == that.attribute;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), testingFigure, testingPlayer, testingName, attributeTestName, testCount, sourceFigure, phase, interruptPlayer, attribute, attributeValue, penaltyToAttribute, penaltyToRoll, result, skip);
     }
 }
