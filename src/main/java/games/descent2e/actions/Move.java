@@ -27,18 +27,18 @@ public class Move extends AbstractAction {
     final Monster.Direction orientation;
     private Vector2D startPosition;
 
-    private Figure f;
+    private int f;
 
     public int directionID;
 
-    public Move(Figure f, List<Vector2D> whereTo) {
+    public Move(int f, List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
         this.orientation = Monster.Direction.DOWN;
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
         this.f = f;
     }
-    public Move(Figure f, List<Vector2D> whereTo, Monster.Direction finalOrientation) {
+    public Move(int f, List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
         this.startPosition = new Vector2D(0,0);
@@ -49,7 +49,7 @@ public class Move extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
-        //Figure f = ((DescentGameState) gs).getActingFigure();
+        Figure f = (Figure) dgs.getComponentById(this.f);
         startPosition = f.getPosition();
         // Remove from old position
         remove(dgs, f);
@@ -303,6 +303,7 @@ public class Move extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         //Figure f = ((DescentGameState) gameState).getActingFigure();
         List<Vector2D> move = positionsTraveled;
+        Figure f = (Figure) ((DescentGameState) gameState).getComponentById(this.f);
 
         if (startPosition.equals(new Vector2D(0,0)))
         {
@@ -389,6 +390,7 @@ public class Move extends AbstractAction {
 
     public void updateDirectionID(AbstractGameState gameState)
     {
+        Figure f = (Figure) ((DescentGameState) gameState).getComponentById(this.f);
         // If directionID is unset, update it
         if (directionID == -1)
         {

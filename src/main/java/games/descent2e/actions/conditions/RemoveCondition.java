@@ -19,9 +19,9 @@ public class RemoveCondition extends DescentAction {
 
     // This is strictly for actions, abilities and items that remove conditions
     // Not for when figures automatically remove Diseased or Poisoned for passing their Attribute Tests
-    Figure f;
+    int f;
     DescentTypes.DescentCondition condition;
-    public RemoveCondition(Figure f, DescentTypes.DescentCondition condition) {
+    public RemoveCondition(int f, DescentTypes.DescentCondition condition) {
         super(Triggers.ACTION_POINT_SPEND);
         this.f = f;
         this.condition = condition;
@@ -29,6 +29,7 @@ public class RemoveCondition extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState dgs) {
+        Figure f = (Figure) dgs.getComponentById(this.f);
         f.removeCondition(condition);
         f.setRemovedConditionThisTurn(true);
         return true;
@@ -41,6 +42,7 @@ public class RemoveCondition extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        Figure f = (Figure) dgs.getComponentById(this.f);
         return f.hasCondition(condition);
     }
 
@@ -60,6 +62,7 @@ public class RemoveCondition extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        Figure f = (Figure) gameState.getComponentById(this.f);
         return "Remove " + condition.toString() + " from " + f.getName().replace("Hero: ", "");
     }
 }

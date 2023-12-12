@@ -174,7 +174,7 @@ public class HeroAbilities {
         List<AbstractAction> removeConditions = new ArrayList<>();
         if (grisbanCanAct(dgs, actingFigure)) {
             for (DescentTypes.DescentCondition condition : actingFigure.getConditions()) {
-                RemoveCondition removeCondition = new RemoveCondition(actingFigure, condition);
+                RemoveCondition removeCondition = new RemoveCondition(actingFigure.getComponentID(), condition);
                 if (removeCondition.canExecute(dgs)) {
                     actingFigure.setUsedHeroAbility(true);
                     removeConditions.add(removeCondition);

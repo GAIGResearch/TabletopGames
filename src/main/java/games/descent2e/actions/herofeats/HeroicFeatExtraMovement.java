@@ -12,6 +12,7 @@ import games.descent2e.components.Hero;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.DescentHelper.moveActions;
 import static games.descent2e.actions.Triggers.ANYTIME;
@@ -88,15 +89,15 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 // If we have not yet chosen if we want to swap, we can do so now
                 // This ensures we are only asked once
                 if (!swapOption) {
-                    retVal.add(new SwapOrder(this, hero, targetAlly, false));
-                    retVal.add(new SwapOrder(this, hero, targetAlly, true));
+                    retVal.add(new SwapOrder(this, hero.getComponentID(), targetAlly.getComponentID(), false));
+                    retVal.add(new SwapOrder(this, hero.getComponentID(), targetAlly.getComponentID(), true));
                 }
                 break;
             case PRE_HERO_MOVE:
                 moveActions = moveActions(dgs, hero);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(hero));
+                    retVal.add(new StopMove(hero.getComponentID()));
                     retVal.addAll(moveActions);
                 }
                 break;
@@ -104,7 +105,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 moveActions = moveActions(dgs, targetAlly);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(targetAlly));
+                    retVal.add(new StopMove(targetAlly.getComponentID()));
                     retVal.addAll(moveActions);
                 }
                 break;
@@ -295,5 +296,10 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     }
     public boolean getSwapOption() {
         return swapOption;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), phase, heroPlayer, allyPlayer, interruptPlayer, heroID, allyID, swapped, swapOption, oldHeroMovePoints, oldAllyMovePoints);
     }
 }

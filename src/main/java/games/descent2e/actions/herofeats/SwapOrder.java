@@ -6,12 +6,14 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 
+import java.util.Objects;
+
 public class SwapOrder extends DescentAction {
 
     HeroicFeatExtraMovement action;
-    Figure first, second;
+    int first, second;
     boolean swap;
-    public SwapOrder(HeroicFeatExtraMovement action, Figure first, Figure second, boolean swap) {
+    public SwapOrder(HeroicFeatExtraMovement action, int first, int second, boolean swap) {
         super(Triggers.ANYTIME);
         this.action = action;
         this.first = first;
@@ -21,10 +23,12 @@ public class SwapOrder extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        String name;
         if (!swap)
-            return first.getName().replace("Hero: ", "") + " moves first";
+            name = gameState.getComponentById(first).getComponentName();
         else
-            return second.getName().replace("Hero: ", "") + " moves first";
+            name = gameState.getComponentById(second).getComponentName();
+        return name.replace("Hero: ", "") + " moves first";
     }
 
     @Override
@@ -43,5 +47,19 @@ public class SwapOrder extends DescentAction {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         return !action.getSwapOption();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SwapOrder swapOrder = (SwapOrder) o;
+        return first == swapOrder.first && second == swapOrder.second && swap == swapOrder.swap && Objects.equals(action, swapOrder.action);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), action, first, second, swap);
     }
 }

@@ -15,6 +15,7 @@ import games.descent2e.components.Hero;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.DescentHelper.moveActions;
 import static games.descent2e.actions.Triggers.ANYTIME;
@@ -88,7 +89,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                 moveActions = moveActions(dgs, hero);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(hero));
+                    retVal.add(new StopMove(hero.getComponentID()));
                     retVal.addAll(moveActions);
                 }
                 if (!attacks.isEmpty())
@@ -215,5 +216,19 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         hero = dgs.getActingFigure();
         if (hero instanceof Hero && !((Hero) hero).isFeatAvailable()) return false;
         return !hero.getNActionsExecuted().isMaximum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DoubleMoveAttack that = (DoubleMoveAttack) o;
+        return heroPlayer == that.heroPlayer && interruptPlayer == that.interruptPlayer && oldMovePoints == that.oldMovePoints && oldFreeAttack == that.oldFreeAttack && phase == that.phase && Objects.equals(hero, that.hero);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), phase, heroPlayer, interruptPlayer, hero, oldMovePoints, oldFreeAttack);
     }
 }
