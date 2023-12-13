@@ -33,7 +33,13 @@ public class AttackAllAdjacent extends MultiAttack {
     }
 
     public AttackAllAdjacent copy() {
-        return this;
+        AttackAllAdjacent retValue = new AttackAllAdjacent(attackingFigure, defendingFigures);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(AttackAllAdjacent target) {
+        super.copyComponentTo(target);
     }
 
     @Override

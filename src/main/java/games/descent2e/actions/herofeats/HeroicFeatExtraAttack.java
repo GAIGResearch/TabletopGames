@@ -38,7 +38,13 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     }
 
     public HeroicFeatExtraAttack copy() {
-        return this;
+        HeroicFeatExtraAttack retValue = new HeroicFeatExtraAttack(attackingFigure, defendingFigure, isMelee);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(FreeAttack target) {
+        super.copyComponentTo(target);
     }
 
     @Override

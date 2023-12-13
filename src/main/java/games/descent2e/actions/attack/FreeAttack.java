@@ -60,25 +60,6 @@ public class FreeAttack extends RangedAttack{
         return true;
     }
 
-    public FreeAttack copy() {
-        FreeAttack retValue = new FreeAttack(attackingFigure, defendingFigure, isMelee);
-        retValue.attackingPlayer = attackingPlayer;
-        retValue.defendingPlayer = defendingPlayer;
-        retValue.phase = phase;
-        retValue.interruptPlayer = interruptPlayer;
-        retValue.surgesToSpend = surgesToSpend;
-        retValue.extraRange = extraRange;
-        retValue.extraDamage = extraDamage;
-        retValue.mending = mending;
-        retValue.surgesUsed = new HashSet<>(surgesUsed);
-        retValue.pierce = pierce;
-        retValue.isDiseasing = isDiseasing;
-        retValue.isImmobilizing = isImmobilizing;
-        retValue.isPoisoning = isPoisoning;
-        retValue.isStunning = isStunning;
-        return retValue;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FreeAttack) {
@@ -117,5 +98,16 @@ public class FreeAttack extends RangedAttack{
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), isMelee);
+    }
+
+
+    public FreeAttack copy() {
+        FreeAttack retValue = new FreeAttack(attackingFigure, defendingFigure, isMelee);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+    public void copyComponentTo(FreeAttack target) {
+        super.copyComponentTo(target);
+        target.isMelee = isMelee;
     }
 }

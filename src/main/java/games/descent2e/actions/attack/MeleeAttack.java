@@ -377,6 +377,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public MeleeAttack copy() {
         MeleeAttack retValue = new MeleeAttack(attackingFigure, defendingFigure);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+    public void copyComponentTo(MeleeAttack retValue) {
         retValue.attackingPlayer = attackingPlayer;
         retValue.defendingPlayer = defendingPlayer;
         retValue.phase = phase;
@@ -392,7 +396,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.isImmobilizing = isImmobilizing;
         retValue.isPoisoning = isPoisoning;
         retValue.isStunning = isStunning;
-        return retValue;
     }
 
     @Override

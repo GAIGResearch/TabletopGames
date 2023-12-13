@@ -109,6 +109,17 @@ public class RangedAttack extends MeleeAttack {
     }
 
     @Override
+    public RangedAttack copy() {
+        RangedAttack retValue = new RangedAttack(attackingFigure, defendingFigure);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(RangedAttack target) {
+        super.copyComponentTo(target);
+    }
+
+    @Override
     public String toString() {
         return String.format("Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }

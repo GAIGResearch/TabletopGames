@@ -160,4 +160,16 @@ public class MultiAttack extends RangedAttack {
     public int hashCode() {
         return Objects.hash(super.hashCode(), defendingFigure, defendingFigures, index);
     }
+
+    @Override
+    public MultiAttack copy() {
+        MultiAttack retValue = new MultiAttack(attackingFigure, defendingFigures);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(MultiAttack target) {
+        target.index = index;
+        super.copyComponentTo(target);
+    }
 }

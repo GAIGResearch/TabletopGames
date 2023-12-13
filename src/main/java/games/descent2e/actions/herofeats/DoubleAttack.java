@@ -31,7 +31,13 @@ public class DoubleAttack extends MultiAttack {
     }
 
     public DoubleAttack copy() {
-        return this;
+        DoubleAttack retValue = new DoubleAttack(attackingFigure, defendingFigures);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(DoubleAttack target) {
+        super.copyComponentTo(target);
     }
 
     @Override
