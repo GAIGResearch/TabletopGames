@@ -102,8 +102,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         attacker.getNActionsExecuted().increment();
         attacker.setHasAttacked(true);
 
-        state.setActionInProgress(null);
-
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
         // 2) Possibly invoke re-roll options (via interrupts)
@@ -202,7 +200,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
                     //System.out.println("Attack missed!");
-                    System.out.println(state.getActionsInProgress());
                     phase = ALL_DONE;
                 }
                 else {
@@ -219,7 +216,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 break;
             case POST_DAMAGE:
                 applyDamage(state);
-                System.out.println(state.getActionsInProgress());
                 phase = ALL_DONE;
                 break;
         }
@@ -495,9 +491,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        state.setActionInProgress(this);
+        //state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
-        state.setActionInProgress(null);
+        //state.setActionInProgress(null);
     }
 
     @Override

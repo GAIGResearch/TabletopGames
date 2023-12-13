@@ -28,7 +28,6 @@ public class HeroicFeatExtraAttack extends FreeAttack {
         // Restore the extra action if it was previously available
         // This is not considered an extra action (a Heroic Feat action), so it should not interfere with the extra action
         f.setUsedExtraAction(hasExtraAction);
-        state.setActionInProgress(null);
         return true;
     }
 

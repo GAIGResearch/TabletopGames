@@ -287,6 +287,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) currentState;
+        // Cleanses actionsInProgress to remove any that were considered completed but not previously removed
+        dgs.isActionInProgress();
         Figure actingFigure = dgs.getActingFigure();
 
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
@@ -521,7 +523,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // Monster Actions can only be taken once per turn, if they haven't already attacked yet
             if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
             {
-                actions.addAll(monsterActions(dgs));
+                List<AbstractAction> monsterActions = monsterActions(dgs);
+                if (!monsterActions.isEmpty()) actions.addAll(monsterActions);
             }
 
             // - Special (specified by quest)

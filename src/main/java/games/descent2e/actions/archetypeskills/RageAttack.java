@@ -39,8 +39,6 @@ public class RageAttack extends MeleeAttack {
         attacker.getAttribute(Figure.Attribute.Fatigue).increment();
         attacker.setHasAttacked(true);
 
-        state.setActionInProgress(null);
-
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
         // 2) Possibly invoke re-roll options (via interrupts)

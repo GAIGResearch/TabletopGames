@@ -52,8 +52,6 @@ public class FreeAttack extends RangedAttack{
         attacker.setUsedExtraAction(true);
         attacker.setHasAttacked(true);
 
-        state.setActionInProgress(null);
-
         return true;
     }
 

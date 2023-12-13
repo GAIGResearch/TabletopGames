@@ -43,8 +43,6 @@ public class Howl extends TriggerAttributeTest {
         monster.getNActionsExecuted().increment();
         monster.setHasAttacked(true);
 
-        state.setActionInProgress(null);
-
         return true;
     }
 
@@ -122,7 +120,6 @@ public class Howl extends TriggerAttributeTest {
         // after the interrupt action has been taken, we can continue to see who interrupts next
         state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
-        state.setActionInProgress(null);
     }
 
     @Override

@@ -61,8 +61,6 @@ public class MultiAttack extends RangedAttack {
         attacker.getNActionsExecuted().increment();
         attacker.setHasAttacked(true);
 
-        state.setActionInProgress(null);
-
         return true;
     }
 

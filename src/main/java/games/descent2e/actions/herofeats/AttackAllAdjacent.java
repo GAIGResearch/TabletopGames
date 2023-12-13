@@ -21,7 +21,6 @@ public class AttackAllAdjacent extends MultiAttack {
         dgs.setActionInProgress(this);
         if (dgs.getActingFigure() instanceof Hero) {((Hero) dgs.getActingFigure()).setFeatAvailable(false); }
         super.execute(dgs);
-        dgs.setActionInProgress(null);
         return true;
     }
 

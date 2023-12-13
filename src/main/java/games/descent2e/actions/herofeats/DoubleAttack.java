@@ -20,7 +20,6 @@ public class DoubleAttack extends MultiAttack {
         dgs.setActionInProgress(this);
         ((Hero) dgs.getActingFigure()).setFeatAvailable(false);
         super.execute(dgs);
-        dgs.setActionInProgress(null);
         return true;
     }
 

@@ -52,8 +52,6 @@ public class RangedAttack extends MeleeAttack {
         attacker.getNActionsExecuted().increment();
         attacker.setHasAttacked(true);
 
-        state.setActionInProgress(null);
-
         return true;
     }
 
