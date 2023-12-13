@@ -55,7 +55,8 @@ public class HeroAbilities {
     // Avric Albright's Hero Ability
     // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
     public static void avric(DescentGameState dgs) {
-        Hero actingFigure = (Hero) dgs.getActingFigure();
+        Figure actingFigure = dgs.getActingFigure();
+        if (!(actingFigure instanceof Hero)) return;
         for (Hero hero : dgs.getHeroes()) {
             if (hero.getAbility().equals(SurgeRecoverOneHeart)) {
                 Vector2D position = actingFigure.getPosition();
@@ -100,7 +101,9 @@ public class HeroAbilities {
     // Once per round, when we make an attack roll, we may reroll one attack or power die, and must keep the new result
     public static int tarha(DescentGameState dgs, DescentDice dice) {
         int face = dice.getFace();
-        Hero f = (Hero) dgs.getActingFigure();
+        Figure actingFigure = dgs.getActingFigure();
+        if (!(actingFigure instanceof Hero)) return face;
+        Hero f = (Hero) actingFigure;
         // We can only do this once per round
         if (f.getAbility().equals(RerollOnce) && !f.hasUsedHeroAbility()) {
             DiceType type = dice.getColour();
@@ -125,8 +128,9 @@ public class HeroAbilities {
     // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
     public static int jain(DescentGameState dgs, int reduce)
     {
-        Hero actingFigure = (Hero) dgs.getActingFigure();
-        if (actingFigure.getAbility().equals(DamageToFatigue))
+        Figure actingFigure = dgs.getActingFigure();
+        if (!(actingFigure instanceof Hero)) return 0;
+        if (((Hero) actingFigure).getAbility().equals(DamageToFatigue))
         {
             int maxFatigue = actingFigure.getAttributeMax(Figure.Attribute.Fatigue);
             int currentFatigue = actingFigure.getAttributeValue(Figure.Attribute.Fatigue);
@@ -139,6 +143,7 @@ public class HeroAbilities {
                 actingFigure.setAttributeToMax(Figure.Attribute.Fatigue);
                 reduce = maxFatigue - currentFatigue;
             }
+            ((Hero) actingFigure).setUsedHeroAbility(true);
         }
         return reduce;
     }
@@ -170,14 +175,17 @@ public class HeroAbilities {
     // Grisban the Thirsty's Hero Ability
     // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
     public static List<AbstractAction> grisban(DescentGameState dgs) {
-        Hero actingFigure = (Hero) dgs.getActingFigure();
         List<AbstractAction> removeConditions = new ArrayList<>();
-        if (grisbanCanAct(dgs, actingFigure)) {
-            for (DescentTypes.DescentCondition condition : actingFigure.getConditions()) {
-                RemoveCondition removeCondition = new RemoveCondition(actingFigure.getComponentID(), condition);
-                if (removeCondition.canExecute(dgs)) {
-                    actingFigure.setUsedHeroAbility(true);
-                    removeConditions.add(removeCondition);
+        Figure actingFigure = dgs.getActingFigure();
+        if ((actingFigure instanceof Hero));
+        {
+            if (grisbanCanAct(dgs, (Hero) actingFigure)) {
+                for (DescentTypes.DescentCondition condition : actingFigure.getConditions()) {
+                    RemoveCondition removeCondition = new RemoveCondition(actingFigure.getComponentID(), condition);
+                    if (removeCondition.canExecute(dgs)) {
+                        ((Hero) actingFigure).setUsedHeroAbility(true);
+                        removeConditions.add(removeCondition);
+                    }
                 }
             }
         }
@@ -194,10 +202,11 @@ public class HeroAbilities {
     // Syndrael's Hero Ability
     // If Syndrael has not moved this turn, recover 2 Fatigue
     public static void syndrael(DescentGameState dgs) {
-        Hero actingFigure = (Hero) dgs.getActingFigure();
-        if (actingFigure.getAbility().equals(HealFatigueOnWait) && !actingFigure.hasMoved()) {
+        Figure actingFigure = dgs.getActingFigure();
+        if (!(actingFigure instanceof Hero)) return;
+        if (((Hero) actingFigure).getAbility().equals(HealFatigueOnWait) && !actingFigure.hasMoved()) {
             actingFigure.decrementAttribute(Figure.Attribute.Fatigue, 2);
-            actingFigure.setUsedHeroAbility(true);
+            ((Hero) actingFigure).setUsedHeroAbility(true);
         }
     }
 }
