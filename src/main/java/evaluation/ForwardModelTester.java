@@ -123,6 +123,8 @@ public class ForwardModelTester {
                 String error = String.format("Mismatch on action %d after decision %d (%s) - old/new hashcodes are %d/%d",
                         i, decision, actionHistory.get(decision-1), hashCodes.get(i), stateHistory.get(i).hashCode());
                 System.out.println(error);
+                for (int j = 0; j <= i; j++)
+                    System.out.printf("Decision %d: %s%n", j, actionHistory.get(j).toString());
                 System.out.printf("\tOld: %s%n\tNew: %s%n", hashNames.get(i), stateHistory.get(i).toString());
                 throw new AssertionError(error + "\n");
             }

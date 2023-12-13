@@ -136,7 +136,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     }
 
     public String toString() {
-        return "Call Attribute Test on";
+        return "Call Attribute Test by +" + attackingFigure + " on " + defendingFigure;
     }
 
     @Override

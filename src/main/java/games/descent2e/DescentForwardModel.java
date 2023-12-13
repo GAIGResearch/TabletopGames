@@ -277,7 +277,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         dgs.searchCards.shuffle(r);
 
         // Ready to start playing!
-        System.out.println("Game begin! Round " + dgs.getTurnOrder().getRoundCounter());
+        System.out.println("Game begin!");
+        for (Hero hero: dgs.heroes) {
+            System.out.println(hero.getComponentName() + " is controlled by Player " + hero.getOwnerId());
+        }
+        System.out.println("Round " + dgs.getTurnOrder().getRoundCounter());
     }
 
     @Override
