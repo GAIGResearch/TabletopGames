@@ -33,7 +33,7 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public String toString() {
-        return "Howl (Willpower) Test by " + super.getSourceFigure() + " on " + super.getTestingFigure() + "-" + super.getTestCount();
+        return "Howl (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
     }
 
     @Override

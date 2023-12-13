@@ -61,6 +61,8 @@ public class MultiAttack extends RangedAttack {
         attacker.getNActionsExecuted().increment();
         attacker.setHasAttacked(true);
 
+        state.setActionInProgress(null);
+
         return true;
     }
 
@@ -70,6 +72,14 @@ public class MultiAttack extends RangedAttack {
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         DicePool defencePool = defender.getDefenceDice();
         state.setDefenceDicePool(defencePool);
+
+        if (defender instanceof Monster) {
+            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
+            {
+                NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
+            }
+        }
+
         System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
     }
 
@@ -169,6 +179,7 @@ public class MultiAttack extends RangedAttack {
     }
 
     public void copyComponentTo(MultiAttack target) {
+        target.defendingFigure = defendingFigure;
         target.index = index;
         super.copyComponentTo(target);
     }

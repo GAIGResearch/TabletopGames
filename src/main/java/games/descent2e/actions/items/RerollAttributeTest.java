@@ -60,7 +60,8 @@ public class RerollAttributeTest extends DescentAction {
         {
             if (!((Hero) f).getOtherEquipment().contains(card)) return false;
         }
-        IExtendedSequence action =  Objects.requireNonNull(dgs.currentActionInProgress());
+        IExtendedSequence action =  dgs.currentActionInProgress();
+        if (action == null) return false;
         if (action instanceof AttributeTest) {
             AttributeTest test = (AttributeTest) action;
             // Reroll should only be available if they failed the test

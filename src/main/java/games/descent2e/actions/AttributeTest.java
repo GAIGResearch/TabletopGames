@@ -85,6 +85,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
         movePhaseForward(state);
 
+        state.setActionInProgress(null);
+
         // When executing an attribute test we need to:
         // 1) Obtain the attribute and its value to test
         // 2) Roll the dice
@@ -217,7 +219,9 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
+        state.setActionInProgress(null);
     }
 
     @Override

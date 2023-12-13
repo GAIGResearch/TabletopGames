@@ -108,7 +108,9 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
+        state.setActionInProgress(null);
     }
 
     @Override
@@ -131,6 +133,8 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         hero.setUsedExtraAction(false);
 
         movePhaseForward(dgs);
+
+        dgs.setActionInProgress(null);
 
         return true;
     }

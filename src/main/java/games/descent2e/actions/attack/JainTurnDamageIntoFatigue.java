@@ -45,6 +45,8 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         MeleeAttack currentAttack = dgs.getActingFigure().getCurrentAttack();
+        if (currentAttack == null)
+            return false;
         if (currentAttack.skip)
             return false;
         damage = currentAttack.getDamage();

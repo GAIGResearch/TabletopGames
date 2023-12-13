@@ -43,6 +43,8 @@ public class Howl extends TriggerAttributeTest {
         monster.getNActionsExecuted().increment();
         monster.setHasAttacked(true);
 
+        state.setActionInProgress(null);
+
         return true;
     }
 
@@ -118,7 +120,9 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
+        state.setActionInProgress(null);
     }
 
     @Override
@@ -129,12 +133,14 @@ public class Howl extends TriggerAttributeTest {
     @Override
     public Howl copy() {
         Howl retVal = new Howl(attackingFigure, heroes);
-        retVal.attackingPlayer = attackingPlayer;
-        retVal.defendingPlayer = defendingPlayer;
-        retVal.interruptPlayer = interruptPlayer;
-        retVal.phase = phase;
-        retVal.heroIndex = heroIndex;
+        copyComponentTo(retVal);
         return retVal;
+    }
+
+    public void copyComponentTo(Howl retVal)
+    {
+        retVal.heroIndex = heroIndex;
+        super.copyComponentTo(retVal);
     }
 
     @Override

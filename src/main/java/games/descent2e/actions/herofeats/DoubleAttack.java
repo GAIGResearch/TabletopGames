@@ -20,6 +20,7 @@ public class DoubleAttack extends MultiAttack {
         dgs.setActionInProgress(this);
         ((Hero) dgs.getActingFigure()).setFeatAvailable(false);
         super.execute(dgs);
+        dgs.setActionInProgress(null);
         return true;
     }
 
@@ -60,7 +61,7 @@ public class DoubleAttack extends MultiAttack {
 
     @Override
     public String toString() {
-        return String.format("Heroic Feat: Double Attack both %d and %d", super.defendingFigures.get(0), super.defendingFigures.get(1));
+        return String.format("Heroic Feat: Double Attack by %d on both %d and %d", super.attackingFigure, super.defendingFigures.get(0), super.defendingFigures.get(1));
     }
 
 }

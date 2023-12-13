@@ -136,7 +136,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     }
 
     public String toString() {
-        return "Call Attribute Test by +" + attackingFigure + " on " + defendingFigure;
+        return "Call Attribute Test by " + attackingFigure + " on " + defendingFigure;
     }
 
     @Override
@@ -170,11 +170,17 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     @Override
     public TriggerAttributeTest copy() {
         TriggerAttributeTest retVal = new TriggerAttributeTest(attackingFigure, defendingFigure);
+        copyComponentTo(retVal);
+        return retVal;
+    }
+
+    public void copyComponentTo(TriggerAttributeTest retVal)
+    {
+        retVal.defendingFigure = defendingFigure;
         retVal.attackingPlayer = attackingPlayer;
         retVal.defendingPlayer = defendingPlayer;
         retVal.interruptPlayer = interruptPlayer;
         retVal.phase = phase;
-        return retVal;
     }
 
     @Override
