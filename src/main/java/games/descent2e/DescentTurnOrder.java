@@ -220,12 +220,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                     {
                         canSpawn = true;
                         tile = "4A";
-                        noToSpawn = maxMonsters.get(i) - dgs.getMonsters().get(i).size();
-                        if (noToSpawn > 2)
-                        {
-                            noToSpawn = 2;
-
-                        }
+                        noToSpawn = Math.min(maxMonsters.get(i) - dgs.getMonsters().get(i).size(), 2);
                     }
                 }
                 break;
@@ -309,8 +304,6 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             {
                 originalMonster = monstersOriginal.get(1);
             }
-
-            // TODO: Figure out why NullPointerException gets thrown for Figure.clearAttributeTests
 
             Monster monster = originalMonster.copyNewID();
 

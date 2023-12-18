@@ -1325,6 +1325,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
+            List<Monster> monsterOriginalGroup = new ArrayList<>();
 
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
@@ -1408,6 +1409,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
                 master.setOwnerId(dgs.overlordPlayer);
                 monsterGroup.add(master);
+                monsterOriginalGroup.add(master.copyNewID());
             }
 
             // How many minions?
@@ -1465,10 +1467,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
 
                 monsterGroup.add(minion);
+                monsterOriginalGroup.add(minion.copyNewID());
             }
             dgs.monsters.add(monsterGroup);
-            dgs.monstersOriginal.add(monsterGroup);
-            dgs.monstersPerGroup.add(monsterGroup.size());
+            dgs.monstersOriginal.add(monsterOriginalGroup);
+            dgs.monstersPerGroup.add(monsterOriginalGroup.size());
             dgs.monsterGroups.add(name);
         }
 
