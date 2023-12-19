@@ -1,6 +1,7 @@
 package games.descent2e.actions.archetypeskills;
 
 import core.AbstractGameState;
+import core.components.Component;
 import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
@@ -48,8 +49,9 @@ public class Heal extends DescentAction {
     public String getString(AbstractGameState gameState) {
         String targetName = gameState.getComponentById(targetID).getComponentName().replace("Hero: ", "");
         String string = "Heal " + targetName + " for 1 Red Power Die";
-        if (cardID != -1) {
-            string = gameState.getComponentById(cardID).getProperty("name").toString() + ": " + string;
+        Component card = gameState.getComponentById(cardID);
+        if (card != null) {
+            string = card.getProperty("name").toString() + ": " + string;
         }
         return string;
     }
@@ -89,7 +91,8 @@ public class Heal extends DescentAction {
             f.getAttribute(Figure.Attribute.Fatigue).increment();
         }
 
-        if (cardID != -1)
+        Component card = dgs.getComponentById(cardID);
+        if (card != null)
         {
             f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         }
@@ -118,7 +121,8 @@ public class Heal extends DescentAction {
                 return false;
         }
 
-        if (cardID == -1)
+        Component card = dgs.getComponentById(cardID);
+        if (card == null)
         {
             // As Prayer of Healing can be upgraded to have additional effects,
             // we do not care if the target is at full health if we are exhausting a card
@@ -126,7 +130,7 @@ public class Heal extends DescentAction {
                 return false;
         }
 
-        if (cardID != -1)
+        if (card != null)
         {
             if (f.isExhausted((DescentCard) dgs.getComponentById(cardID)))
                 return false;
