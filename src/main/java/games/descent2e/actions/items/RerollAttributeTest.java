@@ -42,6 +42,7 @@ public class RerollAttributeTest extends DescentAction {
     public boolean execute(DescentGameState dgs) {
         dgs.getAttributeDicePool().roll(dgs.getRandom());
         Figure f = (Figure) dgs.getComponentById(figureID);
+        System.out.println("Exhausting Lucky Charm reroll!");
         f.exhaustCard(card);
         return true;
     }
