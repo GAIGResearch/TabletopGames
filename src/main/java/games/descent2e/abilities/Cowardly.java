@@ -30,10 +30,10 @@ public class Cowardly {
                 }
             }
         }
-        if (!nearMasterOrLieutenant)
+        /*if (!nearMasterOrLieutenant)
         {
             System.out.println("This monster is too cowardly to make a surge!");
-        }
+        }*/
         return nearMasterOrLieutenant;
     }
 }

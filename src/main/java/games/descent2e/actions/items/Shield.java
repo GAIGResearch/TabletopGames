@@ -36,7 +36,7 @@ public class Shield extends DescentAction {
     @Override
     public boolean execute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(figureID);
-        System.out.println("Exhausting shield!");
+        //System.out.println("Exhausting shield!");
         f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
         return true;

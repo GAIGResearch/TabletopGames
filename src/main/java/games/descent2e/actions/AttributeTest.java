@@ -82,7 +82,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         setTestingName(tester.getName());
         attributeValue = tester.getAttributeValue(attribute);
 
-        announceTestDebug(state);
+        //announceTestDebug(state);
 
         movePhaseForward(state);
 
@@ -160,7 +160,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 testResult(state);
                 resolveTest(state, testingFigure, result);
                 phase = ALL_DONE;
-                System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
+                //System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
                 break;
         }
         // and reset interrupts
@@ -196,7 +196,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         // Normally, both penalties remain at 0, however the Overlord can influence either
         result = (roll + penaltyToRoll) <= (attributeValue - penaltyToAttribute);
 
-        System.out.println("Attribute Test Result: " + result + " (Roll: " + roll + ", Attribute: " + attributeValue + ")");
+        //System.out.println("Attribute Test Result: " + result + " (Roll: " + roll + ", Attribute: " + attributeValue + ")");
     }
 
 

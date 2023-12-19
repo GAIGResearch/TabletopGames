@@ -42,19 +42,19 @@ public class HowlTest extends AttributeTest {
         Figure f = (Figure) dgs.getComponentById(figureID);
         if (result)
         {
-            System.out.println("Passed Howl (Willpower) Test!");
+            //System.out.println("Passed Howl (Willpower) Test!");
         }
         else
         {
             if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum())
             {
                 f.getAttribute(Figure.Attribute.Fatigue).increment();
-                System.out.println("Failed Howl (Willpower) Test!");
+                //System.out.println("Failed Howl (Willpower) Test!");
             }
         }
 
         f.addAttributeTest(this);
-        System.out.println("Added Howl (Willpower) Test");
+        //System.out.println("Added Howl (Willpower) Test");
     }
 
     public HowlTest copy()

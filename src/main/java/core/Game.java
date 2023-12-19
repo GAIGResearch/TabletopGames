@@ -529,12 +529,6 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
-        boolean melee = false;
-        boolean howl = false;
-        if (!gameState.getActionsInProgress().isEmpty()) {
-            melee = gameState.getActionsInProgress().peek() instanceof MeleeAttack;
-            howl = gameState.getActionsInProgress().peek() instanceof Howl;
-        }
         boolean errorInbound = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace).isEmpty();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.size() == 0) {
@@ -857,7 +851,7 @@ public class Game {
 //        players.add(rmhcPlayer);
 //        players.add(rmhcPlayer);
 
-        MCTSParams mcts_params = new MCTSParams();
+//        MCTSParams mcts_params = new MCTSParams();
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
@@ -869,14 +863,14 @@ public class Game {
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;

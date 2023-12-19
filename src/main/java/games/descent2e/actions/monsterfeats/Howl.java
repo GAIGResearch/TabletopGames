@@ -70,7 +70,7 @@ public class Howl extends TriggerAttributeTest {
     }
 
     void executePhase(DescentGameState state) {
-        System.out.println("Executing phase " + phase);
+        //System.out.println("Executing phase " + phase);
         // System.out.println(heroIndex + " " + heroes.size());
         switch (phase) {
             case NOT_STARTED:
