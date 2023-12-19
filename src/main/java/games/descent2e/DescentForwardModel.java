@@ -508,7 +508,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
                         for (DescentAction da : token.getEffects()) {
-                            actions.add(da.copy());
+                            if (da.canExecute(dgs))
+                                actions.add(da.copy());
                         }
                     }
                 }
