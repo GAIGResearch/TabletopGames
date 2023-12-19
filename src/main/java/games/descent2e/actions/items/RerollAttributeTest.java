@@ -24,8 +24,9 @@ public class RerollAttributeTest extends DescentAction {
     @Override
     public String getString(AbstractGameState gameState) {
         DicePool dice = ((DescentGameState) gameState).getAttributeDicePool();
-        String cardname = gameState.getComponentById(cardID).getProperty("name").toString();
-        String retval = cardname + ": Reroll " + ((DescentGameState)gameState).getActingFigure().getLastAttributeTest() + " (";
+        String cardName = gameState.getComponentById(cardID).getProperty("name").toString();
+        String attributeTestName = gameState.currentActionInProgress() instanceof AttributeTest ? ((AttributeTest) gameState.currentActionInProgress()).getAttributeTestName().split(":")[0] : "";
+        String retval = cardName + ": Reroll " + attributeTestName + " (";
         int size = dice.getComponents().size();
         for (int i = 0; i < size; i++) {
             DescentDice d = dice.getDice(i);
@@ -47,7 +48,6 @@ public class RerollAttributeTest extends DescentAction {
         DescentCard card = (DescentCard) dgs.getComponentById(cardID);
         System.out.println("Exhausting Lucky Charm reroll!");
         f.exhaustCard(card);
-        f.removeLastAttributeTest();
         return true;
     }
 

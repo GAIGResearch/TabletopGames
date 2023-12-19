@@ -35,8 +35,9 @@ public class Poisoned extends AttributeTest {
     }
 
     @Override
-    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
+    public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
+        Figure f = (Figure) dgs.getComponentById(figureID);
         if (result)
         {
             f.removeCondition(DescentTypes.DescentCondition.Poison);
