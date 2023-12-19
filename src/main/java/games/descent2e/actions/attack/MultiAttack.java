@@ -68,6 +68,9 @@ public class MultiAttack extends RangedAttack {
     {
         defendingFigure = defendingFigures.get(index);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+
+        defender.setCurrentAttack(this);
+
         DicePool defencePool = defender.getDefenceDice();
         state.setDefenceDicePool(defencePool);
 

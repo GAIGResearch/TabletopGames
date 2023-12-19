@@ -110,6 +110,12 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         components.add(searchCards);
         components.addAll(heroes);
+        for (Hero hero: heroes) {
+            components.addAll(hero.getSkills().getComponents());
+            components.addAll(hero.getHandEquipment().getComponents());
+            components.add(hero.getArmor());
+            components.addAll(hero.getOtherEquipment().getComponents());
+        }
         monsters.forEach(components::addAll);
         monstersOriginal.forEach(components::addAll);
         components.add(overlord);

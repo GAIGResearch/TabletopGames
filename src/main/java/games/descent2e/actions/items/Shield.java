@@ -56,16 +56,14 @@ public class Shield extends DescentAction {
         {
             if (!((Hero) f).getHandEquipment().contains(card)) return false;
         }
-        IExtendedSequence action = dgs.currentActionInProgress();
-        if (action instanceof MeleeAttack) {
-            MeleeAttack melee = (MeleeAttack) action;
-            if (!melee.getSkip() && melee.getDefendingFigure() == figureID && melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) {
+        MeleeAttack melee = f.getCurrentAttack();
+        if (melee == null) return false;
+        if (!melee.getSkip() && melee.getDefendingFigure() == figureID && melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) {
 
-                // If the defender already has enough defence to block the attack, there's no point in exhausting the shield
-                int damage = dgs.getAttackDicePool().getDamage() + melee.getExtraDamage();
-                int defence = dgs.getDefenceDicePool().getShields() + melee.getExtraDefence() - melee.getPierce();
-                return damage > defence;
-            }
+            // If the defender already has enough defence to block the attack, there's no point in exhausting the shield
+            int damage = dgs.getAttackDicePool().getDamage() + melee.getExtraDamage();
+            int defence = dgs.getDefenceDicePool().getShields() + melee.getExtraDefence() - melee.getPierce();
+            return damage > defence;
         }
         return false;
     }

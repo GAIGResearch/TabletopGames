@@ -177,6 +177,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 Figure attacker = (Figure) state.getComponentById(attackingFigure);
                 Figure defender = (Figure) state.getComponentById(defendingFigure);
 
+                attacker.setCurrentAttack(this);
+                defender.setCurrentAttack(this);
+
                 if (attacker instanceof Hero) getWeaponBonuses(state, attackingFigure, true, true);
                 if (defender instanceof Hero) getWeaponBonuses(state, defendingFigure, true, false);
 
@@ -202,7 +205,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case PRE_DEFENCE_ROLL:
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
-                    //System.out.println("Attack missed!");
+                    System.out.println(this.toString() + " (" + this.getString(state)  + ") missed!");
                     phase = ALL_DONE;
                 }
                 else {
@@ -220,6 +223,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case POST_DAMAGE:
                 applyDamage(state);
                 phase = ALL_DONE;
+                System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
                 break;
         }
         // and reset interrupts
@@ -294,7 +298,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     protected void calculateDamage(DescentGameState state) {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
-        Figure defender = (Figure) state.getComponentById(defendingFigure);
 
         damage = state.getAttackDicePool().getDamage() + extraDamage;
         int defence = state.getDefenceDicePool().getShields() + extraDefence - pierce;
@@ -308,9 +311,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
         if (defence < 0) defence = 0;
         damage = Math.max(damage - defence, 0);
-
-        attacker.setCurrentAttack(this);
-        defender.setCurrentAttack(this);
     }
     protected void applyDamage(DescentGameState state) {
 
@@ -432,8 +432,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return longString(gameState);
-//        return shortString(gameState);
+//        return longString(gameState);
+        return shortString(gameState);
         //return toString();
     }
 
