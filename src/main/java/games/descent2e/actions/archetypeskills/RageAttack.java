@@ -81,10 +81,6 @@ public class RageAttack extends MeleeAttack {
         return retValue;
     }
 
-    public void copyComponentTo(RangedAttack target) {
-        super.copyComponentTo(target);
-    }
-
     @Override
     public String toString() {
         return String.format("Rage Attack by %d on %d", attackingFigure, defendingFigure);

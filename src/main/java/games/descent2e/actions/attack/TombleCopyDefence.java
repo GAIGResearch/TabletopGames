@@ -21,13 +21,10 @@ public class TombleCopyDefence extends DescentAction {
     // Tomble Burrowell Hero Ability
     String heroName = "Tomble Burrowell";
     int tomble, ally;
-    List<DescentDice> defenceDice;
-    public TombleCopyDefence(int hero, int ally, List<DescentDice> defenceDice) {
+    public TombleCopyDefence(int hero, int ally) {
         super(Triggers.ROLL_OTHER_DICE);
         this.tomble = hero;
         this.ally = ally;
-        this.defenceDice = defenceDice;
-
     }
 
     @Override
@@ -39,7 +36,7 @@ public class TombleCopyDefence extends DescentAction {
 
     @Override
     public TombleCopyDefence copy() {
-        return new TombleCopyDefence(tomble, ally, defenceDice);
+        return new TombleCopyDefence(tomble, ally);
     }
 
     @Override
@@ -72,14 +69,14 @@ public class TombleCopyDefence extends DescentAction {
     public boolean equals(Object obj) {
         if (obj instanceof TombleCopyDefence) {
             TombleCopyDefence other = (TombleCopyDefence) obj;
-            return other.tomble == tomble && other.ally == ally && other.defenceDice.equals(defenceDice);
+            return other.tomble == tomble && other.ally == ally;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tomble, ally, defenceDice);
+        return Objects.hash(tomble, ally);
     }
 
     @Override

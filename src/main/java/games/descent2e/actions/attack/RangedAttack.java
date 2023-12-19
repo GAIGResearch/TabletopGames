@@ -76,7 +76,8 @@ public class RangedAttack extends MeleeAttack {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String shortString(AbstractGameState gameState) {
+        // TODO: Extend this to pull in details of card and figures involved, including distance
         attackerName = gameState.getComponentById(attackingFigure).getComponentName();
         defenderName = gameState.getComponentById(defendingFigure).getComponentName();
         attackerName = attackerName.replace("Hero: ", "");
@@ -87,8 +88,43 @@ public class RangedAttack extends MeleeAttack {
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
         return String.format("Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + ")");
-        //return toString();
-        // TODO: Extend this to pull in details of card and figures involved, including distance
+    }
+
+    @Override
+    public String longString(AbstractGameState gameState) {
+
+        attackerName = gameState.getComponentById(attackingFigure).getComponentName();
+
+        // Sometimes the game will remove the dead enemy off the board before
+        // it can state in the Action History the attack that killed them
+        if (gameState.getComponentById(defendingFigure) != null) {
+            defenderName = gameState.getComponentById(defendingFigure).getComponentName();
+        }
+        attackerName = attackerName.replace("Hero: ", "");
+        defenderName = defenderName.replace("Hero: ", "");
+
+        Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
+        Figure defender = (Figure) gameState.getComponentById(defendingFigure);
+        String distance = Double.toString(getDistanceFromFigures(attacker, defender));
+
+        return String.format("Ranged Attack by " + attackerName + "(" + attackingPlayer
+                + ") on " + defenderName + "(" + defendingPlayer + "). "
+                + "Phase: " + phase + ". Interrupt player: " + interruptPlayer
+                + ". Range: " + distance
+                + ". Surges to spend: " + surgesToSpend
+                + ". Extra range: " + extraRange
+                + ". Pierce: " + pierce
+                + ". Extra damage: " + extraDamage
+                + ". Extra defence: " + extraDefence
+                + ". Mending: " + mending
+                + ". Disease: " + isDiseasing
+                + ". Immobilize: " + isImmobilizing
+                + ". Poison: " + isPoisoning
+                + ". Stun: " + isStunning
+                + ". Damage: " + damage
+                + ". Skip: " + skip
+                + ". Surges used: " + surgesUsed.toString()
+        );
     }
 
     @Override

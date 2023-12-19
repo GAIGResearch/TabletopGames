@@ -41,7 +41,7 @@ public class SwapOrder extends DescentAction {
 
     @Override
     public DescentAction copy() {
-        return new SwapOrder(action, first, second, swap);
+        return new SwapOrder(action.copy(), first, second, swap);
     }
 
     @Override
