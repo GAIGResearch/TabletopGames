@@ -339,7 +339,12 @@ public class Figure extends Token {
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
         copyTo.removedConditionThisTurn = removedConditionThisTurn;
-        copyTo.attributeTests = new ArrayList<>(attributeTests);
+        copyTo.attributeTests = new ArrayList<>();
+        if (attributeTests != null) {
+            for (AttributeTest test : attributeTests) {
+                copyTo.attributeTests.add(test.copy());
+            }
+        }
         copyTo.abilities = new ArrayList<>();
         if (abilities != null) {
             for (DescentAction ability : abilities) {
@@ -354,7 +359,9 @@ public class Figure extends Token {
         copyTo.isOffMap = isOffMap;
         copyTo.canIgnoreEnemies = canIgnoreEnemies;
         copyTo.extraAction = extraAction;
-        copyTo.currentAttack = currentAttack;
+        if (currentAttack != null) {
+            copyTo.currentAttack = currentAttack.copy();
+        }
         copyTo.exhausted = exhausted.copy();
     }
 

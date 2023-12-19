@@ -27,6 +27,7 @@ public class ForwardModelTester {
      */
 
     List<Integer> hashCodes = new ArrayList<>();
+    List<int[]> superHashCodes = new ArrayList<>();
     List<String> hashNames = new ArrayList<>();
     List<AbstractGameState> stateHistory = new ArrayList<>();
     List<AbstractAction> actionHistory = new ArrayList<>();
@@ -52,6 +53,7 @@ public class ForwardModelTester {
         Random rnd = new Random(seed);
         for (int loop = 1; loop <= numberOfGames; loop++) {
             hashCodes = new ArrayList<>();
+            superHashCodes = new ArrayList<>();
             stateHistory = new ArrayList<>();
             actionHistory = new ArrayList<>();
             hashNames = new ArrayList<>();
@@ -65,6 +67,7 @@ public class ForwardModelTester {
                 AbstractGameState stateCopy = game.getGameState().copy();
                 stateHistory.add(stateCopy);
                 hashCodes.add(game.getGameState().hashCode());
+                superHashCodes.add(game.getGameState().hashCodeArray());
                 hashNames.add(game.getGameState().toString());
                 if (stateCopy.hashCode() != game.getGameState().hashCode()) {
                     String error = String.format("Problem on state copy - orig/copy hashcodes are %d/%d",
