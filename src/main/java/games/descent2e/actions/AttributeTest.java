@@ -10,6 +10,7 @@ import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
+import javassist.runtime.Desc;
 
 import java.util.List;
 import java.util.Objects;
@@ -156,8 +157,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 break;
             case POST_TEST_ROLL:
                 // Any rerolls are executed via interrupts
+                testResult(state);
                 resolveTest(state, (Figure) state.getComponentById(testingFigure), result);
                 phase = ALL_DONE;
+                //System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
                 break;
         }
         // and reset interrupts
@@ -183,11 +186,19 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
         dgs.getAttributeDicePool().roll(dgs.getRandom());
 
+        testResult(dgs);
+    }
+
+    public void testResult(DescentGameState dgs)
+    {
         int roll = dgs.getAttributeDicePool().getShields();
 
         // Normally, both penalties remain at 0, however the Overlord can influence either
         result = (roll + penaltyToRoll) <= (attributeValue - penaltyToAttribute);
+
+        //System.out.println("Attribute Test Result: " + result + " (Roll: " + roll + ", Attribute: " + attributeValue + ")");
     }
+
 
     public void resolveTest(DescentGameState dgs, Figure f, boolean result)
     {

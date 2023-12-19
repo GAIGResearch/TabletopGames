@@ -1,6 +1,7 @@
 package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
+import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
@@ -10,12 +11,10 @@ import java.util.Objects;
 
 public class SwapOrder extends DescentAction {
 
-    HeroicFeatExtraMovement action;
     int first, second;
     boolean swap;
-    public SwapOrder(HeroicFeatExtraMovement action, int first, int second, boolean swap) {
+    public SwapOrder(int first, int second, boolean swap) {
         super(Triggers.ANYTIME);
-        this.action = action;
         this.first = first;
         this.second = second;
         this.swap = swap;
@@ -32,21 +31,28 @@ public class SwapOrder extends DescentAction {
     }
 
     @Override
-    public boolean execute(DescentGameState gs) {
-        action.swap(swap);
-        // Regardless of if we swap or not, we ensure we don't swap again
-        action.setSwapOption(true);
+    public boolean execute(DescentGameState dgs) {
+        IExtendedSequence action = dgs.currentActionInProgress();
+        if (action instanceof HeroicFeatExtraMovement) {
+            // Regardless of if we swap or not, we ensure we don't swap again
+            ((HeroicFeatExtraMovement) action).setSwapOption(true);
+
+            ((HeroicFeatExtraMovement) action).swap(swap);
+        }
         return true;
     }
 
     @Override
     public DescentAction copy() {
-        return new SwapOrder(action.copy(), first, second, swap);
+        return new SwapOrder(first, second, swap);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return !action.getSwapOption();
+        IExtendedSequence action = dgs.currentActionInProgress();
+        if (action instanceof HeroicFeatExtraMovement)
+            return !((HeroicFeatExtraMovement) action).getSwapOption();
+        return false;
     }
 
     @Override
@@ -55,11 +61,11 @@ public class SwapOrder extends DescentAction {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SwapOrder swapOrder = (SwapOrder) o;
-        return first == swapOrder.first && second == swapOrder.second && swap == swapOrder.swap && Objects.equals(action, swapOrder.action);
+        return first == swapOrder.first && second == swapOrder.second && swap == swapOrder.swap;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), action, first, second, swap);
+        return Objects.hash(super.hashCode(), first, second, swap);
     }
 }

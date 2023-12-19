@@ -2,10 +2,12 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.actions.attack.TriggerAttributeTest;
+import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 
 import java.util.ArrayList;
@@ -112,13 +114,21 @@ public class Howl extends TriggerAttributeTest {
             retVal.add(howlTest);
         }
 
+        if (retVal.isEmpty())
+        {
+            List<AbstractAction> superRetVal = super._computeAvailableActions(state);
+            if (superRetVal != null && !superRetVal.isEmpty())
+            {
+                retVal.addAll(superRetVal);
+            }
+        }
+
         return retVal;
     }
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
