@@ -22,7 +22,7 @@
         "weaponSurges": ["String[]", ["RANGE_PLUS_1"]],
         "equipSlots": ["String[]", ["hand"]],
         "cost": ["Integer", 25],
-        "action": ["String", "Attack. When Attacking an adjacent monster, gain +1 damage;Effect:AdjacentFoeDamage:1"]
+        "action": ["String", "Attack. When Attacking an adjacent monster, gain +1 damage.;Effect:AdjacentFoeDamage:1"]
       },
       {
         "name": ["String","Lucky Charm"],
@@ -32,7 +32,7 @@
         "equipmentType": ["String[]", ["Trinket"]],
         "equipSlots": ["String[]", ["other"]],
         "cost": ["Integer", 25],
-        "passive": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results;Effect:Reroll:AttributeTest"]
+        "passive": ["String", "Exhaust this card to reroll an attribute test. You must keep the new results.;Effect:Reroll:AttributeTest"]
       },
       {
         "name": ["String","Appraisal"],

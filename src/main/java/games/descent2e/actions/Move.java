@@ -66,6 +66,15 @@ public class Move extends AbstractAction {
         return true;
     }
 
+    public boolean canExecute (AbstractGameState gs)
+    {
+        Figure f = (Figure) gs.getComponentById(this.f);
+        // We should not finish on the same space that we started on
+        Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
+        if (finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY()) return true;
+        // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
+        return false;
+    }
 
     /**
      * Moves through a tile, applying penalties, NOT final destination.
@@ -322,6 +331,11 @@ public class Move extends AbstractAction {
 
         movement = movement + (f.getSize().a > 1 || f.getSize().b > 1 ? "; Orientation: " + orientation : "");
         return movement;
+    }
+
+    @Override
+    public String toString() {
+        return "Move by " + f + " to " + positionsTraveled.get(positionsTraveled.size()-1) + "";
     }
 
     public String getDirection(Vector2D currentPosition, Vector2D newPosition) {

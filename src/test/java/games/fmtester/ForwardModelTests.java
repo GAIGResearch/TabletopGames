@@ -6,7 +6,7 @@ import org.junit.Test;
 public class ForwardModelTests {
     @Test
     public void testDescent2e() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=1", "nPlayers=2");
+        ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=3", "nPlayers=2");
     }
 
 //    @Test

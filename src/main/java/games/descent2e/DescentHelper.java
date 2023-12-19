@@ -252,7 +252,8 @@ public class DescentHelper {
             if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
                 Move myMoveAction = new Move(f.getComponentID(), allPossibleRotations.get(loc).b, loc.b);
                 myMoveAction.updateDirectionID(dgs);
-                actions.add(myMoveAction);
+                if(myMoveAction.canExecute(dgs))
+                    actions.add(myMoveAction);
             }
         }
 

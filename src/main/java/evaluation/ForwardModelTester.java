@@ -2,6 +2,7 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.Utils;
@@ -92,7 +93,11 @@ public class ForwardModelTester {
                             if (j == 3)
                             {
                                 System.out.println("Orig: " + stateCopy.getActionsInProgress().toString());
+                                for (IExtendedSequence action : stateCopy.getActionsInProgress())
+                                    System.out.println("Hash: " + action.hashCode());
                                 System.out.println("Copy: " + game.getGameState().getActionsInProgress().toString());
+                                for (IExtendedSequence action : game.getGameState().getActionsInProgress())
+                                    System.out.println("Hash: " + action.hashCode());
                             }
                         }
                     }
@@ -123,7 +128,7 @@ public class ForwardModelTester {
                 String error = String.format("Mismatch on action %d after decision %d (%s) - old/new hashcodes are %d/%d",
                         i, decision, actionHistory.get(decision-1), hashCodes.get(i), stateHistory.get(i).hashCode());
                 System.out.println(error);
-                for (int j = 0; j <= i; j++)
+                for (int j = Math.max(0, i - 20); j <= i; j++)
                     System.out.printf("Decision %d: %s%n", j, actionHistory.get(j).toString());
                 System.out.printf("\tOld: %s%n\tNew: %s%n", hashNames.get(i), stateHistory.get(i).toString());
                 throw new AssertionError(error + "\n");
