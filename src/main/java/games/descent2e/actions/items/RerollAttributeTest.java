@@ -3,27 +3,29 @@ package games.descent2e.actions.items;
 import core.AbstractGameState;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentHelper;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.*;
+import javassist.runtime.Desc;
 
 import java.util.Objects;
 
 public class RerollAttributeTest extends DescentAction {
     int figureID = -1;
-    DescentCard card;
-    public RerollAttributeTest(int figureID, DescentCard card) {
+    int cardID;
+
+    public RerollAttributeTest(int figureID, int cardID) {
         super(Triggers.ROLL_OWN_DICE);
         this.figureID = figureID;
-        this.card = card;
+        this.cardID = cardID;
     }
+
     @Override
     public String getString(AbstractGameState gameState) {
         DicePool dice = ((DescentGameState) gameState).getAttributeDicePool();
-        String cardname = card.getProperty("name").toString();
-        String retval = cardname + ": Reroll (";
+        String cardname = gameState.getComponentById(cardID).getProperty("name").toString();
+        String retval = cardname + ": Reroll " + ((DescentGameState)gameState).getActingFigure().getLastAttributeTest() + " (";
         int size = dice.getComponents().size();
         for (int i = 0; i < size; i++) {
             DescentDice d = dice.getDice(i);
@@ -42,20 +44,23 @@ public class RerollAttributeTest extends DescentAction {
     public boolean execute(DescentGameState dgs) {
         dgs.getAttributeDicePool().roll(dgs.getRandom());
         Figure f = (Figure) dgs.getComponentById(figureID);
+        DescentCard card = (DescentCard) dgs.getComponentById(cardID);
         System.out.println("Exhausting Lucky Charm reroll!");
         f.exhaustCard(card);
+        f.removeLastAttributeTest();
         return true;
     }
 
     @Override
     public DescentAction copy() {
-        return new RerollAttributeTest(figureID, card);
+        return new RerollAttributeTest(figureID, cardID);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         if (figureID == -1) return false;
         Figure f = (Figure) dgs.getComponentById(figureID);
+        DescentCard card = (DescentCard) dgs.getComponentById(cardID);
         if (f.isExhausted(card)) return false;
         if (f instanceof Hero)
         {
@@ -78,11 +83,11 @@ public class RerollAttributeTest extends DescentAction {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         RerollAttributeTest that = (RerollAttributeTest) o;
-        return figureID == that.figureID && Objects.equals(card, that.card);
+        return figureID == that.figureID && cardID == that.cardID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), figureID, card);
+        return Objects.hash(super.hashCode(), figureID, cardID);
     }
 }

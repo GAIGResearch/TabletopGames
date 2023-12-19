@@ -540,7 +540,7 @@ public class Game {
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
+                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + (topOfStack instanceof AbstractAction ? ((AbstractAction) topOfStack).getString(gameState) : topOfStack) + ")" : ""));
 
         }
         actionComputeTime = (System.nanoTime() - s);
@@ -848,13 +848,13 @@ public class Game {
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */

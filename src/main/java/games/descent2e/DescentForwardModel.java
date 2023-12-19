@@ -201,8 +201,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     if (dgs.heroes.get(i).equals(hero)) {
                         continue;
                     }
-                    List<DescentDice> defenceDice = hero.getDefenceDice().getComponents();
-                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero.getComponentID(), dgs.heroes.get(i).getComponentID(), defenceDice);
+                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero.getComponentID(), dgs.heroes.get(i).getComponentID());
                     if (!hero.getAbilities().contains(copyDefence)) {
                         hero.addAbility(copyDefence);
                     }

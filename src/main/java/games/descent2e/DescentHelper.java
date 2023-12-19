@@ -514,7 +514,7 @@ public class DescentHelper {
                                 case "Reroll":
                                     switch (effect[2]) {
                                         case "AttributeTest":
-                                            actions.add(new RerollAttributeTest(figure.getComponentID(), equipment));
+                                            actions.add(new RerollAttributeTest(figure.getComponentID(), equipment.getComponentID()));
                                             break;
                                         default:
                                             break;
