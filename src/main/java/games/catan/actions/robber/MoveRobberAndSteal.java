@@ -29,7 +29,7 @@ public class MoveRobberAndSteal extends MoveRobber {
         if (robberTile.removeRobber()){
             cgs.getBoard()[x][y].placeRobber();
 
-            Random random = new Random(gs.getGameParameters().getRandomSeed());
+            Random random = gs.getRnd();
             if (targetPlayer != -1) {
                 // We might not have anyone to steal from, that's ok
                 int nResTarget = cgs.getNResourcesInHand(targetPlayer);

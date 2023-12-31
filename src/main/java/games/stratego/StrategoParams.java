@@ -11,7 +11,7 @@ public class StrategoParams extends AbstractParameters {
     public int[] pieceSetupCount = {1,8,5,4,4,4,3,2,1,1}; // {1,1,2,3,4,4,4,5,8,1};
     public int pieceSetupNBombs = 6;
     public int pieceSetupNFlags = 1;
-    public int maxRounds = 2000;
+    public int maxRounds = 1000;
 
     public boolean isTileValid(final int x, final int y){
         if ((x>=0 && x<gridSize) && (y>=0 && y<gridSize)){
@@ -24,13 +24,19 @@ public class StrategoParams extends AbstractParameters {
         }
     }
 
-    public StrategoParams(long seed) {
-        super(seed);
-    }
-
     @Override
     protected AbstractParameters _copy() {
-        return new StrategoParams(System.currentTimeMillis());
+        StrategoParams retValue = new StrategoParams();
+        retValue.gridSize = gridSize;
+        retValue.xRestrictedTiles = xRestrictedTiles.clone();
+        retValue.yRestrictedTiles = yRestrictedTiles.clone();
+        retValue.moveSpeed = moveSpeed;
+        retValue.attackRange = attackRange;
+        retValue.pieceSetupCount = pieceSetupCount.clone();
+        retValue.pieceSetupNBombs = pieceSetupNBombs;
+        retValue.pieceSetupNFlags = pieceSetupNFlags;
+        retValue.maxRounds = maxRounds;
+        return retValue;
     }
 
     @Override

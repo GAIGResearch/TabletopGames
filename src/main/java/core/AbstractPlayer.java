@@ -14,7 +14,7 @@ public abstract class AbstractPlayer {
     protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
     private AbstractForwardModel forwardModel;
-    public PlayerParameters parameters = new PlayerParameters(System.currentTimeMillis());
+    public PlayerParameters parameters = new PlayerParameters();
     protected List<AbstractPlayerDecorator> decorators = new ArrayList<>();
 
     /* Final methods */

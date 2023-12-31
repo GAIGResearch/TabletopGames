@@ -23,7 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static evaluation.RunArg.parseConfig;
+import static evaluation.RunArg.*;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
 import static utilities.Utils.getArg;
 
@@ -161,8 +161,10 @@ public class SkillLadder {
                 if (newBudget == startGridBudget && otherBudget < startMinorGridBudget) // we fast forward to where we want to start the minor grid
                     continue;
                 List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1), allAgents.get(agentIndex));
-                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration,
-                        ONE_VS_ALL, params, false);
+                Map<RunArg, Object> config = new HashMap<>();
+                config.put(matchups, gamesPerIteration);
+                config.put(byTeam, false);
+                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, ONE_VS_ALL, config);
                 RRT.verbose = false;
                 for (String listenerClass : listenerClasses) {
                     if (listenerClass.isEmpty()) continue;

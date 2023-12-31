@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 
 public class ActionTests {
     CCForwardModel fm = new CCForwardModel();
-    Game game = GameType.ChineseCheckers.createGameInstance(2, new CCParameters(0));
+    Game game = GameType.ChineseCheckers.createGameInstance(2, new CCParameters());
     CCGameState state = (CCGameState) game.getGameState();
 
     @Test

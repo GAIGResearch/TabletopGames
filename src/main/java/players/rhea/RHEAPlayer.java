@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 public class RHEAPlayer extends AbstractPlayer {
     private static final AbstractPlayer randomPlayer = new RandomPlayer();
     private final Random randomGenerator;
-    RHEAParams params;
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     protected List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
@@ -27,21 +26,16 @@ public class RHEAPlayer extends AbstractPlayer {
     protected int repairCount, nonRepairCount;
     private MASTPlayer mastPlayer;
 
-    public RHEAPlayer() {
-        this(System.currentTimeMillis());
-    }
-
     public RHEAPlayer(RHEAParams params) {
         randomGenerator = new Random(params.getRandomSeed());
-        this.params = params;
-        this.parameters = params;
+        parameters = params;
         setName("rhea");
     }
 
-    public RHEAPlayer(long seed) {
-        this(new RHEAParams(seed));
+    @Override
+    public RHEAParams getParameters() {
+        return (RHEAParams) parameters;
     }
-
     @Override
     public void initializePlayer(AbstractGameState state) {
         MASTStatistics = new ArrayList<>();
@@ -53,12 +47,13 @@ public class RHEAPlayer extends AbstractPlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> possibleActions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
-        timer.setMaxTimeMillis(params.budget);
+        timer.setMaxTimeMillis(parameters.budget);
         numIters = 0;
         fmCalls = 0;
         copyCalls = 0;
         repairCount = 0;
         nonRepairCount = 0;
+        RHEAParams params = getParameters();
 
         if (params.useMAST) {
             if (MASTStatistics == null) {
@@ -114,6 +109,7 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     private boolean budgetLeft(ElapsedCpuTimer timer) {
+        RHEAParams params = getParameters();
         if (params.budgetType == PlayerConstants.BUDGET_TIME) {
             long remaining = timer.remainingTimeMillis();
             return remaining > params.breakMS;
@@ -131,13 +127,15 @@ public class RHEAPlayer extends AbstractPlayer {
 
     @Override
     public RHEAPlayer copy() {
-        RHEAParams newParams = (RHEAParams) params.copy();
+        RHEAParams newParams = (RHEAParams) parameters.copy();
         newParams.setRandomSeed(randomGenerator.nextInt());
-        return new RHEAPlayer(newParams);
+        RHEAPlayer retValue = new RHEAPlayer(newParams);
+        retValue.setForwardModel(getForwardModel().copy());
+        return retValue;
     }
 
     private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2) {
-        switch (params.crossoverType) {
+        switch (getParameters().crossoverType) {
             case NONE: // we just take the first parent
                 return new RHEAIndividual(p1);
             case UNIFORM:
@@ -192,7 +190,7 @@ public class RHEAPlayer extends AbstractPlayer {
     RHEAIndividual[] selectParents() {
         RHEAIndividual[] parents = new RHEAIndividual[2];
 
-        switch (params.selectionType) {
+        switch (getParameters().selectionType) {
             case TOURNAMENT:
                 parents[0] = tournamentSelection();
                 parents[1] = tournamentSelection();
@@ -210,7 +208,7 @@ public class RHEAPlayer extends AbstractPlayer {
 
     RHEAIndividual tournamentSelection() {
         RHEAIndividual best = null;
-        for (int i = 0; i < params.tournamentSize; ++i) {
+        for (int i = 0; i < getParameters().tournamentSize; ++i) {
             int rand = randomGenerator.nextInt(population.size());
 
             RHEAIndividual current = population.get(rand);
@@ -240,6 +238,7 @@ public class RHEAPlayer extends AbstractPlayer {
      */
     private void runIteration() {
         //copy elites
+        RHEAParams params = getParameters();
         List<RHEAIndividual> newPopulation = new ArrayList<>();
         for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
             newPopulation.add(new RHEAIndividual(population.get(i)));

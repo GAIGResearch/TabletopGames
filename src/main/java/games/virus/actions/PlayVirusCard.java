@@ -8,7 +8,6 @@ import games.virus.cards.VirusCard;
 import games.virus.components.VirusBody;
 
 import java.util.Objects;
-import java.util.Random;
 
 public class PlayVirusCard extends DrawCard {
     public int bodyId;
@@ -60,7 +59,7 @@ public class PlayVirusCard extends DrawCard {
     public void discardToDraw(VirusGameState vgs) {
         vgs.getDrawDeck().add(vgs.getDiscardDeck());
         vgs.getDiscardDeck().clear();
-        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
+        vgs.getDrawDeck().shuffle(vgs.getRnd());
     }
 
     @Override

@@ -88,7 +88,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
                             Object child = registerChild(key, subJSON);
-                            itp.setParameterValue(key, child);
+                            itp.setParameterValue((String) baseKey, child);
                             if (child instanceof ITunableParameters)
                                 retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
                         } catch (Exception e) {

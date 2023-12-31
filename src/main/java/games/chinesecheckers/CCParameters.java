@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CCParameters extends AbstractParameters {
-    public CCParameters(long seed) {
-        super(seed);
-    }
 
     // These are the colours of the base/target nodes for each player (where they need to get to)
     // To find the starting nodes, look at the colour from boardOpposites
@@ -44,12 +41,12 @@ public class CCParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return this;
+        return new CCParameters();
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return o instanceof GTParameters;
+        return o instanceof CCParameters;
     }
 
     @Override

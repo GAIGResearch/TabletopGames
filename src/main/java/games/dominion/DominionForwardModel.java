@@ -8,6 +8,7 @@ import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -32,7 +33,7 @@ public class DominionForwardModel extends StandardForwardModel {
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
-            state.playerDrawPiles[i].shuffle(state.rnd);
+            state.playerDrawPiles[i].shuffle(state.getRnd());
             for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
         }
         state.actionsLeftForCurrentPlayer = 1;
@@ -150,10 +151,13 @@ public class DominionForwardModel extends StandardForwardModel {
         switch (state.getGamePhase().toString()) {
             case "Play":
                 if (state.actionsLeft() > 0) {
-                    Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
-                            .filter(DominionCard::isActionCard).collect(toSet());
-                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID))
-                            .distinct().collect(toList());
+                    List<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
+                            .filter(DominionCard::isActionCard).collect(toList());
+                    List<AbstractAction> availableActions = actionCards.stream()
+       //                     .sorted(Comparator.comparingInt(c -> c.cardType().cost))
+                            .map(dc -> dc.getAction(playerID))
+                            .distinct()
+                            .collect(toList());
                     availableActions.add(new EndPhase());
                     return availableActions;
                 }

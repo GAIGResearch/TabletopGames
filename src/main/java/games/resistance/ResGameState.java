@@ -21,7 +21,6 @@ public class ResGameState extends AbstractGameState {
     boolean voteSuccess;
     int leaderID;
     int failedVoteCounter = 0;
-    Random rnd;
 
     ResPlayerCards.CardType[] votingChoice;
 
@@ -123,7 +122,6 @@ public class ResGameState extends AbstractGameState {
         copy.playerHandCards = new ArrayList<>();
         copy.finalTeamChoice = new ArrayList<>();
         copy.gameBoardValues = new ArrayList<>(gameBoardValues);
-        copy.rnd = new Random(rnd.nextLong());
         copy.historicTeams = new ArrayList<>(historicTeams);  // we do not need to copy the sub-lists, as they are immutable
         copy.noVotesPerMission = new ArrayList<>(noVotesPerMission);
         copy.leaderID = leaderID;

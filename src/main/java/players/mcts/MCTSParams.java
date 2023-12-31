@@ -4,7 +4,9 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
+import org.json.simple.JSONObject;
 import players.PlayerParameters;
+import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
@@ -25,7 +27,6 @@ public class MCTSParams extends PlayerParameters {
     public double K = Math.sqrt(2);
     public int rolloutLength = 10; // assuming we have a good heuristic
     public int maxTreeDepth = 1000; // effectively no limit
-    public double epsilon = 1e-6;
     public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
@@ -64,18 +65,12 @@ public class MCTSParams extends PlayerParameters {
     public double firstPlayUrgency = 1000000000.0;
 
     public MCTSParams() {
-        this(System.currentTimeMillis());
-    }
-
-    public MCTSParams(long seed) {
-        super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 0.1);
         addTunableParameter("hedgeBoltzmann", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
-        addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100, 1000));
-        addTunableParameter("epsilon", 1e-6);
+        addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
@@ -119,7 +114,6 @@ public class MCTSParams extends PlayerParameters {
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
-        epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
@@ -167,7 +161,9 @@ public class MCTSParams extends PlayerParameters {
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
-
+        // we then null those elements of params which are constructed (lazily) from the above
+        opponentModel = null;
+        rolloutPolicy = null;
     }
 
     @Override
@@ -175,25 +171,31 @@ public class MCTSParams extends PlayerParameters {
         // All the copying is done in TunableParameters.copy()
         // Note that any *local* changes of parameters will not be copied
         // unless they have been 'registered' with setParameterValue("name", value)
-        return new MCTSParams(System.currentTimeMillis());
+        return new MCTSParams();
     }
 
     public AbstractPlayer getOpponentModel() {
-        if (opponentModel != null)
-            return opponentModel;
-        if (oppModelType == PARAMS)
-            return (AbstractPlayer) opponentModelParams.instantiate();
-        if (oppModelType == MCTSEnums.Strategies.DEFAULT)
-            return getRolloutStrategy();
-        return constructStrategy(oppModelType, oppModelClass);
+        if (opponentModel == null) {
+            if (oppModelType == PARAMS)
+                opponentModel = (AbstractPlayer) opponentModelParams.instantiate();
+            else if (oppModelType == MCTSEnums.Strategies.DEFAULT)
+                opponentModel = getRolloutStrategy();
+            else
+                opponentModel = constructStrategy(oppModelType, oppModelClass);
+            opponentModel.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+        }
+        return opponentModel;
     }
 
     public AbstractPlayer getRolloutStrategy() {
-        if (rolloutPolicy != null)
-            return rolloutPolicy;
-        if (rolloutType == PARAMS)
-            return (AbstractPlayer) rolloutPolicyParams.instantiate();
-        return constructStrategy(rolloutType, rolloutClass);
+        if (rolloutPolicy == null) {
+            if (rolloutType == PARAMS)
+                rolloutPolicy = (AbstractPlayer) rolloutPolicyParams.instantiate();
+            else
+                rolloutPolicy = constructStrategy(rolloutType, rolloutClass);
+            rolloutPolicy.getParameters().actionSpace = actionSpace;  // TODO makes sense?
+        }
+        return rolloutPolicy;
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
@@ -201,7 +203,7 @@ public class MCTSParams extends PlayerParameters {
             case RANDOM:
                 return new RandomPlayer(new Random(getRandomSeed()));
             case MAST:
-                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, System.currentTimeMillis(), MASTDefaultValue);
+                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
             case CLASS:
                 // we have a bespoke Class to instantiate
                 return JSONUtils.loadClassFromString(details);

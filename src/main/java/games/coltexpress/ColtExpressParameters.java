@@ -124,9 +124,7 @@ public class ColtExpressParameters extends TunableParameters {
         }});
     }};
 
-    public ColtExpressParameters(long seed) {
-        super(seed);
-
+    public ColtExpressParameters() {
         addTunableParameter("nCardsInHand", 6, Arrays.asList(3,4,5,6,7,8,9,10));
         addTunableParameter("nCardsInHandExtraDoc", 1, Arrays.asList(1,2,3));
         addTunableParameter("nBulletsPerPlayer", 6, Arrays.asList(4,6,8,10,12));
@@ -157,7 +155,7 @@ public class ColtExpressParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        ColtExpressParameters cep = new ColtExpressParameters(System.currentTimeMillis());
+        ColtExpressParameters cep = new ColtExpressParameters();
         cep.dataPath = dataPath;
         cep.nCardsInHand = nCardsInHand;
         cep.nCardsInHandExtraDoc = nCardsInHandExtraDoc;
@@ -194,7 +192,6 @@ public class ColtExpressParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ColtExpressParameters)) return false;
-        if (!super.equals(o)) return false;
         ColtExpressParameters that = (ColtExpressParameters) o;
         return nCardsInHand == that.nCardsInHand &&
                 nCardsInHandExtraDoc == that.nCardsInHandExtraDoc &&

@@ -35,11 +35,14 @@ public class DiscardCard extends DrawCard {
         }
 
         // Player gets 3 coins from discarding card
-        int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin); // No. Coins player has
-        wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.Resource.Coin,  playerValue+ ((Wonders7GameParameters)wgs.getGameParameters()).nCoinsDiscard); // Adds 3 coins to player coin count
+        int playerValue = wgs.getPlayerResources(player).get(Wonders7Constants.Resource.Coin); // No. Coins player has
+        wgs.getPlayerResources(player).put(Wonders7Constants.Resource.Coin,  playerValue+ ((Wonders7GameParameters)wgs.getGameParameters()).nCoinsDiscard); // Adds 3 coins to player coin count
 
         // Removes card from player hand and adds to discarded cards deck
-        wgs.getPlayerHand(wgs.getCurrentPlayer()).remove(card); // remove
+        boolean cardFound = wgs.getPlayerHand(player).remove(card); // remove
+        if (!cardFound) {
+            throw new AssertionError("Card not found in player hand");
+        }
         wgs.getDiscardPile().add(card); // add
 
         return true;

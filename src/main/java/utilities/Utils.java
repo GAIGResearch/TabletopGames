@@ -175,11 +175,10 @@ public abstract class Utils {
      * exploreEpsilon is the percentage chance of taking a random action
      *
      * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
-     * @param rnd
      * @param <T>
      * @return
      */
-    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, Random rnd) {
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, double randomNumber) {
         Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
         // we then add on the exploration bonus
         if (exploreEpsilon > 0.0) {
@@ -187,23 +186,22 @@ public abstract class Utils {
             normalisedMap = normalisedMap.entrySet().stream().collect(
                     toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - exploreEpsilon) + exploreBonus));
         }
-        double cdfSample = rnd.nextDouble();
         double cdf = 0.0;
         for (T item : normalisedMap.keySet()) {
             cdf += normalisedMap.get(item);
-            if (cdf >= cdfSample)
+            if (cdf >= randomNumber)
                 return item;
         }
         throw new AssertionError("Should never get here!");
     }
 
-    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, Random rnd) {
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, double randomNumber) {
         double temp = Math.max(temperature, 0.001);
         // first we find the largest value, and subtract that from all values
         double maxValue = itemsAndValues.values().stream().mapToDouble(d -> d).max().orElse(0.0);
         Map<T, Double> tempModified = itemsAndValues.entrySet().stream().collect(
                 toMap(Map.Entry::getKey, e -> Math.exp((e.getValue() - maxValue) / temp)));
-        return sampleFrom(tempModified, exploreEpsilon, rnd);
+        return sampleFrom(tempModified, exploreEpsilon, randomNumber);
     }
 
     public static double entropyOf(double... data) {

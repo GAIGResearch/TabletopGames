@@ -28,7 +28,6 @@ public class SGGameState extends AbstractGameState {
     HashMap<SGCard.SGCardType, Counter>[] playedCardTypesAllGame;
     HashMap<SGCard.SGCardType, Counter>[] pointsPerCardType;
 
-    Random rnd;
     int deckRotations = 0;
 
     /**
@@ -39,7 +38,6 @@ public class SGGameState extends AbstractGameState {
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -249,8 +247,7 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) &&
                 Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) &&
-                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) &&
-                Objects.equals(rnd, that.rnd);
+                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame);
     }
 
     @Override

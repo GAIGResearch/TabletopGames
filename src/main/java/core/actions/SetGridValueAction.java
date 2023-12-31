@@ -33,7 +33,7 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
 
     @Override
     public AbstractAction copy() {
-        return new SetGridValueAction<>(gridBoard, x, y, value);
+        return this;
     }
 
     @Override

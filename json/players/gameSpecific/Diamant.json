@@ -1,0 +1,20 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 30,
+  "opponentTreePolicy": "MultiTree",
+  "MASTGamma": 0,
+  "heuristic": {
+    "args": [
+      1000.0
+    ],
+    "class": "players.heuristics.WinPlusHeuristic"
+  },
+  "K": 1,
+  "exploreEpsilon": 0.1,
+  "treePolicy": "UCB",
+  "MAST": "Both",
+  "rolloutType": "MAST",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": 40
+}

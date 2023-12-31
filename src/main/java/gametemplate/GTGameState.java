@@ -128,4 +128,20 @@ public class GTGameState extends AbstractGameState {
     // TODO: as soon as a player achieves a winning condition, and has some bespoke method for determining 1st, 2nd, 3rd etc.
     // TODO: Then you *may* want to implement:.
     //public int getOrdinalPosition(int playerId);
+
+    // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
+    // TODO: So you do not (and generally should not) implement your own versions - take advantage of the framework!
+    // public Random getRnd() returns a Random number generator for the game. This will be derived from the seed
+    // in game parameters, and will be updated correctly on a reset
+
+    // Ths following provide access to the id of the current player; the first player in the Round (if that is relevant to a game)
+    // and the current Turn and Round numbers.
+    // public int getCurrentPlayer()
+    // public int getFirstPlayer()
+    // public int getRoundCounter()
+    // public int getTurnCounter()
+    // also make sure you check out the standard endPlayerTurn() and endRound() methods in StandardForwardModel
+
+    // This method can be used to log a game event (e.g. for something game-specific that you want to include in the metrics)
+    // public void logEvent(IGameEvent...)
 }

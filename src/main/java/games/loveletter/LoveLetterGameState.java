@@ -94,7 +94,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                 }
             }
             Random r = new Random(llgs.getGameParameters().getRandomSeed());
-            llgs.drawPile.shuffle(r);
+            llgs.drawPile.shuffle(rnd);
             llgs.removedCard = llgs.drawPile.draw();
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
@@ -105,7 +105,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                             llgs.playerHandCards.get(i).setComponent(j, llgs.drawPile.draw());
                         }
                     }
-                    deck.shuffle(r);
+                    deck.shuffle(rnd);
                 }
             }
         }

@@ -36,17 +36,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     Map<String, Class<?>> parameterTypes = new HashMap<>();
 
     /**
-     * Zero-argument constructor used for auto-tuning
-     */
-    public TunableParameters() {
-        this(System.currentTimeMillis());
-    }
-
-    public TunableParameters(long seed) {
-        super(seed);
-    }
-
-    /**
      * Instantiate parameters from a JSON file
      *
      * @param filename The file with the JSON format data

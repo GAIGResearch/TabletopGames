@@ -58,11 +58,19 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
         for (int i = 0; i < possibleActions.size(); i++) {
             actionToValueMap.put(possibleActions.get(i), actionValues[i]);
         }
-        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd);
+        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd.nextDouble());
     }
 
     @Override
     public AbstractPlayer copy() {
         return this; // stateless (except for rnd)
+    }
+
+    public IActionHeuristic getActionHeuristic() {
+        return actionHeuristic;
+    }
+
+    public void setActionHeuristic(IActionHeuristic actionHeuristic) {
+        this.actionHeuristic = actionHeuristic;
     }
 }

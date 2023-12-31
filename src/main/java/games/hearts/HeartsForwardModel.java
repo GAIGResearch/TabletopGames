@@ -54,11 +54,12 @@ public class HeartsForwardModel extends StandardForwardModel {
 
         hgs.playerDecks = new ArrayList<>();
         hgs.drawDeck = FrenchCard.generateDeck("DrawDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        hgs.playerTricksTaken = new int[hgs.getNPlayers()];
 
         int numOfPlayers = hgs.getNPlayers();
 
         hgs.drawDeck.removeAll(params.cardsToRemove.get(numOfPlayers));
-        hgs.drawDeck.shuffle(hgs.rnd);
+        hgs.drawDeck.shuffle(hgs.getRnd());
 
         for (int i = 0; i < hgs.getNPlayers(); i++) {
             Deck<FrenchCard> playerDeck = new Deck<>("Player " + i + " deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
@@ -172,7 +173,7 @@ public class HeartsForwardModel extends StandardForwardModel {
                 // this is the lead player, they can play any card (except for Hearts if they are not yet broken, or they have no choice)
                 boolean onlyHasHearts = playerHand.getComponents().stream().allMatch(card -> card.suite == FrenchCard.Suite.Hearts);
                 for (FrenchCard card : playerHand.getComponents()) {
-                    if (onlyHasHearts || hgs.heartsBroken || card.suite != FrenchCard.Suite.Hearts ) {
+                    if (onlyHasHearts || hgs.heartsBroken || card.suite != FrenchCard.Suite.Hearts) {
                         actions.add(new Play(player, card));
                     }
                 }
@@ -219,6 +220,8 @@ public class HeartsForwardModel extends StandardForwardModel {
             hgs.playerTricksTaken[winningPlayerID]++;
 
             hgs.setFirstPlayer(winningPlayerID);
+        } else {
+            throw new AssertionError("We must have a trick winner");
         }
         hgs.currentPlayedCards.clear();
 

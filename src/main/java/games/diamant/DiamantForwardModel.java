@@ -24,7 +24,6 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
-        Random r = new Random(dgs.getGameParameters().getRandomSeed());
         dgs._reset();
 
         for (int i = 0; i < dgs.getNPlayers(); i++) {
@@ -42,7 +41,7 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         dgs.recordOfPlayerActions = new ArrayList<>();
 
         createCards(dgs);
-        dgs.mainDeck.shuffle(r);
+        dgs.mainDeck.shuffle(dgs.getRnd());
 
         // Draw first card and play it
         drawAndPlayCard(dgs);
@@ -157,12 +156,10 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         if (dgs.nCave == dp.nCaves)
             endGame(dgs);
         else {
-            Random r = new Random(dgs.getGameParameters().getRandomSeed());
-
             // Move path cards to maindeck and shuffle
             dgs.mainDeck.add(dgs.path);
             dgs.path.clear();
-            dgs.mainDeck.shuffle(r);
+            dgs.mainDeck.shuffle(dgs.getRnd());
 
             // Initialize game state
             dgs.nHazardExplosionsOnPath = 0;

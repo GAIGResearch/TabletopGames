@@ -46,7 +46,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         length = I.length;
         discountFactor = I.discountFactor;
         heuristic = I.heuristic;
-        rolloutPolicy = I.rolloutPolicy.copy();
+        rolloutPolicy = I.rolloutPolicy;
 
         for (int i = 0; i < length; i++) {
             actions[i] = I.actions[i]; //.copy();
