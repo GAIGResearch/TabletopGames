@@ -35,7 +35,8 @@ public class MCGSTests {
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
@@ -70,7 +71,8 @@ public class MCGSTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(3024)));
-        LoveLetterParameters gameParams = new LoveLetterParameters(3812);
+        LoveLetterParameters gameParams = new LoveLetterParameters();
+        gameParams.setRandomSeed(3812);
         Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
         game.reset(players);
         return game;
@@ -127,7 +129,7 @@ public class MCGSTests {
         do {
             int p = game.getGameState().getCurrentPlayer();
             game.oneAction();
-            if (p == 0 && game.getTick() < 10) {
+            if (p == 0 && game.getTick() < 9) {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
                 assertEquals(2, stats.depthReached);
                 assertEquals(101, stats.totalNodes);

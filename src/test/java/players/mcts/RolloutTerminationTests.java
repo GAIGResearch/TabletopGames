@@ -46,7 +46,7 @@ public class RolloutTerminationTests {
     }
 
     public Game createGame(MCTSParams params, GameType gameType) {
-        mctsPlayer = new TestMCTSPlayer(params, (s, p) -> new STNRollout());
+        mctsPlayer = new TestMCTSPlayer(params, STNRollout::new);
         mctsPlayer.setDebug(false);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
