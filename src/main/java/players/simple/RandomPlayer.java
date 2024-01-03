@@ -15,6 +15,7 @@ public class RandomPlayer extends AbstractPlayer {
     private final Random rnd;
 
     public RandomPlayer(Random rnd) {
+        super(null, "RandomPlayer");
         this.rnd = rnd;
     }
 

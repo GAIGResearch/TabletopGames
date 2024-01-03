@@ -189,13 +189,13 @@ public class DataTableSaw implements IDataLogger {
                 for (Column<?> c : metricData.columns()) {
                     if (c.name().equals(indexingColumnName)) {
                         for (int id : gameIDs) {
-                            int nIdx = metricData
+                            int nIdx = (int) metricData
                                     // Filter the table first by game ID
                                     .where(metricData.stringColumn("GameID").isEqualTo(String.valueOf(id)))
                                     // Then find the indexing column
                                     .column(c.name())
                                     // And count the number of unique values
-                                    .countUnique();
+                                    .max(Comparator.comparing((Object a) -> ((Integer) a))).orElseThrow();
                             if (nIdx > maxIndex) {
                                 maxIndex = nIdx;
                             }

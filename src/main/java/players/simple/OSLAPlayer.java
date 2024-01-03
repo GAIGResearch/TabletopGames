@@ -19,8 +19,8 @@ public class OSLAPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
 
     public OSLAPlayer(Random random) {
+        super(null, "OSLA");
         this.rnd = random;
-        setName("OSLA");
     }
 
     public OSLAPlayer() {
