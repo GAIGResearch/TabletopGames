@@ -599,7 +599,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
-        return actions;
+
+        return new ArrayList<>(new HashSet<>(actions));
+        //return actions;
     }
 
     private List<DescentAction> heroicFeatAction(DescentGameState dgs)
