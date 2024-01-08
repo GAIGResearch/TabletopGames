@@ -105,6 +105,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTDefaultValue", 0.0);
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
+        addTunableParameter("FPU", 1000000000.0);
     }
 
     @Override
@@ -162,6 +163,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
         // we then null those elements of params which are constructed (lazily) from the above
+        firstPlayUrgency = (double) getParameterValue("FPU");
         opponentModel = null;
         rolloutPolicy = null;
     }
