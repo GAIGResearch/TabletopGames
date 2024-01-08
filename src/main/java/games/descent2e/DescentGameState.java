@@ -184,8 +184,8 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        // TODO
-        return 0;
+        //return new DescentHeuristic().evaluateState(this, playerId);
+        return 0.0;
     }
 
     @Override
