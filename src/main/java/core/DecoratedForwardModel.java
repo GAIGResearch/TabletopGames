@@ -3,6 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IPlayerDecorator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DecoratedForwardModel extends AbstractForwardModel {
@@ -16,13 +17,13 @@ public class DecoratedForwardModel extends AbstractForwardModel {
     // most function calls are forwarded to the wrapped forward model, except for
     // _computeAvailableActions, to which we first apply the decorators
 
-    List<IPlayerDecorator> decorators;
-    AbstractForwardModel wrappedFM;
-    int decisionPlayerID;
+    final List<IPlayerDecorator> decorators;
+    final AbstractForwardModel wrappedFM;
+    final int decisionPlayerID;
 
     public DecoratedForwardModel(AbstractForwardModel forwardModel, List<IPlayerDecorator> decorators, int playerID) {
         this.wrappedFM = forwardModel;
-        this.decorators = decorators;
+        this.decorators = new ArrayList<>(decorators);
         this.decisionPlayerID = playerID;
     }
 
