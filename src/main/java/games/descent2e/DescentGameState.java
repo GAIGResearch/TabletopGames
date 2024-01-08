@@ -184,8 +184,8 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        //return new DescentHeuristic().evaluateState(this, playerId);
-        return 0.0;
+        return new DescentHeuristic().evaluateState(this, playerId);
+        //return 0.0;
     }
 
     @Override
@@ -196,8 +196,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // TODO
-        return null;
+        // TODO IDs of all components that are not visible to the player
+        // e.g. Overlord cards in their hands and deck (which aren't implemented in this branch yet)
+        return new ArrayList<>();
     }
 
     @Override

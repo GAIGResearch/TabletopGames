@@ -1,8 +1,8 @@
 {
-  "game": "Catan",
+  "game": "Descent2e",
   "selfPlay": false,
-  "nPlayers": 4,
-  "matchups": 1000,
+  "nPlayers": 2,
+  "matchups": 5,
   "listener": "metrics/gamemetrics.json",
   "reportPeriod": 100
 }
