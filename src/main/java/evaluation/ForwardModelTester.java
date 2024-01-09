@@ -2,6 +2,7 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.Utils;
@@ -26,6 +27,7 @@ public class ForwardModelTester {
      */
 
     List<Integer> hashCodes = new ArrayList<>();
+    List<int[]> superHashCodes = new ArrayList<>();
     List<String> hashNames = new ArrayList<>();
     List<AbstractGameState> stateHistory = new ArrayList<>();
     List<AbstractAction> actionHistory = new ArrayList<>();
@@ -51,6 +53,7 @@ public class ForwardModelTester {
         Random rnd = new Random(seed);
         for (int loop = 1; loop <= numberOfGames; loop++) {
             hashCodes = new ArrayList<>();
+            superHashCodes = new ArrayList<>();
             stateHistory = new ArrayList<>();
             actionHistory = new ArrayList<>();
             hashNames = new ArrayList<>();
@@ -64,6 +67,7 @@ public class ForwardModelTester {
                 AbstractGameState stateCopy = game.getGameState().copy();
                 stateHistory.add(stateCopy);
                 hashCodes.add(game.getGameState().hashCode());
+                superHashCodes.add(game.getGameState().hashCodeArray());
                 hashNames.add(game.getGameState().toString());
                 if (stateCopy.hashCode() != game.getGameState().hashCode()) {
                     String error = String.format("Problem on state copy - orig/copy hashcodes are %d/%d",
@@ -81,14 +85,22 @@ public class ForwardModelTester {
                     for (int i = 0; i < origArr.length; i++) {
                         if (origArr[i] != copyArr[i]) {
                             System.out.println(i + ": " + origArr[i] + " != " + copyArr[i]);
-                            if (i == 0) {
-                                for (int j = 0; j < origSupArr.length; j++) {
-                                    if (origSupArr[j] != copySupArr[j]) {
-                                        diffsup.add(j);
-                                    }
-                                }
-                            } else {
-                                diffs.add(i);
+                            diffs.add(i);
+                            }
+                        }
+
+                    for (int j = 0; j < origSupArr.length; j++) {
+                        if (origSupArr[j] != copySupArr[j]) {
+                            System.out.println("SuperHash: " + j + ": " + origSupArr[j] + " != " + copySupArr[j]);
+                            diffsup.add(j);
+                            if (j == 3)
+                            {
+                                System.out.println("Orig: " + stateCopy.getActionsInProgress().toString());
+                                for (IExtendedSequence action : stateCopy.getActionsInProgress())
+                                    System.out.println("Hash: " + action.hashCode());
+                                System.out.println("Copy: " + game.getGameState().getActionsInProgress().toString());
+                                for (IExtendedSequence action : game.getGameState().getActionsInProgress())
+                                    System.out.println("Hash: " + action.hashCode());
                             }
                         }
                     }
@@ -119,6 +131,8 @@ public class ForwardModelTester {
                 String error = String.format("Mismatch on action %d after decision %d (%s) - old/new hashcodes are %d/%d",
                         i, decision, actionHistory.get(decision-1), hashCodes.get(i), stateHistory.get(i).hashCode());
                 System.out.println(error);
+                for (int j = Math.max(0, i - 20); j <= i; j++)
+                    System.out.printf("Decision %d: %s%n", j, actionHistory.get(j).toString());
                 System.out.printf("\tOld: %s%n\tNew: %s%n", hashNames.get(i), stateHistory.get(i).toString());
                 throw new AssertionError(error + "\n");
             }

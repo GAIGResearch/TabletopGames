@@ -90,10 +90,9 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
                     }
                 }
             }
-            Random r = new Random(ekgs.gameParameters.getRandomSeed());
 
             // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
-            ekgs.drawPile.shuffleVisible(r, playerId, false);
+            ekgs.drawPile.shuffleVisible(rnd, playerId, false);
             Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {

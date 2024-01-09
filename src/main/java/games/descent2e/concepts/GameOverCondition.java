@@ -13,4 +13,7 @@ public abstract class GameOverCondition {
     public abstract void parse(JSONObject jsonObject);
     public abstract String toString();  // Print condition info
     public abstract String getString(DescentGameState gs);  // Print condition info + progress so far
+    public abstract GameOverCondition copy();
+    public abstract boolean equals(Object o);
+    public abstract int hashCode();
 }

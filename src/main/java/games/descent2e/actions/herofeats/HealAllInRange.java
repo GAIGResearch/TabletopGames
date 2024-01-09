@@ -100,4 +100,9 @@ public class HealAllInRange extends DescentAction {
     public String toString() {
         return "Heroic Feat: Avric Albright - Group Heal";
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), range);
+    }
 }

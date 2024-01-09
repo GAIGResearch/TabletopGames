@@ -60,7 +60,7 @@ public class TarhaAbilityReroll extends DescentAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(dice);
+        return Objects.hash(super.hashCode(), dice);
     }
 
     @Override

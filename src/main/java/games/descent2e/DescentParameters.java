@@ -22,17 +22,13 @@ public class DescentParameters extends AbstractParameters {
         put(RED, 1);
     }};
 
-    public DescentParameters(long seed) {
-        super(seed);
-    }
-
     public String getDataPath() {
         return dataPath;
     }
 
     @Override
     protected AbstractParameters _copy() {
-        DescentParameters copy = new DescentParameters(System.currentTimeMillis());
+        DescentParameters copy = new DescentParameters();
         copy.nActionsPerFigure = nActionsPerFigure;
         copy.campaign = campaign;
         copy.dataPath = dataPath;

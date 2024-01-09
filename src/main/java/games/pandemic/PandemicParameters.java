@@ -52,8 +52,7 @@ public class PandemicParameters extends TunableParameters {
     // Not parameter
     String dataPath;
 
-    public PandemicParameters(String dataPath, long seed) {
-        super(seed);
+    public PandemicParameters(String dataPath) {
         this.dataPath = dataPath;
 
         addTunableParameter("loseMaxOutbreak", 8, Arrays.asList(3,5,8,10,15));
@@ -80,7 +79,7 @@ public class PandemicParameters extends TunableParameters {
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {
-        this(pandemicParameters.dataPath, System.currentTimeMillis());
+        this(pandemicParameters.dataPath);
 
         this.loseMaxOutbreak = pandemicParameters.loseMaxOutbreak;
         this.maxCubesPerCity = pandemicParameters.maxCubesPerCity;  // More cause outbreak
@@ -246,7 +245,6 @@ public class PandemicParameters extends TunableParameters {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         PandemicParameters that = (PandemicParameters) o;
         return loseMaxOutbreak == that.loseMaxOutbreak && maxCubesPerCity == that.maxCubesPerCity && nEpidemicCards == that.nEpidemicCards && nCubesEpidemic == that.nCubesEpidemic && nInfectionCardsSetup == that.nInfectionCardsSetup && nInfectionsSetup == that.nInfectionsSetup && nCubesInfection == that.nCubesInfection && nInitialDiseaseCubes == that.nInitialDiseaseCubes && nCardsForCure == that.nCardsForCure && nCardsForCureReducedBy == that.nCardsForCureReducedBy && nForecastCards == that.nForecastCards && maxCardsPerPlayer == that.maxCardsPerPlayer && nCardsDraw == that.nCardsDraw && nActionsPerTurn == that.nActionsPerTurn && nResearchStations == that.nResearchStations && survivalRules == that.survivalRules && nCityCards == that.nCityCards && nEventCards == that.nEventCards && Arrays.equals(infectionRate, that.infectionRate) && Objects.equals(nCardsPerPlayer, that.nCardsPerPlayer) && Objects.equals(player0Role, that.player0Role) && Objects.equals(player1Role, that.player1Role) && Objects.equals(player2Role, that.player2Role) && Objects.equals(player3Role, that.player3Role) && Objects.equals(dataPath, that.dataPath);
     }

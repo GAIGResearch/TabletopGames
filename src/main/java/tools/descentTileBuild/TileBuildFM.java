@@ -27,7 +27,7 @@ public class TileBuildFM extends StandardForwardModel {
 
         // By default filled with plain, and with a null border
         //BoardNode bn = new BoardNode(-1, "plain");
-        tbs.tile = new GridBoard(size, size);
+        tbs.tile = new GridBoard<BoardNode>(size, size);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
 
@@ -159,7 +159,7 @@ public class TileBuildFM extends StandardForwardModel {
         return actions;
     }
 
-    private List<Vector2D> countInsideNeighboursOpenTile(int x, int y, int width, int height, GridBoard tile) {
+    private List<Vector2D> countInsideNeighboursOpenTile(int x, int y, int width, int height, GridBoard<BoardNode> tile) {
         List<Vector2D> neighbours = getNeighbourhood(x, y, width, height, false);
         List<Vector2D> insideTileNeighbours = new ArrayList<>();
         for (Vector2D n: neighbours) {

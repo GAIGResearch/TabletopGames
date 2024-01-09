@@ -250,9 +250,10 @@ public class DescentHelper {
         List<Move> actions = new ArrayList<>();
         for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()) {
             if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
-                Move myMoveAction = new Move(f, allPossibleRotations.get(loc).b, loc.b);
+                Move myMoveAction = new Move(f.getComponentID(), allPossibleRotations.get(loc).b, loc.b);
                 myMoveAction.updateDirectionID(dgs);
-                actions.add(myMoveAction);
+                if(myMoveAction.canExecute(dgs))
+                    actions.add(myMoveAction);
             }
         }
 
@@ -514,7 +515,7 @@ public class DescentHelper {
                                 case "Reroll":
                                     switch (effect[2]) {
                                         case "AttributeTest":
-                                            actions.add(new RerollAttributeTest(figure.getComponentID(), equipment));
+                                            actions.add(new RerollAttributeTest(figure.getComponentID(), equipment.getComponentID()));
                                             break;
                                         default:
                                             break;

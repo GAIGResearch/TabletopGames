@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.actions.attack.RangedAttack;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 
@@ -71,6 +72,13 @@ public class RageAttack extends MeleeAttack {
         return String.format("Rage: Melee Attack by " + attackerName + " on " + defenderName + " (+1 Damage, +1 Fatigue)");
         //return toString();
         // TODO: Extend this to pull in details of card and figures involved
+    }
+
+    public RageAttack copy()
+    {
+        RageAttack retValue = new RageAttack(attackingFigure, defendingFigure);
+        copyComponentTo(retValue);
+        return retValue;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     public TradeAcolyteAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
-        receivingHeroIdx = -1;
+        this.receivingHeroIdx = -1;
     }
     public TradeAcolyteAction(int acolyteComponentID) {
         super(acolyteComponentID, Triggers.ACTION_POINT_SPEND);
@@ -52,7 +52,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             HashSet<Hero> adjacentHeroes = new HashSet<>();
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            GridBoard board = dgs.getMasterBoard();
+            GridBoard<BoardNode> board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());
@@ -110,7 +110,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         int heroIdx = acolyte.getOwnerId();
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            GridBoard board = dgs.getMasterBoard();
+            GridBoard<BoardNode> board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());
@@ -131,13 +131,15 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TradeAcolyteAction)) return false;
-        return super.equals(o);
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TradeAcolyteAction that = (TradeAcolyteAction) o;
+        return receivingHeroIdx == that.receivingHeroIdx && complete == that.complete;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode());
+        return Objects.hash(super.hashCode(), receivingHeroIdx, complete);
     }
 
     @Override

@@ -57,4 +57,9 @@ public class RemoveFromMap extends DescentAction {
     public String toString() {
         return "Heroic Feat: Tomble Burrowell - Vanish (1/3)";
     }
+
+    @Override
+    public int hashCode() {
+        return 112011;
+    }
 }

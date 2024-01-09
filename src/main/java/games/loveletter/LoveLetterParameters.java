@@ -38,8 +38,7 @@ public class LoveLetterParameters extends TunableParameters {
     public int nTokensWin3 = 5;
     public int nTokensWin4 = 4;
 
-    public LoveLetterParameters(long seed) {
-        super(seed);
+    public LoveLetterParameters() {
         addTunableParameter("nCardsPerPlayer", 1, Arrays.asList(1,2,3));
         addTunableParameter("nCardsVisibleReserve", 3, Arrays.asList(1,2,3,4,5));
         addTunableParameter("nTokensWin2", 7, Arrays.asList(3,4,5,6,7,8,9,10));
@@ -67,28 +66,15 @@ public class LoveLetterParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        LoveLetterParameters llp = new LoveLetterParameters(System.currentTimeMillis());
-        llp.cardCounts = new HashMap<>(cardCounts);
-        llp.nCardsPerPlayer = nCardsPerPlayer;
-        llp.nCardsVisibleReserve = nCardsVisibleReserve;
-        llp.nTokensWin2 = nTokensWin2;
-        llp.nTokensWin3 = nTokensWin3;
-        llp.nTokensWin4 = nTokensWin4;
-        return llp;
+        return new LoveLetterParameters();
     }
 
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         LoveLetterParameters that = (LoveLetterParameters) o;
         return nCardsPerPlayer == that.nCardsPerPlayer && nCardsVisibleReserve == that.nCardsVisibleReserve && nTokensWin2 == that.nTokensWin2 && nTokensWin3 == that.nTokensWin3 && nTokensWin4 == that.nTokensWin4 && Objects.equals(dataPath, that.dataPath) && Objects.equals(cardCounts, that.cardCounts);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), dataPath, cardCounts, nCardsPerPlayer, nCardsVisibleReserve, nTokensWin2, nTokensWin3, nTokensWin4);
     }
 
     @Override

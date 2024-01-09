@@ -77,7 +77,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                 gs.drawPile.add(new SGCard(p.a, p.b));
             }
         }
-        gs.drawPile.shuffle(new Random(parameters.getRandomSeed()));
+        gs.drawPile.shuffle(gs.getRnd());
     }
 
     @Override
@@ -168,7 +168,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                     // Reshuffle discard into draw pile
                     gs.drawPile.add(gs.discardPile);
                     gs.discardPile.clear();
-                    gs.drawPile.shuffle(new Random(gs.getGameParameters().getRandomSeed()));
+                    gs.drawPile.shuffle(gs.getRnd());
                 }
                 gs.playerHands.get(i).add(gs.drawPile.draw());
             }

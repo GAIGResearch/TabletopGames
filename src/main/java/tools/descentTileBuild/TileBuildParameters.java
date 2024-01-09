@@ -8,13 +8,9 @@ public class TileBuildParameters extends AbstractParameters {
     public int defaultGridSize = 5;
     public int maxGridSize = 50;
 
-    public TileBuildParameters(long seed) {
-        super(seed);
-    }
-
     @Override
     protected AbstractParameters _copy() {
-        return new TileBuildParameters(System.currentTimeMillis());
+        return new TileBuildParameters();
     }
 
     @Override

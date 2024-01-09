@@ -1,6 +1,7 @@
 package games.descent2e.actions.archetypeskills;
 
 import core.AbstractGameState;
+import core.components.Component;
 import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentHelper;
@@ -19,13 +20,13 @@ public class Heal extends DescentAction {
     int targetID;
     int range = 1;
     boolean isAction = false;
-    DescentCard card = null;
+    int cardID = -1;
 
     // Prayer of Healing
-    public Heal(int targetID, DescentCard card) {
+    public Heal(int targetID, int cardID) {
         super(Triggers.ACTION_POINT_SPEND);
         this.targetID = targetID;
-        this.card = card;
+        this.cardID = cardID;
     }
 
     // Flesh Moulder's Heal Action
@@ -36,28 +37,28 @@ public class Heal extends DescentAction {
         this.isAction = isAction;
     }
 
-    public Heal(int targetID, int range, boolean isAction, DescentCard card) {
+    public Heal(int targetID, int range, boolean isAction, int cardID) {
         super(Triggers.ACTION_POINT_SPEND);
         this.targetID = targetID;
         this.range = range;
         this.isAction = isAction;
-        this.card = card;
+        this.cardID = cardID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         String targetName = gameState.getComponentById(targetID).getComponentName().replace("Hero: ", "");
         String string = "Heal " + targetName + " for 1 Red Power Die";
-        if (card != null)
+        Component card = gameState.getComponentById(cardID);
+        if (card != null) {
             string = card.getProperty("name").toString() + ": " + string;
+        }
         return string;
     }
 
     @Override
     public String toString() {
-        if (card != null)
-            return card.getProperty("name").toString() + ": Heal " + targetID;
-        return "Heal " + targetID;
+        return "Heal " + targetID + " (" + cardID + ")";
     }
 
     @Override
@@ -90,9 +91,10 @@ public class Heal extends DescentAction {
             f.getAttribute(Figure.Attribute.Fatigue).increment();
         }
 
+        Component card = dgs.getComponentById(cardID);
         if (card != null)
         {
-            f.exhaustCard(card);
+            f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         }
 
         return true;
@@ -119,6 +121,7 @@ public class Heal extends DescentAction {
                 return false;
         }
 
+        Component card = dgs.getComponentById(cardID);
         if (card == null)
         {
             // As Prayer of Healing can be upgraded to have additional effects,
@@ -129,7 +132,7 @@ public class Heal extends DescentAction {
 
         if (card != null)
         {
-            if (f.isExhausted(card))
+            if (f.isExhausted((DescentCard) dgs.getComponentById(cardID)))
                 return false;
         }
 
@@ -158,17 +161,17 @@ public class Heal extends DescentAction {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Heal heal = (Heal) o;
-        return targetID == heal.targetID && range == heal.range && isAction == heal.isAction && card == heal.card;
+        return targetID == heal.targetID && range == heal.range && isAction == heal.isAction && cardID == heal.cardID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), targetID, range, isAction, card);
+        return Objects.hash(super.hashCode(), targetID, range, isAction, cardID);
     }
 
     @Override
     public DescentAction copy()
     {
-        return new Heal(targetID, range, isAction, card);
+        return new Heal(targetID, range, isAction, cardID);
     }
 }

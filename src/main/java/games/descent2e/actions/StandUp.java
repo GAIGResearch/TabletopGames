@@ -44,4 +44,8 @@ public class StandUp extends DescentAction{
     public boolean canExecute(DescentGameState dgs) {
         return dgs.getActingFigure() instanceof Hero && ((Hero)dgs.getActingFigure()).isDefeated() && dgs.getActingFigure().getNActionsExecuted().isMinimum();
     }
+
+    public int hashCode() {
+        return 111778;
+    }
 }

@@ -6,6 +6,8 @@ import games.descent2e.actions.attack.FreeAttack;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
+import java.util.Objects;
+
 public class HeroicFeatExtraAttack extends FreeAttack {
 
     // Grisban the Thirsty's Heroic Feat
@@ -36,7 +38,13 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     }
 
     public HeroicFeatExtraAttack copy() {
-        return this;
+        HeroicFeatExtraAttack retValue = new HeroicFeatExtraAttack(attackingFigure, defendingFigure, isMelee);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(FreeAttack target) {
+        super.copyComponentTo(target);
     }
 
     @Override
@@ -70,5 +78,10 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     public String toString() {
         if (isMelee) return String.format("Free Attack (Melee) by %d on %d", attackingFigure, defendingFigure);
         return String.format("Free Attack (Ranged) by %d on %d", attackingFigure, defendingFigure);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), HeroicFeatExtraAttack.class);
     }
 }

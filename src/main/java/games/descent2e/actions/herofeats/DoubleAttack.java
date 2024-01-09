@@ -31,7 +31,13 @@ public class DoubleAttack extends MultiAttack {
     }
 
     public DoubleAttack copy() {
-        return this;
+        DoubleAttack retValue = new DoubleAttack(attackingFigure, defendingFigures);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(DoubleAttack target) {
+        super.copyComponentTo(target);
     }
 
     @Override
@@ -54,7 +60,7 @@ public class DoubleAttack extends MultiAttack {
 
     @Override
     public String toString() {
-        return String.format("Heroic Feat: Double Attack both %d and %d", super.defendingFigures.get(0), super.defendingFigures.get(1));
+        return String.format("Heroic Feat: Double Attack by %d on both %d and %d", super.attackingFigure, super.defendingFigures.get(0), super.defendingFigures.get(1));
     }
 
 }

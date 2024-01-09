@@ -21,7 +21,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
     ArrayList<Rectangle> highlight;
     LinkedList<Pair<Integer, Integer>> winningCells;
 
-    public Connect4BoardView(GridBoard gridBoard) {
+    public Connect4BoardView(GridBoard<Token> gridBoard) {
         super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
         rects = new Rectangle[gridBoard.getWidth()];
         highlight = new ArrayList<>();
@@ -65,7 +65,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
             drawWinningCells((Graphics2D) g);
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard<Token> gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = (gridBoard.getHeight()+1) * defaultItemSize;
 
@@ -98,7 +98,7 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
         }
     }
 
-    private void drawCell(Graphics2D g, BoardNode element, int x, int y) {
+    private void drawCell(Graphics2D g, Token element, int x, int y) {
 
 
         // Paint element in cell

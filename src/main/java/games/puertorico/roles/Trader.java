@@ -43,7 +43,7 @@ public class Trader extends PuertoRicoRole<Trader> {
         if (retValue.isEmpty()) {
             retValue.add(new DoNothing());
         } else {
-            retValue.add(new DoNothing());
+            retValue.add(new Sell(null, 0));
         }
         return retValue;
     }

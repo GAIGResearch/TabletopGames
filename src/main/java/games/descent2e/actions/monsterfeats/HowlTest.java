@@ -6,6 +6,7 @@ import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class HowlTest extends AttributeTest {
@@ -32,27 +33,28 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public String toString() {
-        return "Howl (Willpower) Test";
+        return "Howl (Willpower) Test (" + super.getTestCount() + ") by " + super.getSourceFigure() + " on " + super.getTestingFigure();
     }
 
     @Override
-    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
+    public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
+        Figure f = (Figure) dgs.getComponentById(figureID);
         if (result)
         {
-            System.out.println("Passed Howl (Willpower) Test!");
+            //System.out.println("Passed Howl (Willpower) Test!");
         }
         else
         {
             if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum())
             {
                 f.getAttribute(Figure.Attribute.Fatigue).increment();
-                System.out.println("Failed Howl (Willpower) Test!");
+                //System.out.println("Failed Howl (Willpower) Test!");
             }
         }
 
         f.addAttributeTest(this);
-        System.out.println("Added Howl (Willpower) Test");
+        //System.out.println("Added Howl (Willpower) Test");
     }
 
     public HowlTest copy()
@@ -97,5 +99,10 @@ public class HowlTest extends AttributeTest {
 
         // We can only make each attribute test once per turn - if we have already taken it, we can't make another attempt
         return !f.hasAttributeTest(this);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), attributeTestName);
     }
 }

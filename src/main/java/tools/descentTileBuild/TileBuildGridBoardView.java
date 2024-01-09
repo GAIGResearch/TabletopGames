@@ -25,7 +25,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
             0, new float[]{9}, 0);
     final static Stroke boldStroke = new BasicStroke(3);
 
-    public TileBuildGridBoardView(TileBuildState gs, GridBoard gridBoard) {
+    public TileBuildGridBoardView(TileBuildState gs, GridBoard<BoardNode> gridBoard) {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
         this.gs = gs;
 
@@ -33,7 +33,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    GridBoard gridBoard = (GridBoard) component;
+                    GridBoard<BoardNode> gridBoard = (GridBoard<BoardNode>) component;
                     for (int i = 0; i < gridBoard.getHeight(); i++) {
                         boolean found = false;
                         for (int j = 0; j < gridBoard.getWidth(); j++) {
@@ -61,7 +61,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
     @Override
     protected void paintComponent(Graphics g) {
         Stroke s = ((Graphics2D) g).getStroke();
-        GridBoard gridBoard = (GridBoard) component;
+        GridBoard<BoardNode> gridBoard = (GridBoard<BoardNode>) component;
 
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;

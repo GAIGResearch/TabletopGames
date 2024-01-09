@@ -14,21 +14,29 @@ import static games.wonders7.Wonders7Constants.createCardHash;
 import static games.wonders7.Wonders7Constants.createHashList;
 
 public class Wonder7Board extends Card {
-
-
     public enum Wonder {
-        TheColossusOfRhodes(createHashList(createCardHash(Wood, Wood), createCardHash(Clay, Clay, Clay), createCardHash(Ore, Ore, Ore)),
-                createHashList(createCardHash(Victory, Victory, Victory), createCardHash(Shield, Shield), createCardHash(new Pair<>(Victory, 7))),
+        TheColossusOfRhodes(
+                createHashList(createCardHash(Wood, Wood),
+                        createCardHash(Clay, Clay, Clay),
+                        createCardHash(Ore, Ore, Ore)),
+                createHashList(createCardHash(Victory, Victory, Victory),
+                        createCardHash(Shield, Shield),
+                        createCardHash(new Pair<>(Victory, 7))),
                 Ore),
         TheLighthouseOfAlexandria(null, null, Glass),
-        TheTempleOfArtemisInEphesus(createHashList(createCardHash(Stone, Stone), createCardHash(Wood, Wood), createCardHash(Papyrus, Papyrus)), createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Coin, 9)), createCardHash(new Pair<>(Victory,7))),
+        TheTempleOfArtemisInEphesus(
+                createHashList(createCardHash(Stone, Stone), createCardHash(Wood, Wood), createCardHash(Papyrus, Papyrus)),
+                createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Coin, 9)), createCardHash(new Pair<>(Victory,7))),
                 Papyrus),
         TheHangingGardensOfBabylon(null, null, Clay),
-        TheStatueOfZeusInOlympia(createHashList(createCardHash(Wood, Wood), createCardHash(Stone, Stone), createCardHash(Ore, Ore)), createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory, 7))),
+        TheStatueOfZeusInOlympia(createHashList(createCardHash(Wood, Wood), createCardHash(Stone, Stone), createCardHash(Ore, Ore)),
+                createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory, 7))),
                 Wood),
-        TheMausoleumOfHalicarnassus(createHashList(createCardHash(Clay, Clay), createCardHash(new Pair<>(Ore, 4)), createCardHash(Textile, Textile)), createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 7))),
+        TheMausoleumOfHalicarnassus(createHashList(createCardHash(Clay, Clay), createCardHash(new Pair<>(Ore, 4)), createCardHash(Textile, Textile)),
+                createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 7))),
                 Textile),
-        ThePyramidsOfGiza(createHashList(createCardHash(Stone, Stone), createCardHash(new Pair<>(Wood,3)), createCardHash(new Pair<>(Stone, 4))), createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 5)), createCardHash(new Pair<>(Victory, 7))),
+        ThePyramidsOfGiza(createHashList(createCardHash(Stone, Stone), createCardHash(new Pair<>(Wood,3)), createCardHash(new Pair<>(Stone, 4))),
+                createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 5)), createCardHash(new Pair<>(Victory, 7))),
                 Stone);
 
         public final Map<Wonders7Constants.Resource, Long> resourcesProduced; // Default wonder production

@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
-    GridBoard gridBoard;
+    GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -83,7 +83,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    public GridBoard getGridBoard() {
+    public GridBoard<Token> getGridBoard() {
         return gridBoard;
     }
 

@@ -11,27 +11,37 @@ import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class StunAllInMonsterGroup extends DescentAction {
 
     // Ashrian Heroic Feat
-    List<Monster> monsters;
+    List<Integer> monsters = new ArrayList<>();
     String monsterName;
     int range;
     public StunAllInMonsterGroup(List<Monster> monsters, int range) {
         super(Triggers.ACTION_POINT_SPEND);
-        this.monsters = monsters;
+        for (Monster monster : monsters) {
+            this.monsters.add(monster.getComponentID());
+        }
         this.monsterName = monsters.get(0).getName().replace(" master", "").replace(" minion", "");
+        this.range = range;
+    }
+
+    public StunAllInMonsterGroup(List<Integer> monsters, String monsterName, int range) {
+        super(Triggers.ACTION_POINT_SPEND);
+        this.monsters = monsters;
+        this.monsterName = monsterName;
         this.range = range;
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        for (Monster monster : monsters) {
-            monster.addCondition(DescentTypes.DescentCondition.Stun);
+        for (int monster : monsters) {
+            ((Monster) dgs.getComponentById(monster)).addCondition(DescentTypes.DescentCondition.Stun);
         }
         if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         f.getNActionsExecuted().increment();
@@ -40,17 +50,16 @@ public class StunAllInMonsterGroup extends DescentAction {
 
     @Override
     public StunAllInMonsterGroup copy() {
-        StunAllInMonsterGroup retVal = new StunAllInMonsterGroup(monsters, range);
-        retVal.monsterName = monsterName;
-        return retVal;
+        return new StunAllInMonsterGroup(monsters, monsterName, range);
     }
 
     boolean canStunMonsters(DescentGameState dgs) {
         // Check all monsters in our chosen group
         // If at least one of them is within range, we can stun the whole group
         Vector2D position = dgs.getActingFigure().getPosition();
-        for(Monster monster : monsters) {
-            if(DescentHelper.inRange(position, monster.getPosition(), range)) {
+        for(int monster : monsters) {
+            Vector2D monPos = ((Monster) dgs.getComponentById(monster)).getPosition();
+            if(DescentHelper.inRange(position, monPos, range)) {
                 return true;
             }
         }

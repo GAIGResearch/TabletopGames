@@ -15,7 +15,7 @@ import java.util.HashSet;
 
 public class TileBuildGame {
     public static void main(String[] args) {
-        TileBuildParameters tbp = new TileBuildParameters(0);
+        TileBuildParameters tbp = new TileBuildParameters();
         ActionController ac = new ActionController();
 
         TileBuildState tbs = new TileBuildState(tbp, 1);

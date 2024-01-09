@@ -6,7 +6,7 @@ import utilities.Vector2D;
 import java.util.List;
 
 public class Approach extends Move{
-    public Approach(Figure f, List<Vector2D> whereTo) {
+    public Approach(int f, List<Vector2D> whereTo) {
         super(f, whereTo);
     }
 }

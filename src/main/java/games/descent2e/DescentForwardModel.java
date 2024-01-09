@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.*;
+import core.components.Component;
 import core.properties.*;
 import games.descent2e.DescentTypes.*;
 import games.descent2e.abilities.HeroAbilities;
@@ -200,8 +201,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     if (dgs.heroes.get(i).equals(hero)) {
                         continue;
                     }
-                    List<DescentDice> defenceDice = hero.getDefenceDice().getComponents();
-                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero.getComponentID(), dgs.heroes.get(i).getComponentID(), defenceDice);
+                    TombleCopyDefence copyDefence = new TombleCopyDefence(hero.getComponentID(), dgs.heroes.get(i).getComponentID());
                     if (!hero.getAbilities().contains(copyDefence)) {
                         hero.addAbility(copyDefence);
                     }
@@ -276,11 +276,18 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         dgs.searchCards.shuffle(r);
 
         // Ready to start playing!
+        System.out.println("Game begin!");
+        for (Hero hero: dgs.heroes) {
+            System.out.println(hero.getComponentName() + " is controlled by Player " + hero.getOwnerId());
+        }
+        System.out.println("Round " + dgs.getTurnOrder().getRoundCounter());
     }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) currentState;
+        // Cleanses actionsInProgress to remove any that were considered completed but not previously removed
+        dgs.isActionInProgress();
         Figure actingFigure = dgs.getActingFigure();
 
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
@@ -501,7 +508,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
                         for (DescentAction da : token.getEffects()) {
-                            actions.add(da.copy());
+                            if (da.canExecute(dgs))
+                                actions.add(da.copy());
                         }
                     }
                 }
@@ -515,7 +523,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // Monster Actions can only be taken once per turn, if they haven't already attacked yet
             if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
             {
-                actions.addAll(monsterActions(dgs));
+                List<AbstractAction> monsterActions = monsterActions(dgs);
+                if (!monsterActions.isEmpty()) actions.addAll(monsterActions);
             }
 
             // - Special (specified by quest)
@@ -590,7 +599,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
-        return actions;
+
+        return new ArrayList<>(new HashSet<>(actions));
+        //return actions;
     }
 
     private List<DescentAction> heroicFeatAction(DescentGameState dgs)
@@ -796,7 +807,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
-        HashMap<Integer, GridBoard> tileConfigs = new HashMap<>();
+        HashMap<Integer, GridBoard<BoardNode>> tileConfigs = new HashMap<>();
         dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
@@ -804,7 +815,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard tile = _data.findGridBoard(tileName).copyNewID();
+            GridBoard<BoardNode> tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
                 tile = tile.copyNewID();
                 tile.setProperty(bn.getProperty(orientationHash));
@@ -821,7 +832,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         int height = 0;
         for (BoardNode bn : config.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard tile = tileConfigs.get(bn.getComponentID());
+            GridBoard<BoardNode> tile = tileConfigs.get(bn.getComponentID());
             if (tile != null) {
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
@@ -850,9 +861,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         BoardNode firstTile = config.getBoardNodes().iterator().next();
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard tile = tileConfigs.get(firstTile.getComponentID());
+            GridBoard<BoardNode> tile = tileConfigs.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
-            BoardNode[][] rotated = tile.rotate(orientation);
+            Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
@@ -923,7 +934,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
-                                 Map<Integer, GridBoard> tiles,
+                                 Map<Integer, GridBoard<BoardNode>> tiles,
                                  int[][] tileReferences,  Map<String, Map<Vector2D, Vector2D>> gridReferences,
                                  Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
@@ -932,7 +943,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(tileToAdd.getComponentID());
-            BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
+            BoardNode[][] originalTileGrid = tile.convertToBoardNode(tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value));
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
             }
@@ -999,7 +1010,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
                     GridBoard tileN = tiles.get(neighbour.getComponentID());
                     if (tileN != null) {
-                        BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
+                        BoardNode[][] tileGridN = tileN.convertToBoardNode(tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value));
 
                         // Find location to start drawing neighbour
                         Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));
@@ -1316,6 +1327,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
             List<Monster> monsterGroup = new ArrayList<>();
+            List<Monster> monsterOriginalGroup = new ArrayList<>();
 
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
@@ -1399,6 +1411,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
                 master.setOwnerId(dgs.overlordPlayer);
                 monsterGroup.add(master);
+                monsterOriginalGroup.add(master.copyNewID());
             }
 
             // How many minions?
@@ -1456,10 +1469,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 }
 
                 monsterGroup.add(minion);
+                monsterOriginalGroup.add(minion.copyNewID());
             }
             dgs.monsters.add(monsterGroup);
-            dgs.monstersOriginal.add(monsterGroup);
-            dgs.monstersPerGroup.add(monsterGroup.size());
+            dgs.monstersOriginal.add(monsterOriginalGroup);
+            dgs.monstersPerGroup.add(monsterOriginalGroup.size());
             dgs.monsterGroups.add(name);
         }
 

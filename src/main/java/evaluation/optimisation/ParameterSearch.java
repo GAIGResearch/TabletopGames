@@ -27,7 +27,6 @@ public class ParameterSearch {
         // Config
         Map<RunArg, Object> config = parseConfig(args, RunArg.Usage.ParameterSearch);
 
-
         String setupFile = config.getOrDefault(RunArg.config, "").toString();
         if (!setupFile.isEmpty()) {
             // Read from file instead

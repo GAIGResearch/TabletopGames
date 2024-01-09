@@ -16,55 +16,54 @@ public class Shield extends DescentAction {
 
     int figureID;
     int value = 1;
-    DescentCard card;
-    public Shield(int figureID, DescentCard card, int value) {
+    int cardID;
+    public Shield(int figureID, int cardID, int value) {
         super(Triggers.ROLL_OWN_DICE);
         this.figureID = figureID;
-        this.card = card;
+        this.cardID = cardID;
         this.value = value;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Exhaust " + card.getProperty("name") + " for +" + value + " shield to defense roll";
+        return "Exhaust " + gameState.getComponentById(cardID).getProperty("name") + " for +" + value + " shield to defense roll";
     }
 
     public String toString() {
-        return "Exhaust " + card.getProperty("name");
+        return "Exhaust card " + cardID;
     }
 
     @Override
     public boolean execute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(figureID);
-        System.out.println("Exhausting shield!");
-        f.exhaustCard(card);
+        //System.out.println("Exhausting shield!");
+        f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
         return true;
     }
 
     @Override
     public DescentAction copy() {
-        return new Shield(figureID, card, value);
+        return new Shield(figureID, cardID, value);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(figureID);
+        DescentCard card = (DescentCard) dgs.getComponentById(cardID);
         if (f.isExhausted(card)) return false;
         if (f instanceof Hero)
         {
             if (!((Hero) f).getHandEquipment().contains(card)) return false;
         }
-        IExtendedSequence action = dgs.currentActionInProgress();
-        if (action instanceof MeleeAttack) {
-            MeleeAttack melee = (MeleeAttack) action;
-            if (!melee.getSkip() && melee.getDefendingFigure() == figureID && melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) {
+        MeleeAttack melee = f.getCurrentAttack();
+        if (melee == null) return false;
+        if (!melee.getSkip() && melee.getDefendingFigure() == figureID && melee.getPhase() == MeleeAttack.AttackPhase.POST_DEFENCE_ROLL) {
 
-                // If the defender already has enough defence to block the attack, there's no point in exhausting the shield
-                int damage = dgs.getAttackDicePool().getDamage() + melee.getExtraDamage();
-                int defence = dgs.getDefenceDicePool().getShields() + melee.getExtraDefence() - melee.getPierce();
-                return damage > defence;
-            }
+            // If the defender already has enough defence to block the attack, there's no point in exhausting the shield
+            int damage = dgs.getAttackDicePool().getDamage() + melee.getExtraDamage();
+            int defence = dgs.getDefenceDicePool().getShields() + melee.getExtraDefence() - melee.getPierce();
+            return damage > defence;
         }
         return false;
     }
@@ -75,11 +74,11 @@ public class Shield extends DescentAction {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Shield shield = (Shield) o;
-        return figureID == shield.figureID && Objects.equals(card, shield.card);
+        return figureID == shield.figureID && value == shield.value && cardID == shield.cardID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), figureID, card, value);
+        return Objects.hash(super.hashCode(), figureID, value, cardID);
     }
 }

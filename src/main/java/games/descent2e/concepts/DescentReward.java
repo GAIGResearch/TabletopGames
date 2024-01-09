@@ -7,6 +7,8 @@ import games.descent2e.components.Figure;
 import org.json.simple.JSONObject;
 import utilities.Utils;
 
+import java.util.Objects;
+
 public class DescentReward {
     enum RewardType {
         Attribute,
@@ -69,4 +71,30 @@ public class DescentReward {
         return dr;
     }
 
+    public DescentReward copy() {
+        DescentReward dr = new DescentReward();
+        dr.rewardType = rewardType;
+        dr.attribute = attribute;
+        dr.token = token;
+        dr.value = value;
+        dr.mustWinToReceive = mustWinToReceive;
+        dr.mustLoseToReceive = mustLoseToReceive;
+        dr.apply = apply;
+        dr.multiplier = multiplier;
+        if (countGameFeatureMultiplier != null) dr.countGameFeatureMultiplier = countGameFeatureMultiplier.copy();
+        return dr;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DescentReward that = (DescentReward) o;
+        return Double.compare(that.value, value) == 0 && mustWinToReceive == that.mustWinToReceive && mustLoseToReceive == that.mustLoseToReceive && Double.compare(that.multiplier, multiplier) == 0 && rewardType == that.rewardType && attribute == that.attribute && token == that.token && apply == that.apply && Objects.equals(countGameFeatureMultiplier, that.countGameFeatureMultiplier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rewardType, attribute, token, value, mustWinToReceive, mustLoseToReceive, apply, multiplier, countGameFeatureMultiplier);
+    }
 }

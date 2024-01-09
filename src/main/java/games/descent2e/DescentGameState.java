@@ -42,7 +42,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Random rnd;
 
     Deck<Card> searchCards;
-    GridBoard masterBoard;
+    GridBoard<BoardNode> masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
     DicePool attributeDicePool;
@@ -110,6 +110,12 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         components.add(searchCards);
         components.addAll(heroes);
+        for (Hero hero: heroes) {
+            components.addAll(hero.getSkills().getComponents());
+            components.addAll(hero.getHandEquipment().getComponents());
+            components.add(hero.getArmor());
+            components.addAll(hero.getOtherEquipment().getComponents());
+        }
         monsters.forEach(components::addAll);
         monstersOriginal.forEach(components::addAll);
         components.add(overlord);
@@ -121,6 +127,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     @Override
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
+        copy.data = data.copy();
         copy.tiles = new HashMap<>();
         for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
@@ -254,7 +261,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return data;
     }
 
-    public GridBoard getMasterBoard() {
+    public GridBoard<BoardNode> getMasterBoard() {
         return masterBoard;
     }
 

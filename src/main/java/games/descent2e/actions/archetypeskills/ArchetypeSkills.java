@@ -44,7 +44,7 @@ public class ArchetypeSkills {
                 case "Prayer of Healing":
                     for (Hero hero : dgs.getHeroes())
                     {
-                        Heal heal = new Heal(hero.getComponentID(), skill);
+                        Heal heal = new Heal(hero.getComponentID(), skill.getComponentID());
                         if (heal.canExecute(dgs)) actions.add(heal);
                     }
                     break;

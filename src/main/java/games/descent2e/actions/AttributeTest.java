@@ -10,6 +10,7 @@ import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
+import javassist.runtime.Desc;
 
 import java.util.List;
 import java.util.Objects;
@@ -81,7 +82,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         setTestingName(tester.getName());
         attributeValue = tester.getAttributeValue(attribute);
 
-        announceTestDebug(state);
+        //announceTestDebug(state);
 
         movePhaseForward(state);
 
@@ -156,8 +157,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 break;
             case POST_TEST_ROLL:
                 // Any rerolls are executed via interrupts
-                resolveTest(state, (Figure) state.getComponentById(testingFigure), result);
+                testResult(state);
+                resolveTest(state, testingFigure, result);
                 phase = ALL_DONE;
+                //System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
                 break;
         }
         // and reset interrupts
@@ -183,13 +186,21 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
         dgs.getAttributeDicePool().roll(dgs.getRandom());
 
+        testResult(dgs);
+    }
+
+    public void testResult(DescentGameState dgs)
+    {
         int roll = dgs.getAttributeDicePool().getShields();
 
         // Normally, both penalties remain at 0, however the Overlord can influence either
         result = (roll + penaltyToRoll) <= (attributeValue - penaltyToAttribute);
+
+        //System.out.println("Attribute Test Result: " + result + " (Roll: " + roll + ", Attribute: " + attributeValue + ")");
     }
 
-    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
+
+    public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
         return;
     }
@@ -217,8 +228,9 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        state.setActionInProgress(this);
+        //state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
+        //state.setActionInProgress(null);
     }
 
     @Override
@@ -247,34 +259,6 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         return true;  // TODO
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof AttributeTest)
-        {
-            AttributeTest other = (AttributeTest) obj;
-            return  other.testingPlayer == testingPlayer &&
-                    other.phase == phase &&
-                    other.interruptPlayer == interruptPlayer &&
-                    other.attribute == attribute &&
-                    other.attributeValue == attributeValue &&
-                    other.attributeTestName == attributeTestName &&
-                    other.penaltyToAttribute == penaltyToAttribute &&
-                    other.penaltyToRoll == penaltyToRoll &&
-                    other.result == result &&
-                    other.testCount == testCount &&
-                    other.testingName == testingName &&
-                    other.sourceFigure == sourceFigure;
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(testingFigure, testingPlayer, phase.ordinal(), interruptPlayer,
-                attribute, attributeValue, attributeTestName, penaltyToAttribute, penaltyToRoll,
-                result, testCount, testingName, sourceFigure);
     }
 
     public Figure.Attribute getAttribute()
@@ -371,5 +355,19 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     public void setSkip(boolean s)
     {
         skip = s;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        AttributeTest that = (AttributeTest) o;
+        return testingFigure == that.testingFigure && testingPlayer == that.testingPlayer && testCount == that.testCount && sourceFigure == that.sourceFigure && interruptPlayer == that.interruptPlayer && attributeValue == that.attributeValue && penaltyToAttribute == that.penaltyToAttribute && penaltyToRoll == that.penaltyToRoll && result == that.result && skip == that.skip && Objects.equals(testingName, that.testingName) && Objects.equals(attributeTestName, that.attributeTestName) && phase == that.phase && attribute == that.attribute;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), testingFigure, testingPlayer, testingName, attributeTestName, testCount, sourceFigure, phase, interruptPlayer, attribute, attributeValue, penaltyToAttribute, penaltyToRoll, result, skip);
     }
 }

@@ -9,6 +9,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
@@ -67,8 +68,19 @@ public class MultiAttack extends RangedAttack {
     {
         defendingFigure = defendingFigures.get(index);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+
+        defender.setCurrentAttack(this);
+
         DicePool defencePool = defender.getDefenceDice();
         state.setDefenceDicePool(defencePool);
+
+        if (defender instanceof Monster) {
+            if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
+            {
+                NightStalker.addNightStalker(state, attackingFigure, defendingFigure);
+            }
+        }
+
         System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
     }
 
@@ -144,5 +156,32 @@ public class MultiAttack extends RangedAttack {
             }
         }
         return string;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MultiAttack that = (MultiAttack) o;
+        return defendingFigure == that.defendingFigure && index == that.index && Objects.equals(defendingFigures, that.defendingFigures);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), defendingFigure, defendingFigures, index);
+    }
+
+    @Override
+    public MultiAttack copy() {
+        MultiAttack retValue = new MultiAttack(attackingFigure, defendingFigures);
+        copyComponentTo(retValue);
+        return retValue;
+    }
+
+    public void copyComponentTo(MultiAttack target) {
+        target.defendingFigure = defendingFigure;
+        target.index = index;
+        super.copyComponentTo(target);
     }
 }

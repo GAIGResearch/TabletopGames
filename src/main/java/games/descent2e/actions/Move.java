@@ -27,18 +27,18 @@ public class Move extends AbstractAction {
     final Monster.Direction orientation;
     private Vector2D startPosition;
 
-    private Figure f;
+    private int f;
 
     public int directionID;
 
-    public Move(Figure f, List<Vector2D> whereTo) {
+    public Move(int f, List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
         this.orientation = Monster.Direction.DOWN;
         this.startPosition = new Vector2D(0,0);
         this.directionID = -1;
         this.f = f;
     }
-    public Move(Figure f, List<Vector2D> whereTo, Monster.Direction finalOrientation) {
+    public Move(int f, List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
         this.startPosition = new Vector2D(0,0);
@@ -49,7 +49,7 @@ public class Move extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
-        //Figure f = ((DescentGameState) gs).getActingFigure();
+        Figure f = (Figure) dgs.getComponentById(this.f);
         startPosition = f.getPosition();
         // Remove from old position
         remove(dgs, f);
@@ -66,6 +66,15 @@ public class Move extends AbstractAction {
         return true;
     }
 
+    public boolean canExecute (AbstractGameState gs)
+    {
+        Figure f = (Figure) gs.getComponentById(this.f);
+        // We should not finish on the same space that we started on
+        Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
+        if (finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY()) return true;
+        // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
+        return false;
+    }
 
     /**
      * Moves through a tile, applying penalties, NOT final destination.
@@ -174,7 +183,7 @@ public class Move extends AbstractAction {
 
         List<Vector2D> possibilities = new ArrayList<>();
         // Otherwise, we need to find the nearest adjacent space that is empty
-        GridBoard board = dgs.getMasterBoard();
+        GridBoard<BoardNode> board = dgs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(position.getX(), position.getY(), board.getWidth(), board.getHeight(), true);
         for (Vector2D neighbour : neighbours) {
             BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
@@ -303,6 +312,7 @@ public class Move extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         //Figure f = ((DescentGameState) gameState).getActingFigure();
         List<Vector2D> move = positionsTraveled;
+        Figure f = (Figure) ((DescentGameState) gameState).getComponentById(this.f);
 
         if (startPosition.equals(new Vector2D(0,0)))
         {
@@ -321,6 +331,11 @@ public class Move extends AbstractAction {
 
         movement = movement + (f.getSize().a > 1 || f.getSize().b > 1 ? "; Orientation: " + orientation : "");
         return movement;
+    }
+
+    @Override
+    public String toString() {
+        return "Move by " + f + " to " + positionsTraveled.get(positionsTraveled.size()-1) + "";
     }
 
     public String getDirection(Vector2D currentPosition, Vector2D newPosition) {
@@ -389,6 +404,7 @@ public class Move extends AbstractAction {
 
     public void updateDirectionID(AbstractGameState gameState)
     {
+        Figure f = (Figure) ((DescentGameState) gameState).getComponentById(this.f);
         // If directionID is unset, update it
         if (directionID == -1)
         {

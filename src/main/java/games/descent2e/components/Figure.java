@@ -70,7 +70,7 @@ public class Figure extends Token {
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
     boolean removedConditionThisTurn = false;
-    Set<AttributeTest> attributeTests;
+    List<AttributeTest> attributeTests;
     List<DescentAction> abilities;  // TODO track exhausted etc.
     MeleeAttack currentAttack;
     boolean hasMoved, hasAttacked, hasRerolled;
@@ -82,7 +82,7 @@ public class Figure extends Token {
         super(name);
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
-        attributeTests = new HashSet<>();
+        attributeTests = new ArrayList<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         attributes.put(Gold, new Counter(0, 0, -1, "Gold"));
@@ -235,7 +235,7 @@ public class Figure extends Token {
         this.removedConditionThisTurn = removedConditionThisTurn;
     }
 
-    public Set<AttributeTest> getAttributeTests() {
+    public List<AttributeTest> getAttributeTests() {
         return attributeTests;
     }
 
@@ -245,6 +245,14 @@ public class Figure extends Token {
 
     public void removeAttributeTest(AttributeTest attributeTest) {
         attributeTests.remove(attributeTest);
+    }
+    public void removeLastAttributeTest() {
+        if (attributeTests.isEmpty()) return;
+        attributeTests.remove(attributeTests.size()-1);
+    }
+    public AttributeTest getLastAttributeTest() {
+        if (attributeTests.isEmpty()) return null;
+        return attributeTests.get(attributeTests.size()-1);
     }
     public void clearAttributeTest() {
         if (!(attributeTests).isEmpty()) {
@@ -331,7 +339,12 @@ public class Figure extends Token {
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
         copyTo.removedConditionThisTurn = removedConditionThisTurn;
-        copyTo.attributeTests = new HashSet<>(attributeTests);
+        copyTo.attributeTests = new ArrayList<>();
+        if (attributeTests != null) {
+            for (AttributeTest test : attributeTests) {
+                copyTo.attributeTests.add(test.copy());
+            }
+        }
         copyTo.abilities = new ArrayList<>();
         if (abilities != null) {
             for (DescentAction ability : abilities) {
@@ -346,7 +359,9 @@ public class Figure extends Token {
         copyTo.isOffMap = isOffMap;
         copyTo.canIgnoreEnemies = canIgnoreEnemies;
         copyTo.extraAction = extraAction;
-        copyTo.currentAttack = currentAttack;
+        if (currentAttack != null) {
+            copyTo.currentAttack = currentAttack.copy();
+        }
         copyTo.exhausted = exhausted.copy();
     }
 

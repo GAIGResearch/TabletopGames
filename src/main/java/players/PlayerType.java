@@ -91,13 +91,13 @@ public enum PlayerType {
                 break;
             case MCTS:
                 if (params == null) {
-                    params = new MCTSParams(seed);
+                    params = new MCTSParams();
                 }
                 player = new MCTSPlayer((MCTSParams) params);
                 break;
             case RMHC:
                 if (params == null) {
-                    params = new RMHCParams(seed);
+                    params = new RMHCParams();
                 }
                 player = new RMHCPlayer((RMHCParams) params);
                 break;
@@ -106,12 +106,12 @@ public enum PlayerType {
         return player;
     }
 
-    public PlayerParameters createParameterSet(long seed) {
+    public PlayerParameters createParameterSet() {
         switch(this) {
             case MCTS:
-                return new MCTSParams(seed);
+                return new MCTSParams();
             case RMHC:
-                return new RMHCParams(seed);
+                return new RMHCParams();
             default:
                 return null;
         }

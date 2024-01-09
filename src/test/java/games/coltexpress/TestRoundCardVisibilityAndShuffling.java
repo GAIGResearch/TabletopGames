@@ -29,9 +29,11 @@ public class TestRoundCardVisibilityAndShuffling {
 
     @Test
     public void testVisibilityAndShuffleEachRound() {
+        ColtExpressParameters params = new ColtExpressParameters();
+        params.setRandomSeed(6);
         ColtExpressGame game = new ColtExpressGame(players,
                 new ColtExpressForwardModel(),
-                new ColtExpressGameState(new ColtExpressParameters(6), 3));
+                new ColtExpressGameState(params, 3));
 
         // We now run through Game making random decision. Each time the round changes, we copy the state x10 and
         // check shuffling. The work is done in TestRoundEndListener()

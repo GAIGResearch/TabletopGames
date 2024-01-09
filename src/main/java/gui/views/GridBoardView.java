@@ -1,6 +1,5 @@
 package gui.views;
 
-import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 
@@ -8,18 +7,18 @@ import java.awt.*;
 
 import static gui.GUI.defaultItemSize;
 
-public class GridBoardView extends ComponentView {
+public class GridBoardView<T extends Component> extends ComponentView {
 
-    public GridBoardView(GridBoard gridBoard) {
+    public GridBoardView(GridBoard<T> gridBoard) {
         super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard<?>) component, 0, 0);
     }
 
-    public static void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
+    public static <T extends Component> void drawGridBoard(Graphics2D g, GridBoard<T> gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -38,7 +37,7 @@ public class GridBoardView extends ComponentView {
         }
     }
 
-    public static void drawGridBoard(Graphics2D g, GridBoard gridBoard, Rectangle rect) {
+    public static <T extends Component> void drawGridBoard(Graphics2D g, GridBoard<T> gridBoard, Rectangle rect) {
         // Draw background
         g.setColor(Color.lightGray);
         g.fillRect(rect.x, rect.y, rect.width-1, rect.height-1);
@@ -54,7 +53,7 @@ public class GridBoardView extends ComponentView {
         }
     }
 
-    private static void drawCell(Graphics2D g, BoardNode element, int x, int y) {
+    private static <T extends Component> void drawCell(Graphics2D g, T element, int x, int y) {
         // Paint cell background
         g.setColor(Color.lightGray);
         g.fillRect(x, y, defaultItemSize, defaultItemSize);

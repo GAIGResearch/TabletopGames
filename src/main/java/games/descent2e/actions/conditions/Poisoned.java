@@ -9,6 +9,8 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 
+import java.util.Objects;
+
 public class Poisoned extends AttributeTest {
     String attributeTestName = "Poisoned";
     public Poisoned(int testingFigure, Figure.Attribute attribute) {
@@ -33,8 +35,9 @@ public class Poisoned extends AttributeTest {
     }
 
     @Override
-    public void resolveTest(DescentGameState dgs, Figure f, boolean result)
+    public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
+        Figure f = (Figure) dgs.getComponentById(figureID);
         if (result)
         {
             f.removeCondition(DescentTypes.DescentCondition.Poison);
@@ -70,5 +73,19 @@ public class Poisoned extends AttributeTest {
         Figure f = dgs.getActingFigure();
         // We can only make one Poisoned attribute test per turn - if we have already taken it, we can't make another attempt
         return f.hasCondition(DescentTypes.DescentCondition.Poison) && !f.hasAttributeTest(this) && f.getNActionsExecuted().isMinimum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Poisoned poisoned = (Poisoned) o;
+        return Objects.equals(attributeTestName, poisoned.attributeTestName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), attributeTestName);
     }
 }

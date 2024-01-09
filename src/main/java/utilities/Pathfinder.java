@@ -17,7 +17,7 @@ public class Pathfinder {
      * Graph to be used for the path finding.
      * TODO: This could become a GraphBoard at some point.
      */
-    private GridBoard graph;
+    private GridBoard<BoardNode> graph;
 
     /**
      * Cache of shortest path from node i to the others
@@ -34,7 +34,7 @@ public class Pathfinder {
      * Constructor of the pathfinder.
      * @param g Graph of the game.
      */
-    public Pathfinder(GridBoard g)
+    public Pathfinder(GridBoard<BoardNode> g)
     {
         graph = g;
         shortestPaths = new TreeMap<>();

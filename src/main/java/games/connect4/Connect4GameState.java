@@ -3,7 +3,6 @@ package games.connect4;
 import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
-import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 import core.components.Token;
@@ -19,9 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState {
+public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
-    GridBoard gridBoard;
+    GridBoard<Token> gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
 
     public Connect4GameState(AbstractParameters gameParameters, int nPlayers) {
@@ -91,8 +90,8 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
                 if (y != 0 || x != 0) {
                     sb.append(",");
                 }
-                BoardNode t = gridBoard.getElement(x, y);
-                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getComponentName()).append("\"");
+                Token t = gridBoard.getElement(x, y);
+                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getTokenType()).append("\"");
             }
         }
 
@@ -106,7 +105,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     @Override
-    public GridBoard getGridBoard() {
+    public GridBoard<Token> getGridBoard() {
         return gridBoard;
     }
 

@@ -10,6 +10,7 @@ import games.descent2e.components.Hero;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -181,6 +182,32 @@ public class DToken extends Token {
 
         public void setAltName(String altName) {
             this.altName = altName;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DTokenDef dTokenDef = (DTokenDef) o;
+            return tokenType == dTokenDef.tokenType && Objects.equals(setupHowMany, dTokenDef.setupHowMany) && Arrays.equals(locations, dTokenDef.locations) && Objects.equals(effects, dTokenDef.effects) && Objects.equals(attributeModifiers, dTokenDef.attributeModifiers) && Objects.equals(altName, dTokenDef.altName);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(tokenType, setupHowMany, effects, attributeModifiers, altName);
+            result = 31 * result + Arrays.hashCode(locations);
+            return result;
+        }
+
+        public DTokenDef copy() {
+            DTokenDef copy = new DTokenDef();
+            copy.tokenType = tokenType;
+            copy.setupHowMany = setupHowMany;
+            copy.locations = locations.clone();
+            copy.effects = getEffectsCopy();
+            copy.attributeModifiers = new HashMap<>(attributeModifiers);
+            copy.altName = altName;
+            return copy;
         }
     }
 }

@@ -15,13 +15,10 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
     String heroName = "Jain Fairwood";
     int jain;
     int reduce;
-    int damage;
     public JainTurnDamageIntoFatigue(int hero, int reduce) {
         super(Triggers.TAKE_DAMAGE);
         this.jain = hero;
         this.reduce = reduce;
-        // TODO Placeholder
-        this.damage = reduce;
     }
 
     @Override
@@ -37,17 +34,17 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public JainTurnDamageIntoFatigue copy() {
-        JainTurnDamageIntoFatigue retValue = new JainTurnDamageIntoFatigue(jain, reduce);
-        retValue.damage = damage;
-        return retValue;
+        return new JainTurnDamageIntoFatigue(jain, reduce);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         MeleeAttack currentAttack = dgs.getActingFigure().getCurrentAttack();
+        if (currentAttack == null)
+            return false;
         if (currentAttack.skip)
             return false;
-        damage = currentAttack.getDamage();
+        int damage = currentAttack.getDamage();
         // Prevents us from increasing our Fatigue more than the damage we took
         if (damage - reduce < 0)
             return false;
@@ -59,14 +56,14 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
     public boolean equals(Object obj) {
         if (obj instanceof JainTurnDamageIntoFatigue) {
             JainTurnDamageIntoFatigue other = (JainTurnDamageIntoFatigue) obj;
-            return other.jain == jain && other.reduce == reduce && other.damage == damage;
+            return other.jain == jain && other.reduce == reduce;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(jain, reduce, damage);
+        return Objects.hash(jain, reduce);
     }
 
     @Override

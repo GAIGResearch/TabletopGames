@@ -32,4 +32,10 @@ public class GetFatiguedMovementPoints extends DescentAction {
         Figure f = dgs.getActingFigure();
         return !f.hasCondition(DescentTypes.DescentCondition.Immobilize) && !f.getAttribute(Figure.Attribute.Fatigue).isMaximum();
     }
+
+    @Override
+    public int hashCode() {
+        return 111505;
+    }
+
 }

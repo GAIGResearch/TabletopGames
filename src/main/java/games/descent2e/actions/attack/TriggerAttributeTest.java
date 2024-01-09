@@ -2,11 +2,14 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.items.RerollAttributeTest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -136,7 +139,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     }
 
     public String toString() {
-        return "Call Attribute Test on";
+        return "Call Attribute Test by " + attackingFigure + " on " + defendingFigure;
     }
 
     @Override
@@ -147,7 +150,19 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // This is where the call for the Attribute Tests would go
-        return null;
+        List<AbstractAction> retVal = new ArrayList<>();
+        // TODO: This feels incredibly hacky, but for whatever reason, it just works.
+        AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1);
+        if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase)
+        {
+            // If the Reroll option is available, even if the player chooses not to take it, the Game is expecting
+            // there to be at least something within the retVal list of possible actions for the next player.
+            // This seems to be more of an issue with how the TAG Framework handles multiple IExtendedSequences on top of each other,
+            // and will require further inspecting to resolve.
+            retVal.add(new DoNothing());
+        }
+        if (retVal.isEmpty()) return null;
+        return retVal;
     }
 
     @Override
@@ -158,7 +173,6 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -170,11 +184,17 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     @Override
     public TriggerAttributeTest copy() {
         TriggerAttributeTest retVal = new TriggerAttributeTest(attackingFigure, defendingFigure);
+        copyComponentTo(retVal);
+        return retVal;
+    }
+
+    public void copyComponentTo(TriggerAttributeTest retVal)
+    {
+        retVal.defendingFigure = defendingFigure;
         retVal.attackingPlayer = attackingPlayer;
         retVal.defendingPlayer = defendingPlayer;
         retVal.interruptPlayer = interruptPlayer;
         retVal.phase = phase;
-        return retVal;
     }
 
     @Override

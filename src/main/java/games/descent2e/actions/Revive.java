@@ -6,6 +6,8 @@ import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
+import java.util.Objects;
+
 import static games.descent2e.actions.Triggers.ACTION_POINT_SPEND;
 
 public class Revive extends DescentAction{
@@ -47,5 +49,19 @@ public class Revive extends DescentAction{
     public boolean canExecute(DescentGameState dgs) {
         Hero h = (Hero)dgs.getComponentById(heroID);
         return h.isDefeated() && !dgs.getActingFigure().getNActionsExecuted().isMaximum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Revive revive = (Revive) o;
+        return heroID == revive.heroID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), heroID);
     }
 }

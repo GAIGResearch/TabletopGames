@@ -29,7 +29,7 @@ public class UnoGameParameters extends TunableParameters {
     public int nDrawCards = 2;
     public int[] specialDrawCards = new int[]{2};  // DrawTwo card
     public int[] specialWildDrawCards = new int[]{0, 4};  // Wild, WildDrawFour card
-    public String[] colors = new String[]{
+    public static String[] colors = new String[]{
             "Red",
             "Blue",
             "Green",
@@ -44,8 +44,7 @@ public class UnoGameParameters extends TunableParameters {
     public int nWinPoints = 500;
     public int maxTurnsPerRound = 300;
 
-    public UnoGameParameters(long seed) {
-        super(seed);
+    public UnoGameParameters() {
         addTunableParameter("nCardsPerPlayer", 7, Arrays.asList(5,7,10,15));
         addTunableParameter("nNumberCards", 10, Arrays.asList(5,10,15));
         addTunableParameter("nWildCards", 4, Arrays.asList(1,2,4,6,8,10));
@@ -85,18 +84,9 @@ public class UnoGameParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        UnoGameParameters ugp = new UnoGameParameters(System.currentTimeMillis());
-        ugp.dataPath = dataPath;
-        ugp.nNumberCards = nNumberCards;
-        ugp.nCardsPerPlayer = nCardsPerPlayer;
-        ugp.nWildCards = nWildCards;
-        ugp.nSkipCards = nSkipCards;
-        ugp.nReverseCards = nReverseCards;
-        ugp.nDrawCards = nDrawCards;
+        UnoGameParameters ugp = new UnoGameParameters();
         ugp.specialDrawCards = specialDrawCards.clone();
         ugp.specialWildDrawCards = specialWildDrawCards.clone();
-        ugp.colors = colors.clone();
-        ugp.scoringMethod = scoringMethod;
         return ugp;
     }
 

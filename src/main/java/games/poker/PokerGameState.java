@@ -22,18 +22,20 @@ import static utilities.Utils.generateCombinations;
 
 
 public class PokerGameState extends AbstractGameState implements IPrintable {
-    List<Deck<FrenchCard>>  playerDecks;
-    Counter[]               playerMoney;
-    Counter[]               playerBet;
+    List<Deck<FrenchCard>> playerDecks;
+    Counter[] playerMoney;
+    Counter[] playerBet;
 
-    Deck<FrenchCard>        drawDeck;
-    Deck<FrenchCard>        communityCards;
-    List<MoneyPot>          moneyPots;  // mapping from all-in bet amount (max a player can put in the pot) to pot counter; -1 for default with no limits
+    Deck<FrenchCard> drawDeck;
+    Deck<FrenchCard> communityCards;
+    List<MoneyPot> moneyPots;  // mapping from all-in bet amount (max a player can put in the pot) to pot counter; -1 for default with no limits
 
-    boolean[]               playerNeedsToCall;  // True if player needs to call (can't just check)
-    boolean[]               playerFold;  // True if player folded
-    boolean[]               playerActStreet;  // true if player acted this street, false otherwise
-    boolean                 bet;  // True if a bet was made this street
+    boolean[] playerNeedsToCall;  // True if player needs to call (can't just check)
+    boolean[] playerFold;  // True if player folded
+    boolean[] playerAllIn; // True if player is all-in
+    boolean[] playerActStreet;  // true if player acted this street, false otherwise
+    boolean bet;  // True if a bet was made this street
+    protected int bigId; // Stores the id of the previous big blind
 
     enum PokerGamePhase implements IGamePhase {
         Preflop,
@@ -46,7 +48,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param nPlayers      - number of players for this game.
+     * @param nPlayers       - number of players for this game.
      */
 
     public PokerGameState(AbstractParameters gameParameters, int nPlayers) {
@@ -70,19 +72,6 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         }};
     }
 
-    public int getNextPlayer() {
-        int next = (nPlayers + turnOwner + 1) % nPlayers;
-        int nTries = 1;
-        while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME) && nTries <= getNPlayers()) {
-            next = (nPlayers + next + 1) % nPlayers;
-            nTries++;
-        }
-//        if (nTries > getNPlayers()) {
-//            endGame(gameState);
-//        }
-        return next;
-    }
-
     public void placeBet(int amount, int player) {
         // Check which pot this player is participating in, update the one that's not reached max
         int m = amount;
@@ -100,8 +89,11 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                 noLimitPot = pot;
             }
         }
-        if (m > 0 && noLimitPot != null) {
+        if (m > 0) {
             // Add the rest in no-limit pot
+            if (noLimitPot == null) {
+                throw new AssertionError("No no-limit pot found");
+            }
             noLimitPot.increment(m, player);
         }
 
@@ -128,17 +120,20 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                         if (overflow > 0) {
                             // Player bet more than limit, overflow remains here, limit transferred to new pot
                             pot.getPlayerContribution().put(contributor, overflow);
+                            newPot.increment(current, contributor);
                         } else {
                             // Player bet equal to or less than limit, transfer all to new pot, remove from current pot
                             contributorsToRemove.add(contributor);
+                            newPot.increment(pot.getPlayerContribution(contributor), contributor);
                         }
-                        newPot.increment(current, contributor);
                     }
                     for (int contributor : contributorsToRemove) {
                         pot.getPlayerContribution().remove(contributor);
                     }
                     newPots.add(newPot);
                 }
+                // then ensure that the contributions to the pot add up
+                pot.setValue(pot.getPlayerContribution().values().stream().mapToInt(Integer::intValue).sum());
             }
             moneyPots.addAll(newPots);
         }
@@ -164,6 +159,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         return playerNeedsToCall;
     }
 
+    public boolean[] getPlayerAllIn() {
+        return playerAllIn;
+    }
+
     public boolean[] getPlayerFold() {
         return playerFold;
     }
@@ -184,12 +183,78 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         this.bet = bet;
     }
 
+    public int getBigId() {
+        return bigId;
+    }
+
+    /***
+     * Player to the right of big blind is small blind
+     *
+     * @return the id of the player with small blind
+     */
+    public int getSmallId() {
+        return getNextNonBankruptPlayer(getBigId(), -1);
+    }
+
+    public boolean playersLeftToAct() {
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (playerFold[p] || playerAllIn[p] || getPlayerResults()[p] == LOSE_GAME)
+                continue;
+            if (playerNeedsToCall[p] || !playerActStreet[p])
+                return true;
+        }
+        return false;
+    }
+
+    public boolean checkRoundOver() {
+        int stillAlive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (getPlayerResults()[i] != LOSE_GAME && !playerFold[i] && !playerAllIn[i]) {
+                stillAlive++;
+            }
+        }
+        if (stillAlive <= 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public int getNextActingPlayer(int fromPlayer, int direction) {
+        int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        int nTries = 0;
+        while ((playerFold[next] || playerAllIn[next] || getPlayerResults()[next] == LOSE_GAME)) {
+            next = (nPlayers + next + direction) % nPlayers;
+            nTries++;
+            if (nTries > getNPlayers()) {
+                return -1;
+            }
+        }
+        return next;
+    }
+
+    public int getNextNonBankruptPlayer(int fromPlayer, int direction) {
+        int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        while (getPlayerResults()[next] == LOSE_GAME) {
+            next = (nPlayers + next + direction) % nPlayers;
+        }
+        return next;
+    }
+
+    public void otherPlayerMustCall(int playerId) {
+        // Others can't check
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (i != playerId && !playerFold[i] && !playerAllIn[i] && getPlayerResults()[i] != LOSE_GAME) {
+                playerNeedsToCall[i] = true;
+            }
+        }
+    }
+
     @Override
     protected AbstractGameState _copy(int playerId) {
         PokerGameState copy = new PokerGameState(gameParameters.copy(), getNPlayers());
         copy.communityCards = communityCards.copy();
         copy.moneyPots = new ArrayList<>();
-        for (MoneyPot pot: moneyPots) {
+        for (MoneyPot pot : moneyPots) {
             copy.moneyPots.add(pot.copy());
         }
         copy.playerDecks = new ArrayList<>();
@@ -208,7 +273,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     copy.playerDecks.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(new Random(copy.gameParameters.getRandomSeed()));
+            copy.drawDeck.shuffle(rnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
@@ -219,6 +284,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         }
         copy.playerNeedsToCall = playerNeedsToCall.clone();
         copy.playerFold = playerFold.clone();
+        copy.playerAllIn = playerAllIn.clone();
         copy.playerActStreet = playerActStreet.clone();
         copy.bet = bet;
         return copy;
@@ -238,13 +304,13 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<Integer>() {{
             add(drawDeck.getComponentID());
-            for (Component c: drawDeck.getComponents()) {
+            for (Component c : drawDeck.getComponents()) {
                 add(c.getComponentID());
             }
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     add(playerDecks.get(i).getComponentID());
-                    for (Component c: playerDecks.get(i).getComponents()) {
+                    for (Component c : playerDecks.get(i).getComponents()) {
                         add(c.getComponentID());
                     }
                 }
@@ -258,7 +324,15 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Arrays.equals(playerMoney, that.playerMoney) && Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Objects.equals(moneyPots, that.moneyPots) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet);
+        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) &&
+                Arrays.equals(playerMoney, that.playerMoney) &&
+                Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck)
+                && Objects.equals(communityCards, that.communityCards) &&
+                Objects.equals(moneyPots, that.moneyPots) &&
+                Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) &&
+                Arrays.equals(playerFold, that.playerFold) &&
+                Arrays.equals(playerActStreet, that.playerActStreet) &&
+                Arrays.equals(playerAllIn, that.playerAllIn);
     }
 
     @Override
@@ -291,19 +365,20 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     }
 
     enum PokerHand {
-        RoyalFlush (1),
-        StraightFlush (2),
-        FourOfAKind (3),
-        FullHouse (4),
-        Flush (5),
-        Straight (6),
-        ThreeOfAKind (7),
-        TwoPair (8),
-        OnePair (9),
-        HighCard (10);
+        RoyalFlush(1),
+        StraightFlush(2),
+        FourOfAKind(3),
+        FullHouse(4),
+        Flush(5),
+        Straight(6),
+        ThreeOfAKind(7),
+        TwoPair(8),
+        OnePair(9),
+        HighCard(10);
 
         static final int pokerHandSize = 5;
         final int rank;
+
         PokerHand(int rank) {
             this.rank = rank;
         }
@@ -316,7 +391,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     indx[i] = i;
                 }
                 ArrayList<int[]> combinations = generateCombinations(indx, pokerHandSize);
-                ArrayList<Pair<Pair<PokerHand,ArrayList<Integer>>, Deck<FrenchCard>>> handOptions = new ArrayList<>();
+                ArrayList<Pair<Pair<PokerHand, ArrayList<Integer>>, Deck<FrenchCard>>> handOptions = new ArrayList<>();
                 int smallestRank = 11;
                 for (int[] combo : combinations) {
                     Deck<FrenchCard> temp = new Deck<>("Temp", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -333,16 +408,15 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                 }
                 if (handOptions.size() == 1) {
                     deck.clear();
-                    for (FrenchCard c: handOptions.get(0).b.getComponents()) {
+                    for (FrenchCard c : handOptions.get(0).b.getComponents()) {
                         deck.add(c);
                     }
                     return new Pair<>(handOptions.get(0).a.a, new HashSet<>(handOptions.get(0).a.b));
-                }
-                else {
+                } else {
                     // Choose the one with highest card values
                     for (int i = 0; i < pokerHandSize; i++) {
                         int maxValue = 0;
-                        for (Pair<Pair<PokerHand,ArrayList<Integer>>, Deck<FrenchCard>> handOption : handOptions) {
+                        for (Pair<Pair<PokerHand, ArrayList<Integer>>, Deck<FrenchCard>> handOption : handOptions) {
                             int value = handOption.a.b.get(i);
                             if (value > maxValue) maxValue = value;
                         }
@@ -351,10 +425,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                             int value = handOptions.get(j).a.b.get(i);
                             if (value == maxValue) best.add(j);
                         }
-                        if (best.size() == 1 || i == pokerHandSize-1) {
+                        if (best.size() == 1 || i == pokerHandSize - 1) {
                             int option = best.iterator().next();
                             deck.clear();
-                            for (FrenchCard c: handOptions.get(option).b.getComponents()) {
+                            for (FrenchCard c : handOptions.get(option).b.getComponents()) {
                                 deck.add(c);
                             }
                             return new Pair<>(handOptions.get(option).a.a, new HashSet<>(handOptions.get(option).a.b));
@@ -374,7 +448,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             HashSet<Integer> numberSet = new HashSet<>();
             HashMap<Integer, Integer> numberCount = new HashMap<>();
             ArrayList<Integer> numbers = new ArrayList<>();
-            for (FrenchCard card: deck.getComponents()) {
+            for (FrenchCard card : deck.getComponents()) {
                 suites.add(card.suite);
                 numbers.add(card.number);
                 numberSet.add(card.number);
@@ -419,15 +493,15 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         }
 
         static boolean isListConsecutive(ArrayList<Integer> numbers) {
-            for (int i = 0; i < numbers.size()-1; i++) {
-                if (numbers.get(i+1) - numbers.get(i) != 1) return false;
+            for (int i = 0; i < numbers.size() - 1; i++) {
+                if (numbers.get(i + 1) - numbers.get(i) != 1) return false;
             }
             return true;
         }
 
         static int maxCount(HashMap<Integer, Integer> map) {
             int max = 0;
-            for (int c: map.values()) {
+            for (int c : map.values()) {
                 if (c > max) max = c;
             }
             return max;

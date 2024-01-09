@@ -15,6 +15,7 @@ import games.descent2e.components.Hero;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.DescentHelper.moveActions;
 import static games.descent2e.actions.Triggers.ANYTIME;
@@ -50,7 +51,6 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     DoubleMoveAttackPhase phase = NOT_STARTED;
     int heroPlayer;
     int interruptPlayer;
-    Figure hero;
     int oldMovePoints;
     boolean oldFreeAttack;
 
@@ -72,8 +72,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         List<AbstractAction> moveActions;
         List<RangedAttack> attacks = new ArrayList<>();;
 
-        //System.out.println("Jain has attacked yet: " + hero.hasUsedHeroAbility());
-        hero = dgs.getActingFigure();
+        Figure hero = dgs.getActingFigure();
 
         if (!hero.hasUsedExtraAction())
         {
@@ -88,7 +87,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                 moveActions = moveActions(dgs, hero);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(hero));
+                    retVal.add(new StopMove(hero.getComponentID()));
                     retVal.addAll(moveActions);
                 }
                 if (!attacks.isEmpty())
@@ -109,6 +108,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -121,7 +121,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     public boolean execute(DescentGameState dgs) {
         dgs.setActionInProgress(this);
         heroPlayer = dgs.getCurrentPlayer();
-        hero = dgs.getActingFigure();
+        Figure hero = dgs.getActingFigure();
         interruptPlayer = heroPlayer;
         oldMovePoints = hero.getAttribute(Figure.Attribute.MovePoints).getValue();
         oldFreeAttack = hero.hasUsedExtraAction();
@@ -189,6 +189,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                 phase = POST_HERO_ACTION;
                 break;
             case POST_HERO_ACTION:
+                Figure hero = state.getActingFigure();
                 hero.setAttribute(Figure.Attribute.MovePoints, oldMovePoints);
                 hero.setUsedExtraAction(oldFreeAttack);
                 if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
@@ -212,8 +213,22 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        hero = dgs.getActingFigure();
+        Figure hero = dgs.getActingFigure();
         if (hero instanceof Hero && !((Hero) hero).isFeatAvailable()) return false;
         return !hero.getNActionsExecuted().isMaximum();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DoubleMoveAttack that = (DoubleMoveAttack) o;
+        return heroPlayer == that.heroPlayer && interruptPlayer == that.interruptPlayer && oldMovePoints == that.oldMovePoints && oldFreeAttack == that.oldFreeAttack && phase == that.phase;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), phase, heroPlayer, interruptPlayer, oldMovePoints, oldFreeAttack);
     }
 }

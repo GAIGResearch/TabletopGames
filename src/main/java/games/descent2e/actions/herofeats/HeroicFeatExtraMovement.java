@@ -12,6 +12,7 @@ import games.descent2e.components.Hero;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static games.descent2e.DescentHelper.moveActions;
 import static games.descent2e.actions.Triggers.ANYTIME;
@@ -82,21 +83,26 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         Figure hero = (Figure) dgs.getComponentById(heroID);
         Figure targetAlly = (Figure) dgs.getComponentById(allyID);
         List<AbstractAction> retVal = new ArrayList<>();
-        List<AbstractAction> moveActions = new ArrayList<>();
+        List<AbstractAction> moveActions;
         switch (phase) {
             case SWAP:
                 // If we have not yet chosen if we want to swap, we can do so now
                 // This ensures we are only asked once
+                //System.out.println("Swap option: " + swapOption + "\nSwapped: " + swapped);
                 if (!swapOption) {
-                    retVal.add(new SwapOrder(this, hero, targetAlly, false));
-                    retVal.add(new SwapOrder(this, hero, targetAlly, true));
+                    SwapOrder noSwap = new SwapOrder(hero.getComponentID(), targetAlly.getComponentID(), false);
+                    SwapOrder yesSwap = new SwapOrder(hero.getComponentID(), targetAlly.getComponentID(), true);
+                    if (noSwap.canExecute(dgs))
+                        retVal.add(noSwap);
+                    if (yesSwap.canExecute(dgs))
+                        retVal.add(yesSwap);
                 }
                 break;
             case PRE_HERO_MOVE:
                 moveActions = moveActions(dgs, hero);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(hero));
+                    retVal.add(new StopMove(hero.getComponentID()));
                     retVal.addAll(moveActions);
                 }
                 break;
@@ -104,7 +110,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 moveActions = moveActions(dgs, targetAlly);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(targetAlly));
+                    retVal.add(new StopMove(targetAlly.getComponentID()));
                     retVal.addAll(moveActions);
                 }
                 break;
@@ -123,6 +129,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        state.setActionInProgress(this);
         movePhaseForward((DescentGameState) state);
     }
 
@@ -295,5 +302,10 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     }
     public boolean getSwapOption() {
         return swapOption;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), phase, heroPlayer, allyPlayer, interruptPlayer, heroID, allyID, swapped, swapOption, oldHeroMovePoints, oldAllyMovePoints);
     }
 }

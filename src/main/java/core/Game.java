@@ -9,6 +9,9 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
+import games.descent2e.actions.attack.FreeAttack;
+import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.actions.monsterfeats.Howl;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -526,6 +529,7 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
+        boolean errorInbound = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace).isEmpty();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.size() == 0) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
@@ -537,10 +541,21 @@ public class Game {
             if (gameState.getHistory().size() > 1) {
                 lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
             }
+            System.out.println("---\nActions in progress:");
+            for (IExtendedSequence action: actionsInProgress)
+            {
+                System.out.println(action);
+            }
+            System.out.println("---\nRecent History:");
+            List<AbstractAction> history = gameState.getHistory();
+            for (int i = Math.max(0, history.size() - 10); i < history.size(); i++)
+            {
+                System.out.println(history.get(i));
+            }
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
+                    + (topOfStack != null ? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + (topOfStack instanceof AbstractAction ? ((AbstractAction) topOfStack).getString(gameState) : topOfStack) + ")" : ""));
 
         }
         actionComputeTime = (System.nanoTime() - s);
@@ -836,7 +851,7 @@ public class Game {
 //        players.add(rmhcPlayer);
 //        players.add(rmhcPlayer);
 
-        MCTSParams mcts_params = new MCTSParams();
+//        MCTSParams mcts_params = new MCTSParams();
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
@@ -848,14 +863,14 @@ public class Game {
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;

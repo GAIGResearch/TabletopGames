@@ -14,11 +14,14 @@ public class EndCurrentPhase extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         IExtendedSequence action = Objects.requireNonNull(gs.currentActionInProgress());
-        if (action instanceof MeleeAttack)
+        if (action instanceof MeleeAttack) {
             ((MeleeAttack) action).setSkip(true);
-        if (action instanceof AttributeTest)
+            //System.out.println("Skipping current phase");
+        }
+        if (action instanceof AttributeTest) {
             ((AttributeTest) action).setSkip(true);
-        System.out.println("Skipping current phase");
+            //System.out.println("Skipping current phase");
+        }
         return true;
     }
 

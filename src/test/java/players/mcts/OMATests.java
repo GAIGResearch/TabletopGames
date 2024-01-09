@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.BoardNode;
 import core.components.Token;
 import games.GameType;
 import games.loveletter.*;
@@ -24,8 +23,8 @@ public class OMATests {
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
-    BoardNode x = TicTacToeConstants.playerMapping.get(0);
-    BoardNode o = TicTacToeConstants.playerMapping.get(1);
+    Token x = TicTacToeConstants.playerMapping.get(0);
+    Token o = TicTacToeConstants.playerMapping.get(1);
 
     AbstractForwardModel ticTacToeForwardModel = new TicTacToeForwardModel();
     AbstractForwardModel loveLetterForwardModel = new LoveLetterForwardModel();
@@ -33,7 +32,8 @@ public class OMATests {
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA;
         params.information = MCTSEnums.Information.Information_Set;
@@ -51,7 +51,7 @@ public class OMATests {
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
-        TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
+        TicTacToeGameParameters gameParams = new TicTacToeGameParameters();
         gameParams.gridSize = gridSize;
         Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
         game.reset(players);
@@ -65,7 +65,9 @@ public class OMATests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(-36572)));
-        Game game = GameType.LoveLetter.createGameInstance(players.size(), new LoveLetterParameters(68274));
+        LoveLetterParameters gameParams = new LoveLetterParameters();
+        gameParams.setRandomSeed(68274);
+        Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
         game.reset(players);
         return game;
     }
@@ -137,10 +139,10 @@ public class OMATests {
             if (n.getOMAParent().isPresent()) {
                 OMATreeNode OMAParent = n.getOMAParent().get();
                 Set<AbstractAction> parentActions = OMAParent.getChildren().keySet();
-                BoardNode expected = node.getActor() == 0 ? x : o;
+                Token expected = node.getActor() == 0 ? x : o;
                 return parentActions.stream().flatMap(a -> OMAParent.getOMAChildrenActions(a).stream())
                         .filter(Objects::nonNull)
-                        .allMatch(c -> ((SetGridValueAction) c).getValue().equals(expected));
+                        .allMatch(c -> ((SetGridValueAction<Token>) c).getValue().equals(expected));
             } else return true;
         });
         assertEquals(0, problemNodes.size());
