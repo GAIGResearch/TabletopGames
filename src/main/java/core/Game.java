@@ -384,7 +384,7 @@ public class Game {
                 // Create a FM copy for this player (different random seed)
                 player.setForwardModel(this.forwardModel.copy());
                 // Create initial state observation
-                AbstractGameState observation = gameState.copy(id);
+                AbstractGameState observation = gameState.copy(player.playerID);
                 // Allow player to initialize
 
                 player.initializePlayer(observation);
