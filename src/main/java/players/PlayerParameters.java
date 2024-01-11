@@ -69,6 +69,8 @@ public class PlayerParameters extends TunableParameters {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (o instanceof PlayerParameters that) {
+            if (gameHeuristic == null && that.gameHeuristic == null) return true;
+            if (gameHeuristic == null || that.gameHeuristic == null) return false;
             return gameHeuristic.equals(that.gameHeuristic);
         }
         return false;
