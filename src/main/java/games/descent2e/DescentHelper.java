@@ -337,6 +337,7 @@ public class DescentHelper {
                 double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
                 double totalCost = expandingNodeCost + costToMoveToNeighbour;
                 List<Vector2D> totalPath = new ArrayList<>(expandingNodePath);
+                if (totalPath.contains(loc)) continue;
                 totalPath.add(loc);
                 boolean isFriendly = false;
                 boolean isEmpty = DescentTypes.TerrainType.isWalkableTerrain(neighbour.getComponentName());
@@ -346,19 +347,20 @@ public class DescentHelper {
                     isEmpty = false;
                     Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
 
-                    // If our current figure is the same as our neighbour (in the case of large figures), we can move into the neighbour tile
-                    if (figure.equals(neighbourFigure)) {
-                        isEmpty = true;
-                    }
-                    // If our current figure is the same team as the neighbour (Hero or Monster), we can move through it
-                    else if (figureType.equals(neighbourFigure.getTokenType())) {
-                        isFriendly = true;
-                    }
-                    // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
-                    else if (figureType == "Monster")
-                    {
-                        if ((((Monster) figure).hasPassive(MonsterAbilities.MonsterPassive.SCAMPER)) && neighbourFigure.getTokenType().equals("Hero"))
+                    if (neighbourFigure != null) {
+                        // If our current figure is the same as our neighbour (in the case of large figures), we can move into the neighbour tile
+                        if (figure.equals(neighbourFigure)) {
+                            isEmpty = true;
+                        }
+                        // If our current figure is the same team as the neighbour (Hero or Monster), we can move through it
+                        else if (figureType.equals(neighbourFigure.getTokenType())) {
                             isFriendly = true;
+                        }
+                        // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
+                        else if (figureType == "Monster") {
+                            if ((((Monster) figure).hasPassive(MonsterAbilities.MonsterPassive.SCAMPER)) && neighbourFigure.getTokenType().equals("Hero"))
+                                isFriendly = true;
+                        }
                     }
                     // If, for whatever reason, our Heroes are allowed to ignore enemies entirely when moving
                     // We can move through all other figures as if they were friendly
