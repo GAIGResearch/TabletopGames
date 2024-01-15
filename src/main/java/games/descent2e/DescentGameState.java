@@ -65,7 +65,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
      */
     public DescentGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        nTeams = 2;
+        nTeams = 2; // Two teams in Descent - the Heroes, and the Overlord
         tiles = new HashMap<>();
         data = new DescentGameData();
         attackDicePool = new DicePool(Collections.emptyList());

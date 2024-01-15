@@ -20,25 +20,25 @@ import static games.descent2e.components.Figure.Attribute.Health;
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
     // The total HP of the Heroes   - Beneficial to the Heroes
-    double FACTOR_HERO_HP = 0.0;
+    double FACTOR_HERO_HP = 0.5;
     // The number of Heroes defeated - Beneficial to the Overlord
-    double FACTOR_HERO_DEFEATED = 0.0;
+    double FACTOR_HERO_DEFEATED = 0.7;
     // The total HP of the monsters - Beneficial to the Overlord
-    double FACTOR_MONSTERS_HP = 0.0;
+    double FACTOR_MONSTERS_HP = 0.5;
     // The number of monsters defeated - Beneficial to the Heroes
-    double FACTOR_MONSTERS_DEFEATED = 0.0;
+    double FACTOR_MONSTERS_DEFEATED = 0.7;
     // The Overlord's fatigue value - Beneficial to the Overlord
-    double FACTOR_OVERLORD_FATIGUE = 0.0;
+    double FACTOR_OVERLORD_FATIGUE = 0.7;
     // How close the Overlord is to increasing their fatigue - Beneficial to the Overlord
-    double FACTOR_OVERLORD_THREAT = 0.0;
+    double FACTOR_OVERLORD_THREAT = 0.5;
 
     public DescentHeuristic() {
-        addTunableParameter("FACTOR_HERO_HP", 0.0);
-        addTunableParameter("FACTOR_HERO_DEFEATED", 0.0);
-        addTunableParameter("FACTOR_MONSTERS_HP", 0.0);
-        addTunableParameter("FACTOR_MONSTERS_DEFEATED", 0.0);
-        addTunableParameter("FACTOR_OVERLORD_FATIGUE", 0.0);
-        addTunableParameter("FACTOR_OVERLORD_THREAT", 0.0);
+        addTunableParameter("FACTOR_HERO_HP", 0.5);
+        addTunableParameter("FACTOR_HERO_DEFEATED", 0.7);
+        addTunableParameter("FACTOR_MONSTERS_HP", 0.5);
+        addTunableParameter("FACTOR_MONSTERS_DEFEATED", 0.7);
+        addTunableParameter("FACTOR_OVERLORD_FATIGUE", 0.7);
+        addTunableParameter("FACTOR_OVERLORD_THREAT", 0.5);
     }
 
 
