@@ -188,8 +188,9 @@ public class Move extends AbstractAction {
         for (Vector2D neighbour : neighbours) {
             BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
             if (node != null) {
-                // Check if there are no figures on the space, and that it is walkable
-                if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && ((PropertyInt) node.getProperty("players")).value == -1) {
+                // Check if there are no other figures on the space, and that it is walkable
+                player = ((PropertyInt) node.getProperty("players")).value;
+                if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && (player == -1 || player == f.getComponentID())) {
                     possibilities.add(neighbour);
                 }
             }
@@ -208,7 +209,8 @@ public class Move extends AbstractAction {
                 BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
                 // Check if there are no figures on the space, and that it is walkable
                 if (node != null) {
-                    if (((PropertyInt) node.getProperty("players")).value == -1 && DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName())) {
+                    player = ((PropertyInt) node.getProperty("players")).value;
+                    if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && (player == -1 || player == f.getComponentID())) {
                         possibilities.add(neighbour);
                     }
                 }
