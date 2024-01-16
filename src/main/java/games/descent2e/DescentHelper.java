@@ -467,6 +467,12 @@ public class DescentHelper {
     public static boolean inRange(Vector2D origin, Vector2D target, int range) {
         return (Math.abs(origin.getX() - target.getX()) <= range) && (Math.abs(origin.getY() - target.getY()) <= range);
     }
+    public static Vector2D getRange(Vector2D origin, Vector2D target) {
+        return new Vector2D(Math.abs(origin.getX() - target.getX()), Math.abs(origin.getY() - target.getY()));
+    }
+    public static double getDistance(Vector2D origin, Vector2D target) {
+        return Math.sqrt(Math.pow(origin.getX() - target.getX(), 2) + Math.pow(origin.getY() - target.getY(), 2));
+    }
 
     public static DescentTypes.AttackType getAttackType(Figure f)
     {
