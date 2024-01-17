@@ -15,8 +15,8 @@ public class Wonders7GameParameters extends TunableParameters {
 
     // if either wonder or card distribution seeds are set to something other than -1,
     // then this seed is fixed. The game random seed will be used in all cases where these are -1 (the default)
-    protected int wonderDistributionSeed = -1;
-    protected int cardShuffleSeed = -1;
+    public int wonderDistributionSeed = -1;
+    public int cardShuffleSeed = -1;
 
     public Wonders7GameParameters() {
         addTunableParameter("nWonderCardsPerPlayer", 7);
