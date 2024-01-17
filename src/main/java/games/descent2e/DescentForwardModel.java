@@ -43,6 +43,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
         DescentParameters descentParameters = (DescentParameters) firstState.getGameParameters();
+        descentParameters.setTimeoutRounds(100);    // No game of Descent should feasibly last more than 20 rounds, this is being generous
         int nActionsPerFigure = descentParameters.nActionsPerFigure;
         dgs.data.load(descentParameters.getDataPath());
         dgs.initData = false;
@@ -772,6 +773,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
     private boolean checkEndOfGame(DescentGameState dgs) {
         // TODO end of campaign / other phases
+        if (dgs.getTurnOrder().getRoundCounter() > dgs.getGameParameters().getTimeoutRounds())
+        {
+            System.out.println("Timeout! The game ends in a draw.");
+            dgs.setGameStatus(GameResult.TIMEOUT);
+            return true;
+        }
+
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
