@@ -83,7 +83,7 @@ public abstract class AbstractGameState {
     /**
      * Resets variables initialised for this game state.
      */
-    void reset() {
+    protected void reset() {
         allComponents = new Area(-1, "All Components");
         gameStatus = GAME_ONGOING;
         playerResults = new CoreConstants.GameResult[getNPlayers()];
