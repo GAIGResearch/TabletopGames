@@ -47,7 +47,7 @@ public class Wonders7GameState extends AbstractGameState {
         // then this seed is fixed. The game random seed will be used in all cases where these are -1 (the default)
         Wonders7GameParameters params = (Wonders7GameParameters) gameParameters;
         cardRnd = params.cardShuffleSeed == -1 ? rnd : new Random(params.cardShuffleSeed);
-        wonderRnd = params.wonderDistributionSeed == -1 ? rnd : new Random(params.wonderDistributionSeed);
+        wonderRnd = params.wonderShuffleSeed == -1 ? rnd : new Random(params.wonderShuffleSeed);
     }
 
     @Override
@@ -99,6 +99,8 @@ public class Wonders7GameState extends AbstractGameState {
         copy.currentAge = currentAge;
         copy.direction = direction;
         copy.wonderBoardDeck = wonderBoardDeck.copy();
+        copy.wonderRnd = wonderRnd;
+        copy.cardRnd = cardRnd;
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Player does not know the other players hands and discard pile (except for next players hadn)

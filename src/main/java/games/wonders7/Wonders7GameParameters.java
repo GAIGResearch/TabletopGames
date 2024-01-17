@@ -5,8 +5,6 @@ import core.Game;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
-import java.util.Objects;
-
 public class Wonders7GameParameters extends TunableParameters {
     public int nWonderCardsPerPlayer = 7;
     public int nCostNeighbourResource = 2;
@@ -15,7 +13,7 @@ public class Wonders7GameParameters extends TunableParameters {
 
     // if either wonder or card distribution seeds are set to something other than -1,
     // then this seed is fixed. The game random seed will be used in all cases where these are -1 (the default)
-    public int wonderDistributionSeed = -1;
+    public int wonderShuffleSeed = -1;
     public int cardShuffleSeed = -1;
 
     public Wonders7GameParameters() {
@@ -23,7 +21,7 @@ public class Wonders7GameParameters extends TunableParameters {
         addTunableParameter("nCostNeighbourResource", 2);
         addTunableParameter("nCoinsDiscard", 3);
         addTunableParameter("startingCoins", 3);
-        addTunableParameter("wonderDistributionSeed", -1);
+        addTunableParameter("wonderShuffleSeed", -1);
         addTunableParameter("cardShuffleSeed", -1);
         _reset();
     }
@@ -34,7 +32,7 @@ public class Wonders7GameParameters extends TunableParameters {
         nCostNeighbourResource = (int) getParameterValue("nCostNeighbourResource");
         nCoinsDiscard = (int) getParameterValue("nCoinsDiscard");
         startingCoins = (int) getParameterValue("startingCoins");
-        wonderDistributionSeed = (int) getParameterValue("wonderDistributionSeed");
+        wonderShuffleSeed = (int) getParameterValue("wonderShuffleSeed");
         cardShuffleSeed = (int) getParameterValue("cardShuffleSeed");
     }
 
