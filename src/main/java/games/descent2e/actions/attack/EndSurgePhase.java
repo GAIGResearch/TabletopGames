@@ -2,6 +2,7 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.descent2e.DescentGameState;
 
 import java.util.Objects;
 
@@ -11,6 +12,7 @@ public class EndSurgePhase extends AbstractAction  {
     public boolean execute(AbstractGameState gs) {
         // use up surges.
         ((MeleeAttack) Objects.requireNonNull(gs.currentActionInProgress())).surgesToSpend = 0;
+        ((DescentGameState) gs).getActingFigure().addActionTaken(toString());
         return true;
     }
 

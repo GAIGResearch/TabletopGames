@@ -21,6 +21,7 @@ public class StopMove extends DescentAction{
     public boolean execute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(this.f);
         f.setAttributeToMin(Figure.Attribute.MovePoints);
+        f.addActionTaken(toString());
         return true;
     }
 

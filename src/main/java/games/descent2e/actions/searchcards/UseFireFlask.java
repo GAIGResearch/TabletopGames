@@ -33,6 +33,7 @@ public class UseFireFlask extends DescentAction {
     public boolean execute(DescentGameState gs) {
         gs.setAttackDicePool(DicePool.constructDicePool("BlUE", "YELLOW"));
         RangedAttack attack = new RangedAttack(gs.getActingFigure().getComponentID(), enemyID);
+        gs.getActingFigure().addActionTaken(toString());
         attack.execute(gs);
         //TODO Blast Surge
         return true;

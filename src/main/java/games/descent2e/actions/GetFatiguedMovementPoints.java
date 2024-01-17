@@ -14,11 +14,14 @@ public class GetFatiguedMovementPoints extends DescentAction {
     public String getString(AbstractGameState gameState) {
         return "Spent 1 Stamina For 1 Movement Point";
     }
+    @Override
+    public String toString() { return "Fatigue Movement Point"; }
 
     @Override
     public boolean execute(DescentGameState gs) {
         gs.getActingFigure().getAttribute(Figure.Attribute.MovePoints).increment();
         gs.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
+        gs.getActingFigure().addActionTaken(toString());
         return true;
     }
 

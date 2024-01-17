@@ -29,6 +29,7 @@ public class RemoveFromMap extends DescentAction {
         // As Hero Tokens cannot interact with other figures
         f.setAttributeToMin(Figure.Attribute.MovePoints);
         f.getNActionsExecuted().setToMax();
+        f.addActionTaken(toString());
         return true;
     }
 

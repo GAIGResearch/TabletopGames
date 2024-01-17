@@ -45,6 +45,7 @@ public class StunAllInMonsterGroup extends DescentAction {
         }
         if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         f.getNActionsExecuted().increment();
+        f.addActionTaken(toString());
         return true;
     }
 

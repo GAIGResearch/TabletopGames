@@ -26,7 +26,7 @@ public class Revive extends DescentAction{
 
     @Override
     public String toString() {
-        return "Revive";
+        return "Revive " + heroID;
     }
 
     @Override
@@ -37,6 +37,7 @@ public class Revive extends DescentAction{
         DicePool.revive.roll(gs.getRandom());
         hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
         gs.getActingFigure().getNActionsExecuted().increment();
+        gs.getActingFigure().addActionTaken(toString());
         return true;
     }
 

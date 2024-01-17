@@ -117,6 +117,8 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
             heroEquipment.remove(card);
 
             hero.getNActionsExecuted().increment();
+
+            hero.addActionTaken(toString());
         }
         else {
             gs.setActionInProgress(this);

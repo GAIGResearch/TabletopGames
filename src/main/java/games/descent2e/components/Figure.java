@@ -78,6 +78,8 @@ public class Figure extends Token {
 
     Deck<DescentCard> exhausted = new Deck<>("Exhausted", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);;
 
+    List<String> actionsTaken = new ArrayList<>();
+
     public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
@@ -103,6 +105,7 @@ public class Figure extends Token {
         this.nActionsExecuted.setToMin();
         // We unexhaust any exhausted cards at the start of the turn, refreshing them to use this turn
         refreshAllCards();
+        clearActionsTaken();
     }
 
     public Counter getAttribute(Attribute attribute) {
@@ -310,6 +313,9 @@ public class Figure extends Token {
     {
         return exhausted.contains(card);
     }
+    public void addActionTaken(String action) { actionsTaken.add(action);}
+    public List<String> getActionsTaken() { return actionsTaken;}
+    public void clearActionsTaken() { actionsTaken.clear();}
 
     @Override
     public Figure copy() {
@@ -363,6 +369,7 @@ public class Figure extends Token {
             copyTo.currentAttack = currentAttack.copy();
         }
         copyTo.exhausted = exhausted.copy();
+        copyTo.actionsTaken = new ArrayList<>(actionsTaken);
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
@@ -416,7 +423,8 @@ public class Figure extends Token {
                 Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(componentName, figure.componentName) &&
                 Objects.equals(hasMoved, figure.hasMoved) && Objects.equals(hasRerolled, figure.hasRerolled) && Objects.equals(hasAttacked, figure.hasAttacked) &&
                 Objects.equals(isOffMap, figure.isOffMap) && Objects.equals(canIgnoreEnemies, figure.canIgnoreEnemies) &&
-                Objects.equals(extraAction, figure.extraAction) && Objects.equals(exhausted, figure.exhausted);
+                Objects.equals(extraAction, figure.extraAction) && Objects.equals(exhausted, figure.exhausted) &&
+                Objects.equals(actionsTaken, figure.actionsTaken);
     }
 
     @Override
@@ -424,6 +432,6 @@ public class Figure extends Token {
         return Objects.hash(super.hashCode(), tokenType, attackDice, defenceDice, attributes,
                 nActionsExecuted, position, size, conditions, removedConditionThisTurn,
                 attributeTests, abilities, currentAttack, componentName,
-                hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted);
+                hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted, actionsTaken);
     }
 }

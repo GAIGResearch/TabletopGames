@@ -39,6 +39,7 @@ public class SwapOrder extends DescentAction {
 
             ((HeroicFeatExtraMovement) action).swap(swap);
         }
+        ((Figure) dgs.getComponentById(first)).addActionTaken(toString());
         return true;
     }
 

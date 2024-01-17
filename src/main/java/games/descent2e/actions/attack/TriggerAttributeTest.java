@@ -8,6 +8,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.RerollAttributeTest;
+import games.descent2e.components.Figure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,8 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         interruptPlayer = attackingPlayer;
 
         movePhaseForward(state);
+
+        ((Figure) state.getComponentById(attackingFigure)).addActionTaken(toString());
 
         return true;
     }

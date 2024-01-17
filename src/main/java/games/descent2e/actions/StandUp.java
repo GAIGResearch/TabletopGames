@@ -32,6 +32,7 @@ public class StandUp extends DescentAction{
         DicePool.revive.roll(gs.getRandom());
         hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
         hero.getNActionsExecuted().setToMax();   // Only thing they can do this turn
+        hero.addActionTaken(toString());
         return true;
     }
 

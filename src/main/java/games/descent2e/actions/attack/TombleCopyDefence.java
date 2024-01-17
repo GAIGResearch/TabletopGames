@@ -31,6 +31,7 @@ public class TombleCopyDefence extends DescentAction {
     public boolean execute(DescentGameState dgs) {
         DicePool newDice = HeroAbilities.tomble(dgs, tomble, ally);
         dgs.setDefenceDicePool(newDice);
+        ((Figure) dgs.getComponentById(tomble)).addActionTaken(toString());
         return true;
     }
 

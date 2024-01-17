@@ -14,12 +14,15 @@ public class Rest extends DescentAction{
     public String getString(AbstractGameState gameState) {
         return "Rest";
     }
+    @Override
+    public String toString() { return "Rest"; }
 
     @Override
     public boolean execute(DescentGameState gs) {
         Hero hero = (Hero)gs.getActingFigure();
         hero.setRested(true);
         hero.getNActionsExecuted().increment();
+        hero.addActionTaken(toString());
         return true;
     }
 

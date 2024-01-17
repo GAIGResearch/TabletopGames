@@ -25,6 +25,7 @@ public class ReturnToMapMove extends DescentAction {
         f.setAttribute(Figure.Attribute.MovePoints, distance);
         f.setCanIgnoreEnemies(true);
         //System.out.println("Tomble is choosing where to reappear!");
+        f.addActionTaken(toString());
         return true;
     }
 

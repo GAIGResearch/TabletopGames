@@ -12,13 +12,16 @@ public class GetMovementPoints extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Get Movement Points";
+        return toString();
     }
+    @Override
+    public String toString() { return "Get Movement Points"; }
 
     @Override
     public boolean execute(DescentGameState gs) {
         gs.getActingFigure().setAttributeToMax(Figure.Attribute.MovePoints);
         gs.getActingFigure().getNActionsExecuted().increment();
+        gs.getActingFigure().addActionTaken(toString());
         return true;
     }
 

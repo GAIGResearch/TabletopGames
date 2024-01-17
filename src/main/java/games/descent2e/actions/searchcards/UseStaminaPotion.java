@@ -44,6 +44,7 @@ public class UseStaminaPotion extends DescentAction implements IExtendedSequence
         // Heal hero
         Hero hero = (Hero) gs.getComponentById(toRestoreID);
         hero.setAttributeToMin(Figure.Attribute.Fatigue);
+        hero.addActionTaken(toString());
         return true;
     }
 

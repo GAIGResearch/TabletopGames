@@ -23,6 +23,7 @@ public class ReturnToMapPlace extends DescentAction {
         if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         f.setCanIgnoreEnemies(false);
         //System.out.println("Tomble reappeared on the map!");
+        f.addActionTaken(toString());
         return true;
     }
 

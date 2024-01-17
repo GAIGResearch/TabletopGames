@@ -41,6 +41,7 @@ public class SurgeAttackAction extends DescentAction {
         MeleeAttack attack = (MeleeAttack) gs.currentActionInProgress();
         attack.registerSurge(surge);
         surge.apply(attack, gs);
+        ((Figure) gs.getComponentById(figureSource)).addActionTaken(toString());
         return true;
     }
 

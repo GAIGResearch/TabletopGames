@@ -133,6 +133,8 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
 
         movePhaseForward(dgs);
 
+        hero.addActionTaken(toString());
+
         return true;
     }
 

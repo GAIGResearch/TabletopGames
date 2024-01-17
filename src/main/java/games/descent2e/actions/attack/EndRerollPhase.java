@@ -9,6 +9,7 @@ public class EndRerollPhase extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         ((DescentGameState) gs).getActingFigure().setRerolled(true);
+        ((DescentGameState) gs).getActingFigure().addActionTaken(toString());
         return true;
     }
 

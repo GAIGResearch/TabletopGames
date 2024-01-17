@@ -93,6 +93,8 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         // 4) Unlike attacks, tests can only be interrupted after the roll
         // 5) Lastly, we allow the results to be made public
 
+        tester.addActionTaken(toString());
+
         return true;
     }
 

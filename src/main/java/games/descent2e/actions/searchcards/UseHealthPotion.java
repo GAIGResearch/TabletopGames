@@ -44,6 +44,7 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
         // Heal hero
         Hero hero = (Hero) gs.getComponentById(toHealID);
         hero.setAttributeToMax(Figure.Attribute.Health);
+        hero.addActionTaken(toString());
         return true;
     }
 

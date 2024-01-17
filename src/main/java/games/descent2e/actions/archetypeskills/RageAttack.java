@@ -47,6 +47,9 @@ public class RageAttack extends MeleeAttack {
         // 5) with possible rerolls
         // 6) then do the damage
         // 7) target can use items/abilities to modify damage
+
+        attacker.addActionTaken(toString());
+
         return true;
     }
 

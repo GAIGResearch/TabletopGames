@@ -44,6 +44,7 @@ public class Howl extends TriggerAttributeTest {
         Figure monster = (Figure) state.getComponentById(attackingFigure);
         monster.getNActionsExecuted().increment();
         monster.setHasAttacked(true);
+        monster.addActionTaken(toString());
 
         return true;
     }

@@ -40,6 +40,9 @@ public class HealAllInRange extends DescentAction {
             }
             f.getNActionsExecuted().increment();
         }
+
+        f.addActionTaken(toString());
+
         return true;
     }
 

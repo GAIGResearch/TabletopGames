@@ -97,6 +97,8 @@ public class Heal extends DescentAction {
             f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         }
 
+        f.addActionTaken(toString());
+
         return true;
     }
 

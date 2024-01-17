@@ -39,6 +39,7 @@ public class Shield extends DescentAction {
         //System.out.println("Exhausting shield!");
         f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         ((MeleeAttack) Objects.requireNonNull(dgs.currentActionInProgress())).addDefence(value);
+        f.addActionTaken(toString());
         return true;
     }
 

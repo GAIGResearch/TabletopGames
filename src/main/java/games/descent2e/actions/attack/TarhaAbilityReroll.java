@@ -27,6 +27,7 @@ public class TarhaAbilityReroll extends DescentAction {
         if (rerollFace != -1) {
             dgs.getAttackDicePool().getDice(dice).setFace(rerollFace);
         }
+        dgs.getActingFigure().addActionTaken(toString());
         return true;
     }
 

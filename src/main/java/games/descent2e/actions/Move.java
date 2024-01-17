@@ -63,6 +63,8 @@ public class Move extends AbstractAction {
 
         f.setHasMoved(true);
 
+        f.addActionTaken(toString());
+
         return true;
     }
 
