@@ -35,7 +35,7 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
      * Resets variables initialised for this game state.
      */
     @Override
-    void reset() {
+    protected void reset() {
         super.reset();
         turnOrder.reset();
     }
