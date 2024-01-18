@@ -16,7 +16,6 @@ import java.util.Random;
  */
 public class BasicMCTSPlayer extends AbstractPlayer {
 
-    Random rnd;
     public BasicMCTSPlayer() {
         this(System.currentTimeMillis());
     }

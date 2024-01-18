@@ -12,8 +12,6 @@ public class RandomPlayer extends AbstractPlayer {
     /**
      * Random generator for this agent.
      */
-    private final Random rnd;
-
     public RandomPlayer(Random rnd) {
         this.rnd = rnd;
     }

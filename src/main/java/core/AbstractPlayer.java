@@ -81,6 +81,8 @@ public abstract class AbstractPlayer {
                 action = observedActions.get(0);
                 break;
             default:
+                // we then use our Random for any random choices
+                gameState.rnd = this.rnd;
                 action = _getAction(gameState, observedActions);
         }
         for (AbstractPlayerDecorator decorator : decorators) {

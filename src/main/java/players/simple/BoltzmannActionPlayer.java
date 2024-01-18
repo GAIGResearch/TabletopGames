@@ -25,7 +25,6 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     final public double temperature;
     final public double epsilon;
-    final Random rnd;
 
     protected IActionHeuristic actionHeuristic;
 

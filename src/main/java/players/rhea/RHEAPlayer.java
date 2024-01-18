@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 public class RHEAPlayer extends AbstractPlayer {
     private static final AbstractPlayer randomPlayer = new RandomPlayer();
-    private final Random randomGenerator;
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     protected List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
@@ -27,7 +26,7 @@ public class RHEAPlayer extends AbstractPlayer {
     private MASTPlayer mastPlayer;
 
     public RHEAPlayer(RHEAParams params) {
-        randomGenerator = new Random(params.getRandomSeed());
+        rnd = new Random(params.getRandomSeed());
         parameters = params;
         setName("rhea");
     }
@@ -85,7 +84,7 @@ public class RHEAPlayer extends AbstractPlayer {
             for (int i = 0; i < params.populationSize; ++i) {
                 if (!budgetLeft(timer)) break;
                 population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs,
-                        getPlayerID(), randomGenerator, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
+                        getPlayerID(), rnd, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
                 fmCalls += population.get(i).length;
                 copyCalls += population.get(i).length;
             }
@@ -128,7 +127,7 @@ public class RHEAPlayer extends AbstractPlayer {
     @Override
     public RHEAPlayer copy() {
         RHEAParams newParams = (RHEAParams) parameters.copy();
-        newParams.setRandomSeed(randomGenerator.nextInt());
+        newParams.setRandomSeed(rnd.nextInt());
         RHEAPlayer retValue = new RHEAPlayer(newParams);
         retValue.setForwardModel(getForwardModel().copy());
         return retValue;
@@ -154,7 +153,7 @@ public class RHEAPlayer extends AbstractPlayer {
         copyCalls += child.length;
         int min = Math.min(p1.length, p2.length);
         for (int i = 0; i < min; ++i) {
-            if (randomGenerator.nextFloat() >= 0.5f) {
+            if (rnd.nextFloat() >= 0.5f) {
                 child.actions[i] = p2.actions[i];
                 child.gameStates[i] = p2.gameStates[i]; //.copy();
             }
@@ -209,7 +208,7 @@ public class RHEAPlayer extends AbstractPlayer {
     RHEAIndividual tournamentSelection() {
         RHEAIndividual best = null;
         for (int i = 0; i < getParameters().tournamentSize; ++i) {
-            int rand = randomGenerator.nextInt(population.size());
+            int rand = rnd.nextInt(population.size());
 
             RHEAIndividual current = population.get(rand);
             if (best == null || current.value > best.value)
@@ -223,7 +222,7 @@ public class RHEAPlayer extends AbstractPlayer {
         int rankSum = 0;
         for (int i = 0; i < population.size(); ++i)
             rankSum += i + 1;
-        int ran = randomGenerator.nextInt(rankSum);
+        int ran = rnd.nextInt(rankSum);
         int p = 0;
         for (int i = 0; i < population.size(); ++i) {
             p += population.size() - (i);
