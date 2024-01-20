@@ -160,4 +160,8 @@ public abstract class AbstractPlayer {
     public PlayerParameters getParameters() {
         return parameters;
     }
+
+    public Random getRnd() {
+        return rnd;
+    }
 }
