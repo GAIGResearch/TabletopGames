@@ -73,24 +73,25 @@ public class DominionForwardModel extends StandardForwardModel {
         DominionGameState state = (DominionGameState) currentState;
 
         int playerID = state.getCurrentPlayer();
+        if (state.gameOver()) {
+            endGame(state);
+        } else {
 
-        switch (state.getGamePhase().toString()) {
-            case "Play":
-                if ((state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) && !state.isActionInProgress()) {
-                    // change phase
-                    // no change to current player
-                    state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
-                    processDelayedActions(TriggerType.StartBuy, state);
-                    // it would be possible to do this within setGamePhase, but we choose to keep this triggering code
-                    // in the forward model for the moment.
-                }
-                break;
-            case "Buy":
-                if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
-                    // change phase
-                    if (state.gameOver()) {
-                        endGame(state);
-                    } else {
+            switch (state.getGamePhase().toString()) {
+                case "Play":
+                    if ((state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) && !state.isActionInProgress()) {
+                        // change phase
+                        // no change to current player
+                        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+                        processDelayedActions(TriggerType.StartBuy, state);
+                        // it would be possible to do this within setGamePhase, but we choose to keep this triggering code
+                        // in the forward model for the moment.
+                    }
+                    break;
+                case "Buy":
+                    if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
+                        // change phase
+
 
                         // 1) put hand and cards played into discard
                         // 2) draw 5 new cards
@@ -119,14 +120,12 @@ public class DominionForwardModel extends StandardForwardModel {
                         if (state.getCurrentPlayer() == currentState.getFirstPlayer())
                             endRound(state, state.getFirstPlayer());
                     }
-                }
-                break;
-            default:
-                throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
+                    break;
+                default:
+                    throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
+            }
         }
-
     }
-
 
 
     private void processDelayedActions(TriggerType trigger, DominionGameState state) {
@@ -154,7 +153,7 @@ public class DominionForwardModel extends StandardForwardModel {
                     List<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
                             .filter(DominionCard::isActionCard).collect(toList());
                     List<AbstractAction> availableActions = actionCards.stream()
-       //                     .sorted(Comparator.comparingInt(c -> c.cardType().cost))
+                            //                     .sorted(Comparator.comparingInt(c -> c.cardType().cost))
                             .map(dc -> dc.getAction(playerID))
                             .distinct()
                             .collect(toList());
