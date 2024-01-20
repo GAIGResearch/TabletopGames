@@ -91,8 +91,6 @@ public class DominionForwardModel extends StandardForwardModel {
                 case "Buy":
                     if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                         // change phase
-
-
                         // 1) put hand and cards played into discard
                         // 2) draw 5 new cards
                         // 3) shuffle and move discard if we run out
