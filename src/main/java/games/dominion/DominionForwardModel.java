@@ -8,7 +8,6 @@ import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 
@@ -33,7 +32,11 @@ public class DominionForwardModel extends StandardForwardModel {
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
-            state.playerDrawPiles[i].shuffle(state.getRnd());
+            // if we have a separate seed for the initial shuffle, then use this
+            if (params.initialShuffleSeed != -1)
+                state.playerDrawPiles[i].shuffle(new Random(params.initialShuffleSeed));
+            else
+                state.playerDrawPiles[i].shuffle(state.getRnd());
             for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
         }
         state.actionsLeftForCurrentPlayer = 1;
