@@ -1,4 +1,4 @@
-package games.dominion.stats;
+package games.dominion.metrics;
 
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
@@ -69,5 +69,32 @@ public class DominionMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return Collections.singletonMap("EmptySupplySlots", Integer.class);
         }
+    }
+
+    public static class ActionFeatures extends AbstractMetric {
+
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("Money", Integer.class);
+            columns.put("Actions", Integer.class);
+            columns.put("Buys", Integer.class);
+            return columns;
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DominionGameState state = (DominionGameState)e.state;
+            records.put("Money", state.availableSpend(e.playerID));
+            records.put("Actions", state.actionsLeft());
+            records.put("Buys", state.buysLeft());
+            return true;
+        }
+
+
     }
 }

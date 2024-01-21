@@ -53,7 +53,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         playerCount = nPlayers;
-        defenceStatus = new boolean[nPlayers];  // defaults to false
         params = (DominionParameters) gameParameters;
         this._reset();
     }

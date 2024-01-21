@@ -42,6 +42,9 @@ public class DominionForwardModel extends StandardForwardModel {
         state.actionsLeftForCurrentPlayer = 1;
         state.buysLeftForCurrentPlayer = 1;
         state.spentSoFar = 0;
+        state.additionalSpendAvailable = 0;
+        state.delayedActions = new ArrayList<>();
+        state.defenceStatus = new boolean[state.playerCount];  // defaults to false
 
         int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.playerCount];
         state.cardsIncludedInGame = new HashMap<>(16);
