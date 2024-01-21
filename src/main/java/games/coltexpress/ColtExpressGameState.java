@@ -196,7 +196,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
             for (int i = 0; i < rounds.getSize(); i++) {
                 if (!rounds.isComponentVisible(i, playerId)) {
                     if (i == rounds.getSize() - 1) { // last card, so use an End Round Card
-                        copy.rounds.setComponent(i, getRandomEndRoundCard((ColtExpressParameters) getGameParameters()));
+                        copy.rounds.setComponent(i, getRandomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
                     } else {
                         copy.rounds.setComponent(i, getRandomRoundCard((ColtExpressParameters) getGameParameters(), i, exclusionList));
                         exclusionList.add(copy.rounds.get(i));
@@ -435,9 +435,9 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
      * Helper getter methods for round card composition.
      */
 
-    RoundCard getRandomEndRoundCard(ColtExpressParameters cep) {
+    RoundCard getRandomEndRoundCard(ColtExpressParameters cep, Random overrideRnd) {
         int nEndCards = cep.endRoundCards.length;
-        int choice = rnd.nextInt(nEndCards);
+        int choice = overrideRnd == null ? rnd.nextInt(nEndCards) : overrideRnd.nextInt(nEndCards);
         return getEndRoundCard(cep, choice);
     }
 
