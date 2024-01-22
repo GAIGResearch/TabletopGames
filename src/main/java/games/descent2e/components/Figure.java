@@ -105,7 +105,7 @@ public class Figure extends Token {
         this.nActionsExecuted.setToMin();
         // We unexhaust any exhausted cards at the start of the turn, refreshing them to use this turn
         refreshAllCards();
-        clearActionsTaken();
+        //clearActionsTaken();
     }
 
     public Counter getAttribute(Attribute attribute) {

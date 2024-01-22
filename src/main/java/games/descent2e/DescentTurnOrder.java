@@ -6,6 +6,7 @@ import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
+import games.descent2e.actions.Move;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
@@ -17,6 +18,7 @@ import static core.CoreConstants.GameResult.GAME_END;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static core.CoreConstants.playersHash;
 import static core.CoreConstants.sizeHash;
+import static games.descent2e.DescentHelper.collision;
 
 // Order is all heroes (controlled by their owner ID player), then all monsters by monster group (controlled by overlord)
 public class DescentTurnOrder extends ReactiveTurnOrder {
@@ -112,6 +114,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             }
             endRound(gameState);
             System.out.println("Round " + roundCounter);
+            //collision(dgs);
         }
         else {
 
@@ -334,6 +337,9 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                                 canPlace = false;
                             }
                         }
+                    }
+                    if (Move.checkCollision(dgs, monster, option)) {
+                        canPlace = false;
                     }
                     if (canPlace) {
                         monster.setPosition(option.copy());

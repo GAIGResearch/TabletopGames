@@ -539,4 +539,38 @@ public class DescentHelper {
         }
         return actions;
     }
+
+    public static boolean collision(DescentGameState dgs)
+    {
+        // Flags up a collision warning if two opposing figures are on the same tile
+        // There were occasional instances of where Heroes would move onto Monsters' tiles
+        // This is for debugging purposes only
+        boolean collision = false;
+        List<Pair<Pair<Hero, Monster>, Vector2D>> collisions = new ArrayList<>();
+        for (Hero h : dgs.heroes)
+        {
+            if (h.isOffMap()) continue;
+            for (List<Monster> monsterGroup : dgs.monsters)
+            {
+                for (Monster m : monsterGroup)
+                {
+                    if (h.getPosition().equals(m.getPosition()))
+                    {
+                        collision = true;
+                        collisions.add(new Pair<>(new Pair<>(h, m), h.getPosition()));
+                    }
+                }
+            }
+        }
+
+        // If there are collisions, announce every instance of them
+        if(collision)
+        {
+            for (Pair<Pair<Hero, Monster>, Vector2D> c : collisions)
+            {
+                System.out.println("Collision between " + c.a.a.getComponentName() + " and " + c.a.b.getComponentName() + " at " + c.b);
+            }
+        }
+        return collision;
+    }
 }

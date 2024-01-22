@@ -9,7 +9,9 @@ import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
+import javassist.runtime.Desc;
 import org.jetbrains.annotations.NotNull;
 import utilities.Pair;
 import utilities.Utils;
@@ -51,6 +53,10 @@ public class Move extends AbstractAction {
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = (Figure) dgs.getComponentById(this.f);
         startPosition = f.getPosition();
+        // Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
+        // BoardNode node = dgs.getMasterBoard().getElement(finalPosition);
+        // System.out.println("Test 1/2: " + startPosition + " to " + finalPosition + ": " + node.getProperty("players"));
+
         // Remove from old position
         remove(dgs, f);
 
@@ -65,17 +71,67 @@ public class Move extends AbstractAction {
 
         f.addActionTaken(toString());
 
+        //System.out.println("Test 2/2: " + startPosition + " to " + finalPosition + ": " + node.getProperty("players"));
         return true;
     }
 
     public boolean canExecute (AbstractGameState gs)
     {
-        Figure f = (Figure) gs.getComponentById(this.f);
+        DescentGameState dgs = (DescentGameState) gs;
+        Figure f = (Figure) dgs.getComponentById(this.f);
         // We should not finish on the same space that we started on
         Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
-        if (finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY()) return true;
+        BoardNode node = dgs.getMasterBoard().getElement(finalPosition.getX(), finalPosition.getY());
+
+        // We can only end our movement on a space that is not occupied by another figure
+        int player = ((PropertyInt) node.getProperty("players")).value;
+        if (player != -1 && player != f.getComponentID()) return false;
+        if (checkCollision(dgs, f, finalPosition)) return false;
+        return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
         // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
-        return false;
+    }
+
+    public static boolean checkCollision(DescentGameState dgs, Figure f, Vector2D endPos)
+    {
+        // Check if there is a collision with another figure
+        // We cannot end our movement on a space that is already occupied by another figure
+        boolean collision = false;
+
+        if (f.isOffMap()) return false;
+
+        for (Hero h : dgs.getHeroes())
+        {
+            if (endPos.equals(h.getPosition())) {
+                if (f.getComponentID() != h.getComponentID()) {
+                    collision = true;
+                    break;
+                }
+            }
+        }
+
+        for (List<Monster> monster : dgs.getMonsters())
+        {
+            if(collision) break;
+            for (Monster m : monster)
+            {
+                Vector2D topLeftAnchor = m.applyAnchorModifier();
+                Pair<Integer, Integer> size = m.getSize().copy();
+                if (m.getOrientation().ordinal() % 2 == 1) size.swap();
+                for (int i = 0; i < size.b; i++) {
+                    for (int j = 0; j < size.a; j++) {
+                        Vector2D newPos = new Vector2D(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
+                        if (endPos.equals(newPos)) {
+                            if (f.getComponentID() != m.getComponentID()) {
+                                collision = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return collision;
     }
 
     /**
