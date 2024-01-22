@@ -9,14 +9,14 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import static games.descent2e.DescentHelper.*;
+import static games.descent2e.components.Figure.Attribute.*;
+
 import utilities.Utils;
 import utilities.Vector2D;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import static games.descent2e.components.Figure.Attribute.Fatigue;
-import static games.descent2e.components.Figure.Attribute.Health;
 
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -65,7 +65,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         // Likewise, some will be beneficial to the heroes and detrimental to the overlord
         // We need to flip the sign of the heuristic if the player is the overlord where relevant
         Figure overlord = dgs.getOverlord();
-        double isOverlord = playerId == overlord.getOwnerId() ? -1.0 : 1.0;
+        double isOverlord = playerId == dgs.overlordPlayer ? -1.0 : 1.0;
 
         double retValue = 0.0;
 
@@ -91,7 +91,13 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
 
         heuristics.add(FACTOR_HEROES_THREAT * isOverlord * (getHeroesThreat(dgs, questName) / dgs.heroes.size()));
 
-        retValue = heuristics.stream().mapToDouble(Double::doubleValue).sum();
+        // Rounds the Heuristics to 6 decimal places
+        heuristics.replaceAll(aDouble -> (double) Math.round(aDouble * 1000000d) / 1000000d);
+
+        for(double h : heuristics)
+        {
+            retValue += h;
+        }
 
         return Utils.clamp(retValue, -1.0, 1.0);
     }
@@ -110,7 +116,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         return dgs.monsters.get(index).stream().mapToDouble(m -> m.getAttributeValue(Health)).sum();
     }
     private double getMonstersMaxHP(DescentGameState dgs, int index) {
-        return dgs.monsters.get(index).stream().mapToDouble(m -> m.getAttributeMax(Health)).sum();
+        return dgs.monstersOriginal.get(index).stream().mapToDouble(m -> m.getAttributeMax(Health)).sum();
     }
     private double getMonstersDefeated(DescentGameState dgs, int index) {
         // Subtract the number of monsters in the original list from the number in the current list
@@ -126,16 +132,32 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 String scoreZone = "9A";
                 List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(scoreZone).keySet());
 
-                List<Vector2D> neighbourCoords = new ArrayList<>(dgs.gridReferences.get("21A").keySet());
-                neighbourCoords.addAll(dgs.gridReferences.get("entrance1A").keySet());
-                neighbourCoords.addAll(dgs.gridReferences.get("8A").keySet());
+                retVal = -1.0 * getMonstersDefeated(dgs, 0) / dgs.monstersOriginal.get(0).size();
 
                 for (Monster m : dgs.monsters.get(0)) {
-                    if (tileCoords.contains(m.getPosition())) {
-                        retVal += 1.0;
+                    int closest = 0;
+                    double distance = 10000.0;
+                    Vector2D position = m.getPosition();
+                    if (tileCoords.contains(position)) distance = 0.0;
+                    for (int i = 0; i < tileCoords.size(); i++) {
+                        if (distance <= 1.0) break;
+                        double dist = getDistance(position, tileCoords.get(i));
+                        if (dist < distance) {
+                            distance = dist;
+                            closest = i;
+                        }
                     }
-                    else if (neighbourCoords.contains(m.getPosition())) {
-                        retVal += 0.1;
+                    if (distance > 0.0) {
+                        Vector2D range = getRange(position, tileCoords.get(closest));
+                        int potential = Math.max(0, Math.max(range.getX(), range.getY()) - m.getAttribute(MovePoints).getValue());
+                        double d = 1.0 - (potential / 10.0);
+                        retVal += ((double) Math.round(d * 1000000d) / 1000000d);
+                        if (!hasLineOfSight(dgs, position, tileCoords.get(closest))) {
+                            retVal -= 0.01;
+                        }
+                    }
+                    else {
+                        retVal += 1.0;
                     }
                 }
                 break;
@@ -158,6 +180,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     double distance = 10000.0;
                     Vector2D position = h.getPosition();
                     for (int i = 0; i < barghests.size(); i++) {
+                        if (distance <= 1.0) break;
                         Monster m = barghests.get(i);
                         double dist = getDistance(position, m.getPosition());
                         if (dist < distance) {
@@ -167,7 +190,10 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     }
                     Vector2D range = getRange(position, barghests.get(closest).getPosition());
                     double d = 1.0 - (Math.max(range.getX(), range.getY()) / 10.0);
-                    retVal += d;
+                    retVal += ((double) Math.round(d * 1000000d) / 1000000d);
+                    if (!hasLineOfSight(dgs, position, barghests.get(closest).getPosition())) {
+                        retVal -= 0.01;
+                    }
                 }
                 break;
             default:
