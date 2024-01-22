@@ -21,19 +21,19 @@ import java.util.List;
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
     // The total HP of the Heroes   - Beneficial to the Heroes
-    double FACTOR_HERO_HP = 0.5;
+    double FACTOR_HERO_HP = 0.3;
     // The number of Heroes defeated - Beneficial to the Overlord
-    double FACTOR_HERO_DEFEATED = 0.7;
+    double FACTOR_HERO_DEFEATED = 0.5;
     // The total HP of the monsters - Beneficial to the Overlord
-    double FACTOR_MONSTERS_HP = 0.5;
+    double FACTOR_MONSTERS_HP = 0.3;
     // The number of monsters defeated - Beneficial to the Heroes
-    double FACTOR_MONSTERS_DEFEATED = 0.7;
+    double FACTOR_MONSTERS_DEFEATED = 0.5;
     // The Overlord's fatigue value - Beneficial to the Overlord
-    double FACTOR_OVERLORD_FATIGUE = 0.7;
+    double FACTOR_OVERLORD_FATIGUE = 0.5;
     // How close the Overlord is to increasing their fatigue - Beneficial to the Overlord
-    double FACTOR_OVERLORD_THREAT = 0.5;
+    double FACTOR_OVERLORD_THREAT = 0.3;
     // How close the Heroes are to winning - Beneficial to the Heroes
-    double FACTOR_HEROES_THREAT = 0.1;
+    double FACTOR_HEROES_THREAT = 0.3;
 
     public DescentHeuristic() {
         addTunableParameter("FACTOR_HERO_HP", 0.5);
@@ -42,7 +42,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         addTunableParameter("FACTOR_MONSTERS_DEFEATED", 0.7);
         addTunableParameter("FACTOR_OVERLORD_FATIGUE", 0.7);
         addTunableParameter("FACTOR_OVERLORD_THREAT", 0.5);
-        addTunableParameter("FACTOR_HEROES_THREAT", 0.1);
+        addTunableParameter("FACTOR_HEROES_THREAT", 0.5);
     }
 
 
@@ -148,12 +148,12 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                         }
                     }
                     if (distance > 0.0) {
-                        Vector2D range = getRange(position, tileCoords.get(closest));
-                        int potential = Math.max(0, Math.max(range.getX(), range.getY()) - m.getAttribute(MovePoints).getValue());
+                        int range = bfsLee(dgs, position, tileCoords.get(closest));
+                        int potential = Math.max(0, range - m.getAttribute(MovePoints).getValue());
                         double d = 1.0 - (potential / 10.0);
                         retVal += ((double) Math.round(d * 1000000d) / 1000000d);
-                        if (!hasLineOfSight(dgs, position, tileCoords.get(closest))) {
-                            retVal -= 0.01;
+                        if (hasLineOfSight(dgs, position, tileCoords.get(closest))) {
+                            retVal += 0.01;
                         }
                     }
                     else {
@@ -188,11 +188,12 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                             closest = i;
                         }
                     }
-                    Vector2D range = getRange(position, barghests.get(closest).getPosition());
-                    double d = 1.0 - (Math.max(range.getX(), range.getY()) / 10.0);
+                    int range = bfsLee(dgs, position, barghests.get(closest).getPosition());
+                    int potential = Math.max(0, range - h.getAttribute(MovePoints).getValue());
+                    double d = 1.0 - (potential / 10.0);
                     retVal += ((double) Math.round(d * 1000000d) / 1000000d);
-                    if (!hasLineOfSight(dgs, position, barghests.get(closest).getPosition())) {
-                        retVal -= 0.01;
+                    if (hasLineOfSight(dgs, position, barghests.get(closest).getPosition())) {
+                        retVal += 0.01;
                     }
                 }
                 break;

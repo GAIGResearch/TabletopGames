@@ -3,6 +3,7 @@ package games.descent2e;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
 import core.components.Deck;
+import core.components.GridBoard;
 import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyVector2D;
@@ -13,6 +14,7 @@ import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
+import tech.tablesaw.plotly.components.Grid;
 import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -572,5 +574,60 @@ public class DescentHelper {
             }
         }
         return collision;
+    }
+
+    public static int bfsLee(DescentGameState dgs, Vector2D start, Vector2D end) {
+        // Breadth-First Search Lee Algorithm
+        // Used to find the shortest path between two points
+        // Used for the Heroes/Monsters to find the shortest path to their target enemy
+
+        GridBoard board = dgs.getMasterBoard();
+
+        // Ensure that both start and end points are valid
+        if (board.getElement(start) == null || board.getElement(end) == null)
+            return -1;
+
+        boolean[][] visited = new boolean[board.getWidth()][board.getHeight()];
+        visited[start.getX()][start.getY()] = true;
+
+        // Distance from the source cell is initialized to 0
+        Queue<Pair<BoardNode, Integer>> queue = new LinkedList<>();
+        queue.add(new Pair<BoardNode, Integer>((BoardNode) board.getElement(start), 0));
+
+        // BFS starting from start cell
+        while (!queue.isEmpty())
+        {
+            Pair<BoardNode, Integer> curr = queue.peek();
+            BoardNode node = curr.a;
+
+            Vector2D currLoc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
+
+            // If we have reached the destination cell, we are done
+            if (currLoc.equals(end))
+                return curr.b;
+
+            // Otherwise dequeue the front cell in the queue and enqueue its adjacent cells
+            queue.poll();
+
+            for (BoardNode neighbour : node.getNeighbours().keySet())
+            {
+                if (neighbour == null) continue;
+                Vector2D nextLoc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+                if (!checkValid(nextLoc.getX(), nextLoc.getY(), board)) continue;
+                if (!visited[nextLoc.getX()][nextLoc.getY()])
+                {
+                    visited[nextLoc.getX()][nextLoc.getY()] = true;
+                    queue.add(new Pair<>(neighbour, curr.b + 1));
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // Check whether given cell(row,col) is a valid cell or not
+    static boolean checkValid(int row, int col, GridBoard board)
+    {
+        return ((row >= 0) && (row < board.getWidth()) && (col >= 0) && (col < board.getHeight()));
     }
 }
