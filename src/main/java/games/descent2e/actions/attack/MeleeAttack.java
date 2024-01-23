@@ -329,10 +329,13 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             // Death
             if (defender instanceof Hero) {
                 ((Hero)defender).setDefeated(state,true);
+                //System.out.println(defender.getComponentName() + " defeated!");
                 // Overlord may draw a card TODO
             } else {
                 // A monster
                 Monster m = (Monster) defender;
+
+                //System.out.println(m.getComponentName() + " defeated!");
 
                 // Remove from board
                 Move.remove(state, m);
@@ -518,7 +521,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         if (phase == POST_DEFENCE_ROLL || phase == PRE_DAMAGE) {
             retValue.add(new EndCurrentPhase());
         }
-        return retValue;
+        // Remove any duplicate actions from the return list
+        return new ArrayList<>(new HashSet<>(retValue));
     }
 
     @Override
