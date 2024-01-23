@@ -5,8 +5,7 @@ import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
-import games.dominion.DominionConstants;
-import games.dominion.DominionGameState;
+import games.dominion.*;
 import games.dominion.cards.CardType;
 
 import java.util.*;
@@ -69,6 +68,31 @@ public class DominionMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return Collections.singletonMap("EmptySupplySlots", Integer.class);
         }
+    }
+
+
+    public static class GameSeeds extends AbstractMetric {
+
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("InitialShuffle", Integer.class);
+            return columns;
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DominionGameState state = (DominionGameState)e.state;
+            DominionParameters params = (DominionParameters)state.getGameParameters();
+            records.put("InitialShuffle", params.initialShuffleSeed);
+            return true;
+        }
+
+
     }
 
     public static class ActionFeatures extends AbstractMetric {
