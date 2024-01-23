@@ -28,7 +28,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Cards in the reserve
     Deck<LoveLetterCard> reserveCards;
     LoveLetterCard removedCard;
-    Random rnd;
 
     // If true: player cannot be effected by any card effects
     boolean[] effectProtection;
