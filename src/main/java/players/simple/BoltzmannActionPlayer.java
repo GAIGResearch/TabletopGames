@@ -37,6 +37,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
      * @param seed Random seed
      */
     public BoltzmannActionPlayer(IActionHeuristic actionHeuristic, double temperature, double epsilon, long seed) {
+        super(null, "BoltzmannActionPlayer");
         this.actionHeuristic = actionHeuristic;
         this.temperature = Math.max(temperature, 0.001);
         this.epsilon = epsilon;

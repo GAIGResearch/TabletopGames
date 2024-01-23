@@ -34,6 +34,7 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
 
     @SuppressWarnings("unchecked")
     public LearnedValue(String constructionString) {
+        super(null, "LearnedValue");
 
         String[] stuff = constructionString.split(Pattern.quote(":"));
         filename = stuff[0].split(Pattern.quote("."))[0];

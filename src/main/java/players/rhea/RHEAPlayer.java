@@ -27,8 +27,8 @@ public class RHEAPlayer extends AbstractPlayer {
     private MASTPlayer mastPlayer;
 
     public RHEAPlayer(RHEAParams params) {
+        super(params, "RHEAPlayer");
         randomGenerator = new Random(params.getRandomSeed());
-        parameters = params;
         setName("rhea");
     }
 

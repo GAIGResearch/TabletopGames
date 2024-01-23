@@ -23,13 +23,17 @@ public class LinearStateHeuristic extends AbstractStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
-        if (coefficients == null)
-            return defaultHeuristic.evaluateState(state, playerId);
-        double[] phi = features.featureVector(state, playerId);
-        double retValue = coefficients[0]; // the bias term
-        for (int i = 0; i < phi.length; i++) {
-            retValue += phi[i] * coefficients[i+1];
+        // default heuristic is used if the state is terminal (or no coefficients are provided)
+        if (coefficients != null && (defaultHeuristic == null || state.isNotTerminal())) {
+            double[] phi = features.featureVector(state, playerId);
+            double retValue = coefficients[0]; // the bias term
+            for (int i = 0; i < phi.length; i++) {
+                retValue += phi[i] * coefficients[i+1];
+            }
+            return Utils.clamp(retValue, minValue, maxValue);
         }
-        return Utils.clamp(retValue, minValue, maxValue);
+        if (defaultHeuristic != null)
+            return defaultHeuristic.evaluateState(state, playerId);
+        return 0;
     }
 }

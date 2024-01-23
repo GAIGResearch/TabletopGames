@@ -8,9 +8,15 @@ import games.dominion.actions.BuyCard;
 import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class BigMoney extends AbstractPlayer {
+
+    public BigMoney() {
+        super(null, "BigMoney");
+    }
 
     /**
      * Generate a valid action to play in the game. Valid actions can be found by accessing

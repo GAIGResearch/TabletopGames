@@ -3,11 +3,11 @@ package players.rmhc;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 
 public class RMHCPlayer extends AbstractPlayer {
@@ -21,16 +21,12 @@ public class RMHCPlayer extends AbstractPlayer {
     private int copyCalls = 0;
 
     public RMHCPlayer() {
-        long seed = System.currentTimeMillis();
-        randomGenerator = new Random(seed);
-        parameters = new RMHCParams();
-        parameters.setRandomSeed(seed);
+        this(new RMHCParams());
     }
 
     public RMHCPlayer(RMHCParams params) {
+        super(params, "RMHC");
         randomGenerator = new Random(params.getRandomSeed());
-        parameters = params;
-        setName("RMHC");
     }
 
     @Override
