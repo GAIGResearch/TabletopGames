@@ -28,7 +28,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Cards in the reserve
     Deck<LoveLetterCard> reserveCards;
     LoveLetterCard removedCard;
-    Random rnd;
 
     // If true: player cannot be effected by any card effects
     boolean[] effectProtection;
@@ -79,9 +78,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         }
         llgs.effectProtection = effectProtection.clone();
         llgs.affectionTokens = affectionTokens.clone();
-        llgs.rnd = rnd;
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
+            llgs.drawPile.add(llgs.removedCard);
             // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
@@ -94,7 +93,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                     }
                 }
             }
+            Random r = new Random(llgs.getGameParameters().getRandomSeed());
             llgs.drawPile.shuffle(rnd);
+            llgs.removedCard = llgs.drawPile.draw();
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // New random cards

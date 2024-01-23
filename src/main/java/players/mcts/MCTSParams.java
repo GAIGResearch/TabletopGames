@@ -59,7 +59,10 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
+    public IStateKey MCGSStateKey;
+    public boolean MCGSExpandAfterClash = true;
     public double MASTDefaultValue = 0.0;
+    public double firstPlayUrgency = 1000000000.0;
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -87,6 +90,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("expertIterationSpecification", "");
+        addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
@@ -99,6 +103,9 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
+        addTunableParameter("MCGSStateKey", IStateKey.class);
+        addTunableParameter("MCGSExpandAfterClash", true);
+        addTunableParameter("FPU", 1000000000.0);
     }
 
     @Override
@@ -151,9 +158,12 @@ public class MCTSParams extends PlayerParameters {
 
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
+        MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
+        MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
         // we then null those elements of params which are constructed (lazily) from the above
+        firstPlayUrgency = (double) getParameterValue("FPU");
         opponentModel = null;
         rolloutPolicy = null;
     }

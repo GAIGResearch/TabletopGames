@@ -11,10 +11,12 @@ import java.util.Objects;
 public class DBParameters extends TunableParameters {
     int gridWidth = 7;
     int gridHeight = 5;
+    int disallowThreeBoxCreationUntilMove = 0;
 
     public DBParameters() {
         addTunableParameter("gridWidth", 7, Arrays.asList(5, 7, 11, 15, 19));
         addTunableParameter("gridHeight", 5, Arrays.asList(5, 7, 11, 15, 19));
+        addTunableParameter("disallowThreeBoxCreationUntilMove", 0);
         _reset();
     }
 
@@ -22,6 +24,7 @@ public class DBParameters extends TunableParameters {
     public void _reset() {
         gridWidth = (int) getParameterValue("gridWidth");
         gridHeight = (int) getParameterValue("gridHeight");
+        disallowThreeBoxCreationUntilMove = (int) getParameterValue("disallowThreeBoxCreationUntilMove");
     }
 
     @Override
@@ -35,7 +38,8 @@ public class DBParameters extends TunableParameters {
         if (!(o instanceof DBParameters)) return false;
         DBParameters that = (DBParameters) o;
         return gridWidth == that.gridWidth &&
-                gridHeight == that.gridHeight;
+                gridHeight == that.gridHeight &&
+                disallowThreeBoxCreationUntilMove == that.disallowThreeBoxCreationUntilMove;
     }
 
     @Override

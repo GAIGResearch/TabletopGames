@@ -24,7 +24,7 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param playersPerGame  - number of players per game.
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              AbstractParameters gameParams, TournamentMode tournamentMode, Map<RunArg, Object> config) {
+                              AbstractParameters gameParams, AbstractTournament.TournamentMode tournamentMode, Map<RunArg, Object> config) {
 
                               // int totalMatchUps, int reportPeriod, long seed,                              , boolean byTeam) {
         super(agents, gameToPlay, playersPerGame,  gameParams, tournamentMode, config);

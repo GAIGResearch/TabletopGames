@@ -34,10 +34,11 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
             dgs.playerInCave.add(true);
         }
 
-        dgs.mainDeck = new Deck("MainDeck", HIDDEN_TO_ALL);
-        dgs.discardDeck = new Deck("DiscardDeck", VISIBLE_TO_ALL);
-        dgs.path = new Deck("Path", VISIBLE_TO_ALL);
+        dgs.mainDeck = new Deck<>("MainDeck", HIDDEN_TO_ALL);
+        dgs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
+        dgs.path = new Deck<>("Path", VISIBLE_TO_ALL);
         dgs.actionsPlayed = new ActionsPlayed();
+        dgs.recordOfPlayerActions = new ArrayList<>();
 
         createCards(dgs);
         dgs.mainDeck.shuffle(dgs.getRnd());

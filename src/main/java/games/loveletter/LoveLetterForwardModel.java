@@ -34,7 +34,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         llgs.affectionTokens = new int[llgs.getNPlayers()];
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
         llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
-        llgs.rnd = new Random(llgs.getGameParameters().getRandomSeed());
 
         // Set up first round
         setupRound(llgs, null);
@@ -67,7 +66,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         }
 
         // Remove one card from the game
-        llgs.drawPile.shuffle(llgs.rnd);
+        llgs.drawPile.shuffle(llgs.getRnd());
         llgs.removedCard = llgs.drawPile.draw();
 
         // In min-player game, N more cards are on the side, but visible to all players at all times
@@ -113,7 +112,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         if (previousWinners != null) {
             // Random winner starts next round
-            int nextPlayer = llgs.rnd.nextInt(previousWinners.size());
+            int nextPlayer = llgs.getRnd().nextInt(previousWinners.size());
             int n = -1;
             for (int i : previousWinners) {
                 n++;

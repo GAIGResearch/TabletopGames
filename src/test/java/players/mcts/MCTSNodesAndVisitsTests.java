@@ -73,7 +73,8 @@ public class MCTSNodesAndVisitsTests {
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};
         int[] errorMargin = {10, 10, 10, 10};
-        runGame(game, 4, expectedNodes, errorMargin);    }
+        runGame(game, 4, expectedNodes, errorMargin);
+    }
 
     @Test
     public void RegretMatching() {
@@ -90,7 +91,8 @@ public class MCTSNodesAndVisitsTests {
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};
         int[] errorMargin = {10, 10, 10, 10};
-        runGame(game, 4, expectedNodes, errorMargin);    }
+        runGame(game, 4, expectedNodes, errorMargin);
+    }
 
     @Test
     public void reducedDepth3MaxN() {
@@ -122,6 +124,17 @@ public class MCTSNodesAndVisitsTests {
             if (state.getCurrentPlayer() == 0) {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
                 assertEquals(200, mctsPlayer.getRoot(0).getVisits());
+                int childVisits = mctsPlayer.getRoot(0).actionValues.values().stream()
+                        .mapToInt(actionStats -> actionStats.nVisits).sum();
+                assertEquals(200, childVisits);
+                for (AbstractAction child : mctsPlayer.getRoot(0).actionValues.keySet()) {
+                    int timesActionTaken = mctsPlayer.getRoot(0).actionValues.get(child).nVisits;
+                    if (timesActionTaken > 0)
+                        assertEquals(timesActionTaken - 1,
+                                Arrays.stream(mctsPlayer.getRoot(0).children.get(child))
+                                        .filter(Objects::nonNull)
+                                        .mapToInt(SingleTreeNode::getVisits).sum());
+                }
                 if (params.maxTreeDepth == 3)
                     assertEquals(3, stats.depthReached);
                 else {

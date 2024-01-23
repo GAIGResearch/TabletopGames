@@ -90,16 +90,16 @@ public class RewardsForParanoiaTests {
         return true;
     };
     Predicate<SingleTreeNode> paranoidNodeValues = node -> {
-        assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
-        assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
+        assertEquals(node.nodeValue(0), -node.nodeValue(1), 0.001);
+        assertEquals(node.nodeValue(0), -node.nodeValue(2), 0.001);
         assertTrue(node.getChildren().size() < 60);
         return true;
     };
     Predicate<SingleTreeNode> maxNNodeValues = node -> {
         // if we have just one, everyone else must have just lost
-        if (node.getVisits() == 1 && node.getTotValue()[0] == 1.0) {
-            assertEquals(node.getTotValue()[0], -node.getTotValue()[1], 0.001);
-            assertEquals(node.getTotValue()[0], -node.getTotValue()[2], 0.001);
+        if (node.getVisits() == 1 && node.nodeValue(0) == 1.0) {
+            assertEquals(node.nodeValue(0), -node.nodeValue(1), 0.001);
+            assertEquals(node.nodeValue(0), -node.nodeValue(2), 0.001);
         }
         assertTrue(node.getChildren().size() < 60);
         return true;

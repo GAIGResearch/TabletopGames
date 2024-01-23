@@ -1,9 +1,10 @@
-package games.loveletter;
+package games.loveletter.features;
 
 import core.AbstractGameState;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IStateFeatureVector;
+import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
 public class LoveLetterFeatures implements IStateFeatureVector {
@@ -34,7 +35,7 @@ public class LoveLetterFeatures implements IStateFeatureVector {
 
         // Draw Pile
 
-        observationSpace[8] = llgs.drawPile.getSize();
+        observationSpace[8] = llgs.getDrawPile().getSize();
 
         // Discard Piles
         int i = 9;
@@ -47,12 +48,11 @@ public class LoveLetterFeatures implements IStateFeatureVector {
         }
 
         // Affection Tokens
-        for (int j = 0; j < llgs.affectionTokens.length; j++) {
-            observationSpace[16 + j] = llgs.affectionTokens[j];
+        for (int j = 0; j < llgs.getNPlayers(); j++) {
+            observationSpace[16 + j] = llgs.getGameScore(j);
         }
 
         return observationSpace;
-
     }
 //
 //    @Override

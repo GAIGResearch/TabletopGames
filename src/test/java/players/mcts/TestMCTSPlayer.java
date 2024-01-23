@@ -8,6 +8,8 @@ import players.mcts.MultiTreeNode;
 import players.mcts.SingleTreeNode;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
