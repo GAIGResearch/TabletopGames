@@ -111,13 +111,12 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         }
 
         if (previousWinners != null) {
-            // Random winner starts next round
-            int nextPlayer = llgs.getRnd().nextInt(previousWinners.size());
-            int n = -1;
-            for (int i : previousWinners) {
-                n++;
-                if (n == nextPlayer) {
-                    llgs.setTurnOwner(i);
+            // Next winner in turn order starts
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                int p = (i + 1) % llgs.getNPlayers();
+                if (previousWinners.contains(p)) {
+                    llgs.setTurnOwner(p);
+                    break;
                 }
             }
         }
