@@ -68,6 +68,9 @@ public class RangedAttack extends MeleeAttack {
             return true; // due to no damage done
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+        if (defender == null) {
+            return true; // Somehow, we have an attack on a dead figure
+        }
         double distance = getDistanceFromFigures(attacker, defender);
         return (state.getAttackDicePool().getRange() + extraRange < distance);
     }
