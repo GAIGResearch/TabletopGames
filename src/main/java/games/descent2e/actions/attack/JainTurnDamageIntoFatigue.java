@@ -28,8 +28,8 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
             MeleeAttack currentAttack = (MeleeAttack) dgs.currentActionInProgress();
             assert currentAttack != null;
             currentAttack.reduceDamage(reduction);
+            //System.out.println("Reduced the damage by " + reduction + " and turned it into Fatigue!");
         }
-        System.out.println("Reduced the damage by " + reduction + " and turned it into Fatigue!");
         ((Figure) dgs.getComponentById(jain)).addActionTaken(toString());
         return true;
     }

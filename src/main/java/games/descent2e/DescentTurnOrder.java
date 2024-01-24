@@ -244,7 +244,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
         if (canSpawn)
         {
-            System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
+            //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
             List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
             spawnReinforcements(dgs, i, noToSpawn, tileCoords);
         }
@@ -361,7 +361,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                         if (canSpawnMaster)
                             canSpawnMaster = false;
                         dgs.monsters.get(index).add(monster);
-                        System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
+                        //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
                         break;
                     }
                 }
