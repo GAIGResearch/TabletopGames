@@ -113,7 +113,6 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 overlordEndTurn((DescentGameState)gameState);
             }
             endRound(gameState);
-            System.out.println("Round " + roundCounter);
             /*StringBuilder healthCheck = new StringBuilder();
             for (Figure f: dgs.getHeroes()) {
                 healthCheck.append(f.getName()).append(": ").append(f.getAttribute(Figure.Attribute.Health).getValue()).append("/").append(f.getAttributeMax(Figure.Attribute.Health)).append("; ");

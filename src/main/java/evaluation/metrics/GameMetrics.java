@@ -102,8 +102,8 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            records.put("RoundCounter", e.state.getRoundCounter());
-            System.out.println(e.state.getRoundCounter());  // TODO just for debug
+            //records.put("RoundCounter: ", e.state.getRoundCounter());
+            System.out.println("Round: " + e.state.getRoundCounter());  // TODO just for debug
             return true;
         }
 
