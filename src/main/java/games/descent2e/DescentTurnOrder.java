@@ -114,6 +114,17 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             }
             endRound(gameState);
             System.out.println("Round " + roundCounter);
+            /*StringBuilder healthCheck = new StringBuilder();
+            for (Figure f: dgs.getHeroes()) {
+                healthCheck.append(f.getName()).append(": ").append(f.getAttribute(Figure.Attribute.Health).getValue()).append("/").append(f.getAttributeMax(Figure.Attribute.Health)).append("; ");
+            }
+            healthCheck.append("\n");
+            for (List<Monster> mList: dgs.getMonsters()) {
+                for (Monster m: mList) {
+                    healthCheck.append(m.getName()).append(": ").append(m.getAttribute(Figure.Attribute.Health).getValue()).append("/").append(m.getAttributeMax(Figure.Attribute.Health)).append("; ");
+                }
+            }
+            System.out.println(healthCheck);*/
             //collision(dgs);
         }
         else {
@@ -259,8 +270,8 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         // We assume that we can always spawn a Minion
         // As we will just return if we do not have enough monsters to spawn otherwise
 
-        //Random rnd = new Random(dgs.getGameParameters().getRandomSeed());
-        Random rnd = new Random();
+        Random rnd = new Random(dgs.getGameParameters().getRandomSeed() + dgs.getTurnCounter());
+        //Random rnd = new Random();
         List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
         List<Monster> monsters = dgs.getMonsters().get(index);
         for (Monster monster : monstersOriginal)
@@ -321,8 +332,10 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
                 tileCoords.remove(option);
                 BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
-                if (position.getComponentName().equals("plain") &&
+                /*if (position.getComponentName().equals("plain") &&
                         ((PropertyInt)position.getProperty(playersHash)).value == -1) {
+                 */
+                if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
                     // TODO: some monsters want to spawn in lava/water.
                     // This can be top-left corner, check if the other tiles are valid too
                     boolean canPlace = true;
@@ -337,9 +350,6 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                                 canPlace = false;
                             }
                         }
-                    }
-                    if (Move.checkCollision(dgs, monster, option)) {
-                        canPlace = false;
                     }
                     if (canPlace) {
                         monster.setPosition(option.copy());
