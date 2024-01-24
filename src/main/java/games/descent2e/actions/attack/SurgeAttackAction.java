@@ -59,6 +59,10 @@ public class SurgeAttackAction extends DescentAction {
             return false;
         }
 
+        MeleeAttack attack = (MeleeAttack) dgs.currentActionInProgress();
+        if (attack == null) return false;
+        if (surge.getSurgesUsed() > attack.surgesToSpend) return false;
+
         if (f instanceof Monster)
         {
             // If the figure has the Cowardly passive, they can only surge if they are near a master or lieutenant monster

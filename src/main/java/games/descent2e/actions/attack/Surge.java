@@ -53,4 +53,9 @@ public enum Surge {
         lambda.accept(attack, state);
     }
 
+    public int getSurgesUsed()
+    {
+        return surgesUsed;
+    }
+
 }
