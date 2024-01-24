@@ -16,6 +16,7 @@ public enum Surge {
     DAMAGE_PLUS_1(1, (a, s) -> a.addDamage(1)),
     DAMAGE_PLUS_2(1, (a, s) -> a.addDamage(2)),
     DAMAGE_PLUS_3(1, (a, s) -> a.addDamage(3)),
+    DAMAGE_PLUS_1_TWICE(2, (a, s) -> a.addDamage(2)),
     PIERCE_1(1, (a, s) -> a.addPierce(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     PIERCE_3(1, (a, s) -> a.addPierce(3)),
@@ -27,6 +28,7 @@ public enum Surge {
     POISON(1, (a, s) -> a.setPoisoning(true)),
     STUN(1, (a, s) -> a.setStunning(true)),
     RECOVER_1_HEART(1, (a, s) -> a.addMending(1)),
+    RECOVER_1_FATIGUE(1, (a, s) -> a.addFatigueHeal(1)),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
         a.addDamage(2);

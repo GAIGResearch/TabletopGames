@@ -138,6 +138,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // After equipping, set up abilities
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+            // All Heroes have a Surge action of Recover 1 Fatigue
+            figure.addAbility(new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, figure.getComponentID()));
 
             // Set up abilities from other equipment
             List<DescentAction> passiveActions = getOtherEquipmentActions(figure);
