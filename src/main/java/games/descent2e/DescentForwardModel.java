@@ -821,7 +821,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         for (DescentReward dr: heroRewards) dr.applyReward(dgs, i);
                     }
                     */
-                }
+                //}
                 // Quest is over, return true
                 return true;
             }
