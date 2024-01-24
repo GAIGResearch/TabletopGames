@@ -43,7 +43,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
         DescentParameters descentParameters = (DescentParameters) firstState.getGameParameters();
-        descentParameters.setTimeoutRounds(100);    // No game of Descent should feasibly last more than 20 rounds, this is being generous
+        descentParameters.setTimeoutRounds(50);    // No game of Descent should feasibly last more than 20 rounds, this is being generous
         int nActionsPerFigure = descentParameters.nActionsPerFigure;
         dgs.data.load(descentParameters.getDataPath());
         dgs.initData = false;
@@ -779,20 +779,39 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         {
             System.out.println("Timeout! The game ends in a draw.");
             dgs.setGameStatus(GameResult.TIMEOUT);
+            for (int i = 0; i < dgs.getNPlayers(); i++) {
+                dgs.setPlayerResult(GameResult.TIMEOUT, i);
+            }
             return true;
         }
 
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
-                if (condition.getString(dgs).contains("Heroes: WIN_GAME"))
+                if (condition.getString(dgs).contains("Heroes: WIN_GAME")) {
                     System.out.println("Victory! The Heroes win!");
-                else
+                    for (int i = 0; i < dgs.getNPlayers(); i++) {
+                        if (i == dgs.getOverlordPlayer()) {
+                            dgs.setPlayerResult(GameResult.LOSE_GAME, i);
+                        } else {
+                            dgs.setPlayerResult(GameResult.WIN_GAME, i);
+                        }
+                    }
+                }
+                else {
                     System.out.println("Defeat! The Overlord wins!");
-                List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
-                List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
-                List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
-                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    for (int i = 0; i < dgs.getNPlayers(); i++) {
+                        if (i != dgs.getOverlordPlayer()) {
+                            dgs.setPlayerResult(GameResult.LOSE_GAME, i);
+                        } else {
+                            dgs.setPlayerResult(GameResult.WIN_GAME, i);
+                        }
+                    }
+                }
+                //List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
+                //List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
+                //List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
+                //for (int i = 0; i < dgs.getNPlayers(); i++) {
                     // TODO Uncomment this when Rewards are fixed
                     /*
                     for (DescentReward dr: commonRewards) dr.applyReward(dgs, i);
