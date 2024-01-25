@@ -1,8 +1,8 @@
 package games.hanabi;
+
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import games.battlelore.BattleloreGameState;
 
 import java.util.List;
 import java.util.Random;
@@ -10,6 +10,7 @@ import java.util.Random;
 public class HanabiPlayer extends AbstractPlayer{
     private final Random rnd;
     public HanabiPlayer() {
+        super(null, "HanabiPlayer");
         this.rnd = new Random();
     }
 

@@ -13,6 +13,7 @@ public class RandomPlayer extends AbstractPlayer {
      * Random generator for this agent.
      */
     public RandomPlayer(Random rnd) {
+        super(null, "RandomPlayer");
         this.rnd = rnd;
     }
 

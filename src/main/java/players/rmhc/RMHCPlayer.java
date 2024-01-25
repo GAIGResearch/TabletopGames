@@ -3,7 +3,6 @@ package players.rmhc;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 

@@ -1,10 +1,11 @@
 package players;
 
+import core.interfaces.IPlayerDecorator;
 import core.actions.ActionSpace;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
 
-import java.util.*;
+import java.util.Arrays;
 
 public class PlayerParameters extends TunableParameters {
 
@@ -27,6 +28,7 @@ public class PlayerParameters extends TunableParameters {
 
     // Action space type for this player
     public ActionSpace actionSpace = new ActionSpace();
+    public IPlayerDecorator decorator = null;
 
     public PlayerParameters() {
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
@@ -38,6 +40,7 @@ public class PlayerParameters extends TunableParameters {
         addTunableParameter("randomSeed", (int) System.currentTimeMillis());
         addTunableParameter("resetSeedEachGame", false);
         addTunableParameter("epsilon", 1e-6);
+        addTunableParameter("actionRestriction", IPlayerDecorator.class);
     }
 
     @Override
@@ -59,19 +62,18 @@ public class PlayerParameters extends TunableParameters {
         actionSpace = new ActionSpace ((ActionSpace.Structure) getParameterValue("actionSpaceStructure"),
                                         (ActionSpace.Flexibility) getParameterValue("actionSpaceFlexibility"),
                                         (ActionSpace.Context) getParameterValue("actionSpaceContext"));
+        decorator = (IPlayerDecorator) getParameterValue("actionRestriction");
     }
 
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PlayerParameters)) return false;
-        PlayerParameters that = (PlayerParameters) o;
-        return Double.compare(that.noiseEpsilon, noiseEpsilon) == 0  && Objects.equals(gameHeuristic, that.gameHeuristic);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), noiseEpsilon, budgetType, budget, breakMS, gameHeuristic, actionSpace);
+        if (o instanceof PlayerParameters that) {
+            if (gameHeuristic == null && that.gameHeuristic == null) return true;
+            if (gameHeuristic == null || that.gameHeuristic == null) return false;
+            return gameHeuristic.equals(that.gameHeuristic);
+        }
+        return false;
     }
 
     @Override

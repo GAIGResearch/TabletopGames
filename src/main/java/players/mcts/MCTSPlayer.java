@@ -28,13 +28,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
 
     public MCTSPlayer() {
-        this(System.currentTimeMillis());
-    }
-
-    public MCTSPlayer(long seed) {
-        this(new MCTSParams(), "MCTSPlayer");
-        parameters.setRandomSeed(seed);
-        rnd = new Random(parameters.getRandomSeed());
+        this(new MCTSParams());
     }
 
     public MCTSPlayer(MCTSParams params) {
@@ -42,9 +36,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     }
 
     public MCTSPlayer(MCTSParams params, String name) {
-        this.parameters = params;
+        super(params, name);
         rnd = new Random(parameters.getRandomSeed());
-        setName(name);
     }
 
     @Override
