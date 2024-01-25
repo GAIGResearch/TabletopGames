@@ -54,7 +54,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
         // Shuffles wonder-boards
         createWonderDeck(wgs); // Adds Wonders into game
-        wgs.wonderBoardDeck.shuffle(wgs.wonderRnd);
+        wgs.wonderBoardDeck.shuffle(params.wonderShuffleSeed != -1 ? new Random(params.wonderShuffleSeed) : wgs.getRnd());
 
         // Gives each player wonder board and manufactured goods from the wonder
         for (int player = 0; player < wgs.getNPlayers(); player++) {

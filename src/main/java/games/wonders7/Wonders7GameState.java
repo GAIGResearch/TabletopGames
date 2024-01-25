@@ -28,7 +28,6 @@ public class Wonders7GameState extends AbstractGameState {
     public int direction;
 
     protected Random cardRnd;
-    protected Random wonderRnd;
 
     public Wonders7GameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -47,7 +46,6 @@ public class Wonders7GameState extends AbstractGameState {
         // then this seed is fixed. The game random seed will be used in all cases where these are -1 (the default)
         Wonders7GameParameters params = (Wonders7GameParameters) gameParameters;
         cardRnd = params.cardShuffleSeed == -1 ? rnd : new Random(params.cardShuffleSeed);
-        wonderRnd = params.wonderShuffleSeed == -1 ? rnd : new Random(params.wonderShuffleSeed);
     }
 
     @Override
@@ -99,7 +97,6 @@ public class Wonders7GameState extends AbstractGameState {
         copy.currentAge = currentAge;
         copy.direction = direction;
         copy.wonderBoardDeck = wonderBoardDeck.copy();
-        copy.wonderRnd = new Random(redeterminisationRnd.nextInt()); // technically unnecessary, but just to be safe
         copy.cardRnd = new Random(redeterminisationRnd.nextInt());
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
