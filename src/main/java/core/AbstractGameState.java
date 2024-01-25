@@ -200,6 +200,12 @@ public abstract class AbstractGameState {
         turnOwner = newFirstPlayer;
     }
 
+    /**
+     * The framework maintains a random number generator for each game state.
+     * Use this as a default; there is no need to create your own.
+     * The one exception to this guideline is in the copy() method, where redeterminisation should *not* use this generator.
+     * @return
+     */
     public Random getRnd() {
         return rnd;
     }
@@ -405,6 +411,11 @@ public abstract class AbstractGameState {
      * Create a copy of the game state containing only those components the given player can observe (if partial
      * observable).
      *
+     * This is also responsible for shuffling any hidden information, such as cards in a deck. (aka 'redeterminisation')
+     * There are some utilities to assist with this in utilities.DeterminisationUtilities.
+     * One of the most important things to remember is that the random number generator from getRnd() should not be used in this method.
+     * This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)
+     *
      * @param playerId - player observing this game state.
      */
     protected abstract AbstractGameState _copy(int playerId);
@@ -423,7 +434,7 @@ public abstract class AbstractGameState {
      * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
-     * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
+     * (Unlike _getHeuristicScore(), there is no constraint on the range...whatever the game rules say.
      *
      * @param playerId - player observing the state.
      * @return - double, score of current state
