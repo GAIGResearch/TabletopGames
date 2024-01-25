@@ -18,16 +18,11 @@ public class RMHCPlayer extends AbstractPlayer {
     private int copyCalls = 0;
 
     public RMHCPlayer() {
-        long seed = System.currentTimeMillis();
-        rnd = new Random(seed);
-        parameters = new RMHCParams();
-        parameters.setRandomSeed(seed);
+        this(new RMHCParams());
     }
 
     public RMHCPlayer(RMHCParams params) {
-        rnd = new Random(params.getRandomSeed());
-        parameters = params;
-        setName("RMHC");
+        super(params, "RMHC");
     }
 
     @Override
