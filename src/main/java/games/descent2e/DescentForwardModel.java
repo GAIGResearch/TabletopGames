@@ -776,11 +776,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // TODO end of campaign / other phases
         if (dgs.getTurnOrder().getRoundCounter() > dgs.getGameParameters().getTimeoutRounds())
         {
-            System.out.println("Timeout! The game ends in a draw.");
             dgs.setGameStatus(GameResult.TIMEOUT);
-            for (int i = 0; i < dgs.getNPlayers(); i++) {
-                dgs.setPlayerResult(GameResult.TIMEOUT, i);
-            }
             return true;
         }
 
@@ -788,24 +784,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
                 if (condition.getString(dgs).contains("Heroes: WIN_GAME")) {
-                    System.out.println("Victory! The Heroes win!");
-                    for (int i = 0; i < dgs.getNPlayers(); i++) {
-                        if (i == dgs.getOverlordPlayer()) {
-                            dgs.setPlayerResult(GameResult.LOSE_GAME, i);
-                        } else {
-                            dgs.setPlayerResult(GameResult.WIN_GAME, i);
-                        }
-                    }
+                    dgs.setGameStatus(GameResult.WIN_GAME);
                 }
                 else {
-                    System.out.println("Defeat! The Overlord wins!");
-                    for (int i = 0; i < dgs.getNPlayers(); i++) {
-                        if (i != dgs.getOverlordPlayer()) {
-                            dgs.setPlayerResult(GameResult.LOSE_GAME, i);
-                        } else {
-                            dgs.setPlayerResult(GameResult.WIN_GAME, i);
-                        }
-                    }
+                    dgs.setGameStatus(GameResult.LOSE_GAME);
                 }
                 //List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
                 //List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
@@ -826,6 +808,52 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
         return false;
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
+
+        DescentGameState dgs = (DescentGameState) gameState;
+        GameResult gameResult = dgs.getGameStatus();
+
+        switch (gameResult)
+        {
+            case TIMEOUT:
+                System.out.println("Timeout! The game ends in a draw.");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    dgs.setPlayerResult(GameResult.TIMEOUT, i);
+                }
+                break;
+
+            case WIN_GAME:
+                System.out.println("Victory! The Heroes win!");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    if (i == dgs.getOverlordPlayer()) {
+                        dgs.setPlayerResult(GameResult.LOSE_GAME, i);
+                    } else {
+                        dgs.setPlayerResult(GameResult.WIN_GAME, i);
+                    }
+                }
+                break;
+
+            case LOSE_GAME:
+                System.out.println("Defeat! The Overlord wins!");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    if (i != dgs.getOverlordPlayer()) {
+                        dgs.setPlayerResult(GameResult.LOSE_GAME, i);
+                    } else {
+                        dgs.setPlayerResult(GameResult.WIN_GAME, i);
+                    }
+                }
+                break;
+
+            default:
+                System.out.println("Game ended in an unknown way!");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    dgs.setPlayerResult(GameResult.DRAW_GAME, i);
+                }
+                break;
+        }
     }
 
     private void setupBoard(DescentGameState dgs, DescentGameData _data, String bConfig) {
