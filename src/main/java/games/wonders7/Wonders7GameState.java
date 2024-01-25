@@ -99,11 +99,11 @@ public class Wonders7GameState extends AbstractGameState {
         copy.currentAge = currentAge;
         copy.direction = direction;
         copy.wonderBoardDeck = wonderBoardDeck.copy();
-        copy.wonderRnd = wonderRnd;
-        copy.cardRnd = cardRnd;
+        copy.wonderRnd = new Random(redeterminisationRnd.nextInt()); // technically unnecessary, but just to be safe
+        copy.cardRnd = new Random(redeterminisationRnd.nextInt());
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // Player does not know the other players hands and discard pile (except for next players hadn)
+            // Player does not know the other players hands and discard pile (except for next players hand)
             // All the cards of other players and discard pile are shuffled
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
@@ -111,7 +111,7 @@ public class Wonders7GameState extends AbstractGameState {
                 }
             }
             copy.ageDeck.add(copy.discardPile); // Groups the discard pile into the ageDeck
-            copy.ageDeck.shuffle(rnd); // Shuffle all the cards
+            copy.ageDeck.shuffle(redeterminisationRnd); // Shuffle all the cards
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     Deck<Wonder7Card> hand = copy.playerHands.get(i);

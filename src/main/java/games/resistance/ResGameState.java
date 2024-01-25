@@ -141,7 +141,7 @@ public class ResGameState extends AbstractGameState {
             // if not, we need to shuffle all the other players
             LinkedList<Boolean> spyAllocation = new LinkedList<>();
             if (!isSpy) {
-                spyAllocation = new LinkedList<>(ResForwardModel.randomiseSpies(factions[1], this, playerId));
+                spyAllocation = new LinkedList<>(ResForwardModel.randomiseSpies(factions[1], this, playerId, redeterminisationRnd));
             }
             for (int i = 0; i < getNPlayers(); i++) {
                 //Knowledge of Own Hand/Votes

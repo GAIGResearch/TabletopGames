@@ -180,7 +180,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
                     copy.drawDeck.add(copy.playerDecks.get(i));
                 }
             }
-            copy.drawDeck.shuffle(rnd);
+            copy.drawDeck.shuffle(redeterminisationRnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     Deck<UnoCard> d = copy.playerDecks.get(i);

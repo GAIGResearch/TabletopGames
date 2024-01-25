@@ -55,7 +55,8 @@ public class GTGameState extends AbstractGameState {
      * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
      * for the other players). This process is also called 'redeterminisation'.</p>
      * <p>There are some utilities to assist with this in utilities.DeterminisationUtilities. One firm is guideline is
-     * that the standard random number generator from getRnd() should not be used in this method.
+     * that the standard random number generator from getRnd() should not be used in this method. A separate Random is provided
+     * for this purpose - redeterminisationRnd.
      *  This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)</p>
      * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
      *

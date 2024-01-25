@@ -267,7 +267,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // need to shuffle drawpile separately
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
-                retValue.playerDrawPiles[p].shuffleVisible(rnd, p, false);
+                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, p, false);
             } else {
                 // need to combine and shuffle hands and drawpiles
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -282,7 +282,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // we have now moved all the non-visible Hand cards into the Draw pile to reshuffle
                 retValue.playerHands[p].clear(); // we will need to reconstruct this, including visibility status in a sec
                 // we then reshuffle all the non-visible cards
-                retValue.playerDrawPiles[p].shuffleVisible(rnd, playerId, false);
+                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, playerId, false);
                 // we then remove cards from the top of the shuffled draw pile (in the region we know is not visible)
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
                     if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {

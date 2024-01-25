@@ -65,7 +65,11 @@ public abstract class AbstractGameState {
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
     private int gameID;
+    // rnd is used for all random number generation in the game - for events within the game
     protected Random rnd;
+    // redeterminisationRnd is used for redeterminisation only - this is to ensure that the main game is not affected
+    // this is not initialised from any seed, as redeterminisation is used to hide data from players and cannot affect the game itself
+    protected Random redeterminisationRnd = new Random();
 
     /**
      * @param gameParameters - game parameters.
@@ -204,6 +208,7 @@ public abstract class AbstractGameState {
      * The framework maintains a random number generator for each game state.
      * Use this as a default; there is no need to create your own.
      * The one exception to this guideline is in the copy() method, where redeterminisation should *not* use this generator.
+     * It should use redeterminisationRnd instead.
      * @return
      */
     public Random getRnd() {
@@ -415,6 +420,7 @@ public abstract class AbstractGameState {
      * There are some utilities to assist with this in utilities.DeterminisationUtilities.
      * One of the most important things to remember is that the random number generator from getRnd() should not be used in this method.
      * This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)
+     * Instead use redeterminisationRnd, which is provided for this specific purpose.
      *
      * @param playerId - player observing this game state.
      */
