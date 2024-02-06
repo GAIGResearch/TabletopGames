@@ -70,13 +70,13 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
             // process this node
             // we record its depth, value, visits, and the full feature list
             int player = node.getActor();
-            double stateValue = node.getTotValue()[player] / node.getVisits();
+            double stateValue = node.nodeValue(player);
             List<AbstractAction> actionsFromState = forwardModel.computeAvailableActions(node.state);
             Map<AbstractAction, Double> actionTargets = new HashMap<>();
             AbstractAction bestAction = null;
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : actionsFromState) {
-                if (node.children.get(action) == null) {
+                if (node.actionValues.get(action) == null) {
                     actionTargets.put(action, 0.0);  // we have no data for this action
                     continue;
                 }

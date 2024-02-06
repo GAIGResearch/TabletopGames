@@ -6,7 +6,9 @@ import core.actions.AbstractAction;
 import utilities.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
 
 /**
@@ -23,7 +25,6 @@ public class OMATreeNode extends SingleTreeNode {
         public double OMATotValue;
         public int OMAVisits;
     }
-
 
 
     protected Optional<OMATreeNode> OMAParent = Optional.empty(); // the most recent parent of this node when it was the node player action
@@ -49,42 +50,40 @@ public class OMATreeNode extends SingleTreeNode {
         super.backUp(result); // first we do the usual stuff
         // and now we add on the OMA statistics
         // These are updated on the node from which an action was taken (the OMAParent)
-        // and not the node that is reached by taking an action.
-        // We first need to find the action that was taken from this node.
-        // - This will be actionToReach on the next node in the trajectory
-        // - or null for the very last node (the one expanded)...for the moment we do not treat the first
-        // rollout action as the 'action taken'
+        // We first need to find the action that was taken from this node - which we can get from actionsInTree
 
         for (int player = 0; player < result.length; player++) {
             if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA && player != root.decisionPlayer)
                 continue;  // for OMA we only consider the root player
-            // We loop over each player separately to avoid confusion with interleaving actions
-            // it might be more efficient to do this in a single pass...but at the cost of greater algorithmic complexity and bugginess
-            OMATreeNode iteratingNode = this;
-            AbstractAction actionTakenFromChild = null;
-            // we also need the action taken from the OMAParent to get here. To find this we need to back-track up
-            // the nodes and find the actionToReach on the immediate child of OMAParent
 
-            // the aim is to find the first node on the backwards trajectory that has an OMAParent
-            while (iteratingNode != null) {
-                if (iteratingNode.decisionPlayer == player && iteratingNode.OMAParent.isPresent()) {
-                    // Now find the action taken FROM the parent
-                    if (actionTakenFromChild != null) {
-                        OMATreeNode OMAParent = iteratingNode.OMAParent.get();
-                        OMATreeNode parentSearch = iteratingNode;
-                        AbstractAction actionTakenFromParent;
-                        do { // we now head up to the OMAParent, recording the action taken from it
-                            actionTakenFromParent = parentSearch.actionToReach; // this is the action just before we find the OMAParent present
-                            parentSearch = (OMATreeNode) parentSearch.parent;
-                            if (parentSearch == null)
-                                throw new AssertionError("We should be guaranteed to find OMAParent before reaching root");
-                        } while (parentSearch != OMAParent);
-                        OMAParent.OMABackup(result, actionTakenFromParent, actionTakenFromChild);
-                    }
-                    // we now continue from iterating node for BP further up the tree
-                }
-                actionTakenFromChild = iteratingNode.actionToReach;
-                iteratingNode = (OMATreeNode) iteratingNode.parent;
+            // We only care about our actions for OMA stats
+            int finalPlayer = player;
+            List<AbstractAction> selfActionsOnly = root.actionsInTree.stream()
+                    .filter(p -> p.a == finalPlayer).map(p -> p.b)
+                    .collect(toList());
+            List<OMATreeNode> nodes = new ArrayList<>();
+            OMATreeNode currentNode = this;
+            do {
+                if (currentNode.decisionPlayer == player && currentNode.nVisits > 0)
+                    nodes.add(currentNode);
+                currentNode = (OMATreeNode) currentNode.parent;
+            } while (currentNode != null); // we have reached root
+            Collections.reverse(nodes); // and reverse so root is at the start
+            // We now have a list of nodes for player - this should be the same length as the list of actions
+            if (nodes.size() != selfActionsOnly.size())
+                throw new AssertionError("We should have the same number of nodes as actions");
+            if (nodes.isEmpty())
+                continue;
+            // We now go down the sequence of actions taken from the root
+            for (int i = 0; i < selfActionsOnly.size() - 1; i++) {
+                currentNode = nodes.get(i);
+                AbstractAction actionTakenFromParent = selfActionsOnly.get(i);
+                AbstractAction actionTakenFromChild = selfActionsOnly.get(i + 1);
+                if (currentNode.decisionPlayer != player)
+                    throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
+                if (!currentNode.actionValues.containsKey(actionTakenFromParent))
+                    throw new AssertionError("We should not have a value for the action taken from the parent");
+                currentNode.OMABackup(result, actionTakenFromParent, actionTakenFromChild);
             }
         }
     }

@@ -1,8 +1,10 @@
-package games.loveletter;
+package games.loveletter.features;
 
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IStateFeatureVector;
+import games.loveletter.LoveLetterGameState;
+import games.loveletter.LoveLetterParameters;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.HashSet;
@@ -37,10 +39,10 @@ public class LLStateFeaturesReduced implements IStateFeatureVector {
 
         double maxCardValue = 1 + llgs.getPlayerHandCards().get(playerId).getSize() * getMaxCardValue();
         double nRequiredTokens = (llgs.getNPlayers() == 2 ? llp.nTokensWin2 : llgs.getNPlayers() == 3 ? llp.nTokensWin3 : llp.nTokensWin4);
-        if (nRequiredTokens < llgs.affectionTokens[playerId]) nRequiredTokens = llgs.affectionTokens[playerId];
+        if (nRequiredTokens < llgs.getGameScore(playerId)) nRequiredTokens = llgs.getGameScore(playerId);
 
         retValue[0] = cardValues / maxCardValue;
-        retValue[1] = llgs.affectionTokens[playerId] / nRequiredTokens;
+        retValue[1] = llgs.getGameScore(playerId) / nRequiredTokens;
 
         if (cardTypes.contains(Countess)) retValue[2] = 1.0;
         if (cardTypes.contains(King)) retValue[6] = 1.0;
@@ -63,7 +65,7 @@ public class LLStateFeaturesReduced implements IStateFeatureVector {
         int maxOtherScore = IntStream.range(0, llgs.getNPlayers())
                 .filter(p -> p != playerId)
                 .map(p -> (int) llgs.getGameScore(p)).max().orElseThrow(() -> new AssertionError("??"));
-        retValue[11] = (llgs.affectionTokens[playerId] - maxOtherScore) / nRequiredTokens;
+        retValue[11] = (llgs.getGameScore(playerId) - maxOtherScore) / nRequiredTokens;
 
         return retValue;
 

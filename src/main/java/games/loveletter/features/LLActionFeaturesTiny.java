@@ -1,4 +1,4 @@
-package games.loveletter;
+package games.loveletter.features;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;

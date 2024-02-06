@@ -10,10 +10,11 @@ import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import players.IAnyTimePlayer;
 import utilities.Pair;
-import utilities.RandomWrapper;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -53,7 +54,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             getParameters().getRolloutStrategy();
             getParameters().opponentModel = null;  // thi swill force reconstruction from random seed
             getParameters().getOpponentModel();
-     //       System.out.println("Resetting seed for MCTS player to " + params.getRandomSeed());
+            //       System.out.println("Resetting seed for MCTS player to " + params.getRandomSeed());
         }
         if (getParameters().advantageFunction instanceof AbstractPlayer)
             ((AbstractPlayer) getParameters().advantageFunction).initializePlayer(state);
@@ -71,14 +72,22 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         return () -> {
             if (getParameters().opponentTreePolicy == OMA || getParameters().opponentTreePolicy == OMA_All)
                 return new OMATreeNode();
+            else if (getParameters().opponentTreePolicy == MCGS || getParameters().opponentTreePolicy == MCGSSelfOnly)
+                return new MCGSNode();
             else
                 return new SingleTreeNode();
         };
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
-        // Search for best action from the root
+    public void registerUpdatedObservation(AbstractGameState gameState) {
+        super.registerUpdatedObservation(gameState);
+        // We did not take a decision, so blank out the previous set of data
+        root = null;
+    }
+
+
+    private void createRootNode(AbstractGameState gameState) {
         if (getParameters().opponentTreePolicy == MultiTree)
             root = new MultiTreeNode(this, gameState, rnd);
         else
@@ -95,6 +104,12 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (getParameters().getOpponentModel() instanceof IMASTUser) {
             ((IMASTUser) getParameters().getOpponentModel()).setStats(root.MASTStatistics);
         }
+    }
+
+    @Override
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
+        // Search for best action from the root
+        createRootNode(gameState);
         root.mctsSearch();
 
         if (getParameters().advantageFunction instanceof ITreeProcessor)
@@ -111,8 +126,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 2 * actions.size() && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
-            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
+        if (!(root instanceof MCGSNode) && root.children.size() > 2 * actions.size() && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
         return root.bestAction();
     }
 
@@ -130,7 +145,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public MCTSPlayer copy() {
         MCTSPlayer retValue = new MCTSPlayer((MCTSParams) getParameters().copy());
-        retValue.setForwardModel(getForwardModel().copy());
+        if (getForwardModel() != null)
+            retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }
 
@@ -148,10 +164,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         Map<AbstractAction, Map<String, Object>> retValue = new LinkedHashMap<>();
 
         if (root != null && root.getVisits() > 1) {
-            for (AbstractAction action : root.children.keySet()) {
-                int visits = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToInt(SingleTreeNode::getVisits).sum();
+            for (AbstractAction action : root.actionValues.keySet()) {
+                ActionStats stats = root.actionValues.get(action);
+                int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
-                double meanValue =  Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum()/ visits;
+                double meanValue = stats == null || visits == 0 ? 0.0 : stats.totValue[root.decisionPlayer] / visits;
                 double heuristicValue = getParameters().heuristic != null ? getParameters().heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
                 double advantageValue = getParameters().advantageFunction != null ? getParameters().advantageFunction.evaluateAction(action, root.state) : 0.0;
 
