@@ -23,8 +23,6 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 
 public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
-    // Random object for this player
-    protected Random rnd;
     // Heuristics used for the agent
     protected boolean debug = false;
     protected SingleTreeNode root;

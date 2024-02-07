@@ -65,6 +65,8 @@ public abstract class AbstractPlayer {
                 action = observedActions.get(0);
                 break;
             default:
+                // we then use our Random for any random choices
+                gameState.rnd = this.rnd;
                 action = _getAction(gameState, observedActions);
         }
         for (IPlayerDecorator decorator : decorators) {
@@ -174,5 +176,9 @@ public abstract class AbstractPlayer {
 
     public PlayerParameters getParameters() {
         return parameters;
+    }
+
+    public Random getRnd() {
+        return rnd;
     }
 }

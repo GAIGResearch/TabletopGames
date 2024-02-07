@@ -113,7 +113,7 @@ public class SGGameState extends AbstractGameState {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
-            copy.drawPile.shuffle(rnd);
+            copy.drawPile.shuffle(redeterminisationRnd);
 
             // Now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {

@@ -111,13 +111,12 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         }
 
         if (previousWinners != null) {
-            // Random winner starts next round
-            int nextPlayer = llgs.getRnd().nextInt(previousWinners.size());
-            int n = -1;
-            for (int i : previousWinners) {
-                n++;
-                if (n == nextPlayer) {
-                    llgs.setTurnOwner(i);
+            // Next winner in turn order starts
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                int p = (i + 1) % llgs.getNPlayers();
+                if (previousWinners.contains(p)) {
+                    llgs.setTurnOwner(p);
+                    break;
                 }
             }
         }
@@ -172,23 +171,16 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         // Round ends when only a single player is left, or when there are no cards left in the draw pile
         if (playersAlive == 1 || llgs.getRemainingCards() == 0) {
-            boolean tie = false;
-            LoveLetterCard.CardType highestCard = null;
-            for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] != GameResult.LOSE_ROUND && llgs.playerHandCards.get(i).getSize() > 0) {
-                    if (highestCard == null) {
-                        highestCard = llgs.playerHandCards.get(i).peek().cardType;
-                    } else if (highestCard == llgs.playerHandCards.get(i).peek().cardType) tie = true;
-                }
-            }
 
             // End the round and add up points
             Set<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
 
-            if (llgs.getCoreGameParameters().recordEventHistory && playersAlive == 1) {
-                llgs.recordHistory("Winner only player left: " + soleWinner + " (" + actionPlayed.toString() + ")");
-            } else if (llgs.getCoreGameParameters().recordEventHistory && llgs.getRemainingCards() == 0) {
-                llgs.recordHistory("No more cards remaining. Winners: " + winners.toString());
+            if (llgs.getCoreGameParameters().recordEventHistory) {
+                if (playersAlive == 1) {
+                    llgs.recordHistory("Winner only player left: " + soleWinner + " (" + actionPlayed.toString() + ")");
+                } else if (llgs.getRemainingCards() == 0) {
+                    llgs.recordHistory("No more cards remaining. Winners: " + winners.toString());
+                }
             }
 
             GameResult result = GameResult.WIN_ROUND;

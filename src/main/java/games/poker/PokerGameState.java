@@ -273,7 +273,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     copy.playerDecks.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(rnd);
+            copy.drawDeck.shuffle(redeterminisationRnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerDecks.get(i).getSize(); j++) {

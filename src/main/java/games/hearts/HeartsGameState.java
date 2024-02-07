@@ -167,7 +167,7 @@ public class HeartsGameState extends AbstractGameState {
                     copy.pendingPasses.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(rnd);
+            copy.drawDeck.shuffle(redeterminisationRnd);
 
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {

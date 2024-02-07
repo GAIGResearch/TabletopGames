@@ -54,7 +54,7 @@ public class StrategoGameState extends AbstractGameState{
             if (piece != null) {
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
-                    int typeIdx = rnd.nextInt(pieceTypesHidden.size());
+                    int typeIdx = redeterminisationRnd.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
                     s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));

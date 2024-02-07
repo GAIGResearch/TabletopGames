@@ -283,6 +283,9 @@ public class PuertoRicoGameState extends AbstractGameState {
         PuertoRicoGameState retValue = new PuertoRicoGameState(gameParameters.copy(), nPlayers);
         retValue.ships = ships.stream().map(Ship::copy).collect(toList());
         retValue.plantationDeck = plantationDeck.copy();
+        if (playerId != -1) {
+            retValue.plantationDeck.shuffle(redeterminisationRnd);
+        }
         retValue.visiblePlantations = visiblePlantations.copy();
         retValue.plantationDiscards = plantationDiscards.copy();
         retValue.playerBoards = playerBoards.stream().map(PRPlayerBoard::copy).collect(toList());

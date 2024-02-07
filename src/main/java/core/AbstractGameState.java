@@ -65,7 +65,11 @@ public abstract class AbstractGameState {
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
     private int gameID;
+    // rnd is used for all random number generation in the game - for events within the game
     protected Random rnd;
+    // redeterminisationRnd is used for redeterminisation only - this is to ensure that the main game is not affected
+    // this is not initialised from any seed, as redeterminisation is used to hide data from players and cannot affect the game itself
+    protected Random redeterminisationRnd = new Random();
 
     /**
      * @param gameParameters - game parameters.
@@ -83,7 +87,7 @@ public abstract class AbstractGameState {
     /**
      * Resets variables initialised for this game state.
      */
-    void reset() {
+    protected void reset() {
         allComponents = new Area(-1, "All Components");
         gameStatus = GAME_ONGOING;
         playerResults = new CoreConstants.GameResult[getNPlayers()];
@@ -200,6 +204,13 @@ public abstract class AbstractGameState {
         turnOwner = newFirstPlayer;
     }
 
+    /**
+     * The framework maintains a random number generator for each game state.
+     * Use this as a default; there is no need to create your own.
+     * The one exception to this guideline is in the copy() method, where redeterminisation should *not* use this generator.
+     * It should use redeterminisationRnd instead.
+     * @return
+     */
     public Random getRnd() {
         return rnd;
     }
@@ -289,7 +300,10 @@ public abstract class AbstractGameState {
         s.turnCounter = turnCounter;
         s.turnOwner = turnOwner;
         s.firstPlayer = firstPlayer;
-        s.rnd = rnd;
+        // If we are copying from a player's perspective, then we branch the RNG so that the master copy
+        // is not called an arbitrary number of times. This is to ensure that all shuffles in the main game are
+        // the same if we start with the same seed
+        s.rnd = playerId == -1 ? rnd : new Random(System.currentTimeMillis());
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -402,6 +416,12 @@ public abstract class AbstractGameState {
      * Create a copy of the game state containing only those components the given player can observe (if partial
      * observable).
      *
+     * This is also responsible for shuffling any hidden information, such as cards in a deck. (aka 'redeterminisation')
+     * There are some utilities to assist with this in utilities.DeterminisationUtilities.
+     * One of the most important things to remember is that the random number generator from getRnd() should not be used in this method.
+     * This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)
+     * Instead use redeterminisationRnd, which is provided for this specific purpose.
+     *
      * @param playerId - player observing this game state.
      */
     protected abstract AbstractGameState _copy(int playerId);
@@ -420,7 +440,7 @@ public abstract class AbstractGameState {
      * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
-     * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
+     * (Unlike _getHeuristicScore(), there is no constraint on the range...whatever the game rules say.
      *
      * @param playerId - player observing the state.
      * @return - double, score of current state

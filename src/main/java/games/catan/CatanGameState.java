@@ -541,7 +541,7 @@ public class CatanGameState extends AbstractGameState {
             }
             playerDevCards.get(p).clear();
         }
-        devCards.shuffle(rnd);
+        devCards.shuffle(redeterminisationRnd);
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;
