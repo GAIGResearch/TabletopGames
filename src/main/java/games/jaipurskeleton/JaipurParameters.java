@@ -2,7 +2,6 @@ package games.jaipurskeleton;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import evaluation.TunableParameters;
 import games.jaipurskeleton.components.JaipurCard;
 
 import java.util.HashMap;
@@ -16,7 +15,7 @@ import java.util.Objects;
  *
  * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
  *
- * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
+ * <p>The class can optionally extend from {@link evaluation.optimisation.TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
 public class JaipurParameters extends AbstractParameters {
@@ -37,13 +36,13 @@ public class JaipurParameters extends AbstractParameters {
     int nPointsMostCamels = 5;
     int nGoodTokensEmptyRoundEnd = 3;
 
-    public JaipurParameters(long seed) {
-        super(seed);
+    public JaipurParameters() {
+        super();
     }
 
     // Copy constructor
-    private JaipurParameters(long seed, JaipurParameters jaipurParameters) {
-        super(seed);
+    private JaipurParameters(JaipurParameters jaipurParameters) {
+        super();
         this.goodNCardsMinimumSell = new HashMap<>(jaipurParameters.getGoodNCardsMinimumSell());
         this.bonusTokensAvailable = new HashMap<>();
         for (int n: jaipurParameters.getBonusTokensAvailable().keySet()) {
@@ -71,15 +70,14 @@ public class JaipurParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return new JaipurParameters(System.currentTimeMillis(), this);
+        return new JaipurParameters(this);
     }
 
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof JaipurParameters)) return false;
+        if (!(o instanceof JaipurParameters that)) return false;
         if (!super.equals(o)) return false;
-        JaipurParameters that = (JaipurParameters) o;
         return nPointsMostCamels == that.nPointsMostCamels && nGoodTokensEmptyRoundEnd == that.nGoodTokensEmptyRoundEnd && Objects.equals(goodNCardsMinimumSell, that.goodNCardsMinimumSell) && Objects.equals(bonusTokensAvailable, that.bonusTokensAvailable);
     }
 

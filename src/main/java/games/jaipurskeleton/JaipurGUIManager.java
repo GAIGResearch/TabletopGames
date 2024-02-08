@@ -17,6 +17,7 @@ import utilities.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Set;
 
 import static games.jaipurskeleton.components.JaipurCard.GoodType.*;
 
@@ -57,7 +58,7 @@ public class JaipurGUIManager extends AbstractGUIManager {
     public static int viewWidth, viewHeight;
     public static int border = 30;
 
-    public JaipurGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public JaipurGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null) return;
 
@@ -72,7 +73,7 @@ public class JaipurGUIManager extends AbstractGUIManager {
         JPanel main = new JPanel();
         main.setLayout(new BorderLayout());
         JPanel infoPanel = createGameStateInfoPanel("Jaipur", game.getGameState(), defaultDisplayWidth, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
 
         GamePanel playPanel = new GamePanel();
         playPanel.setBackground(ImageIO.GetInstance().getImage("data/games/jaipurbg.png"));
@@ -150,7 +151,7 @@ public class JaipurGUIManager extends AbstractGUIManager {
      */
     @Override
     public int getMaxActionSpace() {
-        return 10;  // TODO: increase this number if doing optional exercise week 1
+        return 10;   // TODO: increase this number if doing optional exercise week 1
     }
 
     /**

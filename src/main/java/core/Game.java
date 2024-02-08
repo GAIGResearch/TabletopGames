@@ -7,7 +7,6 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
@@ -835,7 +834,6 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new BasicMCTSPlayer());
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;

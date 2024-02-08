@@ -1,0 +1,12 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    [
+      {"class": "games.jaipurskeleton.stats.JaipurMetrics$RoundScoreDifference" },
+      {"class": "games.jaipurskeleton.stats.JaipurMetrics$PurchaseFromMarket" },
+      {"class": "games.jaipurskeleton.stats.JaipurMetrics$PurchaseFromMarketTot" },
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "evaluation.metrics.GameMetrics$Actions" }
+    ]
+  ]
+}

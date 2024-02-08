@@ -329,9 +329,9 @@ public class JaipurForwardModel extends StandardForwardModel {
                 jgs.setGameStatus(CoreConstants.GameResult.GAME_END);
                 for (int i = 0; i < jgs.getNPlayers(); i++) {
                     if (i == winner) {
-                        jgs.setPlayerResult(WIN, i);
+                        jgs.setPlayerResult(WIN_GAME, i);
                     } else {
-                        jgs.setPlayerResult(LOSE, i);
+                        jgs.setPlayerResult(LOSE_GAME, i);
                     }
                 }
                 return;

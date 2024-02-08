@@ -177,14 +177,14 @@ public class JaipurGameState extends AbstractGameState {
     }
 
     @Override
-    public Double getTiebreak(int playerId, int tier) {
+    public double getTiebreak(int playerId, int tier) {
         // 2 tiebreaks: most bonus tokens; if still tied, tiebreak is most good tokens
         if (tier == 1) {
-            return (double) playerNBonusTokens.get(playerId).getValue();
+            return playerNBonusTokens.get(playerId).getValue();
         } else if (tier == 2) {
-            return (double) playerNGoodTokens.get(playerId).getValue();
+            return playerNGoodTokens.get(playerId).getValue();
         }
-        return null;
+        return 0;
     }
 
     public List<Map<JaipurCard.GoodType, Counter>> getPlayerHands() {

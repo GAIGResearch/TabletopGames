@@ -1,0 +1,8 @@
+{
+  "game": "Jaipur",
+  "selfPlay": false,
+  "nPlayers": 2,
+  "matchups": 10,
+  "listener": "metrics/jaipur.json",
+  "verbose": true
+}
