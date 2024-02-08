@@ -1,7 +1,6 @@
 package games.dominion;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Card;
@@ -26,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
-    Random rnd;
     int playerCount;
     DominionParameters params;
     // Counts of cards on the table should be fine
@@ -54,9 +52,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
-        defenceStatus = new boolean[nPlayers];  // defaults to false
         params = (DominionParameters) gameParameters;
         this._reset();
     }
@@ -156,8 +152,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
     public int availableSpend(int playerID) {
         if (playerID != turnOwner) {
-            System.out.println(this);
-            throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
+            return 0;
         }
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
@@ -272,7 +267,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // need to shuffle drawpile separately
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
-                retValue.playerDrawPiles[p].shuffleVisible(rnd, p, false);
+                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, p, false);
             } else {
                 // need to combine and shuffle hands and drawpiles
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -287,7 +282,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // we have now moved all the non-visible Hand cards into the Draw pile to reshuffle
                 retValue.playerHands[p].clear(); // we will need to reconstruct this, including visibility status in a sec
                 // we then reshuffle all the non-visible cards
-                retValue.playerDrawPiles[p].shuffleVisible(rnd, playerId, false);
+                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, playerId, false);
                 // we then remove cards from the top of the shuffled draw pile (in the region we know is not visible)
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
                     if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {
@@ -324,9 +319,9 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE_GAME)
             return -1.0;
-        if (getPlayerResults()[playerId] == CoreConstants.GameResult.WIN)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.WIN_GAME)
             return 1.0;
 
         int score = getTotal(playerId, c -> c.victoryPoints(playerId, this));

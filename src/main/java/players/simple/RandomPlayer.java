@@ -1,6 +1,5 @@
 package players.simple;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -13,9 +12,8 @@ public class RandomPlayer extends AbstractPlayer {
     /**
      * Random generator for this agent.
      */
-    private final Random rnd;
-
     public RandomPlayer(Random rnd) {
+        super(null, "RandomPlayer");
         this.rnd = rnd;
     }
 

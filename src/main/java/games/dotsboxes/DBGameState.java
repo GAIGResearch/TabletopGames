@@ -1,13 +1,9 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.interfaces.IStateHeuristic;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.StandardTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 
 import java.util.*;
@@ -29,7 +25,7 @@ public class DBGameState extends AbstractGameState {
     int[] nCellsPerPlayer;
     HashMap<DBCell, Integer> cellToOwnerMap;  // Mapping from each cell to its owner, if complete
     HashMap<DBEdge, Integer> edgeToOwnerMap;  // Mapping from each edge to its owner, if placed
-    boolean lastActionScored;
+    boolean lastActionDidNotScore;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -58,7 +54,7 @@ public class DBGameState extends AbstractGameState {
         dbgs.cells = cells;
         dbgs.edgeToCellMap = edgeToCellMap;
         dbgs.cellToEdgesMap = cellToEdgesMap;
-        dbgs.lastActionScored = lastActionScored;
+        dbgs.lastActionDidNotScore = lastActionDidNotScore;
 
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
         dbgs.cellToOwnerMap = (HashMap<DBCell, Integer>) cellToOwnerMap.clone();
@@ -94,12 +90,19 @@ public class DBGameState extends AbstractGameState {
         if (!(o instanceof DBGameState)) return false;
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
-        return lastActionScored == that.lastActionScored && Objects.equals(heuristic, that.heuristic) && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) && Objects.equals(edgeToCellMap, that.edgeToCellMap) && Objects.equals(cellToEdgesMap, that.cellToEdgesMap) && Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) && Objects.equals(cellToOwnerMap, that.cellToOwnerMap) && Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
+        return lastActionDidNotScore == that.lastActionDidNotScore && Objects.equals(heuristic, that.heuristic)
+                && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) &&
+                Objects.equals(edgeToCellMap, that.edgeToCellMap) &&
+                Objects.equals(cellToEdgesMap, that.cellToEdgesMap) &&
+                Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
+                Objects.equals(cellToOwnerMap, that.cellToOwnerMap) &&
+                Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), heuristic, edges, cells, edgeToCellMap, cellToEdgesMap, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
+        int result = Objects.hash(super.hashCode(), edges, cells, edgeToCellMap, cellToEdgesMap,
+                cellToOwnerMap, edgeToOwnerMap, lastActionDidNotScore);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
@@ -107,25 +110,42 @@ public class DBGameState extends AbstractGameState {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        int result = Objects.hash(gameParameters);
-        sb.append(result).append("|");
-        result = Objects.hash(getAllComponents());
-        sb.append(result).append("|");
-        result = Objects.hash(gameStatus);
-        sb.append(result).append("|");
-        result = Objects.hash(gamePhase);
-        sb.append(result).append("|");
-        result = Arrays.hashCode(playerResults);
-        sb.append(result).append("|*|");
-        result = Arrays.hashCode(nCellsPerPlayer);
-        sb.append(result).append("|");
-        result = Objects.hashCode(cellToOwnerMap);
-        sb.append(result).append("|");
-        result = Objects.hashCode(edgeToOwnerMap);
-        sb.append(result).append("|");
-        result = Objects.hashCode(lastActionScored);
-        sb.append(result).append("|");
+        sb.append("{");
 
+        int i = 0;
+
+        for (DBEdge e: edges) {
+            if (i++ != 0) {
+                sb.append(",");
+            }
+            int owner = -1;
+            if (edgeToOwnerMap.get(e) != null) {
+                owner = edgeToOwnerMap.get(e);
+            }
+            sb.append("\"").append("Edge_Owner_").append(e.from.getX()).append("_").append(e.from.getY()).
+                    append(e.to.getX()).append(e.to.getY()).append("\":").append(owner);
+        }
+
+        for (DBCell c: cells) {
+            sb.append(",");
+            int owner = -1;
+            if (cellToOwnerMap.get(c) != null) {
+                owner = cellToOwnerMap.get(c);
+            }
+            sb.append("\"").append("Cell_Owner_").append(c.position.getX()).append("_").append(c.position.getY()).append("\":").append(owner);
+            sb.append(",");
+
+            int edgeCount = 0;
+
+            for (DBEdge e : cellToEdgesMap.get(c)) {
+                if (edgeToOwnerMap.get(e) != null) {
+                    edgeCount++;
+                }
+            }
+            sb.append("\"").append("Cell_Edge_Count_").append(c.position.getX()).append("_").append(c.position.getY()).append("\":").append(edgeCount);
+        }
+
+        sb.append("}");
         return sb.toString();
     }
 
@@ -139,6 +159,7 @@ public class DBGameState extends AbstractGameState {
         }
         return retValue;
     }
-    public boolean getLastActionScored(){return lastActionScored;}
-    public void setLastActionScored(boolean value){lastActionScored = value;}
+    public boolean getLastActionDidNotScore(){return lastActionDidNotScore;}
+    public void setLastActionDidNotScore(boolean value){
+        lastActionDidNotScore = value;}
 }

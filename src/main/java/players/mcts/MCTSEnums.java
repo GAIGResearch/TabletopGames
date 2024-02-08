@@ -3,7 +3,7 @@ package players.mcts;
 public class MCTSEnums {
 
     public enum Strategies {
-        RANDOM, MAST, CLASS, PARAMS
+        RANDOM, MAST, CLASS, PARAMS, DEFAULT
     }
 
     public enum Information {
@@ -21,7 +21,7 @@ public class MCTSEnums {
     }
 
     public enum TreePolicy {
-        UCB, EXP3, AlphaGo, RegretMatching, UCB_Tuned
+        UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, Hedge
     }
 
     public enum RolloutTermination {
@@ -29,11 +29,12 @@ public class MCTSEnums {
     }
 
     public enum OpponentTreePolicy {
-        SelfOnly(true), Paranoid(false), MaxN(false),
-        MultiTree(true), MultiTreeParanoid(true),
-        OMA(false), OMA_All(false);
+        SelfOnly(true), OneTree(false),
+        MultiTree(true),
+        OMA(false), OMA_All(false),
+        MCGS(false), MCGSSelfOnly(true);
 
-        boolean selfOnlyTree;
+        public final boolean selfOnlyTree;
         OpponentTreePolicy(boolean selfOnlyTree) {
             this.selfOnlyTree = selfOnlyTree;
         }

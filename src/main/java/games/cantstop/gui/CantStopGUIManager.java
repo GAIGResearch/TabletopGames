@@ -7,6 +7,7 @@ import players.human.ActionController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 public class CantStopGUIManager extends AbstractGUIManager {
 
@@ -14,7 +15,7 @@ public class CantStopGUIManager extends AbstractGUIManager {
     static int cantStopWidth = 600;
     static int cantStopHeight = 500;
 
-    public CantStopGUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public CantStopGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         CantStopGameState state = (CantStopGameState) game.getGameState();
         view = new CantStopBoardView(state);
@@ -30,9 +31,6 @@ public class CantStopGUIManager extends AbstractGUIManager {
         parent.add(infoPanel, BorderLayout.NORTH);
         parent.add(actionPanel, BorderLayout.SOUTH);
         parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 20));
-        parent.revalidate();
-        parent.setVisible(true);
-        parent.repaint();
     }
 
     @Override

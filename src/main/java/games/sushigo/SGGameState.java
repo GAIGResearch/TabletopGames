@@ -3,9 +3,12 @@ package games.sushigo;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import org.json.simple.JSONObject;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -17,7 +20,7 @@ public class SGGameState extends AbstractGameState {
     int nCardsInHand = 0;
 
     List<List<ChooseCard>> cardChoices;  // one list per player, per turn, indicates the actions chosen by the player, saved for simultaneous execution
-    HashMap<SGCard.SGCardType, Counter>[] playedCardTypes;
+    Map<SGCard.SGCardType, Counter>[] playedCardTypes;
     List<Deck<SGCard>> playedCards;
     Counter[] playerScore;
 
@@ -25,7 +28,6 @@ public class SGGameState extends AbstractGameState {
     HashMap<SGCard.SGCardType, Counter>[] playedCardTypesAllGame;
     HashMap<SGCard.SGCardType, Counter>[] pointsPerCardType;
 
-    Random rnd;
     int deckRotations = 0;
 
     /**
@@ -36,7 +38,6 @@ public class SGGameState extends AbstractGameState {
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -96,24 +97,14 @@ public class SGGameState extends AbstractGameState {
 
         if (playerId == -1) {
             for (int i = 0; i < getNPlayers(); i++) {
-                copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
+                List<ChooseCard> copiedItems = new ArrayList<>();
+                for (ChooseCard cc : cardChoices.get(i)) {
+                    copiedItems.add(cc.copy());
+                }
+                copy.cardChoices.add(copiedItems);
             }
         } else {
             // Now we need to redeterminise
-            // We don't know what other players have chosen for this round, hide card choices
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i == playerId) {
-                    copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
-                } else {
-                    // Replace others with hidden choices
-                    ArrayList<ChooseCard> hiddenChoice = new ArrayList<>();
-                    for (ChooseCard c : cardChoices.get(i)) {
-                        hiddenChoice.add(c.getHiddenChoice());
-                    }
-                    copy.cardChoices.add(hiddenChoice);
-                }
-            }
-
             // We need to shuffle the hands of other players with the draw deck and then redraw
 
             // Add player hands unseen back to the draw pile
@@ -122,7 +113,7 @@ public class SGGameState extends AbstractGameState {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
-            copy.drawPile.shuffle(rnd);
+            copy.drawPile.shuffle(redeterminisationRnd);
 
             // Now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {
@@ -135,13 +126,24 @@ public class SGGameState extends AbstractGameState {
                     }
                 }
             }
+
+            // We don't know what other players have chosen for this round, hide card choices
+            turnOwner = playerId;
+            for (int i = 0; i < getNPlayers(); i++) {
+                copy.cardChoices.add(new ArrayList<>());
+                if (i == playerId) {
+                    for (ChooseCard cc : cardChoices.get(i)) {
+                        copy.cardChoices.get(i).add(cc.copy());
+                    }
+                }
+            }
         }
 
         return copy;
     }
 
     /**
-     * we do know the contents of the hands of players to our T to our left, where T is the number of player turns
+     * we do know the contents of the hands of players up to T to our left, where T is the number of player turns
      * so far, as we saw that hand on its way through our own
      *
      * @param playerId   - id of player whose vision we're checking
@@ -189,9 +191,9 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    public Double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId, int tier) {
         // Tie-break is number of puddings
-        return (double) playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
+        return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
     }
 
     @Override
@@ -199,15 +201,15 @@ public class SGGameState extends AbstractGameState {
         return playerScore[playerId].getValue();
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
+    public Map<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
         return playedCardTypes;
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
+    public Map<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
         return playedCardTypesAllGame;
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
+    public Map<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
         return pointsPerCardType;
     }
 
@@ -245,8 +247,7 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) &&
                 Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) &&
-                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) &&
-                Objects.equals(rnd, that.rnd);
+                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame);
     }
 
     @Override
@@ -273,4 +274,5 @@ public class SGGameState extends AbstractGameState {
                 Arrays.hashCode(playedCardTypesAllGame) + "|" +
                 super.hashCode() + "|";
     }
+
 }

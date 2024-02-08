@@ -1,6 +1,9 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
+import core.actions.DoNothing;
+import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.Arrays;
@@ -11,6 +14,9 @@ import java.util.stream.IntStream;
 import static core.CoreConstants.GameResult.*;
 
 public abstract class AbstractForwardModel {
+
+    public ActionTreeNode root;
+    public List<ActionTreeNode> leaves;
 
     /* Limited access/Final methods */
 
@@ -67,6 +73,7 @@ public abstract class AbstractForwardModel {
      * @return - List of AbstractAction objects.
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) { return _computeAvailableActions(gameState); }
 
     /**
      * Gets a copy of the FM with a new random number generator.
@@ -93,14 +100,16 @@ public abstract class AbstractForwardModel {
      * @param flag - boolean to check if player should be disqualified, or random action should be played
      * @param gameState - current game state
      */
-    protected final void disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
+    protected final AbstractAction disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
         if (flag) {
             gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             endPlayerTurn(gameState);
+            return new DoNothing();
         } else {
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);
             int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
             next(gameState, possibleActions.get(randomAction));
+            return possibleActions.get(randomAction);
         }
     }
 
@@ -126,10 +135,6 @@ public abstract class AbstractForwardModel {
         if (action != null) {
             int player = currentState.getCurrentPlayer();
             currentState.recordAction(action, player);
-            if (currentState.isActionInProgress()) {
-                // we register the action with the currently active ActionSequence
-                currentState.currentActionInProgress().registerActionTaken(currentState, action);
-            }
             _next(currentState, action);
         } else {
             if (currentState.coreGameParameters.verbose) {
@@ -147,9 +152,16 @@ public abstract class AbstractForwardModel {
      * @return - the list of actions available.
      */
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+        return computeAvailableActions(gameState, gameState.coreGameParameters.actionSpace);
+    }
+
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         if (gameState.isActionInProgress()) {
-            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
+            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace);
+        }
+        if (actionSpace != null && !actionSpace.isDefault()) {
+            return _computeAvailableActions(gameState, actionSpace);
         }
         return _computeAvailableActions(gameState);
     }
@@ -167,11 +179,11 @@ public abstract class AbstractForwardModel {
         for (int p = 0; p < gs.getNPlayers(); p++) {
             int o = gs.getOrdinalPosition(p);
             if (o == 1 && drawn)
-                gs.setPlayerResult(DRAW, p);
+                gs.setPlayerResult(DRAW_GAME, p);
             else if (o == 1)
-                gs.setPlayerResult(WIN, p);
+                gs.setPlayerResult(WIN_GAME, p);
             else
-                gs.setPlayerResult(LOSE, p);
+                gs.setPlayerResult(LOSE_GAME, p);
         }
         if (gs.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gs.getPlayerResults()));

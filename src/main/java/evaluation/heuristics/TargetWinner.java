@@ -18,7 +18,7 @@ public class TargetWinner implements IGameHeuristic {
         // 0 otherwise
         for (int p = 0; p < game.getPlayers().size(); p++) {
             if (game.getPlayers().get(p).toString().equals(winnerName))
-                if (game.getGameState().getPlayerResults()[p] == CoreConstants.GameResult.WIN)
+                if (game.getGameState().getPlayerResults()[p] == CoreConstants.GameResult.WIN_GAME)
                     return 1.0;
         }
         return 0.0;

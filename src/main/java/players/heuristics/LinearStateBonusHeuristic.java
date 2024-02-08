@@ -3,7 +3,6 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
-import utilities.Utils;
 
 
 public class LinearStateBonusHeuristic extends LinearStateHeuristic {
@@ -25,11 +24,11 @@ public class LinearStateBonusHeuristic extends LinearStateHeuristic {
         }
 
         switch (state.getPlayerResults()[playerId]) {
-            case WIN:
+            case WIN_GAME:
                 return 1.5 * super.evaluateState(state, playerId);
-            case LOSE:
+            case LOSE_GAME:
                 return 0.75 * super.evaluateState(state, playerId);
-            case DRAW:
+            case DRAW_GAME:
                 return super.evaluateState(state, playerId);
             default:
                 throw new AssertionError("Not reachable for " + state.getPlayerResults()[playerId]);

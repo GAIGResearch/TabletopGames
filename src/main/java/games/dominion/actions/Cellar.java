@@ -17,6 +17,9 @@ public class Cellar extends DominionAction implements IExtendedSequence {
     public Cellar(int playerId) {
         super(CardType.CELLAR, playerId);
     }
+    public Cellar(int playerId, boolean dummy) {
+        super(CardType.CELLAR, playerId, dummy);
+    }
 
     int cardsDiscarded = 0;
     boolean executed = false;
@@ -35,7 +38,7 @@ public class Cellar extends DominionAction implements IExtendedSequence {
      */
     @Override
     public Cellar copy() {
-        Cellar retValue = new Cellar(player);
+        Cellar retValue = new Cellar(player, dummyAction);
         retValue.cardsDiscarded = cardsDiscarded;
         retValue.executed = executed;
         return retValue;
@@ -45,8 +48,7 @@ public class Cellar extends DominionAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         // we can discard any card in hand, so create a DiscardCard action for each
-        Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, player).stream().collect(toSet());
-        List<AbstractAction> discardActions = uniqueCardsInHand.stream()
+        List<AbstractAction> discardActions = state.getDeck(DeckType.HAND, player).stream()
                 .map(card -> new DiscardCard(card.cardType(), player))
                 .distinct()
                 .collect(toList());
@@ -56,7 +58,7 @@ public class Cellar extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+    public void _afterAction(AbstractGameState gs, AbstractAction action) {
         DominionGameState state = (DominionGameState) gs;
         // if the action is DoNothing, then we have stopped
         // else we continue discarding
@@ -86,13 +88,13 @@ public class Cellar extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Cellar) {
             Cellar other = (Cellar) obj;
-            return other.player == player && other.cardsDiscarded == cardsDiscarded && other.executed == executed;
+            return super.equals(obj) && other.cardsDiscarded == cardsDiscarded && other.executed == executed;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(executed, player, cardsDiscarded, CardType.CELLAR);
+        return Objects.hash(executed, cardsDiscarded) + 31 * super.hashCode();
     }
 }

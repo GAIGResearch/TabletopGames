@@ -1,7 +1,7 @@
 package core;
 
 import core.interfaces.ITunableParameters;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.*;
@@ -25,12 +25,14 @@ public abstract class AbstractParameters {
     long incrementMilestoneS = 0;
 
 
-    public AbstractParameters(long seed) {
-        randomSeed = seed;
+    public AbstractParameters() {
+        this.setRandomSeed(System.currentTimeMillis());
     }
 
     /**
      * Return a copy of this game parameters object, with the same parameters as in the original.
+     * It is important that this return a new object. As the super-class will amend the randomSeed
+     * of the value returned.
      *
      * @return - new game parameters object.
      */
@@ -160,6 +162,7 @@ public abstract class AbstractParameters {
                         params.setParameterValue(name, params.getPossibleValues(name).get(randomChoice));
                     }
             );
+            reset();
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not randomizing");
         }

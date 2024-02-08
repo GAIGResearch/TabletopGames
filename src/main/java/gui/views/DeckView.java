@@ -128,7 +128,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
         }
     }
 
-    private boolean componentVisibility(Deck<T> deck, int index) {
+    public boolean componentVisibility(Deck<T> deck, int index) {
         if (deck instanceof PartialObservableDeck && humanId != -1) {
             return ((PartialObservableDeck<T>) deck).isComponentVisible(index, humanId);
         }

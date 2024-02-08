@@ -2,9 +2,8 @@ package core.turnorders;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult.*;
-import static core.CoreConstants.GameResult.LOSE;
 
 /**
  * This is purely for old-style game implementations from before January 2023
@@ -39,7 +37,7 @@ public abstract class TurnOrder {
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
 
-    protected List<GameListener> listeners = new ArrayList<>();
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
@@ -139,7 +137,7 @@ public abstract class TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
 
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState,getCurrentPlayer(gameState))));
 
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
@@ -156,7 +154,7 @@ public abstract class TurnOrder {
         logEvent(eventText.get(), state);
     }
     public void logEvent(String eventText, AbstractGameState state) {
-        AbstractAction logAction = new LogEvent(eventText);
+        LogEvent logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, state, logAction)));
         if (state.getCoreGameParameters().recordEventHistory) {
             state.recordHistory(eventText);
@@ -176,7 +174,7 @@ public abstract class TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
 
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState, getCurrentPlayer(gameState))));
         if (gameState.getCoreGameParameters().recordEventHistory) {
             gameState.recordHistory(Event.GameEvent.ROUND_OVER.name());
         }
@@ -265,11 +263,11 @@ public abstract class TurnOrder {
         for (int p = 0; p < gs.getNPlayers(); p++) {
             int o = gs.getOrdinalPosition(p);
             if (o == 1 && drawn)
-                gs.setPlayerResult(DRAW, p);
+                gs.setPlayerResult(DRAW_GAME, p);
             else if (o == 1)
-                gs.setPlayerResult(WIN, p);
+                gs.setPlayerResult(WIN_GAME, p);
             else
-                gs.setPlayerResult(LOSE, p);
+                gs.setPlayerResult(LOSE_GAME, p);
         }
         if (gs.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gs.getPlayerResults()));
@@ -295,7 +293,7 @@ public abstract class TurnOrder {
         return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }

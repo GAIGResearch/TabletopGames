@@ -5,8 +5,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
 
-import static core.CoreConstants.GameResult.LOSE;
-
 public class Fold extends AbstractAction implements IPrintable {
 
     public final int playerId;
@@ -20,6 +18,8 @@ public class Fold extends AbstractAction implements IPrintable {
         PokerGameState pgs = (PokerGameState) gameState;
         pgs.getPlayerFold()[playerId] = true;
         pgs.getPlayerNeedsToCall()[playerId] = false;
+        if (pgs.getPlayerAllIn()[playerId])
+            throw new AssertionError("Should not be able to Fold if AllIn");
         return true;
     }
 

@@ -1,6 +1,6 @@
 package players.learners;
 
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import libsvm.svm_parameter;
 
 import static players.learners.SVMParams.SVM_CONSTANTS.NU_SVR;
@@ -13,7 +13,6 @@ public class SVMParams extends TunableParameters {
     double nu, C, eps, p, gamma, coef0;
     int degree;
     public SVMParams() {
-        super(System.currentTimeMillis());
         addTunableParameter("kernel", RBF);
         addTunableParameter("type", NU_SVR);
         addTunableParameter("nu", 0.5);

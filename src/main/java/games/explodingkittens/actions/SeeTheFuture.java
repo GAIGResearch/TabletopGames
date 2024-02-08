@@ -78,7 +78,7 @@ public class SeeTheFuture extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SeeTheFuture && ((SeeTheFuture) obj).playerID == playerID;
+        return obj instanceof SeeTheFuture && ((SeeTheFuture) obj).playerID == playerID && super.equals(obj);
     }
 
     @Override

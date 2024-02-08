@@ -19,7 +19,7 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(new Random(gs.getGameParameters().getRandomSeed()));
+        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(gs.getRnd());
         return super.execute(gs);
     }
 
@@ -45,6 +45,18 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
         boolean[] vis = new boolean[gs.getNPlayers()];
         Arrays.fill(vis, true);
         from.setVisibilityOfComponent(fromIndex, vis);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof ShuffleAction)) return false;
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + 293792;
     }
 
     @Override

@@ -2,7 +2,7 @@ package players.rhea;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 
@@ -26,11 +26,6 @@ public class RHEAParams extends PlayerParameters
 
 
     public RHEAParams() {
-        this(System.currentTimeMillis());
-    }
-
-    public RHEAParams(long seed) {
-        super(seed);
         addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
         addTunableParameter("discountFactor", 0.9, Arrays.asList(0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0));
         addTunableParameter("populationSize", 10, Arrays.asList(6, 8, 10, 12, 14, 16, 18, 20));
@@ -70,47 +65,13 @@ public class RHEAParams extends PlayerParameters
 
     @Override
     protected RHEAParams _copy() {
-         RHEAParams retValue = new RHEAParams(System.currentTimeMillis());
-         retValue.horizon = horizon;
-         retValue.discountFactor = discountFactor;
-         retValue.populationSize = populationSize;
-         retValue.shiftLeft = shiftLeft;
-         retValue.eliteCount = eliteCount;
-         retValue.childCount = childCount;
-         retValue.selectionType = selectionType;
-         retValue.tournamentSize = tournamentSize;
-         retValue.crossoverType = crossoverType;
-         retValue.mutationCount = mutationCount;
-         retValue.heuristic = heuristic;
-         retValue.useMAST = useMAST;
-         return retValue;
+        return new RHEAParams();
     }
 
 
     @Override
     public RHEAPlayer instantiate() {
         return new RHEAPlayer(this);
-    }
-
-
-    /**
-     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
-     * If it is, then we set this as the heuristic after the parent code in TunableParameters
-     * has done the work to merge the search spaces together.
-     *
-     * @param json The raw JSON
-     * @return The instantiated object
-     */
-    @Override
-    public Object registerChild(String nameSpace, JSONObject json) {
-        Object child = super.registerChild(nameSpace, json);
-        if ("heuristic".equals(nameSpace)) {
-            heuristic = (IStateHeuristic) child;
-            setParameterValue("heuristic", child);
-        } else {
-            throw new AssertionError("Unknown nameSpace : " + nameSpace);
-        }
-        return child;
     }
 
     public IStateHeuristic getHeuristic() {

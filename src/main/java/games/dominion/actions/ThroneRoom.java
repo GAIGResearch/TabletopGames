@@ -16,6 +16,10 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         super(CardType.THRONE_ROOM, playerId);
     }
 
+    public ThroneRoom(int playerId, boolean dummy) {
+        super(CardType.THRONE_ROOM, playerId, dummy);
+    }
+
     int executionCount = 0;
     CardType enthronedCard;
 
@@ -24,6 +28,7 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         // No immediate effect, we simply move on to which card to enthrone
         if (state.getDeck(DeckType.HAND, player).stream().anyMatch(DominionCard::isActionCard)) {
             state.setActionInProgress(this);
+            state.changeActions(1); // and do not count the action
             return true;
         }
         return false; // no action cards in hand
@@ -35,18 +40,21 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
         if (enthronedCard == null) {
             if (executionCount != 0)
                 throw new AssertionError("Something has gone wrong with Throne Room");
-            return state.getDeck(DeckType.HAND, player).stream()
+            List<AbstractAction> options = state.getDeck(DeckType.HAND, player).stream()
                     .filter(DominionCard::isActionCard)
-                    .map(c -> new EnthroneCard(c.cardType(), player, executionCount))
+                    .map(c -> DominionCard.create(c.cardType()).getAction(player))
                     .distinct()
                     .collect(toList());
+            if (options.isEmpty()) {
+                // this is possible if we throne room a throne room (etc.) and then have no action cards
+                executionCount = 2; // and we are done
+                options.add(new EndPhase());
+            }
+            return options;
         } else {
             if (executionCount != 1)
                 throw new AssertionError("Something has gone wrong with Throne Room");
-            List<AbstractAction> retValue = new ArrayList<>();
-            retValue.add(new EnthroneCard(enthronedCard, player, 1));
-            retValue.add(new EnthroneCard(null, player, 1));
-            return retValue;
+            return Collections.singletonList(DominionCard.create(enthronedCard).getAction(player, true));
         }
     }
 
@@ -56,14 +64,21 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        if (action instanceof EnthroneCard) {
-            enthronedCard = ((EnthroneCard) action).enthronedCard;
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
+        if (action instanceof EndPhase) {
+            executionCount = 2;
+            return;
+        }
+        DominionAction da = (DominionAction) action;
+        if (enthronedCard == null) {
+            enthronedCard = da.type;
+        }
+        if (enthronedCard == da.type) {
             executionCount++;
-            // The EnthroneCard does the rest
-            if (executionCount > 2) {
-                throw new AssertionError("Enthronement count should stop at 2");
-            }
+        } else
+            throw new AssertionError("Enthrone action should be the same as the one selected");
+        if (executionCount > 2) {
+            throw new AssertionError("Enthronement count should stop at 2");
         }
     }
 
@@ -74,7 +89,7 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
 
     @Override
     public ThroneRoom copy() {
-        ThroneRoom retValue = new ThroneRoom(player);
+        ThroneRoom retValue = new ThroneRoom(player, dummyAction);
         retValue.enthronedCard = enthronedCard;
         retValue.executionCount = executionCount;
         return retValue;
@@ -84,14 +99,14 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof ThroneRoom) {
             ThroneRoom other = (ThroneRoom) obj;
-            return other.player == player && other.enthronedCard == enthronedCard && other.executionCount == executionCount;
+            return super.equals(obj) && other.enthronedCard == enthronedCard && other.executionCount == executionCount;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(CardType.THRONE_ROOM, executionCount, player, enthronedCard);
+        return Objects.hash(executionCount, enthronedCard) + 31 * super.hashCode();
     }
 }
 

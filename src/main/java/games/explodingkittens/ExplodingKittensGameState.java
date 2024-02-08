@@ -1,6 +1,5 @@
 package games.explodingkittens;
 
-import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
@@ -10,7 +9,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
+import core.interfaces.IStateFeatureJSON;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
@@ -91,10 +90,9 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
                     }
                 }
             }
-            Random r = new Random(ekgs.gameParameters.getRandomSeed());
 
             // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
-            ekgs.drawPile.shuffleVisible(r, playerId, false);
+            ekgs.drawPile.shuffleVisible(redeterminisationRnd, playerId, false);
             Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
@@ -140,18 +138,18 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
      */
     @Override
     public double getGameScore(int playerId) {
-        if (playerResults[playerId] == CoreConstants.GameResult.LOSE)
+        if (playerResults[playerId] == CoreConstants.GameResult.LOSE_GAME)
             // knocked out
             return orderOfPlayerDeath[playerId];
         // otherwise our current score is the number knocked out + 1
-        return Arrays.stream(playerResults).filter(status -> status == CoreConstants.GameResult.LOSE).count() + 1;
+        return Arrays.stream(playerResults).filter(status -> status == CoreConstants.GameResult.LOSE_GAME).count() + 1;
     }
 
     @Override
     public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == CoreConstants.GameResult.WIN)
+        if (playerResults[playerId] == CoreConstants.GameResult.WIN_GAME)
             return 1;
-        if (playerResults[playerId] == CoreConstants.GameResult.LOSE)
+        if (playerResults[playerId] == CoreConstants.GameResult.LOSE_GAME)
             return getNPlayers() - orderOfPlayerDeath[playerId] + 1;
         return 1;  // anyone still alive is jointly winning
     }
@@ -180,15 +178,23 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
      * @param playerID - player who was killed in a kitten explosion.
      */
     public void killPlayer(int playerID) {
-        setPlayerResult(CoreConstants.GameResult.LOSE, playerID);
+        setPlayerResult(CoreConstants.GameResult.LOSE_GAME, playerID);
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
             if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) nPlayersActive++;
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
+            this.gameStatus = CoreConstants.GameResult.GAME_END;
+            for (int i = 0; i < getNPlayers(); i++) {
+                // set winner
+                if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) {
+                    playerResults[i] = CoreConstants.GameResult.WIN_GAME;
+                }
+            }
             turnOrder.endGame(this);
         }
+
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 
     }
@@ -238,6 +244,7 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
     public void printToConsole() {
         System.out.println(toString());
     }
+
 
     // Printing functions for the game state and decks.
 

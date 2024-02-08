@@ -2,8 +2,8 @@ package gui;
 
 import core.*;
 import core.actions.AbstractAction;
-import evaluation.listeners.GameListener;
-import evaluation.TunableParameters;
+import evaluation.listeners.MetricsGameListener;
+import evaluation.optimisation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;
 import gui.models.AITableModel;
@@ -116,7 +116,7 @@ public class Frontend extends GUI {
         agentParameters = new PlayerParameters[PlayerType.values().length];
         for (int i = 0; i < playerOptionsString.length; i++) {
             playerOptionsString[i] = PlayerType.values()[i].name();
-            agentParameters[i] = PlayerType.values()[i].createParameterSet(0);
+            agentParameters[i] = PlayerType.values()[i].createParameterSet();
         }
         // We have one JFrame per player, as different players may use the same agent type with different parameters
         playerParameters = new PlayerParameters[nMaxPlayers];
@@ -437,6 +437,9 @@ public class Frontend extends GUI {
         wrapper.add(gamePanel);
 
         getContentPane().add(wrapper, BorderLayout.CENTER);
+        gamePanel.revalidate();
+        gamePanel.setVisible(true);
+        gamePanel.repaint();
 
         // Frame properties
         setFrameProperties();
@@ -463,7 +466,7 @@ public class Frontend extends GUI {
             JButton reset = new JButton("Reset");
             reset.addActionListener(e -> {
                 playerParameters[playerIndex].reset();
-                PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet(0);
+                PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet();
                 if (defaultParams != null)
                     for (String param : paramNames) {
                         paramValueOptions.get(param).setSelectedItem(defaultParams.getDefaultParameterValue(param));
@@ -487,7 +490,7 @@ public class Frontend extends GUI {
 
     private void listenForDecisions() {
         // add a listener to detect every time an action has been taken
-        gameRunning.addListener(new GameListener() {
+        gameRunning.addListener(new MetricsGameListener() {
             @Override
             public void onEvent(evaluation.metrics.Event event)
             {
@@ -504,7 +507,7 @@ public class Frontend extends GUI {
         if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            nextPlayer._getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
+            nextPlayer.getAction(state, nextPlayer.getForwardModel().computeAvailableActions(state, nextPlayer.getParameters().actionSpace));
 
             JFrame AI_debug = new JFrame();
             AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",
@@ -517,7 +520,7 @@ public class Frontend extends GUI {
                 AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());
                 JTable table = new JTable(AIDecisions);
                 table.setAutoCreateRowSorter(true);
-                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel(String.format("%.2f", value)));
+                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel(String.format("%.2f", (Double) value)));
                 JScrollPane scrollPane = new JScrollPane(table);
                 table.setFillsViewportHeight(true);
                 AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -554,6 +557,7 @@ public class Frontend extends GUI {
             }
             if (!gameRunning.isHumanToMove())
                 humanInputQueue.reset(); // clear out any actions clicked before their turn
+            frame.revalidate();
             frame.repaint();
         }
     }

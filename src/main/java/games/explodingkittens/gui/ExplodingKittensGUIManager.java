@@ -15,6 +15,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Set;
 
 
 public class ExplodingKittensGUIManager extends AbstractGUIManager {
@@ -37,7 +38,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 169, 11), 3);
     Border[] playerViewBorders;
 
-    public ExplodingKittensGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public ExplodingKittensGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         if (game != null) {
@@ -67,7 +68,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(humanID, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
+                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(i, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -103,7 +104,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Exploding Kittens", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());
@@ -137,7 +138,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanPlayerId
+                        || humanPlayerId.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
@@ -157,7 +158,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ekgs.getDrawPile());
-            if (activePlayer == humanPlayerId || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
+            if (humanPlayerId.contains(activePlayer) || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
                 drawPile.setFront(true);
 
         }

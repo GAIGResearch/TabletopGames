@@ -28,13 +28,14 @@ public class RandomTestPlayer extends AbstractPlayer {
     }
 
     public RandomTestPlayer(Random random) {
+        super(null, "RandomTestPlayer");
         this.random = random;
         scores = new TAGNumericStatSummary();
         bf = new TAGNumericStatSummary();
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions ) {
+    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         // Iterate through all actions available to gather statistics
         HashSet<AbstractGameState> states = new HashSet<>();
         states.add(gs.copy());

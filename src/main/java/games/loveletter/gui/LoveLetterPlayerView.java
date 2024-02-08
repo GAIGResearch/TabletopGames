@@ -7,6 +7,7 @@ import games.loveletter.cards.LoveLetterCard;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 import static games.loveletter.gui.LoveLetterGUIManager.*;
 
@@ -16,7 +17,7 @@ public class LoveLetterPlayerView extends JPanel {
     // ID of player
     int playerId;
     // ID of human looking
-    int humanId;
+    Set<Integer> humanId;
     // Number of points player has
     int nPoints, nPointsWin;
 
@@ -29,12 +30,12 @@ public class LoveLetterPlayerView extends JPanel {
     LoveLetterDeckView handCards;
     LoveLetterDeckView discardCards;
 
-    public LoveLetterPlayerView(Deck<LoveLetterCard> hand, Deck<LoveLetterCard> discard, int playerId, int humanId, String dataPath) {
+    public LoveLetterPlayerView(Deck<LoveLetterCard> hand, Deck<LoveLetterCard> discard, int playerId, Set<Integer> humanId, String dataPath) {
         JLabel label1 = new JLabel("Player hand:");
         JLabel label2 = new JLabel("Discards:");
-        handCards = new LoveLetterDeckView(humanId, hand, false, dataPath,
+        handCards = new LoveLetterDeckView(playerId, hand, false, dataPath,
                 new Rectangle(0, 0, playerAreaWidth / 2 - border * 2, llCardHeight));
-        discardCards = new LoveLetterDeckView(humanId, discard, true, dataPath,
+        discardCards = new LoveLetterDeckView(playerId, discard, true, dataPath,
                 new Rectangle(0, 0, playerAreaWidth / 2 - border * 2, llCardHeight));
         JPanel wrap = new JPanel();
         wrap.setLayout(new BoxLayout(wrap, BoxLayout.Y_AXIS));

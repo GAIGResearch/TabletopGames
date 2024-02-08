@@ -9,9 +9,8 @@ import games.stratego.components.Piece;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-public class StrategoGameState extends AbstractGameState {
+public class StrategoGameState extends AbstractGameState{
     GridBoard<Piece> gridBoard;
 
     /**
@@ -51,17 +50,16 @@ public class StrategoGameState extends AbstractGameState {
             }
         }
 
-        Random random = new Random(gameParameters.getRandomSeed());
         for (Piece piece : gridBoard.getComponents()){
             if (piece != null) {
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
-                    int typeIdx = random.nextInt(pieceTypesHidden.size());
+                    int typeIdx = redeterminisationRnd.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));
                 } else{
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.copy());
                 }
             }
         }
@@ -119,4 +117,6 @@ public class StrategoGameState extends AbstractGameState {
     public void printToConsole() {
         System.out.println(gridBoard.toString());
     }
+
+
 }

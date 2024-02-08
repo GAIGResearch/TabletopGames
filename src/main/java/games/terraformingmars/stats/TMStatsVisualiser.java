@@ -1,7 +1,7 @@
 package games.terraformingmars.stats;
 
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.StatsVisualiser;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;
@@ -25,7 +25,7 @@ public class TMStatsVisualiser extends StatsVisualiser {
     public static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
     public static Font defaultFontSmall = new Font("Prototype", Font.BOLD, fontSize-5);
 
-    public TMStatsVisualiser(List<GameListener> listeners) {
+    public TMStatsVisualiser(List<MetricsGameListener> listeners) {
         super(listeners);
 
         // Set background image
@@ -98,7 +98,7 @@ public class TMStatsVisualiser extends StatsVisualiser {
 
         // Custom TM Heatmap (percentage of times the tile was placed out of all games played)
         //  - Construct heatmap view
-        TMGameState gs = new TMGameState(new TMGameParameters(0), 2);
+        TMGameState gs = new TMGameState(new TMGameParameters(), 2);
         TMForwardModel fm = new TMForwardModel();
         fm.setup(gs);
         TAGOccurrenceStatSummary stats2 = (TAGOccurrenceStatSummary)getStats("MapTiles", Event.GameEvent.GAME_OVER);

@@ -15,32 +15,24 @@ import java.util.stream.Collectors;
 
 public class RHEAPlayer extends AbstractPlayer {
     private static final AbstractPlayer randomPlayer = new RandomPlayer();
-    private final Random randomGenerator;
-    RHEAParams params;
-    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    private List<RHEAIndividual> population = new ArrayList<>();
+    List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
+    protected List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double timePerIteration = 0, timeTaken = 0, initTime = 0;
-    private int numIters = 0;
-    private int fmCalls = 0;
-    private int copyCalls = 0;
-    private int repairCount, nonRepairCount;
+    protected double timePerIteration = 0, timeTaken = 0, initTime = 0;
+    protected int numIters = 0;
+    protected int fmCalls = 0;
+    protected int copyCalls = 0;
+    protected int repairCount, nonRepairCount;
     private MASTPlayer mastPlayer;
 
-    public RHEAPlayer() {
-        this(System.currentTimeMillis());
-    }
-
     public RHEAPlayer(RHEAParams params) {
-        randomGenerator = new Random(params.getRandomSeed());
-        this.params = params;
-        setName("rhea");
+        super(params, "RHEAPlayer");
     }
 
-    public RHEAPlayer(long seed) {
-        this(new RHEAParams(seed));
+    @Override
+    public RHEAParams getParameters() {
+        return (RHEAParams) parameters;
     }
-
     @Override
     public void initializePlayer(AbstractGameState state) {
         MASTStatistics = new ArrayList<>();
@@ -50,14 +42,15 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> possibleActions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
-        timer.setMaxTimeMillis(params.budget);
+        timer.setMaxTimeMillis(parameters.budget);
         numIters = 0;
         fmCalls = 0;
         copyCalls = 0;
         repairCount = 0;
         nonRepairCount = 0;
+        RHEAParams params = getParameters();
 
         if (params.useMAST) {
             if (MASTStatistics == null) {
@@ -69,7 +62,7 @@ public class RHEAPlayer extends AbstractPlayer {
                         .map(m -> Utils.decay(m, params.discountFactor))
                         .collect(Collectors.toList());
             }
-            mastPlayer = new MASTPlayer(new Random(params.getRandomSeed()));
+            mastPlayer = new MASTPlayer(null, 1.0, 0.0, System.currentTimeMillis(), 0.0);
             mastPlayer.setStats(MASTStatistics);
         }
         // Initialise individuals
@@ -89,7 +82,7 @@ public class RHEAPlayer extends AbstractPlayer {
             for (int i = 0; i < params.populationSize; ++i) {
                 if (!budgetLeft(timer)) break;
                 population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs,
-                        getPlayerID(), randomGenerator, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
+                        getPlayerID(), rnd, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
                 fmCalls += population.get(i).length;
                 copyCalls += population.get(i).length;
             }
@@ -104,16 +97,16 @@ public class RHEAPlayer extends AbstractPlayer {
 
         timeTaken = timer.elapsedMillis();
         timePerIteration = numIters == 0 ? 0.0 : (timeTaken - initTime) / numIters;
-        if (statsLogger != null)
-            logStatistics(stateObs);
         // Return first action of best individual
         AbstractAction retValue = population.get(0).actions[0];
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(stateObs, params.actionSpace);
         if (!actions.contains(retValue))
             throw new AssertionError("Action chosen is not legitimate " + numIters + ", " + params.shiftLeft);
         return retValue;
     }
 
     private boolean budgetLeft(ElapsedCpuTimer timer) {
+        RHEAParams params = getParameters();
         if (params.budgetType == PlayerConstants.BUDGET_TIME) {
             long remaining = timer.remainingTimeMillis();
             return remaining > params.breakMS;
@@ -131,13 +124,15 @@ public class RHEAPlayer extends AbstractPlayer {
 
     @Override
     public RHEAPlayer copy() {
-        RHEAParams newParams = (RHEAParams) params.copy();
-        newParams.setRandomSeed(randomGenerator.nextInt());
-        return new RHEAPlayer(newParams);
+        RHEAParams newParams = (RHEAParams) parameters.copy();
+        newParams.setRandomSeed(rnd.nextInt());
+        RHEAPlayer retValue = new RHEAPlayer(newParams);
+        retValue.setForwardModel(getForwardModel().copy());
+        return retValue;
     }
 
     private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2) {
-        switch (params.crossoverType) {
+        switch (getParameters().crossoverType) {
             case NONE: // we just take the first parent
                 return new RHEAIndividual(p1);
             case UNIFORM:
@@ -156,7 +151,7 @@ public class RHEAPlayer extends AbstractPlayer {
         copyCalls += child.length;
         int min = Math.min(p1.length, p2.length);
         for (int i = 0; i < min; ++i) {
-            if (randomGenerator.nextFloat() >= 0.5f) {
+            if (rnd.nextFloat() >= 0.5f) {
                 child.actions[i] = p2.actions[i];
                 child.gameStates[i] = p2.gameStates[i]; //.copy();
             }
@@ -192,7 +187,7 @@ public class RHEAPlayer extends AbstractPlayer {
     RHEAIndividual[] selectParents() {
         RHEAIndividual[] parents = new RHEAIndividual[2];
 
-        switch (params.selectionType) {
+        switch (getParameters().selectionType) {
             case TOURNAMENT:
                 parents[0] = tournamentSelection();
                 parents[1] = tournamentSelection();
@@ -210,8 +205,8 @@ public class RHEAPlayer extends AbstractPlayer {
 
     RHEAIndividual tournamentSelection() {
         RHEAIndividual best = null;
-        for (int i = 0; i < params.tournamentSize; ++i) {
-            int rand = randomGenerator.nextInt(population.size());
+        for (int i = 0; i < getParameters().tournamentSize; ++i) {
+            int rand = rnd.nextInt(population.size());
 
             RHEAIndividual current = population.get(rand);
             if (best == null || current.value > best.value)
@@ -225,7 +220,7 @@ public class RHEAPlayer extends AbstractPlayer {
         int rankSum = 0;
         for (int i = 0; i < population.size(); ++i)
             rankSum += i + 1;
-        int ran = randomGenerator.nextInt(rankSum);
+        int ran = rnd.nextInt(rankSum);
         int p = 0;
         for (int i = 0; i < population.size(); ++i) {
             p += population.size() - (i);
@@ -240,6 +235,7 @@ public class RHEAPlayer extends AbstractPlayer {
      */
     private void runIteration() {
         //copy elites
+        RHEAParams params = getParameters();
         List<RHEAIndividual> newPopulation = new ArrayList<>();
         for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
             newPopulation.add(new RHEAIndividual(population.get(i)));
@@ -289,22 +285,5 @@ public class RHEAPlayer extends AbstractPlayer {
         }
     }
 
-    protected void logStatistics(AbstractGameState state) {
-        Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("round", state.getRoundCounter());
-        stats.put("turn", state.getTurnCounter());
-        stats.put("turnOwner", state.getTurnOwner());
-        stats.put("iterations", numIters);
-        stats.put("fmCalls", fmCalls);
-        stats.put("copyCalls", copyCalls);
-        stats.put("time", timeTaken);
-        stats.put("timePerIteration", timePerIteration);
-        stats.put("initTime", initTime);
-        stats.put("hiReward", population.get(0).value);
-        stats.put("loReward", population.get(population.size() - 1).value);
-        stats.put("medianReward", population.size() == 1 ? population.get(0).value : population.get(population.size() / 2 - 1).value);
-        stats.put("repairProportion", repairCount == 0 ? 0.0 : repairCount / (double) (repairCount + nonRepairCount));
-        stats.put("repairsPerIteration", repairCount == 0 ? 0.0 : repairCount / (double) numIters);
-        statsLogger.record(stats);
-    }
+
 }

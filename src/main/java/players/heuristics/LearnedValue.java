@@ -34,6 +34,7 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
 
     @SuppressWarnings("unchecked")
     public LearnedValue(String constructionString) {
+        super(null, "LearnedValue");
 
         String[] stuff = constructionString.split(Pattern.quote(":"));
         filename = stuff[0].split(Pattern.quote("."))[0];
@@ -174,11 +175,11 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
             statsWriter2.newLine();
 
 
-          //  Map<String, Map<Integer, Double>> actionAdvantageByBucket = getValues();
+            //  Map<String, Map<Integer, Double>> actionAdvantageByBucket = getValues();
             Map<Integer, String> actionNames = valueHeuristic.actionNames;
             for (String bucket : newData.keySet()) {
                 Map<Integer, Pair<Integer, Double>> newDataByHash = newData.get(bucket);
-             //   Map<Integer, Double> actionAdvantage = actionAdvantageByBucket.getOrDefault(bucket, new HashMap<>());
+                //   Map<Integer, Double> actionAdvantage = actionAdvantageByBucket.getOrDefault(bucket, new HashMap<>());
                 for (Integer hash : newDataByHash.keySet()) {
                     double specificVisits = newDataByHash.get(hash).a;
                     double specificAdvantage = newDataByHash.get(hash).b;
@@ -232,7 +233,7 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
 
         while (!queue.isEmpty()) {
             SingleTreeNode n = queue.poll();
-            double meanValue = useAdvantage ? n.getTotValue()[actor] / (double) n.getVisits() : 0.0;
+            double meanValue = useAdvantage ? n.nodeValue(actor) : 0.0;
             // we then get all the data for the actions taken
             // for each hashcode, we record the number of visits, and the mean advantage
             // if this is a previously unseen hashcode (not in statsByHash), then we add a baseline of anchorVisits
@@ -266,7 +267,7 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
                     // if useAdvantage then we subtract meanValue * visits
                     Map<Integer, Pair<Integer, Double>> data = actionsToNodes.stream()
                             .collect(toMap(p -> p.a.hashCode(),
-                                    p -> new Pair<>(p.b.getVisits(), p.b.getTotValue()[actor] - meanValue * p.b.getVisits())));
+                                    p -> new Pair<>(p.b.getVisits(), p.b.getVisits() * (p.b.nodeValue(actor) - meanValue))));
 
 
                     // now we merge this data into the existing map

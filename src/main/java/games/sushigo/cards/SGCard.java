@@ -2,6 +2,7 @@ package games.sushigo.cards;
 
 import core.components.Card;
 import core.components.Counter;
+import evaluation.metrics.Event;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 
@@ -13,7 +14,7 @@ import java.util.function.Consumer;
 public class SGCard extends Card {
 
     public enum SGCardType {
-        Maki(new int[]{1,2,3}),
+        Maki(new int[]{1, 2, 3}),
         Tempura,
         Sashimi,
         Dumpling,
@@ -26,38 +27,42 @@ public class SGCard extends Card {
 
         static {
             Tempura.onReveal = (gs, p) -> {
-                // Adds points for pairs (/2)
+                // Adds points for pairs
                 Counter amount = gs.getPlayedCardTypes(Tempura, p);
-                int value = ((SGParameters)gs.getGameParameters()).valueTempuraPair * (amount.getValue() / 2);
-                gs.addPlayerScore(p, value, Tempura);
+                if (amount.getValue() % 2 == 0) {
+                    int value = ((SGParameters) gs.getGameParameters()).valueTempuraPair;
+                    gs.addPlayerScore(p, value, Tempura);
+                }
             };
             Sashimi.onReveal = (gs, p) -> {
-                // Adds points for triplets (/3)
+                // Adds points for triplets
                 Counter amount = gs.getPlayedCardTypes(Sashimi, p);
-                int value = ((SGParameters)gs.getGameParameters()).valueSashimiTriss * (amount.getValue() / 3);
-                gs.addPlayerScore(p, value, Sashimi);
+                if (amount.getValue() % 3 == 0) {
+                    int value = ((SGParameters) gs.getGameParameters()).valueSashimiTriple;
+                    gs.addPlayerScore(p, value, Sashimi);
+                }
             };
             Dumpling.onReveal = (gs, p) -> {
                 // Add points depending on how many were collected, parameter array used for increments
                 Counter amount = gs.getPlayedCardTypes(Dumpling, p);
-                int idx = Math.min(amount.getValue(), ((SGParameters)gs.getGameParameters()).valueDumpling.length)-1;
-                int value = ((SGParameters)gs.getGameParameters()).valueDumpling[idx];
+                int idx = Math.min(amount.getValue(), ((SGParameters) gs.getGameParameters()).valueDumpling.length) - 1;
+                int value = ((SGParameters) gs.getGameParameters()).valueDumpling[idx];
                 gs.addPlayerScore(p, value, Dumpling);
             };
             SquidNigiri.onReveal = (gs, p) -> {
                 // Gives points, more if played on Wasabi
-                int value = ((SGParameters)gs.getGameParameters()).valueSquidNigiri;
+                int value = ((SGParameters) gs.getGameParameters()).valueSquidNigiri;
                 if (gs.getPlayedCardTypes()[p].get(Wasabi).getValue() > 0) {
-                    value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
+                    value *= ((SGParameters) gs.getGameParameters()).multiplierWasabi;
                     gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
                 }
                 gs.addPlayerScore(p, value, SquidNigiri);
             };
             SalmonNigiri.onReveal = (gs, p) -> {
                 // Gives points, more if played on Wasabi
-                int value = ((SGParameters)gs.getGameParameters()).valueSalmonNigiri;
+                int value = ((SGParameters) gs.getGameParameters()).valueSalmonNigiri;
                 if (gs.getPlayedCardTypes()[p].get(Wasabi).getValue() > 0) {
-                    value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
+                    value *= ((SGParameters) gs.getGameParameters()).multiplierWasabi;
                     gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
                 }
                 gs.addPlayerScore(p, value, SalmonNigiri);
@@ -66,7 +71,7 @@ public class SGCard extends Card {
                 // Gives points, more if played on Wasabi
                 int value = ((SGParameters) gs.getGameParameters()).valueEggNigiri;
                 if (gs.getPlayedCardTypes()[p].get(Wasabi).getValue() > 0) {
-                    value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
+                    value *= ((SGParameters) gs.getGameParameters()).multiplierWasabi;
                     gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
                 }
                 gs.addPlayerScore(p, value, EggNigiri);
@@ -91,8 +96,7 @@ public class SGCard extends Card {
                         most = nMakiRolls;
                         mostPlayers.clear();
                         mostPlayers.add(i);
-                    }
-                    else if (nMakiRolls == most && nMakiRolls != 0) mostPlayers.add(i);
+                    } else if (nMakiRolls == most && nMakiRolls != 0) mostPlayers.add(i);
                     else if (nMakiRolls > secondMost) {
                         secondMost = nMakiRolls;
                         secondPlayers.clear();
@@ -110,7 +114,7 @@ public class SGCard extends Card {
                     for (Integer mostPlayer : mostPlayers) {
                         gs.addPlayerScore(mostPlayer, mostScore, Maki);
                         if (gs.getCoreGameParameters().recordEventHistory) {
-                            gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
+                            gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
                         }
                     }
                 }
@@ -120,7 +124,7 @@ public class SGCard extends Card {
                     for (Integer secondPlayer : secondPlayers) {
                         gs.addPlayerScore(secondPlayer, secondScore, Maki);
                         if (gs.getCoreGameParameters().recordEventHistory) {
-                            gs.logEvent("Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
+                            gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
                         }
                     }
                 }
@@ -142,8 +146,7 @@ public class SGCard extends Card {
                         best = nPuddings;
                         mostPlayers.clear();
                         mostPlayers.add(i);
-                    }
-                    else if (nPuddings == best && nPuddings != 0) mostPlayers.add(i);
+                    } else if (nPuddings == best && nPuddings != 0) mostPlayers.add(i);
                     if (nPuddings < worst) {
                         worst = nPuddings;
                         leastPlayers.clear();
@@ -161,7 +164,7 @@ public class SGCard extends Card {
                         for (Integer mostPlayer : mostPlayers) {
                             gs.addPlayerScore(mostPlayer, mostScore, Pudding);
                             if (gs.getCoreGameParameters().recordEventHistory) {
-                                gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
+                                gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
                             }
                         }
                     }
@@ -171,7 +174,7 @@ public class SGCard extends Card {
                         for (Integer leastPlayer : leastPlayers) {
                             gs.addPlayerScore(leastPlayer, leastScore, Pudding);
                             if (gs.getCoreGameParameters().recordEventHistory) {
-                                gs.logEvent("Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
+                                gs.logEvent(Event.GameEvent.GAME_EVENT, "Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
                             }
                         }
                     }
@@ -183,10 +186,14 @@ public class SGCard extends Card {
         private Consumer<SGGameState> onRoundEnd, onGameEnd;  // effectively final, should not be modified
         private boolean discardedBetweenRounds = true;
         private int[] iconCountVariation = new int[]{1};
-        SGCardType() {}
+
+        SGCardType() {
+        }
+
         SGCardType(boolean discardedBetweenRounds) {
             this.discardedBetweenRounds = discardedBetweenRounds;
         }
+
         SGCardType(int[] iconCountVariation) {
             this.iconCountVariation = iconCountVariation;
         }
@@ -215,15 +222,13 @@ public class SGCard extends Card {
     public final SGCardType type;
     public final int count;  // Number of tokens of this type on the card. 1 by default, could be 1, 2, 3 for Makis
 
-    public SGCard(SGCardType type)
-    {
+    public SGCard(SGCardType type) {
         super(type.toString());
         this.type = type;
         this.count = 1;
     }
 
-    public SGCard(SGCardType type, int count)
-    {
+    public SGCard(SGCardType type, int count) {
         super(type.toString());
         this.type = type;
         this.count = count;
@@ -236,7 +241,7 @@ public class SGCard extends Card {
 
     @Override
     public String toString() {
-        return type.toString() + (count>1? "-" + count : "");
+        return type.toString() + (count > 1 ? "-" + count : "");
     }
 
     @Override

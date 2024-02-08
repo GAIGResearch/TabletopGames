@@ -94,7 +94,7 @@
      	"green" : ["Integer[]", [0, 0, 1]],
      	"red"   : ["Integer[]", [0, 1, 1]],
      	"blue"  : ["Integer[]", [2, 2, 2]]
-   	},
+   	}
   ]
   },
   {
@@ -109,7 +109,7 @@
   	"mead" : ["Integer", 2],
   	"candle" : ["Integer", 3],
   	"ink" : ["Integer", 4],
-  	"inkType" : ["String", "PALE_GREEN_INK"],
+  	"inkType" : ["String", "PALE_GREEN_INK"]
   	},
    	{
   	"calfSkin" : ["Integer", 3],
@@ -118,7 +118,7 @@
   	"mead" : ["Integer", 3],
   	"candle" : ["Integer", 3],
   	"ink" : ["Integer", 5],
-  	"inkType" : ["String", "PALE_BLUE_INK"],
+  	"inkType" : ["String", "PALE_BLUE_INK"]
   	},
   	{
   	"calfSkin" : ["Integer", 2],
@@ -127,7 +127,7 @@
   	"mead" : ["Integer", 3],
   	"candle" : ["Integer", 4],
   	"ink" : ["Integer", 5],
-  	"inkType" : ["String", "PALE_RED_INK"],
+  	"inkType" : ["String", "PALE_RED_INK"]
   	},
    	{
   	"calfSkin" : ["Integer", 3],
@@ -136,7 +136,7 @@
   	"mead" : ["Integer", 2],
   	"candle" : ["Integer", 4],
   	"ink" : ["Integer", 0],
-  	"inkType" : ["String", ""],
+  	"inkType" : ["String", ""]
   	},
   	{
   	"calfSkin" : ["Integer", 2],
@@ -145,7 +145,7 @@
   	"mead" : ["Integer", 2],
   	"candle" : ["Integer", 3],
   	"ink" : ["Integer", 4],
-  	"inkType" : ["String", "PALE_RED_INK"],
+  	"inkType" : ["String", "PALE_RED_INK"]
   	},
   	{
    	"calfSkin" : ["Integer", 3],
@@ -154,7 +154,7 @@
   	"mead" : ["Integer", 3],
   	"candle" : ["Integer", 3],
   	"ink" : ["Integer", 5],
-  	"inkType" : ["String", "PALE_GREEN_INK"],
+  	"inkType" : ["String", "PALE_GREEN_INK"]
   	},
   	{
   	"calfSkin" : ["Integer", 2],
@@ -163,7 +163,7 @@
   	"mead" : ["Integer", 3],
   	"candle" : ["Integer", 4],
   	"ink" : ["Integer", 0],
-  	"inkType" : ["String", ""],
+  	"inkType" : ["String", ""]
   	},
   	{
    	"calfSkin" : ["Integer", 3],
@@ -172,7 +172,7 @@
   	"mead" : ["Integer", 2],
   	"candle" : ["Integer", 4],
   	"ink" : ["Integer", 4],
-  	"inkType" : ["String", "PALE_BLUE_INK"],
+  	"inkType" : ["String", "PALE_BLUE_INK"]
   	}
   ]
 },

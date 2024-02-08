@@ -5,11 +5,13 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
+import core.interfaces.ITreeActionSpace;
 import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
+import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +20,10 @@ import java.util.Random;
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends StandardForwardModel {
+public class DiamantForwardModel extends StandardForwardModel implements ITreeActionSpace {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
-        Random r = new Random(dgs.getGameParameters().getRandomSeed());
         dgs._reset();
 
         for (int i = 0; i < dgs.getNPlayers(); i++) {
@@ -33,13 +34,14 @@ public class DiamantForwardModel extends StandardForwardModel {
             dgs.playerInCave.add(true);
         }
 
-        dgs.mainDeck = new Deck("MainDeck", HIDDEN_TO_ALL);
-        dgs.discardDeck = new Deck("DiscardDeck", VISIBLE_TO_ALL);
-        dgs.path = new Deck("Path", VISIBLE_TO_ALL);
+        dgs.mainDeck = new Deck<>("MainDeck", HIDDEN_TO_ALL);
+        dgs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
+        dgs.path = new Deck<>("Path", VISIBLE_TO_ALL);
         dgs.actionsPlayed = new ActionsPlayed();
+        dgs.recordOfPlayerActions = new ArrayList<>();
 
         createCards(dgs);
-        dgs.mainDeck.shuffle(r);
+        dgs.mainDeck.shuffle(dgs.getRnd());
 
         // Draw first card and play it
         drawAndPlayCard(dgs);
@@ -89,7 +91,8 @@ public class DiamantForwardModel extends StandardForwardModel {
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
-        endPlayerTurn(dgs);
+        if (dgs.isNotTerminal())
+            endPlayerTurn(dgs);
     }
 
 
@@ -153,12 +156,10 @@ public class DiamantForwardModel extends StandardForwardModel {
         if (dgs.nCave == dp.nCaves)
             endGame(dgs);
         else {
-            Random r = new Random(dgs.getGameParameters().getRandomSeed());
-
             // Move path cards to maindeck and shuffle
             dgs.mainDeck.add(dgs.path);
             dgs.path.clear();
-            dgs.mainDeck.shuffle(r);
+            dgs.mainDeck.shuffle(dgs.getRnd());
 
             // Initialize game state
             dgs.nHazardExplosionsOnPath = 0;
@@ -248,5 +249,27 @@ public class DiamantForwardModel extends StandardForwardModel {
                 prepareNewCave(dgs);
             }
         }
+    }
+
+    @Override
+    public ActionTreeNode initActionTree(AbstractGameState gameState) {
+        ActionTreeNode tree = new ActionTreeNode(0, "root");
+        tree.addChild(0, "continue");
+        tree.addChild(0, "exit");
+        tree.addChild(0, "out"); // dummy action for staying in cave
+        return tree;
+    }
+
+    @Override
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+        DiamantGameState dgs = (DiamantGameState) gameState;
+        root.resetTree();
+        if (dgs.playerInCave.get(gameState.getCurrentPlayer())) {
+            root.findChildrenByName("continue").setAction(new ContinueInCave());
+            root.findChildrenByName("exit").setAction(new ExitFromCave());
+        } else {
+            root.findChildrenByName("out").setAction(new OutOfCave());
+        }
+        return root;
     }
 }

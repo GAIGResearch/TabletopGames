@@ -27,8 +27,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
@@ -63,7 +62,7 @@ public class TMGUI extends AbstractGUIManager {
     TMAction lastAction;
     TMTurnOrder turnOrder;
 
-    public TMGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public TMGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
 
@@ -112,7 +111,7 @@ public class TMGUI extends AbstractGUIManager {
             //Handle exception
         }
 
-        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2);
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, new HashSet<>());
         historyInfo.setFont(defaultFont);
         historyInfo.setForeground(fontColor);
         JPanel historyWrapper = new JPanel();
@@ -227,7 +226,7 @@ public class TMGUI extends AbstractGUIManager {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null, null, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -517,7 +516,7 @@ public class TMGUI extends AbstractGUIManager {
                 int win = -1;
                 String displayText = "<html><table><tr><td>Player</td><td>TR</td><td>Milestones</td><td>Awards</td><td>Board</td><td>Cards</td><td>Total</td></tr>";
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
-                    if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN) win = i;
+                    if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) win = i;
 
                     int tr = gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
                     int milestones = gs.countPointsMilestones(i);

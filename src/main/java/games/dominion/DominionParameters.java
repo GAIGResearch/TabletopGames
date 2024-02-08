@@ -1,7 +1,7 @@
 package games.dominion;
 
 import core.*;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import games.dominion.cards.*;
 
@@ -11,6 +11,7 @@ public class DominionParameters extends TunableParameters {
 
     List<CardType> cardsUsed = new ArrayList<>();
     String dataPath = "data/dominion/";
+    public int initialShuffleSeed = -1;
 
     public int HAND_SIZE = 5;
     public int PILES_EXHAUSTED_FOR_GAME_END = 3;
@@ -24,8 +25,7 @@ public class DominionParameters extends TunableParameters {
     public int[] VICTORY_CARDS_PER_PLAYER = {-1, -1, 8, 12, 12}; // 2-4 players only
 
 
-    public DominionParameters(long seed) {
-        super(seed);
+    public DominionParameters() {
         addTunableParameter("HAND_SIZE", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("PILES_EXHAUSTED_FOR_GAME_END", 3, Arrays.asList(1, 3,5,7,10));
         addTunableParameter("KINGDOM_CARDS_OF_EACH_TYPE", 10, Arrays.asList(5, 10, 15, 20));
@@ -35,6 +35,7 @@ public class DominionParameters extends TunableParameters {
         addTunableParameter("COPPER_SUPPLY", 32, Arrays.asList(10,20,32,40,50));
         addTunableParameter("SILVER_SUPPLY", 40, Arrays.asList(10,20,30,40,50));
         addTunableParameter("GOLD_SUPPLY", 30, Arrays.asList(10,20,30,40,50));
+        addTunableParameter("initialShuffleSeed", -1);
         _reset();
     }
 
@@ -49,10 +50,10 @@ public class DominionParameters extends TunableParameters {
         COPPER_SUPPLY = (int) getParameterValue("COPPER_SUPPLY");
         SILVER_SUPPLY = (int) getParameterValue("SILVER_SUPPLY");
         GOLD_SUPPLY = (int) getParameterValue("GOLD_SUPPLY");
+        initialShuffleSeed = (int) getParameterValue("initialShuffleSeed");
     }
 
-    public DominionParameters(long seed, String[] cards) {
-        super(seed);
+    public DominionParameters(String[] cards) {
         for (String cardName : cards) {
             try {
                 cardsUsed.add(CardType.valueOf(cardName));
@@ -63,24 +64,8 @@ public class DominionParameters extends TunableParameters {
         }
     }
 
-    public static DominionParameters firstGame(long seed) {
-        DominionParameters retValue = new DominionParameters(seed);
-        retValue.cardsUsed.add(CardType.CELLAR);
-        retValue.cardsUsed.add(CardType.MARKET);
-        retValue.cardsUsed.add(CardType.MERCHANT);
-        retValue.cardsUsed.add(CardType.MILITIA);
-        retValue.cardsUsed.add(CardType.MINE);
-        retValue.cardsUsed.add(CardType.MOAT);
-        retValue.cardsUsed.add(CardType.REMODEL);
-        retValue.cardsUsed.add(CardType.SMITHY);
-        retValue.cardsUsed.add(CardType.VILLAGE);
-        retValue.cardsUsed.add(CardType.WORKSHOP);
-        // Note that the three Victory cards and three Treasure cards are always included
-        return retValue;
-    }
-
-    public static DominionParameters sizeDistortion(long seed) {
-        DominionParameters retValue = new DominionParameters(seed);
+    public static DominionParameters sizeDistortion() {
+        DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
         retValue.cardsUsed.add(CardType.BANDIT);
         retValue.cardsUsed.add(CardType.BUREAUCRAT);
@@ -95,8 +80,8 @@ public class DominionParameters extends TunableParameters {
         return retValue;
     }
 
-    public static DominionParameters improvements(long seed) {
-        DominionParameters retValue = new DominionParameters(seed);
+    public static DominionParameters improvements() {
+        DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
         retValue.cardsUsed.add(CardType.CELLAR);
         retValue.cardsUsed.add(CardType.MARKET);
@@ -120,8 +105,10 @@ public class DominionParameters extends TunableParameters {
      */
     @Override
     protected AbstractParameters _copy() {
-        return this;
-        // currently parameters are immutable
+        DominionParameters retValue = new DominionParameters();
+        retValue.cardsUsed = new ArrayList<>(cardsUsed);
+        retValue.VICTORY_CARDS_PER_PLAYER = VICTORY_CARDS_PER_PLAYER.clone();
+        return retValue;
     }
 
     /**
@@ -134,7 +121,8 @@ public class DominionParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (o instanceof DominionParameters) {
             DominionParameters dp = (DominionParameters) o;
-            return dp.cardsUsed.equals(cardsUsed);
+            return dp.cardsUsed.equals(cardsUsed) &&
+                    Arrays.equals(dp.VICTORY_CARDS_PER_PLAYER, VICTORY_CARDS_PER_PLAYER);
         }
         return false;
     }

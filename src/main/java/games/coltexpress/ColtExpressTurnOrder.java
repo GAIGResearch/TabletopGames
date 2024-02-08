@@ -45,8 +45,10 @@ public class ColtExpressTurnOrder extends TurnOrder {
         subTurnCounter = 0;
         roundCounter = 0;
         fullPlayerTurnCounter = 0;
+        firstPlayerOfRound = 0;
         direction = 1;
         firstAction = true;
+        currentTurnType = null;
     }
 
     @Override
@@ -58,6 +60,11 @@ public class ColtExpressTurnOrder extends TurnOrder {
         ceto.firstAction = firstAction;
         ceto.subTurnCounter = subTurnCounter;
         ceto.fullPlayerTurnCounter = fullPlayerTurnCounter;
+        ceto.turnCounter = turnCounter;
+        ceto.roundCounter = roundCounter;
+        ceto.turnOwner = turnOwner;
+        ceto.firstPlayer = firstPlayer;
+
         return ceto;
     }
 
@@ -154,7 +161,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
 
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState, getCurrentPlayer(gameState))));
 
         turnCounter++;
         ColtExpressGamePhase phase = (ColtExpressGamePhase) cegs.getGamePhase();

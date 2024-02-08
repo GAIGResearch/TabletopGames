@@ -1,25 +1,33 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
+import core.interfaces.IPlayerDecorator;
 import evaluation.metrics.Event;
+import players.PlayerParameters;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public abstract class AbstractPlayer {
 
-    protected IStatisticLogger statsLogger = null;
     // ID of this player, assigned by the game
     int playerID;
     String name;
-    Random rnd = new Random(System.currentTimeMillis());
+    protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
     private AbstractForwardModel forwardModel;
-    private double exploreEpsilon;
+    public PlayerParameters parameters;
+    protected List<IPlayerDecorator> decorators;
 
+    public AbstractPlayer(PlayerParameters params, String name) {
+        this.parameters = params != null ? params : new PlayerParameters();
+        this.name = name;
+        // We may have one Decorator defined in the Parameters
+        // others can then be added by calling addDecorator()
+        decorators = new ArrayList<>();
+        if (parameters.decorator != null) {
+            decorators.add(parameters.decorator);
+        }
+    }
 
     /* Final methods */
 
@@ -32,13 +40,41 @@ public abstract class AbstractPlayer {
         return playerID;
     }
 
+    public final void setName(String name) {
+        this.name = name;
+    }
+
     /**
-     * Retrieves the forward model for current game being played.
+     * First of all this applies any decorators to the list of possible actions.
+     * Then we choose one (delegating to the _getAction() implemented by the AbstractPlayer subclass)
+     * Then we apply any decorators to the chosen action.
      *
-     * @return - ForwardModel
+     * @param gameState
+     * @param observedActions
+     * @return
      */
-    public final AbstractForwardModel getForwardModel() {
-        return forwardModel;
+    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> observedActions) {
+        for (IPlayerDecorator decorator : decorators) {
+            observedActions = decorator.actionFilter(gameState, observedActions);
+        }
+        AbstractAction action;
+        switch (observedActions.size()) {
+            case 0:
+                throw new AssertionError("No actions available for player " + this);
+            case 1:
+                action = observedActions.get(0);
+                break;
+            default:
+                // we then use our Random for any random choices
+                gameState.rnd = this.rnd;
+                action = _getAction(gameState, observedActions);
+        }
+        for (IPlayerDecorator decorator : decorators) {
+            decorator.recordDecision(gameState, action);
+        }
+        return action;
+
+
     }
 
     /**
@@ -54,27 +90,41 @@ public abstract class AbstractPlayer {
      * @param model
      */
     public void setForwardModel(AbstractForwardModel model) {
-        this.forwardModel = model;
-    }
-
-    /**
-     * This is the main method called by Game to get an Action. It implements an epsilon-Greedy wrapper around
-     * of the main agent policy. In most cases exploreEpsilon will be zero; but this is useful where we
-     * with to implement noise in the game - the main current example of this is in evaluation.ProgressiveLearner.
-     * @param gameState
-     * @param possibleActions
-     * @return
-     */
-    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        boolean explore = rnd.nextDouble() < exploreEpsilon;
-        if (explore) {
-            int roll = rnd.nextInt(possibleActions.size());
-            return possibleActions.get(roll);
+        // TODO: We currently have no way of specifying a Decorator to only apply
+        // TODO: to the 'top-level' of getAction(), without also being used in the search algorithm.
+        // This could be useful if we want to take random actions at the top level (but not in search)
+        if (decorators.isEmpty()) {
+            this.forwardModel = model;
         } else {
-            return _getAction(gameState, possibleActions);
+            this.forwardModel = new DecoratedForwardModel(model, new ArrayList<>(decorators), playerID);
         }
     }
+    /**
+     * Retrieves the forward model for current game being played.
+     *
+     * @return - ForwardModel
+     */
+    public final AbstractForwardModel getForwardModel() {
+        return forwardModel;
+    }
 
+    public final void addDecorator(IPlayerDecorator decorator) {
+        decorators.add(decorator);
+    }
+
+    public final void clearDecorators() {
+        decorators.clear();
+    }
+
+    public final void removeDecorator(IPlayerDecorator decorator) {
+        decorators.remove(decorator);
+    }
+
+    @Override
+    public String toString() {
+        if (name != null) return name;
+        return this.getClass().getSimpleName();
+    }
 
     /* Methods that should be implemented in subclass */
 
@@ -114,25 +164,8 @@ public abstract class AbstractPlayer {
     public void registerUpdatedObservation(AbstractGameState gameState) {
     }
 
-    public final void setName(String name) {
-        this.name = name;
+    public void onEvent(Event event) {
     }
-
-    @Override
-    public String toString() {
-        if (name != null) return name;
-        return this.getClass().getSimpleName();
-    }
-
-    public final IStatisticLogger getStatsLogger() {
-        return statsLogger;
-    }
-
-    public final void setStatsLogger(IStatisticLogger logger) {
-        this.statsLogger = logger;
-    }
-
-    public void onEvent(Event event) {  }
 
     public abstract AbstractPlayer copy();
 
@@ -140,14 +173,12 @@ public abstract class AbstractPlayer {
     public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
         return Collections.emptyMap();
     }
-    /**
-     * Sets the epsilon to be used for exploration in all games in the tournament
-     * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
-     * independently of any exploration at the individual agent level
-     *
-     * @param epsilon
-     */
-    public void setExploration(double epsilon) {
-        exploreEpsilon = epsilon;
+
+    public PlayerParameters getParameters() {
+        return parameters;
+    }
+
+    public Random getRnd() {
+        return rnd;
     }
 }

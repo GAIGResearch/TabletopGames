@@ -1,0 +1,71 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.SummaryLogger"
+    },
+    [
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$Generation" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$Result" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$CorporationCards" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$CardsPlayed" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$AveragePoints" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PointDifference" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$Milestones" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$Expansions" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$Map" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$Awards" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$MapCoverage" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$MapTiles" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerResourceProduction" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerResult" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerCorporationCard" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerCorporationCardWin" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerCardsPlayed" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerAllCardsPlayed" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPointsTotal" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPointsTR" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPointsMilestones" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPointsBoard" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPointsCards" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerMilestones" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerNumMilestones" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerAwardsFundedAndWon" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerNumAwardsWon" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerAwardsWon" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerNumAwardsFunded" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerAwardsFunded" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerMapCoverage" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerHandSize" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$TRPointsProgress" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$CardsPointsProgress" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$BoardPointsProgress" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$AwardsPointProgress" },
+
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterComplete", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$GlobalParameter",
+        "value": "Temperature"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterIncrease", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$GlobalParameter",
+        "value": "Oxygen"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerParameterContribution", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$GlobalParameter",
+        "value": "OceanTiles"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPlayedCardsPerType", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$CardType",
+        "value": "Automated"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerProduction", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$Resource",
+        "value": "MegaCredit"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerResource", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$Resource",
+        "value": "Plant"
+      } ] }
+    ]
+  ]
+}

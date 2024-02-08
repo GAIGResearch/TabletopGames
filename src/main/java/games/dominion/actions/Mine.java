@@ -22,6 +22,10 @@ public class Mine extends DominionAction implements IExtendedSequence {
         super(CardType.MINE, playerId);
     }
 
+    public Mine(int playerId, boolean dummy) {
+        super(CardType.MINE, playerId, dummy);
+    }
+
     @Override
     boolean _execute(DominionGameState state) {
         if (state.getDeck(DominionConstants.DeckType.HAND, player).stream().anyMatch(DominionCard::isTreasureCard)) {
@@ -62,7 +66,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+    public void _afterAction(AbstractGameState gs, AbstractAction action) {
         DominionGameState state = (DominionGameState) gs;
         if (!trashedCard && action instanceof TrashCard && ((TrashCard) action).player == player) {
             trashedCard = true;
@@ -83,18 +87,18 @@ public class Mine extends DominionAction implements IExtendedSequence {
 
     @Override
     public Mine copy() {
-       Mine retValue = new Mine(player);
-       retValue.gainedCard = gainedCard;
-       retValue.trashedCard = trashedCard;
-       retValue.trashValue = trashValue;
-       return retValue;
+        Mine retValue = new Mine(player, dummyAction);
+        retValue.gainedCard = gainedCard;
+        retValue.trashedCard = trashedCard;
+        retValue.trashValue = trashValue;
+        return retValue;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Mine) {
             Mine other = (Mine) obj;
-            return other.player == player
+            return super.equals(obj)
                     && other.trashValue == trashValue
                     && other.trashedCard == trashedCard
                     && other.gainedCard == gainedCard;
@@ -104,6 +108,6 @@ public class Mine extends DominionAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, trashedCard, trashValue, gainedCard, CardType.MINE);
+        return Objects.hash(trashedCard, trashValue, gainedCard) + 31 * super.hashCode();
     }
 }

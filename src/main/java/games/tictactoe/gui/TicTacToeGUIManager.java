@@ -18,12 +18,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class TicTacToeGUIManager extends AbstractGUIManager {
 
     TTTBoardView view;
 
-    public TicTacToeGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public TicTacToeGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null) return;
 

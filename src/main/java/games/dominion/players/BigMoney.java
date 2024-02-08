@@ -8,9 +8,15 @@ import games.dominion.actions.BuyCard;
 import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class BigMoney extends AbstractPlayer {
+
+    public BigMoney() {
+        super(null, "BigMoney");
+    }
 
     /**
      * Generate a valid action to play in the game. Valid actions can be found by accessing
@@ -19,7 +25,7 @@ public class BigMoney extends AbstractPlayer {
      * @param gameState observation of the current game state
      */
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         DominionGameState state = (DominionGameState) gameState;
         int player = gameState.getCurrentPlayer();
         int cash = state.availableSpend(player);
@@ -27,6 +33,7 @@ public class BigMoney extends AbstractPlayer {
 
         if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
             return new EndPhase();
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
 
         switch (cash) {
             case 0:

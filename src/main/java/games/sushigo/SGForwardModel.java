@@ -6,15 +6,18 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
+import core.interfaces.ITreeActionSpace;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import utilities.ActionTreeNode;
 import utilities.Pair;
 
 import java.util.*;
+
 import static games.sushigo.cards.SGCard.SGCardType.*;
 
 @SuppressWarnings("unchecked")
-public class SGForwardModel extends StandardForwardModel {
+public class SGForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -74,18 +77,23 @@ public class SGForwardModel extends StandardForwardModel {
                 gs.drawPile.add(new SGCard(p.a, p.b));
             }
         }
-        gs.drawPile.shuffle(new Random(parameters.getRandomSeed()));
+        gs.drawPile.shuffle(gs.getRnd());
     }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (currentState.isActionInProgress())
             return; // we only want to trigger this processing if an extended action sequence (i.e. Chopsticks) has been terminated
+
         SGGameState gs = (SGGameState) currentState;
 
         // Check if all players made their choice
-        int turn = gs.getTurnCounter();
-        if ((turn + 1) % gs.getNPlayers() == 0) {
+        int nextPlayer = gs.getCurrentPlayer();
+        do {
+            nextPlayer = (nextPlayer + 1) % gs.getNPlayers();
+        } while (nextPlayer != gs.getCurrentPlayer() && !gs.cardChoices.get(nextPlayer).isEmpty());
+
+        if (nextPlayer == gs.getCurrentPlayer()) {
             // They did! Reveal all cards at once. Process card reveal rules.
             revealCards(gs);
 
@@ -122,11 +130,13 @@ public class SGForwardModel extends StandardForwardModel {
 
         // End player turn
         if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(gs);
+            endPlayerTurn(gs, nextPlayer);
         }
     }
 
     public void _endRound(SGGameState gs) {
+
+
         // Apply card end of round rules
         for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
             type.onRoundEnd(gs);
@@ -134,6 +144,7 @@ public class SGForwardModel extends StandardForwardModel {
 
         // Clear played hands if they get discarded between rounds, they go in the discard pile
         for (int i = 0; i < gs.getNPlayers(); i++) {
+            // We think this copy may be for the properties
             Deck<SGCard> cardsToKeep = gs.playedCards.get(i).copy();
             cardsToKeep.clear();
             for (SGCard card : gs.playedCards.get(i).getComponents()) {
@@ -158,7 +169,7 @@ public class SGForwardModel extends StandardForwardModel {
                     // Reshuffle discard into draw pile
                     gs.drawPile.add(gs.discardPile);
                     gs.discardPile.clear();
-                    gs.drawPile.shuffle(new Random(gs.getGameParameters().getRandomSeed()));
+                    gs.drawPile.shuffle(gs.getRnd());
                 }
                 gs.playerHands.get(i).add(gs.drawPile.draw());
             }
@@ -187,6 +198,12 @@ public class SGForwardModel extends StandardForwardModel {
                 if (cc.useChopsticks) {
                     removeUsedChopsticks(gs, i);
                 }
+            }
+        }
+        int expectedPlayerCards = gs.getPlayerHands().get(0).getSize();
+        for (int i = 1; i < gs.getNPlayers(); i++) {
+            if (gs.getPlayerHands().get(i).getSize() != expectedPlayerCards) {
+                throw new AssertionError("Player " + i + " has " + gs.getPlayerHands().get(i).getSize() + " cards, expected " + expectedPlayerCards);
             }
         }
     }
@@ -253,5 +270,47 @@ public class SGForwardModel extends StandardForwardModel {
             }
         }
         return actions;
+    }
+
+    @Override
+    public ActionTreeNode initActionTree(AbstractGameState gameState) {
+        /* action tree contains 2 branches: play and chopstick and subactions represent the card ids in hand */
+        int nCards = ((SGParameters) gameState.getGameParameters()).nCards;
+        ActionTreeNode root = new ActionTreeNode(0, "root");
+        ActionTreeNode playNode = root.addChild(0, "play");
+        ActionTreeNode chopsticksNode = root.addChild(0, "chopsticks");
+        for (int i = 0; i < nCards; i++){
+            playNode.addChild(0, String.valueOf(i));
+            chopsticksNode.addChild(0, String.valueOf(i));
+        }
+        return root;
+    }
+
+    @Override
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+        root.resetTree();
+        ActionTreeNode playNode = root.findChildrenByName("play");
+        ActionTreeNode chopsticksNode = root.findChildrenByName("chopsticks");
+        SGGameState sggs = (SGGameState) gameState;
+        int currentPlayer = sggs.getCurrentPlayer();
+        Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
+        // handle extended actions
+        if (gameState.isActionInProgress()){
+            // only happens with chopstick
+            for (AbstractAction action: gameState.getActionsInProgress().peek()._computeAvailableActions(gameState)) {
+                chopsticksNode.findChildrenByName(String.valueOf(((ChooseCard)action).cardIdx), true).setAction(action);
+            }
+            return root;
+        }
+        // normal action selection
+        for (int i = 0; i < currentPlayerHand.getSize(); i++) {
+            // All players can do is choose a card in hand to play.
+            playNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, false));
+            if (sggs.playedCardTypes[currentPlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
+                // If the player played chopsticks in a previous round, then they can choose to use the chopsticks now (and will choose one extra card in hand)
+                chopsticksNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, true));
+            }
+        }
+        return root;
     }
 }
