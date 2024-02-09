@@ -54,7 +54,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         super(gameParameters, nPlayers);
         playerCount = nPlayers;
         params = (DominionParameters) gameParameters;
-        this._reset();
+        this.reset();
     }
 
     @Override
@@ -373,7 +373,8 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     /**
      * Resets variables initialised for this game state.
      */
-    protected void _reset() {
+    @Override
+    protected void reset() {
         playerHands = new PartialObservableDeck[playerCount];
         playerDrawPiles = new PartialObservableDeck[playerCount];
         playerDiscards = new Deck[playerCount];
@@ -388,6 +389,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VISIBLE_TO_ALL);
             playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VISIBLE_TO_ALL);
         }
+        super.reset();
     }
 
     /**

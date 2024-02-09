@@ -24,19 +24,15 @@ public class DominionForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DominionGameState state = (DominionGameState) firstState;
-        state._reset();
         DominionParameters params = state.params;
 
+        Random initialShuffleRnd = params.initialShuffleSeed != -1 ? new Random(params.initialShuffleSeed) : state.getRnd();
         for (int i = 0; i < state.playerCount; i++) {
             for (int j = 0; j < params.STARTING_COPPER; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
-            // if we have a separate seed for the initial shuffle, then use this
-            if (params.initialShuffleSeed != -1)
-                state.playerDrawPiles[i].shuffle(new Random(params.initialShuffleSeed));
-            else
-                state.playerDrawPiles[i].shuffle(state.getRnd());
+            state.playerDrawPiles[i].shuffle(initialShuffleRnd);
             for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
         }
         state.actionsLeftForCurrentPlayer = 1;
