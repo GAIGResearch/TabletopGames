@@ -24,7 +24,7 @@ public class DominionForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DominionGameState state = (DominionGameState) firstState;
-        DominionParameters params = state.params;
+        DominionParameters params = (DominionParameters) state.getGameParameters();
 
         Random initialShuffleRnd = params.initialShuffleSeed != -1 ? new Random(params.initialShuffleSeed) : state.getRnd();
         for (int i = 0; i < state.getNPlayers(); i++) {
@@ -104,7 +104,8 @@ public class DominionForwardModel extends StandardForwardModel {
                         discard.add(table);
                         table.clear();
                         hand.clear();
-                        for (int i = 0; i < state.params.HAND_SIZE; i++)
+                        DominionParameters params = (DominionParameters) state.getGameParameters();
+                        for (int i = 0; i < params.HAND_SIZE; i++)
                             state.drawCard(playerID);
 
                         state.defenceStatus = new boolean[state.getNPlayers()];  // resets to false

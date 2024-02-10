@@ -25,8 +25,6 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
-    DominionParameters params;
-    // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
@@ -51,7 +49,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        params = (DominionParameters) gameParameters;
         this.reset();
     }
 
@@ -76,6 +73,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
 
     public boolean gameOver() {
+        DominionParameters params = (DominionParameters) gameParameters;
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
                 cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= params.PILES_EXHAUSTED_FOR_GAME_END;
     }
