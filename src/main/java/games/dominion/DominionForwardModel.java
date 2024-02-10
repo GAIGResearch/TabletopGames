@@ -27,7 +27,7 @@ public class DominionForwardModel extends StandardForwardModel {
         DominionParameters params = state.params;
 
         Random initialShuffleRnd = params.initialShuffleSeed != -1 ? new Random(params.initialShuffleSeed) : state.getRnd();
-        for (int i = 0; i < state.playerCount; i++) {
+        for (int i = 0; i < state.getNPlayers(); i++) {
             for (int j = 0; j < params.STARTING_COPPER; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < params.STARTING_ESTATES; j++)
@@ -40,9 +40,9 @@ public class DominionForwardModel extends StandardForwardModel {
         state.spentSoFar = 0;
         state.additionalSpendAvailable = 0;
         state.delayedActions = new ArrayList<>();
-        state.defenceStatus = new boolean[state.playerCount];  // defaults to false
+        state.defenceStatus = new boolean[state.getNPlayers()];  // defaults to false
 
-        int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.playerCount];
+        int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.getNPlayers()];
         state.cardsIncludedInGame = new HashMap<>(16);
         state.cardsIncludedInGame.put(CardType.PROVINCE, victoryCards);
         state.cardsIncludedInGame.put(CardType.DUCHY, victoryCards);
@@ -53,7 +53,7 @@ public class DominionForwardModel extends StandardForwardModel {
         for (CardType ct : params.cardsUsed) {
             int cardsToUse = ct.isVictory ? victoryCards : params.KINGDOM_CARDS_OF_EACH_TYPE;
             if (ct == CardType.CURSE)
-                cardsToUse = (state.playerCount - 1) * params.CURSE_CARDS_PER_PLAYER;
+                cardsToUse = (state.getNPlayers() - 1) * params.CURSE_CARDS_PER_PLAYER;
             state.cardsIncludedInGame.put(ct, cardsToUse);
         }
         state.setGamePhase(DominionGameState.DominionGamePhase.Play);
@@ -107,7 +107,7 @@ public class DominionForwardModel extends StandardForwardModel {
                         for (int i = 0; i < state.params.HAND_SIZE; i++)
                             state.drawCard(playerID);
 
-                        state.defenceStatus = new boolean[state.playerCount];  // resets to false
+                        state.defenceStatus = new boolean[state.getNPlayers()];  // resets to false
 
                         state.actionsLeftForCurrentPlayer = 1;
                         state.spentSoFar = 0;

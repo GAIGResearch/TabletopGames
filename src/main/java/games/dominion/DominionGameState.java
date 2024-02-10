@@ -25,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
-    int playerCount;
     DominionParameters params;
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
@@ -52,7 +51,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        playerCount = nPlayers;
         params = (DominionParameters) gameParameters;
         this.reset();
     }
@@ -255,11 +253,11 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected AbstractGameState _copy(int playerId) {
-        DominionGameState retValue = new DominionGameState(gameParameters.copy(), playerCount);
+        DominionGameState retValue = new DominionGameState(gameParameters.copy(), nPlayers);
         for (CardType ct : cardsIncludedInGame.keySet()) {
             retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));
         }
-        for (int p = 0; p < playerCount; p++) {
+        for (int p = 0; p < nPlayers; p++) {
             if (playerId == -1) {
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -375,17 +373,17 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected void reset() {
-        playerHands = new PartialObservableDeck[playerCount];
-        playerDrawPiles = new PartialObservableDeck[playerCount];
-        playerDiscards = new Deck[playerCount];
-        playerTableaux = new Deck[playerCount];
+        playerHands = new PartialObservableDeck[nPlayers];
+        playerDrawPiles = new PartialObservableDeck[nPlayers];
+        playerDiscards = new Deck[nPlayers];
+        playerTableaux = new Deck[nPlayers];
 
         trashPile = new Deck<>("Trash", VISIBLE_TO_ALL);
-        for (int i = 0; i < playerCount; i++) {
-            boolean[] handVisibility = new boolean[playerCount];
+        for (int i = 0; i < nPlayers; i++) {
+            boolean[] handVisibility = new boolean[nPlayers];
             handVisibility[i] = true;
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
-            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[playerCount]);
+            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[nPlayers]);
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VISIBLE_TO_ALL);
             playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VISIBLE_TO_ALL);
         }
