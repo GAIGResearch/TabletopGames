@@ -737,6 +737,8 @@ public class SingleTreeNode {
         double regret = potentialValue - nodeValue * nVisits;
         if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
             // in this case we exponentiate the regret to get the probability of taking this action
+            // This may be problematic for large regrets, as it is not standardised to number of actions
+            // So the Boltzmann factor needs to be quite large
             double v = Math.exp(regret / params.hedgeBoltzmann);
             if (Double.isNaN(v))
                 throw new AssertionError("We have a non-number in Hedge somewhere");
