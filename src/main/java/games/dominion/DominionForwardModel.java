@@ -74,6 +74,8 @@ public class DominionForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
 
+        if (state.isActionInProgress()) return;
+
         int playerID = state.getCurrentPlayer();
         if (state.gameOver()) {
             endGame(state);
@@ -81,7 +83,7 @@ public class DominionForwardModel extends StandardForwardModel {
 
             switch (state.getGamePhase().toString()) {
                 case "Play":
-                    if ((state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) && !state.isActionInProgress()) {
+                    if (state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                         // change phase
                         // no change to current player
                         state.setGamePhase(DominionGameState.DominionGamePhase.Buy);

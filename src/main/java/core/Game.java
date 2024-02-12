@@ -372,6 +372,7 @@ public class Game {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 int team = gameState.getTeam(i);
                 AbstractPlayer player = players.get(team);
+                player.setForwardModel(this.forwardModel.copy());
                 this.players.add(player.copy());
             }
         } else
