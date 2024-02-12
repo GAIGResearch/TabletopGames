@@ -330,6 +330,15 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         return actingFigure;
     }
+
+    public int getTeam(int player)
+    {
+        if (player == overlordPlayer)
+            return 1;
+        else
+            return 0;
+    }
+
     public int getActingPlayer() {
         return getActingFigure().getOwnerId();
     }

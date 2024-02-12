@@ -1,8 +1,11 @@
 {
   "game": "Descent2e",
-  "selfPlay": false,
+  "selfPlay": true,
   "nPlayers": 2,
+  "playerDirectory": "MCTS",
   "matchups": 5,
+  "byTeam": false,
   "listener": "metrics/gamemetrics.json",
+  "verbose": true,
   "reportPeriod": 100
 }
