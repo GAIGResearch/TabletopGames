@@ -8,6 +8,7 @@ import games.descent2e.DescentHelper;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.StopMove;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.actions.attack.FreeAttack;
 import games.descent2e.actions.attack.RangedAttack;
 import games.descent2e.components.Figure;
@@ -54,6 +55,8 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     int oldMovePoints;
     boolean oldFreeAttack;
 
+    boolean skip = false;
+
     public DoubleMoveAttack() {
         super(Triggers.ACTION_POINT_SPEND);
     }
@@ -96,6 +99,9 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
             default:
                 break;
         }
+
+        if (retVal.isEmpty())
+            retVal.add(new EndCurrentPhase());
 
         return retVal;
     }
@@ -150,6 +156,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                 // System.out.println("Heroic Feat Interrupt: " + phase + ", Interrupter:" + phase.interrupters + ", Interrupt:" + phase.interrupt + ", Player: " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
+                skip = false;
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
                 if (phase.interrupt == null || interruptPlayer == heroPlayer) {
                     // we have completed the loop, and start again with the attacking player
@@ -161,6 +168,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     }
 
     private boolean playerHasInterruptOption(DescentGameState state) {
+        if (skip) return false;
         if (phase.interrupt == null || phase.interrupters == null) return false;
         // first we see if the interruptPlayer is one who may interrupt
         switch (phase.interrupters) {
@@ -210,6 +218,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         retValue.interruptPlayer = interruptPlayer;
         retValue.oldMovePoints = oldMovePoints;
         retValue.oldFreeAttack = oldFreeAttack;
+        retValue.skip = skip;
         return retValue;
     }
 
@@ -226,11 +235,23 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DoubleMoveAttack that = (DoubleMoveAttack) o;
-        return heroPlayer == that.heroPlayer && interruptPlayer == that.interruptPlayer && oldMovePoints == that.oldMovePoints && oldFreeAttack == that.oldFreeAttack && phase == that.phase;
+        return heroPlayer == that.heroPlayer && interruptPlayer == that.interruptPlayer &&
+                oldMovePoints == that.oldMovePoints && oldFreeAttack == that.oldFreeAttack &&
+                phase == that.phase && skip == that.skip;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), phase, heroPlayer, interruptPlayer, oldMovePoints, oldFreeAttack);
+        return Objects.hash(super.hashCode(), phase, heroPlayer, interruptPlayer, oldMovePoints, oldFreeAttack, skip);
+    }
+
+    public boolean getSkip()
+    {
+        return skip;
+    }
+
+    public void setSkip(boolean s)
+    {
+        skip = s;
     }
 }

@@ -5,6 +5,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.AttributeTest;
+import games.descent2e.actions.herofeats.DoubleMoveAttack;
+import games.descent2e.actions.herofeats.HeroicFeatExtraMovement;
 import org.apache.hadoop.shaded.org.apache.kerby.kerberos.kerb.crypto.util.Des;
 
 import javax.management.Attribute;
@@ -23,6 +25,16 @@ public class EndCurrentPhase extends AbstractAction {
             ((AttributeTest) action).setSkip(true);
             //System.out.println("Skipping current phase");
         }
+        if (action instanceof DoubleMoveAttack) {
+            ((DoubleMoveAttack) action).setSkip(true);
+            //System.out.println("Skipping current phase");
+        }
+
+        if (action instanceof HeroicFeatExtraMovement) {
+            ((HeroicFeatExtraMovement) action).setSkip(true);
+            //System.out.println("Skipping current phase");
+        }
+
         ((DescentGameState) gs).getActingFigure().addActionTaken(toString());
         return true;
     }
