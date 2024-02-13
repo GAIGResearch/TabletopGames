@@ -57,7 +57,10 @@ public class SpecialEffect extends DrawCard {
                 }
 
                 // remove the card from the players hand to the playedDeck
-                wgs.getPlayerHand(wgs.getCurrentPlayer()).remove(card);
+                boolean cardFound = wgs.getPlayerHand(wgs.getCurrentPlayer()).remove(card);
+                if (!cardFound) {
+                    throw new AssertionError("Card not found in player hand");
+                }
                 wgs.getPlayedCards(wgs.getCurrentPlayer()).add(card);
                 wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed = true;
                 return true;

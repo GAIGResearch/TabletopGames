@@ -30,22 +30,41 @@ public class SGPlayerView extends JComponent {
 
     public SGPlayerView(Deck<SGCard> deck, Deck<SGCard> playDeck, int playerId, Set<Integer> humanId, String dataPath)
     {
-        this.width = playerAreaWidth + border*20;
-        this.height = playerAreaHeight + border + borderBottom;
+//        this.width = playerAreaWidth + border*20;
+//        this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
-        this.playerHandView = new SGDeckView(playerId, deck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
-        this.playedCardsView = new SGDeckView(playerId, playDeck, true, dataPath, new Rectangle(border, border, playerAreaWidth, playerAreaHeight));
+        this.playerHandView = new SGDeckView(playerId, deck, true, dataPath, new Rectangle(border, border, playerAreaWidth-50, playerAreaHeight));
+        this.playedCardsView = new SGDeckView(playerId, playDeck, true, dataPath, new Rectangle(border, border, playerAreaWidth-50, playerAreaHeight));
         this.pointsText = new JLabel(0 + " points");
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        add(playerHandView);
-        add(playedCardsView);
+
+        JPanel wrapperHand = new JPanel();
+        wrapperHand.setLayout(new BoxLayout(wrapperHand, BoxLayout.X_AXIS));
+        wrapperHand.add(new JLabel(new ImageIcon(dataPath + "hand.png")));
+        wrapperHand.add(playerHandView);
+        wrapperHand.setOpaque(false);
+
+        JPanel wrapperPlayed = new JPanel();
+        wrapperPlayed.setLayout(new BoxLayout(wrapperPlayed, BoxLayout.X_AXIS));
+        JLabel playedLabel = new JLabel(new ImageIcon(dataPath + "play.png"));
+        wrapperPlayed.add(playedLabel);
+        wrapperPlayed.add(playedCardsView);
+        wrapperPlayed.setOpaque(false);
+
+        playerHandView.setOpaque(false);
+        playedCardsView.setOpaque(false);
+        pointsText.setOpaque(false);
+
+        add(wrapperHand);
+        add(wrapperPlayed);
         add(pointsText);
+        setBackground(Color.WHITE);
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width, height);
-    }
+//    @Override
+//    public Dimension getPreferredSize() {
+//        return new Dimension(width, height);
+//    }
 
     public void update(SGGameState gameState)
     {

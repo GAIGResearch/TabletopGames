@@ -25,7 +25,6 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     final public double temperature;
     final public double epsilon;
-    final Random rnd;
 
     protected IActionHeuristic actionHeuristic;
 
@@ -37,6 +36,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
      * @param seed Random seed
      */
     public BoltzmannActionPlayer(IActionHeuristic actionHeuristic, double temperature, double epsilon, long seed) {
+        super(null, "BoltzmannActionPlayer");
         this.actionHeuristic = actionHeuristic;
         this.temperature = Math.max(temperature, 0.001);
         this.epsilon = epsilon;
@@ -58,11 +58,19 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
         for (int i = 0; i < possibleActions.size(); i++) {
             actionToValueMap.put(possibleActions.get(i), actionValues[i]);
         }
-        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd);
+        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd.nextDouble());
     }
 
     @Override
     public AbstractPlayer copy() {
         return this; // stateless (except for rnd)
+    }
+
+    public IActionHeuristic getActionHeuristic() {
+        return actionHeuristic;
+    }
+
+    public void setActionHeuristic(IActionHeuristic actionHeuristic) {
+        this.actionHeuristic = actionHeuristic;
     }
 }

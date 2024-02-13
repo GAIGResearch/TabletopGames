@@ -5,11 +5,15 @@ import java.awt.*;
 
 public class GamePanel extends JComponent {
     Image background;
+    Color bgColor;
     boolean keepBackgroundRatio = true;
     float alpha = 0.3f;
 
     public void setBackground(Image background) {
         this.background = background;
+    }
+    public void setBgColor(Color bgColor) {
+        this.bgColor = bgColor;
     }
 
     public void setKeepBackgroundRatio(boolean keepBackgroundRatio) {
@@ -40,6 +44,9 @@ public class GamePanel extends JComponent {
             }
             g2d.drawImage(background, 0, 0, (int)(picW * scale), (int)(picH * s2), null);
             g2d.dispose();
+        } else if (bgColor != null) {
+            g.setColor(bgColor);
+            g.fillRect(0, 0, getWidth(), getHeight());
         }
         super.paintComponent(g);
     }

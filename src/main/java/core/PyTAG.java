@@ -8,12 +8,10 @@ import core.interfaces.ITreeActionSpace;
 import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.diamant.DiamantFeatures;
-import games.loveletter.LLStateFeaturesReduced;
+import games.loveletter.features.LLStateFeaturesReduced;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
-import games.tictactoe.TicTacToeStateVector;
-import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
@@ -23,8 +21,6 @@ import utilities.ActionTreeNode;
 import games.explodingkittens.*;
 
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

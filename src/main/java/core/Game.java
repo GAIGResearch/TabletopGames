@@ -379,12 +379,12 @@ public class Game {
         int id = 0;
         if (this.players != null)
             for (AbstractPlayer player : this.players) {
+                // Give player their ID
+                player.playerID = id++;
                 // Create a FM copy for this player (different random seed)
                 player.setForwardModel(this.forwardModel.copy());
                 // Create initial state observation
-                AbstractGameState observation = gameState.copy(id);
-                // Give player their ID
-                player.playerID = id++;
+                AbstractGameState observation = gameState.copy(player.playerID);
                 // Allow player to initialize
 
                 player.initializePlayer(observation);
@@ -585,6 +585,7 @@ public class Game {
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, activePlayer)));
+
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }

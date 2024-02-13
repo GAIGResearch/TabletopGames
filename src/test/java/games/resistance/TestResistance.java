@@ -51,7 +51,9 @@ public class TestResistance {
                 new RandomPlayer(),
                 new RandomPlayer(),
                 new RandomPlayer());
-        resistance = GameType.Resistance.createGameInstance(5, 34, new ResParameters(-274));
+        ResParameters resParameters = new ResParameters();
+        resParameters.setRandomSeed(-274);
+        resistance = GameType.Resistance.createGameInstance(5, 34, resParameters);
         resistance.reset(players);
     }
 

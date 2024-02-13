@@ -23,7 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static evaluation.RunArg.parseConfig;
+import static evaluation.RunArg.*;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
 import static utilities.Utils.getArg;
 
@@ -64,6 +64,9 @@ public class SkillLadder {
                             "\t               If specified, then player is a searchSpace definition, and we use random as the lowest budget.\n" +
                             "\t               The default is to spend 50% on tuning, and 50% on the final tournament to pick the best.\n" +
                             "\tgrid=          Default false. If true, then we run against all previous agents too.\n" +
+                            "\tgridStart=     (Optional). The budget at which to start...the startBudget is still relevant\n" +
+                            "\t               for the opponents against which we test. Do not use with NTBEABudget.\n" +
+                            "\tgridMinorStart=(Optional). The budget at which to start the lower grid budget. Do not use with NTBEABudget.\n" +
                             "\tstartSettings= (Optional). A sequence of numbers that defines the starting agent. This is \n" +
                             "\t               primarily useful if you need to re-start the ladder from a pre-calculated rung.\n"
 
@@ -99,6 +102,8 @@ public class SkillLadder {
         int[] currentBestSettings = new int[0];
 
         boolean runAgainstAllAgents = getArg(args, "grid", false);
+        int startGridBudget = getArg(args, "gridStart", startingTimeBudget);
+        int startMinorGridBudget = getArg(args, "gridMinorStart", startingTimeBudget);
 
         List<AbstractPlayer> allAgents = new ArrayList<>(iterations);
         AbstractPlayer firstAgent;
@@ -146,15 +151,20 @@ public class SkillLadder {
                 allAgents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", String.valueOf(newBudget))));
             }
             allAgents.get(i + 1).setName("Budget " + newBudget);
-
+            if (newBudget < startGridBudget) // we fast forward to where we want to start the grid
+                continue;
             // for each iteration we run a round robin tournament; either against just the previous agent (with the previous budget), or
             // if we have grid set to true, then against all previous agents, one after the other
             int startAgent = runAgainstAllAgents ? 0 : i;
             for (int agentIndex = startAgent; agentIndex <= i; agentIndex++) {
                 int otherBudget = (int) (Math.pow(timeBudgetMultiplier, agentIndex) * startingTimeBudget);
+                if (newBudget == startGridBudget && otherBudget < startMinorGridBudget) // we fast forward to where we want to start the minor grid
+                    continue;
                 List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1), allAgents.get(agentIndex));
-                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration,
-                        ONE_VS_ALL, params, false);
+                Map<RunArg, Object> config = new HashMap<>();
+                config.put(matchups, gamesPerIteration);
+                config.put(byTeam, false);
+                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, ONE_VS_ALL, config);
                 RRT.verbose = false;
                 for (String listenerClass : listenerClasses) {
                     if (listenerClass.isEmpty()) continue;

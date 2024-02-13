@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RoundRobinTournament;
 import org.apache.commons.math3.util.CombinatoricsUtils;
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static evaluation.RunArg.byTeam;
+import static evaluation.RunArg.matchups;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
 import static java.util.stream.Collectors.joining;
 
@@ -150,40 +153,48 @@ public class NTBEA {
             // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
             // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
             //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
-            int nTeams = params.byTeam ?  game.createGameInstance(nPlayers).getGameState().getNTeams() : nPlayers;
-            long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nTeams);
-            int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
-            if (params.verbose)
-                System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
-                        gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
-
-            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams, params.byTeam);
-            tournament.verbose = false;
-            createListeners().forEach(tournament::addListener);
-            tournament.run();
-            // create a new list of results in descending order of score
-            IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
-            List<Integer> agentsInOrder = IntStream.range(0, players.size())
-                    .boxed()
-                    .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
-                    .collect(Collectors.toList());
-            Collections.reverse(agentsInOrder);
-            params.logFile = "RRT_" + params.logFile;
-            for (int index : agentsInOrder) {
+            int nTeams = params.byTeam ? game.createGameInstance(nPlayers).getGameState().getNTeams() : nPlayers;
+            if (players.size() < nTeams) {
+                System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
+                        "check the repeats options is at least equal to the number of players.");
+            } else {
+                long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nTeams);
+                int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
                 if (params.verbose)
-                    System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
-                            tournament.getWinRate(index), tournament.getWinStdErr(index),
-                            tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
-                Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
-                if (params.evalMethod.equals("Ordinal"))
-                    resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                    System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
+                            gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
+                Map<RunArg, Object> config = new HashMap<>();
+                config.put(matchups, gamesPerMatchup);
+                config.put(byTeam, false);
+                config.put(RunArg.distinctRandomSeeds, 0);
+                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
+                        NO_SELF_PLAY, config);
+                tournament.verbose = false;
+                createListeners().forEach(tournament::addListener);
+                tournament.run();
+                // create a new list of results in descending order of score
+                IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
+                List<Integer> agentsInOrder = IntStream.range(0, players.size())
+                        .boxed()
+                        .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
+                        .collect(Collectors.toList());
+                Collections.reverse(agentsInOrder);
+                params.logFile = "RRT_" + params.logFile;
+                for (int index : agentsInOrder) {
+                    if (params.verbose)
+                        System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
+                                tournament.getWinRate(index), tournament.getWinStdErr(index),
+                                tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                    Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
+                    if (params.evalMethod.equals("Ordinal"))
+                        resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
 
-                logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
-            }
-            params.logFile = params.logFile.substring(4);
-            bestResult = params.evalMethod.equals("Ordinal") ?
-                    new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
-                    new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
+                    logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
+                }
+                params.logFile = params.logFile.substring(4);
+                bestResult = params.evalMethod.equals("Ordinal") ?
+                        new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
+                        new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
 
             // We then want to check the win rate against the elite agent (if one was provided)
             // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
@@ -192,9 +203,9 @@ public class NTBEA {
                 double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
                 double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
                 if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
-                   if (params.verbose)
+                    if (params.verbose)
                         System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
-                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
+                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));}
                 }
             }
         }

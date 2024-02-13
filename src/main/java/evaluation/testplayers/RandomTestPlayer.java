@@ -28,6 +28,7 @@ public class RandomTestPlayer extends AbstractPlayer {
     }
 
     public RandomTestPlayer(Random random) {
+        super(null, "RandomTestPlayer");
         this.random = random;
         scores = new TAGNumericStatSummary();
         bf = new TAGNumericStatSummary();

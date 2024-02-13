@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import static core.CoreConstants.GameResult.GAME_END;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -29,8 +30,8 @@ public class BaseActionCardsTest {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
-    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(System.currentTimeMillis()), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(), players.size()));
+    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
@@ -457,7 +458,8 @@ public class BaseActionCardsTest {
         assertTrue(state.isActionInProgress());
         fm.next(state, new DoNothing());
         assertFalse(state.isActionInProgress());
-        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+        // at this point the game is over because we set three stacks to have no cards
+        assertEquals(GAME_END, state.getGameStatus());
     }
 
     @Test

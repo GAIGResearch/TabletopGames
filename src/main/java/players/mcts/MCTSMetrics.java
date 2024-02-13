@@ -35,14 +35,16 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("Iterations", root.getVisits());
                 records.put("MaxDepth", treeStats.depthReached);
                 records.put("MeanLeafDepth", treeStats.meanLeafDepth);
+                records.put("MeanNodeDepth", treeStats.meanNodeDepth);
                 records.put("Nodes", treeStats.totalNodes);
                 records.put("OneActionNodes", treeStats.oneActionNodes);
                 records.put("MeanActionsAtNode", treeStats.meanActionsAtNode);
                 records.put("RolloutLength", mctsPlayer.root.rolloutActionsTaken / (double) visits);
+                records.put("NodeClashes", mctsPlayer.root.nodeClash);
                 OptionalInt maxVisits = Arrays.stream(root.actionVisits()).max();
                 records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) visits);
                 records.put("Action", e.action.getString(e.state));
-                records.put("ActionsAtRoot", root.children.size());
+                records.put("ActionsAtRoot", root.actionValues.size());
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
@@ -64,10 +66,12 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("Iterations", Integer.class);
             cols.put("MaxDepth", Integer.class);
             cols.put("MeanLeafDepth", Double.class);
+            cols.put("MeanNodeDepth", Double.class);
             cols.put("Nodes", Integer.class);
             cols.put("OneActionNodes", Integer.class);
             cols.put("MeanActionsAtNode", Double.class);
             cols.put("RolloutLength", Double.class);
+            cols.put("NodeClashes", Integer.class);
             cols.put("maxVisitProportion", Double.class);
             cols.put("Action", String.class);
             cols.put("ActionsAtRoot", Integer.class);
@@ -101,10 +105,11 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("PlayerID", e.state.getCurrentPlayer());
                 records.put("MaxDepth", treeStats.stream().mapToInt(ts -> ts.depthReached).average().orElse(0.0));
                 records.put("MeanLeafDepth", treeStats.stream().mapToDouble(ts -> ts.meanLeafDepth).average().orElse(0.0));
+                records.put("MeanNodeDepth", treeStats.stream().mapToDouble(ts -> ts.meanNodeDepth).average().orElse(0.0));
                 records.put("Nodes", treeStats.stream().mapToInt(ts -> ts.totalNodes).average().orElse(0.0));
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
-                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.children.size()).average().orElse(0.0));
+                records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.actionValues.size()).average().orElse(0.0));
                 return true;
             }
             return false;
@@ -122,6 +127,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("PlayerID", Integer.class);
             cols.put("MaxDepth", Double.class);
             cols.put("MeanLeafDepth", Double.class);
+            cols.put("MeanNodeDepth", Double.class);
             cols.put("Nodes", Double.class);
             cols.put("OneActionNodes", Double.class);
             cols.put("MeanActionsAtNode", Double.class);
