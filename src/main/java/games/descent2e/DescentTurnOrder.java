@@ -418,13 +418,13 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
     private void overlordIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)
     {
         dgs.overlord.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
-        System.out.println("Overlord's Fatigue increased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
+        //System.out.println("Overlord's Fatigue increased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
     private void overlordDecreaseFatigue (DescentGameState dgs, int decreaseFatigueBy)
     {
         dgs.overlord.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
-        System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
+        //System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
     private void heroesSideIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)

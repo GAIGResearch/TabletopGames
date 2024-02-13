@@ -83,7 +83,7 @@ public class MultiAttack extends RangedAttack {
             }
         }
 
-        System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
+        //System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
     }
 
     @Override
