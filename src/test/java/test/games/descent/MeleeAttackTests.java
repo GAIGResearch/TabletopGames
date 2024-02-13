@@ -5,14 +5,20 @@ import core.components.Deck;
 import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
+import games.descent2e.DescentTypes;
+import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.EndTurn;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.*;
+import games.descent2e.actions.conditions.Stunned;
+import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.components.*;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Vector2D;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -342,6 +348,85 @@ public class MeleeAttackTests {
         }
 
         assertTrue(attack.executionComplete(state));
+    }
+
+    @Test
+    public void monsterOnlyAttacksOnce() {
+        Monster attacker = state.getMonsters().get(1).get(0);
+        Figure victim = state.getActingFigure();
+
+        Vector2D attackerPos = new Vector2D(4, 3);
+        Vector2D victimPos = new Vector2D(5, 4);
+        attacker.setPosition(attackerPos);
+        victim.setPosition(victimPos);
+        ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
+
+        while (!state.getActingFigure().equals(attacker))
+        {
+            new EndTurn().execute(state);
+        }
+        assertEquals(state.getActingFigure(), attacker);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertFalse(actions.stream().noneMatch(a -> a instanceof Howl));
+
+        // Force the dice to roll a result that goes all the way to the end without interruptions
+        DicePool attackDice = attacker.getAttackDice().copy();
+        while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
+            attackDice.roll(state.getRandom());
+
+        MeleeAttack attack = new MeleeAttackDamageOnly(
+                attacker.getComponentID(), victim.getComponentID(), attackDice, null);
+        assertEquals(0, state.getAttackDicePool().getSize());
+        attack.execute(state);
+
+        // Might pause because we roll a Surge or have a reaction - here we ensure it continues
+        while (!attack.executionComplete(state)) {
+            AbstractAction action = attack._computeAvailableActions(state).get(0);
+            action.execute(state);
+            attack._afterAction(state, action);
+        }
+
+        assertEquals(2, state.getAttackDicePool().getSize());
+        assertEquals(1, state.getAttackDicePool().getNumber(DiceType.YELLOW));
+        assertEquals(1, state.getAttackDicePool().getNumber(DiceType.BLUE));
+        assertTrue(state.getAttackDicePool().hasRolled());
+        assertTrue(attack.executionComplete(state));
+
+        actions = fm.computeAvailableActions(state);
+
+        assertTrue(actions.stream().noneMatch(a -> a instanceof MeleeAttack));
+        assertTrue(actions.stream().noneMatch(a -> a instanceof Howl));
+    }
+    @Test
+    public void monsterOnlyUsesAbilityOnce() {
+        Monster attacker = state.getMonsters().get(1).get(0);
+        Figure victim = state.getActingFigure();
+
+        Vector2D attackerPos = new Vector2D(4, 3);
+        Vector2D victimPos = new Vector2D(5, 4);
+        attacker.setPosition(attackerPos);
+        victim.setPosition(victimPos);
+        ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
+
+        while (!state.getActingFigure().equals(attacker))
+        {
+            new EndTurn().execute(state);
+        }
+        assertEquals(state.getActingFigure(), attacker);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertFalse(actions.stream().noneMatch(a -> a instanceof Howl));
+        Howl howl = (Howl) actions.stream().filter(a -> a instanceof Howl).findFirst().get();
+        // Force the dice to roll a result that goes all the way to the end without interruptions
+        howl.execute(state);
+        AbstractAction action = howl._computeAvailableActions(state).get(0);
+        action.execute(state);
+        howl._afterAction(state, action);
+        assertTrue(howl.executionComplete(state));
+
+        actions = fm.computeAvailableActions(state);
+
+        assertTrue(actions.stream().noneMatch(a -> a instanceof MeleeAttack));
+        assertTrue(actions.stream().noneMatch(a -> a instanceof Howl));
     }
 
 }

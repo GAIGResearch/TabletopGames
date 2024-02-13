@@ -155,6 +155,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         // This is where the call for the Attribute Tests would go
         List<AbstractAction> retVal = new ArrayList<>();
         // TODO: This feels incredibly hacky, but for whatever reason, it just works.
+        if (state.getHistory().size() == 0) return null;
         AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1);
         if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase)
         {
