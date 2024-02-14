@@ -10,6 +10,7 @@
       {"class": "evaluation.metrics.GameMetrics$GameScore" },
       {"class": "evaluation.metrics.GameMetrics$FinalScore" },
       {"class": "games.descent2e.DescentMetrics$WinnerType" },
+      {"class": "games.descent2e.DescentMetrics$HealthPoints" },
       {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
       {"class": "evaluation.metrics.GameMetrics$Winner" },
       {"class": "evaluation.metrics.GameMetrics$Actions" },

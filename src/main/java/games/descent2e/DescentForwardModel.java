@@ -43,7 +43,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
         DescentParameters descentParameters = (DescentParameters) firstState.getGameParameters();
-        descentParameters.setTimeoutRounds(50);    // No game of Descent should feasibly last more than 20 rounds, this is being generous
+        descentParameters.setTimeoutRounds(30);    // No game of Descent should feasibly last more than 20 rounds, this is being generous
         int nActionsPerFigure = descentParameters.nActionsPerFigure;
         dgs.data.load(descentParameters.getDataPath());
         dgs.initData = false;

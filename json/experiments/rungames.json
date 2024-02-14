@@ -3,7 +3,7 @@
   "selfPlay": true,
   "nPlayers": 5,
   "playerDirectory": "OSLA",
-  "matchups": 3,
+  "matchups": 5,
   "byTeam": false,
   "listener": "metrics/gamemetrics.json",
   "verbose": true,
