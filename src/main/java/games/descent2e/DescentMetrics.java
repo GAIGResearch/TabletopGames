@@ -1,6 +1,5 @@
 package games.descent2e;
 
-import cats.kernel.Hash;
 import core.CoreConstants;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
@@ -8,12 +7,14 @@ import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class DescentMetrics implements IMetricsCollection {
 
-    public class WinnerType extends AbstractMetric {
+    public static class WinnerType extends AbstractMetric {
 
         public WinnerType() {
             super();
