@@ -335,6 +335,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 // A monster
                 Monster m = (Monster) defender;
 
+                m.setAttributeToMin(Figure.Attribute.Health);
+
                 //System.out.println(m.getComponentName() + " defeated!");
 
                 // Remove from board
