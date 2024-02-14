@@ -64,40 +64,6 @@ public class DominionParameters extends TunableParameters {
         }
     }
 
-    public static DominionParameters sizeDistortion() {
-        DominionParameters retValue = new DominionParameters();
-        retValue.cardsUsed.add(CardType.ARTISAN);
-        retValue.cardsUsed.add(CardType.BANDIT);
-        retValue.cardsUsed.add(CardType.BUREAUCRAT);
-        retValue.cardsUsed.add(CardType.CHAPEL);
-        retValue.cardsUsed.add(CardType.FESTIVAL);
-        retValue.cardsUsed.add(CardType.GARDENS);
-        retValue.cardsUsed.add(CardType.SENTRY);
-        retValue.cardsUsed.add(CardType.THRONE_ROOM);
-        retValue.cardsUsed.add(CardType.WITCH);
-        retValue.cardsUsed.add(CardType.CURSE);
-        retValue.cardsUsed.add(CardType.WORKSHOP);
-        return retValue;
-    }
-
-    public static DominionParameters improvements() {
-        DominionParameters retValue = new DominionParameters();
-        retValue.cardsUsed.add(CardType.ARTISAN);
-        retValue.cardsUsed.add(CardType.CELLAR);
-        retValue.cardsUsed.add(CardType.MARKET);
-        retValue.cardsUsed.add(CardType.MERCHANT);
-        retValue.cardsUsed.add(CardType.MINE);
-        retValue.cardsUsed.add(CardType.MOAT);
-        retValue.cardsUsed.add(CardType.MONEYLENDER);
-        retValue.cardsUsed.add(CardType.POACHER);
-        retValue.cardsUsed.add(CardType.REMODEL);
-        retValue.cardsUsed.add(CardType.WITCH);
-        retValue.cardsUsed.add(CardType.CURSE);
-        // Note that the three Victory cards and three Treasure cards are always included
-        return retValue;
-    }
-
-
     /**
      * Return a copy of this game parameters object, with the same parameters as in the original.
      *

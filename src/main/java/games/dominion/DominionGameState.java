@@ -397,8 +397,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DominionGameState)) return false;
-        DominionGameState other = (DominionGameState) o;
+        if (!(o instanceof DominionGameState other)) return false;
         return cardsIncludedInGame.equals(other.cardsIncludedInGame) &&
                 Arrays.equals(playerHands, other.playerHands) &&
                 Arrays.equals(playerResults, other.playerResults) &&
