@@ -11,6 +11,7 @@ import games.descent2e.components.Monster;
 import java.util.List;
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.hasLineOfSight;
 import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
@@ -150,7 +151,9 @@ public class MultiAttack extends RangedAttack {
         if (f.getNActionsExecuted().isMaximum()) return false;
         for (int defendingFigure : defendingFigures)
         {
-            if(!inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), MAX_RANGE)) return false;
+            Figure target = (Figure) dgs.getComponentById(defendingFigure);
+            if(!inRange(f.getPosition(), target.getPosition(), MAX_RANGE)) return false;
+            if(!hasLineOfSight(dgs, f.getPosition(), target.getPosition())) return false;
         }
         return true;
     }
