@@ -31,18 +31,18 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     // The Overlord's fatigue value - Beneficial to the Overlord
     double FACTOR_OVERLORD_FATIGUE = 0.5;
     // How close the Overlord is to increasing their fatigue - Beneficial to the Overlord
-    double FACTOR_OVERLORD_THREAT = 0.3;
+    double FACTOR_OVERLORD_THREAT = 0.35;
     // How close the Heroes are to winning - Beneficial to the Heroes
-    double FACTOR_HEROES_THREAT = 0.3;
+    double FACTOR_HEROES_THREAT = 0.35;
 
     public DescentHeuristic() {
-        addTunableParameter("FACTOR_HERO_HP", 0.5);
-        addTunableParameter("FACTOR_HERO_DEFEATED", 0.7);
-        addTunableParameter("FACTOR_MONSTERS_HP", 0.5);
-        addTunableParameter("FACTOR_MONSTERS_DEFEATED", 0.7);
-        addTunableParameter("FACTOR_OVERLORD_FATIGUE", 0.7);
-        addTunableParameter("FACTOR_OVERLORD_THREAT", 0.5);
-        addTunableParameter("FACTOR_HEROES_THREAT", 0.5);
+        addTunableParameter("FACTOR_HERO_HP", FACTOR_HERO_HP);
+        addTunableParameter("FACTOR_HERO_DEFEATED", FACTOR_HERO_DEFEATED);
+        addTunableParameter("FACTOR_MONSTERS_HP", FACTOR_MONSTERS_HP);
+        addTunableParameter("FACTOR_MONSTERS_DEFEATED", FACTOR_MONSTERS_DEFEATED);
+        addTunableParameter("FACTOR_OVERLORD_FATIGUE", FACTOR_OVERLORD_FATIGUE);
+        addTunableParameter("FACTOR_OVERLORD_THREAT", FACTOR_OVERLORD_THREAT);
+        addTunableParameter("FACTOR_HEROES_THREAT", FACTOR_HEROES_THREAT);
     }
 
 
@@ -81,7 +81,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 // We only care about the Barghests, as their defeat is the only way for the Heroes to win, as the Goblin Archers infinitely respawn
                 // The Barghests are the second monsters in the list, i.e. index 1
                 heuristics.add(-1 * FACTOR_MONSTERS_HP * isOverlord * (getMonstersHP(dgs, 1) / getMonstersMaxHP(dgs, 1)));
-                heuristics.add(FACTOR_MONSTERS_DEFEATED * isOverlord * (getMonstersDefeated(dgs, 1) / dgs.monstersOriginal.get(1).size()));
+                heuristics.add(FACTOR_MONSTERS_DEFEATED * isOverlord * getMonstersDefeated(dgs, 1));
                 break;
             default:
                 heuristics.add(FACTOR_MONSTERS_HP * isOverlord * (getMonstersHP(dgs, 0) / getMonstersMaxHP(dgs, 0)) / dgs.monsters.size());
@@ -149,7 +149,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     }
                     if (distance > 0.0) {
                         int range = bfsLee(dgs, position, tileCoords.get(closest));
-                        int potential = Math.max(0, range - m.getAttribute(MovePoints).getValue());
+                        double potential = Math.max(0.0, range - (m.getAttribute(MovePoints).getValue() / 10.0));
                         double d = 1.0 - (potential / 10.0);
                         retVal += ((double) Math.round(d * 1000000d) / 1000000d);
                         if (hasLineOfSight(dgs, position, tileCoords.get(closest))) {
@@ -189,7 +189,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                         }
                     }
                     int range = bfsLee(dgs, position, barghests.get(closest).getPosition());
-                    int potential = Math.max(0, range - h.getAttribute(MovePoints).getValue());
+                    double potential = Math.max(0.0, range - (h.getAttribute(MovePoints).getValue() / 10.0));
                     double d = 1.0 - (potential / 10.0);
                     retVal += ((double) Math.round(d * 1000000d) / 1000000d);
                     if (hasLineOfSight(dgs, position, barghests.get(closest).getPosition())) {
