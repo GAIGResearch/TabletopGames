@@ -19,9 +19,10 @@ public class GetFatiguedMovementPoints extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState gs) {
-        gs.getActingFigure().getAttribute(Figure.Attribute.MovePoints).increment();
-        gs.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
-        gs.getActingFigure().addActionTaken(toString());
+        Figure f = gs.getActingFigure();
+        f.setAttribute(Figure.Attribute.MovePoints, f.getAttribute(Figure.Attribute.MovePoints).getValue() + 1);
+        f.getAttribute(Figure.Attribute.Fatigue).increment();
+        f.addActionTaken(toString());
         return true;
     }
 
