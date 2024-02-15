@@ -80,7 +80,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentModelParams", ITunableParameters.class);
         addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
-        addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
+        addTunableParameter("selectionPolicy", SIMPLE, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
