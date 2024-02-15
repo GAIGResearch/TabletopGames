@@ -19,7 +19,7 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 public class RangedAttack extends MeleeAttack {
 
     // How many tiles we check at maximum for Ranged Attacks
-    public static final int MAX_RANGE = 10;
+    public static final int MAX_RANGE = 8;
 
     public RangedAttack(int attackingFigure, int defendingFigure) {
         super(attackingFigure, defendingFigure);
