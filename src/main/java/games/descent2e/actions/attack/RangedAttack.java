@@ -9,6 +9,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import utilities.Distance;
 
+import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
@@ -134,7 +135,9 @@ public class RangedAttack extends MeleeAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return super.canExecute(dgs); // TODO
+        Figure f = dgs.getActingFigure();
+        if (f.getNActionsExecuted().isMaximum()) return false;
+        return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), MAX_RANGE);
     }
 
     @Override

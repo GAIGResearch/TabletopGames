@@ -733,7 +733,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<MeleeAttack> actions = new ArrayList<>();
 
         for (Integer target : targets) {
-            actions.add(new MeleeAttack(f.getComponentID(), target));
+            MeleeAttack attack = new MeleeAttack(f.getComponentID(), target);
+            if (attack.canExecute(dgs))
+                actions.add(attack);
         }
 
         Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
@@ -753,7 +755,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<RangedAttack> actions = new ArrayList<>();
 
         for (Integer target : targets) {
-            actions.add(new RangedAttack(f.getComponentID(), target));
+            RangedAttack attack = new RangedAttack(f.getComponentID(), target);
+            if (attack.canExecute(dgs))
+                actions.add(attack);
         }
 
         Collections.sort(actions, Comparator.comparingInt(RangedAttack::getDefendingFigure));

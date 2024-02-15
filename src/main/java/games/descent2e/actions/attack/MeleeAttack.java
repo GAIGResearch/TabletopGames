@@ -417,7 +417,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return true;  // TODO
+        Figure f = dgs.getActingFigure();
+        if (f.getNActionsExecuted().isMaximum()) return false;
+        return inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class RageAttack extends MeleeAttack {
        Figure f = (Figure) dgs.getComponentById(attackingFigure);
        if (f.getAttribute(Figure.Attribute.Fatigue).isMaximum() || f.getNActionsExecuted().isMaximum()) return false;
        DescentTypes.AttackType attackType = getAttackType(f);
-       return (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH);
+       return (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH) && super.canExecute(dgs);
     }
 
     @Override

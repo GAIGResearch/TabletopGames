@@ -34,7 +34,7 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        return !(f instanceof Hero) || ((Hero) f).isFeatAvailable();
+        return (!(f instanceof Hero) || ((Hero) f).isFeatAvailable()) && super.canExecute(dgs);
     }
 
     public HeroicFeatExtraAttack copy() {

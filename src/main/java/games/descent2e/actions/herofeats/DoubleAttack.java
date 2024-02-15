@@ -27,7 +27,7 @@ public class DoubleAttack extends MultiAttack {
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
         if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
-        return  !f.getNActionsExecuted().isMaximum() && super.defendingFigures.size() == 2;
+        return  super.canExecute(dgs) && super.defendingFigures.size() == 2;
     }
 
     public DoubleAttack copy() {
