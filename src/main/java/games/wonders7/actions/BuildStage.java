@@ -63,6 +63,7 @@ public class BuildStage extends AbstractAction {
         if (!cardFound) {
             throw new AssertionError("Card not found in player hand");
         }
+        // TODO: This is plain wrong - we need to keep these as a separate set of cards (players know which ones they have played, but opponents do not)
         wgs.getDiscardPile().add(card);
 
         wgs.getPlayerWonderBoard(player).changeStage(); // Increases wonderstage value to the next stage
