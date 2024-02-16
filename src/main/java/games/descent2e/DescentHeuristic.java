@@ -17,23 +17,24 @@ import utilities.Vector2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
     // The total HP of the Heroes   - Beneficial to the Heroes
-    double FACTOR_HERO_HP = 0.3;
+    double FACTOR_HERO_HP = 0.7;
     // The number of Heroes defeated - Beneficial to the Overlord
     double FACTOR_HERO_DEFEATED = 0.5;
     // The total HP of the monsters - Beneficial to the Overlord
-    double FACTOR_MONSTERS_HP = 0.3;
+    double FACTOR_MONSTERS_HP = 0.7;
     // The number of monsters defeated - Beneficial to the Heroes
     double FACTOR_MONSTERS_DEFEATED = 0.5;
     // The Overlord's fatigue value - Beneficial to the Overlord
     double FACTOR_OVERLORD_FATIGUE = 0.5;
     // How close the Overlord is to increasing their fatigue - Beneficial to the Overlord
-    double FACTOR_OVERLORD_THREAT = 0.35;
+    double FACTOR_OVERLORD_THREAT = 0.3;
     // How close the Heroes are to winning - Beneficial to the Heroes
-    double FACTOR_HEROES_THREAT = 0.35;
+    double FACTOR_HEROES_THREAT = 0.3;
 
     public DescentHeuristic() {
         addTunableParameter("FACTOR_HERO_HP", FACTOR_HERO_HP);
@@ -149,17 +150,21 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     }
                     if (distance > 0.0) {
                         int range = bfsLee(dgs, position, tileCoords.get(closest));
-                        double potential = Math.max(0.0, range - (m.getAttribute(MovePoints).getValue() / 10.0));
-                        double d = 1.0 - (potential / 10.0);
+                        int movement = Math.min(m.getAttribute(MovePoints).getValue(), m.getAttributeMax(MovePoints));
+                        double potential = Math.max(0.0, range - (movement / 10.0));
+                        double d = 1.0 - (potential / 5.0);
                         retVal += ((double) Math.round(d * 1000000d) / 1000000d);
-                        if (hasLineOfSight(dgs, position, tileCoords.get(closest))) {
-                            retVal += 0.01;
+                        if (!hasLineOfSight(dgs, position, tileCoords.get(closest))) {
+                            retVal -= 0.01;
                         }
                     }
                     else {
                         retVal += 1.0;
                     }
                 }
+
+                retVal = retVal / dgs.monsters.get(0).size();
+
                 break;
             default:
                 break;
@@ -177,6 +182,8 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 List<Monster> barghests = dgs.monsters.get(1);
                 int closest = 0;
                 for (Hero h : dgs.heroes) {
+                    DescentTypes.AttackType attackType = getAttackType(h);
+                    int minRange = attackType == DescentTypes.AttackType.MELEE ? 1 : 3;
                     double distance = 10000.0;
                     Vector2D position = h.getPosition();
                     for (int i = 0; i < barghests.size(); i++) {
@@ -188,14 +195,20 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                             closest = i;
                         }
                     }
-                    int range = bfsLee(dgs, position, barghests.get(closest).getPosition());
-                    double potential = Math.max(0.0, range - (h.getAttribute(MovePoints).getValue() / 10.0));
-                    double d = 1.0 - (potential / 10.0);
-                    retVal += ((double) Math.round(d * 1000000d) / 1000000d);
-                    if (hasLineOfSight(dgs, position, barghests.get(closest).getPosition())) {
-                        retVal += 0.01;
+                    Vector2D target = barghests.get(closest).getPosition();
+                    int range = bfsLee(dgs, position, target);
+                    if (range < minRange && hasLineOfSight(dgs, position, target))
+                    {
+                        retVal += 1.0;
+                    }
+                    else {
+                        int movement = Math.min(h.getAttribute(MovePoints).getValue(), h.getAttributeMax(MovePoints));
+                        double potential = Math.max(0.0, range - (movement * 0.25));
+                        double d = 1.0 - (potential / 5.0);
+                        retVal += ((double) Math.round(d * 1000000d) / 1000000d);
                     }
                 }
+                retVal = retVal / dgs.heroes.size();
                 break;
             default:
                 break;
