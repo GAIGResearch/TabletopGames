@@ -84,9 +84,12 @@ public class Move extends AbstractAction {
         BoardNode node = dgs.getMasterBoard().getElement(finalPosition.getX(), finalPosition.getY());
 
         // We can only end our movement on a space that is not occupied by another figure
+        // This is not important if we are considered off the map
         int player = ((PropertyInt) node.getProperty("players")).value;
-        if (player != -1 && player != f.getComponentID()) return false;
-        if (checkCollision(dgs, f, finalPosition)) return false;
+        if (!f.isOffMap()) {
+            if (player != -1 && player != f.getComponentID()) return false;
+            if (checkCollision(dgs, f, finalPosition)) return false;
+        }
         return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
         // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
     }
@@ -101,6 +104,7 @@ public class Move extends AbstractAction {
 
         for (Hero h : dgs.getHeroes())
         {
+            if (h.isOffMap()) continue;
             if (endPos.equals(h.getPosition())) {
                 if (f.getComponentID() != h.getComponentID()) {
                     collision = true;
@@ -114,6 +118,7 @@ public class Move extends AbstractAction {
             if(collision) break;
             for (Monster m : monster)
             {
+                if (m.isOffMap()) continue;
                 Vector2D topLeftAnchor = m.applyAnchorModifier();
                 Pair<Integer, Integer> size = m.getSize().copy();
                 if (m.getOrientation().ordinal() % 2 == 1) size.swap();
@@ -242,40 +247,31 @@ public class Move extends AbstractAction {
         List<Vector2D> possibilities = new ArrayList<>();
         // Otherwise, we need to find the nearest adjacent space that is empty
         GridBoard<BoardNode> board = dgs.getMasterBoard();
-        List<Vector2D> neighbours = getNeighbourhood(position.getX(), position.getY(), board.getWidth(), board.getHeight(), true);
-        for (Vector2D neighbour : neighbours) {
-            BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
-            if (node != null) {
-                // Check if there are no other figures on the space, and that it is walkable
-                player = ((PropertyInt) node.getProperty("players")).value;
-                if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && (player == -1 || player == f.getComponentID())) {
-                    possibilities.add(neighbour);
-                }
-            }
-        }
-        if (possibilities.isEmpty())
-        {
-            List<Vector2D> neighboursOfNeighbours = new ArrayList<>();
+        List<Vector2D> checked = new ArrayList<>();
+        List<Vector2D> toCheck = new ArrayList<>();
+        toCheck.add(position);
+
+        while (!toCheck.isEmpty()) {
+            Vector2D current = toCheck.remove(0);
+            checked.add(current);
+            List<Vector2D> neighbours = getNeighbourhood(current.getX(), current.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D neighbour : neighbours) {
-                List<Vector2D> uniqueNeighbours = getNeighbourhood(neighbour.getX(), neighbour.getY(), board.getWidth(), board.getHeight(), true);
-                uniqueNeighbours.removeIf(neighboursOfNeighbours::contains);
-                neighboursOfNeighbours.addAll(uniqueNeighbours);
-            }
-            neighboursOfNeighbours.removeIf(neighbours::contains);
-            for (Vector2D neighbour : neighboursOfNeighbours)
-            {
-                BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
-                // Check if there are no figures on the space, and that it is walkable
-                if (node != null) {
-                    player = ((PropertyInt) node.getProperty("players")).value;
-                    if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && (player == -1 || player == f.getComponentID())) {
-                        possibilities.add(neighbour);
+                if (!checked.contains(neighbour) && !toCheck.contains(neighbour)) {
+                    toCheck.add(neighbour);
+                    BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
+                    if (node != null) {
+                        // Check if there are no other figures on the space, and that it is walkable
+                        player = ((PropertyInt) node.getProperty("players")).value;
+                        if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && (player == -1 || player == f.getComponentID())) {
+                            possibilities.add(neighbour);
+                        }
                     }
                 }
             }
+            if (possibilities.size() > 0) break;
         }
 
-        // TODO The game should check more than just two spaces away for possibilities, but this is just a proof of concept for now
+        // This will only occur if, for whatever reason, every single space on the board is considered occupied
         if (possibilities.isEmpty())
         {
             throw new AssertionError("No empty spaces found to place figure!");
