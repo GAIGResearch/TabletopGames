@@ -430,7 +430,12 @@ public class DescentHelper {
 
                             // If the space is not a neighbour of the current position, then it is not a legal move
                             if (i == 1 || j == 1) {
-                                Set<BoardNode> neighbours = dgs.getMasterBoard().getElement(topLeftCorner).getNeighbours().keySet();
+                                BoardNode target = dgs.getMasterBoard().getElement(topLeftCorner);
+                                if (target == null) {
+                                    legal = false;
+                                    break;
+                                }
+                                Set<BoardNode> neighbours = target.getNeighbours().keySet();
                                 if (!neighbours.contains(dgs.getMasterBoard().getElement(space))) {
                                     legal = false;
                                     break;
