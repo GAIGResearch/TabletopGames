@@ -15,6 +15,7 @@ import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import tech.tablesaw.plotly.components.Grid;
+import utilities.Hash;
 import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -425,7 +426,19 @@ public class DescentHelper {
                     boolean legal = true;
                     for (int j = 0; j < mSize.a; j++) {
                         for (int i = 0; i < mSize.b; i++) {
-                            BoardNode spaceOccupied = dgs.getMasterBoard().getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
+                            Vector2D space = new Vector2D(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
+
+                            // If the space is not a neighbour of the current position, then it is not a legal move
+                            if (i == 1 || j == 1) {
+                                Set<BoardNode> neighbours = dgs.getMasterBoard().getElement(topLeftCorner).getNeighbours().keySet();
+                                if (!neighbours.contains(dgs.getMasterBoard().getElement(space))) {
+                                    legal = false;
+                                    break;
+                                }
+                            }
+
+                            BoardNode spaceOccupied = dgs.getMasterBoard().getElement(space.getX(), space.getY());
+
                             if (spaceOccupied != null)
                             {
                                 PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);

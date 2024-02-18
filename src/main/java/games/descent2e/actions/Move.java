@@ -94,7 +94,7 @@ public class Move extends AbstractAction {
         // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
     }
 
-    public static boolean checkCollision(DescentGameState dgs, Figure f, Vector2D endPos)
+    public static boolean checkCollision(DescentGameState dgs, Figure f, Vector2D anchor)
     {
         // Check if there is a collision with another figure
         // We cannot end our movement on a space that is already occupied by another figure
@@ -102,33 +102,44 @@ public class Move extends AbstractAction {
 
         if (f.isOffMap()) return false;
 
-        for (Hero h : dgs.getHeroes())
-        {
-            if (h.isOffMap()) continue;
-            if (endPos.equals(h.getPosition())) {
-                if (f.getComponentID() != h.getComponentID()) {
-                    collision = true;
-                    break;
-                }
-            }
+        Pair<Integer, Integer> fSize = f.getSize().copy();
+
+
+
+        if (f instanceof Monster) {
+            anchor = ((Monster) f).applyAnchorModifier();
+            if (((Monster) f).getOrientation().ordinal() % 2 == 1) fSize.swap();
         }
 
-        for (List<Monster> monster : dgs.getMonsters())
-        {
-            if(collision) break;
-            for (Monster m : monster)
-            {
-                if (m.isOffMap()) continue;
-                Vector2D topLeftAnchor = m.applyAnchorModifier();
-                Pair<Integer, Integer> size = m.getSize().copy();
-                if (m.getOrientation().ordinal() % 2 == 1) size.swap();
-                for (int i = 0; i < size.b; i++) {
-                    for (int j = 0; j < size.a; j++) {
-                        Vector2D newPos = new Vector2D(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
-                        if (endPos.equals(newPos)) {
-                            if (f.getComponentID() != m.getComponentID()) {
-                                collision = true;
-                                break;
+        for (int a = 0; a < fSize.b; a++) {
+            for (int b = 0; b < fSize.a; b++) {
+                Vector2D endPos = new Vector2D(anchor.getX() + b, anchor.getY() + a);
+                for (Hero h : dgs.getHeroes()) {
+                    if (h.isOffMap()) continue;
+                    if (endPos.equals(h.getPosition())) {
+                        if (f.getComponentID() != h.getComponentID()) {
+                            collision = true;
+                            break;
+                        }
+                    }
+                }
+
+                for (List<Monster> monster : dgs.getMonsters()) {
+                    if (collision) break;
+                    for (Monster m : monster) {
+                        if (m.isOffMap()) continue;
+                        Vector2D topLeftAnchorM = m.applyAnchorModifier();
+                        Pair<Integer, Integer> size = m.getSize().copy();
+                        if (m.getOrientation().ordinal() % 2 == 1) size.swap();
+                        for (int i = 0; i < size.b; i++) {
+                            for (int j = 0; j < size.a; j++) {
+                                Vector2D newPos = new Vector2D(topLeftAnchorM.getX() + j, topLeftAnchorM.getY() + i);
+                                if (endPos.equals(newPos)) {
+                                    if (f.getComponentID() != m.getComponentID()) {
+                                        collision = true;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
