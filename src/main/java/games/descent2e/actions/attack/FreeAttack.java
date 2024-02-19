@@ -11,6 +11,7 @@ import games.descent2e.components.Monster;
 import java.util.HashSet;
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.hasLineOfSight;
 import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
 
@@ -59,14 +60,21 @@ public class FreeAttack extends RangedAttack{
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+
+        Figure f = dgs.getActingFigure();
+        if (f == null) return false;
+        if (f.getNActionsExecuted().isMaximum() && f.hasUsedExtraAction()) return false;
+
+        Figure target = (Figure) dgs.getComponentById(defendingFigure);
+
+        int range = MAX_RANGE;
+
         if (isMelee)
         {
-            Figure f = dgs.getActingFigure();
-            return f.getNActionsExecuted().isMaximum() &&
-                    inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1);
+            range = 1;
         }
-        else
-            return super.canExecute(dgs);
+
+        return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), range);
     }
 
     @Override
