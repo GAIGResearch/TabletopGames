@@ -8,6 +8,9 @@ import games.descent2e.components.Hero;
 
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.hasLineOfSight;
+import static games.descent2e.DescentHelper.inRange;
+
 public class HeroicFeatExtraAttack extends FreeAttack {
 
     // Grisban the Thirsty's Heroic Feat
@@ -34,7 +37,19 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        return (!(f instanceof Hero) || ((Hero) f).isFeatAvailable()) && super.canExecute(dgs);
+        if (f == null) return false;
+        if (!(f instanceof Hero) || ((Hero) f).isFeatAvailable()) {
+            Figure target = (Figure) dgs.getComponentById(defendingFigure);
+
+            int range = MAX_RANGE;
+
+            if (isMelee) {
+                range = 1;
+            }
+
+            return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), range);
+        }
+        return false;
     }
 
     public HeroicFeatExtraAttack copy() {
