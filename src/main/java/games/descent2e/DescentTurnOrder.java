@@ -112,6 +112,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 overlordEndTurn((DescentGameState)gameState);
             }
             endRound(gameState);
+            dgs.clearDefeatedFigures();
             /*StringBuilder healthCheck = new StringBuilder();
             for (Figure f: dgs.getHeroes()) {
                 healthCheck.append(f.getName()).append(": ").append(f.getAttribute(Figure.Attribute.Health).getValue()).append("/").append(f.getAttributeMax(Figure.Attribute.Health)).append("; ");
@@ -183,7 +184,6 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         monsterGroupActingNext = 0;
         monsterActingNext = 0;
         heroFigureActingNext = 0;
-        dgs.clearDefeatedFigures();
     }
 
     @Override
