@@ -327,10 +327,14 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             // All conditions are removed when a figure is defeated
             defender.removeAllConditions();
             // Death
+
+            int index1 = 0;
+            int index2 = 0;
             if (defender instanceof Hero) {
                 ((Hero)defender).setDefeated(state,true);
                 //System.out.println(defender.getComponentName() + " defeated!");
                 // Overlord may draw a card TODO
+                index1 = state.getHeroes().indexOf(defender);
             } else {
                 // A monster
                 Monster m = (Monster) defender;
@@ -344,9 +348,45 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
                 // Remove from state lists
                 for (List<Monster> monsterGroup: state.getMonsters()) {
-                    monsterGroup.remove(m);
+                    if (monsterGroup.contains(m)) {
+                        index1 = monsterGroup.indexOf(m);
+
+                        // The Master monster is always first on the list
+                        // if it is not, then that means it is dead and should be accounted for
+                        if (!monsterGroup.get(0).getName().contains("master"))
+                        {
+                            index1++;
+                        }
+                        monsterGroup.remove(m);
+                        break;
+                    }
                 }
             }
+
+            if (attacker instanceof Hero) {
+                index2 = state.getHeroes().indexOf(attacker);
+            }
+
+            if(attacker instanceof Monster)
+            {
+                for (List<Monster> monsterGroup: state.getMonsters()) {
+                    if (monsterGroup.contains(attacker)) {
+                        index2 = monsterGroup.indexOf(attacker);
+
+                        // The Master monster is always first on the list
+                        // If it is not, then that means it is dead and should be accounted for
+                        if (!monsterGroup.get(0).getName().contains("master"))
+                        {
+                            index2++;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // Add to the list of defeated figures this turn
+            state.addDefeatedFigure(defender, index1, attacker, index2);
+
         } else {
             // Conditions only apply if damage is done
             if (damage > 0)

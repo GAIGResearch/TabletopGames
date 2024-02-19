@@ -9,7 +9,6 @@ import core.turnorders.TurnOrder;
 import games.descent2e.actions.Move;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
-import games.descent2e.concepts.Quest;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -184,6 +183,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         monsterGroupActingNext = 0;
         monsterActingNext = 0;
         heroFigureActingNext = 0;
+        dgs.clearDefeatedFigures();
     }
 
     @Override
@@ -358,9 +358,13 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                                 dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                             }
                         }
-                        if (canSpawnMaster)
+                        if (canSpawnMaster) {
+                            dgs.monsters.get(index).add(0, monster);
                             canSpawnMaster = false;
-                        dgs.monsters.get(index).add(monster);
+                        }
+                        else {
+                            dgs.monsters.get(index).add(monster);
+                        }
                         //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
                         break;
                     }

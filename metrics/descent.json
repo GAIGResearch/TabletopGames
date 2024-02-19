@@ -11,6 +11,8 @@
       {"class": "evaluation.metrics.GameMetrics$FinalScore" },
       {"class": "games.descent2e.DescentMetrics$WinnerType" },
       {"class": "games.descent2e.DescentMetrics$HealthPoints" },
+      {"class": "games.descent2e.DescentMetrics$Heroes"},
+      {"class": "games.descent2e.DescentMetrics$Kills"},
       {"class": "games.descent2e.DescentMetrics$Positions"},
       {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
       {"class": "evaluation.metrics.GameMetrics$Winner" },

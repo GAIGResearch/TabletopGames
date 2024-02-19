@@ -8,6 +8,7 @@ import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -15,6 +16,157 @@ import java.util.*;
 import static evaluation.metrics.Event.GameEvent.*;
 
 public class DescentMetrics implements IMetricsCollection {
+
+    public static class Heroes extends AbstractMetric
+    {
+        public Heroes() {
+            super();
+        }
+
+        public Heroes(Event.GameEvent... args) {
+            super(args);
+        }
+
+        public Heroes(Set<IGameEvent> events) {
+            super(events);
+        }
+
+        public Heroes(String[] args) {
+            super(args);
+        }
+
+        public Heroes(String[] args, Event.GameEvent... events) {
+            super(args, events);
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DescentGameState dgs = (DescentGameState) e.state;
+            for (int i = 0; i < dgs.getHeroes().size(); i++) {
+                records.put("Hero " + (i + 1), dgs.getHeroes().get(i).getName().replace("Hero: ", ""));
+            }
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
+                add(ABOUT_TO_START);
+            }};
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            HashMap<String, Class<?>> retVal = new HashMap<>();
+            for (int i = 0; i < nPlayersPerGame-1; i++) {
+                retVal.put("Hero " + (i + 1), String.class);
+            }
+            return retVal;
+        }
+    }
+
+    public static class Kills extends AbstractMetric
+    {
+        public Kills() {
+            super();
+        }
+
+        public Kills(Event.GameEvent... args) {
+            super(args);
+        }
+
+        public Kills(Set<IGameEvent> events) {
+            super(events);
+        }
+
+        public Kills(String[] args) {
+            super(args);
+        }
+
+        public Kills(String[] args, Event.GameEvent... events) {
+            super(args, events);
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DescentGameState dgs = (DescentGameState) e.state;
+
+            List<Pair<String, String>> kills = dgs.getDefeatedFigures();
+
+            for (Pair<String, String> kill : kills) {
+                String[] a = kill.a.split(";");
+                String[] b = kill.b.split(";");
+
+                String target = a[0];
+                String killer = b[0];
+
+                int index1 = Integer.parseInt(a[1]);
+                int index2 = Integer.parseInt(b[1]);
+
+                if (target.contains("Hero:"))
+                {
+                    records.put("Hero " + (index1 + 1), target.replace("Hero: ", "") + " defeated by " + killer);
+                }
+                else
+                {
+                    if (target.contains("Goblin"))
+                    {
+                        if (target.contains("master"))
+                        {
+                            records.put("Goblin Master", target + " defeated by " + killer.replace("Hero: ", ""));
+                        }
+                        else
+                        {
+                            records.put("Goblin Minion " + index1, target + " defeated by " + killer.replace("Hero: ", ""));
+                        }
+                    }
+                    else
+                    {
+                        if (target.contains("Barghest"))
+                        {
+                            if (target.contains("master"))
+                            {
+                                records.put("Barghest Master", target + " defeated by " + killer.replace("Hero: ", ""));
+                            }
+                            else
+                            {
+                                records.put("Barghest Minion " + index1, target + " defeated by " + killer.replace("Hero: ", ""));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
+                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
+            }};
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            HashMap<String, Class<?>> retVal = new HashMap<>();
+            retVal.put("Hero 1", String.class);
+            retVal.put("Hero 2", String.class);
+            retVal.put("Hero 3", String.class);
+            retVal.put("Hero 4", String.class);
+            retVal.put("Goblin Master", String.class);
+            retVal.put("Goblin Minion 1", String.class);
+            retVal.put("Goblin Minion 2", String.class);
+            retVal.put("Goblin Minion 3", String.class);
+            retVal.put("Goblin Minion 4", String.class);
+            retVal.put("Barghest Master", String.class);
+            retVal.put("Barghest Minion 1", String.class);
+            retVal.put("Barghest Minion 2", String.class);
+            retVal.put("Barghest Minion 3", String.class);
+            return retVal;
+        }
+    }
 
     public static class Positions extends AbstractMetric {
 

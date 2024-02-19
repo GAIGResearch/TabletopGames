@@ -13,6 +13,7 @@ import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
 import games.descent2e.concepts.Quest;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -56,6 +57,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     int overlordPlayer;
     ArrayList<DToken> tokens;
     Quest currentQuest;
+    List<Pair<String, String>> defeatedFigures;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -77,6 +79,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         monstersOriginal = new ArrayList<>();
         monstersPerGroup = new ArrayList<>();
         monsterGroups = new ArrayList<>();
+        defeatedFigures = new ArrayList<>();
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -175,7 +178,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         copy.searchCards = searchCards.copy();
         copy.currentQuest = currentQuest;  // TODO does this need to be deep? it (should be) read-only after data parsing
-        // TODO
+        copy.defeatedFigures = new ArrayList<>();
+        for (Pair<String, String> p : defeatedFigures) {
+            copy.defeatedFigures.add(new Pair<>(p.a, p.b));
+        }
         return copy;
     }
 
@@ -221,14 +227,16 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens) &&
                 Objects.equals(monstersOriginal, that.monstersOriginal) &&
                 Objects.equals(monstersPerGroup, that.monstersPerGroup) &&
-                Objects.equals(monsterGroups, that.monsterGroups);
+                Objects.equals(monsterGroups, that.monsterGroups) &&
+                Objects.equals(currentQuest, that.currentQuest) &&
+                Objects.equals(defeatedFigures, that.defeatedFigures);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
-                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest);
+                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest, defeatedFigures);
         result = 31 * result + Arrays.hashCode(tileReferences);
         return result;
     }
@@ -255,6 +263,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 overlordPlayer,
                 tokens.hashCode(),
                 currentQuest.hashCode(),
+                defeatedFigures.hashCode(),
                 Arrays.deepHashCode(tileReferences)
         };
     }
@@ -391,6 +400,26 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     public Quest getCurrentQuest() {
         return currentQuest;
+    }
+    public void addDefeatedFigure(Figure target, int index1, Figure attacker, int index2) {
+        String defeated = target.getName().replace("Hero: ", "");
+        if (target instanceof Monster && index1 > 0)
+            defeated += " " + index1;
+        defeated += " (" + target.getComponentID() + ")";
+
+        String defeatedBy = attacker.getName().replace("Hero: ", "");
+        if (attacker instanceof Monster && index2 > 0)
+            defeatedBy += " " + index2;
+        defeatedBy += " (" + attacker.getComponentID() + ")";
+
+        defeatedFigures.add(new Pair<>(defeated, defeatedBy));
+
+    }
+    public List<Pair<String, String>> getDefeatedFigures() {
+        return defeatedFigures;
+    }
+    public void clearDefeatedFigures() {
+        defeatedFigures.clear();
     }
 
     @Override
