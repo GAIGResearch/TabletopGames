@@ -35,6 +35,7 @@ import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
@@ -390,6 +391,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             StandUp standUp = new StandUp();
             if (standUp.canExecute(dgs)) {
                 actions.add(standUp);
+                actions.remove(endTurn);
             }
             return actions;
         }
@@ -411,8 +413,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 tested = true;
             }
 
-            if (tested)
+            if (tested) {
+                actions.remove(endTurn);
                 return actions;
+            }
         }
 
         // Ashrian's Hero Ability
@@ -425,8 +429,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // If we are stunned, we can only take the 'Stunned' action
         if (actingFigure.hasCondition(DescentCondition.Stun)) {
             Stunned stunned = new Stunned();
-            if (stunned.canExecute(dgs)) actions.add(stunned);
-            return actions;
+            if (stunned.canExecute(dgs)) {
+                actions.add(stunned);
+                actions.remove(endTurn);
+            }
+                return actions;
         }
 
         // Grisban the Thirsty's Hero Ability
@@ -452,6 +459,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
+        List <AbstractAction> attacks = new ArrayList<>();
+
         // Add actions that cost action points
         // These can only be taken if we have not already taken 2 actions
         // Also, the acting figure must be on the map to take them
@@ -468,9 +477,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (!(actingFigure instanceof Monster && actingFigure.hasAttacked())) {
                 if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
                     actions.addAll(meleeAttackActions(dgs, actingFigure));
+                    attacks.addAll(meleeAttackActions(dgs, actingFigure));
                 }
                 if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
                     actions.addAll(rangedAttackActions(dgs, actingFigure));
+                    attacks.addAll(rangedAttackActions(dgs, actingFigure));
                 }
             }
 
@@ -526,7 +537,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
             {
                 List<AbstractAction> monsterActions = monsterActions(dgs);
-                if (!monsterActions.isEmpty()) actions.addAll(monsterActions);
+                if (!monsterActions.isEmpty()) {
+                    actions.addAll(monsterActions);
+                    attacks.addAll(monsterActions);
+                }
             }
 
             // - Special (specified by quest)
@@ -565,12 +579,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
         // This does not cost any action points to take
         // This action may be used as a free attack, or to Restore 2 Hearts
+        List<AbstractAction> twoHeroActions = new ArrayList<>();
         if (dgs.getHeroes().size() == 2) {
             if (actingFigure instanceof Hero && !actingFigure.hasUsedExtraAction())
             {
                 Restore restore = new Restore(2);
                 if (restore.canExecute(dgs)) {
                     actions.add(restore);
+                    twoHeroActions.add(restore);
                 }
 
                 // TODO: Fix this
@@ -584,6 +600,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
                         if (freeAttack.canExecute(dgs)) {
                             actions.add(freeAttack);
+                            twoHeroActions.add(freeAttack);
                         }
                     }
                 }
@@ -594,10 +611,32 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
                         if (freeAttack.canExecute(dgs)) {
                             actions.add(freeAttack);
+                            twoHeroActions.add(freeAttack);
                         }
                     }
                 }
 
+            }
+        }
+
+        // We should remove EndTurn to prevent premature ending of turn
+        if (actions.size() > 1) {
+            // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
+            // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
+            if (actingFigure instanceof Hero) {
+                if (!actingFigure.getNActionsExecuted().isMaximum() ||
+                        !twoHeroActions.isEmpty() ||
+                        actingFigure.getAttribute(MovePoints).getValue() >= actingFigure.getAttributeMax(MovePoints) ||
+                        (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved()))
+                    actions.remove(endTurn);
+            }
+            if (actingFigure instanceof Monster) {
+                // As Monsters can only attack once, they should be allowed to End Turn without using up all of their actions
+                // It should be acceptable for a Monster to use an Attack action, then End Turn without moving
+                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) ||
+                        actingFigure.getAttribute(MovePoints).getValue() >= actingFigure.getAttributeMax(MovePoints) ||
+                        (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved()))
+                    actions.remove(endTurn);
             }
         }
 
