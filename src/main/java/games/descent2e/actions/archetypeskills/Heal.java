@@ -126,8 +126,6 @@ public class Heal extends DescentAction {
         Component card = dgs.getComponentById(cardID);
         if (card == null)
         {
-            // As Prayer of Healing can be upgraded to have additional effects,
-            // we do not care if the target is at full health if we are exhausting a card
             if (target.getAttribute(Figure.Attribute.Health).getValue() >= target.getAttribute(Figure.Attribute.Health).getMaximum())
                 return false;
         }
@@ -135,6 +133,11 @@ public class Heal extends DescentAction {
         if (card != null)
         {
             if (f.isExhausted((DescentCard) dgs.getComponentById(cardID)))
+                return false;
+            // Normally Prayer of Healing can be upgraded to have additional effects,
+            // so we would not care if the target is at full health if we are exhausting a card
+            // However, at this current level, we do not have such abilities, so we still need to check
+            if (target.getAttribute(Figure.Attribute.Health).getValue() >= target.getAttribute(Figure.Attribute.Health).getMaximum())
                 return false;
         }
 
