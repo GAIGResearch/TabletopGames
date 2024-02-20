@@ -360,7 +360,10 @@ public class DescentMetrics implements IMetricsCollection {
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(GAME_OVER);
+            return new HashSet<IGameEvent>() {{
+                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
+            }};
         }
 
         @Override
