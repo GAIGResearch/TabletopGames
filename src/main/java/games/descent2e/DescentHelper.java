@@ -2,6 +2,7 @@ package games.descent2e;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.Component;
 import core.components.Deck;
 import core.components.GridBoard;
 import core.properties.Property;
@@ -647,5 +648,29 @@ public class DescentHelper {
     static boolean checkValid(int row, int col, GridBoard board)
     {
         return ((row >= 0) && (row < board.getWidth()) && (col >= 0) && (col < board.getHeight()));
+    }
+
+    public static String gridCounter(DescentGameState dgs, int figureId, Vector2D startPos, List<Vector2D> positionsTravelled) {
+        Component[] grid = dgs.getMasterBoard().flattenGrid();
+        int counter = 0;
+        StringBuilder coords = new StringBuilder();
+        for (Component node : grid) {
+            if (node != null) {
+                if (((PropertyInt) node.getProperty(playersHash)).value == figureId) {
+                    counter++;
+                    coords.append(node.getProperty("coordinates").toString()+"; ");
+                }
+            }
+        }
+
+        if (figureId != -1) {
+            Figure f = (Figure) dgs.getComponentById(figureId);
+            if (counter > (f.getSize().a * f.getSize().b)) {
+                System.out.println("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+                throw new AssertionError("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+            }
+        }
+
+        return "Player " + figureId + " has " + counter + " node occurrences: " + coords;
     }
 }

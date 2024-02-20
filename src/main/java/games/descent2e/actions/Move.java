@@ -7,6 +7,7 @@ import core.components.GridBoard;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -53,9 +54,6 @@ public class Move extends AbstractAction {
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = (Figure) dgs.getComponentById(this.f);
         startPosition = f.getPosition();
-        // Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
-        // BoardNode node = dgs.getMasterBoard().getElement(finalPosition);
-        // System.out.println("Test 1/2: " + startPosition + " to " + finalPosition + ": " + node.getProperty("players"));
 
         // Remove from old position
         remove(dgs, f);
@@ -71,7 +69,8 @@ public class Move extends AbstractAction {
 
         f.addActionTaken(toString());
 
-        //System.out.println("Test 2/2: " + startPosition + " to " + finalPosition + ": " + node.getProperty("players"));
+        DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
+
         return true;
     }
 
