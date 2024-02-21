@@ -34,7 +34,11 @@ public class Rest extends DescentAction{
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        return f instanceof Hero && f.getAttributeValue(Figure.Attribute.Fatigue) > 0 && !f.getNActionsExecuted().isMaximum() && !(((Hero) f).hasRested());
+        // Control limit for fatigue, to stop agents from spamming Rest when they only have 1 fatigue
+        int control = 2;
+        return f instanceof Hero && !f.getNActionsExecuted().isMaximum() &&
+                (f.getAttributeValue(Figure.Attribute.Fatigue) > control || f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) &&
+                !(((Hero) f).hasRested());
     }
 
     @Override
