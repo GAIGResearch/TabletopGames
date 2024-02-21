@@ -31,6 +31,8 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     double FACTOR_OVERLORD_THREAT = 0.3;
     // How close the Heroes are to winning - Beneficial to the Heroes
     double FACTOR_HEROES_THREAT = 0.3;
+    // Penalise the current player if they End Turn poorly - Penalises both Heroes and Overlord
+    double FACTOR_DONE_NOTHING = 0.0;
 
     public DescentHeuristic() {
         addTunableParameter("FACTOR_HERO_HP", FACTOR_HERO_HP);
@@ -40,6 +42,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         addTunableParameter("FACTOR_OVERLORD_FATIGUE", FACTOR_OVERLORD_FATIGUE);
         addTunableParameter("FACTOR_OVERLORD_THREAT", FACTOR_OVERLORD_THREAT);
         addTunableParameter("FACTOR_HEROES_THREAT", FACTOR_HEROES_THREAT);
+        addTunableParameter("FACTOR_DONE_NOTHING", FACTOR_DONE_NOTHING);
     }
 
 
@@ -89,6 +92,14 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
 
         heuristics.add(FACTOR_HEROES_THREAT * isOverlord * (getHeroesThreat(dgs, questName) / dgs.heroes.size()));
 
+        // Penalise the current player if they immediately End Turn
+        // This is to encourage the AI to do something, even if it's just moving a figure
+        // We penalise the player if they have not executed any actions, or if they have MovePoints remaining and have not moved
+        if (FACTOR_DONE_NOTHING > 0.0) {
+            if (actingFigure.getNActionsExecuted().isMinimum() || (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved())) {
+                heuristics.add(-1.0 * FACTOR_DONE_NOTHING);
+            }
+        }
         // Rounds the Heuristics to 6 decimal places
         heuristics.replaceAll(aDouble -> (double) Math.round(aDouble * 1000000d) / 1000000d);
 
@@ -251,6 +262,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         retVal.FACTOR_MONSTERS_DEFEATED = FACTOR_MONSTERS_DEFEATED;
         retVal.FACTOR_OVERLORD_FATIGUE = FACTOR_OVERLORD_FATIGUE;
         retVal.FACTOR_OVERLORD_THREAT = FACTOR_OVERLORD_THREAT;
+        retVal.FACTOR_DONE_NOTHING = FACTOR_DONE_NOTHING;
         return retVal;
     }
 
@@ -264,7 +276,8 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     FACTOR_MONSTERS_HP == other.FACTOR_MONSTERS_HP &&
                     FACTOR_MONSTERS_DEFEATED == other.FACTOR_MONSTERS_DEFEATED &&
                     FACTOR_OVERLORD_FATIGUE == other.FACTOR_OVERLORD_FATIGUE &&
-                    FACTOR_OVERLORD_THREAT == other.FACTOR_OVERLORD_THREAT;
+                    FACTOR_OVERLORD_THREAT == other.FACTOR_OVERLORD_THREAT &&
+                    FACTOR_DONE_NOTHING == other.FACTOR_DONE_NOTHING;
         }
         return false;
     }
@@ -282,5 +295,6 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         FACTOR_MONSTERS_DEFEATED = (double) getParameterValue("FACTOR_MONSTERS_DEFEATED");
         FACTOR_OVERLORD_FATIGUE = (double) getParameterValue("FACTOR_OVERLORD_FATIGUE");
         FACTOR_OVERLORD_THREAT = (double) getParameterValue("FACTOR_OVERLORD_THREAT");
+        FACTOR_DONE_NOTHING = (double) getParameterValue("FACTOR_DONE_NOTHING");
     }
 }
