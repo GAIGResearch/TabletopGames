@@ -117,7 +117,7 @@ public class DescentMetrics implements IMetricsCollection {
                         }
                         else
                         {
-                            records.put("Goblin Minion " + index1, target + " defeated by " + killer.replace("Hero: ", ""));
+                            records.put("Goblin Minion " + (index1 + 1), target + " defeated by " + killer.replace("Hero: ", ""));
                         }
                     }
                     else
@@ -130,7 +130,7 @@ public class DescentMetrics implements IMetricsCollection {
                             }
                             else
                             {
-                                records.put("Barghest Minion " + index1, target + " defeated by " + killer.replace("Hero: ", ""));
+                                records.put("Barghest Minion " + (index1 + 1), target + " defeated by " + killer.replace("Hero: ", ""));
                             }
                         }
                     }
