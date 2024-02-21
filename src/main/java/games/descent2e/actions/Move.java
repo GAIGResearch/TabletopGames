@@ -70,7 +70,7 @@ public class Move extends AbstractAction {
 
         f.addActionTaken(toString());
 
-        DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
+        //DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
 
         return true;
     }
@@ -88,7 +88,7 @@ public class Move extends AbstractAction {
         int player = ((PropertyInt) node.getProperty("players")).value;
         if (!f.isOffMap()) {
             if (player != -1 && player != f.getComponentID()) return false;
-            if (checkCollision(dgs, f, finalPosition)) return false;
+            //if (checkCollision(dgs, f, finalPosition)) return false;
         }
         return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
         // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
@@ -324,7 +324,7 @@ public class Move extends AbstractAction {
                 PropertyInt placeFigureOnTile = new PropertyInt("players", f.getComponentID());
                 destinationTile.setProperty(placeFigureOnTile);
 
-                DescentHelper.gridCounter(dgs, f.getComponentID(), null, null);
+                //DescentHelper.gridCounter(dgs, f.getComponentID(), null, null);
 
                 DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
                 if (terrain != null) {
