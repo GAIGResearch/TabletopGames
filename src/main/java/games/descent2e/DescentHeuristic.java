@@ -1,7 +1,6 @@
 package games.descent2e;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
@@ -13,11 +12,8 @@ import static games.descent2e.components.Figure.Attribute.*;
 
 import utilities.Utils;
 import utilities.Vector2D;
-
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -61,6 +57,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         }
 
         String questName = dgs.getCurrentQuest().getName();
+        Figure actingFigure = dgs.getActingFigure();
 
         // Some heuristics will be beneficial to the overlord and detrimental to the heroes
         // Likewise, some will be beneficial to the heroes and detrimental to the overlord
@@ -119,6 +116,22 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     private double getMonstersMaxHP(DescentGameState dgs, int index) {
         return dgs.monstersOriginal.get(index).stream().mapToDouble(m -> m.getAttributeMax(Health)).sum();
     }
+    private double getAllMonstersHP(DescentGameState dgs) {
+        double retVal = 0.0;
+        for (int i = 0; i < dgs.monsters.size(); i++) {
+            retVal += getMonstersHP(dgs, i);
+        }
+        return retVal;
+    }
+
+    private double getAllMonstersMaxHP(DescentGameState dgs) {
+        double retVal = 0.0;
+        for (int i = 0; i < dgs.monstersOriginal.size(); i++) {
+            retVal += getMonstersMaxHP(dgs, i);
+        }
+        return retVal;
+    }
+
     private double getMonstersDefeated(DescentGameState dgs, int index) {
         // Subtract the number of monsters in the original list from the number in the current list
         return dgs.monstersOriginal.get(index).size() - dgs.monsters.get(index).size();
@@ -135,7 +148,11 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
 
                 retVal = -1.0 * getMonstersDefeated(dgs, 0) / dgs.monstersOriginal.get(0).size();
 
-                for (Monster m : dgs.monsters.get(0)) {
+                List<Monster> monsters = dgs.getMonsters().get(0);
+                // If the Goblins are all slain (and thus respawning), the Overlord should be penalised
+                // This rewards the Heroes for killing Goblins
+                if (monsters.isEmpty()) return -1.0;
+                for (Monster m : monsters) {
                     int closest = 0;
                     double distance = 10000.0;
                     Vector2D position = m.getPosition();
@@ -163,7 +180,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     }
                 }
 
-                retVal = retVal / dgs.monsters.get(0).size();
+                retVal = retVal / dgs.getOriginalMonsters().get(0).size();
 
                 break;
             default:
@@ -180,8 +197,16 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 // We need to check how far away the Heroes are from the Barghests
                 // The closer the Heroes are, the better
                 List<Monster> barghests = dgs.monsters.get(1);
+                // If all the Barghests are slain, the Heroes win, so there is no further need to check
+                if (barghests.isEmpty()) return 1.0;
                 int closest = 0;
                 for (Hero h : dgs.heroes) {
+                    // Heroes that are defeated should not be counted
+                    // This rewards the Overlord for defeating Heroes
+                    if (h.isDefeated())
+                    {
+                        continue;
+                    }
                     DescentTypes.AttackType attackType = getAttackType(h);
                     int minRange = attackType == DescentTypes.AttackType.MELEE ? 1 : 3;
                     double distance = 10000.0;
