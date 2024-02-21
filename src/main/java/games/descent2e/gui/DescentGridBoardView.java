@@ -9,6 +9,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
@@ -72,7 +73,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
     boolean debugDrawGridReferences = false;
     boolean debugDrawTileReferences = false;
 
-    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
+    public DescentGridBoardView(DescentGridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
         super(gridBoard, width, height);
         this.gameState = gameState;
         this.offset = offset;
@@ -190,7 +191,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                         e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
             }
         } else {
-            drawGridBoardWithGraphConnectivity(g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
+            drawGridBoardWithGraphConnectivity(g, (DescentGridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
         }
 
         // Draw tokens
@@ -345,9 +346,9 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         }
     }
 
-    public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard<BoardNode> gridBoard, int x, int y,
-                                                          Map<String, Map<Vector2D,Vector2D>> gridReferences,
-                                                          int[][] tileReferences) {
+    public void drawGridBoardWithGraphConnectivity(Graphics2D g, DescentGridBoard gridBoard, int x, int y,
+                                                   Map<String, Map<Vector2D,Vector2D>> gridReferences,
+                                                   int[][] tileReferences) {
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {

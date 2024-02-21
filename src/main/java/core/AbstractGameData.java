@@ -2,6 +2,7 @@ package core;
 
 import core.components.*;
 import core.components.Component;
+import games.descent2e.components.DescentGridBoard;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.Objects;
 public class AbstractGameData {
 
     private List<GraphBoard> graphBoards = new ArrayList<>();
-    private List<GridBoard<BoardNode>> gridBoards = new ArrayList<>();
+    private List<DescentGridBoard> gridBoards = new ArrayList<>();
     private List<Deck<Card>> decks = new ArrayList<>();
     private List<Counter> counters = new ArrayList<>();
     private List<Token> tokens = new ArrayList<>();
@@ -36,8 +37,8 @@ public class AbstractGameData {
         }
     }
 
-    public GridBoard findGridBoard(String name) {
-        for (GridBoard c : gridBoards) {
+    public DescentGridBoard findGridBoard(String name) {
+        for (DescentGridBoard c : gridBoards) {
             if (name.equalsIgnoreCase(c.getComponentName())) {
                 return c.copy();
             }
@@ -89,7 +90,7 @@ public class AbstractGameData {
         for (GraphBoard b : graphBoards) retValue.graphBoards.add(b.copy());
 
         retValue.gridBoards = new ArrayList<>();
-        for (GridBoard b : gridBoards) retValue.gridBoards.add(b.copy());
+        for (DescentGridBoard b : gridBoards) retValue.gridBoards.add(b.copy());
 
         retValue.decks = new ArrayList<>();
         for (Deck<Card> d : decks) retValue.decks.add(d.copy());

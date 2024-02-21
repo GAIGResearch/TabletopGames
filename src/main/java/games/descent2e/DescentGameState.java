@@ -32,7 +32,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     // For reference only
 
     // Mapping from board node ID in board configuration to tile configuration
-    Map<Integer, GridBoard> tiles;
+    Map<Integer, DescentGridBoard> tiles;
     // int corresponds to component ID of tile at that location in master board
     int[][] tileReferences;
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
@@ -43,7 +43,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Random rnd;
 
     Deck<Card> searchCards;
-    GridBoard<BoardNode> masterBoard;
+    DescentGridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
     DicePool attributeDicePool;
@@ -133,7 +133,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.data = data.copy();
         copy.tiles = new HashMap<>();
-        for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
+        for (Map.Entry<Integer, DescentGridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
         }
         copy.masterBoard = masterBoard.copy();
@@ -272,7 +272,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return data;
     }
 
-    public GridBoard<BoardNode> getMasterBoard() {
+    public DescentGridBoard getMasterBoard() {
         return masterBoard;
     }
 
@@ -390,7 +390,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return gridReferences;
     }
 
-    public Map<Integer, GridBoard> getTiles() {
+    public Map<Integer, DescentGridBoard> getTiles() {
         return tiles;
     }
 

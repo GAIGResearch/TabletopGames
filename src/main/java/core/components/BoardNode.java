@@ -101,8 +101,6 @@ public class BoardNode extends Component {
     @Override
     public BoardNode copy() {
         BoardNode bn = new BoardNode(maxNeighbours, componentName, componentID);
-        bn.neighbours = new HashMap<>(neighbours);
-        bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
         copyComponentTo(bn);
         return bn;
     }
@@ -110,9 +108,6 @@ public class BoardNode extends Component {
     public void copyComponentTo(Component copyTo) {
         if (!(copyTo instanceof BoardNode))
             throw new RuntimeException("BoardNode.copyComponentTo(): Trying to copy to an incompatible component type");
-        BoardNode bn = (BoardNode) copyTo;
-        bn.neighbours = new HashMap<>(neighbours);
-        bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
         super.copyComponentTo(copyTo);
     }
 

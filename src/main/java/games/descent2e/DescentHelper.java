@@ -600,7 +600,7 @@ public class DescentHelper {
         // Used to find the shortest path between two points
         // Used for the Heroes/Monsters to find the shortest path to their target enemy
 
-        GridBoard board = dgs.getMasterBoard();
+        DescentGridBoard board = dgs.getMasterBoard();
 
         // Ensure that both start and end points are valid
         if (board.getElement(start) == null || board.getElement(end) == null)
@@ -645,13 +645,13 @@ public class DescentHelper {
     }
 
     // Check whether given cell(row,col) is a valid cell or not
-    static boolean checkValid(int row, int col, GridBoard board)
+    static boolean checkValid(int row, int col, DescentGridBoard board)
     {
         return ((row >= 0) && (row < board.getWidth()) && (col >= 0) && (col < board.getHeight()));
     }
 
     public static String gridCounter(DescentGameState dgs, int figureId, Vector2D startPos, List<Vector2D> positionsTravelled) {
-        Component[] grid = dgs.getMasterBoard().flattenGrid();
+        BoardNode[] grid = dgs.getMasterBoard().flattenGrid();
         int counter = 0;
         StringBuilder coords = new StringBuilder();
         for (Component node : grid) {
