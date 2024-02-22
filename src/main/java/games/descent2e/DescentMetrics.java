@@ -7,6 +7,7 @@ import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -43,7 +44,10 @@ public class DescentMetrics implements IMetricsCollection {
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             DescentGameState dgs = (DescentGameState) e.state;
             for (int i = 0; i < dgs.getHeroes().size(); i++) {
-                records.put("Hero " + (i + 1), dgs.getHeroes().get(i).getName().replace("Hero: ", ""));
+                Hero hero = dgs.getHeroes().get(i);
+                records.put("Hero " + (i + 1), hero.getName().replace("Hero: ", ""));
+                records.put("Hero " + (i + 1) + " Archetype", hero.getProperty("archetype").toString());
+                records.put("Hero " + (i + 1) + " Class", hero.getProperty("class").toString());
             }
             return true;
         }
@@ -60,6 +64,8 @@ public class DescentMetrics implements IMetricsCollection {
             HashMap<String, Class<?>> retVal = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame-1; i++) {
                 retVal.put("Hero " + (i + 1), String.class);
+                retVal.put("Hero " + (i + 1) + " Archetype", String.class);
+                retVal.put("Hero " + (i + 1) + " Class", String.class);
             }
             return retVal;
         }
