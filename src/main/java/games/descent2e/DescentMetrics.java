@@ -62,7 +62,10 @@ public class DescentMetrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             HashMap<String, Class<?>> retVal = new HashMap<>();
-            for (int i = 0; i < nPlayersPerGame-1; i++) {
+            // If we only have two Players (i.e. 1 Hero Player), we need to add another column for the second hero
+            int players = nPlayersPerGame;
+            if (nPlayersPerGame == 2) players++;
+            for (int i = 0; i < players-1; i++) {
                 retVal.put("Hero " + (i + 1), String.class);
                 retVal.put("Hero " + (i + 1) + " Archetype", String.class);
                 retVal.put("Hero " + (i + 1) + " Class", String.class);
