@@ -2,6 +2,7 @@ package games.descent2e;
 
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
@@ -197,8 +198,41 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     public double getGameScore(int playerId) {
-        // TODO
-        return 0;
+        double retValue = 0.0;
+        String questName = getCurrentQuest().getName();
+        double isOverlord = playerId == overlordPlayer ? -1.0 : 1.0;
+
+        switch (questName)
+        {
+            case "Acolyte of Saradyn":
+                // What the Heroes need to win
+                int barghestsDefeated = monstersOriginal.get(1).size() - monsters.get(1).size();
+
+                // What the Overlord needs to win
+                int overlordFatigue = overlord.getAttributeValue(Figure.Attribute.Fatigue);
+                int heroesDefeated = 0;
+                for (Hero h : getHeroes())
+                {
+                    if (h.isDefeated())
+                        heroesDefeated++;
+                }
+
+                // The score is admittedly arbitrary, but it's a start
+                // The Overlord wants to keep the Heroes from defeating the Barghests
+                // The Overlord wants to defeat the Heroes
+                // The Overlord wants to raise their Fatigue as much as possible
+                // Likewise, the Heroes want to defeat the Barghests, keep themselves alive, and keep the Overlord's Fatigue low
+
+                double barghestScore = isOverlord * (10.0 * barghestsDefeated / monstersOriginal.get(1).size());
+                double heroesScore = isOverlord * (5.0 * heroesDefeated / getHeroes().size());
+                double fatigueScore = isOverlord * (5.0 * overlordFatigue / overlord.getAttributeMax(Figure.Attribute.Fatigue));
+                retValue = (barghestScore) - (heroesScore + fatigueScore);
+                break;
+            default:
+                break;
+        }
+
+        return retValue;
     }
 
     @Override
