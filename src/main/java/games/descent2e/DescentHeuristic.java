@@ -169,12 +169,11 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 String scoreZone = "9A";
                 List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(scoreZone).keySet());
 
+                // If any Goblins are slain (and thus respawning), the Overlord should be penalised
+                // This rewards the Heroes for killing Goblins
                 retVal = -1.0 * getMonstersDefeated(dgs, 0) / dgs.monstersOriginal.get(0).size();
 
                 List<Monster> monsters = dgs.getMonsters().get(0);
-                // If the Goblins are all slain (and thus respawning), the Overlord should be penalised
-                // This rewards the Heroes for killing Goblins
-                // if (monsters.isEmpty()) return -1.0;
                 for (Monster m : monsters) {
                     int closest = 0;
                     double distance = 10000.0;
