@@ -625,17 +625,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
             if (actingFigure instanceof Hero) {
                 if (!actingFigure.getNActionsExecuted().isMaximum() ||
-                        !twoHeroActions.isEmpty() ||
-                        actingFigure.getAttribute(MovePoints).getValue() >= actingFigure.getAttributeMax(MovePoints) ||
-                        (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved()))
+                        !twoHeroActions.isEmpty() || DescentHelper.canStillMove(actingFigure))
                     actions.remove(endTurn);
             }
             if (actingFigure instanceof Monster) {
                 // As Monsters can only attack once, they should be allowed to End Turn without using up all of their actions
                 // It should be acceptable for a Monster to use an Attack action, then End Turn without moving
-                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) ||
-                        actingFigure.getAttribute(MovePoints).getValue() >= actingFigure.getAttributeMax(MovePoints) ||
-                        (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved()))
+                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) || DescentHelper.canStillMove(actingFigure))
                     actions.remove(endTurn);
             }
         }

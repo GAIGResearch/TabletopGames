@@ -25,6 +25,7 @@ import java.util.*;
 
 import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 
 public class DescentHelper {
 
@@ -672,5 +673,15 @@ public class DescentHelper {
         }
 
         return "Player " + figureId + " has " + counter + " node occurrences: " + coords;
+    }
+
+    public static boolean canStillMove(Figure f)
+    {
+        // Used to check whether it should be legal to EndTurn or not if we still have movement available
+        // If we have more MovePoints than our normal maximum
+        // Or, if we have any MovePoints left and haven't moved yet
+        // Then return true, i.e. do not allow the player to EndTurn
+        return (f.getAttribute(MovePoints).getValue() >= f.getAttributeMax(MovePoints) ||
+                (f.getAttribute(MovePoints).getValue() != 0 && !f.hasMoved()));
     }
 }
