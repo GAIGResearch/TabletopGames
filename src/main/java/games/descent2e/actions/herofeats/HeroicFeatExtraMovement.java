@@ -118,7 +118,9 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 moveActions = moveActions(dgs, targetAlly);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(targetAlly.getComponentID()));
+                    StopMove stopMove = new StopMove(targetAlly.getComponentID());
+                    if (stopMove.canExecute(dgs))
+                        retVal.add(stopMove);
                     retVal.addAll(moveActions);
                 }
                 break;
