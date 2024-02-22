@@ -18,19 +18,26 @@ import java.util.List;
 public class DescentHeuristic extends TunableParameters implements IStateHeuristic {
 
     // The total HP of the Heroes   - Beneficial to the Heroes
-    double FACTOR_HERO_HP = 0.7;
+    double FACTOR_HERO_HP = 0.8;
+
     // The number of Heroes defeated - Beneficial to the Overlord
-    double FACTOR_HERO_DEFEATED = 0.5;
+    double FACTOR_HERO_DEFEATED = 0.7;
+
     // The total HP of the monsters - Beneficial to the Overlord
-    double FACTOR_MONSTERS_HP = 0.7;
+    double FACTOR_MONSTERS_HP = 0.8;
+
     // The number of monsters defeated - Beneficial to the Heroes
-    double FACTOR_MONSTERS_DEFEATED = 0.5;
+    double FACTOR_MONSTERS_DEFEATED = 0.7;
+
     // The Overlord's fatigue value - Beneficial to the Overlord
-    double FACTOR_OVERLORD_FATIGUE = 0.5;
+    double FACTOR_OVERLORD_FATIGUE = 0.7;
+
     // How close the Overlord is to increasing their fatigue - Beneficial to the Overlord
-    double FACTOR_OVERLORD_THREAT = 0.3;
+    double FACTOR_OVERLORD_THREAT = 0.2;
+
     // How close the Heroes are to winning - Beneficial to the Heroes
-    double FACTOR_HEROES_THREAT = 0.3;
+    double FACTOR_HEROES_THREAT = 0.2;
+
     // Penalise the current player if they End Turn poorly - Penalises both Heroes and Overlord
     double FACTOR_DONE_NOTHING = 0.0;
 
@@ -60,7 +67,6 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         }
 
         String questName = dgs.getCurrentQuest().getName();
-        Figure actingFigure = dgs.getActingFigure();
 
         // Some heuristics will be beneficial to the overlord and detrimental to the heroes
         // Likewise, some will be beneficial to the heroes and detrimental to the overlord
@@ -76,17 +82,18 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         heuristics.add(-1 * FACTOR_OVERLORD_FATIGUE * isOverlord * ((double) overlord.getAttributeValue(Fatigue) / (double) overlord.getAttributeMax(Fatigue)));
         heuristics.add(-1 * FACTOR_OVERLORD_THREAT * isOverlord * (getOverlordThreat(dgs, questName)));
 
+
         switch (questName)
         {
             case "Acolyte of Saradyn":
                 // We only care about the Barghests, as their defeat is the only way for the Heroes to win, as the Goblin Archers infinitely respawn
                 // The Barghests are the second monsters in the list, i.e. index 1
                 heuristics.add(-1 * FACTOR_MONSTERS_HP * isOverlord * (getMonstersHP(dgs, 1) / getMonstersMaxHP(dgs, 1)));
-                heuristics.add(FACTOR_MONSTERS_DEFEATED * isOverlord * getMonstersDefeated(dgs, 1));
+                heuristics.add(FACTOR_MONSTERS_DEFEATED * isOverlord * getMonstersDefeated(dgs, 1) / dgs.monstersOriginal.get(1).size());
                 break;
             default:
-                heuristics.add(FACTOR_MONSTERS_HP * isOverlord * (getMonstersHP(dgs, 0) / getMonstersMaxHP(dgs, 0)) / dgs.monsters.size());
-                heuristics.add(FACTOR_MONSTERS_DEFEATED * isOverlord * (getMonstersDefeated(dgs, 0) / dgs.monstersOriginal.get(0).size()) / dgs.monsters.size());
+                heuristics.add(FACTOR_MONSTERS_HP * isOverlord * (getMonstersHP(dgs, -1) / getMonstersMaxHP(dgs, -1)) / dgs.monsters.size());
+                heuristics.add(FACTOR_MONSTERS_DEFEATED * isOverlord * (getMonstersDefeated(dgs, 0) / dgs.monstersOriginal.get(0).size()));
                 break;
         }
 
@@ -96,6 +103,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         // This is to encourage the AI to do something, even if it's just moving a figure
         // We penalise the player if they have not executed any actions, or if they have MovePoints remaining and have not moved
         if (FACTOR_DONE_NOTHING > 0.0) {
+            Figure actingFigure = dgs.getActingFigure();
             if (actingFigure.getNActionsExecuted().isMinimum() || (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved())) {
                 heuristics.add(-1.0 * FACTOR_DONE_NOTHING);
             }
@@ -108,7 +116,9 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
             retValue += h;
         }
 
-        return Utils.clamp(retValue, -1.0, 1.0);
+        // As playerResult.value is 1.0 for a win or -1.0 for a loss
+        // we should clamp the return value to just below to ensure that a win or loss is more noticeable
+        return Utils.clamp(retValue, -0.99, 0.99);
     }
 
     private double getHeroesHP(DescentGameState dgs) {
@@ -122,9 +132,11 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     }
 
     private double getMonstersHP(DescentGameState dgs, int index) {
+        if (index < 0 || index >= dgs.monsters.size()) return getAllMonstersHP(dgs);
         return dgs.monsters.get(index).stream().mapToDouble(m -> m.getAttributeValue(Health)).sum();
     }
     private double getMonstersMaxHP(DescentGameState dgs, int index) {
+        if (index < 0 || index >= dgs.monstersOriginal.size()) return getAllMonstersMaxHP(dgs);
         return dgs.monstersOriginal.get(index).stream().mapToDouble(m -> m.getAttributeMax(Health)).sum();
     }
     private double getAllMonstersHP(DescentGameState dgs) {
@@ -162,7 +174,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 List<Monster> monsters = dgs.getMonsters().get(0);
                 // If the Goblins are all slain (and thus respawning), the Overlord should be penalised
                 // This rewards the Heroes for killing Goblins
-                if (monsters.isEmpty()) return -1.0;
+                // if (monsters.isEmpty()) return -1.0;
                 for (Monster m : monsters) {
                     int closest = 0;
                     double distance = 10000.0;
@@ -214,10 +226,10 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                 for (Hero h : dgs.heroes) {
                     // Heroes that are defeated should not be counted
                     // This rewards the Overlord for defeating Heroes
-                    if (h.isDefeated())
+                    /*if (h.isDefeated())
                     {
                         continue;
-                    }
+                    }*/
                     DescentTypes.AttackType attackType = getAttackType(h);
                     int minRange = attackType == DescentTypes.AttackType.MELEE ? 1 : 3;
                     double distance = 10000.0;
