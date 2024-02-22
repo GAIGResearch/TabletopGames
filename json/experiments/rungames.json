@@ -3,10 +3,10 @@
   "selfPlay": true,
   "nPlayers": 5,
   "playerDirectory": "MCTS",
-  "matchups": 1,
+  "matchups": 5,
   "byTeam": false,
   "listener": "metrics/descent.json",
-  "destDir": "metrics/descent",
+  "destDir": "metrics/descent/test",
   "verbose": true,
   "reportPeriod": 100
 }

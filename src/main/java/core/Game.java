@@ -357,6 +357,8 @@ public class Game {
      * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
+        //newRandomSeed = 2068526905;
+        //newRandomSeed = 441330015;
         System.out.println("Game Seed: " + newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
@@ -856,11 +858,17 @@ public class Game {
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
 
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+
 //        players.add(new OSLAPlayer());
 //        players.add(new OSLAPlayer());
 //        players.add(new OSLAPlayer());
-        players.add(new OSLAPlayer());
-        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());

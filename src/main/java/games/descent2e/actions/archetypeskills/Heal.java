@@ -147,7 +147,7 @@ public class Heal extends DescentAction {
         if (range == 1)
         {
             Vector2D loc = f.getPosition();
-            GridBoard board = dgs.getMasterBoard();
+            DescentGridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             return neighbours.contains(target.getPosition()) || target.getPosition().equals(loc);
         }

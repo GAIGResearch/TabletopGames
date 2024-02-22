@@ -7,6 +7,7 @@ import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -43,7 +44,10 @@ public class DescentMetrics implements IMetricsCollection {
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             DescentGameState dgs = (DescentGameState) e.state;
             for (int i = 0; i < dgs.getHeroes().size(); i++) {
-                records.put("Hero " + (i + 1), dgs.getHeroes().get(i).getName().replace("Hero: ", ""));
+                Hero hero = dgs.getHeroes().get(i);
+                records.put("Hero " + (i + 1), hero.getName().replace("Hero: ", ""));
+                records.put("Hero " + (i + 1) + " Archetype", hero.getProperty("archetype").toString());
+                records.put("Hero " + (i + 1) + " Class", hero.getProperty("class").toString());
             }
             return true;
         }
@@ -58,8 +62,13 @@ public class DescentMetrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             HashMap<String, Class<?>> retVal = new HashMap<>();
-            for (int i = 0; i < nPlayersPerGame-1; i++) {
+            // If we only have two Players (i.e. 1 Hero Player), we need to add another column for the second hero
+            int players = nPlayersPerGame;
+            if (nPlayersPerGame == 2) players++;
+            for (int i = 0; i < players-1; i++) {
                 retVal.put("Hero " + (i + 1), String.class);
+                retVal.put("Hero " + (i + 1) + " Archetype", String.class);
+                retVal.put("Hero " + (i + 1) + " Class", String.class);
             }
             return retVal;
         }
@@ -103,9 +112,12 @@ public class DescentMetrics implements IMetricsCollection {
                 int index1 = Integer.parseInt(a[1]);
                 int index2 = Integer.parseInt(b[1]);
 
+                // Occurs if the Master is defeated, thus Minion 1 is considered 0
+                if (index1 == 0) index1++;
+
                 if (target.contains("Hero:"))
                 {
-                    records.put("Hero " + (index1 + 1), target.replace("Hero: ", "") + " defeated by " + killer);
+                    records.put("Hero " + index1, target.replace("Hero: ", "") + " defeated by " + killer);
                 }
                 else
                 {
@@ -301,66 +313,65 @@ public class DescentMetrics implements IMetricsCollection {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            if (e.state.getGameStatus() == CoreConstants.GameResult.WIN_GAME ||
-                    e.state.getGameStatus() == CoreConstants.GameResult.TIMEOUT ||
-                    e.state.getGameStatus() == CoreConstants.GameResult.LOSE_GAME) {
-                DescentGameState dgs = (DescentGameState) e.state;
-                for (int i = 0; i < dgs.getHeroes().size(); i++) {
-                    records.put("Hero " + (i + 1) + " HP", Integer.toString(dgs.getHeroes().get(i).getAttributeValue(Figure.Attribute.Health)));
-                }
-                records.put("Overlord Fatigue", Integer.toString(dgs.getOverlord().getAttributeValue(Figure.Attribute.Fatigue)));
+            DescentGameState dgs = (DescentGameState) e.state;
+            for (int i = 0; i < dgs.getHeroes().size(); i++) {
+                records.put("Hero " + (i + 1) + " HP", Integer.toString(dgs.getHeroes().get(i).getAttributeValue(Figure.Attribute.Health)));
+            }
+            records.put("Overlord Fatigue", Integer.toString(dgs.getOverlord().getAttributeValue(Figure.Attribute.Fatigue)));
 
-                List<Monster> goblins = dgs.getMonsters().get(0);
-                List<Monster> barghests = dgs.getMonsters().get(1);
+            List<Monster> goblins = dgs.getMonsters().get(0);
+            List<Monster> barghests = dgs.getMonsters().get(1);
 
-                int index = 0;
-                records.put("Goblin Master HP", "Dead");
+            int index = 0;
+            records.put("Goblin Master HP", "Dead");
 
-                for (Monster goblin: goblins)
+            for (Monster goblin: goblins)
+            {
+                if (goblin.getName().contains("master"))
                 {
-                    if (goblin.getName().contains("master"))
-                    {
-                        records.put("Goblin Master HP", Integer.toString(goblin.getAttributeValue(Figure.Attribute.Health)));
-                    }
-                    else
-                    {
-                        records.put("Goblin Minion " + (index + 1) + " HP", Integer.toString(goblin.getAttributeValue(Figure.Attribute.Health)));
-                        index++;
-                    }
+                    records.put("Goblin Master HP", Integer.toString(goblin.getAttributeValue(Figure.Attribute.Health)));
                 }
-
-                for (int i = index; i < dgs.getOriginalMonsters().get(0).size() - 1; i++)
+                else
                 {
-                    records.put("Goblin Minion " + (i + 1) + " HP", "Dead");
+                    records.put("Goblin Minion " + (index + 1) + " HP", Integer.toString(goblin.getAttributeValue(Figure.Attribute.Health)));
+                    index++;
                 }
+            }
 
-                index = 0;
-                records.put("Barghest Master HP", "Dead");
+            for (int i = index; i < dgs.getOriginalMonsters().get(0).size() - 1; i++)
+            {
+                records.put("Goblin Minion " + (i + 1) + " HP", "Dead");
+            }
 
-                for (Monster barghest: barghests)
+            index = 0;
+            records.put("Barghest Master HP", "Dead");
+
+            for (Monster barghest: barghests)
+            {
+                if (barghest.getName().contains("master"))
                 {
-                    if (barghest.getName().contains("master"))
-                    {
-                        records.put("Barghest Master HP", Integer.toString(barghest.getAttributeValue(Figure.Attribute.Health)));
-                    }
-                    else
-                    {
-                        records.put("Barghest Minion " + (index + 1) + " HP", Integer.toString(barghest.getAttributeValue(Figure.Attribute.Health)));
-                        index++;
-                    }
+                    records.put("Barghest Master HP", Integer.toString(barghest.getAttributeValue(Figure.Attribute.Health)));
                 }
-
-                for (int i = index; i < dgs.getOriginalMonsters().get(1).size() - 1; i++)
+                else
                 {
-                    records.put("Barghest Minion " + (i + 1) + " HP", "Dead");
+                    records.put("Barghest Minion " + (index + 1) + " HP", Integer.toString(barghest.getAttributeValue(Figure.Attribute.Health)));
+                    index++;
                 }
+            }
+
+            for (int i = index; i < dgs.getOriginalMonsters().get(1).size() - 1; i++)
+            {
+                records.put("Barghest Minion " + (i + 1) + " HP", "Dead");
             }
             return true;
         }
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(GAME_OVER);
+            return new HashSet<IGameEvent>() {{
+                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
+            }};
         }
 
         @Override

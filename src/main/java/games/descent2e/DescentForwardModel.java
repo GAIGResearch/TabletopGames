@@ -502,7 +502,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
                 // Revive
                 Vector2D loc = actingFigure.getPosition();
-                GridBoard board = dgs.getMasterBoard();
+                DescentGridBoard board = dgs.getMasterBoard();
                 List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
                 for (Hero hero : dgs.heroes) {
                     if (actingFigure.equals(hero)) continue;
@@ -625,17 +625,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
             if (actingFigure instanceof Hero) {
                 if (!actingFigure.getNActionsExecuted().isMaximum() ||
-                        !twoHeroActions.isEmpty() ||
-                        actingFigure.getAttribute(MovePoints).getValue() >= actingFigure.getAttributeMax(MovePoints) ||
-                        (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved()))
+                        !twoHeroActions.isEmpty() || DescentHelper.canStillMove(actingFigure))
                     actions.remove(endTurn);
             }
             if (actingFigure instanceof Monster) {
                 // As Monsters can only attack once, they should be allowed to End Turn without using up all of their actions
                 // It should be acceptable for a Monster to use an Attack action, then End Turn without moving
-                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) ||
-                        actingFigure.getAttribute(MovePoints).getValue() >= actingFigure.getAttributeMax(MovePoints) ||
-                        (actingFigure.getAttribute(MovePoints).getValue() != 0 && !actingFigure.hasMoved()))
+                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) || DescentHelper.canStillMove(actingFigure))
                     actions.remove(endTurn);
             }
         }
@@ -906,7 +902,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
-        HashMap<Integer, GridBoard<BoardNode>> tileConfigs = new HashMap<>();
+        HashMap<Integer, DescentGridBoard> tileConfigs = new HashMap<>();
         dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
@@ -914,7 +910,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard<BoardNode> tile = _data.findGridBoard(tileName).copyNewID();
+            DescentGridBoard tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
                 tile = tile.copyNewID();
                 tile.setProperty(bn.getProperty(orientationHash));
@@ -931,7 +927,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         int height = 0;
         for (BoardNode bn : config.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard<BoardNode> tile = tileConfigs.get(bn.getComponentID());
+            DescentGridBoard tile = tileConfigs.get(bn.getComponentID());
             if (tile != null) {
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
@@ -960,7 +956,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         BoardNode firstTile = config.getBoardNodes().iterator().next();
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard<BoardNode> tile = tileConfigs.get(firstTile.getComponentID());
+            DescentGridBoard tile = tileConfigs.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
@@ -988,7 +984,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
             // This is the final master board!
-            dgs.masterBoard = new GridBoard(trimBoard);
+            dgs.masterBoard = new DescentGridBoard(trimBoard);
             // Init each node (cell) properties - not occupied ("players" int property), and its position in the master grid
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
@@ -1033,7 +1029,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
-                                 Map<Integer, GridBoard<BoardNode>> tiles,
+                                 Map<Integer, DescentGridBoard> tiles,
                                  int[][] tileReferences,  Map<String, Map<Vector2D, Vector2D>> gridReferences,
                                  Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
@@ -1041,8 +1037,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                                  String sideWithOpening) {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
-            GridBoard tile = tiles.get(tileToAdd.getComponentID());
-            BoardNode[][] originalTileGrid = tile.convertToBoardNode(tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value));
+            DescentGridBoard tile = tiles.get(tileToAdd.getComponentID());
+            BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
             }
@@ -1107,9 +1103,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 if (connectionToNeighbour != null) {
                     connectionToNeighbour.b.add(x, y);
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
-                    GridBoard tileN = tiles.get(neighbour.getComponentID());
+                    DescentGridBoard tileN = tiles.get(neighbour.getComponentID());
                     if (tileN != null) {
-                        BoardNode[][] tileGridN = tileN.convertToBoardNode(tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value));
+                        BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
                         // Find location to start drawing neighbour
                         Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));

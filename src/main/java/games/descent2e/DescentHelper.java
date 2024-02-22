@@ -2,6 +2,7 @@ package games.descent2e;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.Component;
 import core.components.Deck;
 import core.components.GridBoard;
 import core.properties.Property;
@@ -24,6 +25,7 @@ import java.util.*;
 
 import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 
 public class DescentHelper {
 
@@ -599,7 +601,7 @@ public class DescentHelper {
         // Used to find the shortest path between two points
         // Used for the Heroes/Monsters to find the shortest path to their target enemy
 
-        GridBoard board = dgs.getMasterBoard();
+        DescentGridBoard board = dgs.getMasterBoard();
 
         // Ensure that both start and end points are valid
         if (board.getElement(start) == null || board.getElement(end) == null)
@@ -644,8 +646,42 @@ public class DescentHelper {
     }
 
     // Check whether given cell(row,col) is a valid cell or not
-    static boolean checkValid(int row, int col, GridBoard board)
+    static boolean checkValid(int row, int col, DescentGridBoard board)
     {
         return ((row >= 0) && (row < board.getWidth()) && (col >= 0) && (col < board.getHeight()));
+    }
+
+    public static String gridCounter(DescentGameState dgs, int figureId, Vector2D startPos, List<Vector2D> positionsTravelled) {
+        BoardNode[] grid = dgs.getMasterBoard().flattenGrid();
+        int counter = 0;
+        StringBuilder coords = new StringBuilder();
+        for (Component node : grid) {
+            if (node != null) {
+                if (((PropertyInt) node.getProperty(playersHash)).value == figureId) {
+                    counter++;
+                    coords.append(node.getProperty("coordinates").toString()+"; ");
+                }
+            }
+        }
+
+        if (figureId != -1) {
+            Figure f = (Figure) dgs.getComponentById(figureId);
+            if (counter > (f.getSize().a * f.getSize().b)) {
+                System.out.println("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+                throw new AssertionError("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+            }
+        }
+
+        return "Player " + figureId + " has " + counter + " node occurrences: " + coords;
+    }
+
+    public static boolean canStillMove(Figure f)
+    {
+        // Used to check whether it should be legal to EndTurn or not if we still have movement available
+        // If we have more MovePoints than our normal maximum
+        // Or, if we have any MovePoints left and haven't moved yet
+        // Then return true, i.e. do not allow the player to EndTurn
+        return (f.getAttribute(MovePoints).getValue() >= f.getAttributeMax(MovePoints) ||
+                (f.getAttribute(MovePoints).getValue() != 0 && !f.hasMoved()));
     }
 }

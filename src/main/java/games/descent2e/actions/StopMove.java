@@ -2,6 +2,7 @@ package games.descent2e.actions;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.components.Figure;
 
 public class StopMove extends DescentAction{
@@ -33,6 +34,6 @@ public class StopMove extends DescentAction{
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = (Figure) dgs.getComponentById(this.f);
-        return !f.getAttribute(Figure.Attribute.MovePoints).isMinimum();
+        return !f.getAttribute(Figure.Attribute.MovePoints).isMinimum() && !DescentHelper.canStillMove(f);
     }
 }

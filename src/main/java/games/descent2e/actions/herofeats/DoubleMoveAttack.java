@@ -54,6 +54,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     int interruptPlayer;
     int oldMovePoints;
     boolean oldFreeAttack;
+    boolean oldHasMoved;
 
     boolean skip = false;
 
@@ -90,7 +91,10 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                 moveActions = moveActions(dgs, hero);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(hero.getComponentID()));
+                    StopMove stopMove = new StopMove(hero.getComponentID());
+                    // Jain should only stop if she has not made her free attack yet
+                    if (stopMove.canExecute(dgs) && hero.hasUsedExtraAction())
+                        retVal.add(stopMove);
                     retVal.addAll(moveActions);
                 }
                 if (!attacks.isEmpty())
@@ -131,11 +135,13 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         interruptPlayer = heroPlayer;
         oldMovePoints = hero.getAttribute(Figure.Attribute.MovePoints).getValue();
         oldFreeAttack = hero.hasUsedExtraAction();
+        oldHasMoved = hero.hasMoved();
         phase = PRE_HERO_ACTION;
 
         // Jain can move up to double her speed, and attack at any point during the move (before, during and after)
         hero.setAttribute(Figure.Attribute.MovePoints, hero.getAttributeMax(Figure.Attribute.MovePoints) * 2);
         hero.setUsedExtraAction(false);
+        hero.setHasMoved(false);
 
         movePhaseForward(dgs);
 
@@ -202,6 +208,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
                 Figure hero = state.getActingFigure();
                 hero.setAttribute(Figure.Attribute.MovePoints, oldMovePoints);
                 hero.setUsedExtraAction(oldFreeAttack);
+                hero.setHasMoved(oldHasMoved);
                 if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
                 hero.getNActionsExecuted().increment();
                 phase = ALL_DONE;
@@ -218,6 +225,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         retValue.interruptPlayer = interruptPlayer;
         retValue.oldMovePoints = oldMovePoints;
         retValue.oldFreeAttack = oldFreeAttack;
+        retValue.oldHasMoved = oldHasMoved;
         retValue.skip = skip;
         return retValue;
     }
@@ -237,12 +245,12 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         DoubleMoveAttack that = (DoubleMoveAttack) o;
         return heroPlayer == that.heroPlayer && interruptPlayer == that.interruptPlayer &&
                 oldMovePoints == that.oldMovePoints && oldFreeAttack == that.oldFreeAttack &&
-                phase == that.phase && skip == that.skip;
+                oldHasMoved == that.oldHasMoved && phase == that.phase && skip == that.skip;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), phase, heroPlayer, interruptPlayer, oldMovePoints, oldFreeAttack, skip);
+        return Objects.hash(super.hashCode(), phase, heroPlayer, interruptPlayer, oldMovePoints, oldFreeAttack, oldHasMoved, skip);
     }
 
     public boolean getSkip()
