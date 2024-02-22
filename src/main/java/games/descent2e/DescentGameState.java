@@ -227,6 +227,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 double heroesScore = isOverlord * (5.0 * heroesDefeated / getHeroes().size());
                 double fatigueScore = isOverlord * (5.0 * overlordFatigue / overlord.getAttributeMax(Figure.Attribute.Fatigue));
                 retValue = (barghestScore) - (heroesScore + fatigueScore);
+                retValue += 10.0 * getPlayerResults()[playerId].value;
                 break;
             default:
                 break;
