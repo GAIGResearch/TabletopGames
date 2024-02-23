@@ -67,6 +67,10 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         return "Heroic Feat: Move twice your speed, and can attack anytime during it.";
     }
 
+    public String toString() {
+        return "Heroic Feat: Move twice and attack.";
+    }
+
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         if (phase.interrupt == null)

@@ -52,7 +52,7 @@ public class ReturnToMapPlace extends DescentAction {
 
     @Override
     public String toString() {
-        return "Heroic Feat: Reappear";
+        return "Heroic Feat: Reappear (3/3)";
     }
 
     @Override

@@ -81,6 +81,10 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         return String.format("Heroic Feat: " + heroName + " and " + allyName + " make a free move action");
     }
 
+    public String toString() {
+        return "Heroic Feat: Extra Movement for " + heroID + " and " + allyID;
+    }
+
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         if (phase.interrupt == null)

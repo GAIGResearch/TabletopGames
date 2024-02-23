@@ -18,6 +18,7 @@ public class HealAllInRange extends DescentAction {
     // TODO: Allow customised ranges
     int range;
     int healthRecovered = 0;
+    int heroesHealed = 0;
     public HealAllInRange(int range) {
         super(Triggers.ACTION_POINT_SPEND);
         this.range = range;
@@ -32,6 +33,7 @@ public class HealAllInRange extends DescentAction {
         healthRecovered = DicePool.revive.getDamage();
         List<Hero> heroesInRange = HeroesInRange(dgs);
         if (heroesInRange != null) {
+            heroesHealed = heroesInRange.size();
             for (Hero hero : heroesInRange) {
                 hero.incrementAttribute(Figure.Attribute.Health, healthRecovered);
                 if (hero.isDefeated())
@@ -52,6 +54,7 @@ public class HealAllInRange extends DescentAction {
     public HealAllInRange copy() {
         HealAllInRange healAllInRange = new HealAllInRange(range);
         healAllInRange.healthRecovered = healthRecovered;
+        healAllInRange.heroesHealed = heroesHealed;
         return healAllInRange;
     }
 
@@ -96,6 +99,7 @@ public class HealAllInRange extends DescentAction {
         return o instanceof HealAllInRange
                 && ((HealAllInRange) o).range == range
                 && ((HealAllInRange) o).healthRecovered == healthRecovered
+                && ((HealAllInRange) o).heroesHealed == heroesHealed
                 && super.equals(o);
     }
 
@@ -103,7 +107,7 @@ public class HealAllInRange extends DescentAction {
     public String getString(AbstractGameState gameState) {
         String retVal = "Heroic Feat: Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
         if (healthRecovered > 0) {
-            retVal += " (+" + healthRecovered + " Health)";
+            retVal += " (+" + healthRecovered + " Health for " + heroesHealed + " Heroes healed)";
         }
         return retVal;
     }
@@ -115,6 +119,6 @@ public class HealAllInRange extends DescentAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), range, healthRecovered);
+        return Objects.hash(super.hashCode(), range, healthRecovered, heroesHealed);
     }
 }

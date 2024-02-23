@@ -47,7 +47,7 @@ public class ReturnToMapMove extends DescentAction {
     }
     @Override
     public String toString() {
-        return "Heroic Feat: Tomble Burrowell - Move (2/3)";
+        return "Heroic Feat: Move (2/3)";
     }
 
     @Override
