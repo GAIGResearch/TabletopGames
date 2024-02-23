@@ -70,7 +70,7 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Heroic Feat: Attack all adjacent monsters";
+        return "Heroic Feat: Attack all adjacent monsters; " + result;
     }
 
     @Override

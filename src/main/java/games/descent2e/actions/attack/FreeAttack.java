@@ -53,7 +53,6 @@ public class FreeAttack extends RangedAttack{
         // Remove the ability to use the Extra Action this turn
         attacker.setUsedExtraAction(true);
         attacker.setHasAttacked(true);
-        attacker.addActionTaken(toString());
 
         return true;
     }
@@ -96,14 +95,14 @@ public class FreeAttack extends RangedAttack{
 
         if (isMelee)
         {
-            return String.format("Free Attack (Melee) by " + attackerName + " on " + defenderName);
+            return String.format("Free Attack (Melee) by " + attackerName + " on " + defenderName + "; " + result);
         }
 
         Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
         Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
-        return String.format("Free Attack (Ranged) by " + attackerName + " on " + defenderName + " (Range: " + distance + ")");
+        return String.format("Free Attack (Ranged) by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
     }
 
     @Override

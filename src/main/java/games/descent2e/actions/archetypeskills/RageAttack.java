@@ -48,8 +48,6 @@ public class RageAttack extends MeleeAttack {
         // 6) then do the damage
         // 7) target can use items/abilities to modify damage
 
-        attacker.addActionTaken(toString());
-
         return true;
     }
 
@@ -72,7 +70,7 @@ public class RageAttack extends MeleeAttack {
         }
         attackerName = attackerName.replace("Hero: ", "");
         defenderName = defenderName.replace("Hero: ", "");
-        return String.format("Rage: Melee Attack by " + attackerName + " on " + defenderName + " (+1 Damage, +1 Fatigue)");
+        return String.format("Rage: Melee Attack by " + attackerName + " on " + defenderName + " (+1 Damage, +1 Fatigue); " + result);
         //return toString();
         // TODO: Extend this to pull in details of card and figures involved
     }

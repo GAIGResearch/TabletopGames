@@ -63,8 +63,6 @@ public class MultiAttack extends RangedAttack {
         attacker.getNActionsExecuted().increment();
         attacker.setHasAttacked(true);
 
-        attacker.addActionTaken(toString());
-
         return true;
     }
 
@@ -100,12 +98,14 @@ public class MultiAttack extends RangedAttack {
                 {
                     index++;
                     setNewTarget(state, index);
+                    result += "; ";
                     // For MultiAttacks, we use the same Attack dice results
                     // But each defender is allowed to roll their own Defence dice
                     phase = PRE_DEFENCE_ROLL;
                 }
                 else
                 {
+                    ((Figure) state.getComponentById(attackingFigure)).addActionTaken(toStringWithResult());
                     phase = ALL_DONE;
                 }
                 break;
@@ -139,6 +139,8 @@ public class MultiAttack extends RangedAttack {
                 string += ", ";
             }
         }
+
+        string += "; " + result;
 
         return string;
         //return toString();

@@ -55,7 +55,7 @@ public class DoubleAttack extends MultiAttack {
         String distance1 = Double.toString(getDistanceFromFigures(attacker, defender1));
         String distance2 = Double.toString(getDistanceFromFigures(attacker, defender2));
 
-        return String.format("Heroic Feat: Double Attack by " + attackerName + " on " + defenderName1 + " (Range: " + distance1 + ") and " + defenderName2 + " (Range: " + distance2 + ")");
+        return String.format("Heroic Feat: Double Attack by " + attackerName + " on " + defenderName1 + " (Range: " + distance1 + ") and " + defenderName2 + " (Range: " + distance2 + "); " + result);
     }
 
     @Override

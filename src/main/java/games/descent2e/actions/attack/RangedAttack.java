@@ -54,8 +54,6 @@ public class RangedAttack extends MeleeAttack {
         attacker.getNActionsExecuted().increment();
         attacker.setHasAttacked(true);
 
-        attacker.addActionTaken(toString());
-
         return true;
     }
 
@@ -74,7 +72,8 @@ public class RangedAttack extends MeleeAttack {
             return true; // Somehow, we have an attack on a dead figure
         }
         double distance = getDistanceFromFigures(attacker, defender);
-        return (state.getAttackDicePool().getRange() + extraRange < distance);
+        range = state.getAttackDicePool().getRange() + extraRange;
+        return (range < distance);
     }
 
     public double getDistanceFromFigures(Figure attacker, Figure defender) {
@@ -94,7 +93,7 @@ public class RangedAttack extends MeleeAttack {
         Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
-        return String.format("Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + ")");
+        return String.format("Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + ")" + "; " + result);
     }
 
     @Override

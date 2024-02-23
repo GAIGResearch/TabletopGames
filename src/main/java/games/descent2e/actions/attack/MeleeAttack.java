@@ -71,7 +71,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     boolean isStunning;
 
     int damage;
+    int range;
     boolean skip = false;
+
+    public String result = "";
 
     Set<Surge> surgesUsed = new HashSet<>();
 
@@ -97,6 +100,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        result = "Result:";
+
         movePhaseForward(state);
 
         attacker.getNActionsExecuted().increment();
@@ -110,8 +115,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // 5) with possible rerolls
         // 6) then do the damage
         // 7) target can use items/abilities to modify damage
-
-        attacker.addActionTaken(toString());
 
         return true;
     }
@@ -167,6 +170,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     void executePhase(DescentGameState state) {
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
         // System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
@@ -177,7 +181,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case PRE_ATTACK_ROLL:
                 // Get the weapon's stats, if they have any modifiers
                 // Only Heroes and Lieutenants can have weapons
-                Figure attacker = (Figure) state.getComponentById(attackingFigure);
                 Figure defender = (Figure) state.getComponentById(defendingFigure);
 
                 defender.setCurrentAttack(this);
@@ -208,6 +211,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
                     //System.out.println(this.toString() + " (" + this.getString(state)  + ") missed!");
+                    result += " Missed; Damage: " + damage + "; Range: " + range;
+                    attacker.addActionTaken(toStringWithResult());
                     phase = ALL_DONE;
                 }
                 else {
@@ -224,6 +229,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 break;
             case POST_DAMAGE:
                 applyDamage(state);
+                attacker.addActionTaken(toStringWithResult());
                 phase = ALL_DONE;
                 //System.out.println(this.toString() + " (" + this.getString(state)  + ") done!");
                 break;
@@ -323,6 +329,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
 
+            result += " Kill; Damage: " + damage + "; Range: " + range;
+
             // All conditions are removed when a figure is defeated
             defender.removeAllConditions();
             // Death
@@ -387,6 +395,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             state.addDefeatedFigure(defender, index1, attacker, index2);
 
         } else {
+            result += " Hit; Damage: " + damage + "; Range: " + range;
             // Conditions only apply if damage is done
             if (damage > 0)
                 applyConditions(defender);
@@ -405,8 +414,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     public boolean attackMissed(DescentGameState state) {
+        range = state.getAttackDicePool().getRange();
+        damage = state.getAttackDicePool().getDamage();
         return state.getAttackDicePool().hasRolled() && (
-                state.getAttackDicePool().getRange() < 0 || state.getAttackDicePool().getDamage() == 0);
+                range < 0 || damage == 0);
     }
 
     public void applyConditions(Figure defender)
@@ -452,6 +463,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.isImmobilizing = isImmobilizing;
         retValue.isPoisoning = isPoisoning;
         retValue.isStunning = isStunning;
+        retValue.damage = damage;
+        retValue.range = range;
+        retValue.skip = skip;
+        retValue.result = result;
     }
 
     @Override
@@ -473,7 +488,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     other.extraRange == extraRange && other.pierce == pierce && other.mending == mending &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.fatigueHeal == fatigueHeal && other.surgesUsed.equals(surgesUsed) &&
-                    other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
+                    other.defendingPlayer == defendingPlayer && other.phase == phase &&
+                    other.damage == damage && other.range == range &&
+                    other.interruptPlayer == interruptPlayer && other.skip == skip &&
+                    other.result.equals(result);
         }
         return false;
     }
@@ -482,7 +500,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public int hashCode() {
         return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, pierce,
                 extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, fatigueHeal,
-                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
+                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, result);
     }
 
     @Override
@@ -503,7 +521,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         }
         attackerName = attackerName.replace("Hero: ", "");
         defenderName = defenderName.replace("Hero: ", "");
-        return String.format("Melee Attack by " + attackerName + " on " + defenderName);
+        return String.format("Melee Attack by " + attackerName + " on " + defenderName + "; " + result);
     }
 
     public String longString(AbstractGameState gameState) {
@@ -532,7 +550,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ". Poison: " + isPoisoning
                 + ". Stun: " + isStunning
                 + ". Damage: " + damage
+                + ". Range: " + range
                 + ". Skip: " + skip
+                + ". " + result
                 + ". Surges used: " + surgesUsed.toString()
         );
     }
@@ -540,6 +560,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public String toString() {
         return String.format("Melee Attack by %d on %d", attackingFigure, defendingFigure);
+    }
+
+    public String toStringWithResult()
+    {
+        String retVal = toString() + " - " + result;
+        return retVal;
     }
 
     public void registerSurge(Surge surge) {

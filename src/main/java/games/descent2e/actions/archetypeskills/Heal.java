@@ -21,6 +21,7 @@ public class Heal extends DescentAction {
     int range = 1;
     boolean isAction = false;
     int cardID = -1;
+    int healthRecovered = 0;
 
     // Prayer of Healing
     public Heal(int targetID, int cardID) {
@@ -53,6 +54,8 @@ public class Heal extends DescentAction {
         if (card != null) {
             string = card.getProperty("name").toString() + ": " + string;
         }
+        if (healthRecovered > 0)
+            string += " (" + healthRecovered + " Health)";
         return string;
     }
 
@@ -68,7 +71,9 @@ public class Heal extends DescentAction {
         // Health recovery: roll 1 red die
         DicePool.heal.roll(dgs.getRandom());
 
-        target.incrementAttribute(Figure.Attribute.Health, DicePool.heal.getDamage());
+        healthRecovered = DicePool.heal.getDamage();
+
+        target.incrementAttribute(Figure.Attribute.Health, healthRecovered);
         //System.out.println(target.getComponentName() + " healed for " + DicePool.heal.getDamage() + " health.");
 
         if (target instanceof Hero && ((Hero) target).isDefeated())
@@ -97,7 +102,7 @@ public class Heal extends DescentAction {
             f.exhaustCard((DescentCard) dgs.getComponentById(cardID));
         }
 
-        f.addActionTaken(toString());
+        f.addActionTaken(getString(dgs));
 
         return true;
     }
@@ -166,17 +171,19 @@ public class Heal extends DescentAction {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Heal heal = (Heal) o;
-        return targetID == heal.targetID && range == heal.range && isAction == heal.isAction && cardID == heal.cardID;
+        return targetID == heal.targetID && range == heal.range && isAction == heal.isAction && cardID == heal.cardID && healthRecovered == heal.healthRecovered;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), targetID, range, isAction, cardID);
+        return Objects.hash(super.hashCode(), targetID, range, isAction, cardID, healthRecovered);
     }
 
     @Override
     public DescentAction copy()
     {
-        return new Heal(targetID, range, isAction, cardID);
+        Heal heal = new Heal(targetID, range, isAction, cardID);
+        heal.healthRecovered = healthRecovered;
+        return heal;
     }
 }
