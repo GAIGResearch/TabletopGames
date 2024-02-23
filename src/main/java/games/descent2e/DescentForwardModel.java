@@ -1528,7 +1528,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             for (int i = 0; i < nMinions; i++) {
                 Monster minion = monsterDef.get(act + "-minion").copyNewID();
                 minion.setProperties(monsterDef.get(act + "-minion").getProperties());
-                minion.setComponentName(name + " minion");
+                minion.setComponentName(name + " minion " + (i+1));
 
                 passives = (PropertyStringArray) minion.getProperty("passive");
                 if(passives != null)

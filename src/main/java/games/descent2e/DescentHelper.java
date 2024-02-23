@@ -684,4 +684,56 @@ public class DescentHelper {
         return (f.getAttribute(MovePoints).getValue() >= f.getAttributeMax(MovePoints) ||
                 (f.getAttribute(MovePoints).getValue() != 0 && !f.hasMoved()));
     }
+
+    public static int distanceFromNearestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
+        int minDistance = Integer.MAX_VALUE;
+        for (Figure ally : allies) {
+            if (ally.isOffMap()) continue;
+            if (ally.equals(f)) continue;
+            int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+        return minDistance;
+    }
+
+    public static int distanceFromFurthestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
+        int maxDistance = 0;
+        for (Figure ally: allies) {
+            if (ally.isOffMap()) continue;
+            if (ally.equals(f)) continue;
+            int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
+            if (distance > maxDistance) {
+                maxDistance = distance;
+            }
+        }
+        return maxDistance;
+    }
+
+    public static float averageDistanceFromAllies(DescentGameState dgs, Figure f, List<Figure> allies) {
+        float totalDistance = 0;
+        int count = 0;
+        for (Figure ally: allies) {
+            if (ally.isOffMap()) continue;
+            if (ally.equals(f)) continue;
+            int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
+            totalDistance += distance;
+            count++;
+        }
+        return totalDistance / count;
+    }
+
+    public static int getFirstMissingIndex(List<Monster> figures) {
+        int i = 1;
+        // We assume that the first figure (index 0) is always the Master
+        // We are only interested in the Minions
+        for (i = 1; i < figures.size(); i++) {
+            if (!figures.get(i).getName().contains(String.valueOf(i)))
+            {
+                return i;
+            }
+        }
+        return i;
+    }
 }

@@ -309,14 +309,16 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             // If the Master exists, it is always the first Monster on the list
             // The only time we do not look at the first Monster on the list is
             // if we can only spawn a Minion when a Master exists
-            Monster originalMonster = monstersOriginal.get(k);
+            int indexToSpawn = k;
 
             // If the Master is alive, we cannot spawn a Master
             // So we spawn a Minion instead
             if (masterExists && !canSpawnMaster)
             {
-                originalMonster = monstersOriginal.get(1);
+                indexToSpawn = DescentHelper.getFirstMissingIndex(monsters);
             }
+
+            Monster originalMonster = monstersOriginal.get(indexToSpawn);
 
             Monster monster = originalMonster.copyNewID();
 
@@ -358,11 +360,11 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                             }
                         }
                         if (canSpawnMaster) {
-                            dgs.monsters.get(index).add(0, monster);
+                            dgs.monsters.get(index).add(indexToSpawn, monster);
                             canSpawnMaster = false;
                         }
                         else {
-                            dgs.monsters.get(index).add(monster);
+                            dgs.monsters.get(index).add(indexToSpawn, monster);
                         }
                         //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
                         break;
