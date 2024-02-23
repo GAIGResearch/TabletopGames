@@ -2,11 +2,11 @@
   "game": "Descent2e",
   "selfPlay": true,
   "nPlayers": 5,
-  "playerDirectory": "MCTS",
-  "matchups": 1,
+  "playerDirectory": "OSLA",
+  "matchups": 1000,
   "byTeam": false,
   "listener": "metrics/descent.json",
-  "destDir": "metrics/descent",
+  "destDir": "metrics/descent/fullpower",
   "verbose": true,
   "reportPeriod": 100
 }
