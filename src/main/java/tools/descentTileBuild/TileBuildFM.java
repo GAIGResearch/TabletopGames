@@ -8,6 +8,7 @@ import core.actions.SetGridValueAction;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import core.properties.PropertyVector2D;
+import games.descent2e.components.DescentGridBoard;
 import utilities.Pathfinder;
 import utilities.Vector2D;
 
@@ -27,7 +28,7 @@ public class TileBuildFM extends StandardForwardModel {
 
         // By default filled with plain, and with a null border
         //BoardNode bn = new BoardNode(-1, "plain");
-        tbs.tile = new GridBoard<BoardNode>(size, size);
+        tbs.tile = new DescentGridBoard(size, size);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
 
@@ -159,7 +160,7 @@ public class TileBuildFM extends StandardForwardModel {
         return actions;
     }
 
-    private List<Vector2D> countInsideNeighboursOpenTile(int x, int y, int width, int height, GridBoard<BoardNode> tile) {
+    private List<Vector2D> countInsideNeighboursOpenTile(int x, int y, int width, int height, DescentGridBoard tile) {
         List<Vector2D> neighbours = getNeighbourhood(x, y, width, height, false);
         List<Vector2D> insideTileNeighbours = new ArrayList<>();
         for (Vector2D n: neighbours) {

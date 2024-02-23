@@ -331,10 +331,9 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 Vector2D option = tileCoords.get(rnd.nextInt(tileCoords.size()));
                 tileCoords.remove(option);
                 BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
-                /*if (position.getComponentName().equals("plain") &&
+                if (position.getComponentName().equals("plain") &&
                         ((PropertyInt)position.getProperty(playersHash)).value == -1) {
-                 */
-                if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
+                //if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
                     // TODO: some monsters want to spawn in lava/water.
                     // This can be top-left corner, check if the other tiles are valid too
                     boolean canPlace = true;

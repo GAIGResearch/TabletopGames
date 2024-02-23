@@ -2,6 +2,7 @@ package games.descent2e;
 
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
@@ -32,7 +33,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     // For reference only
 
     // Mapping from board node ID in board configuration to tile configuration
-    Map<Integer, GridBoard> tiles;
+    Map<Integer, DescentGridBoard> tiles;
     // int corresponds to component ID of tile at that location in master board
     int[][] tileReferences;
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
@@ -43,7 +44,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Random rnd;
 
     Deck<Card> searchCards;
-    GridBoard<BoardNode> masterBoard;
+    DescentGridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
     DicePool attributeDicePool;
@@ -133,7 +134,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.data = data.copy();
         copy.tiles = new HashMap<>();
-        for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
+        for (Map.Entry<Integer, DescentGridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
         }
         copy.masterBoard = masterBoard.copy();
@@ -197,8 +198,42 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     public double getGameScore(int playerId) {
-        // TODO
-        return 0;
+        double retValue = 0.0;
+        String questName = getCurrentQuest().getName();
+        double isOverlord = playerId == overlordPlayer ? -1.0 : 1.0;
+
+        switch (questName)
+        {
+            case "Acolyte of Saradyn":
+                // What the Heroes need to win
+                int barghestsDefeated = monstersOriginal.get(1).size() - monsters.get(1).size();
+
+                // What the Overlord needs to win
+                int overlordFatigue = overlord.getAttributeValue(Figure.Attribute.Fatigue);
+                int heroesDefeated = 0;
+                for (Hero h : getHeroes())
+                {
+                    if (h.isDefeated())
+                        heroesDefeated++;
+                }
+
+                // The score is admittedly arbitrary, but it's a start
+                // The Overlord wants to keep the Heroes from defeating the Barghests
+                // The Overlord wants to defeat the Heroes
+                // The Overlord wants to raise their Fatigue as much as possible
+                // Likewise, the Heroes want to defeat the Barghests, keep themselves alive, and keep the Overlord's Fatigue low
+
+                double barghestScore = isOverlord * (10.0 * barghestsDefeated / monstersOriginal.get(1).size());
+                double heroesScore = isOverlord * (5.0 * heroesDefeated / getHeroes().size());
+                double fatigueScore = isOverlord * (5.0 * overlordFatigue / overlord.getAttributeMax(Figure.Attribute.Fatigue));
+                retValue = (barghestScore) - (heroesScore + fatigueScore);
+                retValue += 10.0 * getPlayerResults()[playerId].value;
+                break;
+            default:
+                break;
+        }
+
+        return retValue;
     }
 
     @Override
@@ -272,7 +307,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return data;
     }
 
-    public GridBoard<BoardNode> getMasterBoard() {
+    public DescentGridBoard getMasterBoard() {
         return masterBoard;
     }
 
@@ -390,7 +425,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return gridReferences;
     }
 
-    public Map<Integer, GridBoard> getTiles() {
+    public Map<Integer, DescentGridBoard> getTiles() {
         return tiles;
     }
 

@@ -5,12 +5,9 @@ import core.components.*;
 import core.properties.PropertyString;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.tokens.TokenAction;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Monster;
+import games.descent2e.components.*;
 import games.descent2e.components.cards.SearchCard;
 import games.descent2e.components.tokens.DToken;
-import games.descent2e.components.DescentDice;
-import games.descent2e.components.Hero;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
@@ -30,7 +27,7 @@ import static core.components.Component.parseComponent;
 import static games.descent2e.DescentConstants.archetypeHash;
 
 public class DescentGameData extends AbstractGameData {
-    List<GridBoard<BoardNode>> tiles;
+    List<DescentGridBoard> tiles;
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
@@ -65,8 +62,8 @@ public class DescentGameData extends AbstractGameData {
     }
 
     @Override
-    public GridBoard<BoardNode> findGridBoard(String name) {
-        for (GridBoard<BoardNode> gb: tiles) {
+    public DescentGridBoard findGridBoard(String name) {
+        for (DescentGridBoard gb: tiles) {
             if (gb.getComponentName().equalsIgnoreCase(name)) {
                 return gb;
             }
@@ -369,7 +366,7 @@ public class DescentGameData extends AbstractGameData {
     public DescentGameData copy() {
         DescentGameData copy = new DescentGameData();
         copy.tiles = new ArrayList<>();
-        for (GridBoard<BoardNode> gb: tiles) {
+        for (DescentGridBoard gb: tiles) {
             copy.tiles.add(gb.copy());
         }
         copy.boardConfigurations = new ArrayList<>();

@@ -180,7 +180,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 Figure attacker = (Figure) state.getComponentById(attackingFigure);
                 Figure defender = (Figure) state.getComponentById(defendingFigure);
 
-                attacker.setCurrentAttack(this);
                 defender.setCurrentAttack(this);
 
                 if (attacker instanceof Hero) getWeaponBonuses(state, attackingFigure, true, true);

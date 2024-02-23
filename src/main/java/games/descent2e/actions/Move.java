@@ -7,7 +7,9 @@ import core.components.GridBoard;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -53,9 +55,6 @@ public class Move extends AbstractAction {
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = (Figure) dgs.getComponentById(this.f);
         startPosition = f.getPosition();
-        // Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
-        // BoardNode node = dgs.getMasterBoard().getElement(finalPosition);
-        // System.out.println("Test 1/2: " + startPosition + " to " + finalPosition + ": " + node.getProperty("players"));
 
         // Remove from old position
         remove(dgs, f);
@@ -71,7 +70,8 @@ public class Move extends AbstractAction {
 
         f.addActionTaken(toString());
 
-        //System.out.println("Test 2/2: " + startPosition + " to " + finalPosition + ": " + node.getProperty("players"));
+        //DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
+
         return true;
     }
 
@@ -88,7 +88,7 @@ public class Move extends AbstractAction {
         int player = ((PropertyInt) node.getProperty("players")).value;
         if (!f.isOffMap()) {
             if (player != -1 && player != f.getComponentID()) return false;
-            if (checkCollision(dgs, f, finalPosition)) return false;
+            //if (checkCollision(dgs, f, finalPosition)) return false;
         }
         return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
         // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
@@ -202,6 +202,7 @@ public class Move extends AbstractAction {
      */
     public static void remove(DescentGameState dgs, Figure f) {
         Vector2D oldTopLeftAnchor = f.getPosition().copy();
+        //System.out.println(oldTopLeftAnchor);
         PropertyInt emptySpace = new PropertyInt("players", -1);
 
         BoardNode baseSpace = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX(), oldTopLeftAnchor.getY());
@@ -257,7 +258,7 @@ public class Move extends AbstractAction {
 
         List<Vector2D> possibilities = new ArrayList<>();
         // Otherwise, we need to find the nearest adjacent space that is empty
-        GridBoard<BoardNode> board = dgs.getMasterBoard();
+        DescentGridBoard board = dgs.getMasterBoard();
         List<Vector2D> checked = new ArrayList<>();
         List<Vector2D> toCheck = new ArrayList<>();
         toCheck.add(position);
@@ -304,6 +305,7 @@ public class Move extends AbstractAction {
      */
     private static void place(DescentGameState dgs, Figure f, Vector2D position, Monster.Direction orientation) {
         // Update location and orientation. Swap size if orientation is horizontal (relevant for medium monsters)
+        Vector2D oldPosition = f.getPosition();
         f.setPosition(position.copy());
         Vector2D topLeftAnchor = position.copy();
         if (f instanceof Monster) {
@@ -321,6 +323,8 @@ public class Move extends AbstractAction {
                 BoardNode destinationTile = dgs.getMasterBoard().getElement(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
                 PropertyInt placeFigureOnTile = new PropertyInt("players", f.getComponentID());
                 destinationTile.setProperty(placeFigureOnTile);
+
+                //DescentHelper.gridCounter(dgs, f.getComponentID(), null, null);
 
                 DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
                 if (terrain != null) {

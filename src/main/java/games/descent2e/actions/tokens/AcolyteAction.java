@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
@@ -38,7 +39,7 @@ public class AcolyteAction extends TokenAction {
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
         Hero hero = gs.getHeroes().get(acolyte.getOwnerId());
         Vector2D loc = hero.getPosition();
-        GridBoard board = gs.getMasterBoard();
+        DescentGridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
         for (DToken token: gs.getTokens()) {
             if (token.getDescentTokenType() == DescentTypes.DescentToken.Villager && neighbours.contains(token.getPosition())) {
@@ -64,7 +65,7 @@ public class AcolyteAction extends TokenAction {
         int heroIdx = acolyte.getOwnerId();
         Hero hero = gs.getHeroes().get(heroIdx);
         Vector2D loc = hero.getPosition();
-        GridBoard board = gs.getMasterBoard();
+        DescentGridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
         for (DToken token: gs.getTokens()) {
             if (token.getDescentTokenType() == DescentTypes.DescentToken.Villager && neighbours.contains(token.getPosition())) {

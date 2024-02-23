@@ -9,6 +9,7 @@ import core.components.BoardNode;
 import core.components.GridBoard;
 import core.properties.PropertyVector2D;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.DescentGridBoard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -72,7 +73,7 @@ public class TileBuildGUI extends AbstractGUIManager {
 
         JButton getjson = new JButton("Generate JSON");
         getjson.addActionListener(e -> {
-            GridBoard tile = ((TileBuildState) dgs).tile.copy();
+            DescentGridBoard tile = ((TileBuildState) dgs).tile.copy();
 
             // Add edge tiles around the grid
             int minX = tile.getWidth()-1;
