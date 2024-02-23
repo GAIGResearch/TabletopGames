@@ -1,0 +1,6 @@
+GameSeed,GameName,Round,Event,Tick,Turn,PlayerCount,GameID,Barghest Minion 1,Hero 1,Barghest Minion 3,Barghest Minion 2,Hero 3,Hero 2,Hero 4,Goblin Minion 3,Goblin Minion 4,Goblin Minion 1,Goblin Minion 2,Goblin Master,Barghest Master
+-1533947634,Descent2e,0,ROUND_OVER,117,12,5,2,,,,,,,,,,,Goblin Archer minion 2 (7943) defeated by Jain Fairwood (7871),,
+-1533947634,Descent2e,1,ROUND_OVER,177,12,5,2,,,,,,,,,,Goblin Archer minion 1 (7933) defeated by Grisban the Thirsty (7912),,,
+-1533947634,Descent2e,2,ROUND_OVER,243,13,5,2,,,,,,,,,,,,,
+-1533947634,Descent2e,3,ROUND_OVER,287,12,5,2,Barghest minion 1 (7983) defeated by Widow Tarha (7899),,,,,,,,,,,,
+-1533947634,Descent2e,4,GAME_OVER,288,0,5,2,,,,,,,,,,,,,

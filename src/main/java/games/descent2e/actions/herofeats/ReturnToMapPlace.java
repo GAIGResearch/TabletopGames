@@ -24,6 +24,7 @@ public class ReturnToMapPlace extends DescentAction {
         f.setCanIgnoreEnemies(false);
         //System.out.println("Tomble reappeared on the map!");
         f.addActionTaken(toString());
+        f.setHasMoved(false);
         return true;
     }
 
