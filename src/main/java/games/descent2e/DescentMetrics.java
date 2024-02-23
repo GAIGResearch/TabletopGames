@@ -237,6 +237,7 @@ public class DescentMetrics implements IMetricsCollection {
                 records.put("Hero " + (i + 1), hero.getName().replace("Hero: ", ""));
                 records.put("Hero " + (i + 1) + " Archetype", hero.getProperty("archetype").toString());
                 records.put("Hero " + (i + 1) + " Class", hero.getProperty("class").toString());
+                records.put("Hero " + (i + 1) + " Used Feat", !hero.isFeatAvailable());
             }
             return true;
         }
@@ -245,6 +246,8 @@ public class DescentMetrics implements IMetricsCollection {
         public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<IGameEvent>() {{
                 add(ABOUT_TO_START);
+                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
             }};
         }
 
@@ -258,6 +261,7 @@ public class DescentMetrics implements IMetricsCollection {
                 retVal.put("Hero " + (i + 1), String.class);
                 retVal.put("Hero " + (i + 1) + " Archetype", String.class);
                 retVal.put("Hero " + (i + 1) + " Class", String.class);
+                retVal.put("Hero " + (i + 1) + " Used Feat", Boolean.class);
             }
             return retVal;
         }
