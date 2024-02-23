@@ -685,42 +685,42 @@ public class DescentHelper {
                 (f.getAttribute(MovePoints).getValue() != 0 && !f.hasMoved()));
     }
 
-    public static int distanceFromNearestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
-        int minDistance = Integer.MAX_VALUE;
+    public static double distanceFromNearestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
+        double minDistance = Double.MAX_VALUE;
         for (Figure ally : allies) {
-            if (ally.isOffMap()) continue;
             if (ally.equals(f)) continue;
             int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
             if (distance < minDistance) {
                 minDistance = distance;
             }
         }
+        if (minDistance == Integer.MAX_VALUE) return -1;
         return minDistance;
     }
 
-    public static int distanceFromFurthestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
-        int maxDistance = 0;
+    public static double distanceFromFurthestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
+        double maxDistance = 0;
         for (Figure ally: allies) {
-            if (ally.isOffMap()) continue;
             if (ally.equals(f)) continue;
             int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
             if (distance > maxDistance) {
                 maxDistance = distance;
             }
         }
+        if (maxDistance == 0) return -1;
         return maxDistance;
     }
 
-    public static float averageDistanceFromAllies(DescentGameState dgs, Figure f, List<Figure> allies) {
-        float totalDistance = 0;
+    public static double averageDistanceFromAllies(DescentGameState dgs, Figure f, List<Figure> allies) {
+        double totalDistance = 0;
         int count = 0;
         for (Figure ally: allies) {
-            if (ally.isOffMap()) continue;
             if (ally.equals(f)) continue;
             int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
             totalDistance += distance;
             count++;
         }
+        if (totalDistance == 0) return -1;
         return totalDistance / count;
     }
 

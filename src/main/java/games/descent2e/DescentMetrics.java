@@ -18,6 +18,195 @@ import static evaluation.metrics.Event.GameEvent.*;
 
 public class DescentMetrics implements IMetricsCollection {
 
+    public static class Distances extends AbstractMetric
+    {
+        public Distances() {
+            super();
+        }
+
+        public Distances(Event.GameEvent... args) {
+            super(args);
+        }
+
+        public Distances(Set<IGameEvent> events) {
+            super(events);
+        }
+
+        public Distances(String[] args) {
+            super(args);
+        }
+
+        public Distances(String[] args, Event.GameEvent... events) {
+            super(args, events);
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DescentGameState dgs = (DescentGameState) e.state;
+            List<Figure> heroes = new ArrayList<>(dgs.getHeroes());
+            List<Figure> goblins = new ArrayList<>(dgs.getMonsters().get(0));
+            List<Figure> barghests = new ArrayList<>(dgs.getMonsters().get(1));
+            for (int i = 0; i < dgs.getHeroes().size(); i++) {
+                Figure hero = heroes.get(i);
+                records.put("Hero " + (i + 1) + " Name", hero.getName().replace("Hero: ", ""));
+                records.put("Hero " + (i + 1) + " Position", hero.getPosition().toString());
+                records.put("Hero " + (i + 1) + " Nearest Hero", (DescentHelper.distanceFromNearestAlly(dgs, hero, heroes)));
+                records.put("Hero " + (i + 1) + " Farthest Hero", (DescentHelper.distanceFromFurthestAlly(dgs, hero, heroes)));
+                records.put("Hero " + (i + 1) + " Average Hero", (DescentHelper.averageDistanceFromAllies(dgs, hero, heroes)));
+                records.put("Hero " + (i + 1) + " Nearest Goblin", (DescentHelper.distanceFromNearestAlly(dgs, hero, goblins)));
+                records.put("Hero " + (i + 1) + " Farthest Goblin", (DescentHelper.distanceFromFurthestAlly(dgs, hero, goblins)));
+                records.put("Hero " + (i + 1) + " Average Goblin", (DescentHelper.averageDistanceFromAllies(dgs, hero, goblins)));
+                records.put("Hero " + (i + 1) + " Nearest Barghest", (DescentHelper.distanceFromNearestAlly(dgs, hero, barghests)));
+                records.put("Hero " + (i + 1) + " Farthest Barghest", (DescentHelper.distanceFromFurthestAlly(dgs, hero, barghests)));
+                records.put("Hero " + (i + 1) + " Average Barghest", (DescentHelper.averageDistanceFromAllies(dgs, hero, barghests)));
+            }
+
+            for (int i = 0; i < goblins.size(); i++)
+            {
+                Figure goblin = goblins.get(i);
+                if (goblin.getName().contains("master"))
+                {
+                    records.put("Goblin Master Position", goblin.getPosition().toString());
+                    records.put("Goblin Master Nearest Hero", (DescentHelper.distanceFromNearestAlly(dgs, goblin, heroes)));
+                    records.put("Goblin Master Farthest Hero", (DescentHelper.distanceFromFurthestAlly(dgs, goblin, heroes)));
+                    records.put("Goblin Master Average Hero", (DescentHelper.averageDistanceFromAllies(dgs, goblin, heroes)));
+                    records.put("Goblin Master Nearest Goblin", (DescentHelper.distanceFromNearestAlly(dgs, goblin, goblins)));
+                    records.put("Goblin Master Farthest Goblin", (DescentHelper.distanceFromFurthestAlly(dgs, goblin, goblins)));
+                    records.put("Goblin Master Average Goblin", (DescentHelper.averageDistanceFromAllies(dgs, goblin, goblins)));
+                    records.put("Goblin Master Nearest Barghest", (DescentHelper.distanceFromNearestAlly(dgs, goblin, barghests)));
+                    records.put("Goblin Master Farthest Barghest", (DescentHelper.distanceFromFurthestAlly(dgs, goblin, barghests)));
+                    records.put("Goblin Master Average Barghest", (DescentHelper.averageDistanceFromAllies(dgs, goblin, barghests)));
+                }
+                else
+                {
+                    int index = Integer.parseInt(goblin.getName().replace("Goblin Archer minion ", ""));
+                    records.put("Goblin Minion " + index + " Position", goblin.getPosition().toString());
+                    records.put("Goblin Minion " + index + " Nearest Hero", (DescentHelper.distanceFromNearestAlly(dgs, goblin, heroes)));
+                    records.put("Goblin Minion " + index + " Farthest Hero", (DescentHelper.distanceFromFurthestAlly(dgs, goblin, heroes)));
+                    records.put("Goblin Minion " + index + " Average Hero", (DescentHelper.averageDistanceFromAllies(dgs, goblin, heroes)));
+                    records.put("Goblin Minion " + index + " Nearest Goblin", (DescentHelper.distanceFromNearestAlly(dgs, goblin, goblins)));
+                    records.put("Goblin Minion " + index + " Farthest Goblin", (DescentHelper.distanceFromFurthestAlly(dgs, goblin, goblins)));
+                    records.put("Goblin Minion " + index + " Average Goblin", (DescentHelper.averageDistanceFromAllies(dgs, goblin, goblins)));
+                    records.put("Goblin Minion " + index + " Nearest Barghest", (DescentHelper.distanceFromNearestAlly(dgs, goblin, barghests)));
+                    records.put("Goblin Minion " + index + " Farthest Barghest", (DescentHelper.distanceFromFurthestAlly(dgs, goblin, barghests)));
+                    records.put("Goblin Minion " + index + " Average Barghest", (DescentHelper.averageDistanceFromAllies(dgs, goblin, barghests)));
+                }
+            }
+
+            for (int i = 0; i < barghests.size(); i++)
+            {
+                Figure barghest = barghests.get(i);
+                if (barghest.getName().contains("master"))
+                {
+                    records.put("Barghest Master Position", barghest.getPosition().toString());
+                    records.put("Barghest Master Nearest Hero", (DescentHelper.distanceFromNearestAlly(dgs, barghest, heroes)));
+                    records.put("Barghest Master Farthest Hero", (DescentHelper.distanceFromFurthestAlly(dgs, barghest, heroes)));
+                    records.put("Barghest Master Average Hero", (DescentHelper.averageDistanceFromAllies(dgs, barghest, heroes)));
+                    records.put("Barghest Master Nearest Goblin", (DescentHelper.distanceFromNearestAlly(dgs, barghest, goblins)));
+                    records.put("Barghest Master Farthest Goblin", (DescentHelper.distanceFromFurthestAlly(dgs, barghest, goblins)));
+                    records.put("Barghest Master Average Goblin", (DescentHelper.averageDistanceFromAllies(dgs, barghest, goblins)));
+                    records.put("Barghest Master Nearest Barghest", (DescentHelper.distanceFromNearestAlly(dgs, barghest, barghests)));
+                    records.put("Barghest Master Farthest Barghest", (DescentHelper.distanceFromFurthestAlly(dgs, barghest, barghests)));
+                    records.put("Barghest Master Average Barghest", (DescentHelper.averageDistanceFromAllies(dgs, barghest, barghests)));
+                }
+                else
+                {
+                    int index = Integer.parseInt(barghest.getName().replace("Barghest minion ", ""));
+                    records.put("Barghest Minion " + index + " Position", barghest.getPosition().toString());
+                    records.put("Barghest Minion " + index + " Nearest Hero", (DescentHelper.distanceFromNearestAlly(dgs, barghest, heroes)));
+                    records.put("Barghest Minion " + index + " Farthest Hero", (DescentHelper.distanceFromFurthestAlly(dgs, barghest, heroes)));
+                    records.put("Barghest Minion " + index + " Average Hero", (DescentHelper.averageDistanceFromAllies(dgs, barghest, heroes)));
+                    records.put("Barghest Minion " + index + " Nearest Goblin", (DescentHelper.distanceFromNearestAlly(dgs, barghest, goblins)));
+                    records.put("Barghest Minion " + index + " Farthest Goblin", (DescentHelper.distanceFromFurthestAlly(dgs, barghest, goblins)));
+                    records.put("Barghest Minion " + index + " Average Goblin", (DescentHelper.averageDistanceFromAllies(dgs, barghest, goblins)));
+                    records.put("Barghest Minion " + index + " Nearest Barghest", (DescentHelper.distanceFromNearestAlly(dgs, barghest, barghests)));
+                    records.put("Barghest Minion " + index + " Farthest Barghest", (DescentHelper.distanceFromFurthestAlly(dgs, barghest, barghests)));
+                    records.put("Barghest Minion " + index + " Average Barghest", (DescentHelper.averageDistanceFromAllies(dgs, barghest, barghests)));
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
+                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
+            }};
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            HashMap<String, Class<?>> retVal = new HashMap<>();
+            for (int i = 0; i < 4; i++) {
+                retVal.put("Hero " + (i + 1) + " Name", String.class);
+                retVal.put("Hero " + (i + 1) + " Position", String.class);
+                retVal.put("Hero " + (i + 1) + " Nearest Hero", Double.class);
+                retVal.put("Hero " + (i + 1) + " Farthest Hero", Double.class);
+                retVal.put("Hero " + (i + 1) + " Average Hero", Double.class);
+                retVal.put("Hero " + (i + 1) + " Nearest Goblin", Double.class);
+                retVal.put("Hero " + (i + 1) + " Farthest Goblin", Double.class);
+                retVal.put("Hero " + (i + 1) + " Average Goblin", Double.class);
+                retVal.put("Hero " + (i + 1) + " Nearest Barghest", Double.class);
+                retVal.put("Hero " + (i + 1) + " Farthest Barghest", Double.class);
+                retVal.put("Hero " + (i + 1) + " Average Barghest", Double.class);
+            }
+
+            retVal.put("Goblin Master Position", String.class);
+            retVal.put("Goblin Master Nearest Hero", Double.class);
+            retVal.put("Goblin Master Farthest Hero", Double.class);
+            retVal.put("Goblin Master Average Hero", Double.class);
+            retVal.put("Goblin Master Nearest Goblin", Double.class);
+            retVal.put("Goblin Master Farthest Goblin", Double.class);
+            retVal.put("Goblin Master Average Goblin", Double.class);
+            retVal.put("Goblin Master Nearest Barghest", Double.class);
+            retVal.put("Goblin Master Farthest Barghest", Double.class);
+            retVal.put("Goblin Master Average Barghest", Double.class);
+
+            for (int i = 0; i < 4; i++)
+            {
+                retVal.put("Goblin Minion " + (i + 1) + " Position", String.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Nearest Hero", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Farthest Hero", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Average Hero", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Nearest Goblin", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Farthest Goblin", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Average Goblin", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Nearest Barghest", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Farthest Barghest", Double.class);
+                retVal.put("Goblin Minion " + (i + 1) + " Average Barghest", Double.class);
+            }
+
+            retVal.put("Barghest Master Position", String.class);
+            retVal.put("Barghest Master Nearest Hero", Double.class);
+            retVal.put("Barghest Master Farthest Hero", Double.class);
+            retVal.put("Barghest Master Average Hero", Double.class);
+            retVal.put("Barghest Master Nearest Goblin", Double.class);
+            retVal.put("Barghest Master Farthest Goblin", Double.class);
+            retVal.put("Barghest Master Average Goblin", Double.class);
+            retVal.put("Barghest Master Nearest Barghest", Double.class);
+            retVal.put("Barghest Master Farthest Barghest", Double.class);
+            retVal.put("Barghest Master Average Barghest", Double.class);
+
+            for (int i = 0; i < 3; i++)
+            {
+                retVal.put("Barghest Minion " + (i + 1) + " Position", String.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Nearest Hero", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Farthest Hero", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Average Hero", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Nearest Goblin", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Farthest Goblin", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Average Goblin", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Nearest Barghest", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Farthest Barghest", Double.class);
+                retVal.put("Barghest Minion " + (i + 1) + " Average Barghest", Double.class);
+            }
+
+            return retVal;
+        }
+    }
+
     public static class Heroes extends AbstractMetric
     {
         public Heroes() {
@@ -129,6 +318,7 @@ public class DescentMetrics implements IMetricsCollection {
                         }
                         else
                         {
+                            index1 = Integer.parseInt(target.replace("Goblin Archer minion ", "").substring(0, 1));
                             records.put("Goblin Minion " + index1, target + " defeated by " + killer.replace("Hero: ", ""));
                         }
                     }
@@ -142,6 +332,7 @@ public class DescentMetrics implements IMetricsCollection {
                             }
                             else
                             {
+                                index1 = Integer.parseInt(target.replace("Barghest minion ", "").substring(0, 1));
                                 records.put("Barghest Minion " + index1, target + " defeated by " + killer.replace("Hero: ", ""));
                             }
                         }
@@ -215,6 +406,10 @@ public class DescentMetrics implements IMetricsCollection {
 
             int index = 0;
             records.put("Goblin Master", "Dead");
+            records.put("Goblin Minion 1", "Dead");
+            records.put("Goblin Minion 2", "Dead");
+            records.put("Goblin Minion 3", "Dead");
+            records.put("Goblin Minion 4", "Dead");
 
             for (Monster goblin: goblins)
             {
@@ -225,18 +420,15 @@ public class DescentMetrics implements IMetricsCollection {
                 }
                 else
                 {
-                    records.put("Goblin Minion " + (index + 1), pos.toString());
-                    index++;
+                    index = Integer.parseInt(goblin.getName().replace("Goblin Archer minion ", ""));
+                    records.put("Goblin Minion " + index, pos.toString());
                 }
             }
 
-            for (int i = index; i < dgs.getOriginalMonsters().get(0).size() - 1; i++)
-            {
-                records.put("Goblin Minion " + (i + 1), "Dead");
-            }
-
-            index = 0;
             records.put("Barghest Master", "Dead");
+            records.put("Barghest Minion 1", "Dead");
+            records.put("Barghest Minion 2", "Dead");
+            records.put("Barghest Minion 3", "Dead");
 
             for (Monster barghest: barghests)
             {
@@ -247,14 +439,9 @@ public class DescentMetrics implements IMetricsCollection {
                 }
                 else
                 {
-                    records.put("Barghest Minion " + (index + 1), pos.toString());
-                    index++;
+                    index = Integer.parseInt(barghest.getName().replace("Barghest minion ", ""));
+                    records.put("Barghest Minion " + index, pos.toString());
                 }
-            }
-
-            for (int i = index; i < dgs.getOriginalMonsters().get(1).size() - 1; i++)
-            {
-                records.put("Barghest Minion " + (i + 1), "Dead");
             }
 
             return true;
@@ -324,6 +511,10 @@ public class DescentMetrics implements IMetricsCollection {
 
             int index = 0;
             records.put("Goblin Master HP", "Dead");
+            records.put("Goblin Minion 1 HP", "Dead");
+            records.put("Goblin Minion 2 HP", "Dead");
+            records.put("Goblin Minion 3 HP", "Dead");
+            records.put("Goblin Minion 4 HP", "Dead");
 
             for (Monster goblin: goblins)
             {
@@ -333,18 +524,15 @@ public class DescentMetrics implements IMetricsCollection {
                 }
                 else
                 {
-                    records.put("Goblin Minion " + (index + 1) + " HP", Integer.toString(goblin.getAttributeValue(Figure.Attribute.Health)));
-                    index++;
+                    index = Integer.parseInt(goblin.getName().replace("Goblin Archer minion ", ""));
+                    records.put("Goblin Minion " + index + " HP", Integer.toString(goblin.getAttributeValue(Figure.Attribute.Health)));
                 }
             }
 
-            for (int i = index; i < dgs.getOriginalMonsters().get(0).size() - 1; i++)
-            {
-                records.put("Goblin Minion " + (i + 1) + " HP", "Dead");
-            }
-
-            index = 0;
             records.put("Barghest Master HP", "Dead");
+            records.put("Barghest Minion 1 HP", "Dead");
+            records.put("Barghest Minion 2 HP", "Dead");
+            records.put("Barghest Minion 3 HP", "Dead");
 
             for (Monster barghest: barghests)
             {
@@ -354,15 +542,11 @@ public class DescentMetrics implements IMetricsCollection {
                 }
                 else
                 {
-                    records.put("Barghest Minion " + (index + 1) + " HP", Integer.toString(barghest.getAttributeValue(Figure.Attribute.Health)));
-                    index++;
+                    index = Integer.parseInt(barghest.getName().replace("Barghest minion ", ""));
+                    records.put("Barghest Minion " + index + " HP", Integer.toString(barghest.getAttributeValue(Figure.Attribute.Health)));
                 }
             }
 
-            for (int i = index; i < dgs.getOriginalMonsters().get(1).size() - 1; i++)
-            {
-                records.put("Barghest Minion " + (i + 1) + " HP", "Dead");
-            }
             return true;
         }
 

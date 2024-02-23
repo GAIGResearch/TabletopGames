@@ -438,13 +438,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     }
     public void addDefeatedFigure(Figure target, int index1, Figure attacker, int index2) {
         String defeated = target.getName();
-        if (target instanceof Monster && index1 > 0)
-            defeated += " " + index1;
         defeated += " (" + target.getComponentID() + ");" + index1;
 
         String defeatedBy = attacker.getName();
-        if (attacker instanceof Monster && index2 > 0)
-            defeatedBy += " " + index2;
         defeatedBy += " (" + attacker.getComponentID() + ");" + index2;
 
         defeatedFigures.add(new Pair<>(defeated, defeatedBy));
