@@ -6,6 +6,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.archetypeskills.Heal;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -61,7 +62,8 @@ public class MonsterAbilities {
                         List<BoardNode> attackingTiles = new ArrayList<>();
 
                         Vector2D currentLocation = actingFigure.getPosition();
-                        BoardNode anchorTile = dgs.getMasterBoard().getElement(currentLocation.getX(), currentLocation.getY());
+                        DescentGridBoard board = dgs.getMasterBoard();
+                        BoardNode anchorTile = board.getElement(currentLocation);
 
                         if (size.a > 1 || size.b > 1) {
                             attackingTiles.addAll(getAttackingTiles(actingFigure.getComponentID(), anchorTile, attackingTiles));
