@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
+import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
 
 import java.util.HashMap;
@@ -28,12 +29,13 @@ public class ActionFeatureListener extends FeatureListener {
     private Map<AbstractAction, Double> actionValues = new HashMap<>();
 
 
-    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken) {
+    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken, String fileName) {
         super(frequency, true);
         if (psi == null) throw new AssertionError("Action Features must be provided and cannot be null");
         this.psiFn = psi;
         this.phiFn = phi;
         this.includeActionsNotTaken = includeActionsNotTaken;
+        logger = new FileStatsLogger(fileName);
     }
 
     @Override
