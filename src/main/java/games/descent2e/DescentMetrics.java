@@ -10,6 +10,7 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import utilities.Pair;
+import utilities.Utils;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -18,6 +19,75 @@ import static evaluation.metrics.Event.GameEvent.*;
 
 public class DescentMetrics implements IMetricsCollection {
 
+    public static class Heuristics extends AbstractMetric
+    {
+        public Heuristics() {
+            super();
+        }
+        public Heuristics(Event.GameEvent... args) {
+            super(args);
+        }
+        public Heuristics(Set<IGameEvent> events) {
+            super(events);
+        }
+        public Heuristics(String[] args) {
+            super(args);
+        }
+        public Heuristics(String[] args, Event.GameEvent... events) {
+            super(args, events);
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DescentGameState dgs = (DescentGameState) e.state;
+            int player = dgs.getHeroes().get(0).getOwnerId();
+            List<Double> heuristics = dgs.getHeuristicValues(player);
+            records.put("FACTOR_HEROES_HP", heuristics.get(0));
+            records.put("FACTOR_HEROES_DEFEATED", heuristics.get(1));
+            records.put("FACTOR_OVERLORD_FATIGUE", heuristics.get(2));
+            records.put("FACTOR_OVERLORD_THREAT", heuristics.get(3));
+            records.put("FACTOR_MONSTERS_HP", heuristics.get(4));
+            records.put("FACTOR_MONSTERS_DEFEATED", heuristics.get(5));
+            records.put("FACTOR_HEROES_THREAT", heuristics.get(6));
+
+            double sum = 0.0;
+
+            if (e.type == GAME_OVER)
+                sum = dgs.getPlayerResults()[player].value;
+            else {
+                sum = heuristics.stream().mapToDouble(Double::doubleValue).sum();
+                Utils.clamp(sum, -0.99, 0.99);
+            }
+
+            records.put("HEURISTICS SCORE", sum);
+
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
+                add(ABOUT_TO_START);
+                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
+            }};
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            HashMap<String, Class<?>> retVal = new HashMap<>();
+            retVal.put("FACTOR_HEROES_HP", Double.class);
+            retVal.put("FACTOR_HEROES_DEFEATED", Double.class);
+            retVal.put("FACTOR_OVERLORD_FATIGUE", Double.class);
+            retVal.put("FACTOR_OVERLORD_THREAT", Double.class);
+            retVal.put("FACTOR_MONSTERS_HP", Double.class);
+            retVal.put("FACTOR_MONSTERS_DEFEATED", Double.class);
+            retVal.put("FACTOR_HEROES_THREAT", Double.class);
+            retVal.put("HEURISTICS SCORE", Double.class);
+            return retVal;
+        }
+
+    }
     public static class Distances extends AbstractMetric
     {
         public Distances() {

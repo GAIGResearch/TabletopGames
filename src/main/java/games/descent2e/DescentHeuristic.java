@@ -56,8 +56,6 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
 
-        List<Double> heuristics = new ArrayList<>();
-
         DescentGameState dgs = (DescentGameState) gs;
         DescentParameters dp = (DescentParameters) gs.getGameParameters();
         CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
@@ -66,6 +64,24 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
             return playerResult.value;
         }
 
+        double retValue = 0.0;
+
+        List<Double> heuristics = getHeuristics(dgs, playerId);
+
+        for(double h : heuristics)
+        {
+            retValue += h;
+        }
+
+        // As playerResult.value is 1.0 for a win or -1.0 for a loss
+        // we should clamp the return value to just below to ensure that a win or loss is more noticeable
+        return Utils.clamp(retValue, -0.99, 0.99);
+    }
+
+    public List<Double> getHeuristics(DescentGameState dgs, int playerId)
+    {
+        List<Double> heuristics = new ArrayList<>();
+
         String questName = dgs.getCurrentQuest().getName();
 
         // Some heuristics will be beneficial to the overlord and detrimental to the heroes
@@ -73,8 +89,6 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         // We need to flip the sign of the heuristic if the player is the overlord where relevant
         Figure overlord = dgs.getOverlord();
         double isOverlord = playerId == dgs.overlordPlayer ? -1.0 : 1.0;
-
-        double retValue = 0.0;
 
         heuristics.add(FACTOR_HERO_HP * isOverlord * (getHeroesHP(dgs) / getHeroesMaxHP(dgs)));
         heuristics.add(-1 * FACTOR_HERO_DEFEATED * isOverlord * (getHeroesDefeated(dgs) / dgs.heroes.size()));
@@ -111,14 +125,21 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
         // Rounds the Heuristics to 6 decimal places
         heuristics.replaceAll(aDouble -> (double) Math.round(aDouble * 1000000d) / 1000000d);
 
-        for(double h : heuristics)
-        {
-            retValue += h;
-        }
+        return heuristics;
+    }
 
-        // As playerResult.value is 1.0 for a win or -1.0 for a loss
-        // we should clamp the return value to just below to ensure that a win or loss is more noticeable
-        return Utils.clamp(retValue, -0.99, 0.99);
+    public List<Double> getHeuristicParameters()
+    {
+        List<Double> params = new ArrayList<>();
+        params.add(FACTOR_HERO_HP);
+        params.add(FACTOR_HERO_DEFEATED);
+        params.add(FACTOR_MONSTERS_HP);
+        params.add(FACTOR_MONSTERS_DEFEATED);
+        params.add(FACTOR_OVERLORD_FATIGUE);
+        params.add(FACTOR_OVERLORD_THREAT);
+        params.add(FACTOR_HEROES_THREAT);
+        params.add(FACTOR_DONE_NOTHING);
+        return params;
     }
 
     private double getHeroesHP(DescentGameState dgs) {
@@ -230,7 +251,7 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                         continue;
                     }*/
                     DescentTypes.AttackType attackType = getAttackType(h);
-                    int minRange = attackType == DescentTypes.AttackType.MELEE ? 1 : 3;
+                    int minRange = attackType == DescentTypes.AttackType.MELEE ? 1 : 2;
                     double distance = 10000.0;
                     Vector2D position = h.getPosition();
                     for (int i = 0; i < barghests.size(); i++) {
@@ -244,13 +265,13 @@ public class DescentHeuristic extends TunableParameters implements IStateHeurist
                     }
                     Vector2D target = barghests.get(closest).getPosition();
                     int range = bfsLee(dgs, position, target);
-                    if (range < minRange && hasLineOfSight(dgs, position, target))
+                    if (range <= minRange && hasLineOfSight(dgs, position, target))
                     {
                         retVal += 1.0;
                     }
                     else {
                         int movement = Math.min(h.getAttribute(MovePoints).getValue(), h.getAttributeMax(MovePoints));
-                        double potential = Math.max(0.0, range - (movement * 0.25));
+                        double potential = Math.max(0.0, range - (movement / 4.0));
                         double d = 1.0 - (potential / 5.0);
                         retVal += ((double) Math.round(d * 1000000d) / 1000000d);
                     }

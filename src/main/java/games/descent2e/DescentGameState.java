@@ -196,6 +196,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         //return 0.0;
     }
 
+    public List<Double> getHeuristicValues(int playerId) {
+        return new DescentHeuristic().getHeuristics(this, playerId);
+    }
+
     @Override
     public double getGameScore(int playerId) {
         double retValue = 0.0;

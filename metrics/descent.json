@@ -12,6 +12,7 @@
       {"class": "games.descent2e.DescentMetrics$WinnerType" },
       {"class": "games.descent2e.DescentMetrics$HealthPoints" },
       {"class": "games.descent2e.DescentMetrics$Heroes"},
+      {"class": "games.descent2e.DescentMetrics$Heuristics"},
       {"class": "games.descent2e.DescentMetrics$Kills"},
       {"class": "games.descent2e.DescentMetrics$Positions"},
       {"class": "games.descent2e.DescentMetrics$Distances"},
