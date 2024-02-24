@@ -24,7 +24,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     private CantStopGameState(CantStopGameState copyFrom) {
         // used by copy method only
-        super(copyFrom.gameParameters, copyFrom.getNPlayers());
+        super(copyFrom.gameParameters.copy(), copyFrom.getNPlayers());
         // TurnOrder will be copied later
         completedColumns = copyFrom.completedColumns.clone();
         playerMarkerPositions = new int[copyFrom.getNPlayers()][];

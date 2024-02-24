@@ -34,7 +34,7 @@ public class StrategoGameState extends AbstractGameState{
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters, 2);
+        StrategoGameState s = new StrategoGameState(gameParameters.copy(), 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;
 
