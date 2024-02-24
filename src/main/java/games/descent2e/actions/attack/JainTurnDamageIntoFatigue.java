@@ -41,16 +41,20 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        MeleeAttack currentAttack = dgs.getActingFigure().getCurrentAttack();
+        Figure f = (Figure) dgs.getComponentById(jain);
+        MeleeAttack currentAttack = f.getCurrentAttack();
         if (currentAttack == null)
             return false;
+        if (currentAttack.defendingFigure != jain)
+            return false;
         if (currentAttack.skip)
+            return false;
+        if (currentAttack.getPhase() != MeleeAttack.AttackPhase.PRE_DAMAGE)
             return false;
         int damage = currentAttack.getDamage();
         // Prevents us from increasing our Fatigue more than the damage we took
         if (damage - reduce < 0)
             return false;
-        Figure f = (Figure) dgs.getComponentById(jain);
         return (reduce + f.getAttributeValue(Figure.Attribute.Fatigue)) <= f.getAttributeMax(Figure.Attribute.Fatigue);
     }
 

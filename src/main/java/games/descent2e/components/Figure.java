@@ -295,7 +295,7 @@ public class Figure extends Token {
 
     public String getName() { return componentName;}
     public MeleeAttack getCurrentAttack() { return currentAttack;}
-    public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack.copy();}
+    public void setCurrentAttack(MeleeAttack currentAttack) { this.currentAttack = currentAttack;}
     public void clearCurrentAttack() { currentAttack = null;}
 
     public void exhaustCard (DescentCard card)

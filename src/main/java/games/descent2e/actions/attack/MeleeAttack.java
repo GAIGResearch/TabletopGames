@@ -183,6 +183,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 // Only Heroes and Lieutenants can have weapons
                 Figure defender = (Figure) state.getComponentById(defendingFigure);
 
+                attacker.setCurrentAttack(this);
                 defender.setCurrentAttack(this);
 
                 if (attacker instanceof Hero) getWeaponBonuses(state, attackingFigure, true, true);
