@@ -8,15 +8,14 @@ import utilities.Utils;
 
 public class LinearStateHeuristic extends AbstractStateHeuristic {
 
-    protected double minValue = Double.NEGATIVE_INFINITY;
-    protected double maxValue = Double.POSITIVE_INFINITY;
-
     public LinearStateHeuristic(String featureVectorClassName, String coefficientsFile, String defaultHeuristicClass) {
         super(featureVectorClassName, coefficientsFile, defaultHeuristicClass);
     }
+
     public LinearStateHeuristic(String featureVectorClassName, String coefficientsFile) {
         super(featureVectorClassName, coefficientsFile, "");
     }
+
     public LinearStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile, IStateHeuristic defaultHeuristic) {
         super(featureVector, coefficientsFile, defaultHeuristic);
     }
@@ -26,14 +25,15 @@ public class LinearStateHeuristic extends AbstractStateHeuristic {
         // default heuristic is used if the state is terminal (or no coefficients are provided)
         if (coefficients != null && (defaultHeuristic == null || state.isNotTerminal())) {
             double[] phi = features.featureVector(state, playerId);
-            double retValue = coefficients[0]; // the bias term
-            for (int i = 0; i < phi.length; i++) {
-                retValue += phi[i] * coefficients[i+1];
-            }
-            return Utils.clamp(retValue, minValue, maxValue);
+            double retValue = applyCoefficients(phi);
+            if (defaultHeuristic != null)
+                return Utils.clamp(retValue, defaultHeuristic.minValue(), defaultHeuristic.maxValue());
+            return retValue;
         }
         if (defaultHeuristic != null)
             return defaultHeuristic.evaluateState(state, playerId);
         return 0;
     }
+
+
 }

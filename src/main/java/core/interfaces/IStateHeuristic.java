@@ -13,4 +13,11 @@ public interface IStateHeuristic {
      * @return - value of given state.
      */
     double evaluateState(AbstractGameState gs, int playerId);
+
+    default double minValue() {
+        return -1;
+    }
+    default double maxValue() {
+        return +1;
+    }
 }

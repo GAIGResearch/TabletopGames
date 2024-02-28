@@ -22,10 +22,7 @@ public class LogisticStateHeuristic extends AbstractStateHeuristic {
         if (coefficients == null)
             return defaultHeuristic.evaluateState(state, playerId);
         double[] phi = features.featureVector(state, playerId);
-        double retValue = coefficients[0];  // the bias term
-        for (int i = 0; i < phi.length; i++) {
-            retValue += phi[i] * coefficients[i+1];
-        }
+        double retValue = applyCoefficients(phi);
         return 1.0 / ( 1.0 + Math.exp(-retValue));
     }
 }
