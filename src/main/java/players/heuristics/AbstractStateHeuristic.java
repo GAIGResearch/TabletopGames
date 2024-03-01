@@ -90,6 +90,7 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
         // and add them to the coefficients if there is no colon in the name
         // If there is a colon in the name, then split by this and look up the relevant feature
         // columns, and put an entry into JSONCoefficients
+        coefficients = new double[features.names().length + 1]; // +1 for the bias term
         for (Object key : json.keySet()) {
             String keyStr = (String) key;
             if (keyStr.contains(":")) {
@@ -104,11 +105,15 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
                 }
                 interactionCoefficients.put(featureIndices, (Double) json.get(key));
             } else {
-                int featureIndex = features.indexOf(keyStr);
-                if (featureIndex == -1) {
-                    throw new AssertionError("Feature not found : " + keyStr);
+                if (keyStr.equals("BIAS")) {
+                    coefficients[0] = (Double) json.get(key);
+                } else {
+                    int featureIndex = features.indexOf(keyStr);
+                    if (featureIndex == -1) {
+                        throw new AssertionError("Feature not found : " + keyStr);
+                    }
+                    coefficients[featureIndex + 1] = (Double) json.get(key);
                 }
-                coefficients[featureIndex] = (Double) json.get(key);
             }
         }
     }
@@ -116,12 +121,15 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
     protected double applyCoefficients(double[] phi) {
         double retValue = coefficients[0]; // the bias term
         for (int i = 0; i < phi.length; i++) {
+            if (Double.isNaN(phi[i]))
+                throw new AssertionError("NaN in feature vector at index " + i);
             retValue += phi[i] * coefficients[i + 1];
         }
         if (!interactionCoefficients.isEmpty())
             retValue += calculateInteractionEffects(phi);
         return retValue;
     }
+
     private double calculateInteractionEffects(double[] phi) {
         double retValue = 0;
         for (int[] interaction : interactionCoefficients.keySet()) {
