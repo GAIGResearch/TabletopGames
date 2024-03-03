@@ -1,9 +1,11 @@
 package games.jaipurskeleton.gui;
 
 import core.components.Deck;
+import games.jaipurskeleton.JaipurGUIManager;
 import games.jaipurskeleton.JaipurGameState;
 import games.jaipurskeleton.components.JaipurCard;
 import games.jaipurskeleton.components.JaipurToken;
+import games.jaipurskeleton.JaipurParameters;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,8 +25,8 @@ public class JaipurGoodTokenView extends JComponent {
     }
 
     private int nMaxGoodTokensLength(JaipurGameState gs) {
-//        return ((JaipurParameters) gs.getGameParameters()).getGoodTokensProgression().values().stream().mapToInt(p -> p.length).max().orElse(0);
-        return 9;
+        return ((JaipurParameters) gs.getGameParameters()).getGoodTokensProgression().values().stream().mapToInt(p -> p.length).max().orElse(0);
+        //return 9;
     }
 
     @Override
@@ -39,9 +41,9 @@ public class JaipurGoodTokenView extends JComponent {
             if (deck == null) {
                 continue;
             }
-//            Integer[] progression = ((JaipurParameters)gs.getGameParameters()).getGoodTokensProgression().get(gt);
-//            drawTokens(g, progression, deck,y, JaipurGUIManager.soldGoodColorMapping.get(gt), outColor, fColor, true);
-//            drawTokens(g, progression, deck, y, JaipurGUIManager.goodColorMapping.get(gt), Color.black, Color.white, false);
+            Integer[] progression = ((JaipurParameters)gs.getGameParameters()).getGoodTokensProgression().get(gt);
+            drawTokens(g, progression, deck,y, JaipurGUIManager.soldGoodColorMapping.get(gt), outColor, fColor, true);
+            drawTokens(g, progression, deck, y, JaipurGUIManager.goodColorMapping.get(gt), Color.black, Color.white, false);
             y += defaultItemSize;
         }
     }

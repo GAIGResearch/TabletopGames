@@ -173,7 +173,7 @@ public class JaipurGUIManager extends AbstractGUIManager {
         rules += "<p>A round ends when " + params.nGoodTokensEmptyRoundEnd + " stacks of good tokens are empty, or no more cards are left in the draw pile when needing to replenish the market.</p><br/>";
         rules += "<p>At the end of the round, the player with the most camel cards wins the camel token and " + params.nPointsMostCamels + " bonus points.</p><br/>";
         rules += "<p>ROUND WIN: The player with the most points (from good tokens, bonus tokens and camel token) wins the round.</p><br/>";
-        rules += "<p>WIN: The player who wins majority of rounds played (" + 2 + ") wins.</p>";
+        rules += "<p>WIN: The player who wins majority of rounds played (" + params.nRoundsWinForGameWin + ") wins.</p>";
         rules += "<hr><p><b>INTERFACE: </b> Click action buttons.</p>";
         rules += "</html>";
         return rules;
