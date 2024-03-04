@@ -42,7 +42,7 @@ public class JaipurForwardModel extends StandardForwardModel {
         gs.market = new HashMap<>();
         for (JaipurCard.GoodType gt: JaipurCard.GoodType.values()) {
             // 5 cards in the market
-            gs.market.put(gt, new Counter(0, 0, jp.MarketMax, "Market: " + gt));
+            gs.market.put(gt, new Counter(0, 0, jp.Marketeers, "Market: " + gt));
         }
 
         gs.drawDeck = new Deck<>("Draw deck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -87,7 +87,7 @@ public class JaipurForwardModel extends StandardForwardModel {
         // Place 3 camel cards in the market
         for (JaipurCard.GoodType gt: JaipurCard.GoodType.values()) {
             if (gt == JaipurCard.GoodType.Camel) {
-                gs.market.get(gt).setValue(jp.initialCamelAmount);
+                gs.market.get(gt).setValue(jp.CamelAmount);
             } else {
                 gs.market.get(gt).setValue(0);
             }
@@ -96,10 +96,10 @@ public class JaipurForwardModel extends StandardForwardModel {
         // Create deck of cards
         gs.drawDeck.clear();
 
-        for (JaipurCard.GoodType type: jp.goodNCardsInDeck.keySet()) {
+        for (JaipurCard.GoodType type: jp.CardsInDeck.keySet()) {
             if (type == Camel)
             {
-                for (int i = 0; i < jp.goodNCardsInDeck.get(type) - jp.initialCamelAmount; i++)
+                for (int i = 0; i < jp.CardsInDeck.get(type) - jp.CamelAmount; i++)
                 {
                     JaipurCard card = new JaipurCard(type);
                     gs.drawDeck.add(card);
@@ -107,7 +107,7 @@ public class JaipurForwardModel extends StandardForwardModel {
             }
             else
             {
-                for (int i = 0; i < jp.goodNCardsInDeck.get(type); i++)
+                for (int i = 0; i < jp.CardsInDeck.get(type); i++)
                 {
                     JaipurCard card = new JaipurCard(type);
                     gs.drawDeck.add(card);
@@ -158,7 +158,7 @@ public class JaipurForwardModel extends StandardForwardModel {
             }
 
             // Deal cards
-            for (int j = 0; j < jp.initialHandAmount; j++) {  // 5 cards in hand
+            for (int j = 0; j < jp.initialAmount; j++) {  // 5 cards in hand
                 JaipurCard card = gs.drawDeck.draw();
 
                 // If camel, it goes into the herd instead
@@ -172,7 +172,7 @@ public class JaipurForwardModel extends StandardForwardModel {
         }
 
         // Take first 2 cards from the deck and place them face up in the market.
-        for (int i = 0; i < jp.MarketMax-jp.initialCamelAmount; i++) {
+        for (int i = 0; i < jp.Marketeers -jp.CamelAmount; i++) {
             JaipurCard card = gs.drawDeck.draw();
             gs.market.get(card.goodType).increment();
         }

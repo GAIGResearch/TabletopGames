@@ -55,17 +55,17 @@ public class JaipurParameters extends TunableParameters {
     int nGoodTokensEmptyRoundEnd = 3;
     int nRoundsWinForGameWin = 10;
 
-    int initialCamelAmount = 3;
+    int CamelAmount = 3;
 
-    int initialHandAmount = 5;
+    int initialAmount = 4;
 
-    int MarketMax = 5;
+    int Marketeers = 5;
 
     int HandLimit = 7;
 
-    boolean toggle = false;
+    boolean toggle = true;
 
-    Map<JaipurCard.GoodType, Integer> goodNCardsInDeck = new HashMap<JaipurCard.GoodType, Integer>() {{
+    Map<JaipurCard.GoodType, Integer> CardsInDeck = new HashMap<JaipurCard.GoodType, Integer>() {{
         put(JaipurCard.GoodType.Diamonds, 6);
         put(JaipurCard.GoodType.Gold, 6);
         put(JaipurCard.GoodType.Silver, 6);
@@ -83,12 +83,12 @@ public class JaipurParameters extends TunableParameters {
         addTunableParameter("nPointsMostCamels", 5, Arrays.asList(0, 2, 5, 7, 10));
         addTunableParameter("nGoodTokensEmptyRoundEnd", 3, Arrays.asList(1, 2, 3, 4, 6));
         addTunableParameter("nRoundsWinForGameWin", 10, Arrays.asList(1, 2, 5, 7, 10));
-        addTunableParameter("initialCamelAmount", 3, Arrays.asList(1, 2, 3, 4, 5));
-        addTunableParameter("initialHandAmount", 5, Arrays.asList(1, 2, 5, 7, 8));
-        addTunableParameter("MarketMax", 5, Arrays.asList(5, 6, 7, 8, 10));
+        addTunableParameter("CamelAmount", 3, Arrays.asList(1, 2, 3, 4, 5));
+        addTunableParameter("initialAmount", 5, Arrays.asList(1, 2, 5, 7, 8));
+        addTunableParameter("Marketeers", 5, Arrays.asList(5, 6, 7, 8, 10));
         addTunableParameter("HandLimit", 7, Arrays.asList(1, 2, 5, 7, 10));
-        for (JaipurCard.GoodType gt: goodNCardsInDeck.keySet()) {
-            addTunableParameter(gt.name() + " InDeck", goodNCardsInDeck.get( gt), Arrays.asList(6, 7, 8, 10, 11));
+        for (JaipurCard.GoodType gt: CardsInDeck.keySet()) {
+            addTunableParameter(gt.name() + " InDeck", CardsInDeck.get( gt), Arrays.asList(6, 7, 8, 10, 11));
         }
     }
 
@@ -104,14 +104,14 @@ public class JaipurParameters extends TunableParameters {
         for (JaipurCard.GoodType gt: jaipurParameters.getGoodTokensProgression(). keySet()) {
             this.goodTokensProgression.put(gt, jaipurParameters. getGoodTokensProgression().get(gt).clone());
         }
-        this.goodNCardsInDeck = new HashMap<>(jaipurParameters.getGoodNCardsInDeck());
+        this.CardsInDeck = new HashMap<>(jaipurParameters.getCardsInDeck());
 
         this.nPointsMostCamels = jaipurParameters.getNPointsMostCamels();
         this.nGoodTokensEmptyRoundEnd = jaipurParameters.getNGoodTokensEmptyGameEnd();
         this.nRoundsWinForGameWin = jaipurParameters.getNRoundsWinForGameWin();
-        this.initialCamelAmount = jaipurParameters.getInitialCamelAmount();
-        this.initialHandAmount = jaipurParameters.getInitialHandAmount();
-        this.MarketMax = jaipurParameters.getMarketMax();
+        this.CamelAmount = jaipurParameters.getCamelAmount();
+        this.initialAmount = jaipurParameters.getInitialAmount();
+        this.Marketeers = jaipurParameters.getMarketeers();
         this.HandLimit = jaipurParameters.getHandLimit();
         this.toggle = jaipurParameters.getToggle();
     }
@@ -125,8 +125,8 @@ public class JaipurParameters extends TunableParameters {
     }
     public Map<JaipurCard.GoodType, Integer[]> getGoodTokensProgression() { return goodTokensProgression;}
 
-    public Map<JaipurCard.GoodType, Integer> getGoodNCardsInDeck() {
-        return goodNCardsInDeck;
+    public Map<JaipurCard.GoodType, Integer> getCardsInDeck() {
+        return CardsInDeck;
     }
 
     public int getNPointsMostCamels() {
@@ -141,16 +141,16 @@ public class JaipurParameters extends TunableParameters {
         return nRoundsWinForGameWin;
     }
 
-    public int getInitialCamelAmount() {
-        return initialCamelAmount;
+    public int getCamelAmount() {
+        return CamelAmount;
     }
 
-    public int getInitialHandAmount() {
-        return initialHandAmount;
+    public int getInitialAmount() {
+        return initialAmount;
     }
 
-    public int getMarketMax() {
-        return MarketMax;
+    public int getMarketeers() {
+        return Marketeers;
     }
 
     public int getHandLimit() {
@@ -172,7 +172,7 @@ public class JaipurParameters extends TunableParameters {
         if (!(o instanceof JaipurParameters that)) return false;
         if (!super.equals(o)) return false;
         //JaipurParameters that = (JaipurParameters) o;
-        return nPointsMostCamels == that.nPointsMostCamels && nGoodTokensEmptyRoundEnd == that.nGoodTokensEmptyRoundEnd && nRoundsWinForGameWin == that.nRoundsWinForGameWin && initialCamelAmount == that.initialCamelAmount && initialHandAmount == that.initialHandAmount && MarketMax == that.MarketMax && HandLimit == that.HandLimit && toggle == that.toggle && Objects.equals(goodNCardsMinimumSell, that.goodNCardsMinimumSell) && Objects.equals(goodNCardsInDeck, that.goodNCardsInDeck) && Objects.equals(bonusTokensAvailable, that.bonusTokensAvailable) && Objects.equals(goodTokensProgression, that.goodTokensProgression);
+        return nPointsMostCamels == that.nPointsMostCamels && nGoodTokensEmptyRoundEnd == that.nGoodTokensEmptyRoundEnd && nRoundsWinForGameWin == that.nRoundsWinForGameWin && CamelAmount == that.CamelAmount && initialAmount == that.initialAmount && Marketeers == that.Marketeers && HandLimit == that.HandLimit && toggle == that.toggle && Objects.equals(goodNCardsMinimumSell, that.goodNCardsMinimumSell) && Objects.equals(CardsInDeck, that.CardsInDeck) && Objects.equals(bonusTokensAvailable, that.bonusTokensAvailable) && Objects.equals(goodTokensProgression, that.goodTokensProgression);
     }
 
     @Override
@@ -181,17 +181,17 @@ public class JaipurParameters extends TunableParameters {
         nPointsMostCamels = (int) getParameterValue("nPointsMostCamels");
         nGoodTokensEmptyRoundEnd = (int) getParameterValue("nGoodTokensEmptyRoundEnd");
         nRoundsWinForGameWin = (int) getParameterValue("nRoundsWinForGameWin");
-        initialCamelAmount = (int) getParameterValue("initialCamelAmount");
-        initialHandAmount = (int) getParameterValue("initialHandAmount");
-        MarketMax = (int) getParameterValue("MarketMax");
+        CamelAmount = (int) getParameterValue("CamelAmount");
+        initialAmount = (int) getParameterValue("initialAmount");
+        Marketeers = (int) getParameterValue("Marketeers");
         HandLimit = (int) getParameterValue("HandLimit");
-        goodNCardsInDeck.replaceAll((gt, v)-> (Integer) getParameterValue(gt. name() + " InDeck"));
+        CardsInDeck.replaceAll((gt, v)-> (Integer) getParameterValue(gt. name() + " InDeck"));
     }
 
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), goodNCardsMinimumSell, bonusTokensAvailable, goodTokensProgression, goodNCardsInDeck, nPointsMostCamels, nGoodTokensEmptyRoundEnd, nRoundsWinForGameWin, initialCamelAmount, MarketMax, HandLimit, toggle, initialHandAmount);
+        return Objects.hash(super.hashCode(), goodNCardsMinimumSell, bonusTokensAvailable, goodTokensProgression, CardsInDeck, nPointsMostCamels, nGoodTokensEmptyRoundEnd, nRoundsWinForGameWin, CamelAmount, Marketeers, HandLimit, toggle, initialAmount);
     }
 
     @Override
@@ -208,12 +208,12 @@ public class JaipurParameters extends TunableParameters {
                 ", nPointsMostCamels=" + nPointsMostCamels +
                 ", nGoodTokensEmptyRoundEnd=" + nGoodTokensEmptyRoundEnd +
                 ", nRoundsWinForGameWin=" + nRoundsWinForGameWin +
-                ", initialCamelAmount=" + initialCamelAmount +
-                ", initialHandAmount=" + initialHandAmount +
-                ", MarketMax=" + MarketMax +
+                ", CamelAmount=" + CamelAmount +
+                ", initialAmount=" + initialAmount +
+                ", Marketeers=" + Marketeers +
                 ", HandLimit=" + HandLimit +
                 ", toggle=" + toggle +
-                ", goodNCardsInDeck=" + goodNCardsInDeck +
+                ", CardsInDeck=" + CardsInDeck +
                 '}';
     }
 }

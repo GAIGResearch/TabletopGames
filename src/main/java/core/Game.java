@@ -855,7 +855,7 @@ public class Game {
         String gameParams = null;
 
         // 3. Run!
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, true, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
 //        ArrayList<GameType> games = new ArrayList<>();
