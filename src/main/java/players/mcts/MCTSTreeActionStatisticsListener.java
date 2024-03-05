@@ -56,6 +56,11 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
 
     public void recordData(SingleTreeNode root, AbstractForwardModel forwardModel) {
 
+        if (root instanceof MultiTreeNode) {
+            // access the root for the acting player instead
+            root = ((MultiTreeNode) root).roots[root.getActor()];
+        }
+
         // Now do our stuff, and trawl through the root to record data
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
         if (root == null || root.getVisits() < visitThreshold) {
