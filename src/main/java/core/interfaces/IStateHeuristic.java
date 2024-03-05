@@ -20,4 +20,5 @@ public interface IStateHeuristic {
     default double maxValue() {
         return +1;
     }
+
 }

@@ -17,7 +17,6 @@ import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
-import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
@@ -98,7 +97,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("nodesStoreScoreDelta", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
-        addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
+        addTunableParameter("advantageFunction",  IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);

@@ -29,7 +29,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
      * @param stateFeatures  - the features that will be record to value a state (V)
      * @param actionFeatures - the additional features used for Q
      */
-    public MCTSTreeActionStatisticsListener(IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures,
+    public MCTSTreeActionStatisticsListener(IActionFeatureVector actionFeatures, IStateFeatureVector stateFeatures,
                                             int visitThreshold, int maxDepth, ActionTargetType actionTarget,
                                             String fileName) {
         super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true, fileName);
@@ -103,7 +103,8 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
             if (actionTarget == ActionTargetType.CHOSEN)
                 actionTargets.put(bestAction, 1.0);
 
-            processStateWithTargets(node.state, bestAction, actionTargets);
+            if (actionsFromState.size() > 1) // no information
+                processStateWithTargets(node.state, bestAction, actionTargets);
 
             // add children of current node to queue if they meet the criteria
             for (SingleTreeNode child : node.children.values().stream()
