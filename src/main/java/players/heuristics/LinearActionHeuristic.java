@@ -3,39 +3,65 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
+import core.interfaces.IActionHeuristic;
+import core.interfaces.ICoefficients;
 import core.interfaces.IStateFeatureVector;
-import utilities.Utils;
+import utilities.Pair;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.DoubleUnaryOperator;
 
-public class LinearActionHeuristic extends GLMActionHeuristic {
+/**
+ * Provides a wrapper around an IStateFeatureVector and an array of coefficients
+ */
+public abstract class LinearActionHeuristic extends GLMHeuristic implements IActionHeuristic {
 
-    protected double minValue = Double.NEGATIVE_INFINITY;
-    protected double maxValue = Double.POSITIVE_INFINITY;
+    protected IStateFeatureVector features;
+    protected IActionFeatureVector actionFeatures;
 
-    public LinearActionHeuristic(IStateFeatureVector featureVector, IActionFeatureVector actionFeatureVector, String coefficientsFile) {
-        super(featureVector, actionFeatureVector, coefficientsFile);
+    String[] names;
+
+    @Override
+    public String[] names() {
+        return names;
     }
+
+
+    /**
+     * The coefficientsFile is a tab separated file with the first line being the names of the features
+     * and the second line being the coefficients.
+     * <p>
+     * The convention required is that the State coefficients are first, followed by the Action coefficients.
+     *
+     * @param featureVector
+     * @param actionFeatureVector
+     * @param coefficientsFile
+     */
+    public LinearActionHeuristic(IActionFeatureVector actionFeatureVector, IStateFeatureVector featureVector, String coefficientsFile) {
+        this.features = featureVector;
+        this.actionFeatures = actionFeatureVector;
+        // then add on the action feature names
+        names = new String[features.names().length + actionFeatures.names().length];
+        System.arraycopy(features.names(), 0, names, 0, features.names().length);
+        System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
+        Pair<double[], Map<int[], Double>> x = loadModel(coefficientsFile);
+        this.coefficients = x.a;
+        this.interactionCoefficients = x.b;
+    }
+
 
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state) {
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
-     //   double[] phi = features.featureVector(state, state.getCurrentPlayer());
-   //     double retValue = coefficients[0]; // the bias term
-   //     for (int i = 0; i < phi.length; i++) {
-  //          retValue += phi[i] * coefficients[i + 1];
-  //      }
-        // We don't need to calculate the state features, since they are the same, by definition, for all actions
-        // and this is a linear approximator (if this were non-linear, then this would not be possible)
-        // we also ignore the BIAS term (the first coefficient) for the same reason
-        // (these are still potentially useful to learn if they reduce bias/variance in the psi coefficients)
-        double retValue = 0;
-        int phiLength = features.names().length;
+        double[] phi = features.featureVector(state, state.getCurrentPlayer());
         double[] psi = actionFeatures.featureVector(action, state, state.getCurrentPlayer());
-        for (int i = 0; i < psi.length; i++) {
-            retValue += psi[i] * coefficients[i + 1 + phiLength];
-        }
-        return Utils.clamp(retValue, minValue, maxValue);
+        double[] combined = new double[phi.length + psi.length];
+        System.arraycopy(phi, 0, combined, 0, phi.length);
+        System.arraycopy(psi, 0, combined, phi.length, psi.length);
+
+        return inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
     }
 
 }

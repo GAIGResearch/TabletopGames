@@ -223,7 +223,7 @@ public class ColtExpressParameters extends TunableParameters {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), dataPath, nCardsInHand, nCardsInHandExtraDoc, nBulletsPerPlayer, nMaxRounds, shooterReward, nCardsDraw, nRoofMove, nCardHostageReward, nCardTakeItAllReward, cardCounts, trainCompartmentConfigurations, playerStartLoot, loot);
+        int result = Objects.hash(super.hashCode(), dataPath, trainCompartmentConfigurations, playerStartLoot, loot);
         result = 31 * result + Arrays.hashCode(characterTypes);
         result = 31 * result + Arrays.hashCode(endRoundCards);
         result = 31 * result + Arrays.hashCode(roundCards);
