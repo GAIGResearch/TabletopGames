@@ -78,6 +78,8 @@ public abstract class FeatureListener implements IGameListener {
             }
             data.put("PlayerCount", (double) getGame().getPlayers().size());
             data.put("TotalRounds", finalRound);
+            data.put("TotalTurns", (double) state.getTurnCounter());
+            data.put("TotalTicks", (double) state.getGameTick());
             data.put("ActionScore", record.actionScore);
             data.put("Win", winLoss[record.player]);
             data.put("Ordinal", ordinal[record.player]);
