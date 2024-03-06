@@ -15,7 +15,6 @@ import static java.util.stream.Collectors.toList;
 public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
 
     public int visitThreshold, maxDepth;
-    protected ActionTargetType actionTarget;
 
     public enum ActionTargetType {
         CHOSEN,
@@ -30,10 +29,8 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
      * @param actionFeatures - the additional features used for Q
      */
     public MCTSTreeActionStatisticsListener(IActionFeatureVector actionFeatures, IStateFeatureVector stateFeatures,
-                                            int visitThreshold, int maxDepth, ActionTargetType actionTarget,
-                                            String fileName) {
+                                            int visitThreshold, int maxDepth, String fileName) {
         super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true, fileName);
-        this.actionTarget = actionTarget;
         this.visitThreshold = visitThreshold;
         this.maxDepth = maxDepth;
     }
@@ -44,8 +41,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
         if (event.type == Event.GameEvent.ACTION_CHOSEN) {
             // We extract the root node from the current player's tree
             AbstractPlayer player = this.getGame().getPlayers().get(event.state.getCurrentPlayer());
-            if (player instanceof MCTSPlayer) {
-                MCTSPlayer mctsPlayer = (MCTSPlayer) player;
+            if (player instanceof MCTSPlayer mctsPlayer) {
                 recordData(mctsPlayer.root, this.getGame().getForwardModel());
             }
         } else if (event.type == Event.GameEvent.GAME_OVER) {
@@ -71,6 +67,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
         if (maxDepth > 0 && !root.params.maintainMasterState) {
             throw new IllegalArgumentException("maxDepth > 0 requires maintainMasterState to be true");
         }
+
         while (!nodeQueue.isEmpty()) {
             SingleTreeNode node = nodeQueue.poll();
             // process this node
@@ -78,12 +75,18 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
             int player = node.getActor();
             double stateValue = node.nodeValue(player);
             List<AbstractAction> actionsFromState = forwardModel.computeAvailableActions(node.state);
-            Map<AbstractAction, Double> actionTargets = new HashMap<>();
+            Map<String, Map<AbstractAction, Double>> actionTargets = new HashMap<>();
+            actionTargets.put("CHOSEN", new HashMap<>());
+            actionTargets.put("VISIT_PROPORTION", new HashMap<>());
+            actionTargets.put("ADVANTAGE", new HashMap<>());
+
             AbstractAction bestAction = null;
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : actionsFromState) {
                 if (node.actionValues.get(action) == null) {
-                    actionTargets.put(action, 0.0);  // we have no data for this action
+                    actionTargets.get("CHOSEN").put(action, 0.0);  // we have no data for this action
+                    actionTargets.get("VISIT_PROPORTION").put(action, 0.0);  // we have no data for this action
+                    actionTargets.get("ADVANTAGE").put(action, 0.0);  // we have no data for this action
                     continue;
                 }
                 double actionValue = node.actionTotValue(action, player) / node.actionVisits(action);
@@ -91,22 +94,15 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
                     bestValue = actionValue;
                     bestAction = action;
                 }
-                switch (actionTarget) {
-                    case CHOSEN:
-                        actionTargets.put(action, 0.0);
-                        break;
-                    case VISIT_PROPORTION:
-                        double visitProportion = (double) node.actionVisits(action) / node.getVisits();
-                        actionTargets.put(action, visitProportion);
-                        break;
-                    case ADVANTAGE:
-                        actionTargets.put(action, actionValue - stateValue);
-                        break;
-                }
+                actionTargets.get("CHOSEN").put(action, 0.0);
+                double visitProportion = (double) node.actionVisits(action) / node.getVisits();
+                actionTargets.get("VISIT_PROPORTION").put(action, visitProportion);
+                actionTargets.get("ADVANTAGE").put(action, actionValue - stateValue);
+
             }
+
             // the best action is the highest scoring one in the available set (which may not be the best one overall away from the root)
-            if (actionTarget == ActionTargetType.CHOSEN)
-                actionTargets.put(bestAction, 1.0);
+            actionTargets.get("CHOSEN").put(bestAction, 1.0);
 
             if (actionsFromState.size() > 1) // no information
                 processStateWithTargets(node.state, bestAction, actionTargets);
@@ -118,7 +114,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
                     .filter(Objects::nonNull)
                     .filter(n -> n.depth <= maxDepth)
                     .filter(n -> n.getVisits() >= visitThreshold)
-                    .collect(toList())) {
+                    .toList()) {
                 if (child != null)
                     nodeQueue.add(child);
             }
