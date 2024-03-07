@@ -7,6 +7,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.StopMove;
 import games.descent2e.actions.Triggers;
+import games.descent2e.actions.attack.EndCurrentPhase;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
@@ -59,7 +60,12 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     int allyID;
     boolean swapped, swapOption = false;
     int oldHeroMovePoints;
+    boolean oldHeroHasMoved;
     int oldAllyMovePoints;
+    boolean oldAllyHasMoved;
+
+    boolean skip = false;
+
     public HeroicFeatExtraMovement(int hero, int ally) {
         super(Triggers.HEROIC_FEAT);
         this.heroID = hero;
@@ -73,6 +79,10 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         String allyName = ((Hero) gameState.getComponentById(allyID)).getName().replace("Hero: ", "");
 
         return String.format("Heroic Feat: " + heroName + " and " + allyName + " make a free move action");
+    }
+
+    public String toString() {
+        return "Heroic Feat: Extra Movement for " + heroID + " and " + allyID;
     }
 
     @Override
@@ -102,7 +112,9 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 moveActions = moveActions(dgs, hero);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(hero.getComponentID()));
+                    StopMove stopMove = new StopMove(hero.getComponentID());
+                    if (stopMove.canExecute(dgs))
+                        retVal.add(stopMove);
                     retVal.addAll(moveActions);
                 }
                 break;
@@ -110,13 +122,18 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 moveActions = moveActions(dgs, targetAlly);
                 if (!moveActions.isEmpty())
                 {
-                    retVal.add(new StopMove(targetAlly.getComponentID()));
+                    StopMove stopMove = new StopMove(targetAlly.getComponentID());
+                    if (stopMove.canExecute(dgs))
+                        retVal.add(stopMove);
                     retVal.addAll(moveActions);
                 }
                 break;
             default:
                 break;
         }
+
+        if (retVal.isEmpty())
+            retVal.add(new EndCurrentPhase());
 
         return retVal;
     }
@@ -153,11 +170,17 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
         oldHeroMovePoints = hero.getAttribute(Figure.Attribute.MovePoints).getValue();
         oldAllyMovePoints = targetAlly.getAttribute(Figure.Attribute.MovePoints).getValue();
+        oldHeroHasMoved = hero.hasMoved();
+        oldAllyHasMoved = targetAlly.hasMoved();
 
         hero.setAttributeToMax(Figure.Attribute.MovePoints);
         targetAlly.setAttributeToMax(Figure.Attribute.MovePoints);
+        hero.setHasMoved(false);
+        targetAlly.setHasMoved(false);
 
         movePhaseForward(dgs);
+
+        hero.addActionTaken(toString());
 
         return true;
     }
@@ -174,6 +197,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 //System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
+                skip = false;
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
                 if (phase.interrupt == null || interruptPlayer == heroPlayer) {
                     // we have completed the loop, and start again with the attacking player
@@ -185,6 +209,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     }
 
     private boolean playerHasInterruptOption(DescentGameState state) {
+        if (skip) return false;
         if (phase.interrupt == null || phase.interrupters == null) return false;
         // first we see if the interruptPlayer is one who may interrupt
         switch (phase.interrupters) {
@@ -234,6 +259,8 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                     if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
                     hero.setAttribute(Figure.Attribute.MovePoints, oldHeroMovePoints);
                     targetAlly.setAttribute(Figure.Attribute.MovePoints, oldAllyMovePoints);
+                    hero.setHasMoved(oldHeroHasMoved);
+                    targetAlly.setHasMoved(oldAllyHasMoved);
                     phase = ALL_DONE;
                 }
                 break;
@@ -245,6 +272,8 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                     if (hero instanceof Hero) {((Hero) hero).setFeatAvailable(false);}
                     hero.setAttribute(Figure.Attribute.MovePoints, oldHeroMovePoints);
                     targetAlly.setAttribute(Figure.Attribute.MovePoints, oldAllyMovePoints);
+                    hero.setHasMoved(oldHeroHasMoved);
+                    targetAlly.setHasMoved(oldAllyHasMoved);
                     phase = ALL_DONE;
                 }
                 else
@@ -267,6 +296,9 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         retVal.swapped = swapped;
         retVal.oldHeroMovePoints = oldHeroMovePoints;
         retVal.oldAllyMovePoints = oldAllyMovePoints;
+        retVal.oldHeroHasMoved = oldHeroHasMoved;
+        retVal.oldAllyHasMoved = oldAllyHasMoved;
+        retVal.skip = skip;
         return retVal;
     }
 
@@ -278,7 +310,9 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                     other.phase == phase && other.interruptPlayer == interruptPlayer &&
                     other.heroPlayer == heroPlayer && other.allyPlayer == allyPlayer &&
                     other.swapOption == swapOption && other.swapped == swapped &&
-                    other.oldHeroMovePoints == oldHeroMovePoints && other.oldAllyMovePoints == oldAllyMovePoints;
+                    other.oldHeroMovePoints == oldHeroMovePoints && other.oldAllyMovePoints == oldAllyMovePoints &&
+                    other.oldHeroHasMoved == oldHeroHasMoved && other.oldAllyHasMoved == oldAllyHasMoved &&
+                    other.skip == skip;
         }
         return false;
     }
@@ -306,6 +340,16 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), phase, heroPlayer, allyPlayer, interruptPlayer, heroID, allyID, swapped, swapOption, oldHeroMovePoints, oldAllyMovePoints);
+        return Objects.hash(super.hashCode(), phase, heroPlayer, allyPlayer, interruptPlayer, heroID, allyID, swapped, swapOption, oldHeroMovePoints, oldAllyMovePoints, oldHeroHasMoved, oldAllyHasMoved, skip);
+    }
+
+    public boolean getSkip()
+    {
+        return skip;
+    }
+
+    public void setSkip(boolean s)
+    {
+        skip = s;
     }
 }

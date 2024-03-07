@@ -11,6 +11,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.DescentCard;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import utilities.Vector2D;
@@ -44,6 +45,7 @@ public class UseStaminaPotion extends DescentAction implements IExtendedSequence
         // Heal hero
         Hero hero = (Hero) gs.getComponentById(toRestoreID);
         hero.setAttributeToMin(Figure.Attribute.Fatigue);
+        hero.addActionTaken(toString());
         return true;
     }
 
@@ -61,7 +63,7 @@ public class UseStaminaPotion extends DescentAction implements IExtendedSequence
         // Get Neighbours
         if (executer.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
             Vector2D loc = executer.getPosition();
-            GridBoard<BoardNode> board = dgs.getMasterBoard();
+            DescentGridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());

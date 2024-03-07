@@ -98,6 +98,28 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
+    public static class RoundCounter extends AbstractMetric {
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            //records.put("RoundCounter: ", e.state.getRoundCounter());
+            System.out.println("Round: " + e.state.getRoundCounter());  // TODO just for debug
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(ROUND_OVER);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("RoundCounter", Integer.class);
+            return columns;
+        }
+    }
+
 
     public static class StateSpace extends AbstractMetric {
         @Override

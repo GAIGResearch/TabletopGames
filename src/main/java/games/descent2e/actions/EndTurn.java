@@ -11,6 +11,8 @@ import games.descent2e.components.Hero;
 
 import java.util.Random;
 
+import static games.descent2e.DescentHelper.collision;
+
 public class EndTurn extends DescentAction{
     public EndTurn() {
         super(Triggers.ACTION_POINT_SPEND);
@@ -18,8 +20,10 @@ public class EndTurn extends DescentAction{
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "End Turn";
+        return toString();
     }
+    @Override
+    public String toString() { return "End Turn"; }
 
     @Override
     public boolean execute(DescentGameState dgs) {
@@ -33,6 +37,7 @@ public class EndTurn extends DescentAction{
             debug_RandomStatus(f);
         }*/
 
+        f.addActionTaken(toString());
         endOfTurn(dgs, f);
 
         return true;
@@ -43,6 +48,9 @@ public class EndTurn extends DescentAction{
     // Or the game forces a figure to end their turn because they can't do anything else
     public static void endOfTurn (DescentGameState dgs, Figure f)
     {
+        f.addActionTaken("--- END OF TURN ---");
+        //System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ") - [" + f.getPosition() + "]");
+        //collision(dgs);
         // Removes all attribute tests taken this turn from the list, so we can check them again next turn
         f.clearAttributeTest();
 
@@ -72,7 +80,6 @@ public class EndTurn extends DescentAction{
         f.setRemovedConditionThisTurn(false);
         f.setUsedExtraAction(false);
 
-        //System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ") - [" + f.getPosition() + "]");
         dgs.getTurnOrder().endPlayerTurn(dgs);
     }
 

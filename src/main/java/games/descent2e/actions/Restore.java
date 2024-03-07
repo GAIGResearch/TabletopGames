@@ -24,6 +24,7 @@ public class Restore extends DescentAction{
         Figure f = dgs.getActingFigure();
         f.incrementAttribute(Figure.Attribute.Health, restore);
         f.setUsedExtraAction(true);
+        f.addActionTaken(toString());
         return true;
     }
 

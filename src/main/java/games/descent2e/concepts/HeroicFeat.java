@@ -49,6 +49,7 @@ public class HeroicFeat {
 
             case StunMonsters:
                 for (List<Monster> monsters : dgs.getMonsters()) {
+                    if (monsters.isEmpty()) continue;
                     feat = new StunAllInMonsterGroup(monsters, 3);
                     if (feat.canExecute(dgs))
                         myFeats.add(feat);

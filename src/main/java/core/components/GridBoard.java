@@ -4,6 +4,7 @@ import core.CoreConstants;
 import core.interfaces.IComponentContainer;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
+import games.descent2e.components.DescentGridBoard;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -296,15 +297,15 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      * @param filename - path to file.
      * @return - List of Board objects.
      */
-    public static List<GridBoard<BoardNode>> loadBoards(String filename) {
+    public static List<DescentGridBoard> loadBoards(String filename) {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<GridBoard<BoardNode>> gridBoards = new ArrayList<>();
+        ArrayList<DescentGridBoard> gridBoards = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for (Object o : data) {
-                GridBoard<BoardNode> newGridBoard = new GridBoard<>();
+                DescentGridBoard newGridBoard = new DescentGridBoard();
                 newGridBoard.loadBoard((JSONObject) o);
                 gridBoards.add(newGridBoard);
             }

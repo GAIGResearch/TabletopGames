@@ -23,6 +23,8 @@ public class ReturnToMapPlace extends DescentAction {
         if (f instanceof Hero) {((Hero) f).setFeatAvailable(false);}
         f.setCanIgnoreEnemies(false);
         //System.out.println("Tomble reappeared on the map!");
+        f.addActionTaken(toString());
+        f.setHasMoved(false);
         return true;
     }
 
@@ -50,7 +52,7 @@ public class ReturnToMapPlace extends DescentAction {
 
     @Override
     public String toString() {
-        return "Heroic Feat: Reappear";
+        return "Heroic Feat: Reappear (3/3)";
     }
 
     @Override

@@ -2,6 +2,7 @@ package tools.descentTileBuild;
 
 import core.components.BoardNode;
 import core.components.GridBoard;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.gui.DescentGridBoardView;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
@@ -25,7 +26,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
             0, new float[]{9}, 0);
     final static Stroke boldStroke = new BasicStroke(3);
 
-    public TileBuildGridBoardView(TileBuildState gs, GridBoard<BoardNode> gridBoard) {
+    public TileBuildGridBoardView(TileBuildState gs, DescentGridBoard gridBoard) {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
         this.gs = gs;
 
@@ -33,7 +34,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    GridBoard<BoardNode> gridBoard = (GridBoard<BoardNode>) component;
+                    DescentGridBoard gridBoard = (DescentGridBoard) component;
                     for (int i = 0; i < gridBoard.getHeight(); i++) {
                         boolean found = false;
                         for (int j = 0; j < gridBoard.getWidth(); j++) {
@@ -61,7 +62,7 @@ public class TileBuildGridBoardView extends ComponentView implements IScreenHigh
     @Override
     protected void paintComponent(Graphics g) {
         Stroke s = ((Graphics2D) g).getStroke();
-        GridBoard<BoardNode> gridBoard = (GridBoard<BoardNode>) component;
+        DescentGridBoard gridBoard = (DescentGridBoard) component;
 
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;

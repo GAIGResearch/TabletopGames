@@ -6,9 +6,9 @@ import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
+import games.descent2e.actions.Move;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
-import games.descent2e.concepts.Quest;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -17,6 +17,7 @@ import static core.CoreConstants.GameResult.GAME_END;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static core.CoreConstants.playersHash;
 import static core.CoreConstants.sizeHash;
+import static games.descent2e.DescentHelper.collision;
 
 // Order is all heroes (controlled by their owner ID player), then all monsters by monster group (controlled by overlord)
 public class DescentTurnOrder extends ReactiveTurnOrder {
@@ -111,7 +112,19 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 overlordEndTurn((DescentGameState)gameState);
             }
             endRound(gameState);
-            System.out.println("Round " + roundCounter);
+            dgs.clearDefeatedFigures();
+            /*StringBuilder healthCheck = new StringBuilder();
+            for (Figure f: dgs.getHeroes()) {
+                healthCheck.append(f.getName()).append(": ").append(f.getAttribute(Figure.Attribute.Health).getValue()).append("/").append(f.getAttributeMax(Figure.Attribute.Health)).append("; ");
+            }
+            healthCheck.append("\n");
+            for (List<Monster> mList: dgs.getMonsters()) {
+                for (Monster m: mList) {
+                    healthCheck.append(m.getName()).append(": ").append(m.getAttribute(Figure.Attribute.Health).getValue()).append("/").append(m.getAttributeMax(Figure.Attribute.Health)).append("; ");
+                }
+            }
+            System.out.println(healthCheck);*/
+            //collision(dgs);
         }
         else {
 
@@ -231,7 +244,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
         if (canSpawn)
         {
-            System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
+            //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
             List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
             spawnReinforcements(dgs, i, noToSpawn, tileCoords);
         }
@@ -256,8 +269,8 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         // We assume that we can always spawn a Minion
         // As we will just return if we do not have enough monsters to spawn otherwise
 
-        //Random rnd = new Random(dgs.getGameParameters().getRandomSeed());
-        Random rnd = new Random();
+        Random rnd = new Random(dgs.getGameParameters().getRandomSeed() + dgs.getTurnCounter());
+        //Random rnd = new Random();
         List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
         List<Monster> monsters = dgs.getMonsters().get(index);
         for (Monster monster : monstersOriginal)
@@ -296,14 +309,16 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             // If the Master exists, it is always the first Monster on the list
             // The only time we do not look at the first Monster on the list is
             // if we can only spawn a Minion when a Master exists
-            Monster originalMonster = monstersOriginal.get(k);
+            int indexToSpawn = k;
 
             // If the Master is alive, we cannot spawn a Master
             // So we spawn a Minion instead
             if (masterExists && !canSpawnMaster)
             {
-                originalMonster = monstersOriginal.get(1);
+                indexToSpawn = DescentHelper.getFirstMissingIndex(monsters);
             }
+
+            Monster originalMonster = monstersOriginal.get(indexToSpawn);
 
             Monster monster = originalMonster.copyNewID();
 
@@ -320,6 +335,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                 BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
                 if (position.getComponentName().equals("plain") &&
                         ((PropertyInt)position.getProperty(playersHash)).value == -1) {
+                //if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
                     // TODO: some monsters want to spawn in lava/water.
                     // This can be top-left corner, check if the other tiles are valid too
                     boolean canPlace = true;
@@ -343,10 +359,14 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
                                 dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
                             }
                         }
-                        if (canSpawnMaster)
+                        if (canSpawnMaster) {
+                            dgs.monsters.get(index).add(indexToSpawn, monster);
                             canSpawnMaster = false;
-                        dgs.monsters.get(index).add(monster);
-                        System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
+                        }
+                        else {
+                            dgs.monsters.get(index).add(indexToSpawn, monster);
+                        }
+                        //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
                         break;
                     }
                 }
@@ -403,13 +423,13 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
     private void overlordIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)
     {
         dgs.overlord.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
-        System.out.println("Overlord's Fatigue increased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
+        //System.out.println("Overlord's Fatigue increased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
     private void overlordDecreaseFatigue (DescentGameState dgs, int decreaseFatigueBy)
     {
         dgs.overlord.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
-        System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
+        //System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
     private void heroesSideIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)

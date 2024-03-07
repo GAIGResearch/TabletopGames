@@ -8,6 +8,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.items.RerollAttributeTest;
+import games.descent2e.components.Figure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +69,8 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         interruptPlayer = attackingPlayer;
 
         movePhaseForward(state);
+
+        ((Figure) state.getComponentById(attackingFigure)).addActionTaken(toString());
 
         return true;
     }
@@ -152,6 +155,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         // This is where the call for the Attribute Tests would go
         List<AbstractAction> retVal = new ArrayList<>();
         // TODO: This feels incredibly hacky, but for whatever reason, it just works.
+        if (state.getHistory().size() == 0) return null;
         AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1);
         if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase)
         {

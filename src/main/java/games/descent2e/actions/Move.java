@@ -7,9 +7,13 @@ import core.components.GridBoard;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
+import javassist.runtime.Desc;
 import org.jetbrains.annotations.NotNull;
 import utilities.Pair;
 import utilities.Utils;
@@ -51,6 +55,7 @@ public class Move extends AbstractAction {
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = (Figure) dgs.getComponentById(this.f);
         startPosition = f.getPosition();
+
         // Remove from old position
         remove(dgs, f);
 
@@ -63,17 +68,86 @@ public class Move extends AbstractAction {
 
         f.setHasMoved(true);
 
+        f.addActionTaken(toString());
+
+        //DescentHelper.gridCounter(dgs, f.getComponentID(), startPosition, positionsTraveled);
+
         return true;
     }
 
     public boolean canExecute (AbstractGameState gs)
     {
-        Figure f = (Figure) gs.getComponentById(this.f);
+        DescentGameState dgs = (DescentGameState) gs;
+        Figure f = (Figure) dgs.getComponentById(this.f);
         // We should not finish on the same space that we started on
         Vector2D finalPosition = positionsTraveled.get(positionsTraveled.size()-1);
-        if (finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY()) return true;
+        BoardNode node = dgs.getMasterBoard().getElement(finalPosition.getX(), finalPosition.getY());
+
+        // We can only end our movement on a space that is not occupied by another figure
+        // This is not important if we are considered off the map
+        int player = ((PropertyInt) node.getProperty("players")).value;
+        if (!f.isOffMap()) {
+            if (player != -1 && player != f.getComponentID()) return false;
+            //if (checkCollision(dgs, f, finalPosition)) return false;
+        }
+        return finalPosition.getX() != f.getPosition().getX() || finalPosition.getY() != f.getPosition().getY();
         // if (f instanceof Monster) return ((Monster) f).getOrientation() != orientation;
-        return false;
+    }
+
+    public static boolean checkCollision(DescentGameState dgs, Figure f, Vector2D anchor)
+    {
+        // Check if there is a collision with another figure
+        // We cannot end our movement on a space that is already occupied by another figure
+        boolean collision = false;
+
+        if (f.isOffMap()) return false;
+
+        Pair<Integer, Integer> fSize = f.getSize().copy();
+
+
+
+        if (f instanceof Monster) {
+            anchor = ((Monster) f).applyAnchorModifier();
+            if (((Monster) f).getOrientation().ordinal() % 2 == 1) fSize.swap();
+        }
+
+        for (int a = 0; a < fSize.b; a++) {
+            for (int b = 0; b < fSize.a; b++) {
+                Vector2D endPos = new Vector2D(anchor.getX() + b, anchor.getY() + a);
+                for (Hero h : dgs.getHeroes()) {
+                    if (h.isOffMap()) continue;
+                    if (endPos.equals(h.getPosition())) {
+                        if (f.getComponentID() != h.getComponentID()) {
+                            collision = true;
+                            break;
+                        }
+                    }
+                }
+
+                for (List<Monster> monster : dgs.getMonsters()) {
+                    if (collision) break;
+                    for (Monster m : monster) {
+                        if (m.isOffMap()) continue;
+                        Vector2D topLeftAnchorM = m.applyAnchorModifier();
+                        Pair<Integer, Integer> size = m.getSize().copy();
+                        if (m.getOrientation().ordinal() % 2 == 1) size.swap();
+                        for (int i = 0; i < size.b; i++) {
+                            for (int j = 0; j < size.a; j++) {
+                                Vector2D newPos = new Vector2D(topLeftAnchorM.getX() + j, topLeftAnchorM.getY() + i);
+                                if (endPos.equals(newPos)) {
+                                    if (f.getComponentID() != m.getComponentID()) {
+                                        collision = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return collision;
     }
 
     /**
@@ -128,6 +202,7 @@ public class Move extends AbstractAction {
      */
     public static void remove(DescentGameState dgs, Figure f) {
         Vector2D oldTopLeftAnchor = f.getPosition().copy();
+        //System.out.println(oldTopLeftAnchor);
         PropertyInt emptySpace = new PropertyInt("players", -1);
 
         BoardNode baseSpace = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX(), oldTopLeftAnchor.getY());
@@ -183,39 +258,32 @@ public class Move extends AbstractAction {
 
         List<Vector2D> possibilities = new ArrayList<>();
         // Otherwise, we need to find the nearest adjacent space that is empty
-        GridBoard<BoardNode> board = dgs.getMasterBoard();
-        List<Vector2D> neighbours = getNeighbourhood(position.getX(), position.getY(), board.getWidth(), board.getHeight(), true);
-        for (Vector2D neighbour : neighbours) {
-            BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
-            if (node != null) {
-                // Check if there are no figures on the space, and that it is walkable
-                if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && ((PropertyInt) node.getProperty("players")).value == -1) {
-                    possibilities.add(neighbour);
-                }
-            }
-        }
-        if (possibilities.isEmpty())
-        {
-            List<Vector2D> neighboursOfNeighbours = new ArrayList<>();
+        DescentGridBoard board = dgs.getMasterBoard();
+        List<Vector2D> checked = new ArrayList<>();
+        List<Vector2D> toCheck = new ArrayList<>();
+        toCheck.add(position);
+
+        while (!toCheck.isEmpty()) {
+            Vector2D current = toCheck.remove(0);
+            checked.add(current);
+            List<Vector2D> neighbours = getNeighbourhood(current.getX(), current.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D neighbour : neighbours) {
-                List<Vector2D> uniqueNeighbours = getNeighbourhood(neighbour.getX(), neighbour.getY(), board.getWidth(), board.getHeight(), true);
-                uniqueNeighbours.removeIf(neighboursOfNeighbours::contains);
-                neighboursOfNeighbours.addAll(uniqueNeighbours);
-            }
-            neighboursOfNeighbours.removeIf(neighbours::contains);
-            for (Vector2D neighbour : neighboursOfNeighbours)
-            {
-                BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
-                // Check if there are no figures on the space, and that it is walkable
-                if (node != null) {
-                    if (((PropertyInt) node.getProperty("players")).value == -1 && DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName())) {
-                        possibilities.add(neighbour);
+                if (!checked.contains(neighbour) && !toCheck.contains(neighbour)) {
+                    toCheck.add(neighbour);
+                    BoardNode node = board.getElement(neighbour.getX(), neighbour.getY());
+                    if (node != null) {
+                        // Check if there are no other figures on the space, and that it is walkable
+                        player = ((PropertyInt) node.getProperty("players")).value;
+                        if (DescentTypes.TerrainType.isWalkableTerrain(node.getComponentName()) && (player == -1 || player == f.getComponentID())) {
+                            possibilities.add(neighbour);
+                        }
                     }
                 }
             }
+            if (possibilities.size() > 0) break;
         }
 
-        // TODO The game should check more than just two spaces away for possibilities, but this is just a proof of concept for now
+        // This will only occur if, for whatever reason, every single space on the board is considered occupied
         if (possibilities.isEmpty())
         {
             throw new AssertionError("No empty spaces found to place figure!");
@@ -237,6 +305,7 @@ public class Move extends AbstractAction {
      */
     private static void place(DescentGameState dgs, Figure f, Vector2D position, Monster.Direction orientation) {
         // Update location and orientation. Swap size if orientation is horizontal (relevant for medium monsters)
+        Vector2D oldPosition = f.getPosition();
         f.setPosition(position.copy());
         Vector2D topLeftAnchor = position.copy();
         if (f instanceof Monster) {
@@ -254,6 +323,8 @@ public class Move extends AbstractAction {
                 BoardNode destinationTile = dgs.getMasterBoard().getElement(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
                 PropertyInt placeFigureOnTile = new PropertyInt("players", f.getComponentID());
                 destinationTile.setProperty(placeFigureOnTile);
+
+                //DescentHelper.gridCounter(dgs, f.getComponentID(), null, null);
 
                 DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
                 if (terrain != null) {

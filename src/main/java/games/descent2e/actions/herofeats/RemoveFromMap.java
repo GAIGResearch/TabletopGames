@@ -29,6 +29,7 @@ public class RemoveFromMap extends DescentAction {
         // As Hero Tokens cannot interact with other figures
         f.setAttributeToMin(Figure.Attribute.MovePoints);
         f.getNActionsExecuted().setToMax();
+        f.addActionTaken(toString());
         return true;
     }
 
@@ -55,7 +56,7 @@ public class RemoveFromMap extends DescentAction {
     }
     @Override
     public String toString() {
-        return "Heroic Feat: Tomble Burrowell - Vanish (1/3)";
+        return "Heroic Feat: Vanish (1/3)";
     }
 
     @Override

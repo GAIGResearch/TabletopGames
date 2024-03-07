@@ -30,6 +30,10 @@ public class SwapOrder extends DescentAction {
         return name.replace("Hero: ", "") + " moves first";
     }
 
+    public String toString() {
+        return "SwapOrder: " + first + " " + second + " " + swap;
+    }
+
     @Override
     public boolean execute(DescentGameState dgs) {
         IExtendedSequence action = dgs.currentActionInProgress();
@@ -39,6 +43,7 @@ public class SwapOrder extends DescentAction {
 
             ((HeroicFeatExtraMovement) action).swap(swap);
         }
+        ((Figure) dgs.getComponentById(first)).addActionTaken(toString());
         return true;
     }
 

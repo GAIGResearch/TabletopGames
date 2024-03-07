@@ -35,6 +35,7 @@ import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
@@ -43,6 +44,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
         DescentParameters descentParameters = (DescentParameters) firstState.getGameParameters();
+        descentParameters.setTimeoutRounds(20);    // No game of Descent should feasibly last more than 20 rounds
         int nActionsPerFigure = descentParameters.nActionsPerFigure;
         dgs.data.load(descentParameters.getDataPath());
         dgs.initData = false;
@@ -137,6 +139,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             // After equipping, set up abilities
             figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
                     .forEach(s -> figure.addAbility(new SurgeAttackAction(s, figure.getComponentID())));
+            // All Heroes have a Surge action of Recover 1 Fatigue
+            figure.addAbility(new SurgeAttackAction(Surge.RECOVER_1_FATIGUE, figure.getComponentID()));
 
             // Set up abilities from other equipment
             List<DescentAction> passiveActions = getOtherEquipmentActions(figure);
@@ -280,7 +284,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         for (Hero hero: dgs.heroes) {
             System.out.println(hero.getComponentName() + " is controlled by Player " + hero.getOwnerId());
         }
-        System.out.println("Round " + dgs.getTurnOrder().getRoundCounter());
     }
 
     @Override
@@ -388,6 +391,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             StandUp standUp = new StandUp();
             if (standUp.canExecute(dgs)) {
                 actions.add(standUp);
+                actions.remove(endTurn);
             }
             return actions;
         }
@@ -409,8 +413,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 tested = true;
             }
 
-            if (tested)
+            if (tested) {
+                actions.remove(endTurn);
                 return actions;
+            }
         }
 
         // Ashrian's Hero Ability
@@ -423,8 +429,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // If we are stunned, we can only take the 'Stunned' action
         if (actingFigure.hasCondition(DescentCondition.Stun)) {
             Stunned stunned = new Stunned();
-            if (stunned.canExecute(dgs)) actions.add(stunned);
-            return actions;
+            if (stunned.canExecute(dgs)) {
+                actions.add(stunned);
+                actions.remove(endTurn);
+            }
+                return actions;
         }
 
         // Grisban the Thirsty's Hero Ability
@@ -450,6 +459,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
+        List <AbstractAction> attacks = new ArrayList<>();
+
         // Add actions that cost action points
         // These can only be taken if we have not already taken 2 actions
         // Also, the acting figure must be on the map to take them
@@ -466,9 +477,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (!(actingFigure instanceof Monster && actingFigure.hasAttacked())) {
                 if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
                     actions.addAll(meleeAttackActions(dgs, actingFigure));
+                    attacks.addAll(meleeAttackActions(dgs, actingFigure));
                 }
                 if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
                     actions.addAll(rangedAttackActions(dgs, actingFigure));
+                    attacks.addAll(rangedAttackActions(dgs, actingFigure));
                 }
             }
 
@@ -489,7 +502,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
                 // Revive
                 Vector2D loc = actingFigure.getPosition();
-                GridBoard board = dgs.getMasterBoard();
+                DescentGridBoard board = dgs.getMasterBoard();
                 List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
                 for (Hero hero : dgs.heroes) {
                     if (actingFigure.equals(hero)) continue;
@@ -524,7 +537,10 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
             {
                 List<AbstractAction> monsterActions = monsterActions(dgs);
-                if (!monsterActions.isEmpty()) actions.addAll(monsterActions);
+                if (!monsterActions.isEmpty()) {
+                    actions.addAll(monsterActions);
+                    attacks.addAll(monsterActions);
+                }
             }
 
             // - Special (specified by quest)
@@ -563,12 +579,14 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
         // This does not cost any action points to take
         // This action may be used as a free attack, or to Restore 2 Hearts
+        List<AbstractAction> twoHeroActions = new ArrayList<>();
         if (dgs.getHeroes().size() == 2) {
             if (actingFigure instanceof Hero && !actingFigure.hasUsedExtraAction())
             {
                 Restore restore = new Restore(2);
                 if (restore.canExecute(dgs)) {
                     actions.add(restore);
+                    twoHeroActions.add(restore);
                 }
 
                 // TODO: Fix this
@@ -582,6 +600,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
                         if (freeAttack.canExecute(dgs)) {
                             actions.add(freeAttack);
+                            twoHeroActions.add(freeAttack);
                         }
                     }
                 }
@@ -592,10 +611,28 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
                         if (freeAttack.canExecute(dgs)) {
                             actions.add(freeAttack);
+                            twoHeroActions.add(freeAttack);
                         }
                     }
                 }
 
+            }
+        }
+
+        // We should remove EndTurn to prevent premature ending of turn
+        if (actions.size() > 1) {
+            // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
+            // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
+            if (actingFigure instanceof Hero) {
+                if (!actingFigure.getNActionsExecuted().isMaximum() ||
+                        !twoHeroActions.isEmpty() || DescentHelper.canStillMove(actingFigure))
+                    actions.remove(endTurn);
+            }
+            if (actingFigure instanceof Monster) {
+                // As Monsters can only attack once, they should be allowed to End Turn without using up all of their actions
+                // It should be acceptable for a Monster to use an Attack action, then End Turn without moving
+                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) || DescentHelper.canStillMove(actingFigure))
+                    actions.remove(endTurn);
             }
         }
 
@@ -731,7 +768,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<MeleeAttack> actions = new ArrayList<>();
 
         for (Integer target : targets) {
-            actions.add(new MeleeAttack(f.getComponentID(), target));
+            MeleeAttack attack = new MeleeAttack(f.getComponentID(), target);
+            if (attack.canExecute(dgs))
+                actions.add(attack);
         }
 
         Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
@@ -751,7 +790,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<RangedAttack> actions = new ArrayList<>();
 
         for (Integer target : targets) {
-            actions.add(new RangedAttack(f.getComponentID(), target));
+            RangedAttack attack = new RangedAttack(f.getComponentID(), target);
+            if (attack.canExecute(dgs))
+                actions.add(attack);
         }
 
         Collections.sort(actions, Comparator.comparingInt(RangedAttack::getDefendingFigure));
@@ -772,17 +813,25 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
     private boolean checkEndOfGame(DescentGameState dgs) {
         // TODO end of campaign / other phases
+        if (dgs.getTurnOrder().getRoundCounter() >= dgs.getGameParameters().getTimeoutRounds())
+        {
+            dgs.setGameStatus(GameResult.TIMEOUT);
+            return true;
+        }
+
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
-                if (condition.getString(dgs).contains("Heroes: WIN_GAME"))
-                    System.out.println("Victory! The Heroes win!");
-                else
-                    System.out.println("Defeat! The Overlord wins!");
-                List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
-                List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
-                List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
-                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                if (condition.getString(dgs).contains("Heroes: WIN_GAME")) {
+                    dgs.setGameStatus(GameResult.WIN_GAME);
+                }
+                else {
+                    dgs.setGameStatus(GameResult.LOSE_GAME);
+                }
+                //List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
+                //List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
+                //List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
+                //for (int i = 0; i < dgs.getNPlayers(); i++) {
                     // TODO Uncomment this when Rewards are fixed
                     /*
                     for (DescentReward dr: commonRewards) dr.applyReward(dgs, i);
@@ -792,12 +841,58 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         for (DescentReward dr: heroRewards) dr.applyReward(dgs, i);
                     }
                     */
-                }
+                //}
                 // Quest is over, return true
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    protected void endGame(AbstractGameState gameState) {
+
+        DescentGameState dgs = (DescentGameState) gameState;
+        GameResult gameResult = dgs.getGameStatus();
+
+        switch (gameResult)
+        {
+            case TIMEOUT:
+                System.out.println("Timeout! The game ends in a draw.");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    dgs.setPlayerResult(GameResult.TIMEOUT, i);
+                }
+                break;
+
+            case WIN_GAME:
+                System.out.println("Victory! The Heroes win!");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    if (i == dgs.getOverlordPlayer()) {
+                        dgs.setPlayerResult(GameResult.LOSE_GAME, i);
+                    } else {
+                        dgs.setPlayerResult(GameResult.WIN_GAME, i);
+                    }
+                }
+                break;
+
+            case LOSE_GAME:
+                System.out.println("Defeat! The Overlord wins!");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    if (i != dgs.getOverlordPlayer()) {
+                        dgs.setPlayerResult(GameResult.LOSE_GAME, i);
+                    } else {
+                        dgs.setPlayerResult(GameResult.WIN_GAME, i);
+                    }
+                }
+                break;
+
+            default:
+                System.out.println("Game ended in an unknown way!");
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    dgs.setPlayerResult(GameResult.DRAW_GAME, i);
+                }
+                break;
+        }
     }
 
     private void setupBoard(DescentGameState dgs, DescentGameData _data, String bConfig) {
@@ -807,7 +902,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
-        HashMap<Integer, GridBoard<BoardNode>> tileConfigs = new HashMap<>();
+        HashMap<Integer, DescentGridBoard> tileConfigs = new HashMap<>();
         dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
@@ -815,7 +910,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard<BoardNode> tile = _data.findGridBoard(tileName).copyNewID();
+            DescentGridBoard tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
                 tile = tile.copyNewID();
                 tile.setProperty(bn.getProperty(orientationHash));
@@ -832,7 +927,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         int height = 0;
         for (BoardNode bn : config.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard<BoardNode> tile = tileConfigs.get(bn.getComponentID());
+            DescentGridBoard tile = tileConfigs.get(bn.getComponentID());
             if (tile != null) {
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
@@ -861,7 +956,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         BoardNode firstTile = config.getBoardNodes().iterator().next();
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard<BoardNode> tile = tileConfigs.get(firstTile.getComponentID());
+            DescentGridBoard tile = tileConfigs.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             Component[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
@@ -889,7 +984,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
             // This is the final master board!
-            dgs.masterBoard = new GridBoard(trimBoard);
+            dgs.masterBoard = new DescentGridBoard(trimBoard);
             // Init each node (cell) properties - not occupied ("players" int property), and its position in the master grid
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
@@ -934,7 +1029,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
      */
     private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
-                                 Map<Integer, GridBoard<BoardNode>> tiles,
+                                 Map<Integer, DescentGridBoard> tiles,
                                  int[][] tileReferences,  Map<String, Map<Vector2D, Vector2D>> gridReferences,
                                  Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
@@ -942,8 +1037,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                                  String sideWithOpening) {
         if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
-            GridBoard tile = tiles.get(tileToAdd.getComponentID());
-            BoardNode[][] originalTileGrid = tile.convertToBoardNode(tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value));
+            DescentGridBoard tile = tiles.get(tileToAdd.getComponentID());
+            BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             if (tileGrid == null) {
                 tileGrid = originalTileGrid;
             }
@@ -1008,9 +1103,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 if (connectionToNeighbour != null) {
                     connectionToNeighbour.b.add(x, y);
                     // Find orientation and opening connection from neighbour, generate top-left corner of neighbour from that
-                    GridBoard tileN = tiles.get(neighbour.getComponentID());
+                    DescentGridBoard tileN = tiles.get(neighbour.getComponentID());
                     if (tileN != null) {
-                        BoardNode[][] tileGridN = tileN.convertToBoardNode(tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value));
+                        BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
                         // Find location to start drawing neighbour
                         Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));
@@ -1433,7 +1528,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             for (int i = 0; i < nMinions; i++) {
                 Monster minion = monsterDef.get(act + "-minion").copyNewID();
                 minion.setProperties(monsterDef.get(act + "-minion").getProperties());
-                minion.setComponentName(name + " minion");
+                minion.setComponentName(name + " minion " + (i+1));
 
                 passives = (PropertyStringArray) minion.getProperty("passive");
                 if(passives != null)

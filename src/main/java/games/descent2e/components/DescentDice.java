@@ -113,7 +113,8 @@ public class DescentDice extends Component {
         copy.range = this.range;
         copy.sides = new HashMap<>();
         for (Map.Entry<Integer, Map<String, Integer>> i: sides.entrySet()) {
-            HashMap<String, Integer> m = new HashMap<>(i.getValue());
+            HashMap<String, Integer> m = new HashMap<>();
+            m.putAll(i.getValue());
             copy.sides.put(i.getKey(), m);
         }
         copyComponentTo(copy);

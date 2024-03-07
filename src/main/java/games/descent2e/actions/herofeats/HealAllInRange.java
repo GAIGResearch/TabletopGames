@@ -17,6 +17,8 @@ public class HealAllInRange extends DescentAction {
 
     // TODO: Allow customised ranges
     int range;
+    int healthRecovered = 0;
+    int heroesHealed = 0;
     public HealAllInRange(int range) {
         super(Triggers.ACTION_POINT_SPEND);
         this.range = range;
@@ -28,10 +30,12 @@ public class HealAllInRange extends DescentAction {
 
         // Health recovery: roll 2 red dice
         DicePool.revive.roll(dgs.getRandom());
+        healthRecovered = DicePool.revive.getDamage();
         List<Hero> heroesInRange = HeroesInRange(dgs);
         if (heroesInRange != null) {
+            heroesHealed = heroesInRange.size();
             for (Hero hero : heroesInRange) {
-                hero.incrementAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
+                hero.incrementAttribute(Figure.Attribute.Health, healthRecovered);
                 if (hero.isDefeated())
                     hero.setDefeated(dgs, false);
             }
@@ -40,12 +44,18 @@ public class HealAllInRange extends DescentAction {
             }
             f.getNActionsExecuted().increment();
         }
+
+        f.addActionTaken(getString(dgs));
+
         return true;
     }
 
     @Override
     public HealAllInRange copy() {
-        return new HealAllInRange(range);
+        HealAllInRange healAllInRange = new HealAllInRange(range);
+        healAllInRange.healthRecovered = healthRecovered;
+        healAllInRange.heroesHealed = heroesHealed;
+        return healAllInRange;
     }
 
     boolean canHealHeroes(DescentGameState dgs) {
@@ -88,21 +98,27 @@ public class HealAllInRange extends DescentAction {
     public boolean equals(Object o) {
         return o instanceof HealAllInRange
                 && ((HealAllInRange) o).range == range
+                && ((HealAllInRange) o).healthRecovered == healthRecovered
+                && ((HealAllInRange) o).heroesHealed == heroesHealed
                 && super.equals(o);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Heroic Feat: Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
+        String retVal = "Heroic Feat: Heal all Heroes in " + range + " spaces for 2 Red Power Dice";
+        if (healthRecovered > 0) {
+            retVal += " (+" + healthRecovered + " Health for " + heroesHealed + " Heroes healed)";
+        }
+        return retVal;
     }
 
     @Override
     public String toString() {
-        return "Heroic Feat: Avric Albright - Group Heal";
+        return "Heroic Feat: Group Heal";
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), range);
+        return Objects.hash(super.hashCode(), range, healthRecovered, heroesHealed);
     }
 }

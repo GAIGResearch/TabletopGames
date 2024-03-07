@@ -47,6 +47,7 @@ public class RageAttack extends MeleeAttack {
         // 5) with possible rerolls
         // 6) then do the damage
         // 7) target can use items/abilities to modify damage
+
         return true;
     }
 
@@ -55,7 +56,7 @@ public class RageAttack extends MeleeAttack {
        Figure f = (Figure) dgs.getComponentById(attackingFigure);
        if (f.getAttribute(Figure.Attribute.Fatigue).isMaximum() || f.getNActionsExecuted().isMaximum()) return false;
        DescentTypes.AttackType attackType = getAttackType(f);
-       return (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH);
+       return (attackType == DescentTypes.AttackType.MELEE || attackType == DescentTypes.AttackType.BOTH) && super.canExecute(dgs);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class RageAttack extends MeleeAttack {
         }
         attackerName = attackerName.replace("Hero: ", "");
         defenderName = defenderName.replace("Hero: ", "");
-        return String.format("Rage: Melee Attack by " + attackerName + " on " + defenderName + " (+1 Damage, +1 Fatigue)");
+        return String.format("Rage: Melee Attack by " + attackerName + " on " + defenderName + " (+1 Damage, +1 Fatigue); " + result);
         //return toString();
         // TODO: Extend this to pull in details of card and figures involved
     }

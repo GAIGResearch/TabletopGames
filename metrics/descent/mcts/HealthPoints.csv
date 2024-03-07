@@ -1,0 +1,6 @@
+GameSeed,GameName,Round,Event,Tick,Turn,PlayerCount,GameID,Hero 1 HP,Goblin Master HP,Overlord Fatigue,Goblin Minion 1 HP,Goblin Minion 2 HP,Hero 3 HP,Hero 4 HP,Goblin Minion 3 HP,Goblin Minion 4 HP,Hero 2 HP,Barghest Minion 2 HP,Barghest Minion 1 HP,Barghest Minion 3 HP,Barghest Master HP
+-1533947634,Descent2e,0,ROUND_OVER,117,12,5,2,5,4,1,2,2,8,14,2,2,12,6,6,6,8
+-1533947634,Descent2e,1,ROUND_OVER,177,12,5,2,8,4,3,2,2,10,13,2,2,12,6,6,6,8
+-1533947634,Descent2e,2,ROUND_OVER,243,13,5,2,8,4,5,2,2,10,13,2,2,12,6,3,6,8
+-1533947634,Descent2e,3,ROUND_OVER,287,12,5,2,8,4,7,2,2,10,14,2,2,12,6,6,Dead,8
+-1533947634,Descent2e,4,GAME_OVER,288,0,5,2,8,4,7,2,2,10,14,2,2,12,6,6,Dead,8

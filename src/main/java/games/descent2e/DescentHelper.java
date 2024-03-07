@@ -2,7 +2,9 @@ package games.descent2e;
 
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.components.Component;
 import core.components.Deck;
+import core.components.GridBoard;
 import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyVector2D;
@@ -13,6 +15,8 @@ import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
+import tech.tablesaw.plotly.components.Grid;
+import utilities.Hash;
 import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -21,6 +25,7 @@ import java.util.*;
 
 import static core.CoreConstants.coordinateHash;
 import static core.CoreConstants.playersHash;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 
 public class DescentHelper {
 
@@ -337,6 +342,7 @@ public class DescentHelper {
                 double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
                 double totalCost = expandingNodeCost + costToMoveToNeighbour;
                 List<Vector2D> totalPath = new ArrayList<>(expandingNodePath);
+                if (totalPath.contains(loc)) continue;
                 totalPath.add(loc);
                 boolean isFriendly = false;
                 boolean isEmpty = DescentTypes.TerrainType.isWalkableTerrain(neighbour.getComponentName());
@@ -346,19 +352,20 @@ public class DescentHelper {
                     isEmpty = false;
                     Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
 
-                    // If our current figure is the same as our neighbour (in the case of large figures), we can move into the neighbour tile
-                    if (figure.equals(neighbourFigure)) {
-                        isEmpty = true;
-                    }
-                    // If our current figure is the same team as the neighbour (Hero or Monster), we can move through it
-                    else if (figureType.equals(neighbourFigure.getTokenType())) {
-                        isFriendly = true;
-                    }
-                    // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
-                    else if (figureType == "Monster")
-                    {
-                        if ((((Monster) figure).hasPassive(MonsterAbilities.MonsterPassive.SCAMPER)) && neighbourFigure.getTokenType().equals("Hero"))
+                    if (neighbourFigure != null) {
+                        // If our current figure is the same as our neighbour (in the case of large figures), we can move into the neighbour tile
+                        if (figure.equals(neighbourFigure)) {
+                            isEmpty = true;
+                        }
+                        // If our current figure is the same team as the neighbour (Hero or Monster), we can move through it
+                        else if (figureType.equals(neighbourFigure.getTokenType())) {
                             isFriendly = true;
+                        }
+                        // If our current figure is a monster with the Scamper passive, we can move through Hero figures as if they were friendly
+                        else if (figureType == "Monster") {
+                            if ((((Monster) figure).hasPassive(MonsterAbilities.MonsterPassive.SCAMPER)) && neighbourFigure.getTokenType().equals("Hero"))
+                                isFriendly = true;
+                        }
                     }
                     // If, for whatever reason, our Heroes are allowed to ignore enemies entirely when moving
                     // We can move through all other figures as if they were friendly
@@ -421,7 +428,24 @@ public class DescentHelper {
                     boolean legal = true;
                     for (int j = 0; j < mSize.a; j++) {
                         for (int i = 0; i < mSize.b; i++) {
-                            BoardNode spaceOccupied = dgs.getMasterBoard().getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
+                            Vector2D space = new Vector2D(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
+
+                            // If the space is not a neighbour of the current position, then it is not a legal move
+                            if (i == 1 || j == 1) {
+                                BoardNode target = dgs.getMasterBoard().getElement(topLeftCorner);
+                                if (target == null) {
+                                    legal = false;
+                                    break;
+                                }
+                                Set<BoardNode> neighbours = target.getNeighbours().keySet();
+                                if (!neighbours.contains(dgs.getMasterBoard().getElement(space))) {
+                                    legal = false;
+                                    break;
+                                }
+                            }
+
+                            BoardNode spaceOccupied = dgs.getMasterBoard().getElement(space.getX(), space.getY());
+
                             if (spaceOccupied != null)
                             {
                                 PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
@@ -464,6 +488,12 @@ public class DescentHelper {
 
     public static boolean inRange(Vector2D origin, Vector2D target, int range) {
         return (Math.abs(origin.getX() - target.getX()) <= range) && (Math.abs(origin.getY() - target.getY()) <= range);
+    }
+    public static Vector2D getRange(Vector2D origin, Vector2D target) {
+        return new Vector2D(Math.abs(origin.getX() - target.getX()), Math.abs(origin.getY() - target.getY()));
+    }
+    public static double getDistance(Vector2D origin, Vector2D target) {
+        return Math.sqrt(Math.pow(origin.getX() - target.getX(), 2) + Math.pow(origin.getY() - target.getY(), 2));
     }
 
     public static DescentTypes.AttackType getAttackType(Figure f)
@@ -530,5 +560,180 @@ public class DescentHelper {
             }
         }
         return actions;
+    }
+
+    public static boolean collision(DescentGameState dgs)
+    {
+        // Flags up a collision warning if two opposing figures are on the same tile
+        // There were occasional instances of where Heroes would move onto Monsters' tiles
+        // This is for debugging purposes only
+        boolean collision = false;
+        List<Pair<Pair<Hero, Monster>, Vector2D>> collisions = new ArrayList<>();
+        for (Hero h : dgs.heroes)
+        {
+            if (h.isOffMap()) continue;
+            for (List<Monster> monsterGroup : dgs.monsters)
+            {
+                for (Monster m : monsterGroup)
+                {
+                    if (h.getPosition().equals(m.getPosition()))
+                    {
+                        collision = true;
+                        collisions.add(new Pair<>(new Pair<>(h, m), h.getPosition()));
+                    }
+                }
+            }
+        }
+
+        // If there are collisions, announce every instance of them
+        if(collision)
+        {
+            for (Pair<Pair<Hero, Monster>, Vector2D> c : collisions)
+            {
+                System.out.println("Collision between " + c.a.a.getComponentName() + " and " + c.a.b.getComponentName() + " at " + c.b);
+            }
+        }
+        return collision;
+    }
+
+    public static int bfsLee(DescentGameState dgs, Vector2D start, Vector2D end) {
+        // Breadth-First Search Lee Algorithm
+        // Used to find the shortest path between two points
+        // Used for the Heroes/Monsters to find the shortest path to their target enemy
+
+        DescentGridBoard board = dgs.getMasterBoard();
+
+        // Ensure that both start and end points are valid
+        if (board.getElement(start) == null || board.getElement(end) == null)
+            return -1;
+
+        boolean[][] visited = new boolean[board.getWidth()][board.getHeight()];
+        visited[start.getX()][start.getY()] = true;
+
+        // Distance from the source cell is initialized to 0
+        Queue<Pair<BoardNode, Integer>> queue = new LinkedList<>();
+        queue.add(new Pair<BoardNode, Integer>((BoardNode) board.getElement(start), 0));
+
+        // BFS starting from start cell
+        while (!queue.isEmpty())
+        {
+            Pair<BoardNode, Integer> curr = queue.peek();
+            BoardNode node = curr.a;
+
+            Vector2D currLoc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
+
+            // If we have reached the destination cell, we are done
+            if (currLoc.equals(end))
+                return curr.b;
+
+            // Otherwise dequeue the front cell in the queue and enqueue its adjacent cells
+            queue.poll();
+
+            for (BoardNode neighbour : node.getNeighbours().keySet())
+            {
+                if (neighbour == null) continue;
+                Vector2D nextLoc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+                if (!checkValid(nextLoc.getX(), nextLoc.getY(), board)) continue;
+                if (!visited[nextLoc.getX()][nextLoc.getY()])
+                {
+                    visited[nextLoc.getX()][nextLoc.getY()] = true;
+                    queue.add(new Pair<>(neighbour, curr.b + 1));
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // Check whether given cell(row,col) is a valid cell or not
+    static boolean checkValid(int row, int col, DescentGridBoard board)
+    {
+        return ((row >= 0) && (row < board.getWidth()) && (col >= 0) && (col < board.getHeight()));
+    }
+
+    public static String gridCounter(DescentGameState dgs, int figureId, Vector2D startPos, List<Vector2D> positionsTravelled) {
+        BoardNode[] grid = dgs.getMasterBoard().flattenGrid();
+        int counter = 0;
+        StringBuilder coords = new StringBuilder();
+        for (Component node : grid) {
+            if (node != null) {
+                if (((PropertyInt) node.getProperty(playersHash)).value == figureId) {
+                    counter++;
+                    coords.append(node.getProperty("coordinates").toString()+"; ");
+                }
+            }
+        }
+
+        if (figureId != -1) {
+            Figure f = (Figure) dgs.getComponentById(figureId);
+            if (counter > (f.getSize().a * f.getSize().b)) {
+                System.out.println("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+                throw new AssertionError("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+            }
+        }
+
+        return "Player " + figureId + " has " + counter + " node occurrences: " + coords;
+    }
+
+    public static boolean canStillMove(Figure f)
+    {
+        // Used to check whether it should be legal to EndTurn or not if we still have movement available
+        // If we have more MovePoints than our normal maximum
+        // Or, if we have any MovePoints left and haven't moved yet
+        // Then return true, i.e. do not allow the player to EndTurn
+        return (f.getAttribute(MovePoints).getValue() >= f.getAttributeMax(MovePoints) ||
+                (f.getAttribute(MovePoints).getValue() != 0 && !f.hasMoved()));
+    }
+
+    public static double distanceFromNearestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
+        double minDistance = Double.MAX_VALUE;
+        for (Figure ally : allies) {
+            if (ally.equals(f)) continue;
+            int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+        if (minDistance == Double.MAX_VALUE) return -1;
+        return minDistance;
+    }
+
+    public static double distanceFromFurthestAlly(DescentGameState dgs, Figure f, List<Figure> allies) {
+        double maxDistance = 0;
+        for (Figure ally: allies) {
+            if (ally.equals(f)) continue;
+            int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
+            if (distance > maxDistance) {
+                maxDistance = distance;
+            }
+        }
+        if (maxDistance == 0) return -1;
+        return maxDistance;
+    }
+
+    public static double averageDistanceFromAllies(DescentGameState dgs, Figure f, List<Figure> allies) {
+        double totalDistance = 0;
+        int count = 0;
+        for (Figure ally: allies) {
+            if (ally.equals(f)) continue;
+            int distance = bfsLee(dgs, f.getPosition(), ally.getPosition());
+            totalDistance += distance;
+            count++;
+        }
+        if (totalDistance == 0) return -1;
+        return totalDistance / count;
+    }
+
+    public static int getFirstMissingIndex(List<Monster> figures) {
+        int i = 1;
+        // We assume that the first figure (index 0) is always the Master
+        // We are only interested in the Minions
+        for (i = 1; i < figures.size(); i++) {
+            if (!figures.get(i).getName().contains(String.valueOf(i)))
+            {
+                return i;
+            }
+        }
+        return i;
     }
 }

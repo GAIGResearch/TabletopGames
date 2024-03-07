@@ -11,6 +11,8 @@ import games.descent2e.components.Monster;
 import java.util.List;
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.hasLineOfSight;
+import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
@@ -81,7 +83,7 @@ public class MultiAttack extends RangedAttack {
             }
         }
 
-        System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
+        //System.out.println("Next target (" + (index+1) + "/" + defendingFigures.size() + "): " + defender.getComponentName());
     }
 
     @Override
@@ -96,12 +98,14 @@ public class MultiAttack extends RangedAttack {
                 {
                     index++;
                     setNewTarget(state, index);
+                    result += "; ";
                     // For MultiAttacks, we use the same Attack dice results
                     // But each defender is allowed to roll their own Defence dice
                     phase = PRE_DEFENCE_ROLL;
                 }
                 else
                 {
+                    ((Figure) state.getComponentById(attackingFigure)).addActionTaken(toStringWithResult());
                     phase = ALL_DONE;
                 }
                 break;
@@ -136,6 +140,8 @@ public class MultiAttack extends RangedAttack {
             }
         }
 
+        string += "; " + result;
+
         return string;
         //return toString();
         // TODO: Extend this to pull in details of card and figures involved, including distance
@@ -143,7 +149,15 @@ public class MultiAttack extends RangedAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return super.canExecute(dgs); // TODO
+        Figure f = dgs.getActingFigure();
+        if (f.getNActionsExecuted().isMaximum()) return false;
+        for (int defendingFigure : defendingFigures)
+        {
+            Figure target = (Figure) dgs.getComponentById(defendingFigure);
+            if(!inRange(f.getPosition(), target.getPosition(), MAX_RANGE)) return false;
+            if(!hasLineOfSight(dgs, f.getPosition(), target.getPosition())) return false;
+        }
+        return true;
     }
 
     @Override

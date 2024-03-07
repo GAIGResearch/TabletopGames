@@ -1,8 +1,12 @@
 {
-  "game": "Catan",
-  "selfPlay": false,
-  "nPlayers": 4,
-  "matchups": 1000,
-  "listener": "metrics/gamemetrics.json",
+  "game": "Descent2e",
+  "selfPlay": true,
+  "nPlayers": 5,
+  "playerDirectory": "json/players/gameSpecific/Descent.json",
+  "matchups": 5,
+  "byTeam": false,
+  "listener": "metrics/descent.json",
+  "destDir": "metrics/descent/test",
+  "verbose": true,
   "reportPeriod": 100
 }

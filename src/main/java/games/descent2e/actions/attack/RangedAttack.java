@@ -9,6 +9,8 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import utilities.Distance;
 
+import static games.descent2e.DescentHelper.hasLineOfSight;
+import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 
 /**
@@ -18,7 +20,7 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 public class RangedAttack extends MeleeAttack {
 
     // How many tiles we check at maximum for Ranged Attacks
-    public static final int MAX_RANGE = 10;
+    public static final int MAX_RANGE = 8;
 
     public RangedAttack(int attackingFigure, int defendingFigure) {
         super(attackingFigure, defendingFigure);
@@ -66,8 +68,12 @@ public class RangedAttack extends MeleeAttack {
             return true; // due to no damage done
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+        if (defender == null) {
+            return true; // Somehow, we have an attack on a dead figure
+        }
         double distance = getDistanceFromFigures(attacker, defender);
-        return (state.getAttackDicePool().getRange() + extraRange < distance);
+        range = state.getAttackDicePool().getRange() + extraRange;
+        return (range < distance);
     }
 
     public double getDistanceFromFigures(Figure attacker, Figure defender) {
@@ -87,7 +93,7 @@ public class RangedAttack extends MeleeAttack {
         Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
-        return String.format("Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + ")");
+        return String.format("Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + ")" + "; " + result);
     }
 
     @Override
@@ -129,7 +135,10 @@ public class RangedAttack extends MeleeAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return super.canExecute(dgs); // TODO
+        Figure f = dgs.getActingFigure();
+        if (f.getNActionsExecuted().isMaximum()) return false;
+        Figure target = (Figure) dgs.getComponentById(defendingFigure);
+        return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), MAX_RANGE);
     }
 
     @Override

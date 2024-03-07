@@ -9,9 +9,6 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
-import games.descent2e.actions.attack.FreeAttack;
-import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.actions.monsterfeats.Howl;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -360,6 +357,9 @@ public class Game {
      * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
+        //newRandomSeed = 2068526905;
+        //newRandomSeed = 441330015;
+        System.out.println("Game Seed: " + newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
         if (players.size() == gameState.getNPlayers()) {
@@ -373,6 +373,7 @@ public class Game {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 int team = gameState.getTeam(i);
                 AbstractPlayer player = players.get(team);
+                player.setForwardModel(this.forwardModel.copy());
                 this.players.add(player.copy());
             }
         } else
@@ -847,7 +848,8 @@ public class Game {
         params.horizon = 15;
         params.discountFactor = 0.99;
         params.heuristic = AbstractGameState::getHeuristicScore;
-        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+//        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
+//        players.add(rmhcPlayer);
 //        players.add(rmhcPlayer);
 //        players.add(rmhcPlayer);
 
@@ -855,11 +857,18 @@ public class Game {
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
 //        players.add(new MCTSPlayer(mcts_params));
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
 
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+        players.add(new OSLAPlayer());
+
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new RMHCPlayer());
@@ -868,9 +877,9 @@ public class Game {
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;

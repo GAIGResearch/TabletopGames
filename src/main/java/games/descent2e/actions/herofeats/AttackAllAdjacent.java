@@ -1,12 +1,18 @@
 package games.descent2e.actions.herofeats;
 
 import core.AbstractGameState;
+import core.components.Deck;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.attack.MultiAttack;
+import games.descent2e.components.DescentCard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 
+import java.util.Arrays;
 import java.util.List;
+
+import static games.descent2e.DescentHelper.inRange;
 
 public class AttackAllAdjacent extends MultiAttack {
 
@@ -26,10 +32,30 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        if (defendingFigures.size() < 1) return false;
         Figure f = dgs.getActingFigure();
-        if (f instanceof Hero && !((Hero) f).isFeatAvailable()) return false;
-        // TODO: Can only use if wielding a Magic weapon
-        return !f.getNActionsExecuted().isMaximum();
+        if (f.getNActionsExecuted().isMaximum()) return false;
+        if (f instanceof Hero)
+        {
+            if (!((Hero) f).isFeatAvailable()) return false;
+            Deck<DescentCard> hand = ((Hero) f).getHandEquipment();
+            if (hand == null || hand.getSize() == 0) return false;
+            boolean hasMagicItem = false;
+            for (DescentCard item : hand.getComponents()) {
+                String[] equipmentType = ((PropertyStringArray) item.getProperty("equipmentType")).getValues();
+                if (equipmentType == null) continue;
+                if (Arrays.asList(equipmentType).contains("Magic")) {
+                    hasMagicItem = true;
+                    break;
+                }
+            }
+            if (!hasMagicItem) return false;
+        }
+        for (int defendingFigure : defendingFigures)
+        {
+            if(!inRange(f.getPosition(), ((Figure) dgs.getComponentById(defendingFigure)).getPosition(), 1)) return false;
+        }
+        return true;
     }
 
     public AttackAllAdjacent copy() {
@@ -44,7 +70,7 @@ public class AttackAllAdjacent extends MultiAttack {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Heroic Feat: Attack all adjacent monsters";
+        return "Heroic Feat: Attack all adjacent monsters; " + result;
     }
 
     @Override

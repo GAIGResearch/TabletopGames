@@ -8,6 +8,9 @@ import games.descent2e.components.Hero;
 
 import java.util.Objects;
 
+import static games.descent2e.DescentHelper.hasLineOfSight;
+import static games.descent2e.DescentHelper.inRange;
+
 public class HeroicFeatExtraAttack extends FreeAttack {
 
     // Grisban the Thirsty's Heroic Feat
@@ -34,7 +37,19 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        return !(f instanceof Hero) || ((Hero) f).isFeatAvailable();
+        if (f == null) return false;
+        if (!(f instanceof Hero) || ((Hero) f).isFeatAvailable()) {
+            Figure target = (Figure) dgs.getComponentById(defendingFigure);
+
+            int range = MAX_RANGE;
+
+            if (isMelee) {
+                range = 1;
+            }
+
+            return hasLineOfSight(dgs, f.getPosition(), target.getPosition()) && inRange(f.getPosition(), target.getPosition(), range);
+        }
+        return false;
     }
 
     public HeroicFeatExtraAttack copy() {
@@ -64,20 +79,20 @@ public class HeroicFeatExtraAttack extends FreeAttack {
 
         if (isMelee)
         {
-            return String.format("Heroic Feat: Extra Attack (Melee) by " + attackerName + " on " + defenderName);
+            return String.format("Heroic Feat: Extra Attack (Melee) by " + attackerName + " on " + defenderName + "; " + result);
         }
 
         Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
         Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
-        return String.format("Heroic Feat: Extra Attack (Ranged) by " + attackerName + " on " + defenderName + " (Range: " + distance + ")");
+        return String.format("Heroic Feat: Extra Attack (Ranged) by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
     }
 
     @Override
     public String toString() {
-        if (isMelee) return String.format("Free Attack (Melee) by %d on %d", attackingFigure, defendingFigure);
-        return String.format("Free Attack (Ranged) by %d on %d", attackingFigure, defendingFigure);
+        if (isMelee) return String.format("Heroic Feat: Free Attack (Melee) by %d on %d", attackingFigure, defendingFigure);
+        return String.format("Heroic Feat: Free Attack (Ranged) by %d on %d", attackingFigure, defendingFigure);
     }
 
     @Override

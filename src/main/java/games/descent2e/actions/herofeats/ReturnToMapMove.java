@@ -25,6 +25,7 @@ public class ReturnToMapMove extends DescentAction {
         f.setAttribute(Figure.Attribute.MovePoints, distance);
         f.setCanIgnoreEnemies(true);
         //System.out.println("Tomble is choosing where to reappear!");
+        f.addActionTaken(toString());
         return true;
     }
 
@@ -46,7 +47,7 @@ public class ReturnToMapMove extends DescentAction {
     }
     @Override
     public String toString() {
-        return "Heroic Feat: Tomble Burrowell - Move (2/3)";
+        return "Heroic Feat: Move (2/3)";
     }
 
     @Override

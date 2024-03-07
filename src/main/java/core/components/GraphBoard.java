@@ -34,7 +34,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         boardNodes = new HashMap<>();
     }
 
-    protected GraphBoard(String name, int ID)
+    public GraphBoard(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
         boardNodes = new HashMap<>();

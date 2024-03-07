@@ -2,6 +2,7 @@ package games.descent2e;
 
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
@@ -13,6 +14,7 @@ import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
 import games.descent2e.concepts.Quest;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -31,7 +33,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     // For reference only
 
     // Mapping from board node ID in board configuration to tile configuration
-    Map<Integer, GridBoard> tiles;
+    Map<Integer, DescentGridBoard> tiles;
     // int corresponds to component ID of tile at that location in master board
     int[][] tileReferences;
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
@@ -42,7 +44,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Random rnd;
 
     Deck<Card> searchCards;
-    GridBoard<BoardNode> masterBoard;
+    DescentGridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
     DicePool attributeDicePool;
@@ -56,6 +58,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     int overlordPlayer;
     ArrayList<DToken> tokens;
     Quest currentQuest;
+    List<Pair<String, String>> defeatedFigures;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -65,6 +68,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
      */
     public DescentGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+        nTeams = 2; // Two teams in Descent - the Heroes, and the Overlord
         tiles = new HashMap<>();
         data = new DescentGameData();
         attackDicePool = new DicePool(Collections.emptyList());
@@ -76,6 +80,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         monstersOriginal = new ArrayList<>();
         monstersPerGroup = new ArrayList<>();
         monsterGroups = new ArrayList<>();
+        defeatedFigures = new ArrayList<>();
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -129,7 +134,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.data = data.copy();
         copy.tiles = new HashMap<>();
-        for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
+        for (Map.Entry<Integer, DescentGridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
         }
         copy.masterBoard = masterBoard.copy();
@@ -174,7 +179,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         copy.searchCards = searchCards.copy();
         copy.currentQuest = currentQuest;  // TODO does this need to be deep? it (should be) read-only after data parsing
-        // TODO
+        copy.defeatedFigures = new ArrayList<>();
+        for (Pair<String, String> p : defeatedFigures) {
+            copy.defeatedFigures.add(new Pair<>(p.a, p.b));
+        }
         return copy;
     }
 
@@ -184,20 +192,59 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        // TODO
-        return 0;
+        return new DescentHeuristic().evaluateState(this, playerId);
+        //return 0.0;
+    }
+
+    public List<Double> getHeuristicValues(int playerId) {
+        return new DescentHeuristic().getHeuristics(this, playerId);
     }
 
     @Override
     public double getGameScore(int playerId) {
-        // TODO
-        return 0;
+        double retValue = 0.0;
+        String questName = getCurrentQuest().getName();
+        double isOverlord = playerId == overlordPlayer ? -1.0 : 1.0;
+
+        switch (questName)
+        {
+            case "Acolyte of Saradyn":
+                // What the Heroes need to win
+                int barghestsDefeated = monstersOriginal.get(1).size() - monsters.get(1).size();
+
+                // What the Overlord needs to win
+                int overlordFatigue = overlord.getAttributeValue(Figure.Attribute.Fatigue);
+                int heroesDefeated = 0;
+                for (Hero h : getHeroes())
+                {
+                    if (h.isDefeated())
+                        heroesDefeated++;
+                }
+
+                // The score is admittedly arbitrary, but it's a start
+                // The Overlord wants to keep the Heroes from defeating the Barghests
+                // The Overlord wants to defeat the Heroes
+                // The Overlord wants to raise their Fatigue as much as possible
+                // Likewise, the Heroes want to defeat the Barghests, keep themselves alive, and keep the Overlord's Fatigue low
+
+                double barghestScore = isOverlord * (10.0 * barghestsDefeated / monstersOriginal.get(1).size());
+                double heroesScore = isOverlord * (5.0 * heroesDefeated / getHeroes().size());
+                double fatigueScore = isOverlord * (5.0 * overlordFatigue / overlord.getAttributeMax(Figure.Attribute.Fatigue));
+                retValue = (barghestScore) - (heroesScore + fatigueScore);
+                retValue += 10.0 * getPlayerResults()[playerId].value;
+                break;
+            default:
+                break;
+        }
+
+        return retValue;
     }
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // TODO
-        return null;
+        // TODO IDs of all components that are not visible to the player
+        // e.g. Overlord cards in their hands and deck (which aren't implemented in this branch yet)
+        return new ArrayList<>();
     }
 
     @Override
@@ -219,14 +266,16 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens) &&
                 Objects.equals(monstersOriginal, that.monstersOriginal) &&
                 Objects.equals(monstersPerGroup, that.monstersPerGroup) &&
-                Objects.equals(monsterGroups, that.monsterGroups);
+                Objects.equals(monsterGroups, that.monsterGroups) &&
+                Objects.equals(currentQuest, that.currentQuest) &&
+                Objects.equals(defeatedFigures, that.defeatedFigures);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
-                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest);
+                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest, defeatedFigures);
         result = 31 * result + Arrays.hashCode(tileReferences);
         return result;
     }
@@ -253,6 +302,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 overlordPlayer,
                 tokens.hashCode(),
                 currentQuest.hashCode(),
+                defeatedFigures.hashCode(),
                 Arrays.deepHashCode(tileReferences)
         };
     }
@@ -261,7 +311,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return data;
     }
 
-    public GridBoard<BoardNode> getMasterBoard() {
+    public DescentGridBoard getMasterBoard() {
         return masterBoard;
     }
 
@@ -328,6 +378,15 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         return actingFigure;
     }
+
+    public int getTeam(int player)
+    {
+        if (player == overlordPlayer)
+            return 1;
+        else
+            return 0;
+    }
+
     public int getActingPlayer() {
         return getActingFigure().getOwnerId();
     }
@@ -370,7 +429,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         return gridReferences;
     }
 
-    public Map<Integer, GridBoard> getTiles() {
+    public Map<Integer, DescentGridBoard> getTiles() {
         return tiles;
     }
 
@@ -380,6 +439,22 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     public Quest getCurrentQuest() {
         return currentQuest;
+    }
+    public void addDefeatedFigure(Figure target, int index1, Figure attacker, int index2) {
+        String defeated = target.getName();
+        defeated += " (" + target.getComponentID() + ");" + index1;
+
+        String defeatedBy = attacker.getName();
+        defeatedBy += " (" + attacker.getComponentID() + ");" + index2;
+
+        defeatedFigures.add(new Pair<>(defeated, defeatedBy));
+
+    }
+    public List<Pair<String, String>> getDefeatedFigures() {
+        return defeatedFigures;
+    }
+    public void clearDefeatedFigures() {
+        defeatedFigures.clear();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
+import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.abilities.Cowardly;
 import games.descent2e.actions.DescentAction;
@@ -41,6 +42,7 @@ public class SurgeAttackAction extends DescentAction {
         MeleeAttack attack = (MeleeAttack) gs.currentActionInProgress();
         attack.registerSurge(surge);
         surge.apply(attack, gs);
+        ((Figure) gs.getComponentById(figureSource)).addActionTaken(toString());
         return true;
     }
 
@@ -57,6 +59,10 @@ public class SurgeAttackAction extends DescentAction {
         {
             return false;
         }
+
+        IExtendedSequence action = dgs.currentActionInProgress();
+        if (!(action instanceof MeleeAttack)) return false;
+        if (surge.getSurgesUsed() > ((MeleeAttack) action).surgesToSpend) return false;
 
         if (f instanceof Monster)
         {
