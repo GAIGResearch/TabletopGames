@@ -99,6 +99,7 @@ public class Wonders7GameState extends AbstractGameState {
         copy.wonderBoardDeck = wonderBoardDeck.copy();
         copy.cardRnd = new Random(redeterminisationRnd.nextInt());
 
+        // TODO: This does not keep the known information!!!
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Player does not know the other players hands and discard pile (except for next players hand)
             // All the cards of other players and discard pile are shuffled
@@ -128,7 +129,7 @@ public class Wonders7GameState extends AbstractGameState {
             copy.turnActions = new AbstractAction[getNPlayers()];
             if (turnActions[playerId] != null)
                 copy.turnActions[playerId] = turnActions[playerId].copy();
-            // we know our action (if one has been chosen, but no one elses
+            // we know our action (if one has been chosen, but no one elses)
         }
         return copy;
     }

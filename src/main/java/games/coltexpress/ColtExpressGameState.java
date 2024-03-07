@@ -76,7 +76,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
     @Override
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
-        ColtExpressGameState copy = new ColtExpressGameState(gameParameters, getNPlayers());
+        ColtExpressGameState copy = new ColtExpressGameState(gameParameters.copy(), getNPlayers());
 
         // These are always visible
         copy.bulletsLeft = bulletsLeft.clone();

@@ -30,8 +30,9 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
      * @param actionFeatures - the additional features used for Q
      */
     public MCTSTreeActionStatisticsListener(IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures,
-                                            int visitThreshold, int maxDepth, ActionTargetType actionTarget) {
-        super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true);
+                                            int visitThreshold, int maxDepth, ActionTargetType actionTarget,
+                                            String fileName) {
+        super(actionFeatures, stateFeatures, Event.GameEvent.ACTION_CHOSEN, true, fileName);
         this.actionTarget = actionTarget;
         this.visitThreshold = visitThreshold;
         this.maxDepth = maxDepth;
