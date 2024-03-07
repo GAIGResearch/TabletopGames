@@ -694,7 +694,7 @@ public class DescentHelper {
                 minDistance = distance;
             }
         }
-        if (minDistance == Integer.MAX_VALUE) return -1;
+        if (minDistance == Double.MAX_VALUE) return -1;
         return minDistance;
     }
 
