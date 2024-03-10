@@ -114,17 +114,15 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-            //       System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+      //      System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
             throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
     }

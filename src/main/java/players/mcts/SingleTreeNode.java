@@ -45,7 +45,7 @@ public class SingleTreeNode {
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
     protected int rolloutDepth, roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
-    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
+    Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
     // Depth of this node
     protected int depth;
     // the id of the player who makes the decision at this node
@@ -66,7 +66,7 @@ public class SingleTreeNode {
     Map<AbstractAction, SingleTreeNode[]> children = new LinkedHashMap<>();
     Map<AbstractAction, ActionStats> actionValues = new HashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
+    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> actionValueEstimates.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // The total value of all trajectories through this node (one element per player)
     private Supplier<? extends SingleTreeNode> factory;
@@ -161,16 +161,16 @@ public class SingleTreeNode {
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if (params.expansionPolicy == MAST) {
-                advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
+                actionValueEstimates = actionsFromOpenLoopState.stream()
                         .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
             } else {
-                if (params.advantageFunction != null) {
+                if (params.actionHeuristic != null) {
                     // advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                     //        .collect(toMap(a -> a, a -> params.advantageFunction.evaluateAction(a, actionState)));
-                    double[] actionValues = params.advantageFunction.evaluateAllActions(actionsFromOpenLoopState, actionState);
-                    advantagesOfActionsFromOLS = new HashMap<>();
+                    double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
+                    actionValueEstimates = new HashMap<>();
                     for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
-                        advantagesOfActionsFromOLS.put(actionsFromOpenLoopState.get(i), actionValues[i]);
+                        actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i] * params.actionHeuristicScale);
                     }
                 }
             }
@@ -403,7 +403,7 @@ public class SingleTreeNode {
             // It is perfectly possible that a previously expanded action falls out of the considered list
             // depending on the advantage heuristic used.
             // However, we do break ties in favour of already expanded actions
-            allAvailable.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
+            allAvailable.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
             return allAvailable.subList(0, actionsToConsider);
         }
         return allAvailable;
@@ -603,9 +603,9 @@ public class SingleTreeNode {
             if (actionValues.get(action) == null || actionValues.get(action).nVisits == 0) {
                 uctValue = untriedActionValue(action);
             } else {
-                double hvVal = actionTotValue(action, decisionPlayer);
+
                 int actionVisits = actionVisits(action);
-                double childValue = hvVal / (actionVisits + params.noiseEpsilon);
+                double childValue = getActionValueWithBias(action);
 
                 // consider OMA term
                 if (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA) {
@@ -631,14 +631,6 @@ public class SingleTreeNode {
                             childValue = (1.0 - beta) * childValue + beta * omaValue;
                         }
                     }
-                }
-
-                // consider any progressive bias term
-                if (params.biasVisits > 0) {
-                    double nodeValue = nodeValue(decisionPlayer);
-                    // nodeValue is the value of the state, V(s), and is used as a baseline when we use an Advantage function later
-                    double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
-                    childValue = (1.0 - beta) * childValue + beta * (advantagesOfActionsFromOLS.getOrDefault(action, 0.0) + nodeValue);
                 }
 
                 if (params.normaliseRewards) {
@@ -699,22 +691,17 @@ public class SingleTreeNode {
     }
 
     public double exp3Value(AbstractAction action) {
-        double actionValue = actionTotValue(action, decisionPlayer);
+        double actionValue = getActionValueWithBias(action);
         int actionVisits = actionVisits(action);
         if (actionVisits == 0)
             return untriedActionValue(action);
-        double meanActionValue = (actionValue / actionVisits);
-        if (params.biasVisits > 0) {
-            double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
-            meanActionValue = (1.0 - beta) * meanActionValue + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0);
-        }
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
         if (params.normaliseRewards)
-            meanActionValue = Utils.normalise(meanActionValue, root.lowReward, root.highReward);
+            actionValue = Utils.normalise(actionValue, root.lowReward, root.highReward);
         else
-            meanActionValue = meanActionValue - nodeValue(decisionPlayer);
-        double retValue = Math.exp(meanActionValue / params.exp3Boltzmann);
+            actionValue = actionValue - nodeValue(decisionPlayer);
+        double retValue = Math.exp(actionValue / params.exp3Boltzmann);
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
             System.out.println("We have a non-number in EXP3 somewhere : " + retValue);
             retValue = 1e6;  // to avoid numeric issues later
@@ -723,17 +710,13 @@ public class SingleTreeNode {
     }
 
     public double rmValue(AbstractAction action) {
-        double actionValue = actionTotValue(action, decisionPlayer);
+        double actionValue = getActionValueWithBias(action);
         double nodeValue = nodeValue(decisionPlayer);
         int actionVisits = actionVisits(action);
         if (actionVisits == 0)
             return untriedActionValue(action);
-        if (params.biasVisits > 0) {
-            double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
-            actionValue = (1.0 - beta) * actionValue + beta * nodeValue + advantagesOfActionsFromOLS.getOrDefault(action, 0.0);
-        }
         // potential value is our estimate of our accumulated reward if we had always taken this action
-        double potentialValue = actionValue * nVisits / actionVisits;
+        double potentialValue = actionValue * nVisits;
         double regret = potentialValue - nodeValue * nVisits;
         if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
             // in this case we exponentiate the regret to get the probability of taking this action
@@ -744,6 +727,22 @@ public class SingleTreeNode {
                 throw new AssertionError("We have a non-number in Hedge somewhere");
         }
         return Math.max(0.0, regret);
+    }
+
+
+    private double getActionValueWithBias(AbstractAction action) {
+        int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            throw new AssertionError("Should not have zero visits; this should have been diverted to untriedActionValue");
+        double actionValue = actionTotValue(action, decisionPlayer);
+        if (params.biasVisits == 0)
+            return actionValue / actionVisits;
+        double nodeValue = nodeValue(decisionPlayer);
+        double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
+        if (params.actionHeuristicIsAdvantage)
+            return (1.0 - beta) * actionValue + beta * (nodeValue + actionValueEstimates.getOrDefault(action, 0.0));
+        else
+            return (1.0 - beta) * actionValue + beta * actionValueEstimates.getOrDefault(action, 0.0);
     }
 
     private AbstractAction sampleFromDistribution(List<AbstractAction> availableActions, double explore) {

@@ -46,8 +46,10 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
-    public IActionHeuristic advantageFunction;
+    public IActionHeuristic actionHeuristic;
     public int biasVisits = 0;
+    public double actionHeuristicScale = 1.0;
+    public boolean actionHeuristicIsAdvantage = false;
     public int omaVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
@@ -88,16 +90,12 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
-        addTunableParameter("expertIterationSpecification", "");
-        addTunableParameter("advantageFunction", "");
-        addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
-        addTunableParameter("advantageFunction",  IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
@@ -105,6 +103,11 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
         addTunableParameter("FPU", 1000000000.0);
+        addTunableParameter("actionHeuristic",  IActionHeuristic.nullReturn);
+        addTunableParameter("actionHeuristicIsAdvantage", false);
+        addTunableParameter("actionHeuristicScale", 1.0);
+        addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
+
     }
 
     @Override
@@ -149,13 +152,15 @@ public class MCTSParams extends PlayerParameters {
         if (information == Closed_Loop)
             discardStateAfterEachIteration = false;
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
-                || (biasVisits > 0 && advantageFunction == null)) {
+                || (biasVisits > 0 && actionHeuristic == null)) {
             useMAST = true;
         }
         MASTActionKey = (IActionKey) getParameterValue("MASTActionKey");
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
-        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
+        actionHeuristic = (IActionHeuristic) getParameterValue("actionHeuristic");
+        actionHeuristicScale = (double) getParameterValue("actionHeuristicScale");
+        actionHeuristicIsAdvantage = (boolean) getParameterValue("actionHeuristicIsAdvantage");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");

@@ -15,7 +15,7 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * Provides a wrapper around an IStateFeatureVector and an array of coefficients
  */
-public abstract class LinearActionHeuristic extends GLMHeuristic implements IActionHeuristic {
+public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuristic {
 
     protected IStateFeatureVector features;
     protected IActionFeatureVector actionFeatures;
