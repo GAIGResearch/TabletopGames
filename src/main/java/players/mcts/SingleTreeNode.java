@@ -599,12 +599,12 @@ public class SingleTreeNode {
         for (AbstractAction action : availableActions) {
             // Find 'UCB' value
             double uctValue = 0;
+            int actionVisits = actionVisits(action);
             // Find child value
-            if (actionValues.get(action) == null || actionValues.get(action).nVisits == 0) {
+            if (actionVisits == 0) {
                 uctValue = untriedActionValue(action);
             } else {
 
-                int actionVisits = actionVisits(action);
                 double childValue = getActionValueWithBias(action);
 
                 // consider OMA term
@@ -691,10 +691,10 @@ public class SingleTreeNode {
     }
 
     public double exp3Value(AbstractAction action) {
-        double actionValue = getActionValueWithBias(action);
         int actionVisits = actionVisits(action);
         if (actionVisits == 0)
             return untriedActionValue(action);
+        double actionValue = getActionValueWithBias(action);
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
         if (params.normaliseRewards)
@@ -710,11 +710,11 @@ public class SingleTreeNode {
     }
 
     public double rmValue(AbstractAction action) {
-        double actionValue = getActionValueWithBias(action);
-        double nodeValue = nodeValue(decisionPlayer);
         int actionVisits = actionVisits(action);
         if (actionVisits == 0)
             return untriedActionValue(action);
+        double actionValue = getActionValueWithBias(action);
+        double nodeValue = nodeValue(decisionPlayer);
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits;
         double regret = potentialValue - nodeValue * nVisits;
