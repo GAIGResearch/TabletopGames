@@ -448,7 +448,15 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         defeatedBy += " (" + attacker.getComponentID() + ");" + index2;
 
         defeatedFigures.add(new Pair<>(defeated, defeatedBy));
+    }
 
+    public void addDefeatedFigure(Figure target, int index1, String killedBy) {
+        String defeated = target.getName();
+        defeated += " (" + target.getComponentID() + ");" + index1;
+
+        String defeatedBy = killedBy + ";-1";
+
+        defeatedFigures.add(new Pair<>(defeated, defeatedBy));
     }
     public List<Pair<String, String>> getDefeatedFigures() {
         return defeatedFigures;

@@ -2,6 +2,7 @@ package games.descent2e.actions.monsterfeats;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
@@ -40,21 +41,19 @@ public class HowlTest extends AttributeTest {
     public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
         Figure f = (Figure) dgs.getComponentById(figureID);
+
+        f.addAttributeTest(this);
+
         if (result)
         {
             //System.out.println("Passed Howl (Willpower) Test!");
         }
         else
         {
-            if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum())
-            {
-                f.getAttribute(Figure.Attribute.Fatigue).increment();
-                //System.out.println("Failed Howl (Willpower) Test!");
-            }
+            //System.out.println("Failed Howl (Willpower) Test!");
+            String test = "Howl of " + ((Figure) dgs.getComponentById(super.getSourceFigure())).getName();
+            DescentHelper.forcedFatigue(dgs, f, test);
         }
-
-        f.addAttributeTest(this);
-        //System.out.println("Added Howl (Willpower) Test");
     }
 
     public HowlTest copy()

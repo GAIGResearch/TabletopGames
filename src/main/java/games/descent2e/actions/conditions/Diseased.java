@@ -2,6 +2,7 @@ package games.descent2e.actions.conditions;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
 import games.descent2e.components.Figure;
@@ -37,21 +38,19 @@ public class Diseased extends AttributeTest {
     public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
         Figure f = (Figure) dgs.getComponentById(figureID);
+
+        f.addAttributeTest(this);
+
         if (result)
         {
             f.removeCondition(DescentTypes.DescentCondition.Disease);
-            System.out.println("Passed Disease Test!");
+            //System.out.println("Passed Disease Test!");
         }
         else
         {
-            if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum())
-            {
-                f.getAttribute(Figure.Attribute.Fatigue).increment();
-                System.out.println("Failed Disease Test!");
-            }
+            //System.out.println("Failed Disease Test!");
+            DescentHelper.forcedFatigue(dgs, f, "Disease");
         }
-
-        f.addAttributeTest(this);
     }
 
     @Override

@@ -16,6 +16,7 @@ import games.descent2e.components.*;
 
 import java.util.*;
 
+import static games.descent2e.DescentHelper.getFigureIndex;
 import static games.descent2e.DescentHelper.inRange;
 import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
@@ -332,65 +333,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
             result += " Kill; Damage: " + damage + "; Range: " + range;
 
-            // All conditions are removed when a figure is defeated
-            defender.removeAllConditions();
+            int index1 = getFigureIndex(state, defender);
+            int index2 = getFigureIndex(state, attacker);
+
             // Death
-
-            int index1 = 0;
-            int index2 = 0;
-            if (defender instanceof Hero) {
-                ((Hero)defender).setDefeated(state,true);
-                //System.out.println(defender.getComponentName() + " defeated!");
-                // Overlord may draw a card TODO
-                index1 = state.getHeroes().indexOf(defender);
-            } else {
-                // A monster
-                Monster m = (Monster) defender;
-
-                m.setAttributeToMin(Figure.Attribute.Health);
-
-                //System.out.println(m.getComponentName() + " defeated!");
-
-                // Remove from board
-                Move.remove(state, m);
-
-                // Remove from state lists
-                for (List<Monster> monsterGroup: state.getMonsters()) {
-                    if (monsterGroup.contains(m)) {
-                        index1 = monsterGroup.indexOf(m);
-
-                        // The Master monster is always first on the list
-                        // if it is not, then that means it is dead and should be accounted for
-                        if (!monsterGroup.get(0).getName().contains("master"))
-                        {
-                            index1++;
-                        }
-                        monsterGroup.remove(m);
-                        break;
-                    }
-                }
-            }
-
-            if (attacker instanceof Hero) {
-                index2 = state.getHeroes().indexOf(attacker);
-            }
-
-            if(attacker instanceof Monster)
-            {
-                for (List<Monster> monsterGroup: state.getMonsters()) {
-                    if (monsterGroup.contains(attacker)) {
-                        index2 = monsterGroup.indexOf(attacker);
-
-                        // The Master monster is always first on the list
-                        // If it is not, then that means it is dead and should be accounted for
-                        if (!monsterGroup.get(0).getName().contains("master"))
-                        {
-                            index2++;
-                        }
-                        break;
-                    }
-                }
-            }
+            DescentHelper.figureDeath(state, defender);
 
             // Add to the list of defeated figures this turn
             state.addDefeatedFigure(defender, index1, attacker, index2);

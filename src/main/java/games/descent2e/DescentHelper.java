@@ -736,4 +736,70 @@ public class DescentHelper {
         }
         return i;
     }
+
+    public static int getFigureIndex(DescentGameState dgs, Figure f)
+    {
+        if (f instanceof Hero)
+        {
+            return dgs.getHeroes().indexOf(f);
+        }
+        else
+        {
+            Monster m = (Monster) f;
+
+            for (List<Monster> monsterGroup: dgs.getMonsters()) {
+                if (monsterGroup.contains(m)) {
+                    int index = monsterGroup.indexOf(m);
+                    // The Master monster is always first on the list
+                    // If a Minion is first, then that means the Master is dead and should be accounted for
+                    if (monsterGroup.get(0).getName().contains("minion"))
+                    {
+                        index++;
+                    }
+                    return index;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public static void forcedFatigue(DescentGameState dgs, Figure f, String source) {
+        if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+            f.getAttribute(Figure.Attribute.Fatigue).increment();
+        }
+        else {
+            f.getAttribute(Figure.Attribute.Health).decrement();
+            if (f.getAttribute(Figure.Attribute.Health).isMinimum()) {
+                int index = getFigureIndex(dgs, f);
+                figureDeath(dgs, f);
+                dgs.addDefeatedFigure(f, index, source);
+            }
+        }
+    }
+
+    public static void figureDeath(DescentGameState dgs, Figure f) {
+        // All conditions are removed when a figure is defeated
+        f.removeAllConditions();
+
+        //System.out.println(defender.getComponentName() + " defeated!");
+
+        // and the Figure is now defeated
+        if (f instanceof Hero) {
+            ((Hero)f).setDefeated(dgs,true);
+            // Overlord may draw a card TODO
+        } else {
+            // A monster
+            Monster m = (Monster) f;
+
+            m.setAttributeToMin(Figure.Attribute.Health);
+
+            // Remove from board
+            Move.remove(dgs, m);
+
+            // Remove from state lists
+            for (List<Monster> monsterGroup: dgs.getMonsters()) {
+                monsterGroup.remove(m);
+            }
+        }
+    }
 }
