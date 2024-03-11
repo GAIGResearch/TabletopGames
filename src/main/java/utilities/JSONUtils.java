@@ -114,7 +114,7 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-      //      System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+       //     System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
@@ -127,6 +127,7 @@ public class JSONUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static Class<?> determineArrayClass(JSONArray array) {
         if (array.size() > 1) {
             JSONObject first = (JSONObject) array.get(0);
@@ -171,7 +172,6 @@ public class JSONUtils {
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + filename);
         }
     }
@@ -199,13 +199,10 @@ public class JSONUtils {
             return loadClassFromJSON(json);
 
         } catch (ParseException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + rawData);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem processing String in " + rawData);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
         }
     }
@@ -283,7 +280,6 @@ public class JSONUtils {
             }
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem writing to file " + filename);
         }
     }
@@ -329,6 +325,7 @@ public class JSONUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static JSONObject createJSONFromMap(Map<String, String> stuff) {
         // first of all we partition the keys by the contents of the key before the first '.'
         Map<String, List<String>> partitioned = stuff.keySet().stream()
