@@ -16,12 +16,6 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
 
     public int visitThreshold, maxDepth;
 
-    public enum ActionTargetType {
-        CHOSEN,
-        VISIT_PROPORTION,
-        ADVANTAGE
-    }
-
     /**
      * Two sets of features are provided.
      *
