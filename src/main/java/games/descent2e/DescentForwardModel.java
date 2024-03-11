@@ -221,10 +221,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         Random r = new Random(dgs.getGameParameters().getRandomSeed());
         dgs.tokens = new ArrayList<>();
         for (DToken.DTokenDef def: firstQuest.getTokens()) {
-            int n = (def.getSetupHowMany().equalsIgnoreCase("nHeroes")? dgs.getNPlayers()-1 : Integer.parseInt(def.getSetupHowMany()));
+            int n = (def.getSetupHowMany().equalsIgnoreCase("nHeroes")? dgs.getHeroes().size() : Integer.parseInt(def.getSetupHowMany()));
             // Find position, if only 1 value for all this is a tile where they have to go, pick random locations
             // TODO let overlord pick locations if not fixed
             String tileName = null;
+            List<Integer> previousKeys = new ArrayList<>();
             if (def.getLocations().length == 1) tileName = def.getLocations()[0];
             for (int i = 0; i < n; i++) {
                 Vector2D location = null;
@@ -245,10 +246,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 } else if (!tileName.equalsIgnoreCase("player")) {
                     // Find random location on tile
                     int idx = r.nextInt(dgs.gridReferences.get(tileName).size());
+                    while (previousKeys.contains(idx)) idx = r.nextInt(dgs.gridReferences.get(tileName).size());
                     int k = 0;
                     for (Vector2D key: dgs.gridReferences.get(tileName).keySet()) {
                         if (k == idx) {
-                            location = key; break;
+                            location = key;
+                            previousKeys.add(idx);
+                            break;
                         }
                         k++;
                     }
