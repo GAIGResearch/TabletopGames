@@ -325,7 +325,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             EndTurn.endOfTurn(dgs, actingFigure);
         }
 
-        if (EndTurn.turnEnded && actions.isEmpty())
+        if (EndTurn.turnEnded && actions.isEmpty() && dgs.getActionsInProgress().isEmpty())
         {
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
