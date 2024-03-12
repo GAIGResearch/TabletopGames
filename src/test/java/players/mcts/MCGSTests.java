@@ -5,8 +5,7 @@ import core.Game;
 import evaluation.features.StateKeyFromFeatureVector;
 import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
-import games.dotsboxes.DBEdgeAndScoreKey;
-import games.dotsboxes.DBStateFeaturesReduced;
+import games.dotsboxes.*;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.features.LLHandCards;
 import games.loveletter.features.LLStateFeaturesReduced;
@@ -181,7 +180,7 @@ public class MCGSTests {
     public void DotsAndBoxesFullRunActionVisitsSelfOnly() {
         // In this case we run through a whole game, relying on the predicate test
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
-        params.MCGSStateKey = new StateKeyFromFeatureVector(new DBStateFeaturesReduced());
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new DBStateFeatures());
         params.budget = 1000;
         Game game = createDotsAndBoxes(params);
         do {

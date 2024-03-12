@@ -64,6 +64,7 @@ public class TestStateHeuristics {
         // then buy a card
         fm.next(domState, new EndPhase());
         fm.next(domState, new BuyCard(CardType.SILVER, 0));
+        assertEquals(1, domState.getCurrentPlayer());
         assertEquals(6.6, linearStateHeuristic.evaluateState(domState, 0), 0.01);
         assertEquals(36.2, linearStateHeuristic.evaluateState(domState, 1), 0.01);
     }
