@@ -691,15 +691,6 @@ public class SingleTreeNode {
         // Apply small noise to break ties randomly
         uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
         return uctValue;
-//            if (uctValue > bestValue) {
-//                bestAction = action;
-//                bestValue = uctValue;
-//            }
-
-//        if (bestAction == null)
-//            throw new AssertionError("We have a null value in UCT : shouldn't really happen!");
-//
-//        return bestAction;
     }
 
     public double exp3Value(AbstractAction action) {
