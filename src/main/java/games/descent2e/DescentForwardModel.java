@@ -447,8 +447,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
             // Ashrian's Hero Ability
-            // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
-            if (actingFigure instanceof Monster) {
+            // If we are a Minion Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
+            if (actingFigure.getName().toLowerCase().contains("minion")) {
                 HeroAbilities.ashrian(dgs);
             }
 

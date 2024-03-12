@@ -35,10 +35,11 @@ public class HeroAbilities {
     // ----- HEALER -----
 
     // Ashrian's Hero Ability
-    // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
+    // Any Minion Monsters that are activated adjacent to Ashrian are forced to take the Stunned condition
     public static void ashrian(DescentGameState dgs) {
         Figure actingFigure = dgs.getActingFigure();
-        if (actingFigure.getNActionsExecuted().isMinimum()) {
+        if (!(actingFigure instanceof Monster) || !actingFigure.getNActionsExecuted().isMinimum()) return;
+        if (actingFigure.getName().toLowerCase().contains("minion")) {
             for (Hero hero : dgs.getHeroes()) {
                 if (hero.getAbility().equals(StunAdjacent)) {
                     Vector2D position = actingFigure.getPosition();
