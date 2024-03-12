@@ -2,7 +2,6 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -526,30 +525,42 @@ public class SingleTreeNode {
         List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
         if (availableActions.isEmpty())
             throw new AssertionError("We need to have at least one option");
+
         AbstractAction actionChosen;
         if (availableActions.size() == 1) {
             actionChosen = availableActions.get(0);
         } else {
-            switch (params.treePolicy) {
-                case UCB:
-                case AlphaGo:
-                case UCB_Tuned:
-                    // These just vary on the form of the exploration term in a UCB algorithm
-                    actionChosen = ucb(availableActions);
-                    break;
-                case EXP3:
-                case RegretMatching:
-                case Hedge:
+            // first get the actionValues
+            double[] actionValues = actionValues(availableActions);
+            // then pick the best one
+            actionChosen = switch (params.treePolicy) {
+                case UCB, AlphaGo, UCB_Tuned -> {
+                    // These take the max
+                    // Find child with highest UCB value
+                    AbstractAction bestAction = null;
+                    double bestValue = -Double.MAX_VALUE;
+                    // no need to shuffle, as ucbValue() adds some random noise
+                    for (AbstractAction availableAction : availableActions) {
+                        double uctValue = ucbValue(availableAction);
+                        if (uctValue > bestValue) {
+                            bestValue = uctValue;
+                            bestAction = availableAction;
+                        }
+                    }
+                    yield bestAction;
+                }
+                case EXP3, RegretMatching, Hedge -> {
                     // These construct a distribution over possible actions and then sample from it
-                    actionChosen = sampleFromDistribution(availableActions, explore ? params.exploreEpsilon : 0.0);
-                    break;
-                default:
-                    throw new AssertionError("Unknown treePolicy: " + params.treePolicy);
-            }
+                    int index = sampleFromPotentials(actionValues, explore ? params.exploreEpsilon : 0.0);
+                    yield availableActions.get(index);
+                }
+                default -> throw new AssertionError("Unknown treePolicy: " + params.treePolicy);
+            };
         }
 
         return actionChosen;
     }
+
 
     /**
      * Returns the next node in the tree after taking the specified action from this one.
@@ -580,139 +591,140 @@ public class SingleTreeNode {
         }
     }
 
-    private double untriedActionValue(AbstractAction action) {
-        double retValue = params.firstPlayUrgency;
-        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = params.expansionPolicy == MAST
-                ? MASTFunction : advantageFunction;
-        if (valueFunction != null) {
-            retValue += valueFunction.applyAsDouble(action, openLoopState);
+
+    // Returns the values according to the selection policy (UCB, EXP3, etc.)
+    // This is stage 1 of processing, before we use these to pick an action to take
+    protected double[] actionValues(List<AbstractAction> actionsToConsider) {
+        double[] retValue = new double[actionsToConsider.size()];
+        for (int i = 0; i < actionsToConsider.size(); i++) {
+            AbstractAction action = actionsToConsider.get(i);
+            retValue[i] = switch (params.treePolicy) {
+                case UCB, AlphaGo, UCB_Tuned -> ucbValue(action);
+                case RegretMatching, Hedge -> rmValue(action);
+                case EXP3 -> exp3Value(action);
+            };
         }
         return retValue;
     }
 
-    private AbstractAction ucb(List<AbstractAction> availableActions) {
-        // Find child with highest UCB value
-        AbstractAction bestAction = null;
-        double bestValue = -Double.MAX_VALUE;
+    private double ucbValue(AbstractAction action) {
 
-        // shuffle so that ties are broken randomly
-        Collections.shuffle(availableActions, rnd);
-        for (AbstractAction action : availableActions) {
-            // Find 'UCB' value
-            double uctValue = 0;
-            int actionVisits = actionVisits(action);
-            // Find child value
-            double childValue = getActionValueWithBias(action);
+        // Find 'UCB' value
+        double uctValue = 0;
+        int actionVisits = actionVisits(action);
+        // Find child value
+        double childValue = getActionValueWithBias(action);
 
-            // consider OMA term
-            if (params.omaVisits > 0 && (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA)) {
-                OMATreeNode oma = ((OMATreeNode) this).OMAParent.orElse(null);
-                if (oma != null) {
-                    double beta = Math.sqrt(params.omaVisits / (double) (params.omaVisits + 3 * actionVisits));
-                    // we need to find the action taken from the OMAParent
-                    SingleTreeNode iteratingNode = this;
-                    List<AbstractAction> actionsTaken = new ArrayList<>();
-                    do {
-                        actionsTaken.add(iteratingNode.actionToReach);
-                        iteratingNode = iteratingNode.parent;
-                        if (iteratingNode == null)
-                            throw new AssertionError("Should always find OMA node before root");
-                    } while (iteratingNode != oma);
-                    Map<AbstractAction, OMATreeNode.OMAStats> tmp = oma.OMAChildren.get(actionsTaken.get(actionsTaken.size() - 1));
-                    if (tmp == null) {
-                        if (actionVisits == 0) {
-                            // do nothing - this is possible as we do not create OMA node until we back-propagate
-                        } else {
-                            throw new AssertionError("We have somehow failed to find the OMA node for this action");
-                        }
+        // consider OMA term
+        if (params.omaVisits > 0 && (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA)) {
+            OMATreeNode oma = ((OMATreeNode) this).OMAParent.orElse(null);
+            if (oma != null) {
+                double beta = Math.sqrt(params.omaVisits / (double) (params.omaVisits + 3 * actionVisits));
+                // we need to find the action taken from the OMAParent
+                SingleTreeNode iteratingNode = this;
+                List<AbstractAction> actionsTaken = new ArrayList<>();
+                do {
+                    actionsTaken.add(iteratingNode.actionToReach);
+                    iteratingNode = iteratingNode.parent;
+                    if (iteratingNode == null)
+                        throw new AssertionError("Should always find OMA node before root");
+                } while (iteratingNode != oma);
+                Map<AbstractAction, OMATreeNode.OMAStats> tmp = oma.OMAChildren.get(actionsTaken.get(actionsTaken.size() - 1));
+                if (tmp == null) {
+                    if (actionVisits == 0) {
+                        // do nothing - this is possible as we do not create OMA node until we back-propagate
+                        // so on the first visit there may not be one yet
                     } else {
-                        OMATreeNode.OMAStats stats = tmp.get(action);
-                        if (stats != null && stats.OMAVisits > 0) {
-                            double omaValue = stats.OMATotValue / stats.OMAVisits;
-                            childValue = (1.0 - beta) * childValue + beta * omaValue;
-                        }
+                        throw new AssertionError("We have somehow failed to find the OMA node for this action");
+                    }
+                } else {
+                    OMATreeNode.OMAStats stats = tmp.get(action);
+                    if (stats != null && stats.OMAVisits > 0) {
+                        double omaValue = stats.OMATotValue / stats.OMAVisits;
+                        childValue = (1.0 - beta) * childValue + beta * omaValue;
                     }
                 }
             }
-
-            if (params.normaliseRewards && actionVisits > 0) {
-                childValue = normalise(childValue, root.lowReward, root.highReward);
-            }
-
-            // default to standard UCB
-            int effectiveTotalVisits = validVisitsFor(action) + 1;
-            // use first play urgency as replacement for exploration term if action not previously taken
-            double explorationTerm = params.firstPlayUrgency;
-            if (actionVisits > 0) {
-                explorationTerm = switch (params.treePolicy) {
-                    case UCB_Tuned -> {
-                        double range = root.highReward - root.lowReward;
-                        if (range < 1e-6) range = 1e-6;
-                        double meanSq = actionSquaredValue(action, decisionPlayer) / actionVisits;
-                        double standardVar = 0.25;
-                        if (params.normaliseRewards) {
-                            // we also need to standardise the sum of squares to calculate the variance
-                            meanSq = (meanSq
-                                    + root.lowReward * root.lowReward
-                                    - 2 * root.lowReward * actionTotValue(action, decisionPlayer) / actionVisits
-                            ) / (range * range);
-                        } else {
-                            // we need to modify the standard variance as it is not on a 0..1 basis (which is where 0.25 comes from)
-                            standardVar = Math.sqrt(range / 2.0);
-                        }
-                        double variance = Math.max(0.0, meanSq - childValue * childValue);
-                        double minTerm = Math.min(standardVar, variance + Math.sqrt(2 * Math.log(effectiveTotalVisits) / actionVisits));
-                        yield params.K * Math.sqrt(Math.log(effectiveTotalVisits) / actionVisits * minTerm);
-                    }
-                    case AlphaGo -> params.K * Math.sqrt(effectiveTotalVisits) / (actionVisits + 1.0);
-                    default -> Math.sqrt(Math.log(effectiveTotalVisits) / actionVisits);
-                };
-            }
-
-            // Paranoid/SelfOnly control determines childValue here
-            // If we are Paranoid, then the back-propagation will ensure that childValue is minus our score for opponent nodes
-            uctValue = childValue + explorationTerm;
-            if (Double.isNaN(uctValue))
-                throw new AssertionError("Numeric error calculating uctValue");
-
-            // Assign value
-            // Apply small noise to break ties randomly
-            uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
-            if (uctValue > bestValue) {
-                bestAction = action;
-                bestValue = uctValue;
-            }
         }
 
-        if (bestAction == null)
-            throw new AssertionError("We have a null value in UCT : shouldn't really happen!");
+        if (params.normaliseRewards && actionVisits > 0) {
+            childValue = normalise(childValue, root.lowReward, root.highReward);
+        }
 
-        return bestAction;
+        // default to standard UCB
+        int effectiveTotalVisits = validVisitsFor(action) + 1;
+        // use first play urgency as replacement for exploration term if action not previously taken
+        double explorationTerm = params.firstPlayUrgency;
+        if (actionVisits > 0) {
+            explorationTerm = switch (params.treePolicy) {
+                case UCB_Tuned -> {
+                    double range = root.highReward - root.lowReward;
+                    if (range < 1e-6) range = 1e-6;
+                    double meanSq = actionSquaredValue(action, decisionPlayer) / actionVisits;
+                    double standardVar = 0.25;
+                    if (params.normaliseRewards) {
+                        // we also need to standardise the sum of squares to calculate the variance
+                        meanSq = (meanSq
+                                + root.lowReward * root.lowReward
+                                - 2 * root.lowReward * actionTotValue(action, decisionPlayer) / actionVisits
+                        ) / (range * range);
+                    } else {
+                        // we need to modify the standard variance as it is not on a 0..1 basis (which is where 0.25 comes from)
+                        standardVar = Math.sqrt(range / 2.0);
+                    }
+                    double variance = Math.max(0.0, meanSq - childValue * childValue);
+                    double minTerm = Math.min(standardVar, variance + Math.sqrt(2 * Math.log(effectiveTotalVisits) / actionVisits));
+                    yield params.K * Math.sqrt(Math.log(effectiveTotalVisits) / actionVisits * minTerm);
+                }
+                case AlphaGo -> params.K * Math.sqrt(effectiveTotalVisits) / (actionVisits + 1.0);
+                default -> Math.sqrt(Math.log(effectiveTotalVisits) / actionVisits);
+            };
+        }
+
+        // Paranoid/SelfOnly control determines childValue here
+        // If we are Paranoid, then the back-propagation will ensure that childValue is minus our score for opponent nodes
+        uctValue = childValue + explorationTerm;
+        if (Double.isNaN(uctValue))
+            throw new AssertionError("Numeric error calculating uctValue");
+
+        // Assign value
+        // Apply small noise to break ties randomly
+        uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
+        return uctValue;
+//            if (uctValue > bestValue) {
+//                bestAction = action;
+//                bestValue = uctValue;
+//            }
+
+//        if (bestAction == null)
+//            throw new AssertionError("We have a null value in UCT : shouldn't really happen!");
+//
+//        return bestAction;
     }
 
     public double exp3Value(AbstractAction action) {
-        int actionVisits = actionVisits(action);
-        if (actionVisits == 0)
-            return untriedActionValue(action);
         double actionValue = getActionValueWithBias(action);
+        int actionVisits = actionVisits(action);
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
-        if (params.normaliseRewards)
+        if (params.normaliseRewards  && actionVisits > 0)
             actionValue = normalise(actionValue, root.lowReward, root.highReward);
         else
             actionValue = actionValue - nodeValue(decisionPlayer);
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
+
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
             System.out.println("We have a non-number in EXP3 somewhere : " + retValue);
             retValue = 1e6;  // to avoid numeric issues later
+        }
+        // We add FPU after exponentiation for safety (as it likely a large number)
+        if (actionVisits == 0) {
+            retValue += params.firstPlayUrgency;
         }
         return retValue;
     }
 
     public double rmValue(AbstractAction action) {
-        int actionVisits = actionVisits(action);
-        if (actionVisits == 0)
-            return untriedActionValue(action);
         double actionValue = getActionValueWithBias(action);
         double nodeValue = nodeValue(decisionPlayer);
         // potential value is our estimate of our accumulated reward if we had always taken this action
@@ -726,33 +738,39 @@ public class SingleTreeNode {
             if (Double.isNaN(v))
                 throw new AssertionError("We have a non-number in Hedge somewhere");
         }
+        // We add FPU after all the exponentiation for safety
+        int actionVisits = actionVisits(action);
+        if (actionVisits == 0) {
+            regret += params.firstPlayUrgency;
+        }
         return Math.max(0.0, regret);
     }
 
 
     private double getActionValueWithBias(AbstractAction action) {
         int actionVisits = actionVisits(action);
-        double actionValue = actionTotValue(action, decisionPlayer);
-        if (params.biasVisits == 0 && actionVisits > 0)
-            return actionValue / actionVisits;
-        double nodeValue = nodeValue(decisionPlayer);
-        double beta = params.biasVisits == 0 ? 0.0 : Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
-        if (params.actionHeuristicIsAdvantage)
-            return (1.0 - beta) * actionValue + beta * (nodeValue + actionValueEstimates.getOrDefault(action, 0.0));
-        else
-            return (1.0 - beta) * actionValue + beta * actionValueEstimates.getOrDefault(action, 0.0);
+        // if we are at 'expansion' phase, then we break ties by expansion policy (which is the same actionHeuristic as progressive bias)
+        int effectiveBiasVisits = actionVisits == 0 ? 1 : params.biasVisits;
+        double actionValue = actionVisits > 0 ? actionTotValue(action, decisionPlayer) / actionVisits : 0.0;
+        if (effectiveBiasVisits > 0) {
+            // then add/subtract any bias
+            double beta = Math.sqrt(effectiveBiasVisits / (double) (effectiveBiasVisits + 3 * actionVisits));
+            if (params.actionHeuristicIsAdvantage) {
+                double nodeValue = nodeValue(decisionPlayer);
+                return (1.0 - beta) * actionValue + beta * (nodeValue + actionValueEstimates.getOrDefault(action, 0.0));
+            } else
+                return (1.0 - beta) * actionValue + beta * actionValueEstimates.getOrDefault(action, 0.0);
+        }
+        return actionValue;
     }
 
-    private AbstractAction sampleFromDistribution(List<AbstractAction> availableActions, double explore) {
-        // first we get a value for each of them
-        Function<AbstractAction, Double> valueFn = switch (params.treePolicy) {
-            case EXP3 -> this::exp3Value;
-            case RegretMatching, Hedge -> this::rmValue;
-            default -> throw new AssertionError("Should not be any other options!");
-        };
-
-        Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
-        return sampleFrom(actionToValueMap, explore, rnd.nextDouble());
+    private int sampleFromPotentials(double[] values, double explore) {
+        // check exploration first
+        if (rnd.nextDouble() < explore) {
+            return rnd.nextInt(values.length);
+        }
+        // then we need
+        return Utils.sampleFrom(values, rnd.nextDouble());
     }
 
 

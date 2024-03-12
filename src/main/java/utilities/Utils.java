@@ -170,6 +170,29 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
+    public static int sampleFrom(double[] potentials, double random) {
+        // first convert to pdf
+        double[] positivePotentials = new double[potentials.length];
+        double largestPotential = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < potentials.length; i++) {
+            if (potentials[i] > largestPotential) {
+                largestPotential = potentials[i];
+            }
+        }
+        for (int i = 0; i < potentials.length; i++) {
+            positivePotentials[i] = Math.exp(potentials[i] - largestPotential);
+        }
+        double sum = Arrays.stream(positivePotentials).sum();
+        double[] probabilities = Arrays.stream(positivePotentials).map(d -> d / sum).toArray();
+        double cdf = 0.0;
+        for (int i = 0; i < probabilities.length; i++) {
+            cdf += probabilities[i];
+            if (cdf >= random)
+                return i;
+        }
+        throw new AssertionError("Should never get here!");
+    }
+
     /**
      * we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
      * exploreEpsilon is the percentage chance of taking a random action
