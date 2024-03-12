@@ -67,6 +67,8 @@ public class SearchAction extends TokenAction {
 
     @Override
     public boolean execute(DescentGameState gs) {
+        gs.getActingFigure().getNActionsExecuted().increment();
+
         Deck<Card> searchCards = gs.getSearchCards();
         DToken searchToken = (DToken) gs.getComponentById(tokenID);
         if (searchCards != null) {
