@@ -14,6 +14,9 @@ import java.util.Random;
 import static games.descent2e.DescentHelper.collision;
 
 public class EndTurn extends DescentAction{
+
+    public static boolean turnEnded = false;
+
     public EndTurn() {
         super(Triggers.ACTION_POINT_SPEND);
     }
@@ -48,6 +51,8 @@ public class EndTurn extends DescentAction{
     // Or the game forces a figure to end their turn because they can't do anything else
     public static void endOfTurn (DescentGameState dgs, Figure f)
     {
+        turnEnded = true;
+
         f.addActionTaken("--- END OF TURN ---");
         //System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ") - [" + f.getPosition() + "]");
         //collision(dgs);
@@ -80,7 +85,7 @@ public class EndTurn extends DescentAction{
         f.setRemovedConditionThisTurn(false);
         f.setUsedExtraAction(false);
 
-        dgs.getTurnOrder().endPlayerTurn(dgs);
+        //dgs.getTurnOrder().endPlayerTurn(dgs);
     }
 
     // TODO Delete after debugging, don't include in the final version

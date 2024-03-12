@@ -6,6 +6,7 @@ import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
+import games.descent2e.actions.EndTurn;
 import games.descent2e.actions.Move;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -100,7 +101,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
         // TODO end-of-turn abilities
 
-
+        EndTurn.turnEnded = false;
 
         turnCounter++;
 

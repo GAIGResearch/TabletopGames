@@ -270,6 +270,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     int idx = r.nextInt(dgs.getHeroes().size()-1);
                     token.setOwnerId(dgs.getHeroes().get(idx).getComponentID(), dgs);
                 }
+                token.setComponentName(def.getAltName());
                 dgs.tokens.add(token);
             }
         }
@@ -322,6 +323,11 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         if (!(action instanceof EndTurn) && noMoreActions && noMoreMovement && noMoreFatigueMovement) {
             EndTurn.endOfTurn(dgs, actingFigure);
+        }
+
+        if (EndTurn.turnEnded && actions.isEmpty())
+        {
+            dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
         /*
@@ -381,265 +387,276 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
 
+        // End Of Turn Actions
+        // We only access this when there is nothing else to do
+        if (EndTurn.turnEnded)
+        {
+            // - Special (specified by quest)
+            if (actingFigure.getAbilities() != null) {
+                for (DescentAction act : actingFigure.getAbilities()) {
+                    // Check if action can be executed right now
+                    if (act.canExecute(Triggers.END_TURN, dgs)) {
+                        actions.add(act);
+                    }
+                }
+            }
+
+            if (!actions.isEmpty()) return new ArrayList<>(new HashSet<>(actions));
+        }
+
         // End turn is (almost) always possible
         // Certain scenarios will need to prevent it from being taken
         // But they will remove it from the list when required, instead of preventing it here
         EndTurn endTurn = new EndTurn();
         actions.add(endTurn);
 
-        // First, we must check if our Figure is a defeated Hero
-        // Defeated Heroes can only perform the StandUp action
+        if (!EndTurn.turnEnded) {
+            // First, we must check if our Figure is a defeated Hero
+            // Defeated Heroes can only perform the StandUp action
 
-        if (actingFigure instanceof Hero && ((Hero) actingFigure).isDefeated())
-        {
-            StandUp standUp = new StandUp();
-            if (standUp.canExecute(dgs)) {
-                actions.add(standUp);
-                actions.remove(endTurn);
-            }
-            return actions;
-        }
-
-        // Next, we check if we can make a Poisoned or Diseased attribute test
-        // We cannot make any actions before we have taken our attribute tests against these conditions
-        if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease)) {
-            boolean tested = false;
-
-            Diseased diseased = new Diseased(actingFigure.getComponentID(), Figure.Attribute.Willpower);
-            if (diseased.canExecute(dgs)) {
-                actions.add(diseased);
-                tested = true;
-            }
-
-            Poisoned poisoned = new Poisoned(actingFigure.getComponentID(), Figure.Attribute.Might);
-            if (poisoned.canExecute(dgs)) {
-                actions.add(poisoned);
-                tested = true;
-            }
-
-            if (tested) {
-                actions.remove(endTurn);
-                return actions;
-            }
-        }
-
-        // Ashrian's Hero Ability
-        // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
-        if (actingFigure instanceof Monster)
-        {
-            HeroAbilities.ashrian(dgs);
-        }
-
-        // If we are stunned, we can only take the 'Stunned' action
-        if (actingFigure.hasCondition(DescentCondition.Stun)) {
-            Stunned stunned = new Stunned();
-            if (stunned.canExecute(dgs)) {
-                actions.add(stunned);
-                actions.remove(endTurn);
-            }
-                return actions;
-        }
-
-        // Grisban the Thirsty's Hero Ability
-        // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
-        if (actingFigure instanceof Hero && ((Hero) actingFigure).hasRested())
-            if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition))
-            {
-                actions.addAll(HeroAbilities.grisban(dgs));
-            }
-
-        // If we have made all our Attribute Tests, then we can take our other actions
-        // If we have movement points to spend, and not immobilized, add move actions
-        if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
-                && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
-            actions.addAll(moveActions(dgs, actingFigure));
-        }
-
-        // If a hero has stamina to spare, add move actions that cost fatigue
-        if (actingFigure instanceof Hero && !actingFigure.isOffMap()) {
-            if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-                GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
-                if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
-            }
-        }
-
-        List <AbstractAction> attacks = new ArrayList<>();
-
-        // Add actions that cost action points
-        // These can only be taken if we have not already taken 2 actions
-        // Also, the acting figure must be on the map to take them
-        if (!actingFigure.getNActionsExecuted().isMaximum() && !actingFigure.isOffMap()) {
-            // Get movement points action
-            GetMovementPoints movePoints = new GetMovementPoints();
-            if (movePoints.canExecute(dgs)) actions.add(movePoints);
-
-            // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-
-            AttackType attackType = getAttackType(actingFigure);
-
-            // Monsters may only perform one attack per activation, so we must check if we have already attacked this turn
-            if (!(actingFigure instanceof Monster && actingFigure.hasAttacked())) {
-                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
-                    actions.addAll(meleeAttackActions(dgs, actingFigure));
-                    attacks.addAll(meleeAttackActions(dgs, actingFigure));
-                }
-                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
-                    actions.addAll(rangedAttackActions(dgs, actingFigure));
-                    attacks.addAll(rangedAttackActions(dgs, actingFigure));
-                }
-            }
-
-            // - Open/close a door TODO
-
-            // Hero Only Actions
-            // Rest
-            // Revive
-            // Search
-            // Heroic Abilities and Feats
-            if (actingFigure instanceof Hero) {
-
-                // Rest
-                Rest act = new Rest();
-                if (act.canExecute(dgs)) {
-                    actions.add(act);
-                }
-
-                // Revive
-                Vector2D loc = actingFigure.getPosition();
-                DescentGridBoard board = dgs.getMasterBoard();
-                List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-                for (Hero hero : dgs.heroes) {
-                    if (actingFigure.equals(hero)) continue;
-                    if (hero.isDefeated() && hero.getPosition() != null
-                            && (neighbours.contains(hero.getPosition()) || hero.getPosition().equals(loc))) {
-                        Revive revive = new Revive(hero.getComponentID());
-                        if (revive.canExecute(dgs)) {
-                            actions.add(revive);
-                        }
-                    }
-                }
-
-                // Search for adjacent Search tokens (or ones they're sitting on top of)
-                for (DToken token : dgs.tokens) {
-                    if (token.getDescentTokenType() == DescentToken.Search
-                            && token.getPosition() != null
-                            && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
-                        for (DescentAction da : token.getEffects()) {
-                            if (da.canExecute(dgs))
-                                actions.add(da.copy());
-                        }
-                    }
-                }
-
-                // Avric Albright's Hero Ability
-                // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
-                HeroAbilities.avric(dgs);
-            }
-
-            // Get Monster Unique Actions
-            // Monster Actions can only be taken once per turn, if they haven't already attacked yet
-            if (actingFigure instanceof Monster && !actingFigure.hasAttacked())
-            {
-                List<AbstractAction> monsterActions = monsterActions(dgs);
-                if (!monsterActions.isEmpty()) {
-                    actions.addAll(monsterActions);
-                    attacks.addAll(monsterActions);
-                }
-            }
-
-            // - Special (specified by quest)
-            if (actingFigure.getAbilities() != null) {
-                for (DescentAction act : actingFigure.getAbilities()) {
-                    // Check if action can be executed right now
-                    if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
-                        actions.add(act);
-                    }
-                }
-            }
-
-        // TODO: exhaust a card for an action/modifier/effect "free" action
-        }
-
-        if (actingFigure instanceof Hero)
-        {
-            // Archetype Skills
-            List <AbstractAction> archetypeSkills = getArchetypeSkillActions(dgs, actingFigure.getComponentID());
-            if (!archetypeSkills.isEmpty()) actions.addAll(archetypeSkills);
-
-            // Heroic Feat
-            if (((Hero) actingFigure).isFeatAvailable())
-            {
-                List<DescentAction> heroicFeats = heroicFeatAction(dgs);
-                if(!heroicFeats.isEmpty())
-                    actions.addAll(heroicFeats);
-
-                // Tomble Burrowell's Heroic Feat
-                // Prevents End Turn from being taken, to stop him from being stuck as a Token
-                if(actions.contains(new ReturnToMapMove(4)) || actions.contains(new ReturnToMapPlace()))
+            if (actingFigure instanceof Hero && ((Hero) actingFigure).isDefeated()) {
+                StandUp standUp = new StandUp();
+                if (standUp.canExecute(dgs)) {
+                    actions.add(standUp);
                     actions.remove(endTurn);
+                }
+                return new ArrayList<>(new HashSet<>(actions));
             }
-        }
 
-        // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
-        // This does not cost any action points to take
-        // This action may be used as a free attack, or to Restore 2 Hearts
-        List<AbstractAction> twoHeroActions = new ArrayList<>();
-        if (dgs.getHeroes().size() == 2) {
-            if (actingFigure instanceof Hero && !actingFigure.hasUsedExtraAction())
-            {
-                Restore restore = new Restore(2);
-                if (restore.canExecute(dgs)) {
-                    actions.add(restore);
-                    twoHeroActions.add(restore);
+            // Next, we check if we can make a Poisoned or Diseased attribute test
+            // We cannot make any actions before we have taken our attribute tests against these conditions
+            if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease)) {
+                boolean tested = false;
+
+                Diseased diseased = new Diseased(actingFigure.getComponentID(), Figure.Attribute.Willpower);
+                if (diseased.canExecute(dgs)) {
+                    actions.add(diseased);
+                    tested = true;
                 }
 
-                // TODO: Fix this
+                Poisoned poisoned = new Poisoned(actingFigure.getComponentID(), Figure.Attribute.Might);
+                if (poisoned.canExecute(dgs)) {
+                    actions.add(poisoned);
+                    tested = true;
+                }
 
-                // Free Attack
+                if (tested) {
+                    actions.remove(endTurn);
+                    return new ArrayList<>(new HashSet<>(actions));
+                }
+            }
+
+            // Ashrian's Hero Ability
+            // If we are a Monster, and we start our turn adjacent to Ashrian, we are forced to take the Stunned condition
+            if (actingFigure instanceof Monster) {
+                HeroAbilities.ashrian(dgs);
+            }
+
+            // If we are stunned, we can only take the 'Stunned' action
+            if (actingFigure.hasCondition(DescentCondition.Stun)) {
+                Stunned stunned = new Stunned();
+                if (stunned.canExecute(dgs)) {
+                    actions.add(stunned);
+                    actions.remove(endTurn);
+                }
+                return new ArrayList<>(new HashSet<>(actions));
+            }
+
+            // Grisban the Thirsty's Hero Ability
+            // If we have used the Rest action this turn, we can remove 1 Condition from ourselves
+            if (actingFigure instanceof Hero && ((Hero) actingFigure).hasRested())
+                if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition)) {
+                    actions.addAll(HeroAbilities.grisban(dgs));
+                }
+
+            // If we have made all our Attribute Tests, then we can take our other actions
+            // If we have movement points to spend, and not immobilized, add move actions
+            if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
+                    && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
+                actions.addAll(moveActions(dgs, actingFigure));
+            }
+
+            // If a hero has stamina to spare, add move actions that cost fatigue
+            if (actingFigure instanceof Hero && !actingFigure.isOffMap()) {
+                if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+                    GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
+                    if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
+                }
+            }
+
+            List<AbstractAction> attacks = new ArrayList<>();
+
+            // Add actions that cost action points
+            // These can only be taken if we have not already taken 2 actions
+            // Also, the acting figure must be on the map to take them
+            if (!actingFigure.getNActionsExecuted().isMaximum() && !actingFigure.isOffMap()) {
+                // Get movement points action
+                GetMovementPoints movePoints = new GetMovementPoints();
+                if (movePoints.canExecute(dgs)) actions.add(movePoints);
+
+                // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+
                 AttackType attackType = getAttackType(actingFigure);
 
-                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
-                    List<Integer> targets = getMeleeTargets(dgs, actingFigure);
-                    for (Integer target : targets) {
-                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
-                        if (freeAttack.canExecute(dgs)) {
-                            actions.add(freeAttack);
-                            twoHeroActions.add(freeAttack);
+                // Monsters may only perform one attack per activation, so we must check if we have already attacked this turn
+                if (!(actingFigure instanceof Monster && actingFigure.hasAttacked())) {
+                    if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                        actions.addAll(meleeAttackActions(dgs, actingFigure));
+                        attacks.addAll(meleeAttackActions(dgs, actingFigure));
+                    }
+                    if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                        actions.addAll(rangedAttackActions(dgs, actingFigure));
+                        attacks.addAll(rangedAttackActions(dgs, actingFigure));
+                    }
+                }
+
+                // - Open/close a door TODO
+
+                // Hero Only Actions
+                // Rest
+                // Revive
+                // Search
+                // Heroic Abilities and Feats
+                if (actingFigure instanceof Hero) {
+
+                    // Rest
+                    Rest act = new Rest();
+                    if (act.canExecute(dgs)) {
+                        actions.add(act);
+                    }
+
+                    // Revive
+                    Vector2D loc = actingFigure.getPosition();
+                    DescentGridBoard board = dgs.getMasterBoard();
+                    List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+                    for (Hero hero : dgs.heroes) {
+                        if (actingFigure.equals(hero)) continue;
+                        if (hero.isDefeated() && hero.getPosition() != null
+                                && (neighbours.contains(hero.getPosition()) || hero.getPosition().equals(loc))) {
+                            Revive revive = new Revive(hero.getComponentID());
+                            if (revive.canExecute(dgs)) {
+                                actions.add(revive);
+                            }
+                        }
+                    }
+
+                    // Search for adjacent Search tokens (or ones they're sitting on top of)
+                    for (DToken token : dgs.tokens) {
+                        if (token.getDescentTokenType() == DescentToken.Search
+                                && token.getPosition() != null
+                                && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+                            for (DescentAction da : token.getEffects()) {
+                                if (da.canExecute(dgs))
+                                    actions.add(da.copy());
+                            }
+                        }
+                    }
+
+                    // Avric Albright's Hero Ability
+                    // If we are a Hero (including Avric himself) within 3 spaces of Avric, we gain a Surge action of Recover 1 Heart
+                    HeroAbilities.avric(dgs);
+                }
+
+                // Get Monster Unique Actions
+                // Monster Actions can only be taken once per turn, if they haven't already attacked yet
+                if (actingFigure instanceof Monster && !actingFigure.hasAttacked()) {
+                    List<AbstractAction> monsterActions = monsterActions(dgs);
+                    if (!monsterActions.isEmpty()) {
+                        actions.addAll(monsterActions);
+                        attacks.addAll(monsterActions);
+                    }
+                }
+
+                // - Special (specified by quest)
+                if (actingFigure.getAbilities() != null) {
+                    for (DescentAction act : actingFigure.getAbilities()) {
+                        // Check if action can be executed right now
+                        if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
+                            actions.add(act);
                         }
                     }
                 }
 
-                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
-                    List<Integer> targets = getRangedTargets(dgs, actingFigure);
-                    for (Integer target : targets) {
-                        FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
-                        if (freeAttack.canExecute(dgs)) {
-                            actions.add(freeAttack);
-                            twoHeroActions.add(freeAttack);
-                        }
-                    }
-                }
-
+                // TODO: exhaust a card for an action/modifier/effect "free" action
             }
-        }
 
-        // We should remove EndTurn to prevent premature ending of turn
-        if (actions.size() > 1) {
-            // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
-            // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
             if (actingFigure instanceof Hero) {
-                if (!actingFigure.getNActionsExecuted().isMaximum() ||
-                        !twoHeroActions.isEmpty() || DescentHelper.canStillMove(actingFigure))
-                    actions.remove(endTurn);
+                // Archetype Skills
+                List<AbstractAction> archetypeSkills = getArchetypeSkillActions(dgs, actingFigure.getComponentID());
+                if (!archetypeSkills.isEmpty()) actions.addAll(archetypeSkills);
+
+                // Heroic Feat
+                if (((Hero) actingFigure).isFeatAvailable()) {
+                    List<DescentAction> heroicFeats = heroicFeatAction(dgs);
+                    if (!heroicFeats.isEmpty())
+                        actions.addAll(heroicFeats);
+
+                    // Tomble Burrowell's Heroic Feat
+                    // Prevents End Turn from being taken, to stop him from being stuck as a Token
+                    if (actions.contains(new ReturnToMapMove(4)) || actions.contains(new ReturnToMapPlace()))
+                        actions.remove(endTurn);
+                }
             }
-            if (actingFigure instanceof Monster) {
-                // As Monsters can only attack once, they should be allowed to End Turn without using up all of their actions
-                // It should be acceptable for a Monster to use an Attack action, then End Turn without moving
-                if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) || DescentHelper.canStillMove(actingFigure))
-                    actions.remove(endTurn);
+
+            // Special - If there are only 2 Heroes in player, each Hero gets a free extra action
+            // This does not cost any action points to take
+            // This action may be used as a free attack, or to Restore 2 Hearts
+            List<AbstractAction> twoHeroActions = new ArrayList<>();
+            if (dgs.getHeroes().size() == 2) {
+                if (actingFigure instanceof Hero && !actingFigure.hasUsedExtraAction()) {
+                    Restore restore = new Restore(2);
+                    if (restore.canExecute(dgs)) {
+                        actions.add(restore);
+                        twoHeroActions.add(restore);
+                    }
+
+                    // TODO: Fix this
+
+                    // Free Attack
+                    AttackType attackType = getAttackType(actingFigure);
+
+                    if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                        List<Integer> targets = getMeleeTargets(dgs, actingFigure);
+                        for (Integer target : targets) {
+                            FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, true);
+                            if (freeAttack.canExecute(dgs)) {
+                                actions.add(freeAttack);
+                                twoHeroActions.add(freeAttack);
+                            }
+                        }
+                    }
+
+                    if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                        List<Integer> targets = getRangedTargets(dgs, actingFigure);
+                        for (Integer target : targets) {
+                            FreeAttack freeAttack = new FreeAttack(actingFigure.getComponentID(), target, false);
+                            if (freeAttack.canExecute(dgs)) {
+                                actions.add(freeAttack);
+                                twoHeroActions.add(freeAttack);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            // We should remove EndTurn to prevent premature ending of turn
+            if (actions.size() > 1) {
+                // Heroes can only End Turn if they have no more actions to take (including Free Actions for Two Heroes), or have moved this turn
+                // This prevents choosing to GetMovementPoints, then immediately Ending Turn without using them
+                if (actingFigure instanceof Hero) {
+                    if (!actingFigure.getNActionsExecuted().isMaximum() ||
+                            !twoHeroActions.isEmpty() || DescentHelper.canStillMove(actingFigure))
+                        actions.remove(endTurn);
+                }
+                if (actingFigure instanceof Monster) {
+                    // As Monsters can only attack once, they should be allowed to End Turn without using up all of their actions
+                    // It should be acceptable for a Monster to use an Attack action, then End Turn without moving
+                    if ((!actingFigure.getNActionsExecuted().isMaximum() && !attacks.isEmpty()) || DescentHelper.canStillMove(actingFigure))
+                        actions.remove(endTurn);
+                }
             }
         }
-
 
         return new ArrayList<>(new HashSet<>(actions));
         //return actions;
