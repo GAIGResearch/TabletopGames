@@ -82,7 +82,8 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return state.getComponentById(tokenID).getOwnerId();
+        int figureIdx = state.getComponentById(tokenID).getOwnerId();
+        return state.getComponentById(figureIdx).getOwnerId();
     }
 
     @Override

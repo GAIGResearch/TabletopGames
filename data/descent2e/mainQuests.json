@@ -7,9 +7,9 @@
       ["Barghest:group", "4A", "all:Health:+2"]
     ],
     "tokens": [
-      ["Villager", "Wounded clergy", "nHeroes", ["8A"], ""],
-      ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], ""],
-      ["WhiteObjective", "Acolyte", "1", ["player"], ""]
+      ["Villager", "Wounded Clergy", "nHeroes", ["8A"], ""],
+      ["Search", "Search action", "nHeroes", ["21A-3;1", "9A-3;3", "11A-1;3", "4A-3;1"], "Effect:SearchAction; Effect:GreedyAction"],
+      ["WhiteObjective", "Acolyte", "1", ["player"], "AttributeModifier:MovePoints:-1;Effect:AcolyteAction;Effect:TradeAcolyteAction"]
     ],
     "rules": [
       ["overlord fatigue", "START_TURN", "if(count(Goblin Archer,9A)>0) AttributeModifier:Fatigue:+1"],
