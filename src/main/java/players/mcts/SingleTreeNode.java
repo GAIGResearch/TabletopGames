@@ -392,10 +392,10 @@ public class SingleTreeNode {
         return cur;
     }
 
-    protected List<AbstractAction> actionsToConsider(List<AbstractAction> allAvailable, int usedElsewhere) {
+    protected List<AbstractAction> actionsToConsider(List<AbstractAction> allAvailable) {
         if (!allAvailable.isEmpty() && params.progressiveWideningConstant >= 1.0) {
             int actionsToConsider = (int) Math.floor(params.progressiveWideningConstant * Math.pow(nVisits + 1, params.progressiveWideningExponent));
-            actionsToConsider = Math.min(actionsToConsider - usedElsewhere, allAvailable.size());
+            actionsToConsider = Math.min(actionsToConsider, allAvailable.size());
             // takes account of the expanded actions
             if (actionsToConsider <= 0) return new ArrayList<>();
             // sort in advantage order (descending)
@@ -403,9 +403,9 @@ public class SingleTreeNode {
             // depending on the advantage heuristic used.
             // However, we do break ties in favour of already expanded actions
             allAvailable.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
-            return allAvailable.subList(0, actionsToConsider);
+            return new ArrayList<>(allAvailable.subList(0, actionsToConsider));
         }
-        return allAvailable;
+        return new ArrayList<>(allAvailable);
     }
 
     /**
@@ -521,7 +521,7 @@ public class SingleTreeNode {
 
         // actionsToConsider takes care of any Progressive Widening in play, so we only consider the
         // widened subset
-        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
+        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState);
         if (availableActions.isEmpty())
             throw new AssertionError("We need to have at least one option");
 
@@ -653,7 +653,7 @@ public class SingleTreeNode {
         }
 
         // default to standard UCB
-        int effectiveTotalVisits = validVisitsFor(action) + 1;
+        int effectiveTotalVisits = validVisitsFor(action);
         // use first play urgency as replacement for exploration term if action not previously taken
         double explorationTerm = params.firstPlayUrgency;
         if (actionVisits > 0) {

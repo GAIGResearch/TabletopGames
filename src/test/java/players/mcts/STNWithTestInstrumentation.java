@@ -14,4 +14,8 @@ public class STNWithTestInstrumentation extends SingleTreeNode {
     public ActionStats getActionStats(AbstractAction action) {
         return actionValues.get(action);
     }
+
+    public AbstractAction treePolicyAction(boolean useExploration) {
+        return super.treePolicyAction(useExploration);
+    }
 }
