@@ -78,7 +78,6 @@ public class SingleTreeNode {
 
     // Called in tree expansion
     public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd, Supplier<? extends SingleTreeNode> factory) {
-        MCTSParams mctsParams = player.getParameters();
         SingleTreeNode retValue = factory.get();
         retValue.factory = factory;
         retValue.decisionPlayer = state.getCurrentPlayer();
@@ -530,7 +529,9 @@ public class SingleTreeNode {
         if (availableActions.size() == 1) {
             actionChosen = availableActions.get(0);
         } else {
-            // first get the actionValues
+            // first we shuffle to break ties
+            Collections.shuffle(availableActions, rnd);
+            // then get the actionValues
             double[] actionValues = actionValues(availableActions);
             // then pick the best one
             actionChosen = switch (params.treePolicy) {
@@ -689,7 +690,7 @@ public class SingleTreeNode {
 
         // Assign value
         // Apply small noise to break ties randomly
-        uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
+     //   uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
         return uctValue;
     }
 
