@@ -3,6 +3,7 @@ package players.mcts;
 import core.actions.AbstractAction;
 import org.junit.Before;
 import org.junit.Test;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -57,12 +58,16 @@ public class MCTSSelectionTests {
         params.normaliseRewards = false;
         setupPlayer();
 
-        node.backUpSingleNode(new LMRAction("Left"), new double[]{-1.0});
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.backUp(new double[]{-1.0});
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
         for (int i = 0; i < 5; i++) {
-            node.backUpSingleNode(new LMRAction("Middle"), new double[]{0.5});
+            node.backUp(new double[]{0.5});
         }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
         for (int i = 0; i < 4; i++) {
-            node.backUpSingleNode(new LMRAction("Right"), new double[]{0.4});
+            node.backUp(new double[]{0.4});
         }
 
         assertEquals(10, node.nVisits);
@@ -81,16 +86,17 @@ public class MCTSSelectionTests {
         params.normaliseRewards = true;
         setupPlayer();
 
-        node.backUpSingleNode(new LMRAction("Left"), new double[]{-1.0});
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.backUp(new double[]{-1.0});
 
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
         for (int i = 0; i < 5; i++) {
-            node.backUpSingleNode(new LMRAction("Middle"), new double[]{0.5});
+            node.backUp(new double[]{0.5});
         }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
         for (int i = 0; i < 4; i++) {
-            node.backUpSingleNode(new LMRAction("Right"), new double[]{0.4});
+            node.backUp(new double[]{0.4});
         }
-        node.normaliseRewardsAfterIteration(new double[]{-1.0});
-        node.normaliseRewardsAfterIteration(new double[]{0.5});
 
         assertEquals(10, node.nVisits);
         assertEquals(1, node.getActionStats(new LMRAction("Left")).nVisits);
@@ -108,11 +114,13 @@ public class MCTSSelectionTests {
     public void ucb20Visits() {
         ucb10Visits();
 
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
         for (int i = 0; i < 5; i++) {
-            node.backUpSingleNode(new LMRAction("Middle"), new double[]{0.5});
+            node.backUp(new double[]{0.5});
         }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
         for (int i = 0; i < 5; i++) {
-            node.backUpSingleNode(new LMRAction("Right"), new double[]{0.4});
+            node.backUp(new double[]{0.4});
         }
 
         assertEquals(20, node.nVisits);
@@ -130,13 +138,14 @@ public class MCTSSelectionTests {
     public void ucb40Visits() {
         ucb20Visits();
 
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
         for (int i = 0; i < 13; i++) {
-            node.backUpSingleNode(new LMRAction("Middle"), new double[]{0.5});
+            node.backUp(new double[]{0.5});
         }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
         for (int i = 0; i < 7; i++) {
-            node.backUpSingleNode(new LMRAction("Right"), new double[]{0.4});
+            node.backUp(new double[]{0.4});
         }
-
         assertEquals(40, node.nVisits);
         assertEquals(1, node.getActionStats(new LMRAction("Left")).nVisits);
         assertEquals(23, node.getActionStats(new LMRAction("Middle")).nVisits);
