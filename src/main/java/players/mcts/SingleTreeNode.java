@@ -734,8 +734,8 @@ public class SingleTreeNode {
             // in this case we exponentiate the regret to get the probability of taking this action
             // This may be problematic for large regrets, as it is not standardised to number of actions
             // So the Boltzmann factor needs to be quite large
-            double v = Math.exp(regret / params.hedgeBoltzmann);
-            if (Double.isNaN(v))
+            regret = Math.exp(regret / params.hedgeBoltzmann);
+            if (Double.isNaN(regret))
                 throw new AssertionError("We have a non-number in Hedge somewhere");
         }
         // We add FPU after all the exponentiation for safety

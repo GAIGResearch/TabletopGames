@@ -1,7 +1,6 @@
 package players.mcts;
 
 import core.actions.AbstractAction;
-import org.junit.Before;
 import org.junit.Test;
 import utilities.Pair;
 
@@ -9,9 +8,9 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static players.mcts.MCTSEnums.TreePolicy.RegretMatching;
+import static players.mcts.MCTSEnums.TreePolicy.*;
 
-public class MCTSSelectionTests {
+public class MCTSTreeSelectionTests {
 
     LMRForwardModel fm = new LMRForwardModel();
     LMRGame game = new LMRGame(new LMTParameters(302));
@@ -316,4 +315,106 @@ public class MCTSSelectionTests {
         assertEquals(0.0, actionValues[2], 0.01);
         assertEquals(new LMRAction("Middle"), node.treePolicyAction(true));
     }
+
+
+
+    @Test
+    public void exp3_10Visits() {
+        params.treePolicy = EXP3;
+        params.exploreEpsilon = 0.3;
+        params.normaliseRewards = true;
+        params.exp3Boltzmann = 0.80;
+        setupPlayer();
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.backUp(new double[]{-1.0});
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        for (int i = 0; i < 5; i++) {
+            node.backUp(new double[]{0.5});
+        }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        for (int i = 0; i < 4; i++) {
+            node.backUp(new double[]{0.4});
+        }
+        // When normalised to [0, 1], we expect
+        // Left: 0.0
+        // Middle: 1.0
+        // Right: 0.9333
+
+        assertEquals(10, node.nVisits);
+        assertEquals(1, node.getActionStats(new LMRAction("Left")).nVisits);
+        assertEquals(5, node.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(4, node.getActionStats(new LMRAction("Right")).nVisits);
+        double[] actionValues = node.actionValues(baseActions);
+        assertEquals(Math.exp(0.0), actionValues[0], 0.01);  // 1.0
+        assertEquals(Math.exp(1.0/0.80), actionValues[1], 0.01); // 3.49
+        assertEquals(Math.exp(0.93333/0.80), actionValues[2], 0.01); // 3.21
+        // The final choice of action is then stochastic
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        // expected probability distribution is 13%, 45%, 42%  [not including the 30% exploration]
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0.13 * 700 + 100, counts[0], 50);
+        assertEquals(0.45 * 700 + 100, counts[1], 50);
+        assertEquals(0.42 * 700 + 100, counts[2], 50);
+    }
+
+
+    @Test
+    public void hedge_10Visits() {
+        params.treePolicy = Hedge;
+        params.exploreEpsilon = 0.1;
+        params.normaliseRewards = false;
+        params.hedgeBoltzmann = 0.8;
+        setupPlayer();
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.backUp(new double[]{-1.0});
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        for (int i = 0; i < 5; i++) {
+            node.backUp(new double[]{0.5});
+        }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        for (int i = 0; i < 4; i++) {
+            node.backUp(new double[]{0.4});
+        }
+
+        // Regrets are:
+        // -1.31 / 0.19 / 0.09
+
+        double[] actionValues = node.actionValues(baseActions);
+        assertEquals(Math.exp(-1.31 * 10 / 0.8), actionValues[0], 0.01);  // 0.00
+        assertEquals(Math.exp(0.19 * 10 / 0.80), actionValues[1], 0.01); // 10.75
+        assertEquals(Math.exp(0.09 * 10/0.80), actionValues[2], 0.01); // 3.08
+        // The final choice of action is then stochastic
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        // expected probability distribution is 0%, 78%, 22%  [not including the 10% exploration]
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0.00 * 900 + 33, counts[0], 15);
+        assertEquals(0.78 * 900 + 33, counts[1], 50);
+        assertEquals(0.22 * 900 + 33, counts[2], 50);
+    }
+
+
 }

@@ -31,7 +31,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
     public double MASTBoltzmann = 0.1;
-    public double exp3Boltzmann = 0.1;
+    public double exp3Boltzmann = 1.0;
     public double hedgeBoltzmann = 100;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
@@ -68,7 +68,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("MASTBoltzmann", 0.1);
-        addTunableParameter("exp3Boltzmann", 0.1);
+        addTunableParameter("exp3Boltzmann", 1.0);
         addTunableParameter("hedgeBoltzmann", 100.0);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
