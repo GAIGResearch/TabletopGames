@@ -556,6 +556,11 @@ public class SingleTreeNode {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = Utils.pdf(actionValues);
+                    long nonZeroActions =  Arrays.stream(actionValues).filter(v -> v > 0.0).count();
+                    if (nonZeroActions == 0) {
+                        // if we have no non-zero values, then we just pick one at random
+                        yield availableActions.get(rnd.nextInt(availableActions.size()));
+                    }
                     yield availableActions.get(Utils.sampleFrom(pdf, rnd.nextDouble()));
                 }
                 default -> throw new AssertionError("Unknown treePolicy: " + params.treePolicy);
@@ -693,7 +698,7 @@ public class SingleTreeNode {
 
         // Assign value
         // Apply small noise to break ties randomly
-     //   uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
+        //   uctValue = noise(uctValue, params.noiseEpsilon, rnd.nextDouble());
         return uctValue;
     }
 
@@ -702,7 +707,7 @@ public class SingleTreeNode {
         int actionVisits = actionVisits(action);
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
-        if (params.normaliseRewards  && actionVisits > 0)
+        if (params.normaliseRewards && actionVisits > 0)
             actionValue = normalise(actionValue, root.lowReward, root.highReward);
         else
             actionValue = actionValue - nodeValue(decisionPlayer);
@@ -912,14 +917,28 @@ public class SingleTreeNode {
         // when we passed through, and keep track of valid visits
 
         // then we update the statistics for the action taken
-        for (AbstractAction action : actionsFromOpenLoopState) {
-            if (!actionValues.containsKey(action))
-                actionValues.put(action, new ActionStats(result.length));
-            actionValues.get(action).validVisits++;
+        if (!actionsFromOpenLoopState.contains(actionTaken)) {
+            if (params.opponentTreePolicy != MCGS && params.opponentTreePolicy != MCGSSelfOnly)
+                throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
+
+            // If MCGS, then this is possible if we have looped in the graph, so that OpenLoopState refers
+            // to a different state than the one for which the action was taken. This is awkward.
+            // In the absence of any good information, we just increment the valid visits of all actions
+            for (ActionStats stats : actionValues.values()) {
+                stats.validVisits++;
+            }
+        } else {
+            for (AbstractAction action : actionsFromOpenLoopState) {
+                if (!actionValues.containsKey(action))
+                    actionValues.put(action, new ActionStats(result.length));
+                actionValues.get(action).validVisits++;
+            }
         }
         ActionStats stats = actionValues.get(actionTaken);
         if (stats == null)
             throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
+        if (stats.validVisits == 0)
+            throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
         stats.update(result);
     }
 
