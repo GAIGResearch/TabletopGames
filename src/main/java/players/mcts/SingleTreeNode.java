@@ -550,10 +550,13 @@ public class SingleTreeNode {
                     }
                     yield bestAction;
                 }
-                case EXP3, RegretMatching, Hedge -> {
-                    // These construct a distribution over possible actions and then sample from it
-                    int index = sampleFromPotentials(actionValues, explore ? params.exploreEpsilon : 0.0);
-                    yield availableActions.get(index);
+                case RegretMatching, EXP3, Hedge -> {
+                    // check exploration first
+                    if (rnd.nextDouble() < params.exploreEpsilon) {
+                        yield availableActions.get(rnd.nextInt(availableActions.size()));
+                    }
+                    double[] pdf = Utils.pdf(actionValues);
+                    yield availableActions.get(Utils.sampleFrom(pdf, rnd.nextDouble()));
                 }
                 default -> throw new AssertionError("Unknown treePolicy: " + params.treePolicy);
             };
@@ -756,11 +759,7 @@ public class SingleTreeNode {
         return actionValue;
     }
 
-    private int sampleFromPotentials(double[] values, double explore) {
-        // check exploration first
-        if (rnd.nextDouble() < explore) {
-            return rnd.nextInt(values.length);
-        }
+    private int sampleFromPotentials(double[] values) {
         // then we need
         return Utils.sampleFrom(values, rnd.nextDouble());
     }

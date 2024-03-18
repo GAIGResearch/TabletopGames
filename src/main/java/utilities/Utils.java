@@ -170,8 +170,30 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
-    public static int sampleFrom(double[] potentials, double random) {
-        // first convert to pdf
+    public static int sampleFrom(double[] probabilities, double random) {
+        double cdf = 0.0;
+        for (int i = 0; i < probabilities.length; i++) {
+            cdf += probabilities[i];
+            if (cdf >= random)
+                return i;
+        }
+        throw new AssertionError("Should never get here!");
+    }
+
+    public static double[] pdf(double[] potentials) {
+        // convert potentials into legal pdf
+        double[] pdf = new double[potentials.length];
+        double sum = Arrays.stream(potentials).sum();
+        for (int i = 0; i < potentials.length; i++) {
+            if (potentials[i] < 0.0) {
+                throw new IllegalArgumentException("Negative potential in pdf");
+            }
+            pdf[i] = potentials[i] / sum;
+        }
+        return pdf;
+    }
+
+    public static double[] exponentiatePotentials(double[] potentials, double temperature) {
         double[] positivePotentials = new double[potentials.length];
         double largestPotential = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < potentials.length; i++) {
@@ -180,17 +202,9 @@ public abstract class Utils {
             }
         }
         for (int i = 0; i < potentials.length; i++) {
-            positivePotentials[i] = Math.exp(potentials[i] - largestPotential);
+            positivePotentials[i] = Math.exp((potentials[i] - largestPotential) / temperature);
         }
-        double sum = Arrays.stream(positivePotentials).sum();
-        double[] probabilities = Arrays.stream(positivePotentials).map(d -> d / sum).toArray();
-        double cdf = 0.0;
-        for (int i = 0; i < probabilities.length; i++) {
-            cdf += probabilities[i];
-            if (cdf >= random)
-                return i;
-        }
-        throw new AssertionError("Should never get here!");
+        return positivePotentials;
     }
 
     /**
@@ -377,6 +391,7 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
+
     public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
@@ -558,7 +573,6 @@ public abstract class Utils {
     public static List<String> enumNames(Enum<?> e) {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
-
 
 
 }
