@@ -166,7 +166,7 @@ public class SingleTreeNode {
                     double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
                     actionValueEstimates = new HashMap<>();
                     for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
-                        actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i] * params.actionHeuristicScale);
+                        actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i]);
                     }
                 }
             }
@@ -745,16 +745,10 @@ public class SingleTreeNode {
     private double getActionValueWithBias(AbstractAction action) {
         int actionVisits = actionVisits(action);
         // if we are at 'expansion' phase, then we break ties by expansion policy (which is the same actionHeuristic as progressive bias)
-        int effectiveBiasVisits = actionVisits == 0 ? 1 : params.biasVisits;
         double actionValue = actionVisits > 0 ? actionTotValue(action, decisionPlayer) / actionVisits : 0.0;
-        if (effectiveBiasVisits > 0) {
+        if (params.progressiveBias > 0) {
             // then add/subtract any bias
-            double beta = Math.sqrt(effectiveBiasVisits / (double) (effectiveBiasVisits + 3 * actionVisits));
-            if (params.actionHeuristicIsAdvantage) {
-                double nodeValue = nodeValue(decisionPlayer);
-                return (1.0 - beta) * actionValue + beta * (nodeValue + actionValueEstimates.getOrDefault(action, 0.0));
-            } else
-                return (1.0 - beta) * actionValue + beta * actionValueEstimates.getOrDefault(action, 0.0);
+            actionValue += params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
         }
         return actionValue;
     }

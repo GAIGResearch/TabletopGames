@@ -4,9 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
-import org.json.simple.JSONObject;
 import players.PlayerParameters;
-import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
@@ -47,8 +45,7 @@ public class MCTSParams extends PlayerParameters {
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
     public IActionHeuristic actionHeuristic;
-    public int biasVisits = 0;
-    public double actionHeuristicScale = 1.0;
+    public double progressiveBias = 0.0;
     public boolean actionHeuristicIsAdvantage = false;
     public int omaVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
@@ -105,8 +102,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("FPU", 1000000000.0);
         addTunableParameter("actionHeuristic",  IActionHeuristic.nullReturn);
         addTunableParameter("actionHeuristicIsAdvantage", false);
-        addTunableParameter("actionHeuristicScale", 1.0);
-        addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
+        addTunableParameter("progressiveBias", 0.0);
 
     }
 
@@ -139,7 +135,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
 
-        biasVisits = (int) getParameterValue("biasVisits");
+        progressiveBias = (double) getParameterValue("progressiveBias");
         omaVisits = (int) getParameterValue("omaVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
@@ -150,14 +146,13 @@ public class MCTSParams extends PlayerParameters {
         if (information == Closed_Loop)
             discardStateAfterEachIteration = false;
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
-                || (biasVisits > 0 && actionHeuristic == null)) {
+                || (progressiveBias > 0.0 && actionHeuristic == null)) {
             useMAST = true;
         }
         MASTActionKey = (IActionKey) getParameterValue("MASTActionKey");
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
         actionHeuristic = (IActionHeuristic) getParameterValue("actionHeuristic");
-        actionHeuristicScale = (double) getParameterValue("actionHeuristicScale");
         actionHeuristicIsAdvantage = (boolean) getParameterValue("actionHeuristicIsAdvantage");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
