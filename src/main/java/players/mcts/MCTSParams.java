@@ -62,6 +62,9 @@ public class MCTSParams extends PlayerParameters {
     public boolean MCGSExpandAfterClash = true;
     public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
+    public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
+    public double pUCTTemperature = 0.0;  // If greater than zero we construct a Boltzmann distribution over actions based on the action heuristic
+    // if zero (or less) then we use the action heuristic values directly, setting any negative values to zero)
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -103,6 +106,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("actionHeuristic",  IActionHeuristic.nullReturn);
         addTunableParameter("actionHeuristicIsAdvantage", false);
         addTunableParameter("progressiveBias", 0.0);
+        addTunableParameter("pUCT", false);
+        addTunableParameter("pUCTTemperature", 0.0);
 
     }
 
@@ -143,6 +148,8 @@ public class MCTSParams extends PlayerParameters {
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
         paranoid = (boolean) getParameterValue("paranoid");
         discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");
+        pUCT = (boolean) getParameterValue("pUCT");
+        pUCTTemperature = (double) getParameterValue("pUCTTemperature");
         if (information == Closed_Loop)
             discardStateAfterEachIteration = false;
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST

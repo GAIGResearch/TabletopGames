@@ -45,6 +45,7 @@ public class SingleTreeNode {
     protected int rolloutDepth, roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
     Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
+    Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
     // Depth of this node
     protected int depth;
     // the id of the player who makes the decision at this node
@@ -168,6 +169,26 @@ public class SingleTreeNode {
                     for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
                         actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i]);
                     }
+                }
+            }
+            if (params.pUCT) {
+                // construct the pdf for the pUCT selection
+                double[] pdf;
+                actionPDFEstimates = new HashMap<>();
+                if (params.pUCTTemperature > 0.0) {
+                    // in this case we construct a Boltzmann
+                    double[] actionValues = actionsFromOpenLoopState.stream().
+                            mapToDouble(a -> actionValueEstimates.getOrDefault(a, 0.0)).toArray();
+                    pdf = Utils.pdf(Utils.exponentiatePotentials(actionValues, params.pUCTTemperature));
+
+                } else {
+                    // in this case, we first set any negative values to zero, and then construct the pdf directly
+                    double[] actionValues = actionsFromOpenLoopState.stream().
+                            mapToDouble(a -> Math.max(0.0, actionValueEstimates.getOrDefault(a, 0.0))).toArray();
+                    pdf = Utils.pdf(actionValues);
+                }
+                for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
+                    actionPDFEstimates.put(actionsFromOpenLoopState.get(i), pdf[i]);
                 }
             }
             for (AbstractAction action : actionsFromOpenLoopState) {
@@ -551,7 +572,7 @@ public class SingleTreeNode {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = Utils.pdf(actionValues);
-                    long nonZeroActions =  Arrays.stream(actionValues).filter(v -> v > 0.0).count();
+                    long nonZeroActions = Arrays.stream(actionValues).filter(v -> v > 0.0).count();
                     if (nonZeroActions == 0) {
                         // if we have no non-zero values, then we just pick one at random
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
@@ -683,6 +704,12 @@ public class SingleTreeNode {
                 case AlphaGo -> params.K * Math.sqrt(effectiveTotalVisits) / (actionVisits + 1.0);
                 default -> Math.sqrt(Math.log(effectiveTotalVisits) / actionVisits);
             };
+
+            if (params.pUCT) {
+                // in this case we multiply the exploration term by the pUCT factor (the probability that the action would be taken by
+                // our actionHeuristic). These were calculated in setActionsFromOpenLoopState
+                explorationTerm *= actionPDFEstimates.get(action);
+            }
         }
 
         // Paranoid/SelfOnly control determines childValue here
