@@ -163,8 +163,6 @@ public class SingleTreeNode {
                         .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
             } else {
                 if (params.actionHeuristic != null) {
-                    // advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                    //        .collect(toMap(a -> a, a -> params.advantageFunction.evaluateAction(a, actionState)));
                     double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
                     actionValueEstimates = new HashMap<>();
                     for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {

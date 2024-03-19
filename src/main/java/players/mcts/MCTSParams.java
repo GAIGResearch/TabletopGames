@@ -139,7 +139,6 @@ public class MCTSParams extends PlayerParameters {
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
 
-        // We will then instantiate the Expert Iteration data once it is needed
         biasVisits = (int) getParameterValue("biasVisits");
         omaVisits = (int) getParameterValue("omaVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
