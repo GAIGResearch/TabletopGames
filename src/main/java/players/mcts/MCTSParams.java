@@ -46,7 +46,6 @@ public class MCTSParams extends PlayerParameters {
     public double exploreEpsilon = 0.1;
     public IActionHeuristic actionHeuristic;
     public double progressiveBias = 0.0;
-    public boolean actionHeuristicIsAdvantage = false;
     public int omaVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
@@ -65,6 +64,8 @@ public class MCTSParams extends PlayerParameters {
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
     public double pUCTTemperature = 0.0;  // If greater than zero we construct a Boltzmann distribution over actions based on the action heuristic
     // if zero (or less) then we use the action heuristic values directly, setting any negative values to zero)
+    public int initialiseVisits = 0;  // This is the number of visits to initialise the MCTS tree with (using the actionHeuristic)
+
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -104,7 +105,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MCGSExpandAfterClash", true);
         addTunableParameter("FPU", 1000000000.0);
         addTunableParameter("actionHeuristic",  IActionHeuristic.nullReturn);
-        addTunableParameter("actionHeuristicIsAdvantage", false);
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCT", false);
         addTunableParameter("pUCTTemperature", 0.0);
@@ -160,7 +160,6 @@ public class MCTSParams extends PlayerParameters {
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
         actionHeuristic = (IActionHeuristic) getParameterValue("actionHeuristic");
-        actionHeuristicIsAdvantage = (boolean) getParameterValue("actionHeuristicIsAdvantage");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");

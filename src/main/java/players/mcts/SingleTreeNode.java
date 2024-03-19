@@ -150,6 +150,16 @@ public class SingleTreeNode {
         return false;
     }
 
+    /**
+     * This is a pretty key method. It is called when the tree search 'moves' to this node.
+     * Because we are using Open Loop search, we need to make sure that the state is updated to reflect the
+     * state in the current trajectory; each visit to the node may have a different underlying state, and it's
+     * perfectly possible for different actions to be available on different visits.
+     * This method looks at the actions available this time round, and initialises relevant parts of the
+     * node information that will then be used during the rest of the decision-making process from this node.
+     *
+     * @param actionState
+     */
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer && actionState.isNotTerminalForPlayer(decisionPlayer)) {
@@ -198,6 +208,20 @@ public class SingleTreeNode {
                     // This *does* rely on a good equals method being implemented for Actions
                     if (!children.containsKey(action))
                         throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
+                    // Then we seed the statistics with heuristic biases (if so parameterised)
+                    // This assumes that we have had params.initialiseVisits trials of each action before we start
+                    if (params.initialiseVisits > 0) {
+                        ActionStats stats = actionValues.get(action);
+                        stats.nVisits = params.initialiseVisits;
+                        stats.validVisits = params.initialiseVisits;
+                        stats.totValue[decisionPlayer] = actionValueEstimates.getOrDefault(action, 0.0);
+                        if (params.paranoid) // default to zero for other players, unless we're paranoid
+                            for (int i = 0; i < actionState.getNPlayers(); i++)
+                                if (i != decisionPlayer)
+                                    stats.totValue[i] = -stats.totValue[decisionPlayer];
+                        if (nVisits < params.initialiseVisits * actionValues.size())
+                            nVisits = params.initialiseVisits * actionValues.size();
+                    }
                 }
             }
         } else if (!params.opponentTreePolicy.selfOnlyTree) {
