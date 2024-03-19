@@ -262,9 +262,6 @@ public class SingleTreeNode {
      * Its result is purely stored in the tree generated from root
      */
     protected void oneSearchIteration() {
-        double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                .mapToDouble(i -> params.heuristic.evaluateState(openLoopState, i)).toArray();
-
         actionsInTree = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
 
@@ -277,7 +274,7 @@ public class SingleTreeNode {
 
         // Monte carlo rollout: return value of MC rollout from the newly added node
         int lastActorInTree = actionsInTree.isEmpty() ? decisionPlayer : actionsInTree.get(actionsInTree.size() - 1).a;
-        double[] delta = selected.rollout(startingValues, lastActorInTree);
+        double[] delta = selected.rollout(lastActorInTree);
         // Back up the value of the rollout through the tree
         rolloutActionsTaken += actionsInRollout.size();
 
@@ -775,7 +772,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    protected double[] rollout(double[] startingValues, int lastActor) {
+    protected double[] rollout(int lastActor) {
         rolloutDepth = 0; // counting from end of tree
         lastActorInRollout = lastActor;
         roundAtStartOfRollout = openLoopState.getRoundCounter();
@@ -809,7 +806,7 @@ public class SingleTreeNode {
         double[] retValue = new double[rolloutState.getNPlayers()];
 
         for (int i = 0; i < retValue.length; i++) {
-            retValue[i] = params.heuristic.evaluateState(rolloutState, i) - startingValues[i];
+            retValue[i] = params.heuristic.evaluateState(rolloutState, i);
             if (Double.isNaN(retValue[i]))
                 throw new AssertionError("Illegal heuristic value - should be a number");
         }

@@ -53,8 +53,9 @@ public class MCTSParams extends PlayerParameters {
     public int omaVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
-    public boolean normaliseRewards = true;
-    public boolean nodesStoreScoreDelta = true;
+    public boolean normaliseRewards = true;  // This will automatically normalise rewards to be in the range [0,1]
+    // so that K does nto need to be tuned to the precise scale of reward in a game
+    // It also means that at the end of the game (when rewards are possibly closer to each other, they are still scaled to [0, 1]
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
@@ -93,7 +94,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
         addTunableParameter("normaliseRewards", true);
-        addTunableParameter("nodesStoreScoreDelta", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("omaVisits", 0);
@@ -145,7 +145,6 @@ public class MCTSParams extends PlayerParameters {
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
-        nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
         paranoid = (boolean) getParameterValue("paranoid");
         discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");

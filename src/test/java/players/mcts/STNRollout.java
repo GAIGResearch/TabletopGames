@@ -56,9 +56,9 @@ public class STNRollout extends SingleTreeNode {
     }
 
     @Override
-    protected double[] rollout(double[] startingValues, int lastActor) {
+    protected double[] rollout(int lastActor) {
         lastActorInTree = lastActor;  // a bit of a hack to track the last Actor in tree search
-        double[] retValue = super.rollout(startingValues, lastActor);
+        double[] retValue = super.rollout(lastActor);
         staticRolloutDepth = rolloutDepth;
         staticStartRound = roundAtStartOfRollout;
         staticStartTurn = turnAtStartOfRollout;
