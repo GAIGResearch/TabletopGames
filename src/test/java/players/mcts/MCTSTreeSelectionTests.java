@@ -585,5 +585,10 @@ public class MCTSTreeSelectionTests {
         }
         assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
         assertEquals(new LMRAction("Left"), node.treePolicyAction(true));
+        // All 3 actions were formally available - so we will strongly investigate new items once they
+        // become available
+        assertEquals(31, node.getActionStats(new LMRAction("Left")).validVisits);
+        assertEquals(31, node.getActionStats(new LMRAction("Right")).validVisits);
+        assertEquals(31, node.getActionStats(new LMRAction("Middle")).validVisits);
     }
 }
