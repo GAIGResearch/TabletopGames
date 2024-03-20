@@ -380,9 +380,107 @@ public class MCTSTreeSelectionTests {
         // And the normalisation only takes place using the actual back-propagated rewards
         double[] actionValues = node.actionValues(baseActions);
         assertEquals(0.3 + Math.sqrt(Math.log(10)), actionValues[0], 0.01);
-        assertEquals(1.0 + Math.sqrt(Math.log(10) / 5) , actionValues[1], 0.01);
+        assertEquals(1.0 + Math.sqrt(Math.log(10) / 5), actionValues[1], 0.01);
         assertEquals(0.4 + 1.4 / 1.5 + Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
         assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
     }
 
+    @Test
+    public void pUCT10VisitsNoTemperature() {
+        params.pUCT = true;
+        params.pUCTTemperature = 0.0;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+        first10Visits(node);
+
+        // With pUCT, the exploration values are modified by the heuristic as follows:
+        // Left: 0.3 / 1.0 = 0.3
+        // Middle: 0.0 / 1.0 = 0.0
+        // Right: 1.0 / 1.0 = 1.0
+        double[] actionValues = node.actionValues(baseActions);
+        assertEquals(0.0 + 0.3 / 1.3 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
+        assertEquals(1.0 + 0.0 * Math.sqrt(Math.log(10) / 5), actionValues[1], 0.01);
+        assertEquals(1.4 / 1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+        assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
+    }
+
+    @Test
+    public void pUCT10VisitsWithTemperature() {
+        params.pUCT = true;
+        params.pUCTTemperature = 2.0;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+        first10Visits(node);
+
+        // With pUCT, the exploration values are modified by the heuristic as follows:
+        // Left: exp(0.3/2) / N = 0.305
+        // Middle: exp(0.0/2) / N = 0.262
+        // Right: exp(1.0/2) / N = 0.433
+        double[] actionValues = node.actionValues(baseActions);
+        assertEquals(0.0 + 0.305 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
+        assertEquals(1.0 + 0.262 * Math.sqrt(Math.log(10) / 5), actionValues[1], 0.01);
+        assertEquals(1.4 / 1.5 + 0.433 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+        assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
+    }
+
+    @Test
+    public void actionSeeding10Visits() {
+        params.initialiseVisits = 4;
+        params.normaliseRewards = false;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+
+        // For this test we don't use first10Visits() as the initial visit parameter changes the visit counts
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.backUp(new double[]{-1.0});
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        for (int i = 0; i < 5; i++) {
+            node.backUp(new double[]{0.5});
+        }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        for (int i = 0; i < 4; i++) {
+            node.backUp(new double[]{0.4});
+        }
+
+        assertEquals(22, node.nVisits); // 10, + 4 seed visits per action
+        assertEquals(5, node.getActionStats(new LMRAction("Left")).nVisits);
+        assertEquals(9, node.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(8, node.getActionStats(new LMRAction("Right")).nVisits);
+
+        assertEquals(22, node.getActionStats(new LMRAction("Left")).validVisits);
+        assertEquals(22, node.getActionStats(new LMRAction("Middle")).validVisits);
+        assertEquals(22, node.getActionStats(new LMRAction("Right")).validVisits);
+
+        // With seeding, we change both the value of the action, and the exploration term
+        double[] actionValues = node.actionValues(baseActions);
+        assertEquals((-1.0 + 0.3 * 4) / 5.0 + Math.sqrt(Math.log(22) / 5), actionValues[0], 0.01);
+        assertEquals(2.5 / 9.0 +  Math.sqrt(Math.log(22) / 9), actionValues[1], 0.01);
+        assertEquals((0.4 * 4 + 4.0) / 8.0 +  Math.sqrt(Math.log(22) / 8), actionValues[2], 0.01);
+        assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
+    }
 }

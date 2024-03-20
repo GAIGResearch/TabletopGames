@@ -212,15 +212,19 @@ public class SingleTreeNode {
                     // This assumes that we have had params.initialiseVisits trials of each action before we start
                     if (params.initialiseVisits > 0) {
                         ActionStats stats = actionValues.get(action);
+                        double actionEstimate = actionValueEstimates.getOrDefault(action, 0.0);
+                        int nActions = Math.max(actionValues.size(), actionsFromOpenLoopState.size());
                         stats.nVisits = params.initialiseVisits;
-                        stats.validVisits = params.initialiseVisits;
-                        stats.totValue[decisionPlayer] = actionValueEstimates.getOrDefault(action, 0.0);
+                        stats.validVisits = params.initialiseVisits * nActions;
+                        stats.totValue[decisionPlayer] = actionEstimate * params.initialiseVisits;
+                        stats.squaredTotValue[decisionPlayer] = actionEstimate * actionEstimate * params.initialiseVisits;
                         if (params.paranoid) // default to zero for other players, unless we're paranoid
                             for (int i = 0; i < actionState.getNPlayers(); i++)
                                 if (i != decisionPlayer)
                                     stats.totValue[i] = -stats.totValue[decisionPlayer];
-                        if (nVisits < params.initialiseVisits * actionValues.size())
-                            nVisits = params.initialiseVisits * actionValues.size();
+                        if (nVisits < params.initialiseVisits * nActions) {
+                            nVisits = params.initialiseVisits * nActions;
+                        }
                     }
                 }
             }
