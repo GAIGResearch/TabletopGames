@@ -556,6 +556,34 @@ public class MCTSTreeSelectionTests {
             node.backUp(new double[]{-1.0});
         }
         assertEquals(3, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+    }
 
+    @Test
+    public void progressiveWideningIII() {
+        // check that only the available actions are used up to the point of widening
+        params.progressiveWideningConstant = 1.0;
+        params.progressiveWideningExponent = 0.2;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+
+        // The second action should become available at the 32nd visit (2 =  N^(1/5))
+        for (int i = 0; i < 31; i++) {
+            // Check that the correct number of actions are available (just the one)
+            // System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+            assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+            assertEquals(new LMRAction("Right"), node.treePolicyAction(true));
+            node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.backUp(new double[]{1.0});
+        }
+        assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+        assertEquals(new LMRAction("Left"), node.treePolicyAction(true));
     }
 }
