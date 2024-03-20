@@ -1,8 +1,6 @@
 package players.mcts;
 
-import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IActionHeuristic;
 import org.junit.Test;
 import utilities.Pair;
 
@@ -482,5 +480,82 @@ public class MCTSTreeSelectionTests {
         assertEquals(2.5 / 9.0 +  Math.sqrt(Math.log(22) / 9), actionValues[1], 0.01);
         assertEquals((0.4 * 4 + 4.0) / 8.0 +  Math.sqrt(Math.log(22) / 8), actionValues[2], 0.01);
         assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
+    }
+
+    @Test
+    public void progressiveWideningI() {
+        params.progressiveWideningConstant = 1.0;
+        params.progressiveWideningExponent = 0.5;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+
+        // The second action should become available at the 4th visits (2 = sqrt(N))
+        for (int i = 0; i < 3; i++) {
+            // Check that the correct number of actions are available (just the one)
+           // System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+            assertEquals(3, node.actionsFromOpenLoopState.size());
+            assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+            assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
+            node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.backUp(new double[]{-1.0});
+        }
+        assertEquals(3, node.actionsFromOpenLoopState.size());
+        assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+        assertTrue(node.actionsToConsider(node.actionsFromOpenLoopState).contains(new LMRAction("Left")));
+        assertTrue(node.actionsToConsider(node.actionsFromOpenLoopState).contains(new LMRAction("Right")));
+
+        // The third action should become available at the 9th visits (3 = sqrt(N))
+        for (int i = 3; i < 8; i++) {
+            // Check that the correct number of actions are available (just the one)
+            // System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+            assertEquals(3, node.actionsFromOpenLoopState.size());
+            assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+            node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+            node.backUp(new double[]{-1.0});
+        }
+        assertEquals(3, node.actionsFromOpenLoopState.size());
+        assertEquals(3, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+        assertTrue(node.actionsToConsider(node.actionsFromOpenLoopState).contains(new LMRAction("Left")));
+        assertTrue(node.actionsToConsider(node.actionsFromOpenLoopState).contains(new LMRAction("Right")));
+        assertTrue(node.actionsToConsider(node.actionsFromOpenLoopState).contains(new LMRAction("Middle")));
+    }
+
+
+    @Test
+    public void progressiveWideningII() {
+        params.progressiveWideningConstant = 2.0;
+        params.progressiveWideningExponent = 0.1;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+
+        // The third action should become available at the 58th visit (3/2)^10
+        for (int i = 0; i < 57; i++) {
+            // Check that the correct number of actions are available (just the one)
+            // System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+            assertEquals(3, node.actionsFromOpenLoopState.size());
+            assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+            assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
+            assertEquals(new LMRAction("Left"), node.actionsToConsider(node.actionsFromOpenLoopState).get(1));
+            node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.backUp(new double[]{-1.0});
+        }
+        assertEquals(3, node.actionsToConsider(node.actionsFromOpenLoopState).size());
+
     }
 }

@@ -446,8 +446,9 @@ public class SingleTreeNode {
             // It is perfectly possible that a previously expanded action falls out of the considered list
             // depending on the advantage heuristic used.
             // However, we do break ties in favour of already expanded actions
-            allAvailable.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
-            return new ArrayList<>(allAvailable.subList(0, actionsToConsider));
+            List<AbstractAction> sortedActions = new ArrayList<>(allAvailable);
+            sortedActions.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
+            return new ArrayList<>(sortedActions.subList(0, actionsToConsider));
         }
         return new ArrayList<>(allAvailable);
     }
@@ -1182,4 +1183,5 @@ public class SingleTreeNode {
             retValue.append(new TreeStatistics(root));
         return retValue.toString();
     }
+
 }
