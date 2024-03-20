@@ -662,7 +662,14 @@ public class SingleTreeNode {
         double uctValue = 0;
         int actionVisits = actionVisits(action);
         // Find child value
-        double childValue = getActionValueWithBias(action);
+        double childValue = getActionValue(action);
+
+        if (params.normaliseRewards && actionVisits > 0) {
+            childValue = normalise(childValue, root.lowReward, root.highReward);
+        }
+        if (params.progressiveBias > 0)
+            childValue += getBiasValue(action);
+
 
         // consider OMA term
         if (params.omaVisits > 0 && (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA)) {
@@ -694,10 +701,6 @@ public class SingleTreeNode {
                     }
                 }
             }
-        }
-
-        if (params.normaliseRewards && actionVisits > 0) {
-            childValue = normalise(childValue, root.lowReward, root.highReward);
         }
 
         // default to standard UCB
@@ -749,7 +752,7 @@ public class SingleTreeNode {
     }
 
     public double exp3Value(AbstractAction action) {
-        double actionValue = getActionValueWithBias(action);
+        double actionValue = getActionValue(action);
         int actionVisits = actionVisits(action);
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
@@ -757,6 +760,8 @@ public class SingleTreeNode {
             actionValue = normalise(actionValue, root.lowReward, root.highReward);
         else
             actionValue = actionValue - nodeValue(decisionPlayer);
+        if (params.progressiveBias > 0)
+           actionValue += getBiasValue(action);
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
 
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
@@ -771,7 +776,9 @@ public class SingleTreeNode {
     }
 
     public double rmValue(AbstractAction action) {
-        double actionValue = getActionValueWithBias(action);
+        double actionValue = getActionValue(action);
+        if (params.progressiveBias > 0)
+            actionValue += getBiasValue(action);
         double nodeValue = nodeValue(decisionPlayer);
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits;
@@ -793,15 +800,15 @@ public class SingleTreeNode {
     }
 
 
-    private double getActionValueWithBias(AbstractAction action) {
+    private double getActionValue(AbstractAction action) {
         int actionVisits = actionVisits(action);
         // if we are at 'expansion' phase, then we break ties by expansion policy (which is the same actionHeuristic as progressive bias)
-        double actionValue = actionVisits > 0 ? actionTotValue(action, decisionPlayer) / actionVisits : 0.0;
-        if (params.progressiveBias > 0) {
-            // then add/subtract any bias
-            actionValue += params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
-        }
-        return actionValue;
+        return actionVisits > 0 ? actionTotValue(action, decisionPlayer) / actionVisits : 0.0;
+    }
+
+    private double getBiasValue(AbstractAction action) {
+        int actionVisits = actionVisits(action);
+        return params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
 
     private int sampleFromPotentials(double[] values) {
