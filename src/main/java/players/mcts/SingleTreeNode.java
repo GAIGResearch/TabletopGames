@@ -592,7 +592,7 @@ public class SingleTreeNode {
                 }
                 case RegretMatching, EXP3, Hedge -> {
                     // check exploration first
-                    if (rnd.nextDouble() < params.exploreEpsilon) {
+                    if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = Utils.pdf(actionValues);

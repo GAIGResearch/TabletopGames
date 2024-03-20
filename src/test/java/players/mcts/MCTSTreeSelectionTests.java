@@ -197,21 +197,35 @@ public class MCTSTreeSelectionTests {
         // The Regret just needs to have the right ratio for the two options with positive regret
         assertEquals(0.09 * actionValues[1] / 0.19, actionValues[2], 0.01);
         // The final choice of action is then stochastic
-        int[] counts = new int[3];
+        int[] countsWithExploration = new int[3];
+        int[] countsWithoutExploration = new int[3];
         for (int i = 0; i < 1000; i++) {
-            AbstractAction action = node.treePolicyAction(true);
-            if (action.equals(new LMRAction("Left"))) {
-                counts[0]++;
-            } else if (action.equals(new LMRAction("Middle"))) {
-                counts[1]++;
+            AbstractAction exploreAction = node.treePolicyAction(true);
+            if (exploreAction.equals(new LMRAction("Left"))) {
+                countsWithExploration[0]++;
+            } else if (exploreAction.equals(new LMRAction("Middle"))) {
+                countsWithExploration[1]++;
             } else {
-                counts[2]++;
+                countsWithExploration[2]++;
+            }
+            AbstractAction bestAction = node.treePolicyAction(false);
+            if (bestAction.equals(new LMRAction("Left"))) {
+                countsWithoutExploration[0]++;
+            } else if (bestAction.equals(new LMRAction("Middle"))) {
+                countsWithoutExploration[1]++;
+            } else {
+                countsWithoutExploration[2]++;
             }
         }
-        assertEquals(1000, counts[0] + counts[1] + counts[2]);
-        assertEquals(100, counts[0], 50);
-        assertEquals(567, counts[1], 50);
-        assertEquals(333, counts[2], 50);
+        assertEquals(1000, countsWithExploration[0] + countsWithExploration[1] + countsWithExploration[2]);
+        assertEquals(100, countsWithExploration[0], 50);
+        assertEquals(611, countsWithExploration[1], 50);
+        assertEquals(289, countsWithExploration[2], 50);
+
+        assertEquals(1000, countsWithoutExploration[0] + countsWithoutExploration[1] + countsWithoutExploration[2]);
+        assertEquals(0, countsWithoutExploration[0], 0);
+        assertEquals(679, countsWithoutExploration[1], 50);
+        assertEquals(321, countsWithoutExploration[2], 50);
     }
 
 
@@ -349,9 +363,9 @@ public class MCTSTreeSelectionTests {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
-                return 1.0;
-            } else {
                 return 0.0;
+            } else {
+                return 1.0;
             }
         };
 
@@ -359,16 +373,16 @@ public class MCTSTreeSelectionTests {
         first10Visits(node);
 
         // With progressive bias, the action values are modified by the heuristic as follows:
-        // Left: +0.6 / 2 - 1.0 = -0.7
-        // Middle: +2.0 / 6 + 0.5 = 0.83
-        // Right: +0.0 / 5 + 0.4 = 0.4
+        // Left: +0.6 / 2 + 0.0 = 0.3
+        // Middle: +0.0 / 6 + 1.0 = 1.0
+        // Right: + 2.0 / 5 + XX = 0.4 + XX
         // These should be added after the normalisation (otherwise normalisation at the start could swing the result far too much later in the search)
         // And the normalisation only takes place using the actual back-propagated rewards
         double[] actionValues = node.actionValues(baseActions);
-        assertEquals(0.0 + Math.sqrt(Math.log(10)) + 0.3, actionValues[0], 0.01);
-        assertEquals(1.0 + Math.sqrt(Math.log(10) / 5) + 0.333, actionValues[1], 0.01);
-        assertEquals(1.4 / 1.5 + Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
-        assertEquals(new LMRAction("Middle"), node.treePolicyAction(false));
+        assertEquals(0.3 + Math.sqrt(Math.log(10)), actionValues[0], 0.01);
+        assertEquals(1.0 + Math.sqrt(Math.log(10) / 5) , actionValues[1], 0.01);
+        assertEquals(0.4 + 1.4 / 1.5 + Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+        assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
     }
 
 }
