@@ -20,7 +20,6 @@ public class RolloutTerminationTests {
             GameType.Dominion,
             GameType.Virus,
             GameType.Poker,
-     //       GameType.DiceMonastery,
             GameType.Catan,
             GameType.ColtExpress,
             GameType.CantStop,
@@ -154,6 +153,27 @@ public class RolloutTerminationTests {
         }
     }
 
+    @Test
+    public void test_MultiTree_DEFAULT() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
 
-
+    @Test
+    public void test_MultiTree_END_TURN() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
 }

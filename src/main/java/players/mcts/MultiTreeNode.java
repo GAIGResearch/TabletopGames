@@ -83,6 +83,7 @@ public class MultiTreeNode extends SingleTreeNode {
 
         actionsInTree = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
+        int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * openLoopState.getNPlayers() : params.rolloutLength;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
@@ -132,7 +133,7 @@ public class MultiTreeNode extends SingleTreeNode {
             // we terminate if the game is over, or if we have exceeded our rollout count AND we have either expanded a node
             // for the decisionPlayer, or they are out of the game (in which case they will never get to expand a node)
         } while (currentState.isNotTerminal() &&
-                !(actionsInRollout.size() >= params.rolloutLength &&
+                !(actionsInRollout.size() >= maxRollout &&
                         (maxDepthReached[decisionPlayer] || nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
 
         // Evaluate final state and return normalised score

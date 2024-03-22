@@ -873,21 +873,18 @@ public class SingleTreeNode {
      * @param rollerState - current state
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState) {
+    protected boolean finishRollout(AbstractGameState rollerState) {
         if (!rollerState.isNotTerminal())
             return true;
         int currentActor = rollerState.getTurnOwner();
-        if (rolloutDepth >= params.rolloutLength) {
-            switch (params.rolloutTermination) {
-                case DEFAULT:
-                    return true;
-                case END_TURN:
-                    return lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
-                case START_TURN:
-                    return lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
-                case END_ROUND:
-                    return rollerState.getRoundCounter() != roundAtStartOfRollout;
-            }
+        int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * rollerState.getNPlayers() : params.rolloutLength;
+        if (rolloutDepth >= maxRollout) {
+            return switch (params.rolloutTermination) {
+                case DEFAULT -> true;
+                case END_TURN -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
+                case START_TURN -> lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
+                case END_ROUND -> rollerState.getRoundCounter() != roundAtStartOfRollout;
+            };
         }
         return false;
     }
