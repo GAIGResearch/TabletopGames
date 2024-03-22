@@ -591,4 +591,34 @@ public class MCTSTreeSelectionTests {
         assertEquals(31, node.getActionStats(new LMRAction("Right")).validVisits);
         assertEquals(31, node.getActionStats(new LMRAction("Middle")).validVisits);
     }
+
+    @Test
+    public void fpuWithpUCT() {
+        // Check that pUCT is applied after FPU, so that we get effective pruning of values
+        params.firstPlayUrgency = 2.0;
+        params.pUCT = true;
+        params.pUCTTemperature = 0.0;
+        params.actionHeuristic = (a, s) -> {
+            if (a.equals(new LMRAction("Left"))) {
+                return 0.3;
+            } else if (a.equals(new LMRAction("Middle"))) {
+                return 0.0;
+            } else {
+                return 1.0;
+            }
+        };
+        setupPlayer();
+
+        double[] actionValues = node.actionValues(baseActions);
+        assertEquals(2.0 * 0.3 / 1.3, actionValues[0], 0.01);
+        assertEquals(0.0, actionValues[1], 0.01);
+        assertEquals(2.0 / 1.3, actionValues[2], 0.01);
+
+        first10Visits(node);
+        assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
+        actionValues = node.actionValues(baseActions);
+        assertEquals( 0.0 + 0.3 / 1.3 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
+        assertEquals( 1.0, actionValues[1], 0.01);
+        assertEquals( 1.4/1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+    }
 }

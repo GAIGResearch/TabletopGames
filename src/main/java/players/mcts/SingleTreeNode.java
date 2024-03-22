@@ -736,12 +736,11 @@ public class SingleTreeNode {
                 case AlphaGo -> params.K * Math.sqrt(effectiveTotalVisits) / (actionVisits + 1.0);
                 default -> Math.sqrt(Math.log(effectiveTotalVisits) / actionVisits);
             };
-
-            if (params.pUCT) {
-                // in this case we multiply the exploration term by the pUCT factor (the probability that the action would be taken by
-                // our actionHeuristic). These were calculated in setActionsFromOpenLoopState
-                explorationTerm *= actionPDFEstimates.get(action);
-            }
+        }
+        if (params.pUCT) {
+            // in this case we multiply the exploration term by the pUCT factor (the probability that the action would be taken by
+            // our actionHeuristic). These were calculated in setActionsFromOpenLoopState
+            explorationTerm *= actionPDFEstimates.get(action);
         }
 
         // Paranoid/SelfOnly control determines childValue here
