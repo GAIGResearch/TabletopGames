@@ -87,7 +87,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     }
 
 
-    private void createRootNode(AbstractGameState gameState) {
+    protected void createRootNode(AbstractGameState gameState) {
         if (getParameters().opponentTreePolicy == MultiTree)
             root = new MultiTreeNode(this, gameState, rnd);
         else

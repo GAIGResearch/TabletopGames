@@ -42,7 +42,7 @@ public class SingleTreeNode {
     // variables to track rollout - these were originally local in rollout(); but
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
-    protected int rolloutDepth, roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
+    protected int roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
     Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
     Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
@@ -515,7 +515,6 @@ public class SingleTreeNode {
     protected void advanceState(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // we execute a copy(), because this can change the action, so we then don't find the node later!
         if (inRollout) {
-            rolloutDepth++;
             lastActorInRollout = gs.getCurrentPlayer();
             root.actionsInRollout.add(new Pair<>(lastActorInRollout, act));
         } else {
@@ -546,7 +545,6 @@ public class SingleTreeNode {
                 throw new AssertionError("Should always have at least one action possible..." + (action != null ? " Last action: " + action : ""));
             action = oppModel.getAction(gs, availableActions);
             if (inRollout) {
-                rolloutDepth++;
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
                 lastActorInRollout = gs.getCurrentPlayer();
             }
@@ -827,7 +825,6 @@ public class SingleTreeNode {
      * @return - value of rollout.
      */
     protected double[] rollout(int lastActor) {
-        rolloutDepth = 0; // counting from end of tree
         lastActorInRollout = lastActor;
         roundAtStartOfRollout = openLoopState.getRoundCounter();
         turnAtStartOfRollout = openLoopState.getTurnCounter();
@@ -878,11 +875,12 @@ public class SingleTreeNode {
             return true;
         int currentActor = rollerState.getTurnOwner();
         int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * rollerState.getNPlayers() : params.rolloutLength;
-        if (rolloutDepth >= maxRollout) {
+        if (root.actionsInRollout.size() >= maxRollout) {
             return switch (params.rolloutTermination) {
                 case DEFAULT -> true;
-                case END_TURN -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
-                case START_TURN -> lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
+                case END_ACTION -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
+                case START_ACTION -> lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
+                case END_TURN -> rollerState.getTurnCounter() != turnAtStartOfRollout;
                 case END_ROUND -> rollerState.getRoundCounter() != roundAtStartOfRollout;
             };
         }
