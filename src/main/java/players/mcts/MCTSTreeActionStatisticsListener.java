@@ -76,7 +76,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
             actionTargets.put("DEPTH", new HashMap<>());
             actionTargets.put("NODE_VISITS", new HashMap<>());
             actionTargets.put("ACTION_VISITS", new HashMap<>());
-            actionTargets.put("ACTIONS", new HashMap<>());
+            actionTargets.put("ACTIONS_TOTAL", new HashMap<>());
             actionTargets.put("PLAYER", new HashMap<>());
 
             AbstractAction bestAction = null;
@@ -85,7 +85,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
                 actionTargets.get("DEPTH").put(action, (double) node.depth);
                 actionTargets.get("NODE_VISITS").put(action, (double) node.getVisits());
                 actionTargets.get("ACTION_VISITS").put(action, (double) node.actionVisits(action));
-                actionTargets.get("ACTIONS").put(action, (double) actionsFromState.size());
+                actionTargets.get("ACTIONS_TOTAL").put(action, (double) actionsFromState.size());
                 actionTargets.get("PLAYER").put(action, (double) player);
                 if (node.actionValues.get(action) == null) {
                     actionTargets.get("CHOSEN").put(action, 0.0);  // we have no data for this action
