@@ -110,7 +110,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCT", false);
         addTunableParameter("pUCTTemperature", 0.0);
-
+        addTunableParameter("initialiseVisits", 0);
     }
 
     @Override
@@ -170,6 +170,7 @@ public class MCTSParams extends PlayerParameters {
         opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
         // we then null those elements of params which are constructed (lazily) from the above
         firstPlayUrgency = (double) getParameterValue("FPU");
+        initialiseVisits = (int) getParameterValue("initialiseVisits");
         opponentModel = null;
         rolloutPolicy = null;
     }
