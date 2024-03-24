@@ -213,6 +213,10 @@ public class SingleTreeNode {
                     if (params.initialiseVisits > 0) {
                         ActionStats stats = actionValues.get(action);
                         double actionEstimate = actionValueEstimates.getOrDefault(action, 0.0);
+                        if (params.normaliseRewards) {
+                            if (actionEstimate > root.highReward) root.highReward = actionEstimate;
+                            if (actionEstimate < root.lowReward) root.lowReward = actionEstimate;
+                        }
                         int nActions = Math.max(actionValues.size(), actionsFromOpenLoopState.size());
                         stats.nVisits = params.initialiseVisits;
                         stats.validVisits = params.initialiseVisits * nActions;
