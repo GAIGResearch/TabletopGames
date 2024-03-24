@@ -73,6 +73,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
             actionTargets.put("CHOSEN", new HashMap<>());
             actionTargets.put("VISIT_PROPORTION", new HashMap<>());
             actionTargets.put("ADVANTAGE", new HashMap<>());
+            actionTargets.put("ACTION_VALUE", new HashMap<>());
             actionTargets.put("DEPTH", new HashMap<>());
             actionTargets.put("NODE_VISITS", new HashMap<>());
             actionTargets.put("ACTION_VISITS", new HashMap<>());
@@ -91,9 +92,11 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
                     actionTargets.get("CHOSEN").put(action, 0.0);  // we have no data for this action
                     actionTargets.get("VISIT_PROPORTION").put(action, 0.0);  // we have no data for this action
                     actionTargets.get("ADVANTAGE").put(action, 0.0);  // we have no data for this action
+                    actionTargets.get("ACTION_VALUE").put(action, 0.0);  // we have no data for this action
                     continue;
                 }
                 double actionValue = node.actionTotValue(action, player) / node.actionVisits(action);
+                actionTargets.get("ACTION_VALUE").put(action, actionValue);
                 if (actionValue > bestValue) {
                     bestValue = actionValue;
                     bestAction = action;

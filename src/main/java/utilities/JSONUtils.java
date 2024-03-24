@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -120,6 +121,9 @@ public class JSONUtils {
 
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
+        } catch (InvocationTargetException e) {
+            System.out.println(e.getTargetException().getMessage());
+            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
