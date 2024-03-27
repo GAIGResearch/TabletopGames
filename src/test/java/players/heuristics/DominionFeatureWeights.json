@@ -1,0 +1,10 @@
+{
+  "victoryPoints": 0.1,
+  "treasureValue": 0.2,
+  "actionCards": 0.0,
+  "treasureInHand": 0.0,
+  "estateCount": 0.0,
+  "estateCount:victoryPoints": 0.5,
+  "estateCount:actionCards": 1.0,
+  "totalCards:estateCount:buysLeft": 1.0
+}

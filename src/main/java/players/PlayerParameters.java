@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class PlayerParameters extends TunableParameters {
 
-    public double noiseEpsilon;
+    public double noiseEpsilon = 1e-6;
 
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;

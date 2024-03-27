@@ -203,6 +203,14 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         possibleValues.put(name, new ArrayList<>(allSettings));
         currentValues.put(name, defaultValue);
     }
+    public <T> void addTunableParameter(String name, Class<?> parameterClass, T defaultValue, List<T> allSettings) {
+        if (!parameterNames.contains(name)) parameterNames.add(name);
+        defaultValues.put(name, defaultValue);
+        parameterTypes.put(name, parameterClass);
+        possibleValues.put(name, new ArrayList<>(allSettings));
+        currentValues.put(name, defaultValue);
+    }
+
 
     public <T> void addTunableParameter(String name, Class<T> classType) {
         if (!parameterNames.contains(name)) parameterNames.add(name);
@@ -283,7 +291,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             oldParamNames.forEach(currentValues::remove);
             for (String name : subParams.getParameterNames()) {
                 String liftedName = parameterName + "." + name;
-                addTunableParameter(liftedName, subParams.getDefaultParameterValue(name), subParams.getPossibleValues(name));
+                addTunableParameter(liftedName, subParams.getParameterTypes().get(name), subParams.getDefaultParameterValue(name), subParams.getPossibleValues(name));
                 setParameterValue(liftedName, subParams.getParameterValue(name));
             }
         }

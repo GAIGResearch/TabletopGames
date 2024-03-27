@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 
 import java.util.List;
 
-public interface IActionHeuristic {
+public interface IActionHeuristic{
     IActionHeuristic nullReturn = (action, state) -> 0;
 
     /**

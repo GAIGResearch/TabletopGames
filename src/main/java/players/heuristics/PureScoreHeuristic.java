@@ -17,4 +17,13 @@ public class PureScoreHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         return gs.getGameScore(playerId);
     }
+
+    @Override
+    public double minValue() {
+        return Double.NEGATIVE_INFINITY;
+    }
+    @Override
+    public double maxValue() {
+        return Double.POSITIVE_INFINITY;
+    }
 }

@@ -170,6 +170,45 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
+    public static int sampleFrom(double[] probabilities, double random) {
+        double cdf = 0.0;
+        for (int i = 0; i < probabilities.length; i++) {
+            cdf += probabilities[i];
+            if (cdf >= random)
+                return i;
+        }
+        throw new AssertionError("Should never get here!");
+    }
+
+    public static double[] pdf(double[] potentials) {
+        // convert potentials into legal pdf
+        double[] pdf = new double[potentials.length];
+        double sum = Arrays.stream(potentials).sum();
+        if (sum <= 0.0)  // default to uniform distribution
+            return Arrays.stream(potentials).map(d -> 1.0 / potentials.length).toArray();
+        for (int i = 0; i < potentials.length; i++) {
+            if (potentials[i] < 0.0) {
+                throw new IllegalArgumentException("Negative potential in pdf");
+            }
+            pdf[i] = potentials[i] / sum;
+        }
+        return pdf;
+    }
+
+    public static double[] exponentiatePotentials(double[] potentials, double temperature) {
+        double[] positivePotentials = new double[potentials.length];
+        double largestPotential = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < potentials.length; i++) {
+            if (potentials[i] > largestPotential) {
+                largestPotential = potentials[i];
+            }
+        }
+        for (int i = 0; i < potentials.length; i++) {
+            positivePotentials[i] = Math.exp((potentials[i] - largestPotential) / temperature);
+        }
+        return positivePotentials;
+    }
+
     /**
      * we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
      * exploreEpsilon is the percentage chance of taking a random action
@@ -354,6 +393,7 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
+
     public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
@@ -535,7 +575,6 @@ public abstract class Utils {
     public static List<String> enumNames(Enum<?> e) {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
-
 
 
 }

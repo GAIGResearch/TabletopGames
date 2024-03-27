@@ -6,13 +6,16 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.mcts.MultiTreeNode;
 import players.mcts.SingleTreeNode;
+import utilities.Utils;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 
 public class TestMCTSPlayer extends MCTSPlayer {
 
@@ -38,6 +41,14 @@ public class TestMCTSPlayer extends MCTSPlayer {
         if (root instanceof MultiTreeNode)
             return ((MultiTreeNode) root).getRoot(player);
         return root;
+    }
+
+    @Override
+    protected void createRootNode(AbstractGameState gameState) {
+        if (getParameters().opponentTreePolicy == MultiTree)
+            root = new MTNRollout(this, gameState, rnd);
+        else
+            super.createRootNode(gameState);
     }
 
 }
