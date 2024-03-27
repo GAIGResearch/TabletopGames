@@ -5,7 +5,7 @@
   "treasureInHand": 0.0,
   "estateCount": 0.0,
   "estateCount:victoryPoints": 0.5,
-  "estateCount:actionCards": 1.0,
+  "estateCount:actionCards": 1,
   "totalCards:estateCount:buysLeft": 1.0,
   "BIAS" : -10.0
 }

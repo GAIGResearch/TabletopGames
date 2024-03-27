@@ -106,10 +106,22 @@ public interface ICoefficients {
                     }
                     featureIndices[i] = featureIndex;
                 }
-                interactionCoefficients.put(featureIndices, (Double) json.get(key));
+                Object value = json.get(key);
+                if (value instanceof Double)
+                    interactionCoefficients.put(featureIndices, (Double) value);
+                else if (value instanceof Long)
+                    interactionCoefficients.put(featureIndices, ((Long) value).doubleValue());
+                else
+                    throw new AssertionError("Unexpected value for " + keyStr + " : " + value);
             } else {
                 if (keyStr.equals("BIAS")) {
-                    coefficients[0] = (Double) json.get(key);
+                    Object value = json.get(key);
+                    if (value instanceof Double)
+                        coefficients[0] = (Double) value;
+                    else if (value instanceof Long)
+                        coefficients[0] = ((Long) value).doubleValue();
+                    else
+                        throw new AssertionError("Unexpected value for BIAS : " + value);
                 } else {
                     int featureIndex = indexOf(keyStr);
                     if (featureIndex == -1) {
