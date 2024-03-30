@@ -172,13 +172,16 @@ public class SingleTreeNode {
             if (params.pUCT || params.progressiveBias > 0 || params.initialiseVisits > 0 || params.progressiveWideningConstant >= 1.0) {
                 // We only need to calculate actionValueEstimates if we are going to be using the data in one of these four variants
                 // If not, then we can save processing time by not calculating them
-                // Unless we are using MAST, in which case these statistics will change over time; so we somewhat arbitrarily
-                // refresh them every 20 visits
-                if (params.expansionPolicy == MAST && nVisits % 20 == 0) {
+                // actionHeuristicRecalculationThreshold defines how often we recalculate the action values
+                // if the actionHeuristic is fixed, then this should be set to a very high value
+                // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
+                // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
+                // at a high additional computational cost.
+                if (params.expansionPolicy == MAST && nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                     actionValueEstimates = actionsFromOpenLoopState.stream()
                             .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
                 } else if (params.actionHeuristic != null) {
-                    if (actionValueEstimates.isEmpty()) {
+                    if (actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                         // in this case we initialise all action values
                         double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
                         for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {

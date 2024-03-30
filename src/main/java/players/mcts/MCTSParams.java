@@ -45,11 +45,7 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
-    public IActionHeuristic actionHeuristic;
-    public double progressiveBias = 0.0;
     public int omaVisits = 0;
-    public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
-    public double progressiveWideningExponent = 0.0;
     public boolean normaliseRewards = true;  // This will automatically normalise rewards to be in the range [0,1]
     // so that K does not need to be tuned to the precise scale of reward in a game
     // It also means that at the end of the game (when rewards are possibly closer to each other, they are still scaled to [0, 1]
@@ -62,11 +58,15 @@ public class MCTSParams extends PlayerParameters {
     public boolean MCGSExpandAfterClash = true;
     public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
+    public IActionHeuristic actionHeuristic;
+    public int actionHeuristicRecalculationThreshold = 20;
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
     public double pUCTTemperature = 0.0;  // If greater than zero we construct a Boltzmann distribution over actions based on the action heuristic
     // if zero (or less) then we use the action heuristic values directly, setting any negative values to zero)
     public int initialiseVisits = 0;  // This is the number of visits to initialise the MCTS tree with (using the actionHeuristic)
-
+    public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
+    public double progressiveWideningExponent = 0.0;
+    public double progressiveBias = 0.0;
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -111,6 +111,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("pUCT", false);
         addTunableParameter("pUCTTemperature", 0.0);
         addTunableParameter("initialiseVisits", 0);
+        addTunableParameter("actionHeuristicRecalculation", 20);
     }
 
     @Override
@@ -171,6 +172,7 @@ public class MCTSParams extends PlayerParameters {
         // we then null those elements of params which are constructed (lazily) from the above
         firstPlayUrgency = (double) getParameterValue("FPU");
         initialiseVisits = (int) getParameterValue("initialiseVisits");
+        actionHeuristicRecalculationThreshold = (int) getParameterValue("actionHeuristicRecalculation");
         opponentModel = null;
         rolloutPolicy = null;
     }
