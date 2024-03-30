@@ -169,20 +169,45 @@ public class SingleTreeNode {
             if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if (params.expansionPolicy == MAST) {
-                actionValueEstimates = actionsFromOpenLoopState.stream()
-                        .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
-            } else {
-                if (params.actionHeuristic != null) {
-                    double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
-                    actionValueEstimates = new HashMap<>();
-                    for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
-                        actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i]);
+            if (params.pUCT || params.progressiveBias > 0 || params.initialiseVisits > 0 || params.progressiveWideningConstant >= 1.0) {
+                // We only need to calculate actionValueEstimates if we are going to be using the data in one of these four variants
+                // If not, then we can save processing time by not calculating them
+                // Unless we are using MAST, in which case these statistics will change over time; so we somewhat arbitrarily
+                // refresh them every 20 visits
+                if (params.expansionPolicy == MAST && nVisits % 20 == 0) {
+                    actionValueEstimates = actionsFromOpenLoopState.stream()
+                            .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
+                } else if (params.actionHeuristic != null) {
+                    if (actionValueEstimates.isEmpty()) {
+                        // in this case we initialise all action values
+                        double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
+                        for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
+                            actionValueEstimates.put(actionsFromOpenLoopState.get(i), actionValues[i]);
+                        }
+                    } else {
+                        // we just initialise the new actions
+                        for (AbstractAction action : actionsFromOpenLoopState) {
+                            if (!actionValueEstimates.containsKey(action)) {
+                                if (params.expansionPolicy == MAST) {
+                                    actionValueEstimates.put(action, root.MASTFunction.applyAsDouble(action, actionState));
+                                } else {
+                                    if (params.actionHeuristic != null) {
+                                        actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState));
+                                    }
+                                }
+                            }
+                        }
                     }
+                } else {
+                    throw new AssertionError("We have no heuristic to evaluate actions, and have pUCT/PB/PW or visitInitialisation set");
                 }
             }
             if (params.pUCT) {
                 // construct the pdf for the pUCT selection
+                // This ignores Progressive widening. This should not be a major issue, but means the pdf is calculated
+                // over all possible actions, rather than just the ones we are considering
+                // Generally if using pUCT we would expect FPU to also be used to give effective pruning, rather than the
+                // explicit pruning of Progressive Widening.
                 double[] pdf;
                 actionPDFEstimates = new HashMap<>();
                 if (params.pUCTTemperature > 0.0) {
@@ -211,6 +236,9 @@ public class SingleTreeNode {
                     // Then we seed the statistics with heuristic biases (if so parameterised)
                     // This assumes that we have had params.initialiseVisits trials of each action before we start
                     if (params.initialiseVisits > 0) {
+                        // This also ignores Progressive widening and initialises all possible actions
+                        // As with pUCT, this won't cause any major issues, but will mean that the effective node visits
+                        // will be higher than the visits of the considered actions.
                         ActionStats stats = actionValues.get(action);
                         double actionEstimate = actionValueEstimates.getOrDefault(action, 0.0);
                         if (params.normaliseRewards) {
@@ -333,7 +361,8 @@ public class SingleTreeNode {
         updateMASTStatistics(actionsInTree, actionsInRollout, delta);
     }
 
-    protected void updateMASTStatistics(List<Pair<Integer, AbstractAction>> tree, List<Pair<Integer, AbstractAction>> rollout, double[] value) {
+    protected void updateMASTStatistics
+            (List<Pair<Integer, AbstractAction>> tree, List<Pair<Integer, AbstractAction>> rollout, double[] value) {
         if (params.useMAST) {
             List<Pair<Integer, AbstractAction>> MASTActions = new ArrayList<>();
             switch (params.MAST) {
@@ -451,7 +480,8 @@ public class SingleTreeNode {
             // depending on the advantage heuristic used.
             // However, we do break ties in favour of already expanded actions
             List<AbstractAction> sortedActions = new ArrayList<>(allAvailable);
-            sortedActions.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) - actionValues.get(a).nVisits * 1e-6));
+            sortedActions.sort(Comparator.comparingDouble(a -> -actionValueEstimates.getOrDefault(a, 0.0) -
+                    actionValues.getOrDefault(a, new ActionStats(1)).nVisits * 1e-6));
             return new ArrayList<>(sortedActions.subList(0, actionsToConsider));
         }
         return new ArrayList<>(allAvailable);
@@ -767,7 +797,7 @@ public class SingleTreeNode {
         else
             actionValue = actionValue - nodeValue(decisionPlayer);
         if (params.progressiveBias > 0)
-           actionValue += getBiasValue(action);
+            actionValue += getBiasValue(action);
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
 
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
@@ -965,9 +995,10 @@ public class SingleTreeNode {
         nVisits++;
         // Here we look at actionsFromOpenLoopState to see which ones were valid
         // when we passed through, and keep track of valid visits
+        List<AbstractAction> actionsToConsider = actionsToConsider(actionsFromOpenLoopState);
 
         // then we update the statistics for the action taken
-        if (!actionsFromOpenLoopState.contains(actionTaken)) {
+        if (!actionsToConsider.contains(actionTaken)) {
             if (params.opponentTreePolicy != MCGS && params.opponentTreePolicy != MCGSSelfOnly)
                 throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
 
@@ -978,7 +1009,7 @@ public class SingleTreeNode {
                 stats.validVisits++;
             }
         } else {
-            for (AbstractAction action : actionsFromOpenLoopState) {
+            for (AbstractAction action : actionsToConsider) {
                 if (!actionValues.containsKey(action))
                     actionValues.put(action, new ActionStats(result.length));
                 actionValues.get(action).validVisits++;

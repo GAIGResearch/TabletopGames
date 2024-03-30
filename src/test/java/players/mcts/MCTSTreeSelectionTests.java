@@ -500,12 +500,17 @@ public class MCTSTreeSelectionTests {
         // The second action should become available at the 4th visits (2 = sqrt(N))
         for (int i = 0; i < 3; i++) {
             // Check that the correct number of actions are available (just the one)
-           // System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+      //      System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
             assertEquals(3, node.actionsFromOpenLoopState.size());
             assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
             assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
             node.backUp(new double[]{-1.0});
+
+            // then check that only the available actions are updated
+            assertEquals(i+1, node.getActionStats(new LMRAction("Right")).validVisits);
+            assertEquals(i == 2 ? 1 : 0, node.getActionStats(new LMRAction("Left")).validVisits);
+            assertEquals(0, node.getActionStats(new LMRAction("Middle")).validVisits);
         }
         assertEquals(3, node.actionsFromOpenLoopState.size());
         assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
@@ -585,11 +590,10 @@ public class MCTSTreeSelectionTests {
         }
         assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
         assertEquals(new LMRAction("Left"), node.treePolicyAction(true));
-        // All 3 actions were formally available - so we will strongly investigate new items once they
-        // become available
-        assertEquals(31, node.getActionStats(new LMRAction("Left")).validVisits);
+        // Actions are only formally available for the visits where they are considered
+        assertEquals(1, node.getActionStats(new LMRAction("Left")).validVisits);
         assertEquals(31, node.getActionStats(new LMRAction("Right")).validVisits);
-        assertEquals(31, node.getActionStats(new LMRAction("Middle")).validVisits);
+        assertEquals(0, node.getActionStats(new LMRAction("Middle")).validVisits);
     }
 
     @Test

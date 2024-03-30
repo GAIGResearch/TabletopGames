@@ -19,7 +19,10 @@ public class MASTPlusActionHeuristic extends MASTActionHeuristic {
 
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state) {
-        return (1 - beta) * super.evaluateAction(action, state) + beta * externalHeuristic.evaluateAction(action, state);
+        if (beta > 0.0)  // avoid potentially expensive computation if beta is 0
+            return (1 - beta) * super.evaluateAction(action, state) + beta * externalHeuristic.evaluateAction(action, state);
+        else
+            return super.evaluateAction(action, state);
     }
 
 }
