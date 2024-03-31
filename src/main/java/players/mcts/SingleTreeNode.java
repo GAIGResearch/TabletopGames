@@ -16,6 +16,7 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
 import static players.mcts.MCTSEnums.Strategies.MAST;
+import static players.mcts.MCTSEnums.Strategies.RANDOM;
 import static utilities.Utils.*;
 
 public class SingleTreeNode {
@@ -66,8 +67,7 @@ public class SingleTreeNode {
     Map<AbstractAction, SingleTreeNode[]> children = new LinkedHashMap<>();
     Map<AbstractAction, ActionStats> actionValues = new HashMap<>();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> actionValueEstimates.getOrDefault(a, 0.0);
-    ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
+    // ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // The total value of all trajectories through this node (one element per player)
     private Supplier<? extends SingleTreeNode> factory;
     // Total value of this node
@@ -89,8 +89,8 @@ public class SingleTreeNode {
         retValue.MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             retValue.MASTStatistics.add(new HashMap<>());
-        MASTActionHeuristic MASTHeuristic = new MASTActionHeuristic(retValue.MASTStatistics, retValue.params.MASTActionKey, retValue.params.MASTDefaultValue);
-        retValue.MASTFunction = MASTHeuristic::evaluateAction;
+        if (retValue.params.useMASTAsActionHeuristic)
+            retValue.params.actionHeuristic = new MASTActionHeuristic(retValue.MASTStatistics, retValue.params.MASTActionKey, retValue.params.MASTDefaultValue);
         retValue.instantiate(null, null, state);
         return retValue;
     }
@@ -169,18 +169,16 @@ public class SingleTreeNode {
             if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if (params.pUCT || params.progressiveBias > 0 || params.initialiseVisits > 0 || params.progressiveWideningConstant >= 1.0) {
-                // We only need to calculate actionValueEstimates if we are going to be using the data in one of these four variants
+            if ((params.actionHeuristic != null && nVisits < actionsFromOpenLoopState.size())
+                    || params.pUCT || params.progressiveBias > 0 || params.initialiseVisits > 0 || params.progressiveWideningConstant >= 1.0) {
+                // We only need to calculate actionValueEstimates if we are going to be using the data in one of these variants
                 // If not, then we can save processing time by not calculating them
                 // actionHeuristicRecalculationThreshold defines how often we recalculate the action values
                 // if the actionHeuristic is fixed, then this should be set to a very high value
                 // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
                 // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
                 // at a high additional computational cost.
-                if (params.expansionPolicy == MAST && nVisits % params.actionHeuristicRecalculationThreshold == 0) {
-                    actionValueEstimates = actionsFromOpenLoopState.stream()
-                            .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
-                } else if (params.actionHeuristic != null) {
+                if (params.actionHeuristic != null) {
                     if (actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                         // in this case we initialise all action values
                         double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
@@ -191,12 +189,8 @@ public class SingleTreeNode {
                         // we just initialise the new actions
                         for (AbstractAction action : actionsFromOpenLoopState) {
                             if (!actionValueEstimates.containsKey(action)) {
-                                if (params.expansionPolicy == MAST) {
-                                    actionValueEstimates.put(action, root.MASTFunction.applyAsDouble(action, actionState));
-                                } else {
-                                    if (params.actionHeuristic != null) {
-                                        actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState));
-                                    }
+                                if (params.actionHeuristic != null) {
+                                    actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState));
                                 }
                             }
                         }
@@ -490,37 +484,6 @@ public class SingleTreeNode {
         return new ArrayList<>(allAvailable);
     }
 
-    /**
-     * Expands the node by creating a new child node for the action taken and adding to the tree.
-     *
-     * @return - new child node.
-     */
-    protected AbstractAction expand(List<AbstractAction> notChosen) {
-        // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
-        // else pick a random unchosen action
-
-        Collections.shuffle(notChosen, rnd);
-
-        AbstractAction chosen = null;
-
-        ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = params.expansionPolicy == MAST ? MASTFunction : advantageFunction;
-        if (valueFunction != null) {
-            double bestValue = Double.NEGATIVE_INFINITY;
-            for (AbstractAction action : notChosen) {
-                double estimate = valueFunction.applyAsDouble(action, openLoopState);
-                if (estimate > bestValue) {
-                    bestValue = estimate;
-                    chosen = action;
-                }
-            }
-        } else {
-            chosen = notChosen.get(0);
-        }
-        if (chosen == null)
-            throw new AssertionError("We have somehow failed to pick an action to expand");
-
-        return chosen;
-    }
 
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node

@@ -32,7 +32,7 @@ public class MCTSParams extends PlayerParameters {
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 1.0;
     public double hedgeBoltzmann = 100;
-    public MCTSEnums.Strategies expansionPolicy = RANDOM;
+    public boolean useMASTAsActionHeuristic = false;
     public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
@@ -91,9 +91,9 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
+        addTunableParameter("useMASTAsActionHeuristic", false);
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
         addTunableParameter("normaliseRewards", true);
@@ -133,7 +133,6 @@ public class MCTSParams extends PlayerParameters {
             // in this case TREE is equivalent to SIMPLE
             selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         }
-        expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
         MASTBoltzmann = (double) getParameterValue("MASTBoltzmann");
@@ -156,10 +155,7 @@ public class MCTSParams extends PlayerParameters {
         pUCTTemperature = (double) getParameterValue("pUCTTemperature");
         if (information == Closed_Loop)
             discardStateAfterEachIteration = false;
-        if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
-                || (progressiveBias > 0.0 && actionHeuristic == null)) {
-            useMAST = true;
-        }
+
         MASTActionKey = (IActionKey) getParameterValue("MASTActionKey");
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
@@ -175,6 +171,8 @@ public class MCTSParams extends PlayerParameters {
         actionHeuristicRecalculationThreshold = (int) getParameterValue("actionHeuristicRecalculation");
         opponentModel = null;
         rolloutPolicy = null;
+        useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
+        useMAST = useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST;
     }
 
     @Override
