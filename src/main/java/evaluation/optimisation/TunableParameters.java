@@ -74,6 +74,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
 
         // We should also check that there are no other properties in there
         allParams.add("class");
+        allParams.add("args"); // this may be present if there are non-configurable parameters needed for the constructor
         for (Object key : rawData.keySet()) {
             if (key instanceof String && !allParams.contains(key)) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);

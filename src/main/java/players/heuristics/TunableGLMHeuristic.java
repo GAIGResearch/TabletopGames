@@ -1,12 +1,17 @@
 package players.heuristics;
 
+import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
+import core.interfaces.IActionHeuristic;
 import core.interfaces.ICoefficients;
+import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
 
+import java.util.List;
 import java.util.Map;
 
-public class TunableGLMHeuristic extends TunableParameters implements ICoefficients {
+public class TunableGLMHeuristic extends TunableParameters implements IActionHeuristic, IStateHeuristic {
 
     public final GLMHeuristic heuristic;
 
@@ -48,23 +53,29 @@ public class TunableGLMHeuristic extends TunableParameters implements ICoefficie
     }
 
     @Override
-    public String[] names() {
-        return heuristic.names();
-    }
-
-    @Override
-    public double[] coefficients() {
-        return heuristic.coefficients;
-    }
-
-    @Override
-    public Map<int[], Double> interactionCoefficients() {
-        return heuristic.interactionCoefficients;
-    }
-
-    @Override
     protected AbstractParameters _copy() {
         return new TunableGLMHeuristic(heuristic);
+    }
+
+    @Override
+    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+        if (heuristic instanceof IActionHeuristic actionHeuristic)
+            return actionHeuristic.evaluateAction(action, state);
+        throw new AssertionError("Heuristic is not an IActionHeuristic");
+    }
+
+    @Override
+    public double[] evaluateAllActions(List<AbstractAction> actions, AbstractGameState state) {
+        if (heuristic instanceof IActionHeuristic actionHeuristic)
+            return actionHeuristic.evaluateAllActions(actions, state);
+        throw new AssertionError("Heuristic is not an IActionHeuristic");
+    }
+
+    @Override
+    public double evaluateState(AbstractGameState gs, int playerId) {
+        if (heuristic instanceof IStateHeuristic stateHeuristic)
+            return stateHeuristic.evaluateState(gs, playerId);
+        throw new AssertionError("Heuristic is not an IStateHeuristic");
     }
 
 }

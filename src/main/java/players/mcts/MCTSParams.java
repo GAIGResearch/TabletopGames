@@ -75,7 +75,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("hedgeBoltzmann", 100.0);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("rolloutLengthPerPlayer", false);
-        addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
+        addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
@@ -84,7 +84,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutTermination", DEFAULT, Arrays.asList(MCTSEnums.RolloutTermination.values()));
         addTunableParameter("opponentModelParams", ITunableParameters.class);
         addTunableParameter("opponentModel", new RandomPlayer());
-        addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
+        addTunableParameter("information", Information_Set, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", SIMPLE, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
