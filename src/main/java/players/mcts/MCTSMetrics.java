@@ -37,6 +37,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("MeanLeafDepth", treeStats.meanLeafDepth);
                 records.put("MeanNodeDepth", treeStats.meanNodeDepth);
                 records.put("Nodes", treeStats.totalNodes);
+                records.put("LeafNodes", treeStats.totalLeaves);
                 records.put("OneActionNodes", treeStats.oneActionNodes);
                 records.put("MeanActionsAtNode", treeStats.meanActionsAtNode);
                 records.put("MeanActionsExpanded", treeStats.meanActionsExpanded);
@@ -69,6 +70,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("MeanLeafDepth", Double.class);
             cols.put("MeanNodeDepth", Double.class);
             cols.put("Nodes", Integer.class);
+            cols.put("LeafNodes", Integer.class);
             cols.put("OneActionNodes", Integer.class);
             cols.put("MeanActionsAtNode", Double.class);
             cols.put("MeanActionsExpanded", Double.class);
@@ -108,6 +110,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("MeanLeafDepth", treeStats.stream().mapToDouble(ts -> ts.meanLeafDepth).average().orElse(0.0));
                 records.put("MeanNodeDepth", treeStats.stream().mapToDouble(ts -> ts.meanNodeDepth).average().orElse(0.0));
                 records.put("Nodes", treeStats.stream().mapToInt(ts -> ts.totalNodes).average().orElse(0.0));
+                records.put("LeafNodes", treeStats.stream().mapToInt(ts -> ts.totalLeaves).average().orElse(0.0));
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
                 records.put("MeanActionsExpanded", treeStats.stream().mapToDouble(ts -> ts.meanActionsExpanded).average().orElse(0.0));
@@ -131,6 +134,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("MeanLeafDepth", Double.class);
             cols.put("MeanNodeDepth", Double.class);
             cols.put("Nodes", Double.class);
+            cols.put("LeafNodes", Double.class);
             cols.put("OneActionNodes", Double.class);
             cols.put("MeanActionsAtNode", Double.class);
             cols.put("MeanActionsExpanded", Double.class);
