@@ -251,7 +251,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected AbstractGameState _copy(int playerId) {
-        DominionGameState retValue = new DominionGameState(gameParameters.copy(), nPlayers);
+        DominionGameState retValue = new DominionGameState(((DominionParameters)gameParameters).shallowCopy(), nPlayers);
         for (CardType ct : cardsIncludedInGame.keySet()) {
             retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));
         }

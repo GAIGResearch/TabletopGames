@@ -91,6 +91,17 @@ public interface ITunableParameters {
     }
 
     /**
+     * Method that reloads all the locally stored values from currentValues
+     * This is in case sub-classes decide to use the frankly more intuitive access via
+     * params.paramName
+     * instead of
+     * params.getParameterValue("paramName")
+     * (the latter is also more typo-prone if we hardcode strings everywhere)
+     */
+     void _reset();
+
+
+    /**
      * Retrieve the values of all parameters.
      *
      * @return mapping from int ID of parameter to its current value.

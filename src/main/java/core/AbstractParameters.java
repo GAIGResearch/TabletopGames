@@ -153,16 +153,15 @@ public abstract class AbstractParameters {
      * Randomizes the set of parameters, if this is a class that implements the TunableParameters interface.
      */
     public void randomize() {
-        if (this instanceof ITunableParameters) {
+        if (this instanceof ITunableParameters params) {
             Random rnd = new Random(randomSeed);
-            ITunableParameters params = (ITunableParameters) this;
             params.getParameterNames().forEach(name -> {
                         int nValues = params.getPossibleValues(name).size();
                         int randomChoice = rnd.nextInt(nValues);
                         params.setParameterValue(name, params.getPossibleValues(name).get(randomChoice));
                     }
             );
-            reset();
+            params._reset();
         } else {
             System.out.println("Error: Not implementing the TunableParameters interface. Not randomizing");
         }
@@ -184,8 +183,7 @@ public abstract class AbstractParameters {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractParameters)) return false;
-        AbstractParameters that = (AbstractParameters) o;
+        if (!(o instanceof AbstractParameters that)) return false;
         return thinkingTimeMins == that.thinkingTimeMins &&
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
