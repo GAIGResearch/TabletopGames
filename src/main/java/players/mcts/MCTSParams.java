@@ -58,7 +58,7 @@ public class MCTSParams extends PlayerParameters {
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
     public double firstPlayUrgency = 1000000000.0;
-    public IActionHeuristic actionHeuristic;
+    public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
     public int actionHeuristicRecalculationThreshold = 20;
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
     public double pUCTTemperature = 0.0;  // If greater than zero we construct a Boltzmann distribution over actions based on the action heuristic

@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IActionHeuristic;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -169,7 +170,7 @@ public class SingleTreeNode {
             if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if ((params.actionHeuristic != null && nVisits < actionsFromOpenLoopState.size())
+            if ((params.actionHeuristic != IActionHeuristic.nullReturn && nVisits < actionsFromOpenLoopState.size())
                     || params.pUCT || params.progressiveBias > 0 || params.initialiseVisits > 0 || params.progressiveWideningConstant >= 1.0) {
                 // We only need to calculate actionValueEstimates if we are going to be using the data in one of these variants
                 // If not, then we can save processing time by not calculating them
@@ -178,7 +179,7 @@ public class SingleTreeNode {
                 // if, like MAST, the actionHeuristic is dynamic, then this should be set to a lower value as estimates may
                 // change over the course of the search. Setting it to 1 will update it on every visit; but possibly
                 // at a high additional computational cost.
-                if (params.actionHeuristic != null) {
+                if (params.actionHeuristic != IActionHeuristic.nullReturn) {
                     if (actionValueEstimates.isEmpty() || nVisits % params.actionHeuristicRecalculationThreshold == 0) {
                         // in this case we initialise all action values
                         double[] actionValues = params.actionHeuristic.evaluateAllActions(actionsFromOpenLoopState, actionState);
@@ -189,9 +190,7 @@ public class SingleTreeNode {
                         // we just initialise the new actions
                         for (AbstractAction action : actionsFromOpenLoopState) {
                             if (!actionValueEstimates.containsKey(action)) {
-                                if (params.actionHeuristic != null) {
-                                    actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState));
-                                }
+                                actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState));
                             }
                         }
                     }
