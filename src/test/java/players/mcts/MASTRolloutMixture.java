@@ -117,7 +117,6 @@ public class MASTRolloutMixture {
         mastParams.setParameterValue("externalHeuristic", (IActionHeuristic) (action, state) -> 47.0);
         mastParams.setParameterValue("weightOfExternal",  0.5);
         params.setParameterValue("rolloutPolicyParams", mastParams);
-        params.setParameterValue("gatherMASTStatistics", true);
         initialiseMCTSPlayer();
 
         assertTrue(player.getParameters().getRolloutStrategy() instanceof MASTPlayer);

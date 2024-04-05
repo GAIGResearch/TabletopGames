@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static players.mcts.MCTSEnums.Information.*;
-import static players.mcts.MCTSEnums.MASTType.Rollout;
+import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
@@ -27,7 +27,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean rolloutLengthPerPlayer = false;  // if true, then rolloutLength is multiplied by the number of players
     public int maxTreeDepth = 1000; // effectively no limit
     public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
-    public MCTSEnums.MASTType MAST = Rollout;
+    public MCTSEnums.MASTType MAST = None;
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
     public double MASTDefaultValue = 0.0;
@@ -92,7 +92,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
+        addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
@@ -113,7 +113,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("pUCTTemperature", 0.0);
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
-        addTunableParameter("gatherMASTStatistics", false);
     }
 
     @Override
@@ -173,8 +172,7 @@ public class MCTSParams extends PlayerParameters {
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
-        useMAST = (boolean) getParameterValue("gatherMASTStatistics");
-        useMAST = useMAST || useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST;
+        useMAST = MAST != None;
     }
 
     @Override
@@ -231,6 +229,9 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     public MCTSPlayer instantiate() {
+        if (!useMAST && (useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST)) {
+            throw new AssertionError("MAST data not being collected, but MAST is being used as the rollout policy or as the action heuristic. Set MAST parameter.");
+        }
         return new MCTSPlayer((MCTSParams) this.copy());
     }
 
