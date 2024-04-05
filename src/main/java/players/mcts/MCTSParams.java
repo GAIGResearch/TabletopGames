@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
+import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
@@ -58,7 +59,7 @@ public class MCTSParams extends PlayerParameters {
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
     public double firstPlayUrgency = 1000000000.0;
-    public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
+    @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
     public int actionHeuristicRecalculationThreshold = 20;
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
     public double pUCTTemperature = 0.0;  // If greater than zero we construct a Boltzmann distribution over actions based on the action heuristic
