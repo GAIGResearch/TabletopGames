@@ -182,6 +182,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         tunable.possibleValues = possibleValues;
         tunable.defaultValues = defaultValues;
         tunable.parameterTypes = parameterTypes;
+        tunable.currentValues = currentValues;
+        tunable._reset();
         return tunable;
     }
 
