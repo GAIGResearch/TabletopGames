@@ -209,58 +209,6 @@ public abstract class Utils {
         return positivePotentials;
     }
 
-    /**
-     * we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
-     * exploreEpsilon is the percentage chance of taking a random action
-     *
-     * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
-     * @param <T>
-     * @return
-     */
-    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, double randomNumber) {
-        Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
-        // we then add on the exploration bonus
-        if (exploreEpsilon > 0.0) {
-            double exploreBonus = exploreEpsilon / normalisedMap.size();
-            normalisedMap = normalisedMap.entrySet().stream().collect(
-                    toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - exploreEpsilon) + exploreBonus));
-        }
-        double cdf = 0.0;
-        for (T item : normalisedMap.keySet()) {
-            cdf += normalisedMap.get(item);
-            if (cdf >= randomNumber)
-                return item;
-        }
-        throw new AssertionError("Should never get here!");
-    }
-
-    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, double randomNumber) {
-        double temp = Math.max(temperature, 0.001);
-        // first we find the largest value, and subtract that from all values
-        double maxValue = itemsAndValues.values().stream().mapToDouble(d -> d).max().orElse(0.0);
-        Map<T, Double> tempModified = itemsAndValues.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, e -> Math.exp((e.getValue() - maxValue) / temp)));
-        return sampleFrom(tempModified, exploreEpsilon, randomNumber);
-    }
-
-    public static double entropyOf(double... data) {
-        double sum = Arrays.stream(data).sum();
-        double[] normalised = Arrays.stream(data).map(d -> d / sum).toArray();
-        return Arrays.stream(normalised).map(d -> -d * Math.log(d)).sum();
-    }
-
-    public static <T> Map<T, Double> normaliseMap(Map<T, ? extends Number> input) {
-        int lessThanZero = (int) input.values().stream().filter(n -> n.doubleValue() < 0.0).count();
-        if (lessThanZero > 0)
-            throw new AssertionError("Probability has negative values!");
-        double sum = input.values().stream().mapToDouble(Number::doubleValue).sum();
-        if (sum == 0.0) {
-            // the sum is zero, with no negative values. Hence all values are zero, and we return a uniform distribution.
-            return input.keySet().stream().collect(toMap(key -> key, key -> 1.0 / input.size()));
-        }
-        return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
-    }
-
     public static double clamp(double value, double min, double max) {
         if (value > max) return max;
         if (value < min) return min;

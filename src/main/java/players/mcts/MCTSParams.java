@@ -29,6 +29,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
+    public double MASTDefaultValue = 0.0;
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 1.0;
     public double hedgeBoltzmann = 100;
@@ -56,7 +57,6 @@ public class MCTSParams extends PlayerParameters {
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
-    public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
     public IActionHeuristic actionHeuristic;
     public int actionHeuristicRecalculationThreshold = 20;
@@ -112,12 +112,12 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("pUCTTemperature", 0.0);
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
+        addTunableParameter("gatherMASTStatistics", false);
     }
 
     @Override
     public void _reset() {
         super._reset();
-        useMAST = false;
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
         rolloutLengthPerPlayer = (boolean) getParameterValue("rolloutLengthPerPlayer");
@@ -172,7 +172,8 @@ public class MCTSParams extends PlayerParameters {
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
-        useMAST = useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST;
+        useMAST = (boolean) getParameterValue("gatherMASTStatistics");
+        useMAST = useMAST || useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST;
     }
 
     @Override

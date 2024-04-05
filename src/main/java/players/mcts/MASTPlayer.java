@@ -18,7 +18,7 @@ public class MASTPlayer extends BoltzmannActionPlayer implements IMASTUser {
 
     // Or we can blend in an external heuristic
     public MASTPlayer(IActionHeuristic externalHeuristic, double weightOfExternal, IActionKey actionKey, double temperature, double epsilon, double defaultValue) {
-        super(new MASTPlusActionHeuristic(externalHeuristic, actionKey, weightOfExternal, defaultValue), temperature, epsilon, System.currentTimeMillis());
+        super(new MASTPlusActionHeuristic(externalHeuristic, actionKey, defaultValue, weightOfExternal), temperature, epsilon, System.currentTimeMillis());
     }
     @Override
     public void setStats(List<Map<Object, Pair<Integer, Double>>> MASTStats) {
