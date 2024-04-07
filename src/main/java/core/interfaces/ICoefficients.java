@@ -22,12 +22,9 @@ public interface ICoefficients {
         return Arrays.asList(names()).indexOf(name);
     }
 
-
     default double applyCoefficients(double[] phi) {
         double retValue = coefficients()[0]; // the bias term
         for (int i = 0; i < phi.length; i++) {
-            if (Double.isNaN(phi[i]))
-                throw new AssertionError("NaN in feature vector at index " + i);
             retValue += phi[i] * coefficients()[i + 1];
         }
         if (!interactionCoefficients().isEmpty())
