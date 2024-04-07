@@ -11,7 +11,7 @@ public class MCTSEnums {
     }
 
     public enum MASTType {
-        Rollout, Tree, Both
+        None, Rollout, Tree, Both
     }
 
     public enum SelectionPolicy {

@@ -169,8 +169,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
                 double meanValue = stats == null || visits == 0 ? 0.0 : stats.totValue[root.decisionPlayer] / visits;
-                double heuristicValue = getParameters().heuristic != null ? getParameters().heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
-                double actionValue = getParameters().actionHeuristic != null ? getParameters().actionHeuristic.evaluateAction(action, root.state) : 0.0;
+                double heuristicValue = getParameters().heuristic.evaluateState(root.state, root.decisionPlayer);
+                double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state);
 
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);

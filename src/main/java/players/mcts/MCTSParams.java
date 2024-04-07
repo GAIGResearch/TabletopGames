@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
+import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static players.mcts.MCTSEnums.Information.*;
-import static players.mcts.MCTSEnums.MASTType.Rollout;
+import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
@@ -26,9 +27,10 @@ public class MCTSParams extends PlayerParameters {
     public boolean rolloutLengthPerPlayer = false;  // if true, then rolloutLength is multiplied by the number of players
     public int maxTreeDepth = 1000; // effectively no limit
     public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
-    public MCTSEnums.MASTType MAST = Rollout;
+    public MCTSEnums.MASTType MAST = None;
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
+    public double MASTDefaultValue = 0.0;
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 1.0;
     public double hedgeBoltzmann = 100;
@@ -56,9 +58,8 @@ public class MCTSParams extends PlayerParameters {
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
-    public double MASTDefaultValue = 0.0;
     public double firstPlayUrgency = 1000000000.0;
-    public IActionHeuristic actionHeuristic;
+    @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
     public int actionHeuristicRecalculationThreshold = 20;
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
     public double pUCTTemperature = 0.0;  // If greater than zero we construct a Boltzmann distribution over actions based on the action heuristic
@@ -91,7 +92,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
+        addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
@@ -117,7 +118,6 @@ public class MCTSParams extends PlayerParameters {
     @Override
     public void _reset() {
         super._reset();
-        useMAST = false;
         K = (double) getParameterValue("K");
         rolloutLength = (int) getParameterValue("rolloutLength");
         rolloutLengthPerPlayer = (boolean) getParameterValue("rolloutLengthPerPlayer");
@@ -172,7 +172,7 @@ public class MCTSParams extends PlayerParameters {
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
-        useMAST = useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST;
+        useMAST = MAST != None;
     }
 
     @Override
@@ -229,6 +229,9 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     public MCTSPlayer instantiate() {
+        if (!useMAST && (useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST)) {
+            throw new AssertionError("MAST data not being collected, but MAST is being used as the rollout policy or as the action heuristic. Set MAST parameter.");
+        }
         return new MCTSPlayer((MCTSParams) this.copy());
     }
 
