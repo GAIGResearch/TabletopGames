@@ -16,7 +16,8 @@ public interface ICoefficients {
 
     double[] coefficients();
 
-    Map<int[], Double> interactionCoefficients();
+    int[][] interactions();
+    double[] interactionCoefficients();
 
     default int indexOf(String name) {
         return Arrays.asList(names()).indexOf(name);
@@ -27,19 +28,21 @@ public interface ICoefficients {
         for (int i = 0; i < phi.length; i++) {
             retValue += phi[i] * coefficients()[i + 1];
         }
-        if (!interactionCoefficients().isEmpty())
+        if (interactionCoefficients() != null)
             retValue += calculateInteractionEffects(phi);
         return retValue;
     }
 
     default double calculateInteractionEffects(double[] phi) {
         double retValue = 0;
-        for (int[] interaction : interactionCoefficients().keySet()) {
+        int[][] interactions = interactions();
+        double[] interactionCoefficients = interactionCoefficients();
+        for (int i = 0; i < interactions.length; i++) {
             double interactionValue = 1;
-            for (int i : interaction) {
-                interactionValue *= phi[i];
+            for (int j : interactions[i]) {
+                interactionValue *= phi[j];
             }
-            retValue += interactionValue * interactionCoefficients().get(interaction);
+            retValue += interactionValue * interactionCoefficients[i];
         }
         return retValue;
     }

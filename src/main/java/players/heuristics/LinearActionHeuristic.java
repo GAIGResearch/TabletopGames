@@ -46,9 +46,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         names = new String[features.names().length + actionFeatures.names().length];
         System.arraycopy(features.names(), 0, names, 0, features.names().length);
         System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
-        Pair<double[], Map<int[], Double>> x = loadModel(coefficientsFile);
-        this.coefficients = x.a;
-        this.interactionCoefficients = x.b;
+        loadFromFile(coefficientsFile);
     }
 
     @Override

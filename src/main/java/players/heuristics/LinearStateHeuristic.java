@@ -5,6 +5,7 @@ import core.interfaces.*;
 import utilities.Pair;
 import utilities.Utils;
 
+import java.util.List;
 import java.util.Map;
 
 public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristic {
@@ -20,9 +21,7 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
     public LinearStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile, IStateHeuristic defaultHeuristic) {
         this.features = featureVector;
         this.defaultHeuristic = defaultHeuristic;
-        Pair<double[], Map<int[], Double>> x = loadModel(coefficientsFile);
-        this.coefficients = x.a;
-        this.interactionCoefficients = x.b;
+        loadFromFile(coefficientsFile);
     }
 
     @Override
