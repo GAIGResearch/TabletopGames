@@ -46,6 +46,7 @@ public interface ICoefficients {
         }
         return retValue;
     }
+
     default Pair<double[], Map<int[], Double>> loadModel(String coefficientsFile) {
         if (coefficientsFile.isEmpty()) {
             // in this case will default to the defaultHeuristic
@@ -75,10 +76,8 @@ public interface ICoefficients {
             }
             return Arrays.stream(br.readLine().split("\\t")).mapToDouble(Double::parseDouble).toArray();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
             throw new AssertionError("File not found : " + coeffFile);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Error accessing : " + coeffFile);
         }
     }
@@ -106,32 +105,30 @@ public interface ICoefficients {
                     }
                     featureIndices[i] = featureIndex;
                 }
-                Object value = json.get(key);
-                if (value instanceof Double)
-                    interactionCoefficients.put(featureIndices, (Double) value);
-                else if (value instanceof Long)
-                    interactionCoefficients.put(featureIndices, ((Long) value).doubleValue());
-                else
-                    throw new AssertionError("Unexpected value for " + keyStr + " : " + value);
+                interactionCoefficients.put(featureIndices, getJSONAsDouble(json, key));
             } else {
                 if (keyStr.equals("BIAS")) {
-                    Object value = json.get(key);
-                    if (value instanceof Double)
-                        coefficients[0] = (Double) value;
-                    else if (value instanceof Long)
-                        coefficients[0] = ((Long) value).doubleValue();
-                    else
-                        throw new AssertionError("Unexpected value for BIAS : " + value);
+                    coefficients[0] = getJSONAsDouble(json, key);
                 } else {
                     int featureIndex = indexOf(keyStr);
                     if (featureIndex == -1) {
                         throw new AssertionError("Feature not found : " + keyStr);
                     }
-                    coefficients[featureIndex + 1] = (Double) json.get(key);
+                    coefficients[featureIndex + 1] = getJSONAsDouble(json, key);
                 }
             }
         }
         return new Pair<>(coefficients, interactionCoefficients);
+    }
+
+    private double getJSONAsDouble(JSONObject json, Object key) {
+        Object value = json.get(key);
+        if (value instanceof Double)
+            return (Double) value;
+        else if (value instanceof Long)
+            return ((Long) value).doubleValue();
+        else
+            throw new AssertionError("Unexpected value for " + key + " : " + value);
     }
 
 }
