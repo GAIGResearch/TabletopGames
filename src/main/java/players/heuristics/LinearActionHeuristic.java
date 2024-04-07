@@ -9,6 +9,7 @@ import core.interfaces.IStateFeatureVector;
 import utilities.Pair;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleUnaryOperator;
 
@@ -50,17 +51,33 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         this.interactionCoefficients = x.b;
     }
 
+    @Override
+    public double[] evaluateAllActions(List<AbstractAction> actions, AbstractGameState state) {
+        if (coefficients == null)
+            throw new AssertionError("No coefficients found");
+        double[] retValue = new double[actions.size()];
+        double[] phi = features.featureVector(state, state.getCurrentPlayer());
+        for (AbstractAction action : actions) {
+            double[] combined = mergePhiAndPsi(state, phi, action);
+            retValue[actions.indexOf(action)] = inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
+        }
+        return retValue;
+    }
+
+    private double[] mergePhiAndPsi(AbstractGameState state, double[] phi, AbstractAction action) {
+        double[] psi = actionFeatures.featureVector(action, state, state.getCurrentPlayer());
+        double[] combined = new double[phi.length + psi.length];
+        System.arraycopy(phi, 0, combined, 0, phi.length);
+        System.arraycopy(psi, 0, combined, phi.length, psi.length);
+        return combined;
+    }
 
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state) {
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
         double[] phi = features.featureVector(state, state.getCurrentPlayer());
-        double[] psi = actionFeatures.featureVector(action, state, state.getCurrentPlayer());
-        double[] combined = new double[phi.length + psi.length];
-        System.arraycopy(phi, 0, combined, 0, phi.length);
-        System.arraycopy(psi, 0, combined, phi.length, psi.length);
-
+        double[] combined = mergePhiAndPsi(state, phi, action);
         return inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
     }
 
