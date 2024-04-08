@@ -18,7 +18,7 @@ public class ToadGameState extends AbstractGameState {
 
     List<Deck<ToadCard>> playerDecks;
     List<Deck<ToadCard>> playerHands;
-    int[] battlesWon;
+    int[][] battlesWon;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
@@ -55,7 +55,11 @@ public class ToadGameState extends AbstractGameState {
         for (Deck<ToadCard> discard : playerDiscards) {
             copy.playerDiscards.add(discard.copy());
         }
-        copy.battlesWon = battlesWon.clone();
+        copy.battlesWon = new int[2][2];
+        for (int i = 0; i < 2; i++) {
+            copy.battlesWon[i] = Arrays.copyOf(battlesWon[i], 2);
+        }
+
         copy.hiddenFlankCards = new ToadCard[hiddenFlankCards.length];
         copy.fieldCards = new ToadCard[fieldCards.length];
         copy.tieBreakers = new ToadCard[tieBreakers.length];
@@ -93,26 +97,6 @@ public class ToadGameState extends AbstractGameState {
         return playerHands.get(playerId);
     }
 
-    public Deck<ToadCard> getPlayerDeck(int playerId) {
-        return playerDecks.get(playerId);
-    }
-
-    public Deck<ToadCard> getPlayerDiscard(int playerId) {
-        return playerDiscards.get(playerId);
-    }
-
-    public ToadCard getHiddenFlankCard(int playerId) {
-        return hiddenFlankCards[playerId];
-    }
-
-    public ToadCard getFieldCard(int playerId) {
-        return fieldCards[playerId];
-    }
-
-    public ToadCard getTieBreaker(int playerId) {
-        return tieBreakers[playerId];
-    }
-
     public void playFieldCard(int playerId, ToadCard card) {
         if (fieldCards[playerId] != null)
             throw new AssertionError("Field card already played");
@@ -140,12 +124,35 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return battlesWon[playerId];
+        // if the game is not over, our score is battles won in the current round
+        if (isNotTerminal())
+            return battlesWon[roundCounter][playerId];
+        // otherwise we give a score of 10 for winning; 0 for losing; 5 for a tie
+        // this is on the same scale of the battles won...and 10 is larger than any possible number of battles
+        int[] roundsWon = new int[2];
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                if (battlesWon[j][i] > battlesWon[j][1 - i])
+                    roundsWon[i]++;
+            }
+        }
+        if (roundsWon[playerId] > roundsWon[1 - playerId])
+            return 10;
+        if (roundsWon[playerId] < roundsWon[1 - playerId])
+            return 0;
+        // if tied on rounds, winner of the second wins
+        if (battlesWon[roundCounter][playerId] > battlesWon[roundCounter][1 - playerId])
+            return 10;
+        if (battlesWon[roundCounter][playerId] < battlesWon[roundCounter][1 - playerId])
+            return 0;
+        // otherwise we tie (and tiebreaker is used)
+        return 5;
     }
 
 
     @Override
     public double getTiebreak(int playerId, int tier) {
+        // TODO: Need to have battle(card, card) to obtain the actual result (and battle (card, card, card, card) for cross-effect tactics)
         return tieBreakers[playerId].value;
     }
 
@@ -160,7 +167,7 @@ public class ToadGameState extends AbstractGameState {
         if (o instanceof ToadGameState toadGameState) {
             return playerDecks.equals(toadGameState.playerDecks) &&
                     playerHands.equals(toadGameState.playerHands) &&
-                    Arrays.equals(battlesWon, toadGameState.battlesWon) &&
+                    Arrays.deepEquals(battlesWon, toadGameState.battlesWon) &&
                     playerDiscards.equals(toadGameState.playerDiscards) &&
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
                     Arrays.equals(tieBreakers, toadGameState.tieBreakers) &&
@@ -171,7 +178,7 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerDecks, playerHands, playerDiscards) + 31 * battlesWon[0] + 31 * 31 * battlesWon[1] +
+        return Objects.hash(playerDecks, playerHands, playerDiscards) + Arrays.deepHashCode(battlesWon) +
                 Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers);
     }
 
@@ -181,7 +188,7 @@ public class ToadGameState extends AbstractGameState {
                 playerDecks.hashCode() + "|" +
                 playerHands.hashCode() + "|" +
                 playerDiscards.hashCode() + "|" +
-                Arrays.hashCode(battlesWon) + "|" +
+                Arrays.deepHashCode(battlesWon) + "|" +
                 Arrays.hashCode(hiddenFlankCards) + "|" +
                 Arrays.hashCode(fieldCards) + "|" +
                 Arrays.hashCode(tieBreakers) + "|";

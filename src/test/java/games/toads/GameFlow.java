@@ -94,8 +94,8 @@ public class GameFlow {
 
         fm._afterAction(state, null);
 
-        assertEquals(1, state.battlesWon[0]);
-        assertEquals(0, state.battlesWon[1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
@@ -106,8 +106,8 @@ public class GameFlow {
         state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
         fm._afterAction(state, null);
 
-        assertEquals(1, state.battlesWon[0]);
-        assertEquals(1, state.battlesWon[1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -118,8 +118,8 @@ public class GameFlow {
         state.hiddenFlankCards[1] = new ToadCard("Six", 6);
         fm._afterAction(state, null);
 
-        assertEquals(0, state.battlesWon[0]);
-        assertEquals(1, state.battlesWon[1]);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -130,8 +130,8 @@ public class GameFlow {
         state.hiddenFlankCards[1] = new ToadCard("Four", 4);
         fm._afterAction(state, null);
 
-        assertEquals(0, state.battlesWon[0]);
-        assertEquals(1, state.battlesWon[1]);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -142,8 +142,8 @@ public class GameFlow {
         state.hiddenFlankCards[0] = new ToadCard("Four", 4);
         fm._afterAction(state, null);
 
-        assertEquals(1, state.battlesWon[0]);
-        assertEquals(0, state.battlesWon[1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
@@ -154,8 +154,8 @@ public class GameFlow {
         state.hiddenFlankCards[0] = new ToadCard("Six", 6);
         fm._afterAction(state, null);
 
-        assertEquals(0, state.battlesWon[0]);
-        assertEquals(1, state.battlesWon[1]);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -166,21 +166,21 @@ public class GameFlow {
         state.hiddenFlankCards[1] = new ToadCard("Six", 6);
         fm._afterAction(state, null);
 
-        assertEquals(1, state.battlesWon[0]);
-        assertEquals(0, state.battlesWon[1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
     public void pushback() {
-        state.battlesWon[1] = 1;
+        state.battlesWon[0][1] = 1;
         state.fieldCards[0] = new ToadCard("Five", 5);
         state.fieldCards[1] = new ToadCard("Three", 3);
         state.hiddenFlankCards[0] = new ToadCard("Seven", 7);
         state.hiddenFlankCards[1] = new ToadCard("Six", 6);
         fm._afterAction(state, null);
 
-        assertEquals(2, state.battlesWon[0]);
-        assertEquals(1, state.battlesWon[1]);
+        assertEquals(2, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -194,5 +194,118 @@ public class GameFlow {
         assertEquals(state.fieldCards[1], copy.fieldCards[1]);
         assertEquals(state.hiddenFlankCards[0], copy.hiddenFlankCards[0]);
         assertNotEquals(state.hiddenFlankCards[1], copy.hiddenFlankCards[1]);
+    }
+
+    @Test
+    public void winFirstLoseSecondLosesGame() {
+        state.battlesWon[0][0] = 10;
+        state.battlesWon[0][1] = 0;
+        assertEquals(10, state.getGameScore(0), 0.001);
+        assertEquals(0, state.getGameScore(1), 0.001);
+        fm.endRound(state, 1);
+        assertEquals(0, state.getGameScore(0), 0.001);
+        assertEquals(0, state.getGameScore(1), 0.001);
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[0] = new ToadCard("Six", 6);
+        state.tieBreakers[1] = new ToadCard("Five", 5);
+
+        state.fieldCards[1] = new ToadCard("Five", 5);
+        state.fieldCards[0] = new ToadCard("Three", 3);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+        fm._afterAction(state, null);
+        assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+        assertEquals(0.0, state.getGameScore(0), 0.001);
+        assertEquals(10.0, state.getGameScore(1), 0.001);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[1]);
+    }
+
+    @Test
+    public void winingFirstAndTieOnSecondWins() {
+        state.battlesWon[0][0] = 0;
+        state.battlesWon[0][1] = 10;
+        assertEquals(0, state.getGameScore(0), 0.001);
+        assertEquals(10, state.getGameScore(1), 0.001);
+        fm.endRound(state, 1);
+        assertEquals(0, state.getGameScore(0), 0.001);
+        assertEquals(0, state.getGameScore(1), 0.001);
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[1] = new ToadCard("Six", 6);
+        state.tieBreakers[0] = new ToadCard("Five", 5);
+
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Three", 3);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+        fm._afterAction(state, null);
+        assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+        assertEquals(0.0, state.getGameScore(0), 0.001);
+        assertEquals(10.0, state.getGameScore(1), 0.001);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[1]);
+    }
+
+    @Test
+    public void tieBreaker() {
+        state.battlesWon[0][0] = 3;
+        state.battlesWon[0][1] = 3;
+        assertEquals(3, state.getGameScore(0), 0.001);
+        assertEquals(3, state.getGameScore(1), 0.001);
+        fm.endRound(state, 1);
+        assertEquals(0, state.getGameScore(0), 0.001);
+        assertEquals(0, state.getGameScore(1), 0.001);
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[1] = new ToadCard("Six", 6);
+        state.tieBreakers[0] = new ToadCard("Five", 5);
+
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Three", 3);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+        fm._afterAction(state, null);
+        assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+        assertEquals(5.0, state.getGameScore(0), 0.001);
+        assertEquals(5.0, state.getGameScore(1), 0.001);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[1]);
+    }
+
+
+    @Test
+    public void absoluteTie() {
+        state.battlesWon[0][0] = 3;
+        state.battlesWon[0][1] = 3;
+        assertEquals(3, state.getGameScore(0), 0.001);
+        assertEquals(3, state.getGameScore(1), 0.001);
+        fm.endRound(state, 1);
+        assertEquals(0, state.getGameScore(0), 0.001);
+        assertEquals(0, state.getGameScore(1), 0.001);
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[1] = new ToadCard("Five", 5);
+        state.tieBreakers[0] = new ToadCard("Five", 5);
+
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Three", 3);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+        fm._afterAction(state, null);
+        assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+        assertEquals(5.0, state.getGameScore(0), 0.001);
+        assertEquals(5.0, state.getGameScore(1), 0.001);
+        assertEquals(CoreConstants.GameResult.DRAW_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.DRAW_GAME, state.getPlayerResults()[1]);
     }
 }

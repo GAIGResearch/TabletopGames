@@ -19,7 +19,7 @@ public class ToadForwardModel extends StandardForwardModel {
         ToadGameState state = (ToadGameState) firstState;
         ToadParameters params = (ToadParameters) state.getGameParameters();
 
-        state.battlesWon = new int[state.getNPlayers()];
+        state.battlesWon = new int[2][2];
         state.fieldCards = new ToadCard[state.getNPlayers()];
         state.hiddenFlankCards = new ToadCard[state.getNPlayers()];
         state.tieBreakers = new ToadCard[state.getNPlayers()];
@@ -91,23 +91,24 @@ public class ToadForwardModel extends StandardForwardModel {
             if (state.hiddenFlankCards[1].ability != null) {
                 p1Flank = state.hiddenFlankCards[1].ability.updatedValue(p1Flank, state.hiddenFlankCards[0].value, state.getTurnOwner() == 1);
             }
-            int[] oldScores = state.battlesWon.clone();
+            int round = state.getRoundCounter();
+            int[] roundScores = state.battlesWon[round].clone();
             if (p0Field > p1Field) {
-                state.battlesWon[0]++;
+                state.battlesWon[round][0]++;
             } else if (p0Field < p1Field) {
-                state.battlesWon[1]++;
+                state.battlesWon[round][1]++;
             }
             if (p0Flank > p1Flank) {
-                state.battlesWon[0]++;
+                state.battlesWon[round][0]++;
             } else if (p0Flank < p1Flank) {
-                state.battlesWon[1]++;
+                state.battlesWon[round][1]++;
             }
-            int[] scoreDiff = new int[]{state.battlesWon[0] - oldScores[0], state.battlesWon[1] - oldScores[1]};
+            int[] scoreDiff = new int[]{state.battlesWon[round][0] - roundScores[0], state.battlesWon[round][1] - roundScores[1]};
             // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead)
-            if (scoreDiff[0] == 2 && oldScores[0] >= oldScores[1]) {
-                state.battlesWon[0]--;
-            } else if (scoreDiff[1] == 2 && oldScores[1] >= oldScores[0]) {
-                state.battlesWon[1]--;
+            if (scoreDiff[0] == 2 && roundScores[0] >= roundScores[1]) {
+                state.battlesWon[round][0]--;
+            } else if (scoreDiff[1] == 2 && roundScores[1] >= roundScores[0]) {
+                state.battlesWon[round][1]--;
             }
 
             // move cards to discard
@@ -128,6 +129,8 @@ public class ToadForwardModel extends StandardForwardModel {
                 // no more cards to draw so end of round
                 if (state.getRoundCounter() == 1) {
                     // end of game
+                    // we need to modify the final scores due to the rules
+
                     endGame(gameState);
                 } else {
                     // set tie breakers
