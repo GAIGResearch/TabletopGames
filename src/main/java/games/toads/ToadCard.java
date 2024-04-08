@@ -40,7 +40,7 @@ public class ToadCard extends Card {
 
     @Override
     public int hashCode() {
-        return super.hashCode() + value + ability.hashCode() * 31;
+        return super.hashCode() + value + (ability != null ? ability.hashCode()  * 31 : 0);
     }
 
 

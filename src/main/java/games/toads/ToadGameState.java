@@ -55,28 +55,31 @@ public class ToadGameState extends AbstractGameState {
         for (Deck<ToadCard> discard : playerDiscards) {
             copy.playerDiscards.add(discard.copy());
         }
-        copy.battlesWon = Arrays.copyOf(battlesWon, battlesWon.length);
+        copy.battlesWon = battlesWon.clone();
         copy.hiddenFlankCards = new ToadCard[hiddenFlankCards.length];
         copy.fieldCards = new ToadCard[fieldCards.length];
+        copy.tieBreakers = new ToadCard[tieBreakers.length];
 
         for (int i = 0; i < hiddenFlankCards.length; i++) {
             if (hiddenFlankCards[i] != null)
                 copy.hiddenFlankCards[i] = hiddenFlankCards[i].copy();
             if (fieldCards[i] != null)
                 copy.fieldCards[i] = fieldCards[i].copy();
-            if (tieBreakers[i] != null)
-                copy.tieBreakers[i] = tieBreakers[i].copy();
+        }
+        if (tieBreakers[0] != null) {
+            copy.tieBreakers[0] = tieBreakers[0].copy();
+            copy.tieBreakers[1] = tieBreakers[1].copy();
         }
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // shuffle the other player's deck and hand, including the hidden flank card
-            int playerToShuffle = playerId == 0 ? 1 : 0;
+            int playerToShuffle = 1 - playerId;
             copy.playerDecks.get(playerToShuffle).add(copy.playerHands.get(playerToShuffle));
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
             // tieBreakers are always known to both players
-            copy.playerHands.clear();
+            copy.playerHands.get(playerToShuffle).clear();
             copy.playerDecks.get(playerToShuffle).shuffle(redeterminisationRnd);
-            for (int i = 0; i < params.handSize; i++) {
+            for (int i = 0; i < playerHands.get(playerToShuffle).getSize(); i++) {
                 ToadCard card = copy.playerDecks.get(playerToShuffle).draw();
                 copy.playerHands.get(playerToShuffle).add(card);
             }
@@ -84,6 +87,30 @@ public class ToadGameState extends AbstractGameState {
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
         }
         return copy;
+    }
+
+    public Deck<ToadCard> getPlayerHand(int playerId) {
+        return playerHands.get(playerId);
+    }
+
+    public Deck<ToadCard> getPlayerDeck(int playerId) {
+        return playerDecks.get(playerId);
+    }
+
+    public Deck<ToadCard> getPlayerDiscard(int playerId) {
+        return playerDiscards.get(playerId);
+    }
+
+    public ToadCard getHiddenFlankCard(int playerId) {
+        return hiddenFlankCards[playerId];
+    }
+
+    public ToadCard getFieldCard(int playerId) {
+        return fieldCards[playerId];
+    }
+
+    public ToadCard getTieBreaker(int playerId) {
+        return tieBreakers[playerId];
     }
 
     public void playFieldCard(int playerId, ToadCard card) {
@@ -116,6 +143,18 @@ public class ToadGameState extends AbstractGameState {
         return battlesWon[playerId];
     }
 
+
+    @Override
+    public double getTiebreak(int playerId, int tier) {
+        return tieBreakers[playerId].value;
+    }
+
+    @Override
+    public int getTiebreakLevels() {
+        return 1;
+    }
+
+
     @Override
     protected boolean _equals(Object o) {
         if (o instanceof ToadGameState toadGameState) {
@@ -136,9 +175,16 @@ public class ToadGameState extends AbstractGameState {
                 Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers);
     }
 
-    // TODO: If your game has multiple special tiebreak options, then implement the next two methods.
-    // TODO: The default is to tie-break on the game score (if this is the case, ignore these)
-    // public double getTiebreak(int playerId, int tier);
-    // public int getTiebreakLevels();
+    @Override
+    public String toString() {
+        return super.hashCode() + "|" +
+                playerDecks.hashCode() + "|" +
+                playerHands.hashCode() + "|" +
+                playerDiscards.hashCode() + "|" +
+                Arrays.hashCode(battlesWon) + "|" +
+                Arrays.hashCode(hiddenFlankCards) + "|" +
+                Arrays.hashCode(fieldCards) + "|" +
+                Arrays.hashCode(tieBreakers) + "|";
+    }
 
 }
