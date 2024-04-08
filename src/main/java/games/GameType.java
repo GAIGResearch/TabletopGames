@@ -51,6 +51,7 @@ import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
+import games.toads.*;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
@@ -199,8 +200,12 @@ public enum GameType {
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
-            Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            Collections.singletonList(GridMovement),
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    WarOfTheToads(2, 2,
+            Arrays.asList(Strategy, Abstract, Cards),
+            Collections.singletonList(TrickTaking),
+            ToadGameState .class, ToadForwardModel .class, ToadParameters .class, ToadGUIManager.class);
 
 
     // Core classes where the game is defined
