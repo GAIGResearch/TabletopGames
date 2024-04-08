@@ -2,6 +2,7 @@ package core.components;
 
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -21,7 +22,7 @@ import static core.CoreConstants.VisibilityMode;
  * * components played on the player's area
  * * Discomponent pile
  */
-public class Deck<T extends Component> extends Component implements IComponentContainer<T> {
+public class Deck<T extends Component> extends Component implements IComponentContainer<T>, Iterable<T> {
 
     protected int capacity;  // Capacity of the deck (maximum number of elements)
     protected List<T> components;  // List of components in this deck
@@ -46,6 +47,29 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         this.ownerId = ownerId;
         this.visibility = visibility;
     }
+
+    @NotNull
+    @Override
+    public Iterator<T> iterator() {
+        return new DeckIterator();
+    }
+
+
+    // Iterator implementation
+    private class DeckIterator implements Iterator<T> {
+        private int currentIndex = 0;
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < getSize();
+        }
+
+        @Override
+        public T next() {
+            return components.get(currentIndex++);
+        }
+    }
+
 
     /**
      * Loads all decks of cards from a given JSON file.

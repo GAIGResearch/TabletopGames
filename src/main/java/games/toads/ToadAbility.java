@@ -1,4 +1,6 @@
 package games.toads;
 
-public class ToadAbility {
+public interface ToadAbility {
+
+    int updatedValue(int myValue, int theirValue, boolean isAttacker);
 }

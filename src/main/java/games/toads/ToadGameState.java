@@ -22,6 +22,7 @@ public class ToadGameState extends AbstractGameState {
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
+    ToadCard[] tieBreakers;
 
     @Override
     protected GameType _getGameType() {
@@ -56,12 +57,15 @@ public class ToadGameState extends AbstractGameState {
         }
         copy.battlesWon = Arrays.copyOf(battlesWon, battlesWon.length);
         copy.hiddenFlankCards = new ToadCard[hiddenFlankCards.length];
+        copy.fieldCards = new ToadCard[fieldCards.length];
+
         for (int i = 0; i < hiddenFlankCards.length; i++) {
-            copy.hiddenFlankCards[i] = hiddenFlankCards[i].copy();
-        }
-        copy.fieldCards = Arrays.copyOf(fieldCards, fieldCards.length);
-        for (int i = 0; i < fieldCards.length; i++) {
-            copy.fieldCards[i] = fieldCards[i].copy();
+            if (hiddenFlankCards[i] != null)
+                copy.hiddenFlankCards[i] = hiddenFlankCards[i].copy();
+            if (fieldCards[i] != null)
+                copy.fieldCards[i] = fieldCards[i].copy();
+            if (tieBreakers[i] != null)
+                copy.tieBreakers[i] = tieBreakers[i].copy();
         }
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // shuffle the other player's deck and hand, including the hidden flank card
@@ -69,6 +73,7 @@ public class ToadGameState extends AbstractGameState {
             copy.playerDecks.get(playerToShuffle).add(copy.playerHands.get(playerToShuffle));
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
+            // tieBreakers are always known to both players
             copy.playerHands.clear();
             copy.playerDecks.get(playerToShuffle).shuffle(redeterminisationRnd);
             for (int i = 0; i < params.handSize; i++) {
@@ -79,6 +84,26 @@ public class ToadGameState extends AbstractGameState {
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
         }
         return copy;
+    }
+
+    public void playFieldCard(int playerId, ToadCard card) {
+        if (fieldCards[playerId] != null)
+            throw new AssertionError("Field card already played");
+        fieldCards[playerId] = card;
+        if (playerHands.get(playerId).contains(card))
+            playerHands.get(playerId).remove(card);
+        else
+            throw new AssertionError("Card not in hand");
+    }
+
+    public void playFlankCard(int playerId, ToadCard card) {
+        if (hiddenFlankCards[playerId] != null)
+            throw new AssertionError("Flank card already played");
+        hiddenFlankCards[playerId] = card;
+        if (playerHands.get(playerId).contains(card))
+            playerHands.get(playerId).remove(card);
+        else
+            throw new AssertionError("Card not in hand");
     }
 
     @Override
@@ -99,6 +124,7 @@ public class ToadGameState extends AbstractGameState {
                     Arrays.equals(battlesWon, toadGameState.battlesWon) &&
                     playerDiscards.equals(toadGameState.playerDiscards) &&
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
+                    Arrays.equals(tieBreakers, toadGameState.tieBreakers) &&
                     Arrays.equals(fieldCards, toadGameState.fieldCards);
         }
         return false;
@@ -107,7 +133,7 @@ public class ToadGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return Objects.hash(playerDecks, playerHands, playerDiscards) + 31 * battlesWon[0] + 31 * 31 * battlesWon[1] +
-                Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards);
+                Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers);
     }
 
     // TODO: If your game has multiple special tiebreak options, then implement the next two methods.
