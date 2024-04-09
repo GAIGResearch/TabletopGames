@@ -20,6 +20,7 @@ public class ToadParameters extends TunableParameters {
     int nRounds = 2;
     int nCards = 2;
     int handSize = 4;
+    boolean useTactics = true;
 
     public ToadParameters() {
         addTunableParameter("dataPath", "data/toads/");
@@ -27,6 +28,7 @@ public class ToadParameters extends TunableParameters {
         addTunableParameter("nRounds", 2);
         addTunableParameter("nCards", 2);
         addTunableParameter("handSize", 4);
+        addTunableParameter("useTactics", true);
     }
 
     @Override
@@ -36,6 +38,7 @@ public class ToadParameters extends TunableParameters {
         nCards = (int) getParameterValue("nCards");
         cardFile = (String) getParameterValue("cardFile");
         handSize = (int) getParameterValue("handSize");
+        useTactics = (boolean) getParameterValue("useTactics");
     }
 
     public List<ToadCard> getCardDeck() {

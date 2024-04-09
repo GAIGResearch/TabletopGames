@@ -75,42 +75,24 @@ public class ToadForwardModel extends StandardForwardModel {
         } else {
             // we reveal cards and resolve
             // not the most elegant solution, but with 2 cards each no need to generalise yet
-            int p0Field = state.fieldCards[0].value;
-            int p0Flank = state.hiddenFlankCards[0].value;
-            int p1Field = state.fieldCards[1].value;
-            int p1Flank = state.hiddenFlankCards[1].value;
-            if (state.fieldCards[0].ability != null) {
-                p0Field = state.fieldCards[0].ability.updatedValue(p0Field, state.fieldCards[1].value, state.getTurnOwner() == 0);
-            }
-            if (state.fieldCards[1].ability != null) {
-                p1Field = state.fieldCards[1].ability.updatedValue(p1Field, state.fieldCards[0].value, state.getTurnOwner() == 1);
-            }
-            if (state.hiddenFlankCards[0].ability != null) {
-                p0Flank = state.hiddenFlankCards[0].ability.updatedValue(p0Flank, state.hiddenFlankCards[1].value, state.getTurnOwner() == 0);
-            }
-            if (state.hiddenFlankCards[1].ability != null) {
-                p1Flank = state.hiddenFlankCards[1].ability.updatedValue(p1Flank, state.hiddenFlankCards[0].value, state.getTurnOwner() == 1);
-            }
-            int round = state.getRoundCounter();
-            int[] roundScores = state.battlesWon[round].clone();
-            if (p0Field > p1Field) {
-                state.battlesWon[round][0]++;
-            } else if (p0Field < p1Field) {
-                state.battlesWon[round][1]++;
-            }
-            if (p0Flank > p1Flank) {
-                state.battlesWon[round][0]++;
-            } else if (p0Flank < p1Flank) {
-                state.battlesWon[round][1]++;
-            }
-            int[] scoreDiff = new int[]{state.battlesWon[round][0] - roundScores[0], state.battlesWon[round][1] - roundScores[1]};
-            // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead)
-            if (scoreDiff[0] == 2 && roundScores[0] >= roundScores[1]) {
-                state.battlesWon[round][0]--;
-            } else if (scoreDiff[1] == 2 && roundScores[1] >= roundScores[0]) {
-                state.battlesWon[round][1]--;
-            }
+            int attacker = state.getRoundCounter();
+            BattleResult battle = new BattleResult(state.fieldCards[attacker], state.fieldCards[1-attacker],
+                    state.hiddenFlankCards[attacker], state.hiddenFlankCards[1-attacker]);
 
+            int[] result = battle.calculate(state);
+
+            // convert back to scores for each player
+            int round = state.getRoundCounter();
+            int[] scoreDiff = new int[]{result[round], result[1 - round]};
+            // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead)
+            if (scoreDiff[0] == 2 && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
+                scoreDiff[0]--;
+            } else if (scoreDiff[1] == 2 && state.battlesWon[round][1] >= state.battlesWon[round][0]) {
+                scoreDiff[1]--;
+            }
+            // and increment scores
+            state.battlesWon[round][0] += scoreDiff[0];
+            state.battlesWon[round][1] += scoreDiff[1];
             // move cards to discard
             state.playerDiscards.get(0).add(state.fieldCards[0]);
             state.playerDiscards.get(0).add(state.hiddenFlankCards[0]);
