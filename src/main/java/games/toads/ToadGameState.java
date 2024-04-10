@@ -4,7 +4,9 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.GameType;
+import utilities.DeterminisationUtilities;
 
 import java.util.*;
 
@@ -17,7 +19,7 @@ public class ToadGameState extends AbstractGameState {
     }
 
     List<Deck<ToadCard>> playerDecks;
-    List<Deck<ToadCard>> playerHands;
+    List<PartialObservableDeck<ToadCard>> playerHands;
     int[][] battlesWon;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
@@ -48,7 +50,7 @@ public class ToadGameState extends AbstractGameState {
             copy.playerDecks.add(deck.copy());
         }
         copy.playerHands = new ArrayList<>();
-        for (Deck<ToadCard> hand : playerHands) {
+        for (PartialObservableDeck<ToadCard> hand : playerHands) {
             copy.playerHands.add(hand.copy());
         }
         copy.playerDiscards = new ArrayList<>();
@@ -77,18 +79,19 @@ public class ToadGameState extends AbstractGameState {
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // shuffle the other player's deck and hand, including the hidden flank card
             int playerToShuffle = 1 - playerId;
-            copy.playerDecks.get(playerToShuffle).add(copy.playerHands.get(playerToShuffle));
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
-            // tieBreakers are always known to both players
-            copy.playerHands.get(playerToShuffle).clear();
-            copy.playerDecks.get(playerToShuffle).shuffle(redeterminisationRnd);
-            for (int i = 0; i < playerHands.get(playerToShuffle).getSize(); i++) {
-                ToadCard card = copy.playerDecks.get(playerToShuffle).draw();
-                copy.playerHands.get(playerToShuffle).add(card);
-            }
+            DeterminisationUtilities.reshuffle(playerToShuffle,
+                    List.of(
+                            copy.playerDecks.get(playerToShuffle),
+                            copy.playerHands.get(playerToShuffle)
+                    ),
+                    i -> true,  // no special conditions
+                    redeterminisationRnd);
+            // then put hidden flank card back
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
+            // tieBreakers are always known to both players
         }
         return copy;
     }

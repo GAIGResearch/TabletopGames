@@ -39,8 +39,21 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         this(id, -1, new boolean[nPlayers]);
     }
 
-    public PartialObservableDeck(String id, int ownerID, VisibilityMode visibilityMode) {
+    public PartialObservableDeck(String id, int ownerID, int nPlayers, VisibilityMode visibilityMode) {
         super(id, ownerID, visibilityMode);
+        deckVisibility = new boolean[nPlayers];
+        switch (visibilityMode) {
+            case VISIBLE_TO_ALL:
+                for (int i = 0; i < nPlayers; i++)
+                    deckVisibility[i] = true;
+                break;
+            case VISIBLE_TO_OWNER:
+                deckVisibility[ownerID] = true;
+                break;
+            default:
+                // more complicated. Needs to be set elsewhere
+                break;
+        }
     }
 
     public PartialObservableDeck(String id, int ownerID, int nPlayers) {

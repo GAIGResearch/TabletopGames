@@ -3,6 +3,7 @@ package games.toads;
 import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import gametemplate.actions.GTAction;
@@ -28,7 +29,7 @@ public class ToadForwardModel extends StandardForwardModel {
         state.playerDecks = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
             state.playerDecks.add(new Deck<>("Player " + i + " Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            state.playerHands.add(new Deck<>("Player " + i + " Hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            state.playerHands.add(new PartialObservableDeck<>("Player " + i + " Hand", i, 2,  CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             state.playerDiscards.add(new Deck<>("Player " + i + " Discard", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             List<ToadCard> cards = params.getCardDeck();
             state.playerDecks.get(i).add(cards);
