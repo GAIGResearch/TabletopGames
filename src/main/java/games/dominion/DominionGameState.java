@@ -380,10 +380,10 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         for (int i = 0; i < nPlayers; i++) {
             boolean[] handVisibility = new boolean[nPlayers];
             handVisibility[i] = true;
-            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
-            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[nPlayers]);
-            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VISIBLE_TO_ALL);
-            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VISIBLE_TO_ALL);
+            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, i, handVisibility);
+            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, i, new boolean[nPlayers]);
+            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, i, VISIBLE_TO_ALL);
+            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, i, VISIBLE_TO_ALL);
         }
         super.reset();
     }

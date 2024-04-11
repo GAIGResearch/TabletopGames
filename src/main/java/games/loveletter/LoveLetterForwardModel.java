@@ -29,7 +29,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         llgs.effectProtection = new boolean[llgs.getNPlayers()];
         // Set up all variables
-        llgs.drawPile = new PartialObservableDeck<>("drawPile", llgs.getNPlayers());
+        llgs.drawPile = new PartialObservableDeck<>("drawPile", -1, llgs.getNPlayers(), VisibilityMode.HIDDEN_TO_ALL);
         llgs.reserveCards = new Deck<>("reserveCards", VisibilityMode.VISIBLE_TO_ALL);
         llgs.affectionTokens = new int[llgs.getNPlayers()];
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
