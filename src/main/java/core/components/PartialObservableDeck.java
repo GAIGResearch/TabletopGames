@@ -141,7 +141,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @param visibility - true if player can see this component, false otherwise.
      */
     public void setVisibilityOfComponent(int index, boolean[] visibility) {
-        if (index >= 0 && index < elementVisibility.size()) {
+        if (index >= 0 && index < elementVisibility.size() && visibility.length == deckVisibility.length) {
             this.elementVisibility.set(index, visibility.clone());
         } else {
             throw new IllegalArgumentException("component index " + index + " needs to be in range [0," + components.size() + "]");
