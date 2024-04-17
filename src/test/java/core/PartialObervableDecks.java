@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
+import static core.CoreConstants.VisibilityMode.TOP_VISIBLE_TO_ALL;
 import static org.junit.Assert.*;
 
 public class PartialObervableDecks {
@@ -53,7 +55,7 @@ public class PartialObervableDecks {
 
     @Test
     public void initialisingWithHiddenToAllDoes() {
-        PartialObservableDeck<DominionCard> deck = new PartialObservableDeck<>("Test", 1, 4, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        PartialObservableDeck<DominionCard> deck = new PartialObservableDeck<>("Test", 1, 4, HIDDEN_TO_ALL);
         deck.add(DominionCard.create(CardType.COPPER));
         deck.add(DominionCard.create(CardType.MILITIA));
         deck.add(DominionCard.create(CardType.SMITHY));
@@ -168,19 +170,90 @@ public class PartialObervableDecks {
     }
 
     @Test
-    public void reshuffleTopDeckWithBottomDeck() {
-        fail("Not yet implemented");
+    public void addingWholeDeckDoesNotIncreaseTopVisibility() {
+        PartialObservableDeck<DominionCard> deck = new PartialObservableDeck<>("Test", 2, 4, HIDDEN_TO_ALL);
+        deck.add(DominionCard.create(CardType.COPPER));
+        deck.add(DominionCard.create(CardType.MILITIA));
+        deck.add(DominionCard.create(CardType.SMITHY));
+        PartialObservableDeck<DominionCard> deck2 = new PartialObservableDeck<>("Test", 2, 4, TOP_VISIBLE_TO_ALL);
+        deck2.add(DominionCard.create(CardType.COPPER));
+        deck2.add(deck);
+        for (int p = 0; p < 4; p++) {
+            assertTrue(deck2.isComponentVisible(0, p));
+            assertFalse(deck2.isComponentVisible(1, p));
+            assertFalse(deck2.isComponentVisible(2, p));
+            assertTrue(deck2.isComponentVisible(3, p));
+        }
+
+        deck2.shuffle(rnd);
+        for (int p = 0; p < 4; p++) {
+            assertTrue(deck2.isComponentVisible(0, p));
+            assertFalse(deck2.isComponentVisible(1, p));
+            assertFalse(deck2.isComponentVisible(2, p));
+            assertFalse(deck2.isComponentVisible(3, p));
+        }
     }
+
 
     @Test
     public void setVisibilityModeToTopAfterCreatingDeck() {
-        fail("Not yet implemented");
+        PartialObservableDeck<DominionCard> deck = new PartialObservableDeck<>("Test", 2, 4, HIDDEN_TO_ALL);
+        deck.add(DominionCard.create(CardType.COPPER));
+        deck.add(DominionCard.create(CardType.MILITIA));
+        deck.add(DominionCard.create(CardType.SMITHY));
+        deck.add(DominionCard.create(CardType.COPPER));
+        deck.setVisibility(CoreConstants.VisibilityMode.TOP_VISIBLE_TO_ALL);
+        for (int p = 0; p < 4; p++) {
+            assertTrue(deck.isComponentVisible(0, p));
+            assertFalse(deck.isComponentVisible(1, p));
+            assertFalse(deck.isComponentVisible(2, p));
+            assertFalse(deck.isComponentVisible(3, p));
+        }
     }
 
+
     @Test
-    public void addingWholeDeckDoesNotIncreaseTopVisibility() {
-        fail("Not yet implemented");
+    public void reshuffleTopDeckWithBottomDeck() {
+        PartialObservableDeck<DominionCard> deck = new PartialObservableDeck<>("Test", 2, 4, CoreConstants.VisibilityMode.BOTTOM_VISIBLE_TO_ALL);
+        deck.add(DominionCard.create(CardType.COPPER));
+        deck.add(DominionCard.create(CardType.MILITIA));
+        deck.add(DominionCard.create(CardType.SMITHY));
+
+        PartialObservableDeck<DominionCard> deck2 = new PartialObservableDeck<>("Test", 2, 4, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        deck2.add(DominionCard.create(CardType.MERCHANT));
+        deck2.add(DominionCard.create(CardType.GOLD));
+        deck2.add(DominionCard.create(CardType.SILVER));
+        deck2.setVisibility(CoreConstants.VisibilityMode.TOP_VISIBLE_TO_ALL);  // SILVER
+
+        deck.add(deck2);  // should put deck2 on top of deck
+        assertEquals(CardType.SILVER, deck.get(0).cardType());  // top
+        assertEquals(CardType.COPPER, deck.get(5).cardType());  // bottom
+        for (int p = 0; p < 4; p++) {
+            assertTrue(deck.isComponentVisible(0, p));
+            assertFalse(deck.isComponentVisible(1, p));
+            assertFalse(deck.isComponentVisible(2, p));
+            assertFalse(deck.isComponentVisible(3, p));
+            assertFalse(deck.isComponentVisible(4, p));
+            assertTrue(deck.isComponentVisible(5, p));
+        }
+
+        deck.redeterminiseUnknown(rnd, 1);
+        assertEquals(CardType.SILVER, deck.get(0).cardType());
+        assertFalse(deck.get(1).cardType() == CardType.GOLD &&
+                deck.get(2).cardType() == CardType.MERCHANT &&
+                deck.get(3).cardType() == CardType.SMITHY &&
+                deck.get(4).cardType() == CardType.MILITIA);
+        assertEquals(CardType.COPPER, deck.get(5).cardType());
+        for (int p = 0; p < 4; p++) {
+            assertTrue(deck.isComponentVisible(0, p));
+            assertFalse(deck.isComponentVisible(1, p));
+            assertFalse(deck.isComponentVisible(2, p));
+            assertFalse(deck.isComponentVisible(3, p));
+            assertFalse(deck.isComponentVisible(4, p));
+            assertTrue(deck.isComponentVisible(5, p));
+        }
     }
+
 
     @Test
     public void reshuffleSingleDeckWithPerspective() {

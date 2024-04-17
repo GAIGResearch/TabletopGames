@@ -92,6 +92,13 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         return elementVisibility.get(idx)[playerID];
     }
 
+
+    @Override
+    public void setVisibility(VisibilityMode visibilityMode) {
+        super.setVisibility(visibilityMode);
+        applyVisibilityMode();
+    }
+
     /**
      * Sets the components in this deck with associated visibility for each player.
      *
@@ -105,6 +112,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         this.elementVisibility = visibilityPerPlayer;
     }
 
+
     /**
      * Sets the visibility for each component in the deck.
      *
@@ -116,6 +124,14 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
                 throw new IllegalArgumentException("All entries of visibility need to have length " + deckVisibility.length +
                         " but at least one entry is of length " + b.length);
         this.elementVisibility = visibility;
+    }
+    private void applyVisibilityMode() {
+        if (getVisibilityMode() == VisibilityMode.TOP_VISIBLE_TO_ALL)
+            for (int j = 0; j < deckVisibility.length; j++)
+                elementVisibility.get(0)[j] = true;
+        if (getVisibilityMode() == VisibilityMode.BOTTOM_VISIBLE_TO_ALL)
+            for (int j = 0; j < deckVisibility.length; j++)
+                elementVisibility.get(components.size() - 1)[j] = true;
     }
 
     /**
@@ -185,49 +201,28 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @param index - the position in which the elements of d should be inserted in this deck.
      * @return true if not over capacity, false otherwise.
      */
+    @Override
     public boolean add(Deck<T> d, int index) {
-        for (int i = 0; i < d.components.size(); i++) {
-            this.elementVisibility.add(index, deckVisibility.clone());
+        if (d instanceof PartialObservableDeck<T> pod) {
+            int length = d.components.size();
+            for (int i = 0; i < length; i++) {
+                // Add in reverse order to keep the order of the deck
+                // this is to ties up with addAll() of components in super.add() a few lines down
+                this.elementVisibility.add(index, pod.elementVisibility.get(length - i - 1).clone());
+            }
+        } else {
+            for (int i = 0; i < d.components.size(); i++) {
+                this.elementVisibility.add(index, deckVisibility.clone());
+            }
         }
+        boolean retValue = super.add(d, index);
         applyVisibilityMode();
-        return super.add(d, index);
-    }
-
-    private void applyVisibilityMode() {
-        if (getVisibilityMode() == VisibilityMode.TOP_VISIBLE_TO_ALL)
-            for (int j = 0; j < deckVisibility.length; j++)
-                elementVisibility.get(0)[j] = true;
-        if (getVisibilityMode() == VisibilityMode.BOTTOM_VISIBLE_TO_ALL)
-            for (int j = 0; j < deckVisibility.length; j++)
-                elementVisibility.get(components.size() - 1)[j] = true;
-    }
-
-    /**
-     * Adds a full other deck to this deck, ignoring capacity, and copies visibility as well.
-     *
-     * @param d - other deck to add to this deck.
-     * @return true if not over capacity, false otherwise.
-     */
-    public boolean add(PartialObservableDeck<T> d) {
-        if (d == null)
-            throw new IllegalArgumentException("d cannot be null");
-        elementVisibility.addAll(d.elementVisibility);
-        for (int i = 0; i < deckVisibility.length; i++) {
-            deckVisibility[i] &= d.deckVisibility[i];
-        }
-        applyVisibilityMode();
-        return super.add(d);
+        return retValue;
     }
 
     @Override
     public boolean add(Deck<T> d) {
-        if (d == null)
-            throw new IllegalArgumentException("d cannot be null");
-        for (int i = 0; i < d.getSize(); i++) {
-            elementVisibility.add(deckVisibility.clone());
-        }
-        applyVisibilityMode();
-        return super.add(d);
+        return add(d, 0);
     }
 
     @Override
