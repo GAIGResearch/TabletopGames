@@ -48,12 +48,12 @@ public class DeterminisationUtilities {
                     case HIDDEN_TO_ALL:
                         allCards.add(d.stream().filter(lambda).collect(toList()));
                         break;
-                    case FIRST_VISIBLE_TO_ALL:
+                    case TOP_VISIBLE_TO_ALL:
                         Deck<C> temp = d.copy();
                         temp.draw();
                         allCards.add(temp.stream().filter(lambda).collect(toList()));
                         break;
-                    case LAST_VISIBLE_TO_ALL:
+                    case BOTTOM_VISIBLE_TO_ALL:
                         throw new AssertionError("Not supported : LAST_VISIBLE_TO_ALL");
                     case MIXED_VISIBILITY:
                         throw new AssertionError("Not supported : MIXED_VISIBILITTY");
@@ -82,12 +82,12 @@ public class DeterminisationUtilities {
                             if (lambda.test(d.get(i)))
                                 d.setComponent(i, allCards.draw());
                         break;
-                    case FIRST_VISIBLE_TO_ALL:
+                    case TOP_VISIBLE_TO_ALL:
                         for (int i = 1; i < d.getSize(); i++)
                             if (lambda.test(d.get(i)))
                                 d.setComponent(i, allCards.draw());
                         break;
-                    case LAST_VISIBLE_TO_ALL:
+                    case BOTTOM_VISIBLE_TO_ALL:
                         throw new AssertionError("Not supported : LAST_VISIBLE_TO_ALL");
                     case MIXED_VISIBILITY:
                         throw new AssertionError("Not supported : MIXED_VISIBILITTY");

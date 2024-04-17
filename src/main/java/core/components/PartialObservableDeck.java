@@ -2,6 +2,8 @@ package core.components;
 
 import core.AbstractGameState;
 import core.CoreConstants.VisibilityMode;
+import org.jetbrains.annotations.NotNull;
+import utilities.DeterminisationUtilities;
 import utilities.Pair;
 
 import java.util.ArrayList;
@@ -171,7 +173,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      */
     public boolean add(T c, int index, boolean[] visibilityPerPlayer) {
         this.elementVisibility.add(index, visibilityPerPlayer.clone());
-        return super.add(c, index);
+        boolean retValue = super.add(c, index);
+        applyVisibilityMode();
+        return retValue;
     }
 
     /**
@@ -190,13 +194,12 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     private void applyVisibilityMode() {
-        if (getVisibilityMode() == VisibilityMode.LAST_VISIBLE_TO_ALL)
+        if (getVisibilityMode() == VisibilityMode.TOP_VISIBLE_TO_ALL)
             for (int j = 0; j < deckVisibility.length; j++)
                 elementVisibility.get(0)[j] = true;
-        if (getVisibilityMode() == VisibilityMode.FIRST_VISIBLE_TO_ALL)
+        if (getVisibilityMode() == VisibilityMode.BOTTOM_VISIBLE_TO_ALL)
             for (int j = 0; j < deckVisibility.length; j++)
                 elementVisibility.get(components.size() - 1)[j] = true;
-
     }
 
     /**
@@ -254,9 +257,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     @Override
     public boolean addToBottom(T c) {
-        if (components.size() == 0)
+        if (components.isEmpty())
             return add(c, 0, deckVisibility);
-        else return add(c, components.size() - 1, deckVisibility);
+        return add(c, components.size(), deckVisibility);
     }
 
     @Override
@@ -279,21 +282,29 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         elementVisibility.clear();
     }
 
+    /**
+     * Shuffles the deck, and updates the visibility of the components accordingly.
+     * After a shuffle players will no longer know the position of the cards they could see before the shuffle
+     * (this resets the visibility of all components to the default deck visibility).
+     * @param rnd
+     */
     @Override
     public void shuffle(Random rnd) {
-        Pair<List<T>, List<boolean[]>> shuffled = shuffleLists(components, elementVisibility, rnd);
-        components = shuffled.a;
-        elementVisibility = shuffled.b;
+        elementVisibility.replaceAll(ignored -> deckVisibility.clone());
+        super.shuffle(rnd);
+        applyVisibilityMode();
     }
 
     /**
-     * Shuffles a deck in its entirety, and resets the visibility of all components to the default visibility of the deck.
+     * Shuffles a deck in its entirety, but players can see any card that they could see before the shuffle (in the new position)
      *
      * @param rnd random number generator to be used in shuffling.
      */
-    public void shuffleAndResetVisibility(Random rnd) {
-        shuffle(rnd);
-        elementVisibility.replaceAll(ignored -> deckVisibility.clone());
+    public void shuffleAndKeepVisibility(Random rnd) {
+        Pair<List<T>, List<boolean[]>> shuffled = shuffleLists(components, elementVisibility, rnd);
+        components = shuffled.a;
+        elementVisibility = shuffled.b;
+        applyVisibilityMode();
     }
 
 
@@ -320,7 +331,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
             tmp_visibility.add(targetIndex, vis.get(sourceIndex));
         }
 
-        return new Pair(tmp_components, tmp_visibility);
+        return new Pair<>(tmp_components, tmp_visibility);
     }
 
     /**
@@ -328,36 +339,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      *
      * @param rnd      - random object to use for shuffling.
      * @param playerId - player observing the deck.
-     * @param visible  - if true, shuffles only visible cards; otherwise, shuffles only hidden cards.
      */
-    public void shuffleVisible(Random rnd, int playerId, boolean visible) {
-        ArrayList<T> visibleComponents = new ArrayList<>();
-        ArrayList<boolean[]> visibility = new ArrayList<>();
-        for (int i = 0; i < components.size(); i++) {
-            boolean[] b = elementVisibility.get(i);
-            if (b[playerId] == visible) {
-                visibleComponents.add(components.get(i));
-                visibility.add(b);
-            }
-        }
-        Pair<List<T>, List<boolean[]>> shuffled = shuffleLists(visibleComponents, visibility, rnd);
-
-        int n = 0;
-        for (int i = 0; i < components.size(); i++) {
-            boolean[] b = elementVisibility.get(i);
-            if (b[playerId] == visible) {
-                // Draw element from shuffled lists
-                components.set(i, shuffled.a.get(n));
-                /*
-                if other players can see a card, we know which card position they can see, but
-                not the actual card (otherwise, it would by definition be visible to us). Therefore
-                we do *not* shuffle element visibility, and keep this in the same order
-                */
-                if (visible)
-                    elementVisibility.set(i, shuffled.b.get(n));
-                n++;
-            }
-        }
+    public void redeterminiseUnknown(Random rnd, int playerId) {
+        DeterminisationUtilities.reshuffle(playerId, List.of(this), c -> true, rnd);
     }
 
     public boolean[] getDeckVisibility() {
@@ -369,21 +353,18 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, ownerId, deckVisibility, componentID);
         this.copyTo(dp); // Copy super
 
-        dp.deckVisibility = deckVisibility.clone();
-
-        ArrayList<boolean[]> newVisibility = new ArrayList<>();
-        for (boolean[] visibility : elementVisibility) {
-            newVisibility.add(visibility.clone());
-        }
-        dp.elementVisibility = newVisibility;
-
-        return dp;
+        return commonCopy(dp);
     }
 
     public PartialObservableDeck<T> copy(int playerId) {
         PartialObservableDeck<T> dp = new PartialObservableDeck<>(componentName, ownerId, deckVisibility, componentID);
         this.copyTo(dp, playerId); // Copy super
 
+        return commonCopy(dp);
+    }
+
+    @NotNull
+    private PartialObservableDeck<T> commonCopy(PartialObservableDeck<T> dp) {
         dp.deckVisibility = deckVisibility.clone();
 
         ArrayList<boolean[]> newVisibility = new ArrayList<>();
@@ -405,7 +386,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
             sb.append(",");
         }
 
-        if (sb.length() > 0)
+        if (!sb.isEmpty())
             sb.deleteCharAt(sb.length() - 1);
         else
             sb.append("EmptyDeck");

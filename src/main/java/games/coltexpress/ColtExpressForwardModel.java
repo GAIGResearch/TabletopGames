@@ -33,7 +33,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         cegs.playerPlayingBelle = -1;
         cegs.plannedActions = null;
         cegs.trainCompartments = new LinkedList<>();
-        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.FIRST_VISIBLE_TO_ALL);
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.TOP_VISIBLE_TO_ALL);
 
         setupRounds(cegs, cep);
         setupTrain(cegs);
@@ -94,7 +94,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
     }
 
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep) {
-        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.FIRST_VISIBLE_TO_ALL);
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.TOP_VISIBLE_TO_ALL);
 
         // Add 1 random end round card
         // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck

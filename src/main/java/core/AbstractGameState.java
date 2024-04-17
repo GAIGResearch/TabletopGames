@@ -538,12 +538,12 @@ public abstract class AbstractGameState {
                     if (((Component) container).getOwnerId() != player)
                         retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
                     break;
-                case FIRST_VISIBLE_TO_ALL:
+                case TOP_VISIBLE_TO_ALL:
                     // add everything as unseen, and then remove the first element
                     retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
                     retValue.remove(container.getComponents().get(0).getComponentID());
                     break;
-                case LAST_VISIBLE_TO_ALL:
+                case BOTTOM_VISIBLE_TO_ALL:
                     // add in the ID of the last item only
                     int length = container.getComponents().size();
                     retValue.add(container.getComponents().get(length - 1).getComponentID());

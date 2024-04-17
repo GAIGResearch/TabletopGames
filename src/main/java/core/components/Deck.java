@@ -231,9 +231,9 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return true if within capacity, false otherwise.
      */
     public boolean addToBottom(T c) {
-        if (components.size() == 0)
+        if (components.isEmpty())
             return add(c, 0);
-        else return add(c, components.size() - 1);
+        else return add(c, components.size());
     }
 
     /**
