@@ -56,7 +56,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     /**
      * Retrieves the components in this deck visible by the given player.
-     *
+     * <p>
      * It always returns a List of the correct length, but with a NULL entry for hidden components
      *
      * @param playerID - ID of player observing the deck.
@@ -128,9 +128,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
             if (playerID >= 0 && playerID < deckVisibility.length)
                 this.elementVisibility.get(index)[playerID] = visibility;
             else
-                throw new IllegalArgumentException("playerID " + playerID + "needs to be in range [0," + (deckVisibility.length-1) + "]");
+                throw new IllegalArgumentException("playerID " + playerID + "needs to be in range [0," + (deckVisibility.length - 1) + "]");
         } else {
-            throw new IllegalArgumentException("component index " + index + " needs to be in range [0," + (components.size()-1) + "]");
+            throw new IllegalArgumentException("component index " + index + " needs to be in range [0," + (components.size() - 1) + "]");
         }
     }
 
@@ -185,7 +185,18 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         for (int i = 0; i < d.components.size(); i++) {
             this.elementVisibility.add(index, deckVisibility.clone());
         }
+        applyVisibilityMode();
         return super.add(d, index);
+    }
+
+    private void applyVisibilityMode() {
+        if (getVisibilityMode() == VisibilityMode.LAST_VISIBLE_TO_ALL)
+            for (int j = 0; j < deckVisibility.length; j++)
+                elementVisibility.get(0)[j] = true;
+        if (getVisibilityMode() == VisibilityMode.FIRST_VISIBLE_TO_ALL)
+            for (int j = 0; j < deckVisibility.length; j++)
+                elementVisibility.get(components.size() - 1)[j] = true;
+
     }
 
     /**
@@ -201,6 +212,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         for (int i = 0; i < deckVisibility.length; i++) {
             deckVisibility[i] &= d.deckVisibility[i];
         }
+        applyVisibilityMode();
         return super.add(d);
     }
 
@@ -211,17 +223,18 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
         for (int i = 0; i < d.getSize(); i++) {
             elementVisibility.add(deckVisibility.clone());
         }
+        applyVisibilityMode();
         return super.add(d);
     }
 
     @Override
     public void setComponents(ArrayList<T> components) {
         super.setComponents(components);
-
         elementVisibility.clear();
         for (int i = 0; i < components.size(); i++) {
             elementVisibility.add(deckVisibility.clone());
         }
+        applyVisibilityMode();
     }
 
     @Override
@@ -241,9 +254,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     @Override
     public boolean addToBottom(T c) {
-        if(components.size() == 0)
+        if (components.size() == 0)
             return add(c, 0, deckVisibility);
-        else return add(c, components.size() -1, deckVisibility);
+        else return add(c, components.size() - 1, deckVisibility);
     }
 
     @Override
@@ -275,10 +288,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     /**
      * Shuffles a deck in its entirety, and resets the visibility of all components to the default visibility of the deck.
+     *
      * @param rnd random number generator to be used in shuffling.
      */
-    public void shuffleAndResetVisibility(Random rnd)
-    {
+    public void shuffleAndResetVisibility(Random rnd) {
         shuffle(rnd);
         elementVisibility.replaceAll(ignored -> deckVisibility.clone());
     }
