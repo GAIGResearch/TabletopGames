@@ -31,9 +31,9 @@ public class DeterminisationUtilities {
 
         // The fully observable decks care now filtered to remove any that are visible to us
         for (Deck<C> d : decks) {
-            if (d instanceof PartialObservableDeck) {
-                PartialObservableDeck<C> pod = (PartialObservableDeck<C>) d;
-                for (int i = 0; i < pod.getSize(); i++) {
+            int length = d.getSize();
+            if (d instanceof PartialObservableDeck<C> pod) {
+                for (int i = 0; i < length; i++) {
                     if (!pod.getVisibilityForPlayer(i, player) && lambda.test(pod.get(i)))
                         allCards.add(pod.get(i));
                 }
@@ -46,15 +46,20 @@ public class DeterminisationUtilities {
                         if (d.getOwnerId() == player)
                             break;
                     case HIDDEN_TO_ALL:
-                        allCards.add(d.stream().filter(lambda).collect(toList()));
+                        for (int i = 0; i < length; i++)
+                            if (lambda.test(d.get(i)))
+                                allCards.add(d.get(i));
                         break;
                     case TOP_VISIBLE_TO_ALL:
-                        Deck<C> temp = d.copy();
-                        temp.draw();
-                        allCards.add(temp.stream().filter(lambda).collect(toList()));
+                        for (int i = 1; i < length; i++)
+                            if (lambda.test(d.get(i)))
+                                allCards.add(d.get(i));
                         break;
                     case BOTTOM_VISIBLE_TO_ALL:
-                        throw new AssertionError("Not supported : LAST_VISIBLE_TO_ALL");
+                        for (int i = 0; i < length - 1;  i++)
+                            if (lambda.test(d.get(i)))
+                                allCards.add(d.get(i));
+                        break;
                     case MIXED_VISIBILITY:
                         throw new AssertionError("Not supported : MIXED_VISIBILITTY");
                 }
@@ -64,9 +69,9 @@ public class DeterminisationUtilities {
 
         // and put the shuffled cards in place
         for (Deck<C> d : decks) {
-            if (d instanceof PartialObservableDeck) {
-                PartialObservableDeck<C> pod = (PartialObservableDeck<C>) d;
-                for (int i = 0; i < pod.getSize(); i++) {
+            int length = d.getSize();
+            if (d instanceof PartialObservableDeck<C> pod) {
+                for (int i = 0; i < length; i++) {
                     if (!pod.getVisibilityForPlayer(i, player) && lambda.test(pod.get(i)))
                         pod.setComponent(i, allCards.draw());
                 }
@@ -78,17 +83,20 @@ public class DeterminisationUtilities {
                         if (d.getOwnerId() == player)
                             break;
                     case HIDDEN_TO_ALL:
-                        for (int i = 0; i < d.getSize(); i++)
+                        for (int i = 0; i < length; i++)
                             if (lambda.test(d.get(i)))
                                 d.setComponent(i, allCards.draw());
                         break;
                     case TOP_VISIBLE_TO_ALL:
-                        for (int i = 1; i < d.getSize(); i++)
+                        for (int i = 1; i < length; i++)
                             if (lambda.test(d.get(i)))
                                 d.setComponent(i, allCards.draw());
                         break;
                     case BOTTOM_VISIBLE_TO_ALL:
-                        throw new AssertionError("Not supported : LAST_VISIBLE_TO_ALL");
+                        for (int i = 0; i < length - 1;  i++)
+                            if (lambda.test(d.get(i)))
+                                d.setComponent(i, allCards.draw());
+                        break;
                     case MIXED_VISIBILITY:
                         throw new AssertionError("Not supported : MIXED_VISIBILITTY");
                 }

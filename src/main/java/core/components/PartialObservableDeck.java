@@ -6,10 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import utilities.DeterminisationUtilities;
 import utilities.Pair;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
@@ -312,10 +309,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @return - both lists shuffled, keeping the mapping from component to visibility at the same index.
      */
     private Pair<List<T>, List<boolean[]>> shuffleLists(List<T> comps, List<boolean[]> vis, Random rnd) {
-        List<T> tmp_components = new ArrayList<>();
-        List<boolean[]> tmp_visibility = new ArrayList<>();
+        List<T> tmp_components = new LinkedList<>();
+        List<boolean[]> tmp_visibility = new LinkedList<>();
 
-        List<Integer> indexList = new ArrayList<>();
+        List<Integer> indexList = new ArrayList<>(comps.size());
         for (int i = 0; i < comps.size(); i++)
             indexList.add(i);
         Collections.shuffle(indexList, rnd);

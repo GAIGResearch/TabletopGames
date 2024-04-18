@@ -34,7 +34,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     public Deck(String name, int ownerId, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name);
-        this.components = new ArrayList<>();
+        this.components = new LinkedList<>();   // we always add new components to element 0...so an ArrayList is inefficient
         this.ownerId = ownerId;
         this.capacity = -1;
         this.visibility = visibility;
@@ -42,7 +42,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     protected Deck(String name, int ownerId, int ID, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name, ID);
-        this.components = new ArrayList<>();
+        this.components = new LinkedList<>();
         this.capacity = -1;
         this.ownerId = ownerId;
         this.visibility = visibility;
