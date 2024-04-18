@@ -141,7 +141,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return the component in position idx from the deck
      */
     public T pick(int idx) {
-        if (components.size() > 0 && idx < components.size() && idx >= 0) {
+        if (!components.isEmpty() && idx < components.size() && idx >= 0) {
             T c = components.get(idx);
             components.remove(idx);
             return c;
@@ -191,7 +191,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return The component peeked.
      */
     public T peek(int idx) {
-        if (components.size() > 0 && idx < components.size()) {
+        if (!components.isEmpty() && idx < components.size()) {
             return components.get(idx);
         }
         return null;
@@ -364,7 +364,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      *
      * @param components - new components for the deck, overrides old content.
      */
-    public void setComponents(ArrayList<T> components) {
+    public void setComponents(List<T> components) {
         this.components = components;
         for (T comp : components) {
             comp.setOwnerId(ownerId);
@@ -435,8 +435,9 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return dp;
     }
 
+    @SuppressWarnings("unchecked")
     protected void copyTo(Deck<T> deck) {
-        List<T> newComponents = new ArrayList<>();
+        List<T> newComponents = new LinkedList<>();
         for (T c : components) {
             newComponents.add((T) c.copy());
         }
@@ -448,8 +449,9 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
 
+    @SuppressWarnings("unchecked")
     protected void copyTo(Deck<T> deck, int playerId) {
-        List<T> newComponents = new ArrayList<>();
+        List<T> newComponents = new LinkedList<>();
         for (T c : components) {
             newComponents.add((T) c.copy(playerId));
         }
@@ -468,7 +470,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
             sb.append(",");
         }
 
-        if (sb.length() > 0)
+        if (!sb.isEmpty())
             sb.deleteCharAt(sb.length() - 1);
         else
             sb.append("EmptyDeck");
@@ -479,9 +481,8 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Deck)) return false;
+        if (!(o instanceof Deck<?> deck)) return false;
         if (!super.equals(o)) return false;
-        Deck<?> deck = (Deck<?>) o;
         return capacity == deck.capacity &&
                 Objects.equals(components, deck.components);
     }

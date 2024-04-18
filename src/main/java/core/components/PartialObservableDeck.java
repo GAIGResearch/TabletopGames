@@ -15,7 +15,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     protected boolean[] deckVisibility;
 
     // Visibility of each component in the deck, order corresponds to order of elements in the deck;
-    protected List<boolean[]> elementVisibility = new ArrayList<>();
+    protected List<boolean[]> elementVisibility = new LinkedList<>();
 
     public boolean getVisibilityForPlayer(int elementIdx, int playerID) {
         return elementVisibility.get(elementIdx)[playerID];
@@ -61,11 +61,11 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @param playerID - ID of player observing the deck.
      * @return - ArrayList of components observed by the player.
      */
-    public ArrayList<T> getVisibleComponents(int playerID) {
+    public List<T> getVisibleComponents(int playerID) {
         if (playerID < 0 || playerID >= deckVisibility.length)
             throw new IllegalArgumentException("playerID " + playerID + " needs to be in range [0," + (deckVisibility.length - 1) + "]");
 
-        ArrayList<T> visibleComponents = new ArrayList<>(components.size());
+        List<T> visibleComponents = new ArrayList<>(components.size());
         for (int i = 0; i < components.size(); i++) {
             boolean[] b = elementVisibility.get(i);
             if (b[playerID])
@@ -104,7 +104,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      *                            indicating which player can see the specific component (true if player can see it,
      *                            false otherwise).
      */
-    public void setComponents(ArrayList<T> components, ArrayList<boolean[]> visibilityPerPlayer) {
+    public void setComponents(List<T> components, List<boolean[]> visibilityPerPlayer) {
         super.setComponents(components);
         this.elementVisibility = visibilityPerPlayer;
     }
@@ -115,7 +115,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      *
      * @param visibility - new list of component visibility.
      */
-    public void setVisibility(ArrayList<boolean[]> visibility) {
+    public void setVisibility(List<boolean[]> visibility) {
         for (boolean[] b : visibility)
             if (b.length != this.deckVisibility.length)
                 throw new IllegalArgumentException("All entries of visibility need to have length " + deckVisibility.length +
@@ -223,7 +223,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     @Override
-    public void setComponents(ArrayList<T> components) {
+    public void setComponents(List<T> components) {
         super.setComponents(components);
         elementVisibility.clear();
         for (int i = 0; i < components.size(); i++) {

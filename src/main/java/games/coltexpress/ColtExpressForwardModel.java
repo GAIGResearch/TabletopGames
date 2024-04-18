@@ -101,7 +101,6 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck
 
         Random rndForRoundCards = cep.roundDeckShuffleSeed != -1 ? new Random(cep.roundDeckShuffleSeed) : cegs.getRnd();
-        RoundCard endCard = cegs.getRandomEndRoundCard(cep, rndForRoundCards);
 
         // Add random round cards
         ArrayList<ColtExpressTypes.RegularRoundCard> availableRounds = new ArrayList<>(Arrays.asList(cep.roundCards));
@@ -111,6 +110,8 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
             availableRounds.remove(availableRounds.get(choice));
         }
         cegs.rounds.shuffle(rndForRoundCards);
+
+        RoundCard endCard = cegs.getRandomEndRoundCard(cep, rndForRoundCards);
         cegs.rounds.addToBottom(endCard);
     }
 
