@@ -26,6 +26,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     // Heuristics used for the agent
     protected boolean debug = false;
     protected SingleTreeNode root;
+    protected AbstractAction lastAction;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
 
     public MCTSPlayer() {
@@ -86,13 +87,72 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         root = null;
     }
 
+    protected SingleTreeNode newRootNode(AbstractGameState gameState) {
+        //TODO: For MultiTree MCTS we need to do this across each opponent tree in sequence
+        SingleTreeNode newRoot = null;
+        if (getParameters().reuseTree && root != null) {
+            // we see if we can reuse the tree
+            // We need to look at all actions taken since our last action
+            List<AbstractAction> history = gameState.getHistory();
+            newRoot = root;
+            for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
+                if (history.get(backwardLoop).equals(lastAction)) {
+                    // We can reuse the tree from this point
+                    // We now work forward through the actions
+                    for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
+                        AbstractAction nextAction = history.get(forwardLoop);
+                        SingleTreeNode[] nextNodeArray = root.children.get(nextAction);
+                        boolean nextNodeFound = false;
+                        for (SingleTreeNode singleTreeNode : nextNodeArray) {
+                            if (singleTreeNode != null) {
+                                if (nextNodeFound) {
+                                    throw new AssertionError("Two acting players found from same state");
+                                }
+                                nextNodeFound = true;
+                                newRoot = singleTreeNode;
+                            }
+                        }
+                        if (!nextNodeFound) {
+                            newRoot = null; // the actions taken have moved out of the tree; nothing to reuse
+                        }
+                    }
+                }
+            }
+        }
+        // at this stage we should have moved down the tree to get to the correct node
+        // based on the actions taken in the game since our last decision
+        // The node we have reached should be the new root node
+        if (newRoot != null) {
+            if (newRoot.decisionPlayer != gameState.getCurrentPlayer()) {
+                throw new AssertionError("Current player does not match decision player in tree");
+                // if this is a problem, we can just set newRoot = null;
+            }
+            rootify(newRoot);
+        }
+        return newRoot;
+    }
+
+    protected void rootify(SingleTreeNode newRoot) {
+        // We need to make the new root the root of the tree
+        // We need to remove the parent link from the new root
+        newRoot.parent = null;
+        newRoot.actionToReach = null;
+        // and set the MAST statistics from the old root
+        newRoot.MASTStatistics = root.MASTStatistics;
+
+    }
+
 
     protected void createRootNode(AbstractGameState gameState) {
-        if (getParameters().opponentTreePolicy == MultiTree)
-            root = new MultiTreeNode(this, gameState, rnd);
-        else
-            root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
-
+        SingleTreeNode newRoot = newRootNode(gameState);
+        if (newRoot == null) {
+            if (getParameters().opponentTreePolicy == MultiTree)
+                root = new MultiTreeNode(this, gameState, rnd);
+            else
+                root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
+        } else {
+            root = newRoot;
+        }
         if (MASTStats != null)
             root.MASTStatistics = MASTStats.stream()
                     .map(m -> Utils.decay(m, getParameters().MASTGamma))
@@ -128,7 +188,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
         if (root.children.size() > 2 * actions.size() && !(root instanceof MCGSNode) && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
-        return root.bestAction();
+        lastAction = root.bestAction();
+        return lastAction.copy();
     }
 
     @Override
