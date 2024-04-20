@@ -140,6 +140,15 @@ public class SingleTreeNode {
 
     }
 
+    public void resetDepth() {
+        depth = parent == null ? 0 : parent.depth + 1;
+        for (SingleTreeNode[] childArray : children.values()) {
+            for (SingleTreeNode child : childArray) {
+                if (child != null) child.resetDepth();
+            }
+        }
+    }
+
     public AbstractGameState getState() {
         return state;
     }

@@ -123,23 +123,23 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         // based on the actions taken in the game since our last decision
         // The node we have reached should be the new root node
         if (newRoot != null) {
-            if (newRoot.decisionPlayer != gameState.getCurrentPlayer()) {
+            if (newRoot.turnOwner != gameState.getCurrentPlayer() || newRoot.decisionPlayer != gameState.getCurrentPlayer()) {
                 throw new AssertionError("Current player does not match decision player in tree");
                 // if this is a problem, we can just set newRoot = null;
             }
-            rootify(newRoot);
+            rootify(newRoot, gameState);
         }
         return newRoot;
     }
 
-    protected void rootify(SingleTreeNode newRoot) {
+    protected void rootify(SingleTreeNode newRoot, AbstractGameState gameState) {
         // We need to make the new root the root of the tree
         // We need to remove the parent link from the new root
-        newRoot.parent = null;
-        newRoot.actionToReach = null;
+        newRoot.instantiate(null, null, gameState);
         // and set the MAST statistics from the old root
         newRoot.MASTStatistics = root.MASTStatistics;
-
+        // now we need to reset the depth on all the children (recursively)
+        newRoot.resetDepth();
     }
 
 
