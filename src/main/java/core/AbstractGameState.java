@@ -13,6 +13,7 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
+import utilities.Pair;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -53,7 +54,7 @@ public abstract class AbstractGameState {
     protected ElapsedCpuChessTimer[] playerTimer;
 
     // A record of all actions taken to reach this game state
-    private List<AbstractAction> history = new ArrayList<>();
+    private List<Pair<Integer, AbstractAction>> history = new ArrayList<>();
     private List<String> historyText = new ArrayList<>();
 
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
@@ -161,7 +162,7 @@ public abstract class AbstractGameState {
     /**
      * @return All actions that have been executed on this state since reset()/initialisation
      */
-    public List<AbstractAction> getHistory() { return new ArrayList<>(history);}
+    public List<Pair<Integer, AbstractAction>> getHistory() { return new ArrayList<>(history);}
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
@@ -337,7 +338,7 @@ public abstract class AbstractGameState {
      * @param action The action that has just been applied (or is about to be applied) to the game state
      */
     protected final void recordAction(AbstractAction action, int player) {
-        history.add(action);
+        history.add(new Pair<>(player, action));
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 

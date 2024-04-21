@@ -93,27 +93,23 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (getParameters().reuseTree && root != null) {
             // we see if we can reuse the tree
             // We need to look at all actions taken since our last action
-            List<AbstractAction> history = gameState.getHistory();
+            List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
+            Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
             newRoot = root;
             for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
-                if (history.get(backwardLoop).equals(lastAction)) {
+                if (history.get(backwardLoop).equals(lastExpected)) {
                     // We can reuse the tree from this point
                     // We now work forward through the actions
                     for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
-                        AbstractAction nextAction = history.get(forwardLoop);
+                        AbstractAction nextAction = history.get(forwardLoop).b;
+                        int nextActionPlayer = history.get(forwardLoop).a;
+                        // then make sure that we have a transition for this player and this action
                         SingleTreeNode[] nextNodeArray = root.children.get(nextAction);
-                        boolean nextNodeFound = false;
-                        for (SingleTreeNode singleTreeNode : nextNodeArray) {
-                            if (singleTreeNode != null) {
-                                if (nextNodeFound) {
-                                    throw new AssertionError("Two acting players found from same state");
-                                }
-                                nextNodeFound = true;
-                                newRoot = singleTreeNode;
-                            }
-                        }
-                        if (!nextNodeFound) {
-                            newRoot = null; // the actions taken have moved out of the tree; nothing to reuse
+                        newRoot = nextNodeArray != null ? nextNodeArray[nextActionPlayer] : null;
+                        if (newRoot == null) {
+                            // we have not seen this action before, so we stop, as the game has moved
+                            // beyond the last stored open loop tree
+                            break;
                         }
                     }
                 }
