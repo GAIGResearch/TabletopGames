@@ -11,6 +11,10 @@ import org.junit.Test;
 import players.PlayerConstants;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
 
 public class TreeReuseTests {
 
@@ -47,7 +51,22 @@ public class TreeReuseTests {
         // Plus that the number of visits
         AbstractAction lastAction = null;
         do {
-            game.oneAction();
+            int currentPlayer = state.getCurrentPlayer();
+            AbstractAction nextAction = game.oneAction();
+            Map<AbstractAction, Integer> nextVisitActions;
+            SingleTreeNode oldRoot = null;
+            if (currentPlayer == 0) {
+                SingleTreeNode playerTwoNode = playerOne.getRoot(currentPlayer).getChildren().get(nextAction)[0];
+                nextVisitActions = playerTwoNode.actionValues.keySet().stream()
+                        .collect(Collectors.toMap(
+                                a -> a,
+                                a -> playerTwoNode.actionValues.get(a).nVisits));
+                if (lastAction != null) {
+                    oldRoot = playerOne.getRoot(currentPlayer).getChildren().get(lastAction)[0];
+                }
+                lastAction = nextAction;
+                assertEquals(oldVisits + 100, visits);
+            }
         } while (state.isNotTerminal());
 
         // After each action, obtain the node that we should move to next.
