@@ -3,8 +3,10 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import games.GameType;
+import games.dominion.DominionConstants;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
+import games.dominion.cards.CardType;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -142,6 +144,9 @@ public class TreeReuseTests {
         // To test this we can use Dominion, in which the first couple of Turns will have the single END_PHASE action
         // to move on to the buy phase - as no player has any Action cards until these have been purchased and reshuffled into hand
         initialiseDominion();
+        DominionGameState dgs = (DominionGameState) state;
+        // this is to test more complicated actions
+        dgs.addCard(CardType.MILITIA, 0, DominionConstants.DeckType.HAND);
         runDominion();
 
     }
@@ -166,6 +171,8 @@ public class TreeReuseTests {
             int currentPlayer = state.getCurrentPlayer();
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
+            if (paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.SelfOnly)
+                continue;
             System.out.println("Action: " + nextAction.toString());
             SingleTreeNode newRoot = currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(0);
             if (currentPlayer == 0 && !oneAction) {

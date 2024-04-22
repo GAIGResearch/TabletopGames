@@ -99,7 +99,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
             newRoot = root;
             System.out.println("Backtracking for " + lastAction + " by " + gameState.getCurrentPlayer());
-            outer: for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
+            for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
                 if (history.get(backwardLoop).equals(lastExpected)) {
                     // We can reuse the tree from this point
                     // We now work forward through the actions
@@ -114,14 +114,16 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                         else
                             newRoot = null;
                         if (newRoot == null)
-                            break outer;
+                            break;
                     }
-                    break outer;
+                    break;
                 }
             }
+            if (root == newRoot)
+                throw new AssertionError("Root node should not be the same as the new root node");
+            if (newRoot == null)
+                System.out.println("No matching node found");
         }
-        if (newRoot == null)
-            System.out.println("No matching node found");
         // at this stage we should have moved down the tree to get to the correct node
         // based on the actions taken in the game since our last decision
         // The node we have reached should be the new root node

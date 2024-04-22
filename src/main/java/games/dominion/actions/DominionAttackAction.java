@@ -123,8 +123,7 @@ public abstract class DominionAttackAction extends DominionAction implements IEx
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DominionAttackAction) {
-            DominionAttackAction other = (DominionAttackAction) obj;
+        if (obj instanceof DominionAttackAction other) {
             return super.equals(obj)
                     && other.currentTarget == currentTarget
                     && Arrays.equals(reactionsInitiated, other.reactionsInitiated)

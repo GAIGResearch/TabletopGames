@@ -562,7 +562,7 @@ public class Game {
 
         // Either ask player which action to use or, in case no actions are available, report the updated observation
         AbstractAction action = null;
-        if (observedActions.size() > 0) {
+        if (!observedActions.isEmpty()) {
             if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer || currentPlayer instanceof HumanConsolePlayer) || observedActions.get(0) instanceof DoNothing)) {
                 // Can only do 1 action, so do it.
                 action = observedActions.get(0);
@@ -607,7 +607,8 @@ public class Game {
         } else {
             // Resolve action and game rules, time it
             s = System.nanoTime();
-            forwardModel.next(gameState, action);
+            // we copy the action before using it..so that the action returned by oneAction() does not have a state link
+            forwardModel.next(gameState, action.copy());
             nextTime = (System.nanoTime() - s);
         }
 
