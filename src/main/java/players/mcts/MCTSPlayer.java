@@ -99,7 +99,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
             newRoot = root;
             System.out.println("Backtracking for " + lastAction + " by " + gameState.getCurrentPlayer());
-            for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
+            outer: for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
                 if (history.get(backwardLoop).equals(lastExpected)) {
                     // We can reuse the tree from this point
                     // We now work forward through the actions
@@ -113,14 +113,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                             newRoot = newRoot.children.get(action)[nextActionPlayer];
                         else
                             newRoot = null;
-                        if (newRoot == null) {
-                            // we have not seen this action before, so we stop, as the game has moved
-                            // beyond the last stored open loop tree
-                            break;
-                        }
+                        if (newRoot == null)
+                            break outer;
                     }
+                    break outer;
                 }
-                break;
             }
         }
         if (newRoot == null)
