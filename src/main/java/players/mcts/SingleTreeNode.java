@@ -16,8 +16,6 @@ import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.Strategies.MAST;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
 import static utilities.Utils.*;
 
 public class SingleTreeNode {
@@ -140,11 +138,22 @@ public class SingleTreeNode {
 
     }
 
-    public void resetDepth() {
+    public void rootify(SingleTreeNode template) {
+        // now we need to reset the depth on all the children (recursively)
+        parent = null;
+        actionToReach = null;
+        resetDepth(this);
+        highReward = template.highReward;
+        lowReward = template.lowReward;
+    }
+
+    private void resetDepth(SingleTreeNode newRoot) {
         depth = parent == null ? 0 : parent.depth + 1;
+        root = newRoot;
         for (SingleTreeNode[] childArray : children.values()) {
+            if (childArray == null) continue;
             for (SingleTreeNode child : childArray) {
-                if (child != null) child.resetDepth();
+                if (child != null) child.resetDepth(newRoot);
             }
         }
     }
@@ -270,7 +279,7 @@ public class SingleTreeNode {
         }
     }
 
-    protected void initialiseRoot() {
+    protected void initialiseRootMetrics() {
         timeTaken = 0.0;
         nodeClash = 0;
         rolloutActionsTaken = 0;
@@ -280,7 +289,7 @@ public class SingleTreeNode {
      * Performs full MCTS search, using the defined budget limits.
      */
     public void mctsSearch() {
-        initialiseRoot();
+        initialiseRootMetrics();
         // Variables for tracking time budget
         double avgTimeTaken;
         long remaining;

@@ -83,8 +83,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public void registerUpdatedObservation(AbstractGameState gameState) {
         super.registerUpdatedObservation(gameState);
-        // We did not take a decision, so blank out the previous set of data
-        root = null;
+        if (!getParameters().reuseTree) {
+            root = null;
+        }
     }
 
     protected SingleTreeNode newRootNode(AbstractGameState gameState) {
@@ -101,11 +102,13 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                     // We can reuse the tree from this point
                     // We now work forward through the actions
                     for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
-                        AbstractAction nextAction = history.get(forwardLoop).b;
-                        int nextActionPlayer = history.get(forwardLoop).a;
+                        AbstractAction action = history.get(forwardLoop).b;
+                        int nextActionPlayer = forwardLoop < history.size() - 1 ? history.get(forwardLoop + 1).a : gameState.getCurrentPlayer();
                         // then make sure that we have a transition for this player and this action
-                        SingleTreeNode[] nextNodeArray = root.children.get(nextAction);
-                        newRoot = nextNodeArray != null ? nextNodeArray[nextActionPlayer] : null;
+                        if (newRoot != null && newRoot.children != null && newRoot.children.get(action) != null)
+                            newRoot = newRoot.children.get(action)[nextActionPlayer];
+                        else
+                            newRoot = null;
                         if (newRoot == null) {
                             // we have not seen this action before, so we stop, as the game has moved
                             // beyond the last stored open loop tree
@@ -123,19 +126,12 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 throw new AssertionError("Current player does not match decision player in tree");
                 // if this is a problem, we can just set newRoot = null;
             }
-            rootify(newRoot, gameState);
+            // We need to make the new root the root of the tree
+            // We need to remove the parent link from the new root
+            newRoot.instantiate(null, null, gameState);
+            newRoot.rootify(root);
         }
         return newRoot;
-    }
-
-    protected void rootify(SingleTreeNode newRoot, AbstractGameState gameState) {
-        // We need to make the new root the root of the tree
-        // We need to remove the parent link from the new root
-        newRoot.instantiate(null, null, gameState);
-        // and set the MAST statistics from the old root
-        newRoot.MASTStatistics = root.MASTStatistics;
-        // now we need to reset the depth on all the children (recursively)
-        newRoot.resetDepth();
     }
 
 
