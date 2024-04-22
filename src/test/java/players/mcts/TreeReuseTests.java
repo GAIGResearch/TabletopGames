@@ -1,8 +1,10 @@
 package players.mcts;
 
-import core.Game;
+import core.*;
 import core.actions.AbstractAction;
 import games.GameType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGameState;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -10,9 +12,9 @@ import org.apache.arrow.vector.complex.impl.SingleListReaderImpl;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
+import players.simple.RandomPlayer;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -22,8 +24,8 @@ public class TreeReuseTests {
     public TestMCTSPlayer playerOne;
     public TestMCTSPlayer playerTwo;
     public MCTSParams paramsOne, paramsTwo;
-    public TicTacToeGameState state;
-    public TicTacToeForwardModel fm;
+    public AbstractGameState state;
+    public AbstractForwardModel fm;
     public Game game;
 
 
@@ -96,6 +98,7 @@ public class TreeReuseTests {
                         assertEquals(expectedNewRoot, newRoot);
                     }
                 }
+                System.out.println("Visits: " + newRoot.getVisits());
                 assertEquals(paramsOne.budget + oldVisits, newRoot.getVisits());
 
             } else {
@@ -116,11 +119,13 @@ public class TreeReuseTests {
         if (actingPlayers.length != actions.size() + 1)
             throw new AssertionError("actingPlayers must be one longer than actions");
         SingleTreeNode currentNode = startingNode;
+        if (currentNode == null)
+            return null;
         for (int i = 0; i < actions.size(); i++) {
             AbstractAction action = actions.get(i);
             SingleTreeNode[] nodeArray = currentNode.getChildren().get(action);
             if (nodeArray != null)
-                currentNode = nodeArray[actingPlayers[i+1]];
+                currentNode = nodeArray[actingPlayers[i + 1]];
             else
                 currentNode = null;
             if (currentNode == null)
@@ -134,5 +139,61 @@ public class TreeReuseTests {
     public void treeReusedAfterSingleAction() {
         // if we have a mandatory single action that did not go through MCTSPlayer.getAction()
         // check we still move to the correct place in the tree
+        // To test this we can use Dominion, in which the first couple of Turns will have the single END_PHASE action
+        // to move on to the buy phase - as no player has any Action cards until these have been purchased and reshuffled into hand
+        initialiseDominion();
+        runDominion();
+
+    }
+
+    public void initialiseDominion() {
+        playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
+        playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
+        fm = new DominionForwardModel();
+        game = GameType.Dominion.createGameInstance(3, 404);
+        game.reset(List.of(playerOne, playerTwo, new RandomPlayer()));
+        state = game.getGameState();
+    }
+
+    public void runDominion() {
+        List<AbstractAction> actionsTakenSinceLastPlayerZeroDecision = new ArrayList<>();
+        List<Integer> nextActingPlayers = new ArrayList<>();
+        nextActingPlayers.add(state.getCurrentPlayer());
+        SingleTreeNode[] oldRoots = new SingleTreeNode[2];
+        int oldVisits = 0;
+        do {
+            System.out.println("Current Player: " + state.getCurrentPlayer() + ", Turn: " + state.getTurnCounter() + ", Phase: " + state.getGamePhase());
+            int currentPlayer = state.getCurrentPlayer();
+            boolean oneAction = fm.computeAvailableActions(state).size() == 1;
+            AbstractAction nextAction = game.oneAction();
+            System.out.println("Action: " + nextAction.toString());
+            SingleTreeNode newRoot = currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(0);
+            if (currentPlayer == 0 && !oneAction) {
+                // check tree reuse
+                if (oldRoots[0] != null) {
+                    assertNotEquals(oldRoots[0], playerOne.getRoot(0));
+                    // we apply the last actions for p0 and p1 in sequence
+                    SingleTreeNode expectedNewRoot = descendTree(oldRoots[0], nextActingPlayers.stream().mapToInt(i -> i).toArray(), actionsTakenSinceLastPlayerZeroDecision);
+                    if (expectedNewRoot != null) {
+                        assertEquals(expectedNewRoot, newRoot);
+                    }
+                }
+                System.out.println("Visits: " + newRoot.getVisits());
+                assertEquals(paramsOne.budget + oldVisits, newRoot.getVisits());
+                // reset track of actions
+                actionsTakenSinceLastPlayerZeroDecision.clear();
+                nextActingPlayers.clear();
+                nextActingPlayers.add(state.getCurrentPlayer());
+            }
+            actionsTakenSinceLastPlayerZeroDecision.add(nextAction);
+            nextActingPlayers.add(state.getCurrentPlayer());
+            if (currentPlayer != 2)
+                oldRoots[currentPlayer] = newRoot;
+            // if the next player is 0, then we determine how many oldVisits there are before they make the next decision
+            if (state.getCurrentPlayer() == 0) {
+                SingleTreeNode nextNode = descendTree(oldRoots[0], nextActingPlayers.stream().mapToInt(i -> i).toArray(), actionsTakenSinceLastPlayerZeroDecision);
+                oldVisits = nextNode == null ? 0 : nextNode.getVisits();
+            }
+        } while (state.isNotTerminal());
     }
 }

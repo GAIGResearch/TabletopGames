@@ -271,7 +271,7 @@ public class TestBaseActionCardsWithCopy {
     private void moveForwardToNextPlayer(DominionGameState state) {
         int startingPlayer = state.getCurrentPlayer();
         while (state.getCurrentPlayer() == startingPlayer)
-            fm.next(state, new EndPhase());
+            fm.next(state, new EndPhase((DominionGameState.DominionGamePhase) state.getGamePhase()));
     }
 
     @Test
@@ -388,7 +388,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase());
+        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
@@ -411,7 +411,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase());
+        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
@@ -435,7 +435,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase());
+        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
@@ -461,7 +461,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase());
+        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
