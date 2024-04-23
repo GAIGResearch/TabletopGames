@@ -113,14 +113,15 @@ public class SingleTreeNode {
         this.turnOwner = state.getCurrentPlayer();
         this.terminalNode = !state.isNotTerminal();
 
-        decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         this.actionToReach = actionToReach;
 
         if (parent != null) {
             depth = parent.depth + 1;
             factory = parent.factory;
+            decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         } else {
             depth = 0;
+            decisionPlayer = state.getCurrentPlayer();
         }
 
         if (params.information != Closed_Loop && (params.maintainMasterState || depth == 0)) {
@@ -1043,7 +1044,7 @@ public class SingleTreeNode {
             // (and this is good, as it throws an error as a bug-check if this is not true).
             bestAction = treePolicyAction(false);
         } else {
-            // We iterate through all action valid in the original root state
+            // We iterate through all actions valid in the original root state
             // as openLoopState may be different if using MCGS (not an issue with SingleTreeNode or MultiTreeNode)
             for (AbstractAction action : forwardModel.computeAvailableActions(state, params.actionSpace)) {
                 if (!actionValues.containsKey(action)) {

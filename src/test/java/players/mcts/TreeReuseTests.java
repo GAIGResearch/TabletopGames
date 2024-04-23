@@ -2,22 +2,20 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IGamePhase;
 import games.GameType;
 import games.dominion.DominionConstants;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
+import games.dominion.actions.BuyCard;
 import games.dominion.cards.CardType;
 import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
-import games.tictactoe.TicTacToeGameState;
-import org.apache.arrow.vector.complex.impl.SingleListReaderImpl;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -44,13 +42,26 @@ public class TreeReuseTests {
         paramsTwo.discardStateAfterEachIteration = false;
     }
 
-    public void initialiseGame() {
+    public void initialiseTicTacToe() {
         playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
+        playerOne.rolloutTest = false;
         playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
+        playerTwo.rolloutTest = false;
         fm = new TicTacToeForwardModel();
         game = GameType.TicTacToe.createGameInstance(2, 404);
         game.reset(List.of(playerOne, playerTwo));
-        state = (TicTacToeGameState) game.getGameState();
+        state = game.getGameState();
+    }
+
+    public void initialiseDominion() {
+        playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
+        playerOne.rolloutTest = false;
+        playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
+        playerTwo.rolloutTest = false;
+        fm = new DominionForwardModel();
+        game = GameType.Dominion.createGameInstance(3, 404);
+        game.reset(List.of(playerOne, playerTwo, new RandomPlayer()));
+        state = game.getGameState();
     }
 
     @Test
@@ -66,7 +77,7 @@ public class TreeReuseTests {
         // and has had its visit count increased by 100 (and children are also incremented in total by 100)
 
         // Repeat to the penultimate turn (when there is only one action left)
-        initialiseGame();
+        initialiseTicTacToe();
         runGame();
     }
 
@@ -76,7 +87,7 @@ public class TreeReuseTests {
         // created for the next move until we get to the end of the game.
         paramsOne.budget = 20;
         paramsTwo.budget = 20;
-        initialiseGame();
+        initialiseTicTacToe();
         runGame();
     }
 
@@ -103,6 +114,13 @@ public class TreeReuseTests {
         runGame();
     }
 
+    @Test
+    public void treeReusedWithMultiTree() {
+        paramsOne.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        initialiseDominion();
+        runGame();
+    }
+
 
     private SingleTreeNode descendTree(SingleTreeNode startingNode, int[] actingPlayers, List<AbstractAction> actions) {
         if (actingPlayers.length != actions.size() + 1)
@@ -123,17 +141,8 @@ public class TreeReuseTests {
         return currentNode;
     }
 
-
-    public void initialiseDominion() {
-        playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
-        playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
-        fm = new DominionForwardModel();
-        game = GameType.Dominion.createGameInstance(3, 404);
-        game.reset(List.of(playerOne, playerTwo, new RandomPlayer()));
-        state = game.getGameState();
-    }
-
     public void runGame() {
+        boolean selfOnlyTree = paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.SelfOnly || paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree;
         List<AbstractAction> actionsTakenSinceLastPlayerZeroDecision = new ArrayList<>();
         List<Integer> nextActingPlayers = new ArrayList<>();
         nextActingPlayers.add(state.getCurrentPlayer());
@@ -142,11 +151,23 @@ public class TreeReuseTests {
         do {
             System.out.println("Current Player: " + state.getCurrentPlayer() + ", Turn: " + state.getTurnCounter() + ", Phase: " + state.getGamePhase());
             int currentPlayer = state.getCurrentPlayer();
+            AbstractGameState preActionCopy = state.copy();
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
-            SingleTreeNode newRoot = currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(0);
+            STNWithTestInstrumentation newRoot = (STNWithTestInstrumentation) (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
             if (currentPlayer == 0 && !oneAction) {
+                if (newRoot != null) {
+                    assertEquals(preActionCopy.getGamePhase(), newRoot.state.getGamePhase());
+                    // we also want to check if we have a whole load of ESTATE purchases
+                    if (preActionCopy instanceof DominionGameState dgs) {
+                        int ESTATE_Visits = newRoot.getActionStats(new BuyCard(CardType.ESTATE, 0)) == null ? 0
+                                : newRoot.getActionStats(new BuyCard(CardType.ESTATE, 0)).validVisits;
+                        int ESTATES_available = dgs.getCardsIncludedInGame().get(CardType.ESTATE);
+                        if (ESTATES_available == 0)
+                            assertTrue(ESTATE_Visits <= oldVisits);
+                    }
+                }
                 // check tree reuse
                 if (oldRoots[0] != null) {
                     assertNotEquals(oldRoots[0], playerOne.getRoot(0));
@@ -163,9 +184,9 @@ public class TreeReuseTests {
                 nextActingPlayers.clear();
                 nextActingPlayers.add(state.getCurrentPlayer());
             }
-            if (currentPlayer == 0 || paramsOne.opponentTreePolicy != MCTSEnums.OpponentTreePolicy.SelfOnly)
+            if (currentPlayer == 0 || !selfOnlyTree)
                 actionsTakenSinceLastPlayerZeroDecision.add(nextAction);
-            if (state.getCurrentPlayer() == 0 || paramsOne.opponentTreePolicy != MCTSEnums.OpponentTreePolicy.SelfOnly)
+            if (state.getCurrentPlayer() == 0 || !selfOnlyTree)
                 nextActingPlayers.add(state.getCurrentPlayer());
 
             if (currentPlayer != 2)

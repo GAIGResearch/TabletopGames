@@ -88,43 +88,42 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         }
     }
 
+    protected MultiTreeNode newMultiTreeRootNode(AbstractGameState state) {
+        // We need to update each of the individual player root nodes independently
+        MultiTreeNode mtRoot = (MultiTreeNode) this.root;
+        // We retain this, but update the root nodes
+        // We could have run through the history once...but more robust to do this once per player
+        // and reuse the code for SelfOnly
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            SingleTreeNode oldRoot = mtRoot.roots[p];
+            if (debug)
+                System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
+            mtRoot.roots[p] = backtrack(mtRoot.roots[p], state);
+            if (mtRoot.roots[p] != null) {
+       //         if (p == mtRoot.decisionPlayer)
+        //            mtRoot.roots[p].instantiate(null, null, state);
+                mtRoot.roots[p].rootify(oldRoot);
+                mtRoot.roots[p].state = state.copy();
+            }
+        }
+        mtRoot.state = state.copy();
+        return mtRoot;
+    }
+
     protected SingleTreeNode newRootNode(AbstractGameState gameState) {
-        //TODO: For MultiTree MCTS we need to do this across each opponent tree in sequence
+        MCTSParams params = getParameters();
         SingleTreeNode newRoot = null;
-        if (getParameters().reuseTree && root != null) {
+        if (params.reuseTree && root != null) {
             // we see if we can reuse the tree
             // We need to look at all actions taken since our last action
-            List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
-            Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
-            newRoot = root;
             if (debug)
                 System.out.println("Backtracking for " + lastAction + " by " + gameState.getCurrentPlayer());
-            for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
-                if (history.get(backwardLoop).equals(lastExpected)) {
-                    // We can reuse the tree from this point
-                    // We now work forward through the actions
-                    if (debug)
-                        System.out.println("Matching action found at " + backwardLoop + " of " + history.size() + " - tracking forward");
-                    for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
-                        if (getParameters().opponentTreePolicy == SelfOnly && history.get(forwardLoop).a != gameState.getCurrentPlayer())
-                            continue; // we only care about our actions
-                        AbstractAction action = history.get(forwardLoop).b;
-                        int nextActionPlayer = forwardLoop < history.size() - 1 ? history.get(forwardLoop + 1).a : gameState.getCurrentPlayer();
-                        // then make sure that we have a transition for this player and this action
-                        // If we are SelfOnly, then we only store our actions in the tree
-                        nextActionPlayer = getParameters().opponentTreePolicy == SelfOnly ? gameState.getCurrentPlayer() : nextActionPlayer;
-                        if (debug)
-                            System.out.println("\tAction: " + action.toString() + "\t Next Player: " + nextActionPlayer);
-                        if (newRoot != null && newRoot.children != null && newRoot.children.get(action) != null)
-                            newRoot = newRoot.children.get(action)[nextActionPlayer];
-                        else
-                            newRoot = null;
-                        if (newRoot == null)
-                            break;
-                    }
-                    break;
-                }
-            }
+
+            if (params.opponentTreePolicy == MultiTree)
+                return newMultiTreeRootNode(gameState);
+
+            newRoot = backtrack(root, gameState);
+
             if (root == newRoot)
                 throw new AssertionError("Root node should not be the same as the new root node");
             if (debug && newRoot == null)
@@ -148,6 +147,43 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         return newRoot;
     }
 
+    protected SingleTreeNode backtrack(SingleTreeNode startingRoot, AbstractGameState gameState) {
+        List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
+        Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
+        MCTSParams params = getParameters();
+        boolean selfOnly = params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MultiTree;
+        SingleTreeNode newRoot = startingRoot;
+        int rootPlayer = startingRoot.decisionPlayer;
+        for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
+            if (history.get(backwardLoop).equals(lastExpected)) {
+                // We can reuse the tree from this point
+                // We now work forward through the actions
+                if (debug)
+                    System.out.println("Matching action found at " + backwardLoop + " of " + history.size() + " - tracking forward");
+                for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
+                    if (selfOnly && history.get(forwardLoop).a != rootPlayer)
+                        continue; // we only care about our actions
+                    AbstractAction action = history.get(forwardLoop).b;
+                    int nextActionPlayer = forwardLoop < history.size() - 1 ? history.get(forwardLoop + 1).a : gameState.getCurrentPlayer();
+                    // then make sure that we have a transition for this player and this action
+                    // If we are SelfOnly, then we only store our actions in the tree
+                    nextActionPlayer = selfOnly ? rootPlayer : nextActionPlayer;
+                    if (debug)
+                        System.out.println("\tAction: " + action.toString() + "\t Next Player: " + nextActionPlayer);
+                    if (newRoot.children != null && newRoot.children.get(action) != null)
+                        newRoot = newRoot.children.get(action)[nextActionPlayer];
+                    else
+                        newRoot = null;
+                    if (newRoot == null)
+                        break;
+                }
+                break;
+            }
+        }
+        if (debug)
+            System.out.println("\tBacktracking complete : " + (newRoot == null ? "no matching node found" : "node found"));
+        return newRoot;
+    }
 
     protected void createRootNode(AbstractGameState gameState) {
         SingleTreeNode newRoot = newRootNode(gameState);
@@ -187,9 +223,12 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (getParameters().getOpponentModel() instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().getOpponentModel()).process(root);
 
-        if (debug)
-            System.out.println(root.toString());
-
+        if (debug) {
+            if (getParameters().opponentTreePolicy == MultiTree)
+                System.out.println(((MultiTreeNode) root).getRoot(gameState.getCurrentPlayer()));
+            else
+                System.out.println(root);
+        }
         MASTStats = root.MASTStatistics;
 
         if (root.children.size() > 2 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
