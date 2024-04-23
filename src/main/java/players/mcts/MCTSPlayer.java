@@ -90,7 +90,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     protected SingleTreeNode newRootNode(AbstractGameState gameState) {
         //TODO: For MultiTree MCTS we need to do this across each opponent tree in sequence
-        // TODO: For Self-Play MCTS we need to skip actions for other players
         SingleTreeNode newRoot = null;
         if (getParameters().reuseTree && root != null) {
             // we see if we can reuse the tree
@@ -98,17 +97,24 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
             Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
             newRoot = root;
-            System.out.println("Backtracking for " + lastAction + " by " + gameState.getCurrentPlayer());
+            if (debug)
+                System.out.println("Backtracking for " + lastAction + " by " + gameState.getCurrentPlayer());
             for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
                 if (history.get(backwardLoop).equals(lastExpected)) {
                     // We can reuse the tree from this point
                     // We now work forward through the actions
-                    System.out.println("Matching action found at " + backwardLoop + " of " +history.size() + " - tracking forward");
+                    if (debug)
+                        System.out.println("Matching action found at " + backwardLoop + " of " + history.size() + " - tracking forward");
                     for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
+                        if (getParameters().opponentTreePolicy == SelfOnly && history.get(forwardLoop).a != gameState.getCurrentPlayer())
+                            continue; // we only care about our actions
                         AbstractAction action = history.get(forwardLoop).b;
                         int nextActionPlayer = forwardLoop < history.size() - 1 ? history.get(forwardLoop + 1).a : gameState.getCurrentPlayer();
                         // then make sure that we have a transition for this player and this action
-                        System.out.println("\tAction: " + action.toString() + "\t Next Player: " + nextActionPlayer);
+                        // If we are SelfOnly, then we only store our actions in the tree
+                        nextActionPlayer = getParameters().opponentTreePolicy == SelfOnly ? gameState.getCurrentPlayer() : nextActionPlayer;
+                        if (debug)
+                            System.out.println("\tAction: " + action.toString() + "\t Next Player: " + nextActionPlayer);
                         if (newRoot != null && newRoot.children != null && newRoot.children.get(action) != null)
                             newRoot = newRoot.children.get(action)[nextActionPlayer];
                         else
@@ -121,14 +127,15 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             }
             if (root == newRoot)
                 throw new AssertionError("Root node should not be the same as the new root node");
-            if (newRoot == null)
+            if (debug && newRoot == null)
                 System.out.println("No matching node found");
         }
         // at this stage we should have moved down the tree to get to the correct node
         // based on the actions taken in the game since our last decision
         // The node we have reached should be the new root node
         if (newRoot != null) {
-            System.out.println("Matching node found");
+            if (debug)
+                System.out.println("Matching node found");
             if (newRoot.turnOwner != gameState.getCurrentPlayer() || newRoot.decisionPlayer != gameState.getCurrentPlayer()) {
                 throw new AssertionError("Current player does not match decision player in tree");
                 // if this is a problem, we can just set newRoot = null;

@@ -80,42 +80,29 @@ public class TreeReuseTests {
         runGame();
     }
 
-
-    public void runGame() {
-        AbstractAction[] lastActions = new AbstractAction[2];
-        SingleTreeNode[] oldRoots = new SingleTreeNode[2];
-        int oldVisits = 0;
-        do {
-            System.out.println("Current player: " + state.getCurrentPlayer() + ", Turn: " + state.getTurnCounter());
-            int currentPlayer = state.getCurrentPlayer();
-            AbstractAction nextAction = game.oneAction();
-            SingleTreeNode newRoot = currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(0);
-            if (currentPlayer == 0) {
-                // check tree reuse
-                if (oldRoots[0] != null) {
-                    assertNotEquals(oldRoots[0], playerOne.getRoot(0));
-                    // we apply the last actions for p0 and p1 in sequence
-                    SingleTreeNode expectedNewRoot = descendTree(oldRoots[0], new int[]{0, 1, 0}, List.of(lastActions[0], lastActions[1]));
-                    if (expectedNewRoot != null) {
-                        assertEquals(expectedNewRoot, newRoot);
-                    }
-                }
-                System.out.println("Visits: " + newRoot.getVisits());
-                assertEquals(paramsOne.budget + oldVisits, newRoot.getVisits());
-
-            } else {
-                // check tree is not reused, but also record the current number of visits on the playerOne node
-                if (oldRoots[1] != null) {
-                    assertNotEquals(oldRoots[1], playerTwo.getRoot(1));
-                }
-                assertEquals(paramsTwo.budget, playerTwo.getRoot(1).getVisits());
-                SingleTreeNode nextNode = descendTree(oldRoots[0], new int[]{0, 1, 0}, List.of(lastActions[0], nextAction));
-                oldVisits = nextNode == null ? 0 : nextNode.getVisits();
-            }
-            lastActions[currentPlayer] = nextAction;
-            oldRoots[currentPlayer] = newRoot;
-        } while (state.isNotTerminal() && fm.computeAvailableActions(state).size() > 1);
+    @Test
+    public void treeReusedAfterSingleAction() {
+        // if we have a mandatory single action that did not go through MCTSPlayer.getAction()
+        // check we still move to the correct place in the tree
+        // To test this we can use Dominion, in which the first couple of Turns will have the single END_PHASE action
+        // to move on to the buy phase - as no player has any Action cards until these have been purchased and reshuffled into hand
+        initialiseDominion();
+        DominionGameState dgs = (DominionGameState) state;
+        // this is to test more complicated actions
+        dgs.addCard(CardType.MILITIA, 0, DominionConstants.DeckType.HAND);
+        runGame();
     }
+
+    @Test
+    public void treeReusedWithSelfOnly() {
+        paramsOne.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        initialiseDominion();
+        DominionGameState dgs = (DominionGameState) state;
+        // this is to test more complicated actions
+        dgs.addCard(CardType.MINE, 0, DominionConstants.DeckType.HAND);
+        runGame();
+    }
+
 
     private SingleTreeNode descendTree(SingleTreeNode startingNode, int[] actingPlayers, List<AbstractAction> actions) {
         if (actingPlayers.length != actions.size() + 1)
@@ -137,20 +124,6 @@ public class TreeReuseTests {
     }
 
 
-    @Test
-    public void treeReusedAfterSingleAction() {
-        // if we have a mandatory single action that did not go through MCTSPlayer.getAction()
-        // check we still move to the correct place in the tree
-        // To test this we can use Dominion, in which the first couple of Turns will have the single END_PHASE action
-        // to move on to the buy phase - as no player has any Action cards until these have been purchased and reshuffled into hand
-        initialiseDominion();
-        DominionGameState dgs = (DominionGameState) state;
-        // this is to test more complicated actions
-        dgs.addCard(CardType.MILITIA, 0, DominionConstants.DeckType.HAND);
-        runDominion();
-
-    }
-
     public void initialiseDominion() {
         playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
         playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
@@ -160,7 +133,7 @@ public class TreeReuseTests {
         state = game.getGameState();
     }
 
-    public void runDominion() {
+    public void runGame() {
         List<AbstractAction> actionsTakenSinceLastPlayerZeroDecision = new ArrayList<>();
         List<Integer> nextActingPlayers = new ArrayList<>();
         nextActingPlayers.add(state.getCurrentPlayer());
@@ -171,8 +144,6 @@ public class TreeReuseTests {
             int currentPlayer = state.getCurrentPlayer();
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
-            if (paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.SelfOnly)
-                continue;
             System.out.println("Action: " + nextAction.toString());
             SingleTreeNode newRoot = currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(0);
             if (currentPlayer == 0 && !oneAction) {
@@ -192,8 +163,11 @@ public class TreeReuseTests {
                 nextActingPlayers.clear();
                 nextActingPlayers.add(state.getCurrentPlayer());
             }
-            actionsTakenSinceLastPlayerZeroDecision.add(nextAction);
-            nextActingPlayers.add(state.getCurrentPlayer());
+            if (currentPlayer == 0 || paramsOne.opponentTreePolicy != MCTSEnums.OpponentTreePolicy.SelfOnly)
+                actionsTakenSinceLastPlayerZeroDecision.add(nextAction);
+            if (state.getCurrentPlayer() == 0 || paramsOne.opponentTreePolicy != MCTSEnums.OpponentTreePolicy.SelfOnly)
+                nextActingPlayers.add(state.getCurrentPlayer());
+
             if (currentPlayer != 2)
                 oldRoots[currentPlayer] = newRoot;
             // if the next player is 0, then we determine how many oldVisits there are before they make the next decision
