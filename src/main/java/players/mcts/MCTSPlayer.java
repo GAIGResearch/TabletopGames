@@ -114,6 +114,12 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         MCTSParams params = getParameters();
         SingleTreeNode newRoot = null;
         if (params.reuseTree && root != null) {
+            if (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly) {
+                throw new AssertionError("MCGS does not support tree reuse yet");
+                // The idea will be to copy over the old Graph; and then check this before creating a
+                // new node; if it exists in the previous graph then we just use it directly.
+            }
+
             // we see if we can reuse the tree
             // We need to look at all actions taken since our last action
             if (debug)
