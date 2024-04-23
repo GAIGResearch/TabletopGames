@@ -37,7 +37,7 @@ public class SingleTreeNode {
     // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
     protected AbstractAction actionToReach;
     // Number of visits to this node
-    protected int nVisits;
+    protected int nVisits, inheritedVisits;
     protected int rolloutActionsTaken;
     // variables to track rollout - these were originally local in rollout(); but
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
@@ -145,6 +145,7 @@ public class SingleTreeNode {
         resetDepth(this);
         highReward = template.highReward;
         lowReward = template.lowReward;
+        inheritedVisits = nVisits;
     }
 
     private void resetDepth(SingleTreeNode newRoot) {

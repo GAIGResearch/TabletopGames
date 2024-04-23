@@ -33,6 +33,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("PlayerType", mctsPlayer.toString());
                 records.put("PlayerID", e.state.getCurrentPlayer());
                 records.put("Iterations", root.getVisits());
+                records.put("ReusedVisits", mctsPlayer.root.inheritedVisits);
                 records.put("MaxDepth", treeStats.depthReached);
                 records.put("MeanLeafDepth", treeStats.meanLeafDepth);
                 records.put("MeanNodeDepth", treeStats.meanNodeDepth);
@@ -66,6 +67,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("PlayerType", String.class);
             cols.put("PlayerID", Integer.class);
             cols.put("Iterations", Integer.class);
+            cols.put("ReusedVisits", Integer.class); // visits from reused tree
             cols.put("MaxDepth", Integer.class);
             cols.put("MeanLeafDepth", Double.class);
             cols.put("MeanNodeDepth", Double.class);
