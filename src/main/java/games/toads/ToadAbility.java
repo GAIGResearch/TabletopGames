@@ -2,5 +2,5 @@ package games.toads;
 
 public interface ToadAbility {
 
-    int updatedValue(int myValue, int theirValue, boolean isAttacker);
+    int deltaToValue(int myValue, int theirValue, boolean isAttacker);
 }

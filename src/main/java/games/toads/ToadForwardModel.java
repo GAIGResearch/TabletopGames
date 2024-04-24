@@ -77,7 +77,7 @@ public class ToadForwardModel extends StandardForwardModel {
             // we reveal cards and resolve
             // not the most elegant solution, but with 2 cards each no need to generalise yet
             int attacker = state.getRoundCounter();
-            BattleResult battle = new BattleResult(state.fieldCards[attacker], state.fieldCards[1-attacker],
+            BattleResult battle = new BattleResult(attacker, state.fieldCards[attacker], state.fieldCards[1-attacker],
                     state.hiddenFlankCards[attacker], state.hiddenFlankCards[1-attacker]);
 
             int[] result = battle.calculate(state);

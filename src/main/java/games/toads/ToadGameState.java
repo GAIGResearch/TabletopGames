@@ -100,6 +100,14 @@ public class ToadGameState extends AbstractGameState {
         return playerHands.get(playerId);
     }
 
+
+    public void seeOpponentsHand(int player) {
+        PartialObservableDeck<ToadCard> handToSee = playerHands.get(1 - player);
+        for (int i = 0; i < handToSee.getSize(); i++) {
+            handToSee.setVisibilityOfComponent(i, player, true);
+        }
+    }
+
     public void playFieldCard(int playerId, ToadCard card) {
         if (fieldCards[playerId] != null)
             throw new AssertionError("Field card already played");
