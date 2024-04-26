@@ -96,6 +96,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         // and reuse the code for SelfOnly
         for (int p = 0; p < state.getNPlayers(); p++) {
             SingleTreeNode oldRoot = mtRoot.roots[p];
+            if (oldRoot == null)
+                continue;
             if (debug)
                 System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
             mtRoot.roots[p] = backtrack(mtRoot.roots[p], state);
