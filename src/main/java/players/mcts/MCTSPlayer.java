@@ -60,6 +60,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (getParameters().actionHeuristic instanceof AbstractPlayer)
             ((AbstractPlayer) getParameters().actionHeuristic).initializePlayer(state);
         MASTStats = null;
+        root = null;
         getParameters().getRolloutStrategy().initializePlayer(state);
         getParameters().getOpponentModel().initializePlayer(state);
     }
