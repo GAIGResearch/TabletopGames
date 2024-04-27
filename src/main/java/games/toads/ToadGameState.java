@@ -100,6 +100,14 @@ public class ToadGameState extends AbstractGameState {
         return playerHands.get(playerId);
     }
 
+
+    public void seeOpponentsHand(int player) {
+        PartialObservableDeck<ToadCard> handToSee = playerHands.get(1 - player);
+        for (int i = 0; i < handToSee.getSize(); i++) {
+            handToSee.setVisibilityOfComponent(i, player, true);
+        }
+    }
+
     public ToadCard getFieldCard(int playerId) {
         return fieldCards[playerId];
     }
@@ -179,6 +187,7 @@ public class ToadGameState extends AbstractGameState {
     public int getTiebreakLevels() {
         return 1;
     }
+
 
     @Override
     protected boolean _equals(Object o) {
