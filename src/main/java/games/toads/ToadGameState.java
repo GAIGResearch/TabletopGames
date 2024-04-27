@@ -96,8 +96,24 @@ public class ToadGameState extends AbstractGameState {
         return copy;
     }
 
-    public Deck<ToadCard> getPlayerHand(int playerId) {
+    public PartialObservableDeck<ToadCard> getPlayerHand(int playerId) {
         return playerHands.get(playerId);
+    }
+
+    public ToadCard getFieldCard(int playerId) {
+        return fieldCards[playerId];
+    }
+
+    public ToadCard getHiddenFlankCard(int playerId) {
+        return hiddenFlankCards[playerId];
+    }
+
+    public ToadCard getTieBreaker(int playerId) {
+        return tieBreakers[playerId];
+    }
+
+    public Deck<ToadCard> getDiscards(int playerId) {
+        return playerDiscards.get(playerId);
     }
 
     public void playFieldCard(int playerId, ToadCard card) {
@@ -163,7 +179,6 @@ public class ToadGameState extends AbstractGameState {
     public int getTiebreakLevels() {
         return 1;
     }
-
 
     @Override
     protected boolean _equals(Object o) {
