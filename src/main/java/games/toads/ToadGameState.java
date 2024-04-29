@@ -179,7 +179,8 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public double getTiebreak(int playerId, int tier) {
-        // TODO: Need to have battle(card, card) to obtain the actual result (and battle (card, card, card, card) for cross-effect tactics)
+        if (tieBreakers[playerId] == null)
+            return 0;
         return tieBreakers[playerId].value;
     }
 
