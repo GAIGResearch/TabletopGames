@@ -7,8 +7,8 @@ import java.util.*;
 
 public class MCGSNode extends SingleTreeNode {
 
-    private final Map<String, MCGSNode> transpositionMap = new HashMap<>();
-    public List<String> trajectory = new ArrayList<>();
+    private final Map<Object, MCGSNode> transpositionMap = new HashMap<>();
+    public List<Object> trajectory = new ArrayList<>();
 
     protected MCGSNode() {
     }
@@ -21,7 +21,7 @@ public class MCGSNode extends SingleTreeNode {
     }
 
     private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
-        String key = params.MCGSStateKey.getKey(keyState);
+        Object key = params.MCGSStateKey.getKey(keyState);
         MCGSNode graphRoot = (MCGSNode) root;
         if (graphRoot.transpositionMap.containsKey(key)) {
             throw new AssertionError("Unexpected?");
@@ -42,7 +42,7 @@ public class MCGSNode extends SingleTreeNode {
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
         MCGSNode graphRoot = (MCGSNode) root;
-        String key = params.MCGSStateKey.getKey(nextState);
+        Object key = params.MCGSStateKey.getKey(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
             if (params.MCGSExpandAfterClash) {
                 throw new AssertionError("Unexpected?");
@@ -58,7 +58,7 @@ public class MCGSNode extends SingleTreeNode {
     @Override
     protected SingleTreeNode nextNodeInTree(AbstractAction actionChosen) {
         // we look up the node in the transposition table using the feature vector for the openLoopState
-        String key = params.MCGSStateKey.getKey(openLoopState);
+        Object key = params.MCGSStateKey.getKey(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode != null) {
@@ -82,7 +82,7 @@ public class MCGSNode extends SingleTreeNode {
             // We only track this while in the tree (we could do the rollout as well, but at the overhead
             // of featureVector calculations
             MCGSNode mcgsRoot = (MCGSNode) root;
-            String key = params.MCGSStateKey.getKey(gs);
+            Object key = params.MCGSStateKey.getKey(gs);
             mcgsRoot.trajectory.add(key);
 //            System.out.println("Adding to trajectory: " + key);
         }
@@ -106,7 +106,7 @@ public class MCGSNode extends SingleTreeNode {
         }
 
         for (int i = 0; i < nRoot.trajectory.size(); i++) {
-            String key = nRoot.trajectory.get(i);
+            Object key = nRoot.trajectory.get(i);
             MCGSNode node = nRoot.transpositionMap.get(key);
             AbstractAction action = nRoot.actionsInTree.get(i).b;
             if (node == null) {
@@ -117,7 +117,7 @@ public class MCGSNode extends SingleTreeNode {
         nRoot.trajectory.clear();
     }
 
-    public Map<String, MCGSNode> getTranspositionMap() {
+    public Map<Object, MCGSNode> getTranspositionMap() {
         return new HashMap<>(transpositionMap);
     }
 

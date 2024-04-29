@@ -2,9 +2,10 @@ package games.toads.metrics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateKey;
 import games.toads.ToadGameState;
 
-public class ToadFeatures001 implements IStateFeatureVector {
+public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
 
     @Override
     public String[] names() {
@@ -53,4 +54,13 @@ public class ToadFeatures001 implements IStateFeatureVector {
         return features;
     }
 
+    @Override
+    public Integer getKey(AbstractGameState state) {
+        int retValue = state.getCurrentPlayer();
+        double[] features = featureVector(state, state.getCurrentPlayer());
+        for (int i = 0; i < features.length; i++) {
+            retValue += (int) (features[i] * ((i+1) * 31));
+        }
+        return retValue;
+    }
 }

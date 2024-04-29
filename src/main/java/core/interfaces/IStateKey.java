@@ -4,5 +4,5 @@ import core.AbstractGameState;
 
 public interface IStateKey {
 
-    String getKey(AbstractGameState state);
+    Object getKey(AbstractGameState state);
 }
