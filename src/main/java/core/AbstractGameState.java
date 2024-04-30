@@ -20,7 +20,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Contains all game state information.
@@ -175,7 +174,7 @@ public abstract class AbstractGameState {
      * In general getCurrentPlayer() should be used to find the current player.
      * getTurnOwner() will give a different answer if an Extended Action Sequence is in progress.
      * In this case getTurnOwner() returns the underlying player on whose turn the Action Sequence was initiated.
-     * @return
+     * @return the player whose turn it currently is (which may be different to the next player to act)
      */
     public int getTurnOwner() {return turnOwner;}
     public int getFirstPlayer() {return firstPlayer;}
@@ -209,7 +208,7 @@ public abstract class AbstractGameState {
      * Use this as a default; there is no need to create your own.
      * The one exception to this guideline is in the copy() method, where redeterminisation should *not* use this generator.
      * It should use redeterminisationRnd instead.
-     * @return
+     * @return the Random to use for game decisions/events
      */
     public Random getRnd() {
         return rnd;
@@ -459,7 +458,7 @@ public abstract class AbstractGameState {
     /**
      * This sets the number of tieBreak levels in a game.
      * If we reach this level then we stop recursing.
-     * @return
+     * @return the number of levels of tiebreaks in the game
      */
     public int getTiebreakLevels() {return 5;}
 
@@ -521,8 +520,7 @@ public abstract class AbstractGameState {
 
     private List<Integer> unknownComponents(IComponentContainer<?> container, int player) {
         ArrayList<Integer> retValue = new ArrayList<>();
-        if (container instanceof PartialObservableDeck<?>) {
-            PartialObservableDeck<?> pod = (PartialObservableDeck<?>) container;
+        if (container instanceof PartialObservableDeck<?> pod) {
             for (int i = 0; i < pod.getSize(); i++) {
                 if (!pod.getVisibilityForPlayer(i, player))
                     retValue.add(pod.get(i).getComponentID());
@@ -532,15 +530,15 @@ public abstract class AbstractGameState {
                 case VISIBLE_TO_ALL:
                     break;
                 case HIDDEN_TO_ALL:
-                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case VISIBLE_TO_OWNER:
                     if (((Component) container).getOwnerId() != player)
-                        retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                        retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case TOP_VISIBLE_TO_ALL:
                     // add everything as unseen, and then remove the first element
-                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     retValue.remove(container.getComponents().get(0).getComponentID());
                     break;
                 case BOTTOM_VISIBLE_TO_ALL:
@@ -604,15 +602,12 @@ public abstract class AbstractGameState {
 
     /**
      * The equals method is final, but is left here so it is next to hashcode, which is not final
-     * @param o
-     * @return
      */
 
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractGameState)) return false;
-        AbstractGameState gameState = (AbstractGameState) o;
+        if (!(o instanceof AbstractGameState gameState)) return false;
         return Objects.equals(gameParameters, gameState.gameParameters) &&
                 gameStatus == gameState.gameStatus &&
                 nPlayers == gameState.nPlayers && roundCounter == gameState.roundCounter &&
@@ -632,13 +627,11 @@ public abstract class AbstractGameState {
     /**
      * Override the hashCode as needed for individual game states
      * (It is OK for two java objects to be not equal and have the same hashcode)
-     *
      *         we deliberately exclude history and allComponents from the hashcode
      *         this is because history is deliberately erased at times to hide hidden information (and is read-only)
      *         and allComponents is not always populated (it is a convenience to get hold of all components in a game
      *         at the superclass level - the actually important components are instantiated in sub-classes, and should be
      *         included in the hashCode() method implemented there
-     * @return
      */
     @Override
     public int hashCode() {
