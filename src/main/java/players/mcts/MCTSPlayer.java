@@ -220,8 +220,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
+        long currentTimeNano = System.nanoTime();
         createRootNode(gameState);
-        root.mctsSearch();
+        long timeTaken = System.nanoTime() - currentTimeNano;
+
+        root.mctsSearch(timeTaken / 1000000);
 
         if (getParameters().actionHeuristic instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);

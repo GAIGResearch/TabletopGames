@@ -51,6 +51,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
+                records.put("initTime", mctsPlayer.root.initialisationTimeTaken);
                 return true;
             }
             return false;
@@ -84,6 +85,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("fmCalls", Integer.class);
             cols.put("copyCalls", Integer.class);
             cols.put("time", Double.class);
+            cols.put("initTime", Double.class);
             return cols;
         }
     }

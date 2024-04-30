@@ -53,6 +53,7 @@ public class SingleTreeNode {
     protected int round, turn, turnOwner;
     boolean terminalNode;
     double timeTaken;
+    double initialisationTimeTaken;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
     protected int nodeClash;
@@ -283,6 +284,7 @@ public class SingleTreeNode {
 
     protected void initialiseRootMetrics() {
         timeTaken = 0.0;
+        initialisationTimeTaken = 0.0;
         nodeClash = 0;
         rolloutActionsTaken = 0;
     }
@@ -290,15 +292,16 @@ public class SingleTreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    public void mctsSearch() {
+    public void mctsSearch(long initialisationTime) {
         initialiseRootMetrics();
+        initialisationTimeTaken = initialisationTime;
         // Variables for tracking time budget
         double avgTimeTaken;
         long remaining;
         int remainingLimit = params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if (params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(params.budget);
+            elapsedTimer.setMaxTimeMillis(params.budget - initialisationTime);
         }
 
         // Tracking number of iterations for iteration budget
