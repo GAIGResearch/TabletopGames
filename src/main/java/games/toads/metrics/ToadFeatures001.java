@@ -10,7 +10,7 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
     @Override
     public String[] names() {
         return new String[]{
-                "ROUND",
+                "TICK",
                 "HAND_1", "HAND_2", "HAND_3", "HAND_4",
                 "SCORE_US", "SCORE_THEM",
                 "FIELD_CARD", "FLANK_CARD",
@@ -25,7 +25,7 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
     public double[] featureVector(AbstractGameState gs, int playerID) {
         double[] features = new double[16];
         ToadGameState state = (ToadGameState) gs;
-        features[0] = state.getRoundCounter();
+        features[0] = state.getGameTick();
         int handSize = state.getPlayerHand(playerID).getSize();
         for (int i = 0; i < handSize; i++) {
             features[i + 1] = state.getPlayerHand(playerID).get(i).value;

@@ -21,6 +21,7 @@ public class ToadGameState extends AbstractGameState {
     List<Deck<ToadCard>> playerDecks;
     List<PartialObservableDeck<ToadCard>> playerHands;
     int[][] battlesWon;
+    int[][] roundWinners;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
@@ -118,6 +119,9 @@ public class ToadGameState extends AbstractGameState {
 
     public ToadCard getTieBreaker(int playerId) {
         return tieBreakers[playerId];
+    }
+    public int getBattlesWon(int playerId, int round) {
+        return battlesWon[round][playerId];
     }
 
     public Deck<ToadCard> getDiscards(int playerId) {
