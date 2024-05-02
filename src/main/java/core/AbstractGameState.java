@@ -54,6 +54,8 @@ public abstract class AbstractGameState {
     protected ElapsedCpuChessTimer[] playerTimer;
 
     // A record of all actions taken to reach this game state
+    // The history is stored as a list of pairs, where the first element is the player who took the action
+    // this is in chronological order
     private List<Pair<Integer, AbstractAction>> history = new ArrayList<>();
     private List<String> historyText = new ArrayList<>();
 
