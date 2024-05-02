@@ -42,14 +42,9 @@ public class MultiTreeNode extends SingleTreeNode {
         MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
-        MASTFunction = (a, s) -> {
-            Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
-            if (MAST.containsKey(a)) {
-                Pair<Integer, Double> stats = MAST.get(a);
-                return stats.b / (stats.a + params.noiseEpsilon);
-            }
-            return 0.0;
-        };
+        if (params.useMASTAsActionHeuristic) {
+            params.actionHeuristic = new MASTActionHeuristic(MASTStatistics, params.MASTActionKey, params.MASTDefaultValue);
+        }
         instantiate(null, null, state);
 
         roots = new SingleTreeNode[state.getNPlayers()];
@@ -72,9 +67,6 @@ public class MultiTreeNode extends SingleTreeNode {
         AbstractGameState currentState = this.openLoopState;  // this will have been set correctly before calling this method
         SingleTreeNode currentNode;
 
-        double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                .mapToDouble(i -> params.heuristic.evaluateState(currentState, i)).toArray();
-
         if (!currentState.isNotTerminal())
             return;
 
@@ -86,7 +78,6 @@ public class MultiTreeNode extends SingleTreeNode {
 
         actionsInTree = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
-
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
             if (debug)
@@ -132,17 +123,14 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
-            // we terminate if the game is over, or if we have exceeded our rollout count AND we have either expanded a node
-            // for the decisionPlayer, or they are out of the game (in which case they will never get to expand a node)
-        } while (currentState.isNotTerminal() &&
-                !(actionsInRollout.size() >= params.rolloutLength &&
-                        (maxDepthReached[decisionPlayer] || nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
+            // we terminate if the game is over, or if we have exceeded our rollout count
+        } while (currentState.isNotTerminal() && !finishRollout(currentState));
 
         // Evaluate final state and return normalised score
         double[] finalValues = new double[state.getNPlayers()];
 
         for (int i = 0; i < finalValues.length; i++) {
-            finalValues[i] = params.heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
+            finalValues[i] = params.heuristic.evaluateState(currentState, i);
         }
         for (int p = 0; p < roots.length; p++) {
             if (currentLocation[p] != null) { // the currentLocation will be null if the player has not acted at all (if, say they have been eliminated)

@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -114,21 +115,23 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-            //       System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+       //     System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
+        } catch (InvocationTargetException e) {
+            System.out.println(e.getTargetException().getMessage());
+            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
             throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static Class<?> determineArrayClass(JSONArray array) {
         if (array.size() > 1) {
             JSONObject first = (JSONObject) array.get(0);
@@ -173,7 +176,6 @@ public class JSONUtils {
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + filename);
         }
     }
@@ -201,13 +203,10 @@ public class JSONUtils {
             return loadClassFromJSON(json);
 
         } catch (ParseException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + rawData);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem processing String in " + rawData);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
         }
     }
@@ -285,7 +284,6 @@ public class JSONUtils {
             }
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem writing to file " + filename);
         }
     }
@@ -331,6 +329,7 @@ public class JSONUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static JSONObject createJSONFromMap(Map<String, String> stuff) {
         // first of all we partition the keys by the contents of the key before the first '.'
         Map<String, List<String>> partitioned = stuff.keySet().stream()

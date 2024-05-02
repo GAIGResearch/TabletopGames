@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
 
     private static boolean debug = false;
+    protected boolean resetOn = true; // if set to false while setting many parameter values, the _reset() method will not be called (for efficiency)
     List<String> parameterNames = new ArrayList<>();
     Map<String, List<Object>> possibleValues = new HashMap<>();
     Map<String, Object> defaultValues = new HashMap<>();
@@ -74,6 +75,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
 
         // We should also check that there are no other properties in there
         allParams.add("class");
+        allParams.add("args"); // this may be present if there are non-configurable parameters needed for the constructor
         for (Object key : rawData.keySet()) {
             if (key instanceof String && !allParams.contains(key)) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
@@ -94,14 +96,13 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         if (finalData == null)
             return null;
         Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
-        if (finalData instanceof JSONObject) {
-            JSONObject subJson = (JSONObject) finalData;
+        if (finalData instanceof JSONObject subJson) {
             T retValue = JSONUtils.loadClassFromJSON(subJson);
             if (retValue instanceof TunableParameters) {
                 TunableParameters subParams = (TunableParameters) retValue;
                 TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
-            //    params.registerChild(name, subJson);
+                //    params.registerChild(name, subJson);
             }
             return retValue;
         }
@@ -155,17 +156,33 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         tunable.possibleValues = new HashMap<>(possibleValues);
         tunable.defaultValues = new HashMap<>(defaultValues);
         tunable.parameterTypes = new HashMap<>(parameterTypes);
+        tunable.resetOn = false;
         for (String name : parameterNames) {
             Object value = getParameterValue(name);
-            if (value instanceof TunableParameters) {
+            if (value instanceof TunableParameters subParams) {
                 // then we have to recurse
-                TunableParameters subParams = (TunableParameters) value;
                 TunableParameters subParamsCopy = subParams.copy();
                 tunable.setParameterValue(name, subParamsCopy);
             } else {
                 tunable.setParameterValue(name, value);
             }
         }
+        tunable.resetOn = true;
+        tunable._reset();
+        return tunable;
+    }
+
+    // This is much faster in a forward model, and just changes the random seed
+    // It is suitable if the same set of parameters are being used with none of them recording any state
+    // This is usually the case for forward models in MCTS for example
+    public TunableParameters shallowCopy() {
+        AbstractParameters retValue = super.copy();  // this calls ._copy()
+        TunableParameters tunable = (TunableParameters) retValue;
+        tunable.parameterNames = parameterNames;
+        tunable.possibleValues = possibleValues;
+        tunable.defaultValues = defaultValues;
+        tunable.parameterTypes = parameterTypes;
+        tunable.currentValues = currentValues;
         tunable._reset();
         return tunable;
     }
@@ -203,6 +220,15 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         possibleValues.put(name, new ArrayList<>(allSettings));
         currentValues.put(name, defaultValue);
     }
+
+    public <T> void addTunableParameter(String name, Class<?> parameterClass, T defaultValue, List<T> allSettings) {
+        if (!parameterNames.contains(name)) parameterNames.add(name);
+        defaultValues.put(name, defaultValue);
+        parameterTypes.put(name, parameterClass);
+        possibleValues.put(name, new ArrayList<>(allSettings));
+        currentValues.put(name, defaultValue);
+    }
+
 
     public <T> void addTunableParameter(String name, Class<T> classType) {
         if (!parameterNames.contains(name)) parameterNames.add(name);
@@ -256,7 +282,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             String[] split = parameterName.split(Pattern.quote("."));
             String subParamName = split[0];
             String subParam = parameterName.substring(subParamName.length() + 1);
-            ((ITunableParameters)getParameterValue(subParamName)).setParameterValue(subParam, value);
+            ((ITunableParameters) getParameterValue(subParamName)).setParameterValue(subParam, value);
         }
         if (parameterTypes.get(parameterName).isEnum() && value instanceof String) {
             Object[] values = parameterTypes.get(parameterName).getEnumConstants();
@@ -273,9 +299,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         }
         // Then, if value is TunableParameter itself, we 'lift' its attributes up to the top level
         // and remove any previous ones
-        if (value instanceof TunableParameters) {
-            TunableParameters subParams = (TunableParameters) value;
-            List<String> oldParamNames = parameterNames.stream().filter(n -> n.startsWith(parameterName + ".")).collect(toList());
+        if (value instanceof TunableParameters subParams) {
+            List<String> oldParamNames = parameterNames.stream().filter(n -> n.startsWith(parameterName + ".")).toList();
             // we now remove these
             oldParamNames.forEach(parameterNames::remove);
             oldParamNames.forEach(possibleValues::remove);
@@ -283,24 +308,15 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             oldParamNames.forEach(currentValues::remove);
             for (String name : subParams.getParameterNames()) {
                 String liftedName = parameterName + "." + name;
-                addTunableParameter(liftedName, subParams.getDefaultParameterValue(name), subParams.getPossibleValues(name));
+                addTunableParameter(liftedName, subParams.getParameterTypes().get(name), subParams.getDefaultParameterValue(name), subParams.getPossibleValues(name));
                 setParameterValue(liftedName, subParams.getParameterValue(name));
             }
         }
 
         // this sets the value within ITunableParameters; but this may need to be transposed to the local field
-        _reset();
+        if (resetOn)
+            _reset();
     }
-
-    /**
-     * Method that reloads all the locally stored values from currentValues
-     * This is in case sub-classes decide to use the frankly more intuitive access via
-     * params.paramName
-     * instead of
-     * params.getParameterValue("paramName")
-     * (the latter is also more typo-prone if we hardcode strings everywhere)
-     */
-    abstract public void _reset();
 
     /**
      * Retrieve the values of one parameter.
@@ -410,7 +426,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         if (!(o instanceof TunableParameters)) return false;
         TunableParameters that = (TunableParameters) o;
         // getRandomSeed() == that.getRandomSeed() && removed, so that equals (and hashcode) covers parameters only
-        return  _equals(o)
+        return _equals(o)
                 && that.parameterNames.equals(parameterNames)
                 && that.possibleValues.equals(possibleValues)
                 && that.currentValues.equals(currentValues)

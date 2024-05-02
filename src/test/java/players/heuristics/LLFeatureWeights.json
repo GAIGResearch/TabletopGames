@@ -1,0 +1,11 @@
+{
+  "CARDS": 0.1,
+  "GUARD": 0.2,
+  "PRINCE": 0.05,
+  "Guard_PLAY": 0.01,
+  "Prince_PLAY": -0.01,
+  "Princess_PLAY": -0.1,
+  "GUARD:Prince_PLAY" : 0.25,
+  "BARON:Guard_PLAY" : 0.07,
+  "BIAS": 10
+}

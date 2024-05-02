@@ -106,7 +106,7 @@ public class TunableParametersTest {
     public void loadSearchSpaceIncludesSubParams() {
         String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_MASTRollout.json";
         ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
-        assertEquals(9, itp.getSearchKeys().size());
+        assertEquals(8, itp.getSearchKeys().size());
         int MASTBoltzmannIndex = itp.getIndexOf("MASTBoltzmann");
         int heuristicTypeIndex = itp.getIndexOf("heuristic.heuristicType");
         assertTrue(MASTBoltzmannIndex > -1);
@@ -117,7 +117,7 @@ public class TunableParametersTest {
         List<CoarseTunableHeuristic.HeuristicType> expectedArray = Arrays.asList(WIN_ONLY, SCORE_PLUS, LEADER);
         assertEquals(expectedArray, itp.getSearchValues().get(heuristicTypeIndex));
 
-        int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
         settings[heuristicTypeIndex] = 1;
         settings[MASTBoltzmannIndex] = 3;
         MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);

@@ -22,7 +22,6 @@
         "exploreEpsilon" : 0.30,
         "rolloutTermination" : "DEFAULT",
         "maintainMasterState" : false,
-        "nodesStoreScoreDelta" : [false, true],
         "heuristic" : {
                 "class" : "players.heuristics.CoarseTunableHeuristic",
                 "heuristicType" : ["WIN_ONLY", "SCORE_PLUS", "LEADER"]

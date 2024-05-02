@@ -66,7 +66,6 @@ public class MultiTreeMCTSTests {
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        params.nodesStoreScoreDelta = false;
         params.maintainMasterState = true;
         params.K = 1.0;
     }

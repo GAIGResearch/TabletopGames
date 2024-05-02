@@ -113,7 +113,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         if (debug)
                             System.out.println("Setting default: " + namespaceSplit[namespaceSplit.length - 1] + " = " + data);
                     }
-                } else if (!baseKey.equals("class")) {
+                } else if (!baseKey.equals("class") && !baseKey.equals("args")) {
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
                 }
             }

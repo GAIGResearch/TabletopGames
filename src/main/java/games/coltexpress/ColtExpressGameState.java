@@ -263,7 +263,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerHandCards, playerDecks, playerLoot, playerCharacters, playerPlayingBelle, plannedActions, trainCompartments, rounds);
+        int result = Objects.hash(turnOrder, playerHandCards, playerDecks, playerLoot, playerCharacters, playerPlayingBelle, plannedActions, trainCompartments, rounds);
         result = 31 * result + Arrays.hashCode(bulletsLeft);
         return result;
     }

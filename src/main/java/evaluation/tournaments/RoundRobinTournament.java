@@ -408,12 +408,12 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.println();
         }
 
-        String str = "---- Ranking ---- \n";
+        String str = "---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) \n";
         if (toFile) dataDump.add(str);
         if (verbose) System.out.print(str);
 
         for (Integer i : finalWinRanking.keySet()) {
-            str = String.format("%s: Win rate %.2f +/- %.2f\tMean Ordinal %.2f +/- %.2f\n",
+            str = String.format("%s: Win rate %.2f +/- %.3f\tMean Ordinal %.2f +/- %.2f\n",
                     agents.get(i).toString(),
                     finalWinRanking.get(i).a, finalWinRanking.get(i).b,
                     finalOrdinalRanking.get(i).a, finalOrdinalRanking.get(i).b);

@@ -36,5 +36,4 @@ public class MASTActionHeuristic implements IActionHeuristic {
         }
         return defaultValue;
     }
-
 }
