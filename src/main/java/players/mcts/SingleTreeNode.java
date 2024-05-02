@@ -150,7 +150,7 @@ public class SingleTreeNode {
         inheritedVisits = nVisits;
     }
 
-    private void resetDepth(SingleTreeNode newRoot) {
+    protected void resetDepth(SingleTreeNode newRoot) {
         depth = parent == null ? 0 : parent.depth + 1;
         root = newRoot;
         for (SingleTreeNode[] childArray : children.values()) {
@@ -1167,7 +1167,7 @@ public class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         String valueString = String.format("%.2f", nodeValue(decisionPlayer));
-        if (!params.opponentTreePolicy.selfOnlyTree) {
+        if (!params.opponentTreePolicy.selfOnlyTree && openLoopState != null) {
             valueString = IntStream.range(0, openLoopState.getNPlayers())
                     .mapToDouble(this::nodeValue)
                     .mapToObj(v -> String.format("%.2f", v))

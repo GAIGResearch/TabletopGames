@@ -28,6 +28,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     protected SingleTreeNode root;
     protected AbstractAction lastAction;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
+    Map<String, Integer> oldGraphKeys = new HashMap<>();
 
     public MCTSPlayer() {
         this(new MCTSParams());
@@ -115,14 +116,43 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     protected SingleTreeNode newRootNode(AbstractGameState gameState) {
         MCTSParams params = getParameters();
+        if (params.reuseTree && (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)) {
+            // In this case we remove any nodes from the graph that were not present before the last action was taken
+            MCGSNode mcgsRoot = (MCGSNode) root;
+            for (String key : oldGraphKeys.keySet()) {
+                int oldVisits = oldGraphKeys.get(key);
+                int newVisits = mcgsRoot.getTranspositionMap().get(key) != null ? mcgsRoot.getTranspositionMap().get(key).nVisits : 0;
+                if (newVisits == oldVisits) {
+                    // no change, so remove
+                    mcgsRoot.getTranspositionMap().remove(key);
+                } else if (newVisits < oldVisits) {
+                    throw new AssertionError("Unexpectedly fewer visits to a state than before");
+                }
+            }
+            // then reset the old keys
+            if (mcgsRoot != null) {
+                oldGraphKeys = mcgsRoot.getTranspositionMap().entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().nVisits));
+            } else {
+                // we just have the starting node
+                oldGraphKeys.put(params.MCGSStateKey.getKey(gameState), 0);
+                return null;
+            }
+            // we create the root node as we would have done normally; and then override the transposition map
+            MCGSNode retValue = ((MCGSNode) root).getTranspositionMap().get(params.MCGSStateKey.getKey(gameState));
+            if (retValue == null) {
+                // have left graph; start from scratch
+                return null;
+            }
+            retValue.instantiate(null, null, gameState);
+            retValue.setTranspositionMap(mcgsRoot.getTranspositionMap());
+            retValue.rootify(root);
+            return retValue;
+        }
+
+        // Now for standard open loop processing
         SingleTreeNode newRoot = null;
         if (params.reuseTree && root != null) {
-            if (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly) {
-                throw new AssertionError("MCGS does not support tree reuse yet");
-                // The idea will be to copy over the old Graph; and then check this before creating a
-                // new node; if it exists in the previous graph then we just use it directly.
-            }
-
             // we see if we can reuse the tree
             // We need to look at all actions taken since our last action
             if (debug)
