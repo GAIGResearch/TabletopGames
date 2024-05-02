@@ -23,11 +23,7 @@ public class MCGSNode extends SingleTreeNode {
     private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
         Object key = params.MCGSStateKey.getKey(keyState);
         MCGSNode graphRoot = (MCGSNode) root;
-        if (graphRoot.transpositionMap.containsKey(key)) {
-            throw new AssertionError("Unexpected?");
-        }
         graphRoot.transpositionMap.put(key, node);
-     //   System.out.println("Adding to transposition table: " + key);
     }
 
     /**

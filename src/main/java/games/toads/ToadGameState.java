@@ -2,11 +2,16 @@ package games.toads;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
+import games.toads.actions.FlankCardPlayed;
+import games.toads.actions.PlayFlankCard;
+import scala.concurrent.impl.FutureConvertersImpl;
 import utilities.DeterminisationUtilities;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -93,6 +98,15 @@ public class ToadGameState extends AbstractGameState {
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
             // tieBreakers are always known to both players
+
+            // Then we blank out the history of actual Flank cards played
+            for (int i = 0; i < getHistory().size(); i++) {
+                Pair<Integer, AbstractAction> pair = getHistory().get(i);
+                if (pair.a == playerId) // ours, so fine
+                    continue;
+                if (pair.b instanceof PlayFlankCard)
+                    getHistory().set(i, new Pair<>(pair.a, new FlankCardPlayed()));
+            }
         }
         return copy;
     }
