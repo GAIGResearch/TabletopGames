@@ -70,4 +70,9 @@ public class Militia extends DominionAttackAction {
         // Does the victim now have 3 or fewer cards in hand?
         return state.getDeck(DeckType.HAND, currentTarget).getSize() <= OTHERS_DISCARD_DOWN_TO;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Militia && super.equals(other);
+    }
 }

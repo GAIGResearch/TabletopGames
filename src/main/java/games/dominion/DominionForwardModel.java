@@ -160,10 +160,10 @@ public class DominionForwardModel extends StandardForwardModel {
                             .map(dc -> dc.getAction(playerID))
                             .distinct()
                             .collect(toList());
-                    availableActions.add(new EndPhase());
+                    availableActions.add(new EndPhase(DominionGameState.DominionGamePhase.Play));
                     return availableActions;
                 }
-                return Collections.singletonList(new EndPhase());
+                return Collections.singletonList(new EndPhase(DominionGameState.DominionGamePhase.Play));
             case "Buy":
                 // we return every available card for purchase within our price range
                 int budget = state.availableSpend(playerID);
@@ -172,7 +172,7 @@ public class DominionForwardModel extends StandardForwardModel {
                         .sorted(Comparator.comparingInt(c -> -c.cost))
                         .map(ct -> new BuyCard(ct, playerID))
                         .collect(toList());
-                options.add(new EndPhase());
+                options.add(new EndPhase(DominionGameState.DominionGamePhase.Buy));
                 return options;
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());

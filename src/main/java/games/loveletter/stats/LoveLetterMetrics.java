@@ -241,7 +241,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 eliminatedPlayers.add(victim);
                 return false;
             } else {
-                AbstractAction action = e.state.getHistory().get(e.state.getHistory().size() - 1);  // Last action played
+                AbstractAction action = e.state.getHistory().get(e.state.getHistory().size() - 1).b;  // Last action played
                 if (action instanceof PlayCard) {
                     PlayCard pc = (PlayCard) action;
                     if (killer != -1) {
