@@ -62,6 +62,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             ((AbstractPlayer) getParameters().actionHeuristic).initializePlayer(state);
         MASTStats = null;
         root = null;
+        oldGraphKeys = new HashMap<>();
         getParameters().getRolloutStrategy().initializePlayer(state);
         getParameters().getOpponentModel().initializePlayer(state);
     }
@@ -104,8 +105,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
             mtRoot.roots[p] = backtrack(mtRoot.roots[p], state);
             if (mtRoot.roots[p] != null) {
-       //         if (p == mtRoot.decisionPlayer)
-        //            mtRoot.roots[p].instantiate(null, null, state);
+                //         if (p == mtRoot.decisionPlayer)
+                //            mtRoot.roots[p].instantiate(null, null, state);
                 mtRoot.roots[p].rootify(oldRoot);
                 mtRoot.roots[p].state = state.copy();
             }
@@ -124,24 +125,25 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 int newVisits = mcgsRoot.getTranspositionMap().get(key) != null ? mcgsRoot.getTranspositionMap().get(key).nVisits : 0;
                 if (newVisits == oldVisits) {
                     // no change, so remove
+                    System.out.println("Removing node: " + key + " with " + oldVisits + " visits");
                     mcgsRoot.getTranspositionMap().remove(key);
                 } else if (newVisits < oldVisits) {
                     throw new AssertionError("Unexpectedly fewer visits to a state than before");
                 }
             }
             // then reset the old keys
-            if (mcgsRoot != null) {
-                oldGraphKeys = mcgsRoot.getTranspositionMap().entrySet().stream()
-                        .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().nVisits));
-            } else {
-                // we just have the starting node
-                oldGraphKeys.put(params.MCGSStateKey.getKey(gameState), 0);
+            if (mcgsRoot == null) {
+                oldGraphKeys = new HashMap<>();
                 return null;
             }
+
+            oldGraphKeys = mcgsRoot.getTranspositionMap().entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().nVisits));
             // we create the root node as we would have done normally; and then override the transposition map
             MCGSNode retValue = ((MCGSNode) root).getTranspositionMap().get(params.MCGSStateKey.getKey(gameState));
             if (retValue == null) {
                 // have left graph; start from scratch
+                oldGraphKeys = new HashMap<>();
                 return null;
             }
             retValue.instantiate(null, null, gameState);

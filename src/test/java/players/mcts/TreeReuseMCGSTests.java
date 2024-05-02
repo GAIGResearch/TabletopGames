@@ -127,7 +127,7 @@ public class TreeReuseMCGSTests {
             oldOldKeys[currentPlayer] = oldKeys[currentPlayer];
             oldKeys[currentPlayer] = paramsOne.MCGSStateKey.getKey(state);
             TestMCTSPlayer player = currentPlayer == 0 ? playerOne : playerTwo;
-            oldRoots[currentPlayer] = (MCGSNode) player.root;
+            oldRoots[currentPlayer] = (MCGSNode) player.root; // root from last action taken
             oldVisitsMap.remove(currentPlayer);
             oldVisitsMap.add(currentPlayer, new HashMap<>(visitsMap.get(currentPlayer)));
             if (player.root != null) {
@@ -141,14 +141,19 @@ public class TreeReuseMCGSTests {
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
+            // newRoot is the root of the tree just used - i.e. it is rooted at the state before the action was taken
             MCGSNode newRoot = (MCGSNode) (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
             if (!oneAction) {
                 // check tree reuse
                 if (oldRoots[currentPlayer] != null) {
                     assertNotEquals(oldRoots[currentPlayer], newRoot);
-                    if (currentPlayer == 0 && oldRoots[currentPlayer].getTranspositionMap().size() > 1) {
-                        assertTrue(oldRoots[currentPlayer].getTranspositionMap().containsKey(oldKeys[currentPlayer]));
-                        assertSame(newRoot, oldRoots[currentPlayer].getTranspositionMap().get(oldKeys[currentPlayer]));
+                    if (currentPlayer == 0) {
+                        // old root still contains the starting state key
+                        assertTrue(oldRoots[currentPlayer].getTranspositionMap().containsKey(oldOldKeys[currentPlayer]));
+                        boolean searchExitedGraph = !oldRoots[currentPlayer].getTranspositionMap().containsKey(oldKeys[currentPlayer]);
+                        if (!searchExitedGraph) {
+                            assertSame(newRoot, oldRoots[currentPlayer].getTranspositionMap().get(oldKeys[currentPlayer]));
+                        }
                         System.out.println("Visits: " + newRoot.getVisits());
                         assertEquals(oldVisits[0] + paramsOne.budget, newRoot.getVisits());
                         // and check older root is no longer in the tree
