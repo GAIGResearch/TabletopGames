@@ -125,7 +125,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 int newVisits = mcgsRoot.getTranspositionMap().get(key) != null ? mcgsRoot.getTranspositionMap().get(key).nVisits : 0;
                 if (newVisits == oldVisits) {
                     // no change, so remove
-                    System.out.println("Removing node: " + key + " with " + oldVisits + " visits");
                     mcgsRoot.getTranspositionMap().remove(key);
                 } else if (newVisits < oldVisits) {
                     throw new AssertionError("Unexpectedly fewer visits to a state than before");
