@@ -161,6 +161,10 @@ public abstract class AbstractGameState {
         return gameType;
     }
 
+
+    protected void setHistoryAt(int index, Pair<Integer, AbstractAction> action) {
+        history.set(index, action);
+    }
     /**
      * @return All actions that have been executed on this state since reset()/initialisation
      */

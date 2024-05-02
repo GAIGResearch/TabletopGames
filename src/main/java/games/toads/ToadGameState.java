@@ -100,12 +100,13 @@ public class ToadGameState extends AbstractGameState {
             // tieBreakers are always known to both players
 
             // Then we blank out the history of actual Flank cards played
-            for (int i = 0; i < getHistory().size(); i++) {
-                Pair<Integer, AbstractAction> pair = getHistory().get(i);
+            List<Pair<Integer, AbstractAction>> history = copy.getHistory();
+            for (int i = 0; i < history.size(); i++) {
+                Pair<Integer, AbstractAction> pair = history.get(i);
                 if (pair.a == playerId) // ours, so fine
                     continue;
                 if (pair.b instanceof PlayFlankCard)
-                    getHistory().set(i, new Pair<>(pair.a, new FlankCardPlayed()));
+                    copy.setHistoryAt(i, new Pair<>(pair.a, new FlankCardPlayed()));
             }
         }
         return copy;
