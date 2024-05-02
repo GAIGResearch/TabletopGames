@@ -16,8 +16,6 @@ import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.Strategies.MAST;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
 import static utilities.Utils.*;
 
 public class SingleTreeNode {
@@ -39,7 +37,7 @@ public class SingleTreeNode {
     // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
     protected AbstractAction actionToReach;
     // Number of visits to this node
-    protected int nVisits;
+    protected int nVisits, inheritedVisits;
     protected int rolloutActionsTaken;
     // variables to track rollout - these were originally local in rollout(); but
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
@@ -55,6 +53,7 @@ public class SingleTreeNode {
     protected int round, turn, turnOwner;
     boolean terminalNode;
     double timeTaken;
+    double initialisationTimeTaken;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
     protected int nodeClash;
@@ -115,14 +114,15 @@ public class SingleTreeNode {
         this.turnOwner = state.getCurrentPlayer();
         this.terminalNode = !state.isNotTerminal();
 
-        decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         this.actionToReach = actionToReach;
 
         if (parent != null) {
             depth = parent.depth + 1;
             factory = parent.factory;
+            decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         } else {
             depth = 0;
+            decisionPlayer = state.getCurrentPlayer();
         }
 
         if (params.information != Closed_Loop && (params.maintainMasterState || depth == 0)) {
@@ -138,6 +138,27 @@ public class SingleTreeNode {
         // then set up available actions, and set openLoopState = state
         setActionsFromOpenLoopState(state);
 
+    }
+
+    public void rootify(SingleTreeNode template) {
+        // now we need to reset the depth on all the children (recursively)
+        parent = null;
+        actionToReach = null;
+        resetDepth(this);
+        highReward = template.highReward;
+        lowReward = template.lowReward;
+        inheritedVisits = nVisits;
+    }
+
+    protected void resetDepth(SingleTreeNode newRoot) {
+        depth = parent == null ? 0 : parent.depth + 1;
+        root = newRoot;
+        for (SingleTreeNode[] childArray : children.values()) {
+            if (childArray == null) continue;
+            for (SingleTreeNode child : childArray) {
+                if (child != null) child.resetDepth(newRoot);
+            }
+        }
     }
 
     public AbstractGameState getState() {
@@ -261,8 +282,9 @@ public class SingleTreeNode {
         }
     }
 
-    protected void initialiseRoot() {
+    protected void initialiseRootMetrics() {
         timeTaken = 0.0;
+        initialisationTimeTaken = 0.0;
         nodeClash = 0;
         rolloutActionsTaken = 0;
     }
@@ -270,15 +292,16 @@ public class SingleTreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    public void mctsSearch() {
-        initialiseRoot();
+    public void mctsSearch(long initialisationTime) {
+        initialiseRootMetrics();
+        initialisationTimeTaken = initialisationTime;
         // Variables for tracking time budget
         double avgTimeTaken;
         long remaining;
         int remainingLimit = params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
         if (params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(params.budget);
+            elapsedTimer.setMaxTimeMillis(params.budget - initialisationTime);
         }
 
         // Tracking number of iterations for iteration budget
@@ -1024,7 +1047,7 @@ public class SingleTreeNode {
             // (and this is good, as it throws an error as a bug-check if this is not true).
             bestAction = treePolicyAction(false);
         } else {
-            // We iterate through all action valid in the original root state
+            // We iterate through all actions valid in the original root state
             // as openLoopState may be different if using MCGS (not an issue with SingleTreeNode or MultiTreeNode)
             for (AbstractAction action : forwardModel.computeAvailableActions(state, params.actionSpace)) {
                 if (!actionValues.containsKey(action)) {
@@ -1144,7 +1167,7 @@ public class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         String valueString = String.format("%.2f", nodeValue(decisionPlayer));
-        if (!params.opponentTreePolicy.selfOnlyTree) {
+        if (!params.opponentTreePolicy.selfOnlyTree && openLoopState != null) {
             valueString = IntStream.range(0, openLoopState.getNPlayers())
                     .mapToDouble(this::nodeValue)
                     .mapToObj(v -> String.format("%.2f", v))

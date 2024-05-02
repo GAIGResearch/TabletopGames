@@ -33,6 +33,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("PlayerType", mctsPlayer.toString());
                 records.put("PlayerID", e.state.getCurrentPlayer());
                 records.put("Iterations", root.getVisits());
+                records.put("ReusedVisits", mctsPlayer.root.inheritedVisits);
                 records.put("MaxDepth", treeStats.depthReached);
                 records.put("MeanLeafDepth", treeStats.meanLeafDepth);
                 records.put("MeanNodeDepth", treeStats.meanNodeDepth);
@@ -50,6 +51,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
                 records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 records.put("time", mctsPlayer.root.timeTaken);
+                records.put("initTime", mctsPlayer.root.initialisationTimeTaken);
                 return true;
             }
             return false;
@@ -66,6 +68,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("PlayerType", String.class);
             cols.put("PlayerID", Integer.class);
             cols.put("Iterations", Integer.class);
+            cols.put("ReusedVisits", Integer.class); // visits from reused tree
             cols.put("MaxDepth", Integer.class);
             cols.put("MeanLeafDepth", Double.class);
             cols.put("MeanNodeDepth", Double.class);
@@ -82,6 +85,7 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("fmCalls", Integer.class);
             cols.put("copyCalls", Integer.class);
             cols.put("time", Double.class);
+            cols.put("initTime", Double.class);
             return cols;
         }
     }

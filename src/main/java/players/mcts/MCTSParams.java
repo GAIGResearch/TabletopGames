@@ -68,6 +68,7 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
     public double progressiveBias = 0.0;
+    public boolean reuseTree = false;
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -113,6 +114,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("pUCTTemperature", 0.0);
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
+        addTunableParameter("reuseTree", false);
     }
 
     @Override
@@ -169,6 +171,7 @@ public class MCTSParams extends PlayerParameters {
         firstPlayUrgency = (double) getParameterValue("FPU");
         initialiseVisits = (int) getParameterValue("initialiseVisits");
         actionHeuristicRecalculationThreshold = (int) getParameterValue("actionHeuristicRecalculation");
+        reuseTree = (boolean) getParameterValue("reuseTree");
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
