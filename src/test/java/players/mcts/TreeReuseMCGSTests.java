@@ -109,13 +109,13 @@ public class TreeReuseMCGSTests {
         // [as we don't prune this until the *next* decision is taken]
         // After the action is taken we confirm that the old root node no longer exists in the tree (i.e. that we do prune states)
         MCGSNode[] oldRoots = new MCGSNode[2];
-        String[] oldKeys = new String[]{"", ""};
-        String[] oldOldKeys = new String[]{"", ""};
-        String[] oldOldOldKeys = new String[]{"", ""};
-        List<Map<String, Integer>> oldVisitsMap = new ArrayList<>(2);
+        Object[] oldKeys = new Object[]{null, null};
+        Object[] oldOldKeys = new Object[]{null, null};
+        Object[] oldOldOldKeys = new Object[]{null, null};
+        List<Map<Object, Integer>> oldVisitsMap = new ArrayList<>(2);
         oldVisitsMap.add(new HashMap<>());
         oldVisitsMap.add(new HashMap<>());
-        List<Map<String, Integer>> visitsMap = new ArrayList<>(2);
+        List<Map<Object, Integer>> visitsMap = new ArrayList<>(2);
         visitsMap.add(new HashMap<>());
         visitsMap.add(new HashMap<>());
         int[] oldVisits = new int[2];
@@ -157,13 +157,13 @@ public class TreeReuseMCGSTests {
                         System.out.println("Visits: " + newRoot.getVisits());
                         assertEquals(oldVisits[0] + paramsOne.budget, newRoot.getVisits());
                         // and check older root is no longer in the tree
-                        if (!oldOldOldKeys[currentPlayer].isEmpty()) {
+                        if (oldOldOldKeys[currentPlayer] != null) {
                             assertFalse(newRoot.getTranspositionMap().containsKey(oldOldOldKeys[currentPlayer]));
                         }
                         // then for each node that was
-                        Map<String, Integer> newVisitsMap = newRoot.getTranspositionMap().entrySet().stream()
+                        Map<Object, Integer> newVisitsMap = newRoot.getTranspositionMap().entrySet().stream()
                                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll);
-                        for (String key : oldVisitsMap.get(currentPlayer).keySet()) {
+                        for (Object key : oldVisitsMap.get(currentPlayer).keySet()) {
                             if (newVisitsMap.containsKey(key)) {
                                 assertTrue(newVisitsMap.get(key) > oldVisitsMap.get(currentPlayer).get(key));
                             }

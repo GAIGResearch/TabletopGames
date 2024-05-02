@@ -28,7 +28,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     protected SingleTreeNode root;
     protected AbstractAction lastAction;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
-    Map<String, Integer> oldGraphKeys = new HashMap<>();
+    Map<Object, Integer> oldGraphKeys = new HashMap<>();
 
     public MCTSPlayer() {
         this(new MCTSParams());
@@ -120,7 +120,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (params.reuseTree && (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)) {
             // In this case we remove any nodes from the graph that were not present before the last action was taken
             MCGSNode mcgsRoot = (MCGSNode) root;
-            for (String key : oldGraphKeys.keySet()) {
+            for (Object key : oldGraphKeys.keySet()) {
                 int oldVisits = oldGraphKeys.get(key);
                 int newVisits = mcgsRoot.getTranspositionMap().get(key) != null ? mcgsRoot.getTranspositionMap().get(key).nVisits : 0;
                 if (newVisits == oldVisits) {
