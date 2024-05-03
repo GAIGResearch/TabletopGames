@@ -84,7 +84,7 @@ public class BackupTests {
         }
         SingleTreeNode levelThreeRight = levelTwoLeft.getChildren().get(baseActions.get(2))[0];
         for (int i = 0; i < 2; i++) {
-            levelThreeRight.backUpSingleNode(new LMRAction("Left"), new double[]{1.0});
+            levelThreeRight.backUpSingleNode(new LMRAction("Left"), new double[]{0.8});
         }
         for (int i = 0; i < 2; i++) {
             levelThreeRight.backUpSingleNode(new LMRAction("Middle"), new double[]{0.7});
@@ -142,11 +142,11 @@ public class BackupTests {
 
     @Test
     public void maxBackup001() {
+        setupPlayer();
+        params.maxBackupThreshold = 30; // we set this now to avoid interfering with the tree construction
         // This will just affect the root and first level nodes
         // But, since the best action is already taken from the root, it will not affect the final result
         // It will affect the level 1 node
-        setupPlayer();
-        params.maxBackupThreshold = 30; // we set this now to avoid interfering with the tree construction
         lastNode.backUp(new double[]{0.5});
 
         assertEquals(101, root.getVisits());
@@ -167,5 +167,65 @@ public class BackupTests {
 
         assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
         assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+    }
+
+    @Test
+    public void maxBackup002() {
+        setupPlayer();
+        params.maxBackupThreshold = 2; // we set this now to avoid interfering with the tree construction
+        lastNode.backUp(new double[]{0.5});
+
+        assertEquals(101, root.getVisits());
+        assertEquals(51, nodeTrajectory001.get(1).getVisits());
+        assertEquals(26, nodeTrajectory001.get(2).getVisits());
+        assertEquals(6, nodeTrajectory001.get(3).getVisits());
+        assertEquals(0, lastNode.getVisits());
+
+        // no effect on root given max was picked
+        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(50.5, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+
+        double update = 2.0/53.0 * 0.5 + 51.0 / 53.0 * 1.0;
+        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+
+        update = 2.0/28.0 * 0.5 + 26.0 / 28.0 * 1.0;
+        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
+        assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+
+        update = 2.0/8.0 * 0.5 + 6.0 / 8.0 * 0.8;
+        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + update, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+    }
+
+    @Test
+    public void maxBackupRecursive() {
+        setupPlayer();
+        params.maxBackupThreshold = 5; // we set this now to avoid interfering with the tree construction
+        params.recursiveBackup = true;
+        lastNode.backUp(new double[]{0.5});
+
+        double leafUpdate = 5.0/11.0 * 0.5 + 6.0 / 11.0 * 0.8;
+        double level3Update = 5.0/31.0 * leafUpdate + 26.0 / 31.0 * 1.0;
+        double level2Update = 5.0/56.0 * level3Update + 51.0 / 56.0 * 1.0;
+        double level1Update = level2Update;
+
+        assertEquals(101, root.getVisits());
+        assertEquals(51, nodeTrajectory001.get(1).getVisits());
+        assertEquals(26, nodeTrajectory001.get(2).getVisits());
+        assertEquals(6, nodeTrajectory001.get(3).getVisits());
+        assertEquals(0, lastNode.getVisits());
+
+        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + leafUpdate, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+
+        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
+        assertEquals(level3Update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+
+        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + level2Update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+
+        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(50.0 + level1Update, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
     }
 }
