@@ -71,6 +71,7 @@ public class SingleTreeNode {
     // The total value of all trajectories through this node (one element per player)
     private Supplier<? extends SingleTreeNode> factory;
     // Total value of this node
+    protected List<SingleTreeNode> currentNodeTrajectory;
     protected List<Pair<Integer, AbstractAction>> actionsInTree;
     List<Pair<Integer, AbstractAction>> actionsInRollout;
 
@@ -361,6 +362,7 @@ public class SingleTreeNode {
      */
     protected void oneSearchIteration() {
         actionsInTree = new ArrayList<>();
+        currentNodeTrajectory = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
 
         SingleTreeNode selected = treePolicy();
@@ -474,6 +476,8 @@ public class SingleTreeNode {
             } else {
                 cur.advanceState(cur.openLoopState, chosen, false);
             }
+            // add node to trajectory for later backprop
+            currentNodeTrajectory.add(cur);
             // then find out where this has taken us
             boolean terminal = !cur.openLoopState.isNotTerminal() ||
                     (params.opponentTreePolicy.selfOnlyTree && !cur.openLoopState.isNotTerminalForPlayer(decisionPlayer));
@@ -917,21 +921,14 @@ public class SingleTreeNode {
     protected void backUp(double[] delta) {
         normaliseRewardsAfterIteration(delta);
         double[] result = processResultsForParanoidOrSelfOnly(delta);
-        // we also need the action taken at each step which we should be able to get from actionsInTree...
-        SingleTreeNode n = root;
-        for (int i = 0; i < root.actionsInTree.size(); i++) {
+        // we need to go backwards up the tree, as the result may change
+        for (int i = root.currentNodeTrajectory.size() - 1; i >= 0; i--) {
             int actingPlayer = root.actionsInTree.get(i).a;
             AbstractAction action = root.actionsInTree.get(i).b;
+            SingleTreeNode n = root.currentNodeTrajectory.get(i);
             if (n.decisionPlayer != actingPlayer)
                 throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
-            n.backUpSingleNode(action, result);
-            if (i < root.actionsInTree.size() - 1) {
-                int nextPlayer = root.actionsInTree.get(i + 1).a;
-                SingleTreeNode[] nextN = n.children.get(action);
-                if (nextN == null)
-                    throw new AssertionError("We have somehow failed to find the next node in the tree");
-                n = nextN[nextPlayer];
-            }
+            result = n.backUpSingleNode(action, result);
         }
     }
 
@@ -973,7 +970,13 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    protected void backUpSingleNode(AbstractAction actionTaken, double[] result) {
+    /**
+     * This take in the result coming from the child node, and updates the statistics for the action taken
+     * It returns the reward that should be back-propagated to the parent node.
+     * In the case of vanilla MCTS, this is unchanged from the input result.
+     * But, if we are interpolating some max/Q update, then this will change the result.
+     */
+    protected double[] backUpSingleNode(AbstractAction actionTaken, double[] result) {
         if (params.discardStateAfterEachIteration) {
             if (depth > 0)
                 openLoopState = null; // releases for Garbage Collection
@@ -1009,6 +1012,7 @@ public class SingleTreeNode {
         if (stats.validVisits == 0)
             throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
         stats.update(result);
+        return result;
     }
 
 
