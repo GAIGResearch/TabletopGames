@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IActionHeuristic;
 import players.PlayerConstants;
 import utilities.*;
@@ -920,7 +921,8 @@ public class SingleTreeNode {
      */
     protected void backUp(double[] delta) {
         normaliseRewardsAfterIteration(delta);
-        double[] result = processResultsForParanoidOrSelfOnly(delta);
+        double[] baseReward = processResultsForParanoidOrSelfOnly(delta);
+        double[] result = baseReward;
         // we need to go backwards up the tree, as the result may change
         for (int i = root.currentNodeTrajectory.size() - 1; i >= 0; i--) {
             int actingPlayer = root.actionsInTree.get(i).a;
@@ -1011,7 +1013,36 @@ public class SingleTreeNode {
             throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
         if (stats.validVisits == 0)
             throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
-        stats.update(result);
+        double localResult[] = result;
+        if (nVisits > params.maxBackupThreshold) {
+            localResult = result.clone();
+            // in this case we mix in a max backup
+            // *if* we took an action other than the one with the current best estimate
+            AbstractAction bestAction = null;
+            double maxValue = -Double.MAX_VALUE;
+            for (AbstractAction action : actionsToConsider) {
+                double value = actionValues.get(action).nVisits == 0 ? -Double.MAX_VALUE :
+                        actionValues.get(action).totValue[decisionPlayer] / actionValues.get(action).nVisits;
+                if (value > maxValue) {
+                    maxValue = value;
+                    bestAction = action;
+                }
+            }
+            if (bestAction == null) {
+                throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
+            }
+            if (!bestAction.equals(actionTaken)) {
+                double maxWeight = nVisits / (double) (nVisits + params.maxBackupThreshold);
+                // we mix for all players, based on the counterfactual decision of the acting player
+                for (int i = 0; i < result.length; i++) {
+                    localResult[i] = (1 - maxWeight) * result[i] + maxWeight * maxValue;
+                }
+            }
+        }
+
+        stats.update(localResult);
+        if (params.recursiveBackup)
+            return localResult;
         return result;
     }
 
