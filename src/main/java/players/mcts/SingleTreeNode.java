@@ -1032,7 +1032,9 @@ public class SingleTreeNode {
                 }
             }
             if (bestAction == null) {
-                throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
+                // this can happen for low maxBackupCounts with no actions available
+                // we default to ignoring Max functionality
+                bestAction = actionTaken;
             }
             if (!bestAction.equals(actionTaken)) {
                 double maxWeight = nVisits / (double) (nVisits + params.maxBackupThreshold);
