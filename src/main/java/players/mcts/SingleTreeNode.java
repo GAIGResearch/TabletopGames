@@ -1082,7 +1082,7 @@ public class SingleTreeNode {
         if (params.selectionPolicy == TREE || params.treePolicy == Hedge || params.treePolicy == EXP3) {
             // EXP3, Hedge use the tree policy (without exploration)
             bestAction = treePolicyAction(false);
-        } else if (params.treePolicy == RegretMatching) {
+        } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
             // RM uses a special policy as the average of all previous root policies
             bestAction = regretMatchingAverage();
         } else {
