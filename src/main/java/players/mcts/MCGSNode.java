@@ -111,14 +111,14 @@ public class MCGSNode extends SingleTreeNode {
                     nRoot.trajectory.size() + " != " + nRoot.actionsInTree.size());
         }
 
-        for (int i = 0; i < nRoot.trajectory.size(); i++) {
+        for (int i = nRoot.trajectory.size() - 1; i >= 0; i--) {
             Object key = nRoot.trajectory.get(i);
             MCGSNode node = nRoot.transpositionMap.get(key);
             AbstractAction action = nRoot.actionsInTree.get(i).b;
             if (node == null) {
                 throw new AssertionError("Node should not be null");
             }
-            node.backUpSingleNode(action, result);
+            result = node.backUpSingleNode(action, result);
         }
         nRoot.trajectory.clear();
     }
