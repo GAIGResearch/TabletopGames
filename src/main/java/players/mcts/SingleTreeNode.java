@@ -589,7 +589,7 @@ public class SingleTreeNode {
      * @return - child node according to the tree policy
      */
     protected AbstractAction treePolicyAction(boolean explore) {
-        if (params.opponentTreePolicy == SelfOnly && openLoopState != null && openLoopState.getCurrentPlayer() != decisionPlayer)
+        if (params.opponentTreePolicy == SelfOnly && parent != null && openLoopState != null && openLoopState.getCurrentPlayer() != decisionPlayer)
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
 
         // actionsToConsider takes care of any Progressive Widening in play, so we only consider the
@@ -629,7 +629,7 @@ public class SingleTreeNode {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = Utils.pdf(actionValues);
-                    if (params.treePolicy == RegretMatching && nVisits > actionValues.length && nVisits % Math.min(actionValues.length, 10) == 1) {
+                    if (this == root && params.treePolicy == RegretMatching && nVisits > actionValues.length && nVisits % Math.min(actionValues.length, 10) == 1) {
                         // we update the average policy each time we have had the opportunity to take each action once
                         for (int i = 0; i < actionValues.length; i++) {
                             root.regretMatchingAverage.merge(availableActions.get(i), pdf[i], Double::sum);

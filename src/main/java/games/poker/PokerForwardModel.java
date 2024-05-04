@@ -32,6 +32,7 @@ public class PokerForwardModel extends StandardForwardModel {
         pgs.playerBet = new Counter[firstState.getNPlayers()];
         pgs.playerActStreet = new boolean[pgs.getNPlayers()];
         pgs.moneyPots = new ArrayList<>();
+        pgs.bet = false;
 
         pgs.playerDecks = new ArrayList<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
