@@ -849,12 +849,6 @@ public class SingleTreeNode {
         return params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
 
-    private int sampleFromPotentials(double[] values) {
-        // then we need
-        return Utils.sampleFrom(values, rnd.nextDouble());
-    }
-
-
     /**
      * Perform a Monte Carlo rollout from this node.
      *
