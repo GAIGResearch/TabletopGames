@@ -1032,7 +1032,9 @@ public class SingleTreeNode {
                 }
             }
             if (bestAction == null) {
-                throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
+                // this can happen for low maxBackupCounts with no actions available
+                // we default to ignoring Max functionality
+                bestAction = actionTaken;
             }
             if (!bestAction.equals(actionTaken)) {
                 double maxWeight = nVisits / (double) (nVisits + params.maxBackupThreshold);
@@ -1082,7 +1084,7 @@ public class SingleTreeNode {
         if (params.selectionPolicy == TREE || params.treePolicy == Hedge || params.treePolicy == EXP3) {
             // EXP3, Hedge use the tree policy (without exploration)
             bestAction = treePolicyAction(false);
-        } else if (params.treePolicy == RegretMatching) {
+        } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
             // RM uses a special policy as the average of all previous root policies
             bestAction = regretMatchingAverage();
         } else {
