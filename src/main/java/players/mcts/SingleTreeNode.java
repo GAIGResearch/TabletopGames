@@ -17,6 +17,7 @@ import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
+import static players.mcts.MCTSEnums.TreePolicy.*;
 import static utilities.Utils.*;
 
 public class SingleTreeNode {
@@ -57,6 +58,7 @@ public class SingleTreeNode {
     double initialisationTimeTaken;
     protected double highReward = Double.NEGATIVE_INFINITY;
     protected double lowReward = Double.POSITIVE_INFINITY;
+    protected Map<AbstractAction, Double> regretMatchingAverage = new HashMap<>();
     protected int nodeClash;
     // Root node of tree
     protected SingleTreeNode root;
@@ -289,6 +291,7 @@ public class SingleTreeNode {
         initialisationTimeTaken = 0.0;
         nodeClash = 0;
         rolloutActionsTaken = 0;
+        regretMatchingAverage.clear();
     }
 
     /**
@@ -626,6 +629,12 @@ public class SingleTreeNode {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = Utils.pdf(actionValues);
+                    if (nVisits % Math.min(actionValues.length, 10) == 1) {
+                        // we update the average policy each time we have had the opportunity to take each action once
+                        for (int i = 0; i < actionValues.length; i++) {
+                            regretMatchingAverage.merge(availableActions.get(i), pdf[i], Double::sum);
+                        }
+                    }
                     long nonZeroActions = Arrays.stream(actionValues).filter(v -> v > 0.0).count();
                     if (nonZeroActions == 0) {
                         // if we have no non-zero values, then we just pick one at random
@@ -812,7 +821,7 @@ public class SingleTreeNode {
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits;
         double regret = potentialValue - nodeValue * nVisits;
-        if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
+        if (params.treePolicy == Hedge) {
             // in this case we exponentiate the regret to get the probability of taking this action
             // This may be problematic for large regrets, as it is not standardised to number of actions
             // So the Boltzmann factor needs to be quite large
@@ -1076,11 +1085,12 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-        if (params.selectionPolicy == TREE) {
-            // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
-            // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
-            // (and this is good, as it throws an error as a bug-check if this is not true).
+        if (params.selectionPolicy == TREE || params.treePolicy == Hedge || params.treePolicy == EXP3) {
+            // EXP3, Hedge use the tree policy (without exploration)
             bestAction = treePolicyAction(false);
+        } else if (params.treePolicy == RegretMatching) {
+            // RM uses a special policy as the average of all previous root policies
+            bestAction = regretMatchingAverage();
         } else {
             // We iterate through all actions valid in the original root state
             // as openLoopState may be different if using MCGS (not an issue with SingleTreeNode or MultiTreeNode)
@@ -1115,6 +1125,18 @@ public class SingleTreeNode {
         }
 
         return bestAction;
+    }
+
+    protected AbstractAction regretMatchingAverage() {
+        double[] potentials = new double[regretMatchingAverage.size()];
+        int count = 0;
+        for (AbstractAction action : regretMatchingAverage.keySet()) {
+            potentials[count] = regretMatchingAverage.get(action);
+            count++;
+        }
+        double[] pdf = Utils.pdf(potentials);
+        int index = Utils.sampleFrom(pdf, rnd.nextDouble());
+        return regretMatchingAverage.keySet().stream().skip(index).findFirst().orElseThrow(() -> new AssertionError("No action found"));
     }
 
     public int getVisits() {
