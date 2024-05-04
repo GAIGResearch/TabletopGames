@@ -184,6 +184,26 @@ public class MCTSTreeSelectionTests {
 
 
     @Test
+    public void rm10VisitsFinalSelection() {
+        rm10Visits();
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0, counts[0], 0);
+        assertEquals(679, counts[1], 100);
+        assertEquals(321, counts[2], 100);
+    }
+
+    @Test
     public void rm10VisitsWithExploration() {
         params.treePolicy = RegretMatching;
         params.exploreEpsilon = 0.3;

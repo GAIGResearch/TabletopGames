@@ -629,10 +629,10 @@ public class SingleTreeNode {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = Utils.pdf(actionValues);
-                    if (nVisits % Math.min(actionValues.length, 10) == 1) {
+                    if (params.treePolicy == RegretMatching && nVisits > actionValues.length && nVisits % Math.min(actionValues.length, 10) == 1) {
                         // we update the average policy each time we have had the opportunity to take each action once
                         for (int i = 0; i < actionValues.length; i++) {
-                            regretMatchingAverage.merge(availableActions.get(i), pdf[i], Double::sum);
+                            root.regretMatchingAverage.merge(availableActions.get(i), pdf[i], Double::sum);
                         }
                     }
                     long nonZeroActions = Arrays.stream(actionValues).filter(v -> v > 0.0).count();
