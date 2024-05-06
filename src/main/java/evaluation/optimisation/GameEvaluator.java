@@ -105,18 +105,21 @@ public class GameEvaluator implements SolutionEvaluator {
         // we assign one player to each team (the default for a game is each player being their own team of 1)
         int nTeams = newGame.getGameState().getNTeams();
 
-        // We can reduce variance here by cycling the playerIndex on each iteration
+        // We can reduce variance here by cycling the teamIndex on each iteration
         // If we're not tuning the player, then setting index to -99 means we just use the provided opponents list
-        int playerIndex = tuningPlayer ? nEvals % nTeams : -99;
-
+        // in setupPlayers()
+        int teamIndex = tuningPlayer ? nEvals % nTeams : -99;
 
         // We generally one game per evaluation, unless we are in 'Stable' mode,
         // in which case we reduce variance by running one game for each position the tuned agent can be in
-        int gamesToRun = params.mode == StableNTBEA ? nPlayers : 1;
+        if (params.mode == StableNTBEA && !tuningPlayer)
+            throw new AssertionError("StableNTBEA mode requires tuning of player");
+        int gamesToRun = params.mode == StableNTBEA ? nTeams : 1;
         long seed = rnd.nextLong();
         double retValue = 0.0;
         for (int loop = 0; loop < gamesToRun; loop++) {
-            List<AbstractPlayer> allPlayers = setupPlayers((playerIndex + loop) % nTeams, nTeams, settings);
+            int thisTeamIndex = teamIndex == -99 ? -99 : (teamIndex + loop) % nTeams;
+            List<AbstractPlayer> allPlayers = setupPlayers(thisTeamIndex, nTeams, settings);
 
             // always reset the random seed for each new game
             newGame.reset(allPlayers, seed);
@@ -124,12 +127,12 @@ public class GameEvaluator implements SolutionEvaluator {
 
             int playerOnTeam = -1;
             for (int p = 0; p < newGame.getGameState().getNPlayers(); p++) {
-                if (newGame.getGameState().getTeam(p) == playerIndex) {
+                if (newGame.getGameState().getTeam(p) == thisTeamIndex) {
                     playerOnTeam = p;
                 }
             }
-            if (playerOnTeam == -1)
-                throw new AssertionError("No Player found on team " + playerIndex);
+            if (tuningPlayer && playerOnTeam == -1)
+                throw new AssertionError("No Player found on team " + thisTeamIndex);
             retValue += tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam);
         }
         //    System.out.println("GameEvaluator: " + retValue);
