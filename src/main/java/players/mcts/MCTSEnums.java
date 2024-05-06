@@ -21,7 +21,7 @@ public class MCTSEnums {
     }
 
     public enum TreePolicy {
-        UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, Hedge
+        UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching
     }
 
     public enum RolloutTermination {

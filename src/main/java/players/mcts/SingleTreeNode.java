@@ -623,7 +623,7 @@ public class SingleTreeNode {
                     }
                     yield bestAction;
                 }
-                case RegretMatching, EXP3, Hedge -> {
+                case RegretMatching, EXP3 -> {
                     // check exploration first
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
@@ -688,7 +688,7 @@ public class SingleTreeNode {
             AbstractAction action = actionsToConsider.get(i);
             retValue[i] = switch (params.treePolicy) {
                 case UCB, AlphaGo, UCB_Tuned -> ucbValue(action);
-                case RegretMatching, Hedge -> rmValue(action);
+                case RegretMatching -> rmValue(action);
                 case EXP3 -> exp3Value(action);
             };
         }
@@ -821,14 +821,6 @@ public class SingleTreeNode {
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits;
         double regret = potentialValue - nodeValue * nVisits;
-        if (params.treePolicy == Hedge) {
-            // in this case we exponentiate the regret to get the probability of taking this action
-            // This may be problematic for large regrets, as it is not standardised to number of actions
-            // So the Boltzmann factor needs to be quite large
-            regret = Math.exp(regret / params.hedgeBoltzmann);
-            if (Double.isNaN(regret))
-                throw new AssertionError("We have a non-number in Hedge somewhere");
-        }
         // We add FPU after all the exponentiation for safety
         int actionVisits = actionVisits(action);
         if (actionVisits == 0) {
@@ -1081,7 +1073,7 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-        if (params.selectionPolicy == TREE || params.treePolicy == Hedge || params.treePolicy == EXP3) {
+        if (params.selectionPolicy == TREE || params.treePolicy == EXP3) {
             // EXP3, Hedge use the tree policy (without exploration)
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
