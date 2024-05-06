@@ -141,7 +141,7 @@ public class GameEvaluator implements SolutionEvaluator {
         return retValue;
     }
 
-    private List<AbstractPlayer> setupPlayers(int playerIndex, int nTeams, int[] settings) {
+    private List<AbstractPlayer> setupPlayers(int teamIndex, int nTeams, int[] settings) {
         List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
         // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
         // if we allow duplicates, then we randomise them all independently
@@ -149,7 +149,7 @@ public class GameEvaluator implements SolutionEvaluator {
         Collections.shuffle(opponentOrdering);
         int count = 0;
         for (int i = 0; i < nTeams; i++) {
-            if (params.mode != CoopNTBEA && i != playerIndex) {
+            if (params.mode != CoopNTBEA && i != teamIndex) {
                 int oppIndex = (avoidOppDupes) ? count : rnd.nextInt(opponents.size());
                 count = (count + 1) % nTeams;
                 allPlayers.add(opponents.get(oppIndex).copy());
