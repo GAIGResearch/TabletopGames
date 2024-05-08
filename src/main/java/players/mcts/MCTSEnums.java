@@ -11,7 +11,7 @@ public class MCTSEnums {
     }
 
     public enum MASTType {
-        None, Rollout, Tree, Both
+        Rollout, Tree, Both
     }
 
     public enum SelectionPolicy {
@@ -21,23 +21,19 @@ public class MCTSEnums {
     }
 
     public enum TreePolicy {
-        UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, Hedge
+        UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, RM_Plus, Hedge
     }
 
     public enum RolloutTermination {
-        DEFAULT, END_ACTION, END_TURN, START_ACTION, END_ROUND
-        // ???_ACTION refers to the acting player (regardless of Turn or Round)
-        // END_ACTION will stop a rollout when the player changes from the acting player; and START_ACTION will keep going until it is their action again
-        // END_TURN|ROUND is triggered when the game round/turn changes
+        DEFAULT, END_TURN, START_TURN, END_ROUND;
     }
 
     public enum OpponentTreePolicy {
         SelfOnly(true), OneTree(false),
         MultiTree(true),
-        OMA(false), OMA_All(false),
-        MCGS(false), MCGSSelfOnly(true);
+        OMA(false), OMA_All(false);
 
-        public final boolean selfOnlyTree;
+        boolean selfOnlyTree;
         OpponentTreePolicy(boolean selfOnlyTree) {
             this.selfOnlyTree = selfOnlyTree;
         }

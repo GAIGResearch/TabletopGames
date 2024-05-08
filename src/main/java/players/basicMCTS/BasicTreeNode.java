@@ -57,16 +57,14 @@ class BasicTreeNode {
      */
     void mctsSearch() {
 
-        BasicMCTSParams params = player.getParameters();
-
         // Variables for tracking time budget
         double avgTimeTaken;
         double acumTimeTaken = 0;
         long remaining;
-        int remainingLimit = params.breakMS;
+        int remainingLimit = player.params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
-        if (params.budgetType == BUDGET_TIME) {
-            elapsedTimer.setMaxTimeMillis(params.budget);
+        if (player.params.budgetType == BUDGET_TIME) {
+            elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
         // Tracking number of iterations for iteration budget
@@ -88,7 +86,7 @@ class BasicTreeNode {
             numIters++;
 
             // Check stopping condition
-            PlayerConstants budgetType = params.budgetType;
+            PlayerConstants budgetType = player.params.budgetType;
             if (budgetType == BUDGET_TIME) {
                 // Time budget
                 acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
@@ -97,10 +95,10 @@ class BasicTreeNode {
                 stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
             } else if (budgetType == BUDGET_ITERATIONS) {
                 // Iteration budget
-                stop = numIters >= params.budget;
+                stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop = fmCallsCount > params.budget;
+                stop = fmCallsCount > player.params.budget;
             }
         }
     }
@@ -117,7 +115,7 @@ class BasicTreeNode {
         BasicTreeNode cur = this;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.state.isNotTerminal() && cur.depth < player.getParameters().maxTreeDepth) {
+        while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
@@ -136,7 +134,7 @@ class BasicTreeNode {
     private void setState(AbstractGameState newState) {
         state = newState;
         if (newState.isNotTerminal())
-            for (AbstractAction action : player.getForwardModel().computeAvailableActions(state, player.getParameters().actionSpace)) {
+            for (AbstractAction action : player.getForwardModel().computeAvailableActions(state, player.params.actionSpace)) {
                 children.put(action, null); // mark a new node to be expanded
             }
     }
@@ -155,7 +153,7 @@ class BasicTreeNode {
      */
     private BasicTreeNode expand() {
         // Find random child not already created
-        Random r = new Random(player.getParameters().getRandomSeed());
+        Random r = new Random(player.params.getRandomSeed());
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
         AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
@@ -186,7 +184,6 @@ class BasicTreeNode {
         // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
-        BasicMCTSParams params = player.getParameters();
 
         for (AbstractAction action : children.keySet()) {
             BasicTreeNode child = children.get(action);
@@ -197,10 +194,10 @@ class BasicTreeNode {
 
             // Find child value
             double hvVal = child.totValue;
-            double childValue = hvVal / (child.nVisits + params.epsilon);
+            double childValue = hvVal / (child.nVisits + player.params.epsilon);
 
             // default to standard UCB
-            double explorationTerm = params.K * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + params.epsilon));
+            double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (child.nVisits + player.params.epsilon));
             // unless we are using a variant
 
             // Find 'UCB' value
@@ -211,7 +208,7 @@ class BasicTreeNode {
             uctValue += explorationTerm;
 
             // Apply small noise to break ties randomly
-            uctValue = noise(uctValue,params.epsilon, player.getRnd().nextDouble());
+            uctValue = noise(uctValue, player.params.epsilon, player.rnd.nextDouble());
 
             // Assign value
             if (uctValue > bestValue) {
@@ -237,7 +234,7 @@ class BasicTreeNode {
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = state.copy();
-        if (player.getParameters().rolloutLength > 0) {
+        if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
                 AbstractAction next = randomPlayer.getAction(rolloutState, randomPlayer.getForwardModel().computeAvailableActions(rolloutState, randomPlayer.parameters.actionSpace));
                 advance(rolloutState, next);
@@ -245,7 +242,7 @@ class BasicTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        double value = player.getParameters().getHeuristic().evaluateState(rolloutState, player.getPlayerID());
+        double value = player.params.getHeuristic().evaluateState(rolloutState, player.getPlayerID());
         if (Double.isNaN(value))
             throw new AssertionError("Illegal heuristic value - should be a number");
         return value;
@@ -259,7 +256,7 @@ class BasicTreeNode {
      * @return - true if rollout finished, false otherwise
      */
     private boolean finishRollout(AbstractGameState rollerState, int depth) {
-        if (depth >= player.getParameters().rolloutLength)
+        if (depth >= player.params.rolloutLength)
             return true;
 
         // End of game
@@ -296,7 +293,7 @@ class BasicTreeNode {
                 double childValue = node.nVisits;
 
                 // Apply small noise to break ties randomly
-                childValue = noise(childValue, player.getParameters().epsilon, player.getRnd().nextDouble());
+                childValue = noise(childValue, player.params.epsilon, player.rnd.nextDouble());
 
                 // Save best value (highest visit count)
                 if (childValue > bestValue) {

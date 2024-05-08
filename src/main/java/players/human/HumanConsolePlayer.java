@@ -11,10 +11,6 @@ import java.util.Scanner;
 
 public class HumanConsolePlayer extends AbstractPlayer {
 
-    public HumanConsolePlayer() {
-        super(null, "HumanConsolePlayer");
-    }
-
     @Override
     public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
 

@@ -12,7 +12,6 @@ import core.interfaces.IStateFeatureNormVector;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import org.apache.spark.internal.config.R;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
@@ -88,6 +87,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     @Override
     protected AbstractGameState _copy(int playerId)
     {
+        Random r = new Random(getGameParameters().getRandomSeed());
+
         DiamantGameState dgs = new DiamantGameState(gameParameters.copy(), getNPlayers());
 
         dgs.mainDeck    = mainDeck.copy();
@@ -126,7 +127,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         // mainDeck and is actionsPlayed are hidden.
         if (getCoreGameParameters().partialObservable && playerId != -1)
         {
-            dgs.mainDeck.shuffle(redeterminisationRnd);
+            dgs.mainDeck.shuffle(new Random(getGameParameters().getRandomSeed()));
 
             dgs.actionsPlayed.clear();
 

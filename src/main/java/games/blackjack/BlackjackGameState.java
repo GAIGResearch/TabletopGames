@@ -9,14 +9,16 @@ import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
-
 import java.util.ArrayList;
 import java.util.*;
+
+import static core.CoreConstants.GameResult.*;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 public class BlackjackGameState extends AbstractGameState implements IPrintable {
     List<PartialObservableDeck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
-    int dealerPlayer;
+    public int dealerPlayer;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -27,7 +29,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     public BlackjackGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
-
     @Override
     protected GameType _getGameType() {
         return GameType.Blackjack;
@@ -48,6 +49,16 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     public List<PartialObservableDeck<FrenchCard>> getPlayerDecks() {
         return playerDecks;
+    }
+
+    public boolean isGameOver() {
+        
+        for (CoreConstants.GameResult playerResult : getPlayerResults()) {
+            if (playerResult != GAME_ONGOING) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public int getDealerPlayer() {

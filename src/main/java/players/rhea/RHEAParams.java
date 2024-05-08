@@ -26,6 +26,11 @@ public class RHEAParams extends PlayerParameters
 
 
     public RHEAParams() {
+        this(System.currentTimeMillis());
+    }
+
+    public RHEAParams(long seed) {
+        super(seed);
         addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
         addTunableParameter("discountFactor", 0.9, Arrays.asList(0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0));
         addTunableParameter("populationSize", 10, Arrays.asList(6, 8, 10, 12, 14, 16, 18, 20));
@@ -65,7 +70,20 @@ public class RHEAParams extends PlayerParameters
 
     @Override
     protected RHEAParams _copy() {
-        return new RHEAParams();
+         RHEAParams retValue = new RHEAParams(System.currentTimeMillis());
+         retValue.horizon = horizon;
+         retValue.discountFactor = discountFactor;
+         retValue.populationSize = populationSize;
+         retValue.shiftLeft = shiftLeft;
+         retValue.eliteCount = eliteCount;
+         retValue.childCount = childCount;
+         retValue.selectionType = selectionType;
+         retValue.tournamentSize = tournamentSize;
+         retValue.crossoverType = crossoverType;
+         retValue.mutationCount = mutationCount;
+         retValue.heuristic = heuristic;
+         retValue.useMAST = useMAST;
+         return retValue;
     }
 
 

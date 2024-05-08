@@ -1,43 +1,35 @@
 package players.heuristics;
 
 import core.AbstractGameState;
-import core.interfaces.*;
-import utilities.Pair;
+import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 import utilities.Utils;
 
-import java.util.List;
-import java.util.Map;
 
-public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristic {
+public class LinearStateHeuristic extends AbstractStateHeuristic {
 
-    protected IStateFeatureVector features;
-    protected IStateHeuristic defaultHeuristic;
+    protected double minValue = Double.NEGATIVE_INFINITY;
+    protected double maxValue = Double.POSITIVE_INFINITY;
 
-    @Override
-    public String[] names() {
-        return features.names();
+    public LinearStateHeuristic(String featureVectorClassName, String coefficientsFile, String defaultHeuristicClass) {
+        super(featureVectorClassName, coefficientsFile, defaultHeuristicClass);
     }
-
+    public LinearStateHeuristic(String featureVectorClassName, String coefficientsFile) {
+        super(featureVectorClassName, coefficientsFile, "");
+    }
     public LinearStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile, IStateHeuristic defaultHeuristic) {
-        this.features = featureVector;
-        this.defaultHeuristic = defaultHeuristic;
-        loadFromFile(coefficientsFile);
+        super(featureVector, coefficientsFile, defaultHeuristic);
     }
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
-        // default heuristic is used if the state is terminal (or no coefficients are provided)
-        if (coefficients != null && (defaultHeuristic == null || state.isNotTerminal())) {
-            double[] phi = features.featureVector(state, playerId);
-            double retValue = inverseLinkFunction.applyAsDouble(applyCoefficients(phi));
-            if (defaultHeuristic != null)
-                return Utils.clamp(retValue, defaultHeuristic.minValue(), defaultHeuristic.maxValue());
-            return retValue;
-        }
-        if (defaultHeuristic != null)
+        if (coefficients == null)
             return defaultHeuristic.evaluateState(state, playerId);
-        return 0;
+        double[] phi = features.featureVector(state, playerId);
+        double retValue = coefficients[0]; // the bias term
+        for (int i = 0; i < phi.length; i++) {
+            retValue += phi[i] * coefficients[i+1];
+        }
+        return Utils.clamp(retValue, minValue, maxValue);
     }
-
-
 }

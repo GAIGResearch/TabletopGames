@@ -34,7 +34,8 @@ public enum PlayerType {
     Random (new ArrayList<Property>() {{ add(Simple); add(Stochastic); }}),
     OSLA (new ArrayList<Property>() {{ add(Simple); add(Stochastic); add(ForwardPlanning); add(Greedy); }}),
     MCTS (new ArrayList<Property>() {{ add(Stochastic); add(ForwardPlanning); add(TreeSearch); }}),
-    RMHC (new ArrayList<Property>() {{ add(Stochastic); add(ForwardPlanning); add(EvolutionaryAlgorithm); }});
+    RMHC (new ArrayList<Property>() {{ add(Stochastic); add(ForwardPlanning); add(EvolutionaryAlgorithm); }}), 
+    RL_player(new ArrayList<Property>() {{add(Stochastic);add(ForwardPlanning);add(EvolutionaryAlgorithm);}});
 
     /**
      * Converts a given string to the enum type corresponding to the player.
@@ -91,13 +92,13 @@ public enum PlayerType {
                 break;
             case MCTS:
                 if (params == null) {
-                    params = new MCTSParams();
+                    params = new MCTSParams(seed);
                 }
                 player = new MCTSPlayer((MCTSParams) params);
                 break;
             case RMHC:
                 if (params == null) {
-                    params = new RMHCParams();
+                    params = new RMHCParams(seed);
                 }
                 player = new RMHCPlayer((RMHCParams) params);
                 break;
@@ -106,12 +107,12 @@ public enum PlayerType {
         return player;
     }
 
-    public PlayerParameters createParameterSet() {
+    public PlayerParameters createParameterSet(long seed) {
         switch(this) {
             case MCTS:
-                return new MCTSParams();
+                return new MCTSParams(seed);
             case RMHC:
-                return new RMHCParams();
+                return new RMHCParams(seed);
             default:
                 return null;
         }

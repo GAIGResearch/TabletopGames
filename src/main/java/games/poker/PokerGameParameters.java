@@ -28,7 +28,8 @@ public class PokerGameParameters extends TunableParameters {
     public double[] raiseMultipliers = new double[]{1., 2., 3., 4.};
     public int bet = 5;
 
-    public PokerGameParameters() {
+    public PokerGameParameters(long seed) {
+        super(seed);
         addTunableParameter("maxRounds", 10, Arrays.asList(1, 5, 10, 15, 20));
         addTunableParameter("endMinMoney", false, Arrays.asList(false, true));
         addTunableParameter("nWinMoney", 80, Arrays.asList(50, 80, 100, 200, 500, 1000));
@@ -64,8 +65,21 @@ public class PokerGameParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        PokerGameParameters pgp = new PokerGameParameters();
+        PokerGameParameters pgp = new PokerGameParameters(System.currentTimeMillis());
+        pgp.dataPath = dataPath;
+        pgp.nCardsPerPlayer = nCardsPerPlayer;
+
+        pgp.nStartingMoney = nStartingMoney;
+        pgp.nWinMoney = nWinMoney;
+        pgp.nFlopCards = nFlopCards;
+        pgp.nTurnCards = nTurnCards;
+        pgp.nRiverCards = nRiverCards;
+        pgp.smallBlind = smallBlind;
+        pgp.bigBlind = bigBlind;
         pgp.raiseMultipliers = raiseMultipliers.clone();
+        pgp.bet = bet;
+        pgp.endMinMoney = endMinMoney;
+
         return pgp;
     }
 
@@ -73,6 +87,7 @@ public class PokerGameParameters extends TunableParameters {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PokerGameParameters)) return false;
+        if (!super.equals(o)) return false;
         PokerGameParameters that = (PokerGameParameters) o;
         return nStartingMoney == that.nStartingMoney && nWinMoney == that.nWinMoney && nFlopCards == that.nFlopCards && nTurnCards == that.nTurnCards && nRiverCards == that.nRiverCards && nCardsPerPlayer == that.nCardsPerPlayer && smallBlind == that.smallBlind && bigBlind == that.bigBlind && bet == that.bet && endMinMoney == that.endMinMoney && Objects.equals(dataPath, that.dataPath) && Arrays.equals(raiseMultipliers, that.raiseMultipliers);
     }

@@ -56,7 +56,7 @@ public class TreeRecorder {
 
                 StringBuilder output = new StringBuilder();
                 int player = node.getActor();
-                double stateValue = node.nodeValue(player);
+                double stateValue = node.getTotValue()[player] / node.getVisits();
                 output.append(String.format("%d\t%s\t%.3g\t%d", node.depth, nameMap.get(node), stateValue , node.getVisits()));
 
                 String parentName;

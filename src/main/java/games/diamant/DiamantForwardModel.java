@@ -24,6 +24,7 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
+        Random r = new Random(dgs.getGameParameters().getRandomSeed());
         dgs._reset();
 
         for (int i = 0; i < dgs.getNPlayers(); i++) {
@@ -34,14 +35,13 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
             dgs.playerInCave.add(true);
         }
 
-        dgs.mainDeck = new Deck<>("MainDeck", HIDDEN_TO_ALL);
-        dgs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
-        dgs.path = new Deck<>("Path", VISIBLE_TO_ALL);
+        dgs.mainDeck = new Deck("MainDeck", HIDDEN_TO_ALL);
+        dgs.discardDeck = new Deck("DiscardDeck", VISIBLE_TO_ALL);
+        dgs.path = new Deck("Path", VISIBLE_TO_ALL);
         dgs.actionsPlayed = new ActionsPlayed();
-        dgs.recordOfPlayerActions = new ArrayList<>();
 
         createCards(dgs);
-        dgs.mainDeck.shuffle(dgs.getRnd());
+        dgs.mainDeck.shuffle(r);
 
         // Draw first card and play it
         drawAndPlayCard(dgs);
@@ -156,10 +156,12 @@ public class DiamantForwardModel extends StandardForwardModel implements ITreeAc
         if (dgs.nCave == dp.nCaves)
             endGame(dgs);
         else {
+            Random r = new Random(dgs.getGameParameters().getRandomSeed());
+
             // Move path cards to maindeck and shuffle
             dgs.mainDeck.add(dgs.path);
             dgs.path.clear();
-            dgs.mainDeck.shuffle(dgs.getRnd());
+            dgs.mainDeck.shuffle(r);
 
             // Initialize game state
             dgs.nHazardExplosionsOnPath = 0;

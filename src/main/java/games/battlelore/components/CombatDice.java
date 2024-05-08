@@ -12,23 +12,28 @@ public class CombatDice extends Dice {
         super();
     }
 
-    public Result getResult(Random rnd) {
-        int value = rnd.nextInt(6);
+    public int getRandomNumberUsingNextInt (int min, int max) {
+        Random random = new Random();
+        return random.nextInt(max - min) + min;
+    }
+
+    public Result getResult() {
+        int value = getRandomNumberUsingNextInt(0, 3);
         switch(value) {
-            case 0:
-                return Result.Strike;
             case 1:
-                return Result.Cleave;
+                return Result.Strike;
             case 2:
-                return Result.Pierce;
+                return Result.Cleave;
             case 3:
-                return Result.Morale;
+                return Result.Pierce;
             case 4:
-                return Result.Lore;
+                return Result.Morale;
             case 5:
+                return Result.Lore;
+            case 6:
                 return Result.Heroic;
             default:
-                throw new AssertionError("Invalid value: " + value);
+                return Result.N_A;
         }
     }
 }

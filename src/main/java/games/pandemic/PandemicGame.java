@@ -81,7 +81,7 @@ public class PandemicGame extends Game {
             players.add(new RandomPlayer());
         }
 
-        PandemicParameters params = new PandemicParameters("data/pandemic/");
+        PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         runCompetition(config, players, -1, false, listeners, nRepetition, ac);
         pl.report();
     }
@@ -153,7 +153,8 @@ public class PandemicGame extends Game {
             List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
-            PandemicParameters params = new PandemicParameters("data/pandemic/");
+            PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
+
             List<AbstractPlayer> players = new ArrayList<>();
             for (int i = 0; i < nPlayers; i++) {
                 players.add(playerType.createPlayerInstance(params.getRandomSeed()));
@@ -193,6 +194,6 @@ public class PandemicGame extends Game {
 
         // Run
         runCompetition(config, nPlayers, playersToTest, nRepetitions);
-//        runWithStats(config, nPlayers, nRepetitions);
+        runWithStats(config, nPlayers, nRepetitions);
     }
 }

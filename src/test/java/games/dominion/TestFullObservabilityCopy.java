@@ -26,14 +26,12 @@ public class TestFullObservabilityCopy {
     private void moveForwardToNextPlayer(DominionGameState state) {
         int startingPlayer = state.getCurrentPlayer();
         while (state.getCurrentPlayer() == startingPlayer)
-            fm.next(state, new EndPhase((DominionGameState.DominionGamePhase) state.getGamePhase()));
+            fm.next(state, new EndPhase());
     }
 
     @Test
     public void gameStateCopyVanilla() {
-        DominionParameters params = new DominionParameters();
-        params.setRandomSeed(36);
-        Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(params, 4));
+        Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(new DominionParameters(36), 4));
         DominionGameState startState = (DominionGameState) game.getGameState();
         startState.setDefended(2);
 
@@ -66,9 +64,7 @@ public class TestFullObservabilityCopy {
 
     @Test
     public void gameStateCopyWithActionInProgress() {
-        DominionParameters params = new DominionParameters();
-        params.setRandomSeed(36);
-        Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(params, 4));
+        Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(new DominionParameters(36), 4));
         DominionGameState startState = (DominionGameState) game.getGameState();
         fm.endPlayerTurn(startState);
         fm.endPlayerTurn(startState);

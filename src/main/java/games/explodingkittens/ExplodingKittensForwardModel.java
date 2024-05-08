@@ -33,6 +33,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      * @param firstState - the state to be modified to the initial game state.
      */
     protected void _setup(AbstractGameState firstState) {
+        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
+
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
         ExplodingKittensParameters ekp = (ExplodingKittensParameters)firstState.getGameParameters();
         ekgs.playerHandCards = new ArrayList<>();
@@ -51,7 +53,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                 drawPile.add(card);
             }
         }
-        ekgs.getDrawPile().shuffle(ekgs.getRnd());
+        ekgs.getDrawPile().shuffle(rnd);
 
         // Set up player hands
         List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
@@ -85,7 +87,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
             ExplodingKittensCard explodingKitten = new ExplodingKittensCard(ExplodingKittensCard.CardType.EXPLODING_KITTEN);
             drawPile.add(explodingKitten);
         }
-        drawPile.shuffle(ekgs.getRnd());
+        drawPile.shuffle(rnd);
 
         ekgs.setActionStack(new Stack<>());
         ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];

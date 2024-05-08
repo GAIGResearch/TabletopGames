@@ -5,7 +5,10 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import utilities.Vector2D;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 public class DBForwardModel extends StandardForwardModel {
 
@@ -14,7 +17,7 @@ public class DBForwardModel extends StandardForwardModel {
         DBGameState dbgs = (DBGameState) firstState;
         DBParameters dbp = (DBParameters) firstState.getGameParameters();
 
-        dbgs.lastActionDidNotScore = false;
+        dbgs.lastActionScored = false;
         // Generate edge to cell mapping and all cell objects with appropriate constructor
         dbgs.edgeToCellMap = new HashMap<>();
         dbgs.cellToEdgesMap = new HashMap<>();
@@ -56,7 +59,7 @@ public class DBForwardModel extends StandardForwardModel {
         if (dbgs.cellToOwnerMap.size() == dbp.gridWidth * dbp.gridHeight) {
             // Game is over. Set status and find winner
             endGame(dbgs);
-        } else if (dbgs.getLastActionDidNotScore()) {
+        } else if (dbgs.getLastActionScored()) {
             // If not returned, check if the action completed one more box, otherwise move to the next player
             endPlayerTurn(currentState);
         }
@@ -64,42 +67,17 @@ public class DBForwardModel extends StandardForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-
-        Set<AbstractAction> actions = calculateActions((DBGameState) gameState, false);
-        if (actions.isEmpty()) {
-            // in case the only actions are to create a three-box, we need to override the rule
-            actions = calculateActions((DBGameState) gameState, true);
-        }
-
-        return new ArrayList<>(actions);
-    }
-
-    private Set<AbstractAction> calculateActions(DBGameState dbgs, boolean override) {
-        Set<AbstractAction> actions = new HashSet<>();  // Same edge may appear in multiple cells, ensure unique actions
-        DBParameters dbp = (DBParameters) dbgs.getGameParameters();
+        HashSet<AbstractAction> actions = new HashSet<>();  // Same edge may appear in multiple cells, ensure unique actions
+        DBGameState dbgs = (DBGameState) gameState;
 
         // Actions in this game are adding edges to the board (that don't already exist)
         for (DBEdge e : dbgs.edges) {
             if (!dbgs.edgeToOwnerMap.containsKey(e)) {
-                if (!override && dbgs.getGameTick() < dbp.disallowThreeBoxCreationUntilMove) {
-                    // we also need to check if this would create a three-box without closing one
-                    // (i.e. any cell already has 2 edges; and none have 3)
-                    boolean threeBox = false;
-                    for (DBCell c : dbgs.edgeToCellMap.get(e)) {
-                        int edges = dbgs.countCompleteEdges(c);
-                        if (edges == 3) {
-                            threeBox = false;
-                            break;  // and no need to check other cells
-                        } else if (edges == 2) {
-                            threeBox = true;
-                        }
-                    }
-                    if (threeBox) continue;
-                }
                 // Can add this edge
                 actions.add(new AddGridCellEdge(e));
             }
         }
-        return actions;
+
+        return new ArrayList<>(actions);
     }
 }

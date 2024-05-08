@@ -30,7 +30,7 @@ public class RoundCardBraking extends RoundEvent {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof RoundCardBraking;
+        return false;
     }
 
     @Override

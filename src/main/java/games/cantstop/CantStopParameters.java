@@ -31,6 +31,10 @@ public class CantStopParameters extends AbstractParameters {
     public final int COLUMNS_TO_WIN = 3;
     public final int MARKERS = 3; // number of temporary markers
 
+    public CantStopParameters(long seed) {
+        super(seed);
+    }
+
     public int maxValue(int number) {
         switch (number) {
             case 2:
@@ -62,7 +66,7 @@ public class CantStopParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return new CantStopParameters();
+        return this; // immutable currently
     }
 
     @Override

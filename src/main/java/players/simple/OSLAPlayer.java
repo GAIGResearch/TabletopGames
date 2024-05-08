@@ -19,8 +19,8 @@ public class OSLAPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
 
     public OSLAPlayer(Random random) {
-        super(null, "OSLA");
         this.rnd = random;
+        setName("OSLA");
     }
 
     public OSLAPlayer() {
@@ -59,7 +59,7 @@ public class OSLAPlayer extends AbstractPlayer {
                 valState[actionIndex] = gsCopy.getHeuristicScore(playerID);
             }
 
-            double Q = noise(valState[actionIndex], getParameters().noiseEpsilon, rnd.nextDouble());
+            double Q = noise(valState[actionIndex], getParameters().exploreEpsilon, rnd.nextDouble());
             //     System.out.println(Arrays.stream(valState).mapToObj(v -> String.format("%1.3f", v)).collect(Collectors.joining("\t")));
 
             if (Q > maxQ) {
@@ -73,9 +73,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
     @Override
     public OSLAPlayer copy() {
-        OSLAPlayer retValue = new OSLAPlayer(heuristic, new Random(rnd.nextInt()));
-        retValue.setForwardModel(getForwardModel().copy());
-        return retValue;
+        return new OSLAPlayer(heuristic, new Random(rnd.nextInt()));
     }
 
     private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy, int startingPlayer) {

@@ -119,7 +119,8 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
-        TMGameState copy = new TMGameState(gameParameters.copy(), getNPlayers());
+        Random rnd = new Random(getGameParameters().getRandomSeed());
+        TMGameState copy = new TMGameState(gameParameters, getNPlayers());
 
         // General public info
         copy.generation = generation;
@@ -268,7 +269,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
         if (projectCards.getSize() == 0) {
             projectCards.add(discardCards);
             discardCards.clear();
-            projectCards.shuffle(rnd);
+            projectCards.shuffle(new Random(getGameParameters().getRandomSeed()));
         }
         return projectCards.draw();
     }

@@ -27,8 +27,8 @@ public class TestBaseActionCardsWithCopy {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(), players.size()));
-    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
+    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(System.currentTimeMillis()), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
@@ -271,7 +271,7 @@ public class TestBaseActionCardsWithCopy {
     private void moveForwardToNextPlayer(DominionGameState state) {
         int startingPlayer = state.getCurrentPlayer();
         while (state.getCurrentPlayer() == startingPlayer)
-            fm.next(state, new EndPhase((DominionGameState.DominionGamePhase) state.getGamePhase()));
+            fm.next(state, new EndPhase());
     }
 
     @Test
@@ -388,7 +388,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
+        fm.next(state, new EndPhase());
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
@@ -411,7 +411,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
+        fm.next(state, new EndPhase());
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
@@ -435,7 +435,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
+        fm.next(state, new EndPhase());
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());
@@ -461,7 +461,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EndPhase(DominionGameState.DominionGamePhase.Play));
+        fm.next(state, new EndPhase());
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
         assertEquals(midHash, midCopy.hashCode());

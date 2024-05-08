@@ -30,7 +30,7 @@ public class TestCoreGameLoop {
             new TestPlayer(),
             new TestPlayer());
 
-    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(), players.size()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(System.currentTimeMillis()), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
@@ -80,7 +80,7 @@ public class TestCoreGameLoop {
                 case 1:
                 case 0:
                     assertTrue(availableCards.contains(CardType.COPPER));
-                    assertTrue(fm.computeAvailableActions(state).contains(new EndPhase(DominionGamePhase.Buy)));
+                    assertTrue(fm.computeAvailableActions(state).contains(new EndPhase()));
             }
         }
     }
@@ -93,7 +93,7 @@ public class TestCoreGameLoop {
         state.addCard(CardType.COPPER, 1, DeckType.TABLE);
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(0, state.getCurrentPlayer());
-        fm.next(state, new EndPhase(DominionGamePhase.Buy));
+        fm.next(state, new EndPhase());
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(0, state.getDeck(DeckType.DRAW, 0).getSize());
@@ -122,7 +122,7 @@ public class TestCoreGameLoop {
     private void moveForwardToNextPlayer(DominionGameState state) {
         int startingPlayer = state.getCurrentPlayer();
         while (state.getCurrentPlayer() == startingPlayer)
-            fm.next(state, new EndPhase((DominionGamePhase) state.getGamePhase()));
+            fm.next(state, new EndPhase());
     }
 
     @Test
@@ -171,7 +171,7 @@ public class TestCoreGameLoop {
             assertEquals(4 - i, state.buysLeft());
             assertEquals(i, state.cardsOfType(CardType.COPPER, 0, DeckType.DISCARD));
             List<AbstractAction> actions = fm.computeAvailableActions(state);
-            assertTrue(actions.contains(new EndPhase(DominionGamePhase.Buy)));
+            assertTrue(actions.contains(new EndPhase()));
             assertTrue(actions.contains(newBuy));
             fm.computeAvailableActions(state);
             fm.next(state, newBuy);
@@ -210,16 +210,16 @@ public class TestCoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
-        assertTrue(actions.contains(new EndPhase(DominionGamePhase.Play)));
+        assertTrue(actions.contains(new EndPhase()));
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
-        assertTrue(actions.contains(new EndPhase(DominionGamePhase.Play)));
+        assertTrue(actions.contains(new EndPhase()));
         assertTrue(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         actions = fm.computeAvailableActions(state);
         assertEquals(3, actions.size());
-        assertTrue(actions.contains(new EndPhase(DominionGamePhase.Play)));
+        assertTrue(actions.contains(new EndPhase()));
         assertTrue(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));
         assertTrue(actions.contains(new SimpleAction(CardType.SMITHY, 0)));
     }
@@ -230,7 +230,7 @@ public class TestCoreGameLoop {
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.setGamePhase(DominionGamePhase.Buy);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertTrue(actions.contains(new EndPhase(DominionGamePhase.Buy)));
+        assertTrue(actions.contains(new EndPhase()));
         assertFalse(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));
     }
 
@@ -243,7 +243,7 @@ public class TestCoreGameLoop {
         assertEquals(0, state.actionsLeft());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
-        assertTrue(actions.contains(new EndPhase(DominionGamePhase.Play)));
+        assertTrue(actions.contains(new EndPhase()));
     }
 
     @Test

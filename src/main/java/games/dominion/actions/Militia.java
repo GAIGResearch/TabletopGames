@@ -33,7 +33,8 @@ public class Militia extends DominionAttackAction {
         // we can discard any card in hand, so create a DiscardCard action for each
         if (isAttackComplete(currentTarget, state))
             throw new AssertionError("Should not be here - there are no actions to be taken");
-        return state.getDeck(DeckType.HAND, currentTarget).stream()
+        Set<DominionCard> uniqueCardsInHand = state.getDeck(DeckType.HAND, currentTarget).stream().collect(toSet());
+        return uniqueCardsInHand.stream()
                 .map(card -> new DiscardCard(card.cardType(), currentTarget))
                 .distinct()
                 .collect(toList());
@@ -69,10 +70,5 @@ public class Militia extends DominionAttackAction {
     public boolean isAttackComplete(int currentTarget, DominionGameState state) {
         // Does the victim now have 3 or fewer cards in hand?
         return state.getDeck(DeckType.HAND, currentTarget).getSize() <= OTHERS_DISCARD_DOWN_TO;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return other instanceof Militia && super.equals(other);
     }
 }

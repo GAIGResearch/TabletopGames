@@ -17,7 +17,10 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PokerGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -289,16 +292,16 @@ public class PokerGUIManager extends AbstractGUIManager {
                     }
                 }
 
-                Pair<Map<Integer, Integer>, Map<Integer, Set<Integer>>> translated = pfm.translatePokerHands(pgs);
-                Map<Integer, Integer> ranks = translated.a;
-                Map<Integer, Set<Integer>> hands = translated.b;
+                Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translated = pfm.translatePokerHands(pgs);
+                HashMap<Integer, Integer> ranks = translated.a;
+                HashMap<Integer, HashSet<Integer>> hands = translated.b;
 
                 int p = 0;
                 String winnerString = "";
                 for (MoneyPot pot: pgs.getMoneyPots()) {
                     // Calculate winners separately for each money pot
                     p++;
-                    Set<Integer> winners = pfm.getWinner(pgs, pot, ranks, hands);
+                    HashSet<Integer> winners = pfm.getWinner(pgs, pot, ranks, hands);
                     if (winners != null) {
                         winnerString += "pot" + p + " {";
                         for (int win: winners) {

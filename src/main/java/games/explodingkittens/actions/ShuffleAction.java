@@ -19,7 +19,7 @@ public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(gs.getRnd());
+        ((ExplodingKittensGameState)gs).getDrawPile().shuffle(new Random(gs.getGameParameters().getRandomSeed()));
         return super.execute(gs);
     }
 

@@ -6,14 +6,17 @@ import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
+import utilities.Utils;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class EndCardPickPocket extends RoundEvent {
 
     @Override
     public boolean execute(AbstractGameState gs) {
         ColtExpressGameState gameState = (ColtExpressGameState) gs;
+        Random random = new Random(gs.getGameParameters().getRandomSeed());
 
         LinkedList<Compartment> train = gameState.getTrainCompartments();
         for (Compartment currentCompartment : train) {
@@ -25,7 +28,7 @@ public class EndCardPickPocket extends RoundEvent {
                 }
                 if (purses.size() > 0) {
                     for (Integer playerID : currentCompartment.playersInsideCompartment)
-                        gameState.addLoot(playerID, purses.get(gameState.getRnd().nextInt(purses.size())));
+                        gameState.addLoot(playerID, purses.get(random.nextInt(purses.size())));
                 }
             }
 
@@ -37,7 +40,7 @@ public class EndCardPickPocket extends RoundEvent {
                 }
                 if (purses.size() > 0) {
                     for (Integer playerID : currentCompartment.playersOnTopOfCompartment)
-                        gameState.addLoot(playerID, purses.get(gameState.getRnd().nextInt(purses.size())));
+                        gameState.addLoot(playerID, purses.get(random.nextInt(purses.size())));
                 }
             }
         }

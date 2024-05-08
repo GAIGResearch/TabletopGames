@@ -11,12 +11,11 @@ import java.util.Objects;
 public class DBParameters extends TunableParameters {
     int gridWidth = 7;
     int gridHeight = 5;
-    int disallowThreeBoxCreationUntilMove = 0;
 
-    public DBParameters() {
+    public DBParameters(long seed) {
+        super(seed);
         addTunableParameter("gridWidth", 7, Arrays.asList(5, 7, 11, 15, 19));
         addTunableParameter("gridHeight", 5, Arrays.asList(5, 7, 11, 15, 19));
-        addTunableParameter("disallowThreeBoxCreationUntilMove", 0);
         _reset();
     }
 
@@ -24,22 +23,29 @@ public class DBParameters extends TunableParameters {
     public void _reset() {
         gridWidth = (int) getParameterValue("gridWidth");
         gridHeight = (int) getParameterValue("gridHeight");
-        disallowThreeBoxCreationUntilMove = (int) getParameterValue("disallowThreeBoxCreationUntilMove");
     }
 
     @Override
     protected AbstractParameters _copy() {
-        return new DBParameters();
+        DBParameters copy = new DBParameters(System.currentTimeMillis());
+        copy.gridWidth = gridWidth;
+        copy.gridHeight = gridHeight;
+        return copy;
     }
 
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DBParameters)) return false;
+        if (!super.equals(o)) return false;
         DBParameters that = (DBParameters) o;
         return gridWidth == that.gridWidth &&
-                gridHeight == that.gridHeight &&
-                disallowThreeBoxCreationUntilMove == that.disallowThreeBoxCreationUntilMove;
+                gridHeight == that.gridHeight;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), gridWidth, gridHeight);
     }
 
     @Override

@@ -25,6 +25,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     final public double temperature;
     final public double epsilon;
+    final Random rnd;
 
     protected IActionHeuristic actionHeuristic;
 
@@ -36,7 +37,6 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
      * @param seed Random seed
      */
     public BoltzmannActionPlayer(IActionHeuristic actionHeuristic, double temperature, double epsilon, long seed) {
-        super(null, "BoltzmannActionPlayer");
         this.actionHeuristic = actionHeuristic;
         this.temperature = Math.max(temperature, 0.001);
         this.epsilon = epsilon;
@@ -53,43 +53,16 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        double[] actionPDF = createPDF(gameState, possibleActions);
-        if (epsilon > 0.0 && rnd.nextDouble() < epsilon)
-            return possibleActions.get(rnd.nextInt(possibleActions.size()));
-        return possibleActions.get(Utils.sampleFrom(actionPDF, rnd.nextDouble()));
-    }
-
-    private double[] createPDF(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         double[] actionValues = actionHeuristic.evaluateAllActions(possibleActions, gameState);
-        double[] boltzmann = Utils.exponentiatePotentials(actionValues, temperature);
-        return Utils.pdf(boltzmann);
-    }
-
-    // for testing
-    public double valueOf(AbstractAction action, AbstractGameState gameState) {
-        return actionHeuristic.evaluateAction(action, gameState);
-    }
-
-    // for testing
-    public double probabilityOf(AbstractAction action, AbstractGameState gameState, List<AbstractAction> allActions) {
-        double[] actionValues = actionHeuristic.evaluateAllActions(allActions, gameState);
-        double sum = 0;
-        for (double value : actionValues) {
-            sum += Math.exp(value / temperature);
+        Map<AbstractAction, Double> actionToValueMap = new HashMap<>();
+        for (int i = 0; i < possibleActions.size(); i++) {
+            actionToValueMap.put(possibleActions.get(i), actionValues[i]);
         }
-        return Math.exp(actionHeuristic.evaluateAction(action, gameState) / temperature) / sum;
+        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd);
     }
 
     @Override
     public AbstractPlayer copy() {
         return this; // stateless (except for rnd)
-    }
-
-    public IActionHeuristic getActionHeuristic() {
-        return actionHeuristic;
-    }
-
-    public void setActionHeuristic(IActionHeuristic actionHeuristic) {
-        this.actionHeuristic = actionHeuristic;
     }
 }
