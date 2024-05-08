@@ -234,12 +234,13 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponentsMap();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
                     if (gs.getCoreGameParameters().partialObservable && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                        Random r = new Random(gs.getGameParameters().getRandomSeed());
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled
-                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).nForecastCards, hiddenDeck.getSize(), redeterminisationRnd);
+                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).nForecastCards, hiddenDeck.getSize(), r);
                         } else {
-                            hiddenDeck.shuffle(redeterminisationRnd);  // We know what cards are in there, a simple shuffle is enough
+                            hiddenDeck.shuffle(r);  // We know what cards are in there, a simple shuffle is enough
                         }
                         a.putComponent(e.getKey(), hiddenDeck);
                     } else {

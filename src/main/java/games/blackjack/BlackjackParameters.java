@@ -22,7 +22,8 @@ public class BlackjackParameters extends TunableParameters {
     public int dealerStand = 17;
     public int nDealerCardsHidden = 1;
 
-    public BlackjackParameters() {
+    public BlackjackParameters(long seed) {
+        super(seed);
         addTunableParameter("nCardsPerPlayer", 2, Arrays.asList(1,2,3,4,5));
         addTunableParameter("jackCard", 10, Arrays.asList(5, 10, 15, 20));
         addTunableParameter("queenCard", 10, Arrays.asList(5, 10, 15, 20));
@@ -32,7 +33,7 @@ public class BlackjackParameters extends TunableParameters {
         addTunableParameter("pointThreshold", 10, Arrays.asList(7, 10, 15));
         addTunableParameter("winScore", 21, Arrays.asList(15, 21, 30, 50));
         addTunableParameter("dealerStand", 17, Arrays.asList(5, 7, 10, 13, 15, 17, 20));
-        addTunableParameter("nDealerCardsHidden", 1, Arrays.asList(0,1,2,3,4,5));
+        addTunableParameter("nDealerCardsHidden", 1, Arrays.asList(0, 1, 2, 3, 4, 5));
         _reset();
     }
 
@@ -50,30 +51,53 @@ public class BlackjackParameters extends TunableParameters {
         nDealerCardsHidden = (int) getParameterValue("nDealerCardsHidden");
     }
 
-    public String getDataPath(){
+    public String getDataPath() {
         return dataPath;
     }
 
     @Override
     protected AbstractParameters _copy() {
-        return new BlackjackParameters();
+        BlackjackParameters bjgp = new BlackjackParameters(System.currentTimeMillis());
+        bjgp.dataPath = dataPath;
+        bjgp.nCardsPerPlayer = nCardsPerPlayer;
+        bjgp.jackCard = jackCard;
+        bjgp.queenCard = queenCard;
+        bjgp.kingCard = kingCard;
+        bjgp.aceCardBelowThreshold = aceCardBelowThreshold;
+        bjgp.aceCardAboveThreshold = aceCardAboveThreshold;
+        bjgp.pointThreshold = pointThreshold;
+        bjgp.winScore = winScore;
+        bjgp.dealerStand = dealerStand;
+        bjgp.nDealerCardsHidden = nDealerCardsHidden;
+        return bjgp;
     }
 
     @Override
     public boolean _equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BlackjackParameters)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof BlackjackParameters))
+            return false;
+        if (!super.equals(o))
+            return false;
         BlackjackParameters that = (BlackjackParameters) o;
-        return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold && winScore == that.winScore && dealerStand == that.dealerStand && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath);
+        return nCardsPerPlayer == that.nCardsPerPlayer && jackCard == that.jackCard && queenCard == that.queenCard
+                && kingCard == that.kingCard && aceCardBelowThreshold == that.aceCardBelowThreshold
+                && aceCardAboveThreshold == that.aceCardAboveThreshold && pointThreshold == that.pointThreshold
+                && winScore == that.winScore && dealerStand == that.dealerStand
+                && nDealerCardsHidden == that.nDealerCardsHidden && Objects.equals(dataPath, that.dataPath);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, jackCard, queenCard, kingCard, aceCardBelowThreshold, aceCardAboveThreshold, pointThreshold, winScore, dealerStand, nDealerCardsHidden);
+        return Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, jackCard, queenCard, kingCard,
+                aceCardBelowThreshold, aceCardAboveThreshold, pointThreshold, winScore, dealerStand,
+                nDealerCardsHidden);
     }
 
     @Override
     public Game instantiate() {
-        return new Game(GameType.Blackjack, new BlackjackForwardModel(), new BlackjackGameState(this, GameType.Blackjack.getMinPlayers()));
+        return new Game(GameType.Blackjack, new BlackjackForwardModel(),
+                new BlackjackGameState(this, GameType.Blackjack.getMinPlayers()));
     }
 }

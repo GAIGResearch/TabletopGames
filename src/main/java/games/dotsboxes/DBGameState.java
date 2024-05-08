@@ -1,9 +1,13 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.interfaces.IStateHeuristic;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 
 import java.util.*;
@@ -25,7 +29,7 @@ public class DBGameState extends AbstractGameState {
     int[] nCellsPerPlayer;
     HashMap<DBCell, Integer> cellToOwnerMap;  // Mapping from each cell to its owner, if complete
     HashMap<DBEdge, Integer> edgeToOwnerMap;  // Mapping from each edge to its owner, if placed
-    boolean lastActionDidNotScore;
+    boolean lastActionScored;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -54,7 +58,7 @@ public class DBGameState extends AbstractGameState {
         dbgs.cells = cells;
         dbgs.edgeToCellMap = edgeToCellMap;
         dbgs.cellToEdgesMap = cellToEdgesMap;
-        dbgs.lastActionDidNotScore = lastActionDidNotScore;
+        dbgs.lastActionScored = lastActionScored;
 
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
         dbgs.cellToOwnerMap = (HashMap<DBCell, Integer>) cellToOwnerMap.clone();
@@ -90,19 +94,12 @@ public class DBGameState extends AbstractGameState {
         if (!(o instanceof DBGameState)) return false;
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
-        return lastActionDidNotScore == that.lastActionDidNotScore && Objects.equals(heuristic, that.heuristic)
-                && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) &&
-                Objects.equals(edgeToCellMap, that.edgeToCellMap) &&
-                Objects.equals(cellToEdgesMap, that.cellToEdgesMap) &&
-                Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
-                Objects.equals(cellToOwnerMap, that.cellToOwnerMap) &&
-                Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
+        return lastActionScored == that.lastActionScored && Objects.equals(heuristic, that.heuristic) && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) && Objects.equals(edgeToCellMap, that.edgeToCellMap) && Objects.equals(cellToEdgesMap, that.cellToEdgesMap) && Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) && Objects.equals(cellToOwnerMap, that.cellToOwnerMap) && Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), edges, cells, edgeToCellMap, cellToEdgesMap,
-                cellToOwnerMap, edgeToOwnerMap, lastActionDidNotScore);
+        int result = Objects.hash(super.hashCode(), heuristic, edges, cells, edgeToCellMap, cellToEdgesMap, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
@@ -159,7 +156,6 @@ public class DBGameState extends AbstractGameState {
         }
         return retValue;
     }
-    public boolean getLastActionDidNotScore(){return lastActionDidNotScore;}
-    public void setLastActionDidNotScore(boolean value){
-        lastActionDidNotScore = value;}
+    public boolean getLastActionScored(){return lastActionScored;}
+    public void setLastActionScored(boolean value){lastActionScored = value;}
 }

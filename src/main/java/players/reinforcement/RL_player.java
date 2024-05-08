@@ -72,10 +72,10 @@ public class RL_player extends AbstractPlayer {
         epsilon = Math.max(final_epsilon, epsilon - epsilon_decay);
         // System.out.println("epsilon is" + epsilon);
         if (random.nextDouble() < epsilon) {
-         
+
             return possibleActions.get(random.nextInt(possibleActions.size()));
         } else {
-            
+
             return getBestAction((BlackjackGameState) gameState, possibleActions);
         }
     }
@@ -129,7 +129,7 @@ public class RL_player extends AbstractPlayer {
 
     public double calculateReward(BlackjackGameState gameState, int playerId) {
         CoreConstants.GameResult playerResult = gameState.getPlayerResults()[playerId];
-        int playerPoints = gameState.calculatePoints(playerId); 
+        int playerPoints = gameState.calculatePoints(playerId);
         double reward = 0.0;
 
         switch (playerResult) {
@@ -155,14 +155,12 @@ public class RL_player extends AbstractPlayer {
         return reward;
     }
 
-
     @Override
     public AbstractPlayer copy() {
         RL_player clone = new RL_player(alpha, gamma, epsilon, random.nextLong());
         clone.qTable.putAll(this.qTable);
         return clone;
     }
-
 
     public static void main(String[] args) {
         double win = 0.0;
@@ -174,40 +172,40 @@ public class RL_player extends AbstractPlayer {
         BlackjackForwardModel model = new BlackjackForwardModel();
         RewardChart chart = new RewardChart("RL Training Reward Progress", totalIterations);
 
-
-
         for (int i = 0; i < totalIterations; i++) {
-            long seed = System.currentTimeMillis(); 
+            long seed = System.currentTimeMillis();
             BlackjackParameters params = new BlackjackParameters(seed);
 
-            
-
             BlackjackGameState gameState = new BlackjackGameState(params, 2); // two player, one rl one dealer
-            model.setup(gameState); 
+            model.setup(gameState);
             while (!gameState.isGameOver()) {
                 List<AbstractAction> possibleActions = model.computeAvailableActions(gameState);
                 AbstractAction chosenAction = rlPlayer.getAction(gameState, possibleActions);
                 model.performAction(gameState, chosenAction);
                 if (gameState.isGameOver()) {
                     double reward = rlPlayer.calculateReward(gameState, rlPlayer.getPlayerID());
-                    if(reward == -1.0){lose ++;}
-                    else if(reward == 1.0){win ++;}
-                    else{draw ++;}
+                    if (reward == -1.0) {
+                        lose++;
+                    } else if (reward == 1.0) {
+                        win++;
+                    } else {
+                        draw++;
+                    }
                     String nextState = rlPlayer.encodeState(gameState);
                     rlPlayer.updateQTable(rlPlayer.encodeState(gameState), chosenAction, reward, nextState,
                             gameState.isGameOver());
                     chart.updateChart(i, reward);
-                    table.updateQTable(rlPlayer.qTable, i+1);
+                    table.updateQTable(rlPlayer.qTable, i + 1);
                     break;
                 }
             }
         }
         System.out.println("Training completed.");
-       // double win_rate = (win/totalIterations)*100;
-       // double lose_rate = (lose/totalIterations)*100;
+        // double win_rate = (win/totalIterations)*100;
+        // double lose_rate = (lose/totalIterations)*100;
         System.out.println(draw);
-       // System.out.println(win_rate + "%");
-       // System.out.println(lose_rate + "%");
+        // System.out.println(win_rate + "%");
+        // System.out.println(lose_rate + "%");
         chart.displayChart();
     }
 

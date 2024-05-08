@@ -24,25 +24,22 @@ public class DominionForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DominionGameState state = (DominionGameState) firstState;
-        DominionParameters params = (DominionParameters) state.getGameParameters();
+        state._reset();
+        DominionParameters params = state.params;
 
-        Random initialShuffleRnd = params.initialShuffleSeed != -1 ? new Random(params.initialShuffleSeed) : state.getRnd();
-        for (int i = 0; i < state.getNPlayers(); i++) {
+        for (int i = 0; i < state.playerCount; i++) {
             for (int j = 0; j < params.STARTING_COPPER; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.COPPER));
             for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
-            state.playerDrawPiles[i].shuffle(initialShuffleRnd);
+            state.playerDrawPiles[i].shuffle(state.rnd);
             for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
         }
         state.actionsLeftForCurrentPlayer = 1;
         state.buysLeftForCurrentPlayer = 1;
         state.spentSoFar = 0;
-        state.additionalSpendAvailable = 0;
-        state.delayedActions = new ArrayList<>();
-        state.defenceStatus = new boolean[state.getNPlayers()];  // defaults to false
 
-        int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.getNPlayers()];
+        int victoryCards = params.VICTORY_CARDS_PER_PLAYER[state.playerCount];
         state.cardsIncludedInGame = new HashMap<>(16);
         state.cardsIncludedInGame.put(CardType.PROVINCE, victoryCards);
         state.cardsIncludedInGame.put(CardType.DUCHY, victoryCards);
@@ -53,7 +50,7 @@ public class DominionForwardModel extends StandardForwardModel {
         for (CardType ct : params.cardsUsed) {
             int cardsToUse = ct.isVictory ? victoryCards : params.KINGDOM_CARDS_OF_EACH_TYPE;
             if (ct == CardType.CURSE)
-                cardsToUse = (state.getNPlayers() - 1) * params.CURSE_CARDS_PER_PLAYER;
+                cardsToUse = (state.playerCount - 1) * params.CURSE_CARDS_PER_PLAYER;
             state.cardsIncludedInGame.put(ct, cardsToUse);
         }
         state.setGamePhase(DominionGameState.DominionGamePhase.Play);
@@ -74,27 +71,26 @@ public class DominionForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
 
-        if (state.isActionInProgress()) return;
-
         int playerID = state.getCurrentPlayer();
-        if (state.gameOver()) {
-            endGame(state);
-        } else {
 
-            switch (state.getGamePhase().toString()) {
-                case "Play":
-                    if (state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
-                        // change phase
-                        // no change to current player
-                        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
-                        processDelayedActions(TriggerType.StartBuy, state);
-                        // it would be possible to do this within setGamePhase, but we choose to keep this triggering code
-                        // in the forward model for the moment.
-                    }
-                    break;
-                case "Buy":
-                    if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
-                        // change phase
+        switch (state.getGamePhase().toString()) {
+            case "Play":
+                if ((state.actionsLeftForCurrentPlayer < 1 || action instanceof EndPhase) && !state.isActionInProgress()) {
+                    // change phase
+                    // no change to current player
+                    state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+                    processDelayedActions(TriggerType.StartBuy, state);
+                    // it would be possible to do this within setGamePhase, but we choose to keep this triggering code
+                    // in the forward model for the moment.
+                }
+                break;
+            case "Buy":
+                if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
+                    // change phase
+                    if (state.gameOver()) {
+                        endGame(state);
+                    } else {
+
                         // 1) put hand and cards played into discard
                         // 2) draw 5 new cards
                         // 3) shuffle and move discard if we run out
@@ -106,11 +102,10 @@ public class DominionForwardModel extends StandardForwardModel {
                         discard.add(table);
                         table.clear();
                         hand.clear();
-                        DominionParameters params = (DominionParameters) state.getGameParameters();
-                        for (int i = 0; i < params.HAND_SIZE; i++)
+                        for (int i = 0; i < state.params.HAND_SIZE; i++)
                             state.drawCard(playerID);
 
-                        state.defenceStatus = new boolean[state.getNPlayers()];  // resets to false
+                        state.defenceStatus = new boolean[state.playerCount];  // resets to false
 
                         state.actionsLeftForCurrentPlayer = 1;
                         state.spentSoFar = 0;
@@ -123,12 +118,14 @@ public class DominionForwardModel extends StandardForwardModel {
                         if (state.getCurrentPlayer() == currentState.getFirstPlayer())
                             endRound(state, state.getFirstPlayer());
                     }
-                    break;
-                default:
-                    throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
-            }
+                }
+                break;
+            default:
+                throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
+
     }
+
 
 
     private void processDelayedActions(TriggerType trigger, DominionGameState state) {
@@ -153,17 +150,14 @@ public class DominionForwardModel extends StandardForwardModel {
         switch (state.getGamePhase().toString()) {
             case "Play":
                 if (state.actionsLeft() > 0) {
-                    List<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
-                            .filter(DominionCard::isActionCard).collect(toList());
-                    List<AbstractAction> availableActions = actionCards.stream()
-                            //                     .sorted(Comparator.comparingInt(c -> c.cardType().cost))
-                            .map(dc -> dc.getAction(playerID))
-                            .distinct()
-                            .collect(toList());
-                    availableActions.add(new EndPhase(DominionGameState.DominionGamePhase.Play));
+                    Set<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
+                            .filter(DominionCard::isActionCard).collect(toSet());
+                    List<AbstractAction> availableActions = actionCards.stream().map(dc -> dc.getAction(playerID))
+                            .distinct().collect(toList());
+                    availableActions.add(new EndPhase());
                     return availableActions;
                 }
-                return Collections.singletonList(new EndPhase(DominionGameState.DominionGamePhase.Play));
+                return Collections.singletonList(new EndPhase());
             case "Buy":
                 // we return every available card for purchase within our price range
                 int budget = state.availableSpend(playerID);
@@ -172,7 +166,7 @@ public class DominionForwardModel extends StandardForwardModel {
                         .sorted(Comparator.comparingInt(c -> -c.cost))
                         .map(ct -> new BuyCard(ct, playerID))
                         .collect(toList());
-                options.add(new EndPhase(DominionGameState.DominionGamePhase.Buy));
+                options.add(new EndPhase());
                 return options;
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());

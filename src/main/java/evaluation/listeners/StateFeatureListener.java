@@ -3,7 +3,6 @@ package evaluation.listeners;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
-import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
 
 import java.util.regex.Pattern;
@@ -18,10 +17,9 @@ public class StateFeatureListener extends FeatureListener {
 
     IStateFeatureVector phiFn;
 
-    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly, String fileName) {
+    public StateFeatureListener(IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(frequency, currentPlayerOnly);
         this.phiFn = phi;
-        logger = new FileStatsLogger(fileName);
     }
 
     @Override

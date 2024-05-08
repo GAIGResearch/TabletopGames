@@ -6,6 +6,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 
 import java.util.Objects;
+import java.util.Random;
 
 import static core.CoreConstants.DefaultGamePhase.Main;
 
@@ -24,12 +25,13 @@ public class StealResource extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
+        Random random = new Random(gs.getGameParameters().getRandomSeed());
         int nResTarget = cgs.getNResourcesInHand(targetPlayerID);
         if (nResTarget == 0){
             cgs.setGamePhase(Main);
             return false;
         }
-        int cardIndex = cgs.getRnd().nextInt(nResTarget);
+        int cardIndex = random.nextInt(nResTarget);
         CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayerID, cardIndex);
         cgs.getPlayerResources(playerID).get(resource).increment();
         cgs.getPlayerResources(targetPlayerID).get(resource).decrement();

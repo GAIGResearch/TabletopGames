@@ -50,12 +50,7 @@ public class FrenchCard extends Card {
         this.number = type.number;
     }
 
-    private FrenchCard(FrenchCardType type, Suite suite, int number, int componentID){
-        super(type.toString(), componentID);
-        this.suite = suite;
-        this.type = type;
-        this.number = number;
-    }
+
 
     public static Deck<FrenchCard> generateDeck(String name, CoreConstants.VisibilityMode visibilityMode) {
         Deck<FrenchCard> deck = new Deck<>(name, visibilityMode);

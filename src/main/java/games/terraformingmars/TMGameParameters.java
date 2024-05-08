@@ -70,9 +70,13 @@ public class TMGameParameters extends AbstractParameters {
     int nPointsAwardFirst = 5;
     int nPointsAwardSecond = 2;
 
+    public TMGameParameters(long seed) {
+        super(seed);
+    }
+
     @Override
     protected AbstractParameters _copy() {
-        return new TMGameParameters();
+        return new TMGameParameters(System.currentTimeMillis());
     }
 
     @Override

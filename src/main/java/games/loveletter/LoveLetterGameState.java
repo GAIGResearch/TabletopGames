@@ -28,7 +28,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Cards in the reserve
     Deck<LoveLetterCard> reserveCards;
     LoveLetterCard removedCard;
-    Random redeterminisationRnd = new Random(System.currentTimeMillis());
 
     // If true: player cannot be effected by any card effects
     boolean[] effectProtection;
@@ -93,7 +92,8 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                     }
                 }
             }
-            llgs.drawPile.shuffle(redeterminisationRnd);
+            Random r = new Random(llgs.getGameParameters().getRandomSeed());
+            llgs.drawPile.shuffle(r);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // New random cards
@@ -103,7 +103,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                             llgs.playerHandCards.get(i).setComponent(j, llgs.drawPile.draw());
                         }
                     }
-                    deck.shuffle(redeterminisationRnd);
+                    deck.shuffle(r);
                 }
             }
         }

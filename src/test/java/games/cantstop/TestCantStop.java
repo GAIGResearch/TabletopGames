@@ -29,9 +29,7 @@ public class TestCantStop {
         players = Arrays.asList(new RandomPlayer(),
                 new RandomPlayer(),
                 new RandomPlayer());
-        CantStopParameters params = new CantStopParameters();
-        params.setRandomSeed(-274);
-        cantStop = GameType.CantStop.createGameInstance(3, 34, params);
+        cantStop = GameType.CantStop.createGameInstance(3, 34, new CantStopParameters(-274));
         cantStop.reset(players);
     }
 

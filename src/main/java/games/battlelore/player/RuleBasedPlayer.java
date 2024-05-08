@@ -23,7 +23,6 @@ public class RuleBasedPlayer extends AbstractPlayer
     private final Random rnd;
 
     public RuleBasedPlayer() {
-        super(null, "RuleBasedPlayer");
         this.rnd = new Random();
     }
 

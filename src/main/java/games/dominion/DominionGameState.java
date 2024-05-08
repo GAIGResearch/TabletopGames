@@ -25,6 +25,10 @@ import static java.util.stream.Collectors.toList;
 
 public class DominionGameState extends AbstractGameState implements IPrintable {
 
+    Random rnd;
+    int playerCount;
+    DominionParameters params;
+    // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
@@ -49,7 +53,11 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        this.reset();
+        rnd = new Random(gameParameters.getRandomSeed());
+        playerCount = nPlayers;
+        defenceStatus = new boolean[nPlayers];  // defaults to false
+        params = (DominionParameters) gameParameters;
+        this._reset();
     }
 
     @Override
@@ -73,7 +81,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
 
     public boolean gameOver() {
-        DominionParameters params = (DominionParameters) gameParameters;
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
                 cardsIncludedInGame.values().stream().filter(i -> i == 0).count() >= params.PILES_EXHAUSTED_FOR_GAME_END;
     }
@@ -251,11 +258,11 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected AbstractGameState _copy(int playerId) {
-        DominionGameState retValue = new DominionGameState(((DominionParameters)gameParameters).shallowCopy(), nPlayers);
+        DominionGameState retValue = new DominionGameState(gameParameters.copy(), playerCount);
         for (CardType ct : cardsIncludedInGame.keySet()) {
             retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));
         }
-        for (int p = 0; p < nPlayers; p++) {
+        for (int p = 0; p < playerCount; p++) {
             if (playerId == -1) {
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -263,7 +270,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // need to shuffle drawpile separately
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
-                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, p, false);
+                retValue.playerDrawPiles[p].shuffleVisible(rnd, p, false);
             } else {
                 // need to combine and shuffle hands and drawpiles
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -278,7 +285,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // we have now moved all the non-visible Hand cards into the Draw pile to reshuffle
                 retValue.playerHands[p].clear(); // we will need to reconstruct this, including visibility status in a sec
                 // we then reshuffle all the non-visible cards
-                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, playerId, false);
+                retValue.playerDrawPiles[p].shuffleVisible(rnd, playerId, false);
                 // we then remove cards from the top of the shuffled draw pile (in the region we know is not visible)
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
                     if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {
@@ -369,23 +376,21 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     /**
      * Resets variables initialised for this game state.
      */
-    @Override
-    protected void reset() {
-        playerHands = new PartialObservableDeck[nPlayers];
-        playerDrawPiles = new PartialObservableDeck[nPlayers];
-        playerDiscards = new Deck[nPlayers];
-        playerTableaux = new Deck[nPlayers];
+    protected void _reset() {
+        playerHands = new PartialObservableDeck[playerCount];
+        playerDrawPiles = new PartialObservableDeck[playerCount];
+        playerDiscards = new Deck[playerCount];
+        playerTableaux = new Deck[playerCount];
 
         trashPile = new Deck<>("Trash", VISIBLE_TO_ALL);
-        for (int i = 0; i < nPlayers; i++) {
-            boolean[] handVisibility = new boolean[nPlayers];
+        for (int i = 0; i < playerCount; i++) {
+            boolean[] handVisibility = new boolean[playerCount];
             handVisibility[i] = true;
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
-            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[nPlayers]);
+            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[playerCount]);
             playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VISIBLE_TO_ALL);
             playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VISIBLE_TO_ALL);
         }
-        super.reset();
     }
 
     /**
@@ -397,7 +402,8 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DominionGameState other)) return false;
+        if (!(o instanceof DominionGameState)) return false;
+        DominionGameState other = (DominionGameState) o;
         return cardsIncludedInGame.equals(other.cardsIncludedInGame) &&
                 Arrays.equals(playerHands, other.playerHands) &&
                 Arrays.equals(playerResults, other.playerResults) &&

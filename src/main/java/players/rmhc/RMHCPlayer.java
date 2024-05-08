@@ -2,15 +2,24 @@ package players.rmhc;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
+import net.jpountz.util.Utils;
 import players.PlayerConstants;
+import players.human.ActionController;
+import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
 
 import java.util.*;
 
 
 public class RMHCPlayer extends AbstractPlayer {
+
+    RMHCParams params;
     private Individual bestIndividual;
+    private final Random randomGenerator;
+
     // Budgets
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
@@ -18,16 +27,29 @@ public class RMHCPlayer extends AbstractPlayer {
     private int copyCalls = 0;
 
     public RMHCPlayer() {
-        this(new RMHCParams());
+        this(System.currentTimeMillis());
     }
 
     public RMHCPlayer(RMHCParams params) {
-        super(params, "RMHC");
+        randomGenerator = new Random(params.getRandomSeed());
+        this.params = params;
+        setName("RMHC");
     }
 
-    @Override
-    public RMHCParams getParameters() {
-        return (RMHCParams) parameters;
+    public RMHCPlayer(long seed) {
+        this(new RMHCParams(seed));
+    }
+
+    public RMHCPlayer(IStateHeuristic heuristic) {
+        this(System.currentTimeMillis());
+    }
+
+    public RMHCPlayer(RMHCParams params, IStateHeuristic heuristic) {
+        this(params);
+    }
+
+    public RMHCPlayer(long seed, IStateHeuristic heuristic) {
+        this(new RMHCParams(seed));
     }
 
     @Override
@@ -38,10 +60,9 @@ public class RMHCPlayer extends AbstractPlayer {
         numIters = 0;
         fmCalls = 0;
         copyCalls = 0;
-        RMHCParams params = getParameters();
 
         // Initialise individual
-        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), rnd, params.getHeuristic());
+        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, params.getHeuristic());
         fmCalls += bestIndividual.length;
 
         // Run evolution
@@ -70,11 +91,9 @@ public class RMHCPlayer extends AbstractPlayer {
 
     @Override
     public RMHCPlayer copy() {
-        RMHCParams newParams = (RMHCParams) parameters.copy();
-        newParams.setRandomSeed(rnd.nextInt());
-        RMHCPlayer retValue = new RMHCPlayer(newParams);
-        retValue.setForwardModel(getForwardModel().copy());
-        return retValue;
+        RMHCParams newParams = (RMHCParams) params.copy();
+        newParams.setRandomSeed(randomGenerator.nextInt());
+        return new RMHCPlayer(newParams);
     }
 
     /**
@@ -102,27 +121,27 @@ public class RMHCPlayer extends AbstractPlayer {
         avgTimeTaken = acumTimeTaken / numIters;
     }
 
-//    public static void main(String[] args){
-//        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-//        ActionController ac = new ActionController(); //null;
-//
-//        /* 2. Game seed */
-//        long seed = System.currentTimeMillis(); //0;
-//
-//        /* 3. Set up players for the game */
-//        ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new RandomPlayer(new Random()));
-//        players.add(new RMHC());
-//
-//        /* 4. Run! */
-//        int wonGames = 0;
-//        for (int i = 0; i < 1000; i++) {
-//            Game game = runOne(TicTacToe, players, seed, ac, false);
-//            if (game.getGameState().getPlayerResults()[1] == Utils.GameResult.WIN) {
-//                wonGames += 1;
-//            }
-//        }
-//        System.out.println(wonGames);
-//    }
+    public static void main(String[] args){
+        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        ActionController ac = new ActionController(); //null;
+
+        /* 2. Game seed */
+        long seed = System.currentTimeMillis(); //0;
+
+        /* 3. Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+        players.add(new RandomPlayer(new Random()));
+        players.add(new RMHCPlayer());
+
+        /* 4. Run! */
+        int wonGames = 0;
+        for (int i = 0; i < 1000; i++) {
+            Game game = runOne(TicTacToe, players, seed, ac, false);
+            if (game.getGameState().getPlayerResults()[1] == Utils.GameResult.WIN) {
+                wonGames += 1;
+            }
+        }
+        System.out.println(wonGames);
+    }
 
 }

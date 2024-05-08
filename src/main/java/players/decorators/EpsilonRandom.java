@@ -2,11 +2,10 @@ package players.decorators;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.IPlayerDecorator;
 
 import java.util.*;
 
-public class EpsilonRandom implements IPlayerDecorator {
+public class EpsilonRandom implements AbstractPlayerDecorator {
 
     private double epsilon;
     private final Random rnd;
@@ -45,4 +44,8 @@ public class EpsilonRandom implements IPlayerDecorator {
         }
     }
 
+    @Override
+    public void recordDecision(AbstractGameState state, AbstractAction action) {
+        // Do nothing
+    }
 }

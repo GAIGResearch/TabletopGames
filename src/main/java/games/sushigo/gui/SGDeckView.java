@@ -26,9 +26,7 @@ public class SGDeckView extends DeckView<SGCard> {
         Image cardFace = getCardImage(card);
         int fontSize = g.getFont().getSize();
         CardView.drawCard(g, new Rectangle(rect.x, rect.y, rect.width, rect.height-fontSize), card, cardFace, backOfCard, front);
-        if (front) {
-            g.drawString(card.type.name(), rect.x + 2, (int) (rect.y + rect.height - fontSize * 1.5));
-        }
+        g.drawString(card.type.name(), rect.x + 2, (int)(rect.y + rect.height - fontSize*1.5));
     }
 
     private Image getCardImage(SGCard card)

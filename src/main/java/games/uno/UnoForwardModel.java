@@ -102,6 +102,8 @@ public class UnoForwardModel extends StandardForwardModel {
      * @param ugs - current game state.
      */
     private void setupRound(UnoGameState ugs) {
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getRoundCounter());
+
         // Refresh player decks
         for (int i = 0; i < ugs.getNPlayers(); i++) {
             ugs.drawDeck.add(ugs.playerDecks.get(i));
@@ -111,7 +113,7 @@ public class UnoForwardModel extends StandardForwardModel {
         // Refresh draw deck and shuffle
         ugs.drawDeck.add(ugs.discardDeck);
         ugs.discardDeck.clear();
-        ugs.drawDeck.shuffle(ugs.getRnd());
+        ugs.drawDeck.shuffle(r);
 
         // Draw new cards for players
         drawCardsToPlayers(ugs);
@@ -127,7 +129,7 @@ public class UnoForwardModel extends StandardForwardModel {
                 System.out.println("First card wild");
             }
             ugs.drawDeck.add(ugs.currentCard);
-            ugs.drawDeck.shuffle(ugs.getRnd());
+            ugs.drawDeck.shuffle(r);
             ugs.currentCard = ugs.drawDeck.draw();
             ugs.currentColor = ugs.currentCard.color;
         }

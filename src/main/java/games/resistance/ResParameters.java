@@ -6,6 +6,10 @@ import games.resistance.components.ResGameBoard;
 public class ResParameters extends AbstractParameters {
     public String dataPath = "data/resistance/";
 
+    public ResParameters(long seed) {
+        super(seed);
+    }
+
     public int[][] playersPerMission = {
             {2, 3, 2, 3, 3},
             {2, 3, 4, 3, 4},
@@ -39,11 +43,7 @@ public class ResParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        ResParameters retValue = new ResParameters();
-        retValue.dataPath = dataPath;
-        retValue.playersPerMission = playersPerMission.clone();
-        retValue.spiesByPlayerCount = spiesByPlayerCount.clone();
-        return retValue;
+        return new ResParameters(System.currentTimeMillis());
     }
 
     @Override

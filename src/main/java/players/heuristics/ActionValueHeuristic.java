@@ -32,7 +32,6 @@ public class ActionValueHeuristic extends AbstractPlayer implements ToDoubleBiFu
             Function<AbstractGameState, String> bucketFn,
             double defaultValue
     ) {
-        super(null, "ActionValueHeuristic");
         actionValues = advantages;
         RND_WEIGHT = rndWeight;
         if (bucketFn == null)
@@ -42,7 +41,6 @@ public class ActionValueHeuristic extends AbstractPlayer implements ToDoubleBiFu
     }
 
     public ActionValueHeuristic(String filename) {
-        super(null, "ActionValueHeuristic");
         this.filename = filename;
         initialiseFromFile();
     }

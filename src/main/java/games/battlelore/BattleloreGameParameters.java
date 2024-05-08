@@ -12,14 +12,15 @@ public class BattleloreGameParameters extends AbstractParameters {
     private int meleeRange = 1;
     private int rangedRange = 5;
 
-    public BattleloreGameParameters(String dataPath) {
+    public BattleloreGameParameters(String dataPath, long seed) {
+        super(seed);
         this.dataPath = dataPath;
         setMaxRounds(100);
     }
 
     @Override
     protected AbstractParameters _copy() {
-        BattleloreGameParameters copy = new BattleloreGameParameters(dataPath);
+        BattleloreGameParameters copy = new BattleloreGameParameters(dataPath, System.currentTimeMillis());
         copy.hexWidth = hexWidth;
         copy.hexHeight = hexHeight;
         return copy;

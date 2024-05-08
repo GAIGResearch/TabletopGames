@@ -12,6 +12,7 @@ import games.coltexpress.components.Loot;
 
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 
 
@@ -79,7 +80,8 @@ public class PunchAction  extends DrawCard {
             }
 
             if (potentialLoot.size() > 0){
-                Loot chosenLoot = potentialLoot.get(gameState.getRnd().nextInt(potentialLoot.size()));
+                Random r = new Random(gameState.getGameParameters().getRandomSeed());
+                Loot chosenLoot = potentialLoot.get(r.nextInt(potentialLoot.size()));
                 if (playerIsCheyenne && loot == ColtExpressTypes.LootType.Purse)
                     ((ColtExpressGameState) gameState).addLoot(card.playerID, chosenLoot);
                 else

@@ -170,43 +170,58 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
-    public static int sampleFrom(double[] probabilities, double random) {
+    /**
+     * we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
+     * exploreEpsilon is the percentage chance of taking a random action
+     *
+     * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
+     * @param rnd
+     * @param <T>
+     * @return
+     */
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, Random rnd) {
+        Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
+        // we then add on the exploration bonus
+        if (exploreEpsilon > 0.0) {
+            double exploreBonus = exploreEpsilon / normalisedMap.size();
+            normalisedMap = normalisedMap.entrySet().stream().collect(
+                    toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - exploreEpsilon) + exploreBonus));
+        }
+        double cdfSample = rnd.nextDouble();
         double cdf = 0.0;
-        for (int i = 0; i < probabilities.length; i++) {
-            cdf += probabilities[i];
-            if (cdf >= random)
-                return i;
+        for (T item : normalisedMap.keySet()) {
+            cdf += normalisedMap.get(item);
+            if (cdf >= cdfSample)
+                return item;
         }
         throw new AssertionError("Should never get here!");
     }
 
-    public static double[] pdf(double[] potentials) {
-        // convert potentials into legal pdf
-        double[] pdf = new double[potentials.length];
-        double sum = Arrays.stream(potentials).sum();
-        if (sum <= 0.0)  // default to uniform distribution
-            return Arrays.stream(potentials).map(d -> 1.0 / potentials.length).toArray();
-        for (int i = 0; i < potentials.length; i++) {
-            if (potentials[i] < 0.0) {
-                throw new IllegalArgumentException("Negative potential in pdf");
-            }
-            pdf[i] = potentials[i] / sum;
-        }
-        return pdf;
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, Random rnd) {
+        double temp = Math.max(temperature, 0.001);
+        // first we find the largest value, and subtract that from all values
+        double maxValue = itemsAndValues.values().stream().mapToDouble(d -> d).max().orElse(0.0);
+        Map<T, Double> tempModified = itemsAndValues.entrySet().stream().collect(
+                toMap(Map.Entry::getKey, e -> Math.exp((e.getValue() - maxValue) / temp)));
+        return sampleFrom(tempModified, exploreEpsilon, rnd);
     }
 
-    public static double[] exponentiatePotentials(double[] potentials, double temperature) {
-        double[] positivePotentials = new double[potentials.length];
-        double largestPotential = Double.NEGATIVE_INFINITY;
-        for (int i = 0; i < potentials.length; i++) {
-            if (potentials[i] > largestPotential) {
-                largestPotential = potentials[i];
-            }
+    public static double entropyOf(double... data) {
+        double sum = Arrays.stream(data).sum();
+        double[] normalised = Arrays.stream(data).map(d -> d / sum).toArray();
+        return Arrays.stream(normalised).map(d -> -d * Math.log(d)).sum();
+    }
+
+    public static <T> Map<T, Double> normaliseMap(Map<T, ? extends Number> input) {
+        int lessThanZero = (int) input.values().stream().filter(n -> n.doubleValue() < 0.0).count();
+        if (lessThanZero > 0)
+            throw new AssertionError("Probability has negative values!");
+        double sum = input.values().stream().mapToDouble(Number::doubleValue).sum();
+        if (sum == 0.0) {
+            // the sum is zero, with no negative values. Hence all values are zero, and we return a uniform distribution.
+            return input.keySet().stream().collect(toMap(key -> key, key -> 1.0 / input.size()));
         }
-        for (int i = 0; i < potentials.length; i++) {
-            positivePotentials[i] = Math.exp((potentials[i] - largestPotential) / temperature);
-        }
-        return positivePotentials;
+        return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
     public static double clamp(double value, double min, double max) {
@@ -341,7 +356,6 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
-
     public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
@@ -523,6 +537,7 @@ public abstract class Utils {
     public static List<String> enumNames(Enum<?> e) {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
+
 
 
 }

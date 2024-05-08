@@ -14,9 +14,11 @@ import static games.pandemic.PandemicConstants.infectionHash;
 
 @SuppressWarnings("unchecked")
 public class EpidemicIntensify extends RuleNode {
+    Random rnd;
 
-    public EpidemicIntensify() {
+    public EpidemicIntensify(Random rnd) {
         super();
+        this.rnd = rnd;
     }
 
     /**
@@ -25,6 +27,7 @@ public class EpidemicIntensify extends RuleNode {
      */
     public EpidemicIntensify(EpidemicIntensify epidemicIntensify) {
         super(epidemicIntensify);
+        this.rnd = epidemicIntensify.rnd;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class EpidemicIntensify extends RuleNode {
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
         // 3. shuffle infection discard deck, add back on top of infection deck
-        infectionDiscard.shuffle(gs.getRnd());
+        infectionDiscard.shuffle(rnd);
         infectionDeck.add(infectionDiscard);
         infectionDiscard.clear();
         return true;

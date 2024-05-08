@@ -9,6 +9,7 @@ import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 
 import java.util.Objects;
+import java.util.Random;
 
 /**
  * Move 1 component (deckFrom -> deckTo), and draw another to replace them (deckDraw -> deckFrom).
@@ -43,7 +44,7 @@ public class ReplaceOneCard extends DrawCard {
             VirusCard card = vgs.getDiscardDeck().draw();
             vgs.getDrawDeck().add(card);
         }
-        vgs.getDrawDeck().shuffle(vgs.getRnd());
+        vgs.getDrawDeck().shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
     }
 
 

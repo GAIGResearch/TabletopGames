@@ -88,7 +88,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
                             Object child = registerChild(key, subJSON);
-                            itp.setParameterValue((String) baseKey, child);
+                            itp.setParameterValue(key, child);
                             if (child instanceof ITunableParameters)
                                 retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
                         } catch (Exception e) {
@@ -113,7 +113,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         if (debug)
                             System.out.println("Setting default: " + namespaceSplit[namespaceSplit.length - 1] + " = " + data);
                     }
-                } else if (!baseKey.equals("class") && !baseKey.equals("args")) {
+                } else if (!baseKey.equals("class")) {
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
                 }
             }

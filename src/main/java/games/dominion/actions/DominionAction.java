@@ -68,7 +68,8 @@ public abstract class DominionAction extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DominionAction other) {
+        if (obj instanceof DominionAction) {
+            DominionAction other = (DominionAction) obj;
             return type == other.type && player == other.player && dummyAction == other.dummyAction;
         }
         return false;

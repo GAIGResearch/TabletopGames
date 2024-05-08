@@ -34,7 +34,8 @@ public class ExplodingKittensParameters extends TunableParameters {
     public int nSeeFutureCards = 3;
     public boolean nopeOwnCards = true;
 
-    public ExplodingKittensParameters() {
+    public ExplodingKittensParameters(long seed) {
+        super(seed);
         addTunableParameter("nCardsPerPlayer", 7, Arrays.asList(3,5,7,10,15));
         addTunableParameter("nDefuseCards", 6, Arrays.asList(1,2,3,6,9));
         addTunableParameter("nSeeFutureCards", 3, Arrays.asList(1,3,5,7));
@@ -61,7 +62,12 @@ public class ExplodingKittensParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return new ExplodingKittensParameters();
+        ExplodingKittensParameters ekp = new ExplodingKittensParameters(System.currentTimeMillis());
+        ekp.cardCounts = new HashMap<>(cardCounts);
+        ekp.nCardsPerPlayer = nCardsPerPlayer;
+        ekp.nDefuseCards = nDefuseCards;
+        ekp.nSeeFutureCards = nSeeFutureCards;
+        return ekp;
     }
 
     @Override
