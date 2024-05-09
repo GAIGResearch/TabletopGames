@@ -26,7 +26,7 @@ public class ToadGameState extends AbstractGameState {
     List<Deck<ToadCard>> playerDecks;
     List<PartialObservableDeck<ToadCard>> playerHands;
     int[][] battlesWon;
-    int[][] roundWinners;
+    protected int[][] roundWinners;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
@@ -66,6 +66,13 @@ public class ToadGameState extends AbstractGameState {
         copy.battlesWon = new int[2][2];
         for (int i = 0; i < 2; i++) {
             copy.battlesWon[i] = Arrays.copyOf(battlesWon[i], 2);
+        }
+        // battlesWon tracks the win/loss rates over all 8 Battles
+        copy.roundWinners = new int[8][2];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 2; j++) {
+                copy.roundWinners[i][j] = roundWinners[i][j];
+            }
         }
 
         copy.hiddenFlankCards = new ToadCard[hiddenFlankCards.length];
@@ -128,6 +135,9 @@ public class ToadGameState extends AbstractGameState {
     }
     public int getBattlesWon(int playerId, int round) {
         return battlesWon[round][playerId];
+    }
+    public int getScoreInBattle(int battle, int playerId) {
+        return roundWinners[battle][playerId];
     }
 
     public Deck<ToadCard> getDiscards(int playerId) {

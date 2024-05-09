@@ -21,6 +21,7 @@ public class ToadForwardModel extends StandardForwardModel {
         ToadParameters params = (ToadParameters) state.getGameParameters();
 
         state.battlesWon = new int[2][2];
+        state.roundWinners = new int[8][2];
         state.fieldCards = new ToadCard[state.getNPlayers()];
         state.hiddenFlankCards = new ToadCard[state.getNPlayers()];
         state.tieBreakers = new ToadCard[state.getNPlayers()];
@@ -93,6 +94,11 @@ public class ToadForwardModel extends StandardForwardModel {
             // and increment scores
             state.battlesWon[round][0] += scoreDiff[0];
             state.battlesWon[round][1] += scoreDiff[1];
+
+            // First 4 ticks are the first set of battles, and so on
+            state.roundWinners[state.getGameTick() / 4][0] = scoreDiff[0];
+            state.roundWinners[state.getGameTick() / 4][1] = scoreDiff[1];
+
             // move cards to discard
             state.playerDiscards.get(0).add(state.fieldCards[0]);
             state.playerDiscards.get(0).add(state.hiddenFlankCards[0]);

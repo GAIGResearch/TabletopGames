@@ -54,6 +54,11 @@ public class ToadMetrics implements IMetricsCollection {
                 }
                 records.put("P" + i + "_TieBreaker", state.getTieBreaker(i).toString());
             }
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 2; j++) {
+                    records.put("BattleScore_" + (i + 1) + "_P" + j, state.getScoreInBattle(i, j));
+                }
+            }
             return true;
         }
 
@@ -70,6 +75,11 @@ public class ToadMetrics implements IMetricsCollection {
                     columns.put("P" + i + "_R" + r + "_Battles", Integer.class);
                 }
                 columns.put("P" + i + "_TieBreaker", String.class);
+            }
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 2; j++) {
+                    columns.put("BattleScore_" + (i + 1) + "_P" + j, Integer.class);
+                }
             }
             return columns;
         }
