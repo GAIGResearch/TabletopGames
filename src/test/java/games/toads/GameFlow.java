@@ -176,39 +176,40 @@ public class GameFlow {
     @Test
     public void bombAgainstFourAttack() {
         playCards(
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Bomb", 0, new Bomb()),  // Flank
                 new ToadCard("Five", 5), // field
-                new ToadCard("Four", 4) // flank
-        );
-        assertEquals(0, state.battlesWon[0][0]);
-        assertEquals(1, state.battlesWon[0][1]);
-    }
-
-    @Test
-    public void bombAgainstFourDefense() {
-        playCards(
-                new ToadCard("Five", 5),  // Field
                 new ToadCard("Four", 4), // flank
-                new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb())  // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Bomb", 0, new Bomb())
+                // Flank
         );
-
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
-    public void bombAgainstSixDefense() {
+    public void bombAgainstFourDefense() {
         playCards(
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Six", 6), // flank
                 new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb())  // Flank
+                new ToadCard("Bomb", 0, new Bomb()),  // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Four", 4) // flank
         );
 
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
+    }
+
+    @Test
+    public void bombAgainstSixDefense() {
+        playCards(
+                new ToadCard("Five", 5), // field
+                new ToadCard("Bomb", 0, new Bomb()), // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Six", 6) // flank
+        );
+
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
