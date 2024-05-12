@@ -145,8 +145,8 @@ public class BackupTests {
         setupPlayer();
         params.maxBackupThreshold = 30; // we set this now to avoid interfering with the tree construction
         // This will just affect the root and first level nodes
-        // But, since the best action is already taken from the root, it will not affect the final result
-        // It will affect the level 1 node
+        // the best action is already taken at the root, but at level 1 we take a suboptimal action
+        // This will not affect the update at level 1; but will affect the update at the root
         lastNode.backUp(new double[]{0.5});
 
         assertEquals(101, root.getVisits());
@@ -155,24 +155,29 @@ public class BackupTests {
         assertEquals(6, nodeTrajectory001.get(3).getVisits());
         assertEquals(0, lastNode.getVisits());
 
-        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
-        assertEquals(50.5, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+        // no change at level 3
+        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
 
-        double update = 30.0/81.0 * 0.5 + 51.0 / 81.0 * 1.0;
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
-
+        // no change at level 2
         assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
         assertEquals(0.5, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
 
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        // no change at level 1
+        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + 0.5, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+
+        // change at root
+        double update = 30.0/51.0 * 0.5 + 21.0 / 51.0 * 1.0;
+        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(50.0 + update, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
     }
 
     @Test
     public void maxBackup002() {
         setupPlayer();
         params.maxBackupThreshold = 2; // we set this now to avoid interfering with the tree construction
+        // This will now affect all the updates
         lastNode.backUp(new double[]{0.5});
 
         assertEquals(101, root.getVisits());
@@ -181,34 +186,42 @@ public class BackupTests {
         assertEquals(6, nodeTrajectory001.get(3).getVisits());
         assertEquals(0, lastNode.getVisits());
 
-        // no effect on root given max was picked
-        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
-        assertEquals(50.5, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+        // 6 visits, Left is best action at 0.8
+        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
 
-        double update = 2.0/53.0 * 0.5 + 51.0 / 53.0 * 1.0;
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
-
-        update = 2.0/28.0 * 0.5 + 26.0 / 28.0 * 1.0;
+        // 26 Visits, Left and Middle are both 1.0 (Right has been taken 5 times with mean 0 reward)
+        double update = 2.0/6.0 * 0.5 + 4.0 / 6.0 * 0.8;
         assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
         assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
 
-        update = 2.0/8.0 * 0.5 + 6.0 / 8.0 * 0.8;
-        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + update, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        // 51 Visits, Right is best at 1.0 (Left has been taken 25 times with mean 0.9 reward)
+        update = 2.0/26.0 * update + 24.0 / 26.0 * 1.0;
+        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+
+        // Middle is best action
+        update = 2.0/51.0 * update + 49.0 / 51.0 * 1.0;
+        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(50 + update, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+
     }
 
-    @Test
-    public void maxBackupRecursive() {
-        setupPlayer();
-        params.maxBackupThreshold = 5; // we set this now to avoid interfering with the tree construction
-        params.recursiveBackup = true;
-        lastNode.backUp(new double[]{0.5});
 
-        double leafUpdate = 5.0/11.0 * 0.5 + 6.0 / 11.0 * 0.8;
-        double level3Update = 5.0/31.0 * leafUpdate + 26.0 / 31.0 * 1.0;
-        double level2Update = 5.0/56.0 * level3Update + 51.0 / 56.0 * 1.0;
-        double level1Update = level2Update;
+    @Test
+    public void maxBackup003() {
+        setupPlayer();
+        // the one change we make to 002 is to take the best action at the first level (Right instead of Left)
+        // however we still visit the same nodes (which is not realistic, but we are testing the backup)
+        actionTrajectory001 = List.of(new Pair<>(0, new LMRAction("Middle")),
+                new Pair<>(0, new LMRAction("Right")),
+                new Pair<>(0, new LMRAction("Right")),
+                new Pair<>(0, new LMRAction("Middle")));
+        root.actionsInTree = actionTrajectory001;
+
+        params.maxBackupThreshold = 2; // we set this now to avoid interfering with the tree construction
+        // This will now affect all the updates
+        lastNode.backUp(new double[]{0.5});
 
         assertEquals(101, root.getVisits());
         assertEquals(51, nodeTrajectory001.get(1).getVisits());
@@ -216,16 +229,27 @@ public class BackupTests {
         assertEquals(6, nodeTrajectory001.get(3).getVisits());
         assertEquals(0, lastNode.getVisits());
 
+        // 6 visits, Left is best action at 0.8
         assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
-        assertEquals(0.7 + 0.7 + leafUpdate, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
+        assertEquals(0.7 + 0.7 + 0.5, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[0], 0.0001);
 
+        // 26 Visits, Left and Middle are both 1.0 (Right has been taken 5 times with mean 0 reward)
+        double update = 2.0/6.0 * 0.5 + 4.0 / 6.0 * 0.8;
         assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
-        assertEquals(level3Update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
+        assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[0], 0.0001);
 
-        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
-        assertEquals(25 * 0.9 + level2Update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+        // 51 Visits, Right is best at 1.0 (Left has been taken 25 times with mean 0.9 reward)
+        update = 2.0/26.0 * update + 24.0 / 26.0 * 1.0;
+        assertEquals(25, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
+        assertEquals(25 * 0.9, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[0], 0.00001);
+        assertEquals(11, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Right")).nVisits);
+        assertEquals(10.0 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Right")).totValue[0], 0.00001);
 
+        // Middle is best action
+     //   update = 2.0/51.0 * update + 49.0 / 51.0 * 1.0;
+        // Because we took the 'best' action at the next node down, we have not mixed in any max, even though the score was quite low
         assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
-        assertEquals(50.0 + level1Update, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+        assertEquals(50 + update, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+
     }
 }

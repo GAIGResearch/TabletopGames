@@ -70,7 +70,6 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveBias = 0.0;
     public boolean reuseTree = false;
     public int maxBackupThreshold = 1000000;
-    public boolean recursiveBackup = false;
 
 
     public MCTSParams() {
@@ -119,7 +118,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("actionHeuristicRecalculation", 20);
         addTunableParameter("reuseTree", false);
         addTunableParameter("maxBackupThreshold", 1000000);
-        addTunableParameter("recursiveBackup", false);
     }
 
     @Override
@@ -178,7 +176,6 @@ public class MCTSParams extends PlayerParameters {
         actionHeuristicRecalculationThreshold = (int) getParameterValue("actionHeuristicRecalculation");
         reuseTree = (boolean) getParameterValue("reuseTree");
         maxBackupThreshold = (int) getParameterValue("maxBackupThreshold");
-        recursiveBackup = (boolean) getParameterValue("recursiveBackup");
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
