@@ -745,7 +745,9 @@ public class SingleTreeNode {
         // default to standard UCB
         int effectiveTotalVisits = validVisitsFor(action);
         // use first play urgency as replacement for exploration term if action not previously taken
-        double explorationTerm = params.firstPlayUrgency;
+        // we add in the second term based on the AlphaGo selection rule, so that the exploration term is monotonically increasing with N
+        // this will come into play for small values of FPU and acts as soft-pruning rather than the harder form if FPU is a fixed constant
+        double explorationTerm = Math.max(params.firstPlayUrgency, params.K * Math.sqrt(effectiveTotalVisits));
         if (actionVisits > 0) {
             explorationTerm = switch (params.treePolicy) {
                 case UCB_Tuned -> {
@@ -1074,7 +1076,7 @@ public class SingleTreeNode {
             policy = SIMPLE;
         }
         if (params.selectionPolicy == TREE || params.treePolicy == EXP3) {
-            // EXP3, Hedge use the tree policy (without exploration)
+            // EXP3 uses the tree policy (without exploration)
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
             // RM uses a special policy as the average of all previous root policies

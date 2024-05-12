@@ -340,41 +340,6 @@ public class MCTSTreeSelectionTests {
 
 
     @Test
-    public void hedge_10Visits() {
-        params.treePolicy = Hedge;
-        params.exploreEpsilon = 0.1;
-        params.normaliseRewards = false;
-        params.hedgeBoltzmann = 0.8;
-        setupPlayer();
-        first10Visits(node);
-
-        // Regrets are:
-        // -1.31 / 0.19 / 0.09
-
-        double[] actionValues = node.actionValues(baseActions);
-        assertEquals(Math.exp(-1.31 * 10 / 0.8), actionValues[0], 0.01);  // 0.00
-        assertEquals(Math.exp(0.19 * 10 / 0.80), actionValues[1], 0.01); // 10.75
-        assertEquals(Math.exp(0.09 * 10 / 0.80), actionValues[2], 0.01); // 3.08
-        // The final choice of action is then stochastic
-        int[] counts = new int[3];
-        for (int i = 0; i < 1000; i++) {
-            AbstractAction action = node.treePolicyAction(true);
-            if (action.equals(new LMRAction("Left"))) {
-                counts[0]++;
-            } else if (action.equals(new LMRAction("Middle"))) {
-                counts[1]++;
-            } else {
-                counts[2]++;
-            }
-        }
-        // expected probability distribution is 0%, 78%, 22%  [not including the 10% exploration]
-        assertEquals(1000, counts[0] + counts[1] + counts[2]);
-        assertEquals(0.00 * 900 + 33, counts[0], 15);
-        assertEquals(0.78 * 900 + 33, counts[1], 50);
-        assertEquals(0.22 * 900 + 33, counts[2], 50);
-    }
-
-    @Test
     public void bias10Visits() {
         params.treePolicy = UCB;
         params.normaliseRewards = true;
