@@ -2,11 +2,16 @@ package games.toads;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
+import games.toads.actions.FlankCardPlayed;
+import games.toads.actions.PlayFlankCard;
+import scala.concurrent.impl.FutureConvertersImpl;
 import utilities.DeterminisationUtilities;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -21,6 +26,7 @@ public class ToadGameState extends AbstractGameState {
     List<Deck<ToadCard>> playerDecks;
     List<PartialObservableDeck<ToadCard>> playerHands;
     int[][] battlesWon;
+    int[][] roundWinners;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
@@ -92,6 +98,7 @@ public class ToadGameState extends AbstractGameState {
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
             // tieBreakers are always known to both players
+
         }
         return copy;
     }
@@ -118,6 +125,9 @@ public class ToadGameState extends AbstractGameState {
 
     public ToadCard getTieBreaker(int playerId) {
         return tieBreakers[playerId];
+    }
+    public int getBattlesWon(int playerId, int round) {
+        return battlesWon[round][playerId];
     }
 
     public Deck<ToadCard> getDiscards(int playerId) {

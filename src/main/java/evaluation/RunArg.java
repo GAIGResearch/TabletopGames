@@ -15,7 +15,11 @@ import static utilities.Utils.getArg;
 public enum RunArg {
 
 
-    NTBEAmode("Defaults to NTBEA. The other options are MultiNTBEA and CoopNTBEA. This last uses the same agent for all players.",
+    NTBEAMode("Defaults to NTBEA. The other options are StableNTBEA, MultiNTBEA and CoopNTBEA.\n" +
+            "The default runs a single game for each iteration. CoopNTBEA uses the same agent for all players.\n" +
+            "StableNTBEA runs P (number of players) for a given random seed, with the tuned agent in each position.\n" +
+            "This is useful for games with strong positional or random seed effects to reduce variance.\n" +
+            "MultiNTBEA is deprecated and should not be used.",
             "NTBEA",
             new Usage[]{Usage.ParameterSearch}),
     addTimeStamp("(Optional) If true (default is false), then the results will be written to a subdirectory of destDir.\n" +

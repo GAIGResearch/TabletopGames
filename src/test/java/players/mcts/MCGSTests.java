@@ -191,7 +191,7 @@ public class MCGSTests {
                 if (game.getTick() < 10) // at this point we are at no risk of the game ending during search
                     assertEquals(root.getVisits(), root.getTranspositionMap().size(), 1);
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
-                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !((String)s).startsWith("0-")).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
                 problemNodes = root.nonMatchingNodes(allNodesForPlayerZero);
@@ -214,7 +214,7 @@ public class MCGSTests {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
                 if (root == null) continue;
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
-                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !((String)s).startsWith("0-")).count());
                 //                        root.getTranspositionMap().get(s).openLoopState.isNotTerminalForPlayer(0)).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
@@ -256,7 +256,7 @@ public class MCGSTests {
         // We now have a total space of 7 + 6 + 5 + 5 + 4 + 3 + 2 + 1 = 33 states
         game.oneAction();
         MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-        assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+        assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !((String)s).startsWith("0-")).count());
         assertEquals(33, root.getTranspositionMap().size());
     }
 }

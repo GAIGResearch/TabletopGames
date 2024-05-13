@@ -19,6 +19,11 @@ public class BattleResult {
         this.attacker = attacker;
     }
 
+    /**
+     *
+     * @param state Game State
+     * @return int[] with the number of battles won by each player (in player order)
+     */
     int[] calculate(ToadGameState state) {
 
         ToadParameters params = (ToadParameters) state.getGameParameters();
@@ -102,7 +107,11 @@ public class BattleResult {
         } else if (AFlank < DFlank) {
             result[1]++;
         }
-        return result;
+        int[] retValue = new int[2];
+        // now put in correct player order (result is attacker/defender)
+        retValue[attacker] = result[0];
+        retValue[1 - attacker] = result[1];
+        return retValue;
     }
 
 }

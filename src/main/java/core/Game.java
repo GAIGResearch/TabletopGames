@@ -530,15 +530,15 @@ public class Game {
         // Get actions for the player
         s = System.nanoTime();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
-        if (observedActions.size() == 0) {
+        if (observedActions.isEmpty()) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
             IExtendedSequence topOfStack = null;
             AbstractAction lastAction = null;
-            if (actionsInProgress.size() > 0) {
+            if (!actionsInProgress.isEmpty()) {
                 topOfStack = actionsInProgress.peek();
             }
             if (gameState.getHistory().size() > 1) {
-                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
+                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
             }
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
@@ -562,7 +562,7 @@ public class Game {
 
         // Either ask player which action to use or, in case no actions are available, report the updated observation
         AbstractAction action = null;
-        if (observedActions.size() > 0) {
+        if (!observedActions.isEmpty()) {
             if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer || currentPlayer instanceof HumanConsolePlayer) || observedActions.get(0) instanceof DoNothing)) {
                 // Can only do 1 action, so do it.
                 action = observedActions.get(0);
@@ -573,6 +573,10 @@ public class Game {
                 if (debug)
                     System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
+                if (!observedActions.contains(action)) {
+                    throw new AssertionError("Action played that was not in the list of available actions: " + action);
+                }
+
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
@@ -607,7 +611,8 @@ public class Game {
         } else {
             // Resolve action and game rules, time it
             s = System.nanoTime();
-            forwardModel.next(gameState, action);
+            // we copy the action before using it..so that the action returned by oneAction() does not have a state link
+            forwardModel.next(gameState, action.copy());
             nextTime = (System.nanoTime() - s);
         }
 

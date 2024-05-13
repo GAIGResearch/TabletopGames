@@ -26,7 +26,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     // Heuristics used for the agent
     protected boolean debug = false;
     protected SingleTreeNode root;
+    protected AbstractAction lastAction;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
+    Map<Object, Integer> oldGraphKeys = new HashMap<>();
 
     public MCTSPlayer() {
         this(new MCTSParams());
@@ -59,6 +61,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (getParameters().actionHeuristic instanceof AbstractPlayer)
             ((AbstractPlayer) getParameters().actionHeuristic).initializePlayer(state);
         MASTStats = null;
+        root = null;
+        oldGraphKeys = new HashMap<>();
         getParameters().getRolloutStrategy().initializePlayer(state);
         getParameters().getOpponentModel().initializePlayer(state);
     }
@@ -82,17 +86,155 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public void registerUpdatedObservation(AbstractGameState gameState) {
         super.registerUpdatedObservation(gameState);
-        // We did not take a decision, so blank out the previous set of data
-        root = null;
+        if (!getParameters().reuseTree) {
+            root = null;
+        }
     }
 
+    protected MultiTreeNode newMultiTreeRootNode(AbstractGameState state) {
+        // We need to update each of the individual player root nodes independently
+        MultiTreeNode mtRoot = (MultiTreeNode) this.root;
+        // We retain this, but update the root nodes
+        // We could have run through the history once...but more robust to do this once per player
+        // and reuse the code for SelfOnly
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            SingleTreeNode oldRoot = mtRoot.roots[p];
+            if (oldRoot == null)
+                continue;
+            if (debug)
+                System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
+            mtRoot.roots[p] = backtrack(mtRoot.roots[p], state);
+            if (mtRoot.roots[p] != null) {
+                //         if (p == mtRoot.decisionPlayer)
+                //            mtRoot.roots[p].instantiate(null, null, state);
+                mtRoot.roots[p].rootify(oldRoot);
+                mtRoot.roots[p].state = state.copy();
+            }
+        }
+        mtRoot.state = state.copy();
+        return mtRoot;
+    }
+
+    protected SingleTreeNode newRootNode(AbstractGameState gameState) {
+        MCTSParams params = getParameters();
+        if (params.reuseTree && (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)) {
+            // In this case we remove any nodes from the graph that were not present before the last action was taken
+            MCGSNode mcgsRoot = (MCGSNode) root;
+            for (Object key : oldGraphKeys.keySet()) {
+                int oldVisits = oldGraphKeys.get(key);
+                int newVisits = mcgsRoot.getTranspositionMap().get(key) != null ? mcgsRoot.getTranspositionMap().get(key).nVisits : 0;
+                if (newVisits == oldVisits) {
+                    // no change, so remove
+                    mcgsRoot.getTranspositionMap().remove(key);
+                } else if (newVisits < oldVisits) {
+                    throw new AssertionError("Unexpectedly fewer visits to a state than before");
+                }
+            }
+            // then reset the old keys
+            if (mcgsRoot == null) {
+                oldGraphKeys = new HashMap<>();
+                return null;
+            }
+
+            oldGraphKeys = mcgsRoot.getTranspositionMap().entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().nVisits));
+            // we create the root node as we would have done normally; and then override the transposition map
+            MCGSNode retValue = ((MCGSNode) root).getTranspositionMap().get(params.MCGSStateKey.getKey(gameState));
+            if (retValue == null) {
+                // have left graph; start from scratch
+                oldGraphKeys = new HashMap<>();
+                return null;
+            }
+            retValue.instantiate(null, null, gameState);
+            retValue.setTranspositionMap(mcgsRoot.getTranspositionMap());
+            retValue.rootify(root);
+            return retValue;
+        }
+
+        // Now for standard open loop processing
+        SingleTreeNode newRoot = null;
+        if (params.reuseTree && root != null) {
+            // we see if we can reuse the tree
+            // We need to look at all actions taken since our last action
+            if (debug)
+                System.out.println("Backtracking for " + lastAction + " by " + gameState.getCurrentPlayer());
+
+            if (params.opponentTreePolicy == MultiTree)
+                return newMultiTreeRootNode(gameState);
+
+            newRoot = backtrack(root, gameState);
+
+            if (root == newRoot)
+                throw new AssertionError("Root node should not be the same as the new root node");
+            if (debug && newRoot == null)
+                System.out.println("No matching node found");
+        }
+        // at this stage we should have moved down the tree to get to the correct node
+        // based on the actions taken in the game since our last decision
+        // The node we have reached should be the new root node
+        if (newRoot != null) {
+            if (debug)
+                System.out.println("Matching node found");
+            if (newRoot.turnOwner != gameState.getCurrentPlayer() || newRoot.decisionPlayer != gameState.getCurrentPlayer()) {
+                throw new AssertionError("Current player does not match decision player in tree");
+                // if this is a problem, we can just set newRoot = null;
+            }
+            // We need to make the new root the root of the tree
+            // We need to remove the parent link from the new root
+            newRoot.instantiate(null, null, gameState);
+            newRoot.rootify(root);
+        }
+        return newRoot;
+    }
+
+    protected SingleTreeNode backtrack(SingleTreeNode startingRoot, AbstractGameState gameState) {
+        List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
+        Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
+        MCTSParams params = getParameters();
+        boolean selfOnly = params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MultiTree;
+        SingleTreeNode newRoot = startingRoot;
+        int rootPlayer = startingRoot.decisionPlayer;
+        for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
+            if (history.get(backwardLoop).equals(lastExpected)) {
+                // We can reuse the tree from this point
+                // We now work forward through the actions
+                if (debug)
+                    System.out.println("Matching action found at " + backwardLoop + " of " + history.size() + " - tracking forward");
+                for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
+                    if (selfOnly && history.get(forwardLoop).a != rootPlayer)
+                        continue; // we only care about our actions
+                    AbstractAction action = history.get(forwardLoop).b;
+                    int nextActionPlayer = forwardLoop < history.size() - 1 ? history.get(forwardLoop + 1).a : gameState.getCurrentPlayer();
+                    // then make sure that we have a transition for this player and this action
+                    // If we are SelfOnly, then we only store our actions in the tree
+                    nextActionPlayer = selfOnly ? rootPlayer : nextActionPlayer;
+                    if (debug)
+                        System.out.println("\tAction: " + action.toString() + "\t Next Player: " + nextActionPlayer);
+                    if (newRoot.children != null && newRoot.children.get(action) != null)
+                        newRoot = newRoot.children.get(action)[nextActionPlayer];
+                    else
+                        newRoot = null;
+                    if (newRoot == null)
+                        break;
+                }
+                break;
+            }
+        }
+        if (debug)
+            System.out.println("\tBacktracking complete : " + (newRoot == null ? "no matching node found" : "node found"));
+        return newRoot;
+    }
 
     protected void createRootNode(AbstractGameState gameState) {
-        if (getParameters().opponentTreePolicy == MultiTree)
-            root = new MultiTreeNode(this, gameState, rnd);
-        else
-            root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
-
+        SingleTreeNode newRoot = newRootNode(gameState);
+        if (newRoot == null) {
+            if (getParameters().opponentTreePolicy == MultiTree)
+                root = new MultiTreeNode(this, gameState, rnd);
+            else
+                root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
+        } else {
+            root = newRoot;
+        }
         if (MASTStats != null)
             root.MASTStatistics = MASTStats.stream()
                     .map(m -> Utils.decay(m, getParameters().MASTGamma))
@@ -109,8 +251,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
+        long currentTimeNano = System.nanoTime();
         createRootNode(gameState);
-        root.mctsSearch();
+        long timeTaken = System.nanoTime() - currentTimeNano;
+
+        root.mctsSearch(timeTaken / 1000000);
 
         if (getParameters().actionHeuristic instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);
@@ -121,14 +266,18 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         if (getParameters().getOpponentModel() instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().getOpponentModel()).process(root);
 
-        if (debug)
-            System.out.println(root.toString());
-
+        if (debug) {
+            if (getParameters().opponentTreePolicy == MultiTree)
+                System.out.println(((MultiTreeNode) root).getRoot(gameState.getCurrentPlayer()));
+            else
+                System.out.println(root);
+        }
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 2 * actions.size() && !(root instanceof MCGSNode) && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+        if (root.children.size() > 2 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
-        return root.bestAction();
+        lastAction = root.bestAction();
+        return lastAction.copy();
     }
 
     @Override

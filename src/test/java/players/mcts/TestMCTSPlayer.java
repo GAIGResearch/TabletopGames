@@ -20,6 +20,7 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 public class TestMCTSPlayer extends MCTSPlayer {
 
     protected Supplier<? extends SingleTreeNode> factory;
+    public boolean rolloutTest = true;
 
     public TestMCTSPlayer(MCTSParams params, Supplier<? extends SingleTreeNode> factory) {
         super(params, "TestMCTSPlayer");
@@ -45,7 +46,7 @@ public class TestMCTSPlayer extends MCTSPlayer {
 
     @Override
     protected void createRootNode(AbstractGameState gameState) {
-        if (getParameters().opponentTreePolicy == MultiTree)
+        if (rolloutTest && getParameters().opponentTreePolicy == MultiTree)
             root = new MTNRollout(this, gameState, rnd);
         else
             super.createRootNode(gameState);

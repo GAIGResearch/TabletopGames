@@ -22,7 +22,7 @@ import static utilities.Utils.*;
 public class NTBEAParameters {
 
     public enum Mode {
-        NTBEA, MultiNTBEA, CoopNTBEA
+        NTBEA, MultiNTBEA, CoopNTBEA, StableNTBEA
     }
 
     public boolean tuningGame;
@@ -68,7 +68,7 @@ public class NTBEAParameters {
         gameParams = args.get(RunArg.gameParams).equals("") ? null :
                 AbstractParameters.createFromFile(game, (String) args.get(RunArg.gameParams));
 
-        mode = Mode.valueOf((String) args.get(RunArg.NTBEAmode));
+        mode = Mode.valueOf((String) args.get(RunArg.NTBEAMode));
         logFile = (String) args.get(RunArg.output);
         if (logFile.isEmpty()) logFile = "NTBEA.log";
         listenerClasses = (List<String>) args.get(RunArg.listener);

@@ -164,6 +164,7 @@ public abstract class AbstractPlayer {
     public void registerUpdatedObservation(AbstractGameState gameState) {
     }
 
+
     public void onEvent(Event event) {
     }
 

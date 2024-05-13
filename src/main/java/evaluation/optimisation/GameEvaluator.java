@@ -14,6 +14,8 @@ import games.GameType;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static evaluation.optimisation.NTBEAParameters.Mode.CoopNTBEA;
+import static evaluation.optimisation.NTBEAParameters.Mode.StableNTBEA;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -24,6 +26,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class GameEvaluator implements SolutionEvaluator {
 
+    NTBEAParameters params;
     public boolean debug = false;
     GameType game;
     AbstractParameters gameParams;
@@ -33,7 +36,6 @@ public class GameEvaluator implements SolutionEvaluator {
     int nEvals = 0;
     Random rnd;
     boolean avoidOppDupes;
-    boolean fullyCoop;
     IStateHeuristic stateHeuristic;
     IGameHeuristic gameHeuristic;
     List<IGameListener> listeners = new ArrayList<>();
@@ -42,35 +44,33 @@ public class GameEvaluator implements SolutionEvaluator {
      * GameEvaluator
      *
      * @param game                    The game that will be run for each trial. After each trial it is reset().
-     * @param parametersToTune        The ITunableParameters object that defines the parameter space we are optimising over.
-     *                                This will vary with whatever is being optimised.
+     * @param params                  The NTBEAParameters object that defines any parameter settings
      * @param opponents               A List of opponents to be played against. In each trial a random set of these opponents will be
      *                                used in addition to the main agent being tested.
      *                                To use the same set of opponents in each game, this should contain N-1 AbstractPlayers, where
      *                                N is the number of players in the game.
-     * @param seed                    Random seed to use
      * @param avoidOpponentDuplicates If this is true, then each individual in opponents will only be used once per game.
      *                                If this is false, then it is important not to use AbstractPlayers that maintain
      *                                any state, or that make any use of their playerId. (So RandomPlayer is fine.)
      */
-    public GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
-                         AbstractParameters gameParams,
+    public GameEvaluator(GameType game,
+                         NTBEAParameters params,
                          int nPlayers,
-                         List<AbstractPlayer> opponents, long seed,
+                         List<AbstractPlayer> opponents,
                          IStateHeuristic stateHeuristic, IGameHeuristic gameHeuristic,
                          boolean avoidOpponentDuplicates) {
         this.game = game;
-        this.gameParams = gameParams;
-        this.searchSpace = parametersToTune;
+        this.params = params;
+        this.gameParams = params.gameParams;
+        this.searchSpace = params.searchSpace;
         this.nPlayers = nPlayers;
         this.stateHeuristic = stateHeuristic;
         this.gameHeuristic = gameHeuristic;
         this.opponents = opponents;
-        this.rnd = new Random(seed);
+        this.rnd = new Random(params.seed);
         this.avoidOppDupes = avoidOpponentDuplicates && opponents.size() > 1;
         if (avoidOppDupes && opponents.size() < nPlayers - 1)
             throw new AssertionError("Insufficient Opponents to avoid duplicates");
-        if (opponents.isEmpty()) fullyCoop = true;
     }
 
     @Override
@@ -104,19 +104,52 @@ public class GameEvaluator implements SolutionEvaluator {
         Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
         // we assign one player to each team (the default for a game is each player being their own team of 1)
         int nTeams = newGame.getGameState().getNTeams();
-        List<AbstractPlayer> allPlayers = new ArrayList<>(nTeams);
 
-        // We can reduce variance here by cycling the playerIndex on each iteration
+        // We can reduce variance here by cycling the teamIndex on each iteration
         // If we're not tuning the player, then setting index to -99 means we just use the provided opponents list
-        int playerIndex = tuningPlayer ? nEvals % nTeams : -99;
+        // in setupPlayers()
+        int teamIndex = tuningPlayer ? nEvals % nTeams : -99;
 
+        // We generally one game per evaluation, unless we are in 'Stable' mode,
+        // in which case we reduce variance by running one game for each position the tuned agent can be in
+        if (params.mode == StableNTBEA && !tuningPlayer)
+            throw new AssertionError("StableNTBEA mode requires tuning of player");
+        int gamesToRun = params.mode == StableNTBEA ? nTeams : 1;
+        long seed = rnd.nextLong();
+        double retValue = 0.0;
+        for (int loop = 0; loop < gamesToRun; loop++) {
+            int thisTeamIndex = teamIndex == -99 ? -99 : (teamIndex + loop) % nTeams;
+            List<AbstractPlayer> allPlayers = setupPlayers(thisTeamIndex, nTeams, settings);
+
+            // always reset the random seed for each new game
+            newGame.reset(allPlayers, seed);
+            newGame.run();
+
+            int playerOnTeam = -1;
+            for (int p = 0; p < newGame.getGameState().getNPlayers(); p++) {
+                if (newGame.getGameState().getTeam(p) == thisTeamIndex) {
+                    playerOnTeam = p;
+                }
+            }
+            if (tuningPlayer && playerOnTeam == -1)
+                throw new AssertionError("No Player found on team " + thisTeamIndex);
+            retValue += tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam);
+        }
+        //    System.out.println("GameEvaluator: " + retValue);
+
+        nEvals++;
+        return retValue;
+    }
+
+    private List<AbstractPlayer> setupPlayers(int teamIndex, int nTeams, int[] settings) {
+        List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
         // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
         // if we allow duplicates, then we randomise them all independently
         List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(toList());
         Collections.shuffle(opponentOrdering);
         int count = 0;
         for (int i = 0; i < nTeams; i++) {
-            if (!fullyCoop && i != playerIndex) {
+            if (params.mode != CoopNTBEA && i != teamIndex) {
                 int oppIndex = (avoidOppDupes) ? count : rnd.nextInt(opponents.size());
                 count = (count + 1) % nTeams;
                 allPlayers.add(opponents.get(oppIndex).copy());
@@ -125,30 +158,13 @@ public class GameEvaluator implements SolutionEvaluator {
                 allPlayers.add(tunedPlayer);
             }
         }
-
-        // always reset the random seed for each new game
-        newGame.reset(allPlayers, rnd.nextLong());
-
-        newGame.run();
-        int playerOnTeam = -1;
-        for (int p = 0; p < newGame.getGameState().getNPlayers(); p++) {
-            if (newGame.getGameState().getTeam(p) == playerIndex) {
-                playerOnTeam = p;
-            }
-        }
-        if (playerOnTeam == -1)
-            throw new AssertionError("No Player found on team " + playerIndex);
-        double retValue = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerOnTeam);
-
-    //    System.out.println("GameEvaluator: " + retValue);
-
-        nEvals++;
-        return retValue;
+        return allPlayers;
     }
 
     public void addListener(IGameListener listener) {
         listeners.add(listener);
     }
+
     public void clearListeners() {
         listeners.clear();
     }

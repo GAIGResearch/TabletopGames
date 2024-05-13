@@ -20,7 +20,6 @@ import java.util.stream.IntStream;
 public class MultiTreeNode extends SingleTreeNode {
 
     boolean debug = false;
-    int decisionPlayer;
     SingleTreeNode[] roots;
     SingleTreeNode[] currentLocation;
     AbstractAction[] lastAction;
@@ -29,13 +28,14 @@ public class MultiTreeNode extends SingleTreeNode {
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        if (player.getParameters().information == MCTSEnums.Information.Closed_Loop)
-            player.getParameters().information = MCTSEnums.Information.Open_Loop;
-        // Closed Loop is not yet supported for MultiTree search
-        // TODO: implement this (not too difficult, but some tricky bits as we shift from tree to rollout and back again)
         this.decisionPlayer = state.getCurrentPlayer();
         this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
+        if (params.information == MCTSEnums.Information.Closed_Loop)
+           params.information = MCTSEnums.Information.Open_Loop;
+        // Closed Loop is not yet supported for MultiTree search
+        // TODO: implement this (not too difficult, but some tricky bits as we shift from tree to rollout and back again)
+
         this.rnd = rnd;
         mctsPlayer = player;
         // only root node maintains MAST statistics
@@ -54,7 +54,6 @@ public class MultiTreeNode extends SingleTreeNode {
         currentLocation = new SingleTreeNode[state.getNPlayers()];
         currentLocation[this.decisionPlayer] = roots[decisionPlayer];
     }
-
     /**
      * oneSearchIteration() implements the strategy for tree search (plus expansion, rollouts, backup and so on)
      * Its result is purely stored in the tree generated from root
@@ -77,6 +76,7 @@ public class MultiTreeNode extends SingleTreeNode {
         System.arraycopy(roots, 0, currentLocation, 0, currentLocation.length);
 
         actionsInTree = new ArrayList<>();
+        currentNodeTrajectory = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
@@ -119,6 +119,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (debug)
                     System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
                 advanceState(currentState, chosen, false);
+                currentNodeTrajectory.add(currentNode);
 
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
@@ -138,13 +139,16 @@ public class MultiTreeNode extends SingleTreeNode {
                 // for each player-specific sub-tree we filter these to just their actions
                 if (p != currentLocation[p].decisionPlayer)
                     throw new AssertionError("We should only be backing up for the decision player");
-                int finalP = p;
-                currentLocation[p].root.actionsInTree = actionsInTree.stream()
-                        .filter(a -> a.a == finalP)
-                        .collect(Collectors.toList());
-//                singleTreeNode.root.actionsInRollout = actionsInRollout.stream()
-//                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
-//                        .collect(Collectors.toList());
+
+                currentLocation[p].root.actionsInTree = new ArrayList<>();
+                currentLocation[p].root.currentNodeTrajectory = new ArrayList<>();
+                for (int i = 0; i < actionsInTree.size(); i++) {
+                    if (actionsInTree.get(i).a == p) {
+                        currentLocation[p].root.actionsInTree.add(actionsInTree.get(i));
+                        if (i < currentNodeTrajectory.size())
+                            currentLocation[p].root.currentNodeTrajectory.add(currentNodeTrajectory.get(i));
+                    }
+                }
                 currentLocation[p].backUp(finalValues);
             }
         }

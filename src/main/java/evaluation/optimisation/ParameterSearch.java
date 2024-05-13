@@ -65,13 +65,19 @@ public class ParameterSearch {
         NTBEAParameters params = new NTBEAParameters(config);
         params.printSearchSpaceDetails();
 
-        if (params.mode == NTBEAParameters.Mode.MultiNTBEA) {
-            MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
-            multiNTBEA.run();
-        } else {
-            NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
-            singleNTBEA.run();
+        switch (params.mode) {
+            case NTBEA:
+            case CoopNTBEA:
+            case StableNTBEA:
+                NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
+                singleNTBEA.run();
+                break;
+            case MultiNTBEA:
+                MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
+                multiNTBEA.run();
+                break;
         }
+
     }
 
 

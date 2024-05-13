@@ -26,7 +26,7 @@ public class TestFullObservabilityCopy {
     private void moveForwardToNextPlayer(DominionGameState state) {
         int startingPlayer = state.getCurrentPlayer();
         while (state.getCurrentPlayer() == startingPlayer)
-            fm.next(state, new EndPhase());
+            fm.next(state, new EndPhase((DominionGameState.DominionGamePhase) state.getGamePhase()));
     }
 
     @Test

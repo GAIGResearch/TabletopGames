@@ -179,7 +179,7 @@ public class MultiTreeMCTSTests {
         Game game = createTicTacToe(params, 4);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
-        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+        game.getPlayers().get(state.getCurrentPlayer())
                 ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));

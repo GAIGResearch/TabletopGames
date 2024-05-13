@@ -72,19 +72,18 @@ public class ToadForwardModel extends StandardForwardModel {
             // continue with the same player
         } else if (state.fieldCards[1 - currentPlayer] == null) {
             // next player
-            endTurn(gameState);
+            endTurn(gameState, 1 - currentPlayer);
         } else {
             // we reveal cards and resolve
             // not the most elegant solution, but with 2 cards each no need to generalise yet
-            int attacker = state.getRoundCounter();
+            int attacker = 1 - currentPlayer; // defender always goes second, so is the current player
             BattleResult battle = new BattleResult(attacker, state.fieldCards[attacker], state.fieldCards[1-attacker],
                     state.hiddenFlankCards[attacker], state.hiddenFlankCards[1-attacker]);
 
-            int[] result = battle.calculate(state);
+            int[] scoreDiff = battle.calculate(state);
 
             // convert back to scores for each player
             int round = state.getRoundCounter();
-            int[] scoreDiff = new int[]{result[round], result[1 - round]};
             // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead)
             if (scoreDiff[0] == 2 && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
                 scoreDiff[0]--;
@@ -103,6 +102,7 @@ public class ToadForwardModel extends StandardForwardModel {
             state.fieldCards = new ToadCard[state.getNPlayers()];
             state.hiddenFlankCards = new ToadCard[state.getNPlayers()];
 
+            // if all cards played, then we keep the same player as the attacker for the next round
             // Then check for end of round
             if (state.playerHands.get(0).getSize() <= 1) {
                 // one card left in hand each
@@ -133,15 +133,16 @@ public class ToadForwardModel extends StandardForwardModel {
                         state.playerHands.get(0).add(state.playerDecks.get(0).draw());
                         state.playerHands.get(1).add(state.playerDecks.get(1).draw());
                     }
-                    endRound(gameState, 1);
+                    endRound(gameState, 0);
                 }
             } else {
-                endTurn(gameState);
+                // the
+                endTurn(gameState, currentPlayer);
             }
         }
     }
 
-    protected void endTurn(AbstractGameState gs) {
+    protected void endTurn(AbstractGameState gs, int nextPlayer) {
         ToadGameState state = (ToadGameState) gs;
         int player = state.getCurrentPlayer();
         // Draw 2 cards
@@ -149,7 +150,6 @@ public class ToadForwardModel extends StandardForwardModel {
         for (int i = 0; i < cardsToDraw; i++) {
             state.playerHands.get(player).add(state.playerDecks.get(player).draw());
         }
-        // super-class stuff
-        endPlayerTurn(state);
+        endPlayerTurn(state, nextPlayer);
     }
 }

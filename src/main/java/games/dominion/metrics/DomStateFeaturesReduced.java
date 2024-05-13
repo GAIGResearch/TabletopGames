@@ -17,7 +17,6 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
     @Override
     public double[] featureVector(AbstractGameState gs, int playerId) {
         DominionGameState state = (DominionGameState) gs;
-        CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
         double[] retValue = new double[names.length];
 

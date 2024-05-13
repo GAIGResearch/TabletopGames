@@ -155,7 +155,7 @@ public class MetricsGameListener implements IGameListener {
         } else if (e == ROUND_OVER) {
             return "Round";
         } else if (e == TURN_OVER) {
-            return "Turn";
+            return "Tick";
         } else if (e == ACTION_CHOSEN || e == ACTION_TAKEN || e == GAME_EVENT) {
             return "Tick";
         }
