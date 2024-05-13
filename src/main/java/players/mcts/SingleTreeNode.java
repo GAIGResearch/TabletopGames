@@ -745,7 +745,9 @@ public class SingleTreeNode {
         // default to standard UCB
         int effectiveTotalVisits = validVisitsFor(action);
         // use first play urgency as replacement for exploration term if action not previously taken
-        double explorationTerm = params.firstPlayUrgency;
+        // we add in the second term based on the AlphaGo selection rule, so that the exploration term is monotonically increasing with N
+        // this will come into play for small values of FPU and acts as soft-pruning rather than the harder form if FPU is a fixed constant
+        double explorationTerm = Math.max(params.firstPlayUrgency, params.K * Math.sqrt(effectiveTotalVisits));
         if (actionVisits > 0) {
             explorationTerm = switch (params.treePolicy) {
                 case UCB_Tuned -> {
@@ -916,8 +918,7 @@ public class SingleTreeNode {
      */
     protected void backUp(double[] delta) {
         normaliseRewardsAfterIteration(delta);
-        double[] baseReward = processResultsForParanoidOrSelfOnly(delta);
-        double[] result = baseReward;
+        double[] result = processResultsForParanoidOrSelfOnly(delta);
         // we need to go backwards up the tree, as the result may change
         for (int i = root.currentNodeTrajectory.size() - 1; i >= 0; i--) {
             int actingPlayer = root.actionsInTree.get(i).a;
@@ -1008,16 +1009,19 @@ public class SingleTreeNode {
             throw new AssertionError("We have somehow failed to find the action taken in the list of actions");
         if (stats.validVisits == 0)
             throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
-        double localResult[] = result;
+
+        stats.update(result);
+
         if (nVisits > params.maxBackupThreshold) {
-            localResult = result.clone();
+            double resultToPropagateUpwards[] = result.clone();
             // in this case we mix in a max backup
             // *if* we took an action other than the one with the current best estimate
             AbstractAction bestAction = null;
             double maxValue = -Double.MAX_VALUE;
             for (AbstractAction action : actionsToConsider) {
-                double value = actionValues.get(action).nVisits == 0 ? -Double.MAX_VALUE :
-                        actionValues.get(action).totValue[decisionPlayer] / actionValues.get(action).nVisits;
+                ActionStats temp = actionValues.get(action);
+                double value = temp.nVisits == 0 ? -Double.MAX_VALUE :
+                        temp.totValue[decisionPlayer] / temp.nVisits;
                 if (value > maxValue) {
                     maxValue = value;
                     bestAction = action;
@@ -1029,18 +1033,16 @@ public class SingleTreeNode {
                 bestAction = actionTaken;
             }
             if (!bestAction.equals(actionTaken)) {
-                double maxWeight = nVisits / (double) (nVisits + params.maxBackupThreshold);
+                double maxWeight = (nVisits - params.maxBackupThreshold) / (double) nVisits;
                 // we mix for all players, based on the counterfactual decision of the acting player
                 for (int i = 0; i < result.length; i++) {
-                    localResult[i] = (1 - maxWeight) * result[i] + maxWeight * maxValue;
+                    resultToPropagateUpwards[i] = (1 - maxWeight) * result[i] + maxWeight * maxValue;
                 }
             }
+            return resultToPropagateUpwards;
+        } else {
+            return result;
         }
-
-        stats.update(localResult);
-        if (params.recursiveBackup)
-            return localResult;
-        return result;
     }
 
 
@@ -1074,7 +1076,7 @@ public class SingleTreeNode {
             policy = SIMPLE;
         }
         if (params.selectionPolicy == TREE || params.treePolicy == EXP3) {
-            // EXP3, Hedge use the tree policy (without exploration)
+            // EXP3 uses the tree policy (without exploration)
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
             // RM uses a special policy as the average of all previous root policies
