@@ -21,6 +21,8 @@ public class ToadForwardModel extends StandardForwardModel {
         ToadParameters params = (ToadParameters) state.getGameParameters();
 
         state.battlesWon = new int[2][2];
+        state.battlesWon[0][0] = params.firstRoundHandicap;
+        state.battlesWon[1][0] = params.firstRoundHandicap;
         state.fieldCards = new ToadCard[state.getNPlayers()];
         state.hiddenFlankCards = new ToadCard[state.getNPlayers()];
         state.tieBreakers = new ToadCard[state.getNPlayers()];

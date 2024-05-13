@@ -26,7 +26,6 @@ public class ToadGameState extends AbstractGameState {
     List<Deck<ToadCard>> playerDecks;
     List<PartialObservableDeck<ToadCard>> playerHands;
     int[][] battlesWon;
-    int[][] roundWinners;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
