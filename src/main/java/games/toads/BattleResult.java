@@ -1,7 +1,6 @@
 package games.toads;
 
-import games.toads.abilities.Assassin;
-import games.toads.abilities.Bomb;
+import games.toads.abilities.*;
 
 public class BattleResult {
 
@@ -80,7 +79,7 @@ public class BattleResult {
                 if (defenderFlank.value == 5) { // Berserker
                     DFlank += state.battlesWon[round][attacker];
                 }
-                if (defenderFlank.value == 6 && !(defenderField.ability instanceof Bomb)) { // Icon Bearer
+                if (defenderFlank.value == 6 && !(defenderField.ability instanceof AssaultCannon)) { // Icon Bearer
                     DField += 1;
                 }
             }
