@@ -23,6 +23,11 @@ public class ToadParameters extends TunableParameters {
     boolean useTactics = true;
     int firstRoundHandicap = 0;
     int secondRoundHandicap = 0;
+    SecondRoundStart secondRoundStart = SecondRoundStart.ONE;
+
+    enum SecondRoundStart {
+        ONE, TWO, LOSER, WINNER
+    }
 
     public ToadParameters() {
         addTunableParameter("dataPath", "data/toads/");
@@ -33,6 +38,7 @@ public class ToadParameters extends TunableParameters {
         addTunableParameter("useTactics", true);
         addTunableParameter("firstRoundHandicap", 0);
         addTunableParameter("secondRoundHandicap", 0);
+        addTunableParameter("secondRoundStart", SecondRoundStart.ONE);
     }
 
     @Override
@@ -45,6 +51,7 @@ public class ToadParameters extends TunableParameters {
         useTactics = (boolean) getParameterValue("useTactics");
         firstRoundHandicap = (int) getParameterValue("firstRoundHandicap");
         secondRoundHandicap = (int) getParameterValue("secondRoundHandicap");
+        secondRoundStart = (SecondRoundStart) getParameterValue("secondRoundStart");
     }
 
     public List<ToadCard> getCardDeck() {

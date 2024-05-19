@@ -82,6 +82,7 @@ public class GameFlow {
 
     @Test
     public void playersAlternateAsAttackerStartingWithPlayerZero() {
+        params.secondRoundStart = ToadParameters.SecondRoundStart.ONE;
         for (int i = 0; i < 32; i++) {
             // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
             int expectedPlayer = ((i + 2) / 4) % 2;
@@ -91,6 +92,23 @@ public class GameFlow {
         }
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
     }
+
+
+    @Test
+    public void playersAlternateAsAttackerStartingWithSecondPlayerOnSecondRound() {
+        params.secondRoundStart = ToadParameters.SecondRoundStart.TWO;
+        for (int i = 0; i < 32; i++) {
+            // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
+            int expectedPlayer = ((i + 2) / 4) % 2;
+            if (i >= 16)
+                expectedPlayer = 1 - expectedPlayer;
+            System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
+            assertEquals(expectedPlayer, state.getCurrentPlayer());
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
+        assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+    }
+
 
     @Test
     public void winInRoundTwoIsCorrectlyAllocated() {

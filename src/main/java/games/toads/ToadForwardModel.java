@@ -141,7 +141,13 @@ public class ToadForwardModel extends StandardForwardModel {
                         state.playerHands.get(0).add(state.playerDecks.get(0).draw());
                         state.playerHands.get(1).add(state.playerDecks.get(1).draw());
                     }
-                    endRound(gameState, 0);
+                    int firstPlayerOfSecondRound = switch(params.secondRoundStart) {
+                        case ONE -> 0;
+                        case TWO -> 1;
+                        case LOSER -> state.battlesWon[0][0] >= state.battlesWon[0][1] ? 1 : 0;
+                        case WINNER -> state.battlesWon[0][0] > state.battlesWon[0][1] ? 0 : 1;
+                    };
+                    endRound(gameState, firstPlayerOfSecondRound);
                 }
             } else {
                 // the
