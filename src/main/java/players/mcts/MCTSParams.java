@@ -29,7 +29,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Information information = Information_Set;  // this should be the default in TAG, given that most games have hidden information
     public MCTSEnums.MASTType MAST = None;
     public boolean useMAST = false;
-    public double MASTGamma = 0.5;
+    public double MASTGamma = 0.0;
     public double MASTDefaultValue = 0.0;
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 1.0;
@@ -96,7 +96,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
-        addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
+        addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));

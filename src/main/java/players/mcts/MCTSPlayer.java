@@ -235,7 +235,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         } else {
             root = newRoot;
         }
-        if (MASTStats != null)
+        if (MASTStats != null && getParameters().MASTGamma > 0.0)
             root.MASTStatistics = MASTStats.stream()
                     .map(m -> Utils.decay(m, getParameters().MASTGamma))
                     .collect(Collectors.toList());
