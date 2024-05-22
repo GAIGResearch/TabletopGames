@@ -1,4 +1,4 @@
-package core.forwardModels;
+package players.decorators;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
