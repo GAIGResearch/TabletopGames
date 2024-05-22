@@ -101,15 +101,12 @@ public class NTBEA {
         // Initialise the GameEvaluator that will do all the heavy lifting
         evaluator = new GameEvaluator(
                 game,
-                params.searchSpace,
-                params.gameParams,
+                params,
                 nPlayers,
                 opponents,
-                params.seed,
                 stateHeuristic,
                 gameHeuristic,
-                true
-        );
+                true);
     }
 
     public void setOpponents(List<AbstractPlayer> opponents) {

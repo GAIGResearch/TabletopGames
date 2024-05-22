@@ -68,7 +68,7 @@ public class MCTSNodesAndVisitsTests {
     }
 
     @Test
-    public void maxN() {
+    public void oneTree() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};

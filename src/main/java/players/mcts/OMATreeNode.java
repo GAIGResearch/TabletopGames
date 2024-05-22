@@ -60,7 +60,7 @@ public class OMATreeNode extends SingleTreeNode {
             int finalPlayer = player;
             List<AbstractAction> selfActionsOnly = root.actionsInTree.stream()
                     .filter(p -> p.a == finalPlayer).map(p -> p.b)
-                    .collect(toList());
+                    .toList();
             List<OMATreeNode> nodes = new ArrayList<>();
             OMATreeNode currentNode = this;
             do {

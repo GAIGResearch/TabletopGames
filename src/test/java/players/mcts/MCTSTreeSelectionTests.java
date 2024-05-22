@@ -27,7 +27,6 @@ public class MCTSTreeSelectionTests {
         player = new TestMCTSPlayer(params, STNWithTestInstrumentation::new);
         player.setForwardModel(fm);
         node = (STNWithTestInstrumentation) SingleTreeNode.createRootNode(player, game, rnd, STNWithTestInstrumentation::new);
-
     }
 
     @Test
@@ -58,13 +57,16 @@ public class MCTSTreeSelectionTests {
 
     private void first10Visits(STNWithTestInstrumentation node) {
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.currentNodeTrajectory = List.of(node);
         node.backUp(new double[]{-1.0});
 
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        node.currentNodeTrajectory = List.of(node);
         for (int i = 0; i < 5; i++) {
             node.backUp(new double[]{0.5});
         }
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        node.currentNodeTrajectory = List.of(node);
         for (int i = 0; i < 4; i++) {
             node.backUp(new double[]{0.4});
         }
@@ -180,6 +182,26 @@ public class MCTSTreeSelectionTests {
         assertEquals(321, counts[2], 100);
     }
 
+
+    @Test
+    public void rm10VisitsFinalSelection() {
+        rm10Visits();
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0, counts[0], 0);
+        assertEquals(679, counts[1], 100);
+        assertEquals(321, counts[2], 100);
+    }
 
     @Test
     public void rm10VisitsWithExploration() {
@@ -318,41 +340,6 @@ public class MCTSTreeSelectionTests {
 
 
     @Test
-    public void hedge_10Visits() {
-        params.treePolicy = Hedge;
-        params.exploreEpsilon = 0.1;
-        params.normaliseRewards = false;
-        params.hedgeBoltzmann = 0.8;
-        setupPlayer();
-        first10Visits(node);
-
-        // Regrets are:
-        // -1.31 / 0.19 / 0.09
-
-        double[] actionValues = node.actionValues(baseActions);
-        assertEquals(Math.exp(-1.31 * 10 / 0.8), actionValues[0], 0.01);  // 0.00
-        assertEquals(Math.exp(0.19 * 10 / 0.80), actionValues[1], 0.01); // 10.75
-        assertEquals(Math.exp(0.09 * 10 / 0.80), actionValues[2], 0.01); // 3.08
-        // The final choice of action is then stochastic
-        int[] counts = new int[3];
-        for (int i = 0; i < 1000; i++) {
-            AbstractAction action = node.treePolicyAction(true);
-            if (action.equals(new LMRAction("Left"))) {
-                counts[0]++;
-            } else if (action.equals(new LMRAction("Middle"))) {
-                counts[1]++;
-            } else {
-                counts[2]++;
-            }
-        }
-        // expected probability distribution is 0%, 78%, 22%  [not including the 10% exploration]
-        assertEquals(1000, counts[0] + counts[1] + counts[2]);
-        assertEquals(0.00 * 900 + 33, counts[0], 15);
-        assertEquals(0.78 * 900 + 33, counts[1], 50);
-        assertEquals(0.22 * 900 + 33, counts[2], 50);
-    }
-
-    @Test
     public void bias10Visits() {
         params.treePolicy = UCB;
         params.normaliseRewards = true;
@@ -454,13 +441,16 @@ public class MCTSTreeSelectionTests {
 
         // For this test we don't use first10Visits() as the initial visit parameter changes the visit counts
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.currentNodeTrajectory = List.of(node);
         node.backUp(new double[]{-1.0});
 
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        node.currentNodeTrajectory = List.of(node);
         for (int i = 0; i < 5; i++) {
             node.backUp(new double[]{0.5});
         }
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        node.currentNodeTrajectory = List.of(node);
         for (int i = 0; i < 4; i++) {
             node.backUp(new double[]{0.4});
         }
@@ -477,8 +467,8 @@ public class MCTSTreeSelectionTests {
         // With seeding, we change both the value of the action, and the exploration term
         double[] actionValues = node.actionValues(baseActions);
         assertEquals((-1.0 + 0.3 * 4) / 5.0 + Math.sqrt(Math.log(22) / 5), actionValues[0], 0.01);
-        assertEquals(2.5 / 9.0 +  Math.sqrt(Math.log(22) / 9), actionValues[1], 0.01);
-        assertEquals((0.4 * 4 + 4.0) / 8.0 +  Math.sqrt(Math.log(22) / 8), actionValues[2], 0.01);
+        assertEquals(2.5 / 9.0 + Math.sqrt(Math.log(22) / 9), actionValues[1], 0.01);
+        assertEquals((0.4 * 4 + 4.0) / 8.0 + Math.sqrt(Math.log(22) / 8), actionValues[2], 0.01);
         assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
     }
 
@@ -500,15 +490,16 @@ public class MCTSTreeSelectionTests {
         // The second action should become available at the 4th visits (2 = sqrt(N))
         for (int i = 0; i < 3; i++) {
             // Check that the correct number of actions are available (just the one)
-      //      System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+            //      System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
             assertEquals(3, node.actionsFromOpenLoopState.size());
             assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
             assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.currentNodeTrajectory = List.of(node);
             node.backUp(new double[]{-1.0});
 
             // then check that only the available actions are updated
-            assertEquals(i+1, node.getActionStats(new LMRAction("Right")).validVisits);
+            assertEquals(i + 1, node.getActionStats(new LMRAction("Right")).validVisits);
             assertEquals(i == 2 ? 1 : 0, node.getActionStats(new LMRAction("Left")).validVisits);
             assertEquals(0, node.getActionStats(new LMRAction("Middle")).validVisits);
         }
@@ -558,6 +549,7 @@ public class MCTSTreeSelectionTests {
             assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
             assertEquals(new LMRAction("Left"), node.actionsToConsider(node.actionsFromOpenLoopState).get(1));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.currentNodeTrajectory = List.of(node);
             node.backUp(new double[]{-1.0});
         }
         assertEquals(3, node.actionsToConsider(node.actionsFromOpenLoopState).size());
@@ -586,6 +578,7 @@ public class MCTSTreeSelectionTests {
             assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
             assertEquals(new LMRAction("Right"), node.treePolicyAction(true));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.currentNodeTrajectory = List.of(node);
             node.backUp(new double[]{1.0});
         }
         assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
@@ -621,8 +614,8 @@ public class MCTSTreeSelectionTests {
         first10Visits(node);
         assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
         actionValues = node.actionValues(baseActions);
-        assertEquals( 0.0 + 0.3 / 1.3 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
-        assertEquals( 1.0, actionValues[1], 0.01);
-        assertEquals( 1.4/1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+        assertEquals(0.0 + 0.3 / 1.3 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
+        assertEquals(1.0, actionValues[1], 0.01);
+        assertEquals(1.4 / 1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
     }
 }

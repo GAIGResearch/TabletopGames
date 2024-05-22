@@ -573,6 +573,10 @@ public class Game {
                 if (debug)
                     System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
+                if (!observedActions.contains(action)) {
+                    throw new AssertionError("Action played that was not in the list of available actions: " + action);
+                }
+
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
