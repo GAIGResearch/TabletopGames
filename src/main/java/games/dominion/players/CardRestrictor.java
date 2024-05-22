@@ -12,12 +12,12 @@ public class CardRestrictor implements IPlayerDecorator {
 
     List<CardType> cardsToIgnore;
 
-    public CardRestrictor(CardType cardType) {
+    public CardRestrictor(String cardType) {
         this(List.of(cardType));
     }
 
-    public CardRestrictor(List<CardType> types) {
-        cardsToIgnore = types;
+    public CardRestrictor(List<String> types) {
+        cardsToIgnore = types.stream().map(CardType::valueOf).toList();
     }
 
     @Override

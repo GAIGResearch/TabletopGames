@@ -17,15 +17,13 @@ public class FirstRandomMoves implements IPlayerDecorator {
         TICK, TURN, ROUND
     }
 
-    public FirstRandomMoves(int n, TIME type) {
-        this.randomUntil = n;
-        this.type = type;
-        rnd = new Random(System.currentTimeMillis());
+    public FirstRandomMoves(int n, String type) {
+        this(n, type, System.currentTimeMillis());
     }
 
-    public FirstRandomMoves(int n, TIME type, long seed) {
+    public FirstRandomMoves(int n, String type, long seed) {
         this.randomUntil = n;
-        this.type = type;
+        this.type = TIME.valueOf(type.toUpperCase());
         rnd = new Random(seed);
     }
 
