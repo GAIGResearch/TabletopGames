@@ -9,7 +9,6 @@ import java.util.Random;
 
 public class FirstRandomMoves implements IPlayerDecorator {
 
-
     TIME type;
     int randomUntil;
     Random rnd;
