@@ -33,7 +33,6 @@ public class MCTSParams extends PlayerParameters {
     public double MASTDefaultValue = 0.0;
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 1.0;
-    public double hedgeBoltzmann = 100;
     public boolean useMASTAsActionHeuristic = false;
     public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
@@ -76,7 +75,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 1.0);
-        addTunableParameter("hedgeBoltzmann", 100.0);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("rolloutLengthPerPlayer", false);
         addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100));
@@ -144,7 +142,6 @@ public class MCTSParams extends PlayerParameters {
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         MASTGamma = (double) getParameterValue("MASTGamma");
         exp3Boltzmann = (double) getParameterValue("exp3Boltzmann");
-        hedgeBoltzmann = (double) getParameterValue("hedgeBoltzmann");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
 
@@ -215,19 +212,15 @@ public class MCTSParams extends PlayerParameters {
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
-        switch (type) {
-            case RANDOM:
-                return new RandomPlayer(new Random(getRandomSeed()));
-            case MAST:
-                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
-            case CLASS:
+        return switch (type) {
+            case RANDOM -> new RandomPlayer(new Random(getRandomSeed()));
+            case MAST -> new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
+            case CLASS ->
                 // we have a bespoke Class to instantiate
-                return JSONUtils.loadClassFromString(details);
-            case PARAMS:
-                throw new AssertionError("PolicyParameters have not been set");
-            default:
-                throw new AssertionError("Unknown strategy type : " + type);
-        }
+                    JSONUtils.loadClassFromString(details);
+            case PARAMS -> throw new AssertionError("PolicyParameters have not been set");
+            default -> throw new AssertionError("Unknown strategy type : " + type);
+        };
     }
 
     public IStateHeuristic getHeuristic() {
