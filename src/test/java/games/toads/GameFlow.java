@@ -109,6 +109,46 @@ public class GameFlow {
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
     }
 
+    @Test
+    public void loserStartsSecondRoundIfSoConfigured() {
+        params.secondRoundStart = ToadParameters.SecondRoundStart.LOSER;
+        for (int game = 0; game < 10; game++) {
+            fm.setup(state);
+            for (int i = 0; i < 32; i++) {
+                // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
+                int expectedPlayer = ((i + 2) / 4) % 2;
+                if (i >= 16) {
+                    int startPlayer = state.battlesWon[0][0] < state.battlesWon[0][1] ? 0 : 1;
+                    expectedPlayer = (expectedPlayer + startPlayer) % 2;
+                }
+                System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
+                assertEquals(expectedPlayer, state.getCurrentPlayer());
+                fm.next(state, fm.computeAvailableActions(state).get(0));
+            }
+            assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+        }
+    }
+
+    @Test
+    public void winnerStartsSecondRoundIfSoConfigured() {
+        params.secondRoundStart = ToadParameters.SecondRoundStart.WINNER;
+        for (int game = 0; game < 10; game++) {
+            fm.setup(state);
+            for (int i = 0; i < 32; i++) {
+                // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
+                int expectedPlayer = ((i + 2) / 4) % 2;
+                if (i >= 16) {
+                    int startPlayer = state.battlesWon[0][0] > state.battlesWon[0][1] ? 0 : 1;
+                    expectedPlayer = (expectedPlayer + startPlayer) % 2;
+                }
+                System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
+                assertEquals(expectedPlayer, state.getCurrentPlayer());
+                fm.next(state, fm.computeAvailableActions(state).get(0));
+            }
+            assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
+        }
+    }
+
 
     @Test
     public void winInRoundTwoIsCorrectlyAllocated() {
@@ -133,7 +173,7 @@ public class GameFlow {
         // attacker is player one
         playCards(
                 new ToadCard("Three", 3), // field
-                new ToadCard("Six", 6) ,
+                new ToadCard("Six", 6),
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6)  // Flank
         );
@@ -194,23 +234,36 @@ public class GameFlow {
     @Test
     public void bombAgainstFourAttack() {
         playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("Four", 4), // flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Bomb", 0, new Bomb())
-                // Flank
+                new ToadCard("Bomb", 0, new Bomb()),
+                new ToadCard("Five", 5), // field
+                new ToadCard("Four", 4) // flank
         );
-        assertEquals(1, state.battlesWon[0][0]);
-        assertEquals(0, state.battlesWon[0][1]);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
     public void bombAgainstFourDefense() {
         playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb()),  // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Four", 4) // flank
+                new ToadCard("Four", 4),  // flank
+                new ToadCard("Five", 5), // field
+                new ToadCard("Bomb", 0, new Bomb())  // Flank
+        );
+
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
+    }
+
+
+    @Test
+    public void bombAgainstSixAttack() {
+        playCards(
+                new ToadCard("Five", 5), // field
+                new ToadCard("Bomb", 0, new Bomb()), // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Six", 6)// flank
         );
 
         assertEquals(0, state.battlesWon[0][0]);
@@ -220,14 +273,14 @@ public class GameFlow {
     @Test
     public void bombAgainstSixDefense() {
         playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb()), // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Six", 6) // flank
+                new ToadCard("Six", 6), // flank
+                new ToadCard("Five", 5), // field
+                new ToadCard("Bomb", 0, new Bomb()) // Flank
         );
 
-        assertEquals(1, state.battlesWon[0][0]);
-        assertEquals(0, state.battlesWon[0][1]);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
