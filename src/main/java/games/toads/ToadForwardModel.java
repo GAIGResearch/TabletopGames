@@ -79,7 +79,7 @@ public class ToadForwardModel extends StandardForwardModel {
         } else {
             // we reveal cards and resolve
             // not the most elegant solution, but with 2 cards each no need to generalise yet
-            int attacker =  1 - currentPlayer; // attacker always goes first, so the current player is the defender
+            int attacker =  currentPlayer; // defender always goes first, so the current player is the attacker
             BattleResult battle = new BattleResult(attacker, state.fieldCards[attacker], state.fieldCards[1-attacker],
                     state.hiddenFlankCards[attacker], state.hiddenFlankCards[1-attacker]);
 

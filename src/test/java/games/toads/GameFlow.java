@@ -234,44 +234,31 @@ public class GameFlow {
     @Test
     public void bombAgainstFourAttack() {
         playCards(
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Bomb", 0, new Bomb()),
                 new ToadCard("Five", 5), // field
-                new ToadCard("Four", 4) // flank
+                new ToadCard("Four", 4), // flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Bomb", 0, new Bomb())
         );
-        assertEquals(0, state.battlesWon[0][0]);
-        assertEquals(1, state.battlesWon[0][1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
     public void bombAgainstFourDefense() {
         playCards(
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Four", 4),  // flank
                 new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb())  // Flank
-        );
-
-        assertEquals(1, state.battlesWon[0][0]);
-        assertEquals(0, state.battlesWon[0][1]);
-    }
-
-
-    @Test
-    public void bombAgainstSixAttack() {
-        playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb()), // Flank
+                new ToadCard("Bomb", 0, new Bomb()),  // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Six", 6)// flank
+                new ToadCard("Four", 4)  // flank
         );
 
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
 
+
     @Test
-    public void bombAgainstSixDefense() {
+    public void bombAgainstSixAttack() {
         playCards(
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6), // flank
@@ -279,8 +266,21 @@ public class GameFlow {
                 new ToadCard("Bomb", 0, new Bomb()) // Flank
         );
 
-        assertEquals(0, state.battlesWon[0][0]);
-        assertEquals(1, state.battlesWon[0][1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
+    }
+
+    @Test
+    public void bombAgainstSixDefense() {
+        playCards(
+                new ToadCard("Five", 5), // field
+                new ToadCard("Bomb", 0, new Bomb()), // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Six", 6) // flank
+        );
+
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
