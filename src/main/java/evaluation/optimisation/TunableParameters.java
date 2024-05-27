@@ -381,6 +381,36 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return retValue.toJSONString();
     }
 
+    @Override
+    public JSONObject instanceToJSON(boolean excludeDefaults) {
+        // this is very similar to getJSONDescription(), but only
+        // considers the current Parameter settings
+        // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
+        JSONObject retValue = new JSONObject();
+        retValue.put("class", this.getClass().getName());
+        for (String name : parameterNames) {
+            Object value = getParameterValue(name);
+            if (value != null) {
+                // check for defaults
+                if (excludeDefaults && value.equals(getDefaultParameterValue(name))) {
+                    continue;
+                }
+                if (value instanceof ITunableParameters tp) {
+                    value = tp.instanceToJSON(excludeDefaults);
+                } else if (value instanceof Enum) {
+                    value = value.toString();
+                }
+                retValue.put(name, value);
+            }
+        }
+        return retValue;
+    }
+
+    @Override
+    public ITunableParameters instanceFromJSON(JSONObject jsonObject) {
+        return JSONUtils.loadClassFromJSON(jsonObject);
+    }
+
     /**
      * Retrieve the values of all parameters.
      *
