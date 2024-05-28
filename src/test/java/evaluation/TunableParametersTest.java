@@ -166,11 +166,21 @@ public class TunableParametersTest {
         params.setParameterValue("maxTreeDepth", 67);
 
         JSONObject json = params.instanceToJSON(false);
+        assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
+
+        MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(params.allParametersAndValuesEqual(noChange));
+
         assertEquals(67, json.get("maxTreeDepth"));
+        assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
         assertEquals(0.56, ((JSONObject) json.get("rolloutPolicyParams")).get("temperature"));
         assertEquals(Math.sqrt(2), (Double) json.get("K"), 0.002);
         assertEquals(false, json.get("useMASTAsActionHeuristic"));
         assertEquals("BUDGET_FM_CALLS", json.get("budgetType"));
+
+        assertEquals(MCTSParams.class, params.instanceFromJSON(json).getClass());
+        MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
     }
 
     @Test
@@ -180,11 +190,18 @@ public class TunableParametersTest {
         params.setParameterValue("budgetType", BUDGET_TIME);
 
         JSONObject json = params.instanceToJSON(true);
+
+        MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(params.allParametersAndValuesEqual(noChange));
+
         assertEquals(67, json.get("maxTreeDepth"));
         assertEquals(0.56, ((JSONObject) json.get("rolloutPolicyParams")).get("temperature"));
         assertFalse(json.containsKey("K"));
         assertFalse(json.containsKey("useMASTAsActionHeuristic"));
         assertFalse(json.containsKey("selectionPolicy"));
         assertEquals("BUDGET_TIME", json.get("budgetType"));
+
+        MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
     }
 }

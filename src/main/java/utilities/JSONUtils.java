@@ -1,5 +1,6 @@
 package utilities;
 
+import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -59,6 +60,13 @@ public class JSONUtils {
                 return (T) Enum.valueOf(enumClass, val);
             }
             Class<T> outputClass = (Class<T>) Class.forName(cl);
+            if (TunableParameters.class.isAssignableFrom(outputClass)) {
+                // in this case we do not look for the Constructor arguments, as
+                // the parameters are defined directly as name-value pairs in JSON
+                T t = outputClass.getConstructor().newInstance();
+                TunableParameters.loadFromJSON((TunableParameters) t, json);
+                return t;
+            }
             JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
             Class<?>[] argClasses = new Class[argArray.size()];
             Object[] args = new Object[argArray.size()];
