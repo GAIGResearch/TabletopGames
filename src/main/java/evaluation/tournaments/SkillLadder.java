@@ -146,7 +146,10 @@ public class SkillLadder {
 
                 Pair<Object, int[]> results = ntbea.run();
                 allAgents.add((AbstractPlayer) results.a);
-                currentBestSettings = results.b;
+                if (!Arrays.equals(results.b, currentBestSettings)) {
+                    currentBestSettings = results.b;
+                    ntbea.writeAgentJSON(currentBestSettings, destDir + File.separator + "NTBEA_Budget_" + newBudget + ".json");
+                }
             } else {
                 allAgents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", String.valueOf(newBudget))));
             }

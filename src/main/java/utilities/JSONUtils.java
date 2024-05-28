@@ -6,6 +6,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import scala.util.parsing.json.JSON;
 
 import java.io.*;
 import java.lang.reflect.Array;
@@ -335,6 +336,49 @@ public class JSONUtils {
             e.printStackTrace();
             throw new AssertionError("Problem reading from file " + filename);
         }
+    }
+
+    public static String prettyPrint(JSONObject json, int tabDepth) {
+        StringBuilder sb = new StringBuilder("{\n");
+        Object[] keys = json.keySet().toArray();
+        for (int keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+            String keyName = keys[keyIndex].toString();
+            Object value = json.get(keyName);
+            sb.append("\t".repeat(Math.max(0, tabDepth)));
+            sb.append("\"").append(keyName).append("\"").append(" : ");
+            if (value instanceof JSONObject subJSON) {
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
+            } else if (value instanceof JSONArray array) {
+                sb.append("[\n");
+                tabDepth++;
+                for (int index = 0; index < array.size(); index++) {
+                    Object v = array.get(index);
+                    sb.append("\t".repeat(Math.max(0, tabDepth)));
+                    if (v instanceof JSONObject subJSON) {
+                        sb.append(prettyPrint(subJSON, tabDepth + 1));
+                    } else {
+                        sb.append(v);
+                    }
+                    if (index < array.size() - 1)
+                        sb.append(",");
+                    sb.append("\n");
+                }
+                tabDepth--;
+            } else if (value instanceof String){
+                sb.append("\"").append(value).append("\"");
+            } else if (value instanceof Long || value instanceof Integer ||
+                    value instanceof Double || value instanceof Boolean) {
+                sb.append(value);
+            } else {
+                throw new AssertionError("Unexpected value type in prettyPrint : " + value);
+            }
+            if (keyIndex < keys.length - 1)
+                sb.append(",");
+            sb.append("\n");
+        }
+        sb.append("\t".repeat(Math.max(0, tabDepth-1)));
+        sb.append("}");
+        return sb.toString();
     }
 
     @SuppressWarnings("unchecked")

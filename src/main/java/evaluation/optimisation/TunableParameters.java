@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
 
     private static boolean debug = false;
+    private JSONObject rawJSON;
     protected boolean resetOn = true; // if set to false while setting many parameter values, the _reset() method will not be called (for efficiency)
     List<String> parameterNames = new ArrayList<>();
     Map<String, List<Object>> possibleValues = new HashMap<>();
@@ -48,7 +49,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
             loadFromJSON(params, rawData);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
         }
     }
@@ -72,7 +72,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
         }
         params._reset();
-
+        params.rawJSON = rawData;
         // We should also check that there are no other properties in there
         allParams.add("class");
         allParams.add("args"); // this may be present if there are non-configurable parameters needed for the constructor
@@ -387,6 +387,10 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return JSONUtils.loadClassFromJSON(jsonObject);
     }
 
+    public void setRawJSON(JSONObject json) {
+        rawJSON = json;
+    }
+
     @Override
     public JSONObject instanceToJSON(boolean excludeDefaults) {
         // this is very similar to getJSONDescription(), but only
@@ -409,6 +413,14 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                     value = tp.instanceToJSON(excludeDefaults);
                 } else if (value instanceof Enum) {
                     value = value.toString();
+                } else if (!(value instanceof Integer || value instanceof Long ||
+                        value instanceof Double || value instanceof String ||
+                        value instanceof Boolean)) {
+                    // in this case we need to extract from the original rawJSON
+                    if (rawJSON == null) {
+                        throw new AssertionError("No rawJSON available to extract value for " + name);
+                    }
+                    value = rawJSON.get(name);
                 }
                 retValue.put(name, value);
             }

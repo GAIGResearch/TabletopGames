@@ -81,7 +81,6 @@ public class NTBEA {
                 } catch (NoSuchMethodException e) {
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " has no no-arg constructor");
                 } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " reflection error");
                 }
             }
@@ -118,6 +117,14 @@ public class NTBEA {
         elites.add(settings);
     }
 
+    public void writeAgentJSON(int[] settings, String fileName) {
+        try(FileWriter writer = new FileWriter(fileName)) {
+            writer.write(JSONUtils.prettyPrint(params.searchSpace.getAgentJSON(settings), 1));
+        } catch (IOException e) {
+            throw new AssertionError("Error writing agent settings to file " + fileName);
+        }
+    }
+
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *
@@ -127,6 +134,8 @@ public class NTBEA {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
+            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
+                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
         }
 
         // After all runs are complete, if tournamentGames are specified, then we allow all the
@@ -211,6 +220,8 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
+        writeAgentJSON(bestResult.b,
+                params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
     }
 
