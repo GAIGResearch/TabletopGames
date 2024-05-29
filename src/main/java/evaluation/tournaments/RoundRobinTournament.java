@@ -42,7 +42,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public boolean byTeam;
 
     protected long randomSeed = System.currentTimeMillis();
-    List<Integer> gameSeeds = new ArrayList();
+    List<Integer> gameSeeds = new ArrayList<>();
     int tournamentSeeds;
     String seedFile;
     Random seedRnd = new Random(randomSeed);
