@@ -92,6 +92,7 @@ public class SkillLadder {
         }
         firstAgent.setName("Budget " + startingTimeBudget);
         allAgents.add(firstAgent);
+        int matchups = (int) config.get(RunArg.matchups);
 
         for (int i = 0; i < iterations; i++) {
             int newBudget = (int) (Math.pow(timeBudgetMultiplier, i + 1) * startingTimeBudget);
@@ -120,6 +121,8 @@ public class SkillLadder {
             allAgents.get(i + 1).setName("Budget " + newBudget);
             if (newBudget < startGridBudget) // we fast forward to where we want to start the grid
                 continue;
+            if (matchups == 0)
+                continue; // we are just using this for progressive NTBEA tuning
             // for each iteration we run a round robin tournament; either against just the previous agent (with the previous budget), or
             // if we have grid set to true, then against all previous agents, one after the other
             boolean runAgainstAllAgents = (boolean) config.get(RunArg.grid);
@@ -130,7 +133,7 @@ public class SkillLadder {
                     continue;
                 List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1), allAgents.get(agentIndex));
                 Map<RunArg, Object> finalConfig = new HashMap<>();
-                finalConfig.put(RunArg.matchups, config.get(RunArg.matchups));
+                finalConfig.put(RunArg.matchups, matchups);
                 finalConfig.put(RunArg.byTeam, false);
                 finalConfig.put(RunArg.budget, newBudget);
                 RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, ONE_VS_ALL, finalConfig);
