@@ -7,6 +7,7 @@ import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
 import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
+import players.IAnyTimePlayer;
 import utilities.LinearRegression;
 import utilities.Pair;
 
@@ -37,6 +38,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected LinkedHashMap<Integer, Pair<Double, Double>> finalOrdinalRanking; // contains index of agent in agents
     LinkedList<Integer> allAgentIds;
     private int totalGamesRun;
+    private int budget;
     protected boolean randomGameParams;
     public String name;
     public boolean byTeam;
@@ -71,6 +73,12 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
         this.tournamentMode = tournamentMode;
+        this.budget = (int) config.get(RunArg.budget);
+        for (AbstractPlayer player : agents) {
+            if (player instanceof IAnyTimePlayer) {
+                ((IAnyTimePlayer) player).setBudget(this.budget);
+            }
+        }
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
@@ -123,7 +131,7 @@ public class RoundRobinTournament extends AbstractTournament {
             if (tournamentSeeds > 0) {
                 // use the same seed for each game in the tournament
                 // allSeeds contains the ones loaded from file - if empty then use a random one
-                int nextRnd =  allSeeds.isEmpty() ? seedRnd.nextInt() : allSeeds.get(iter);
+                int nextRnd = allSeeds.isEmpty() ? seedRnd.nextInt() : allSeeds.get(iter);
                 gameSeeds = IntStream.range(0, gamesPerMatchUp).mapToObj(i -> nextRnd).collect(toList());
             } else {
                 // use a seed per matchup
@@ -147,7 +155,6 @@ public class RoundRobinTournament extends AbstractTournament {
             }
             return new ArrayList<>(seeds);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Could not load seeds from file " + seedFile);
         }
 

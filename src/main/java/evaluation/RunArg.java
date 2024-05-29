@@ -10,8 +10,6 @@ import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;
 
 public enum RunArg {
-
-
     NTBEAMode("Defaults to NTBEA. The other options are StableNTBEA, MultiNTBEA and CoopNTBEA.\n" +
             "The default runs a single game for each iteration. CoopNTBEA uses the same agent for all players.\n" +
             "StableNTBEA runs P (number of players) for a given random seed, with the tuned agent in each position.\n" +
@@ -23,6 +21,10 @@ public enum RunArg {
             "\t This may be useful if you want to use the same destDir for multiple experiments.",
             false,
             new Usage[]{Usage.RunGames}),
+    budget("The budget to be used by all agent (if they support the IAnyTime interface). \n" +
+            "\t If non-zero then this will override the value in any JSON definitions.\n",
+            0,
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     byTeam("If true (the default) and the game supports teams, then one player type will be assigned to all players on a team.\n" +
             "\t If false, then each player will be assigned a player type independently.",
             true,
@@ -36,6 +38,11 @@ public enum RunArg {
             "\t will be created for each game, and then within that for  each player count combination.",
             "metrics" + File.separator + "out",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
+            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
+            "\t If a seedFile is specified, then this is ignored.",
+            0,
+            new Usage[]{Usage.RunGames}),
     evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
             -1,
             new Usage[]{Usage.ParameterSearch}),
@@ -60,6 +67,21 @@ public enum RunArg {
     gameParams("(Optional) A JSON file from which the game parameters will be initialised.",
             "",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    grid("If true, then we compare the current best agent against all previous budget levels. \n" +
+            "\t If false, then we just compare against the previous budget level.\n",
+            false,
+            new Usage[]{Usage.SkillLadder}),
+    gridMinorStart("""
+            Only relevant if grid is true, and gridStart != 0
+            \tThis is the minor grid budget start level.\s
+            """,
+            0,
+            new Usage[]{Usage.SkillLadder}),
+    gridStart("If provided we start calculating from the specified budget level. \n" +
+            "\tThe default is to start from the startBudget, which is always where\n" +
+            "\t the number of iterations are calculated from.\n",
+            0,
+            new Usage[]{Usage.SkillLadder}),
     iterations("The number of iterations of NTBEA to run (default is 1000)",
             1000,
             new Usage[]{Usage.ParameterSearch, Usage.SkillLadder}),
@@ -94,6 +116,9 @@ public enum RunArg {
             "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
+    multiplier("The multiplier for budget at each iteration of the SkillLadder process. \n",
+            2,
+            new Usage[]{Usage.SkillLadder}),
     nPlayers("The number of players in each game. Overrides playerRange.",
             -1,
             new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
@@ -128,11 +153,6 @@ public enum RunArg {
             "\t Defaults to the end of the tournament (-1)",
             -1,
             new Usage[]{Usage.RunGames}),
-    distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
-            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
-            "\t If a seedFile is specified, then this is ignored.",
-            0,
-            new Usage[]{Usage.RunGames}),
     searchSpace("The json-format file of the search space to use. No default.",
             "",
             new Usage[]{Usage.ParameterSearch}),
@@ -149,35 +169,17 @@ public enum RunArg {
             "\t Defaults to false",
             false,
             new Usage[]{Usage.RunGames}),
-    tuningBudget("The number of games to be played in total for each tuning process. \n" +
-            "\t One tuning process is run for each iteration of SkillLadder.\n",
-            1000,
-            new Usage[]{Usage.SkillLadder}),
     startBudget("The starting budget for the SkillLadder process. \n",
             8,
-            new Usage[]{Usage.SkillLadder}),
-    multiplier("The multiplier for budget at each iteration of the SkillLadder process. \n",
-            2,
-            new Usage[]{Usage.SkillLadder}),
-    grid("If true, then we compare the current best agent against all previous budget levels. \n" +
-            "\t If false, then we just compare against the previous budget level.\n",
-            false,
-            new Usage[]{Usage.SkillLadder}),
-    gridStart("If provided we start calculating from the specified budget level. \n" +
-            "\tThe default is to start from the startBudget, which is always where\n" +
-            "\t the number of iterations are calculated from.\n",
-            0,
-            new Usage[]{Usage.SkillLadder}),
-    gridMinorStart("""
-            Only relevant if grid is true, and gridStart != 0
-            \tThis is the minor grid budget start level.\s
-            """,
-            0,
             new Usage[]{Usage.SkillLadder}),
     tuneGame("If true, then we will tune the game instead of tuning the agent.\n" +
             "\tIn this case the searchSpace file must be relevant for the game.",
             false,
             new Usage[]{Usage.ParameterSearch}),
+    tuningBudget("The number of games to be played in total for each tuning process. \n" +
+            "\t One tuning process is run for each iteration of SkillLadder.\n",
+            1000,
+            new Usage[]{Usage.SkillLadder}),
     useThreeTuples("If true then we use 3-tuples as well as 1-, 2- and N-tuples",
             false,
             new Usage[]{Usage.ParameterSearch}),
@@ -233,7 +235,7 @@ public enum RunArg {
         if (checkUnknownArgs)
             checkUnknownArgs(args, usages);
         return Arrays.stream(RunArg.values())
-                .filter(arg ->  usages.stream().anyMatch(arg::isUsedIn))
+                .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(args)));
     }
 
@@ -261,7 +263,7 @@ public enum RunArg {
         String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
         checkUnknownArgs(keyNames, usages);
         return Arrays.stream(RunArg.values())
-                .filter(arg ->  usages.stream().anyMatch(arg::isUsedIn))
+                .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(json)));
     }
 

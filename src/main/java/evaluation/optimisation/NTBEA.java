@@ -12,6 +12,7 @@ import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
+import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -65,6 +66,13 @@ public class NTBEA {
         // if we are in coop mode, then we have no opponents. This is indicated by leaving the list empty.
         List<AbstractPlayer> opponents = params.mode == NTBEAParameters.Mode.CoopNTBEA ? new ArrayList<>()
                 : PlayerFactory.createPlayers(params.opponentDescriptor);
+        if (params.budget > 0) {
+            for (AbstractPlayer opponent : opponents) {
+                if (opponent instanceof IAnyTimePlayer anyTimePlayer) {
+                    anyTimePlayer.setBudget(params.budget);
+                }
+            }
+        }
 
         if (params.tuningGame) {
             if (new File(params.evalMethod).exists()) {

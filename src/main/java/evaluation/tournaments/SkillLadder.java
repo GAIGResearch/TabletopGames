@@ -23,7 +23,6 @@ import java.util.*;
 
 import static evaluation.RunArg.parseConfig;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
-import static utilities.Utils.getArg;
 
 /**
  * This runs experiments to plot the skills ladder of a game.
@@ -59,7 +58,8 @@ public class SkillLadder {
             }
         }
 
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(((String)config.get(RunArg.listener)).split("\\|")));
+        @SuppressWarnings("unchecked")
+        List<String> listenerClasses = (List<String>) config.get(RunArg.listener);
 
         GameType gameType = GameType.valueOf(config.get(RunArg.game).toString());
         int nPlayers = (int) config.get(RunArg.nPlayers);
@@ -79,7 +79,7 @@ public class SkillLadder {
         List<AbstractPlayer> allAgents = new ArrayList<>(iterations);
         AbstractPlayer firstAgent;
         if (NTBEABudget > 0) {
-            NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, String.valueOf(startingTimeBudget));
+            NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, startingTimeBudget);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
             ntbeaParameters.printSearchSpaceDetails();
             // first we tune the minimum budget against the default starting agent
@@ -99,15 +99,11 @@ public class SkillLadder {
         for (int i = 0; i < iterations; i++) {
             int newBudget = (int) (Math.pow(timeBudgetMultiplier, i + 1) * startingTimeBudget);
             if (NTBEABudget > 0) {
-                NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, String.valueOf(newBudget));
+                NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, newBudget);
                 // ensure we have one repeat for each player position (to make the tournament easier)
                 // we will have one from the elite set, so we need nPlayers-1 more
-                ntbeaParameters.repeats = Math.max(nPlayers - 1, ntbeaParameters.repeats);
                 NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
                 AbstractPlayer benchmark = allAgents.get(i).copy();
-                if (benchmark instanceof IAnyTimePlayer) {
-                    ((IAnyTimePlayer) benchmark).setBudget(newBudget);
-                }
                 ntbea.setOpponents(Collections.singletonList(benchmark));
                 ntbea.addElite(currentBestSettings);
 
@@ -118,11 +114,7 @@ public class SkillLadder {
                     ntbea.writeAgentJSON(currentBestSettings, destDir + File.separator + "NTBEA_Budget_" + newBudget + ".json");
                 }
             } else {
-                AbstractPlayer playerAgent = PlayerFactory.createPlayer(player);
-                if (playerAgent instanceof IAnyTimePlayer) {
-                    ((IAnyTimePlayer) playerAgent).setBudget(newBudget);
-                }
-                allAgents.add(playerAgent);
+                allAgents.add(PlayerFactory.createPlayer(player));
             }
             allAgents.get(i + 1).setName("Budget " + newBudget);
             if (newBudget < startGridBudget) // we fast forward to where we want to start the grid
@@ -139,6 +131,7 @@ public class SkillLadder {
                 Map<RunArg, Object> finalConfig = new HashMap<>();
                 finalConfig.put(RunArg.matchups, config.get(RunArg.matchups));
                 finalConfig.put(RunArg.byTeam, false);
+                finalConfig.put(RunArg.budget, newBudget);
                 RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, ONE_VS_ALL, finalConfig);
                 RRT.verbose = false;
                 for (String listenerClass : listenerClasses) {
@@ -153,6 +146,8 @@ public class SkillLadder {
                         gameTracker.setOutputDirectory(nestedDirectories);
                     }
                 }
+
+                // TODO: Check that we also set the budget correctly on all NTBEA runs etc.
 
                 long startTime = System.currentTimeMillis();
                 RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
@@ -171,15 +166,16 @@ public class SkillLadder {
         }
     }
 
-    private static NTBEAParameters constructNTBEAParameters(Map<RunArg, Object> config, String descriptor)   {
+    private static NTBEAParameters constructNTBEAParameters(Map<RunArg, Object> config, int budget) {
         double NTBEABudgetOnTournament = 0.50; // the complement will be spent on NTBEA runs
 
         NTBEAParameters ntbeaParameters = new NTBEAParameters(config);
         int gameBudget = (int) config.get(RunArg.tuningBudget);
         // then we override the parameters we want to change
 
-        ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + descriptor + File.separator + "NTBEA";
-        ntbeaParameters.repeats =  Math.max((int) config.get(RunArg.nPlayers), ntbeaParameters.repeats);;
+        ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + budget + File.separator + "NTBEA";
+        ntbeaParameters.repeats = Math.max((int) config.get(RunArg.nPlayers) - 1, ntbeaParameters.repeats);
+        ntbeaParameters.budget = budget;
 
         // TODO: If using StableNTBEA, then adjust this further for nPlayers
         ntbeaParameters.tournamentGames = (int) (gameBudget * NTBEABudgetOnTournament);

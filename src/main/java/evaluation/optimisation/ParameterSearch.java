@@ -57,7 +57,7 @@ public class ParameterSearch {
             return;
         }
         String searchSpaceFile = config.get(RunArg.searchSpace).toString();
-        if (searchSpaceFile.equals("")) {
+        if (searchSpaceFile.isEmpty()) {
             System.out.println("No search space file provided. Please provide a search space file.");
             return;
         }

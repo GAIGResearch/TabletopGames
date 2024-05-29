@@ -28,6 +28,7 @@ public class NTBEAParameters {
     public boolean tuningGame;
     public int iterationsPerRun;
     public int repeats;
+    public int budget;
     public int evalGames;
     public double kExplore;
     public int tournamentGames;
@@ -59,6 +60,7 @@ public class NTBEAParameters {
         kExplore = (double) args.get(RunArg.kExplore);
         neighbourhoodSize = (int) args.get(RunArg.neighbourhood);
         opponentDescriptor = (String) args.get(RunArg.opponent);
+        budget = (int) args.get(RunArg.budget);
         evalMethod = (String) args.get(RunArg.evalMethod);
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
         verbose = (boolean) args.get(RunArg.verbose);
