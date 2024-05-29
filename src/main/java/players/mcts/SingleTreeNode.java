@@ -152,6 +152,9 @@ public class SingleTreeNode {
         highReward = template.highReward;
         lowReward = template.lowReward;
         inheritedVisits = nVisits;
+        MASTStatistics = new ArrayList<>();
+        for (int i = 0; i < state.getNPlayers(); i++)
+            MASTStatistics.add(new HashMap<>());
     }
 
     protected void resetDepth(SingleTreeNode newRoot) {

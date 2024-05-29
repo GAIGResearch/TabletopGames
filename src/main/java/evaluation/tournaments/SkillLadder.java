@@ -89,9 +89,6 @@ public class SkillLadder {
         } else {
             // We are not tuning between rungs, and just update the budget in the player definition
             firstAgent = PlayerFactory.createPlayer(player);
-            if (firstAgent instanceof IAnyTimePlayer) {
-                ((IAnyTimePlayer) firstAgent).setBudget(startingTimeBudget);
-            }
         }
         firstAgent.setName("Budget " + startingTimeBudget);
         allAgents.add(firstAgent);
@@ -104,6 +101,10 @@ public class SkillLadder {
                 // we will have one from the elite set, so we need nPlayers-1 more
                 NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
                 AbstractPlayer benchmark = allAgents.get(i).copy();
+                // and set the budget of the benchmark (NTBEA will set the budgets of the other players)
+                if (benchmark instanceof IAnyTimePlayer bm) {
+                    bm.setBudget(newBudget);
+                }
                 ntbea.setOpponents(Collections.singletonList(benchmark));
                 ntbea.addElite(currentBestSettings);
 
@@ -147,8 +148,6 @@ public class SkillLadder {
                     }
                 }
 
-                // TODO: Check that we also set the budget correctly on all NTBEA runs etc.
-
                 long startTime = System.currentTimeMillis();
                 RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
                 RRT.run();
@@ -173,13 +172,17 @@ public class SkillLadder {
         int gameBudget = (int) config.get(RunArg.tuningBudget);
         // then we override the parameters we want to change
 
+        int nPlayers = (int) config.get(RunArg.nPlayers);
+
         ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + budget + File.separator + "NTBEA";
-        ntbeaParameters.repeats = Math.max((int) config.get(RunArg.nPlayers) - 1, ntbeaParameters.repeats);
+        ntbeaParameters.repeats = Math.max(nPlayers, ntbeaParameters.repeats);
         ntbeaParameters.budget = budget;
 
-        // TODO: If using StableNTBEA, then adjust this further for nPlayers
         ntbeaParameters.tournamentGames = (int) (gameBudget * NTBEABudgetOnTournament);
         ntbeaParameters.iterationsPerRun = (gameBudget - ntbeaParameters.tournamentGames) / ntbeaParameters.repeats;
+        if (ntbeaParameters.mode == NTBEAParameters.Mode.StableNTBEA) {
+            ntbeaParameters.iterationsPerRun /= nPlayers;
+        }
         ntbeaParameters.evalGames = 0;
         ntbeaParameters.logFile = "NTBEA_Runs.log";
 

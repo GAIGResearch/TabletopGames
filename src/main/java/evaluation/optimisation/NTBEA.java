@@ -12,6 +12,7 @@ import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
+import org.json.simple.JSONObject;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
@@ -125,9 +126,12 @@ public class NTBEA {
         elites.add(settings);
     }
 
+    @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
         try(FileWriter writer = new FileWriter(fileName)) {
-            writer.write(JSONUtils.prettyPrint(params.searchSpace.getAgentJSON(settings), 1));
+            JSONObject json = params.searchSpace.getAgentJSON(settings);
+            json.put("budget", params.budget);
+            writer.write(JSONUtils.prettyPrint(json, 1));
         } catch (IOException e) {
             throw new AssertionError("Error writing agent settings to file " + fileName);
         }
@@ -181,6 +185,7 @@ public class NTBEA {
                 config.put(matchups, gamesPerMatchup);
                 config.put(byTeam, false);
                 config.put(RunArg.distinctRandomSeeds, 0);
+                config.put(RunArg.budget, params.budget);
                 RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
                         NO_SELF_PLAY, config);
                 tournament.verbose = false;
