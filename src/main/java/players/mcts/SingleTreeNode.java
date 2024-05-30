@@ -799,10 +799,12 @@ public class SingleTreeNode {
         int actionVisits = actionVisits(action);
         // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
         // NaN or Infinities when we exponentiate)
-        if (params.normaliseRewards && actionVisits > 0)
-            actionValue = normalise(actionValue, root.lowReward, root.highReward);
-        else
-            actionValue = actionValue - nodeValue(decisionPlayer);
+        if (actionVisits > 0) {
+            if (params.normaliseRewards)
+                actionValue = normalise(actionValue, root.lowReward, root.highReward);
+            else
+                actionValue = actionValue - nodeValue(decisionPlayer);
+        }
         if (params.progressiveBias > 0)
             actionValue += getBiasValue(action);
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
