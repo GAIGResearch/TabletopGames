@@ -808,7 +808,7 @@ public class SingleTreeNode {
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
 
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
-            System.out.println("We have a non-number in EXP3 somewhere : " + retValue);
+            System.out.printf("We have a non-number %s in EXP3 somewhere from %s %n", retValue, action);
             retValue = 1e6;  // to avoid numeric issues later
         }
         // We add FPU after exponentiation for safety (as it likely a large number)
@@ -845,7 +845,6 @@ public class SingleTreeNode {
         int actionVisits = actionVisits(action);
         return params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
-
     /**
      * Perform a Monte Carlo rollout from this node.
      *

@@ -81,6 +81,11 @@ public class CatanActionFactory {
         OfferPlayerTrade opt = (OfferPlayerTrade) gs.tradeOffer;
 
         if (opt != null) {
+
+            if (opt.offeringPlayerID == player) {
+                throw new AssertionError("Player cannot trade with themselves");
+            }
+
             // Reject the trade offer
             actions.add(new EndNegotiation(player, opt.offeringPlayerID));
 
