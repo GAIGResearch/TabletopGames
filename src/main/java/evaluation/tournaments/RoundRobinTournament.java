@@ -7,6 +7,10 @@ import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
 import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
 import players.IAnyTimePlayer;
 import utilities.LinearRegression;
 import utilities.Pair;
@@ -28,9 +32,10 @@ public class RoundRobinTournament extends AbstractTournament {
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
     double[] pointsPerPlayer, winsPerPlayer;
-    double[][] winsPerPlayerPerOpponent;
     int[] nGamesPlayed, gamesPerPlayer;
     int[][] nGamesPlayedPerOpponent;
+    double[][] winsPerPlayerPerOpponent;
+    int[][] ordinalDeltaPerOpponent;
     double[] pointsPerPlayerSquared;
     double[] rankPerPlayer;
     double[] rankPerPlayerSquared;
@@ -84,10 +89,12 @@ public class RoundRobinTournament extends AbstractTournament {
         this.winsPerPlayer = new double[agents.size()];
         this.nGamesPlayed = new int[agents.size()];
         this.nGamesPlayedPerOpponent = new int[agents.size()][];
+        this.ordinalDeltaPerOpponent = new int[agents.size()][];
         this.winsPerPlayerPerOpponent = new double[agents.size()][];
         for (int i = 0; i < agents.size(); i++) {
             this.winsPerPlayerPerOpponent[i] = new double[agents.size()];
             this.nGamesPlayedPerOpponent[i] = new int[agents.size()];
+            this.ordinalDeltaPerOpponent[i] = new int[agents.size()];
         }
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
@@ -113,7 +120,6 @@ public class RoundRobinTournament extends AbstractTournament {
     public void run() {
         if (verbose)
             System.out.println("Playing " + game.getGameType().name());
-
 
         Set<String> agentNames = agents.stream()
                 //           .peek(a -> System.out.println(a.toString()))
@@ -339,6 +345,13 @@ public class RoundRobinTournament extends AbstractTournament {
         rankPerPlayer[j] += ordinalPos;
         rankPerPlayerSquared[j] += ordinalPos * ordinalPos;
 
+        for (int playerPos = 0; playerPos < game.getGameState().getNPlayers(); playerPos++) {
+            if (playerPos != player) {
+                int ordinalOther = game.getGameState().getOrdinalPosition(playerPos);
+                ordinalDeltaPerOpponent[j][matchUpPlayers.get(playerPos)] += ordinalOther - ordinalPos;
+            }
+        }
+
         if (results[player] == GameResult.WIN_GAME) {
             pointsPerPlayer[j] += 1;
             winsPerPlayer[j] += 1;
@@ -376,13 +389,16 @@ public class RoundRobinTournament extends AbstractTournament {
                 .sorted(Map.Entry.comparingByValue((o1, o2) -> o2.a.compareTo(o1.a)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
                         LinkedHashMap::new));
+
     }
 
     protected void reportResults() {
         calculateFinalResults();
         boolean toFile = resultsFile != null && !resultsFile.equals("");
-        ArrayList<String> dataDump = new ArrayList<>();
+        List<String> dataDump = new ArrayList<>();
         dataDump.add(name + "\n");
+
+        reportAlphaRank(dataDump);
 
         // To console
         if (verbose)
@@ -439,6 +455,102 @@ public class RoundRobinTournament extends AbstractTournament {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    protected void reportAlphaRank(List<String> dataDump) {
+        // alpha-rank calculations
+        double[] alphaValues = new double[]{1.0, 10.0, 100.0, 1000.0};
+        for (int alphaIndex = 0; alphaIndex < alphaValues.length; alphaIndex++) {
+            // T is our transition matrix
+            double alpha = alphaValues[alphaIndex];
+            double[][] T = new double[agents.size()][agents.size()];
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = 0; j < agents.size(); j++) {
+                    if (i == j) {
+                        T[i][j] = Math.exp(0);
+                    } else {
+                        double baseValue = ordinalDeltaPerOpponent[i][j] / (double) nGamesPlayedPerOpponent[i][j];
+                        T[i][j] = Math.exp(-alpha * baseValue);
+                    }
+                }
+                // then normalise the row
+                double rowSum = Arrays.stream(T[i]).sum();
+                for (int j = 0; j < agents.size(); j++) {
+                    T[i][j] /= rowSum;
+                }
+            }
+            RealMatrix transitionMatrix = MatrixUtils.createRealMatrix(T);
+
+            // We now find the stationary distribution of this transition matrix
+            // i.e. the pi for which T^T pi = pi
+            EigenDecomposition eig = new EigenDecomposition(transitionMatrix.transpose());
+            double[] eigenValues = eig.getRealEigenvalues();
+            // we now expect one of these to have a value of +1.0
+            for (int eigenIndex = 0; eigenIndex < eigenValues.length; eigenIndex++) {
+                if (Math.abs(eigenValues[eigenIndex] - 1.0) < 1e-6) {
+                    // we have found the eigenvector we want
+                    double[] pi = eig.getEigenvector(eigenIndex).toArray();
+                    // normalise pi
+                    double piSum = Arrays.stream(pi).sum();
+                    for (int i = 0; i < agents.size(); i++) {
+                        pi[i] /= piSum;
+                    }
+                    String str = "Alpha: " + alpha;
+                    dataDump.add(str + "\n");
+                    if (verbose) System.out.println(str);
+                    for (int i = 0; i < agents.size(); i++) {
+                        str = String.format("\t: %.3f\t%s%n", pi[i], agents.get(i));
+                        dataDump.add(str + "\n");
+                        if (verbose) System.out.print(str);
+                    }
+                    dataDump.add("\n");
+                    if (verbose) System.out.println();
+                }
+            }
+
+            // print the transition matrix
+            String str = "Transition matrix for alpha = " + alpha;
+            dataDump.add(str+ "\n");
+            if (verbose) System.out.println(str);
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = 0; j < agents.size(); j++) {
+                    str = String.format("%.3f\t", T[i][j]);
+                    dataDump.add(str);
+                    if (verbose) System.out.print(str);
+                }
+                dataDump.add("\n");
+                if (verbose) System.out.println();
+            }
+
+            // B = A^TA + A A^T
+            RealMatrix B = transitionMatrix.transpose().multiply(transitionMatrix).add(transitionMatrix.multiply(transitionMatrix.transpose()));
+            // This provides useful clustering information
+
+            // print the B matrix
+            str = "B matrix for alpha = " + alpha;
+            dataDump.add(str+ "\n");
+            if (verbose) System.out.println(str);
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = 0; j < agents.size(); j++) {
+                    str = String.format("%.3f\t", B.getEntry(i, j));
+                    dataDump.add(str);
+                    if (verbose) System.out.print(str);
+                }
+                dataDump.add("\n");
+                if (verbose) System.out.println();
+            }
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = i; j < agents.size(); j++) {
+                    if (i != j && B.getEntry(i, j) > 0.7) {
+                        str = String.format("\tAgents %s and %s have similar profiles\n", agents.get(i), agents.get(j));
+                        dataDump.add(str);
+                        if (verbose) System.out.print(str);
+                    }
+                }
+            }
+            dataDump.add("\n");
+            if (verbose) System.out.println();
         }
     }
 
