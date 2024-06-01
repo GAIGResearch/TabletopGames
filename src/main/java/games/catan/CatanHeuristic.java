@@ -98,7 +98,7 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
 
         // value player ports
         if (playerPorts != 0.0){
-            HashMap<CatanParameters.Resource, Counter> playerExchangeRates = state.getExchangeRates(playerId);
+            Map<CatanParameters.Resource, Counter> playerExchangeRates = state.getExchangeRates(playerId);
             for(Map.Entry<CatanParameters.Resource, Counter> e: playerExchangeRates.entrySet()){
                     if(e.getValue().getValue() < ((CatanParameters)state.getGameParameters()).default_exchange_rate - 1)
                         stateValue += playerPorts * 0.2;
