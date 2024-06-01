@@ -527,6 +527,7 @@ public class CatanGameState extends AbstractGameState {
         return scores[playerId];
     }
 
+
     private void shuffleDevelopmentCards(int playerId) {
         // Dev cards in hand are hidden and shuffled with the main deck
         int[][] turnCardsWereBoughtIn = new int[nPlayers][];

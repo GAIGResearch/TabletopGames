@@ -266,7 +266,7 @@ public class CatanForwardModel extends StandardForwardModel {
             mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
 
             // Trade With other players, unless already too many trades this turn
-            if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
+            if (cp.tradingAllowed && cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
                 mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
             }
 
