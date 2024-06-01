@@ -164,14 +164,13 @@ public class CatanForwardModel extends StandardForwardModel {
                     gs.setTurnOwner(opt.offeringPlayerID);
                     gs.nTradesThisTurn++;
                 } else {
+
                     // Trade offer reply needed, swap player between offering and other in action
                     switch (opt.stage) {
                         case Offer:
                             gs.setTurnOwner(opt.otherPlayerID);
-                            break;
                         case CounterOffer:
                             gs.setTurnOwner(opt.offeringPlayerID);
-                            break;
                     }
                 }
             }

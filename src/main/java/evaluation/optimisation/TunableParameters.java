@@ -418,6 +418,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                         value instanceof Boolean)) {
                     // in this case we need to extract from the original rawJSON
                     if (rawJSON == null) {
+                        if (getDefaultParameterValue(name).equals(value))
+                            continue; // in this case we have the default, so no need to pull in
                         throw new AssertionError("No rawJSON available to extract value for " + name);
                     }
                     value = rawJSON.get(name);

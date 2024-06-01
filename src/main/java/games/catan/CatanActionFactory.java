@@ -81,11 +81,6 @@ public class CatanActionFactory {
         OfferPlayerTrade opt = (OfferPlayerTrade) gs.tradeOffer;
 
         if (opt != null) {
-
-            if (opt.offeringPlayerID == player) {
-                throw new AssertionError("Player cannot trade with themselves");
-            }
-
             // Reject the trade offer
             actions.add(new EndNegotiation(player, opt.offeringPlayerID));
 
@@ -117,7 +112,7 @@ public class CatanActionFactory {
      */
     public static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs, ActionSpace actionSpace, int playerID, OfferPlayerTrade tradeOffer) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Map<CatanParameters.Resource, Counter> resources = gs.getPlayerResources(playerID);
+        HashMap<CatanParameters.Resource, Counter> resources = gs.getPlayerResources(playerID);
         int n_players = gs.getNPlayers();
         if (tradeOffer == null) {
             // Construct new offer
@@ -504,7 +499,7 @@ public class CatanActionFactory {
      */
     public static List<AbstractAction> getDefaultTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        Map<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
+        HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
         for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources.get(player).entrySet()) {
             if (res.getKey() == CatanParameters.Resource.WILD) continue;
 
@@ -520,7 +515,7 @@ public class CatanActionFactory {
                         trades.add(new DefaultTrade(resToGive, resToGet, nGive, player));
                     }
                 }
-                if (!trades.isEmpty()) {
+                if (trades.size() > 0) {
                     if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
                         actions.addAll(trades);
                     } else {
