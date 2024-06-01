@@ -1,6 +1,7 @@
 package games.fmtester;
 
 import evaluation.ForwardModelTester;
+import games.catan.CatanParameters;
 import org.junit.Test;
 
 public class ForwardModelTestsWithMCTS {
@@ -17,6 +18,13 @@ public class ForwardModelTestsWithMCTS {
     @Test
     public void testCatan() {
         new ForwardModelTester("game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Catan.json");
+    }
+
+    @Test
+    public void testCatanNoTrading() {
+        CatanParameters cp = new CatanParameters();
+        cp.setParameterValue("tradingAllowed", false);
+        new ForwardModelTester(cp, "game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Catan.json");
     }
     @Test
     public void testColtExpress() {
