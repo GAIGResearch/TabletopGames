@@ -542,7 +542,7 @@ public class RoundRobinTournament extends AbstractTournament {
             }
             for (int i = 0; i < agents.size(); i++) {
                 for (int j = i; j < agents.size(); j++) {
-                    if (i != j && B.getEntry(i, j) > 0.7) {
+                    if (i != j && B.getEntry(i, j) > 0.5) { // a somewhat arbitrary threshold
                         str = String.format("\tAgents %s and %s have similar profiles\n", agents.get(i), agents.get(j));
                         dataDump.add(str);
                         if (verbose) System.out.print(str);
