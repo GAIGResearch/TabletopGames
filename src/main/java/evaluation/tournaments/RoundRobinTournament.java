@@ -640,29 +640,31 @@ public class RoundRobinTournament extends AbstractTournament {
             }
 
             // print the cluster membership
-            String str = "The following agents cluster together, and may be considered equivalent: ";
-            dataDump.add(str + "\n");
-            if (verbose) System.out.println(str);
-            for (int i = 0; i < agents.size(); i++) {
-                // get all agents in this cluster
-                boolean clusterExists = false;
-                for (int j = 0; j < agents.size(); j++) {
-                    if (clusterMembership[j] != null && clusterMembership[j].equals(agents.get(i).toString())) {
-                        if (!clusterExists) {
-                            str = String.format("\tCluster for %s%n", agents.get(i));
+            if (alphaRankDetails && Arrays.stream(clusterMembership).anyMatch(Objects::nonNull)) {
+
+                String str = "The following agents cluster together, and may be considered equivalent: ";
+                dataDump.add(str + "\n");
+                if (verbose) System.out.println(str);
+                for (int i = 0; i < agents.size(); i++) {
+                    // get all agents in this cluster
+                    boolean clusterExists = false;
+                    for (int j = 0; j < agents.size(); j++) {
+                        if (clusterMembership[j] != null && clusterMembership[j].equals(agents.get(i).toString())) {
+                            if (!clusterExists) {
+                                str = String.format("\tCluster for %s%n", agents.get(i));
+                                dataDump.add(str);
+                                if (verbose) System.out.print(str);
+                            }
+                            clusterExists = true;
+                            str = String.format("\t\t%s%n", agents.get(j));
                             dataDump.add(str);
                             if (verbose) System.out.print(str);
                         }
-                        clusterExists = true;
-                        str = String.format("\t\t%s%n", agents.get(j));
-                        dataDump.add(str);
-                        if (verbose) System.out.print(str);
                     }
                 }
+                dataDump.add("\n");
+                if (verbose) System.out.println();
             }
-
-            dataDump.add("\n");
-            if (verbose) System.out.println();
         }
         return retValue;
     }
