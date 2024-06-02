@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
+import static java.lang.Math.sqrt;
 import static java.util.stream.Collectors.toList;
 
 public class RoundRobinTournament extends AbstractTournament {
@@ -31,11 +32,14 @@ public class RoundRobinTournament extends AbstractTournament {
     final int gamesPerMatchUp;
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
+    public boolean alphaRankDetails = true;
     double[] pointsPerPlayer, winsPerPlayer;
     int[] nGamesPlayed, gamesPerPlayer;
     int[][] nGamesPlayedPerOpponent;
-    double[][] winsPerPlayerPerOpponent;
+    int[][] winsPerPlayerPerOpponent;
     int[][] ordinalDeltaPerOpponent;
+    double[] alphaRankByWin;
+    double[] alphaRankByOrdinal;
     double[] pointsPerPlayerSquared;
     double[] rankPerPlayer;
     double[] rankPerPlayerSquared;
@@ -90,9 +94,9 @@ public class RoundRobinTournament extends AbstractTournament {
         this.nGamesPlayed = new int[agents.size()];
         this.nGamesPlayedPerOpponent = new int[agents.size()][];
         this.ordinalDeltaPerOpponent = new int[agents.size()][];
-        this.winsPerPlayerPerOpponent = new double[agents.size()][];
+        this.winsPerPlayerPerOpponent = new int[agents.size()][];
         for (int i = 0; i < agents.size(); i++) {
-            this.winsPerPlayerPerOpponent[i] = new double[agents.size()];
+            this.winsPerPlayerPerOpponent[i] = new int[agents.size()];
             this.nGamesPlayedPerOpponent[i] = new int[agents.size()];
             this.ordinalDeltaPerOpponent[i] = new int[agents.size()];
         }
@@ -374,11 +378,11 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.agents.size(); i++) {
             // We calculate the standard deviation, and hence the standard error on the mean value
             // (using a normal approximation, which is valid for large N)
-            double stdDev = pointsPerPlayerSquared[i] / nGamesPlayed[i] - (pointsPerPlayer[i] / nGamesPlayed[i])
-                    * (pointsPerPlayer[i] / nGamesPlayed[i]);
-            finalWinRanking.put(i, new Pair<>(pointsPerPlayer[i] / nGamesPlayed[i], stdDev / Math.sqrt(nGamesPlayed[i])));
+            double stdDev = Math.sqrt(pointsPerPlayerSquared[i] / nGamesPlayed[i] - (pointsPerPlayer[i] / nGamesPlayed[i])
+                    * (pointsPerPlayer[i] / nGamesPlayed[i]));
+            finalWinRanking.put(i, new Pair<>(pointsPerPlayer[i] / nGamesPlayed[i], stdDev / sqrt(nGamesPlayed[i])));
             stdDev = rankPerPlayerSquared[i] / nGamesPlayed[i] - (rankPerPlayer[i] / nGamesPlayed[i]) * (rankPerPlayer[i] / nGamesPlayed[i]);
-            finalOrdinalRanking.put(i, new Pair<>(rankPerPlayer[i] / nGamesPlayed[i], stdDev / Math.sqrt(nGamesPlayed[i])));
+            finalOrdinalRanking.put(i, new Pair<>(rankPerPlayer[i] / nGamesPlayed[i], stdDev / sqrt(nGamesPlayed[i])));
         }
         // Sort by points.
         finalWinRanking = finalWinRanking.entrySet().stream()
@@ -394,11 +398,24 @@ public class RoundRobinTournament extends AbstractTournament {
 
     protected void reportResults() {
         calculateFinalResults();
-        boolean toFile = resultsFile != null && !resultsFile.equals("");
+        boolean toFile = resultsFile != null && !resultsFile.isEmpty();
         List<String> dataDump = new ArrayList<>();
         dataDump.add(name + "\n");
 
-        reportAlphaRank(dataDump);
+        dataDump.add("Alpha calculations using Delta Ordinal\n");
+        if (verbose)
+            System.out.println("Alpha calculations using Delta Ordinal");
+        alphaRankByOrdinal = reportAlphaRank(dataDump, ordinalDeltaPerOpponent);
+        dataDump.add("Alpha calculations using Win Rate\n");
+        if (verbose)
+            System.out.println("Alpha calculations using Win Rate");
+        int[][] symmetrisedWins = new int[agents.size()][agents.size()];
+        for (int i = 0; i < agents.size(); i++) {
+            for (int j = 0; j < agents.size(); j++) {
+                symmetrisedWins[i][j] = (winsPerPlayerPerOpponent[i][j] - winsPerPlayerPerOpponent[j][i]);
+            }
+        }
+        alphaRankByWin = reportAlphaRank(dataDump, symmetrisedWins);
 
         // To console
         if (verbose)
@@ -444,6 +461,34 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.print(str);
         }
 
+        // now report alpha-rank
+        str = "\nAlpha-rank by Win Rate\n";
+        if (toFile) dataDump.add(str);
+        if (verbose) System.out.print(str);
+        List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
+                .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
+                .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                .toList();
+        for (Pair<String, Double> pair : sortedAlphaRank) {
+            str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+            if (toFile) dataDump.add(str);
+            if (verbose) System.out.print(str);
+        }
+
+        // and then by ordinal
+        str = "\nAlpha-rank by Ordinal Position\n";
+        if (toFile) dataDump.add(str);
+        if (verbose) System.out.print(str);
+        sortedAlphaRank = IntStream.range(0, agents.size())
+                .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
+                .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                .toList();
+        for (Pair<String, Double> pair : sortedAlphaRank) {
+            str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+            if (toFile) dataDump.add(str);
+            if (verbose) System.out.print(str);
+        }
+
         // To file
         if (toFile) {
             try {
@@ -458,9 +503,10 @@ public class RoundRobinTournament extends AbstractTournament {
         }
     }
 
-    protected void reportAlphaRank(List<String> dataDump) {
+    protected double[] reportAlphaRank(List<String> dataDump, int[][] values) {
         // alpha-rank calculations
-        double[] alphaValues = new double[]{1.0, 10.0, 100.0, 1000.0};
+        double[] alphaValues = new double[]{30.0};
+        double[] retValue = new double[agents.size()];
         for (int alphaIndex = 0; alphaIndex < alphaValues.length; alphaIndex++) {
             // T is our transition matrix
             double alpha = alphaValues[alphaIndex];
@@ -470,7 +516,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     if (i == j) {
                         T[i][j] = Math.exp(0);
                     } else {
-                        double baseValue = ordinalDeltaPerOpponent[i][j] / (double) nGamesPlayedPerOpponent[i][j];
+                        double baseValue = values[i][j] / (double) nGamesPlayedPerOpponent[i][j];
                         T[i][j] = Math.exp(-alpha * baseValue);
                     }
                 }
@@ -484,24 +530,47 @@ public class RoundRobinTournament extends AbstractTournament {
 
             // We now find the stationary distribution of this transition matrix
             // i.e. the pi for which T^T pi = pi
-            EigenDecomposition eig = new EigenDecomposition(transitionMatrix.transpose());
-            double[] eigenValues = eig.getRealEigenvalues();
-            // we now expect one of these to have a value of +1.0
-            for (int eigenIndex = 0; eigenIndex < eigenValues.length; eigenIndex++) {
-                if (Math.abs(eigenValues[eigenIndex] - 1.0) < 1e-6) {
-                    // we have found the eigenvector we want
-                    double[] pi = eig.getEigenvector(eigenIndex).toArray();
-                    // normalise pi
-                    double piSum = Arrays.stream(pi).sum();
-                    for (int i = 0; i < agents.size(); i++) {
-                        pi[i] /= piSum;
-                    }
-                    String str = "Alpha: " + alpha;
-                    dataDump.add(str + "\n");
-                    if (verbose) System.out.println(str);
-                    for (int i = 0; i < agents.size(); i++) {
-                        str = String.format("\t: %.3f\t%s%n", pi[i], agents.get(i));
+            try {
+                EigenDecomposition eig = new EigenDecomposition(transitionMatrix.transpose());
+                double[] eigenValues = eig.getRealEigenvalues();
+                // we now expect one of these to have a value of +1.0
+                for (int eigenIndex = 0; eigenIndex < eigenValues.length; eigenIndex++) {
+                    if (Math.abs(eigenValues[eigenIndex] - 1.0) < 1e-6) {
+                        // we have found the eigenvector we want
+                        double[] pi = eig.getEigenvector(eigenIndex).toArray();
+                        // normalise pi
+                        double piSum = Arrays.stream(pi).sum();
+                        for (int i = 0; i < agents.size(); i++) {
+                            pi[i] /= piSum;
+                        }
+                        String str = "Alpha: " + alpha;
                         dataDump.add(str + "\n");
+                        if (verbose) System.out.println(str);
+                        for (int i = 0; i < agents.size(); i++) {
+                            retValue[i] = pi[i];
+                            str = String.format("\t%.3f\t%s%n", pi[i], agents.get(i));
+                            dataDump.add(str);
+                            if (verbose) System.out.print(str);
+                        }
+                        dataDump.add("\n");
+                        if (verbose) System.out.println();
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Error in eigen decomposition - unable to calculate alpha-rank.");
+                return new double[agents.size()];
+            }
+
+            // print the transition matrix
+            if (alphaRankDetails) {
+                String str = "Transition matrix for alpha = " + alpha;
+                dataDump.add(str + "\n");
+                if (verbose) System.out.println(str);
+                for (int i = 0; i < agents.size(); i++) {
+                    for (int j = 0; j < agents.size(); j++) {
+                        str = String.format("%.3f\t", T[i][j]);
+                        dataDump.add(str);
                         if (verbose) System.out.print(str);
                     }
                     dataDump.add("\n");
@@ -509,49 +578,93 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
             }
 
-            // print the transition matrix
-            String str = "Transition matrix for alpha = " + alpha;
-            dataDump.add(str+ "\n");
-            if (verbose) System.out.println(str);
-            for (int i = 0; i < agents.size(); i++) {
-                for (int j = 0; j < agents.size(); j++) {
-                    str = String.format("%.3f\t", T[i][j]);
-                    dataDump.add(str);
-                    if (verbose) System.out.print(str);
-                }
-                dataDump.add("\n");
-                if (verbose) System.out.println();
-            }
-
             // B = A^TA + A A^T
             RealMatrix B = transitionMatrix.transpose().multiply(transitionMatrix).add(transitionMatrix.multiply(transitionMatrix.transpose()));
             // This provides useful clustering information
 
             // print the B matrix
-            str = "B matrix for alpha = " + alpha;
-            dataDump.add(str+ "\n");
-            if (verbose) System.out.println(str);
-            for (int i = 0; i < agents.size(); i++) {
-                for (int j = 0; j < agents.size(); j++) {
-                    str = String.format("%.3f\t", B.getEntry(i, j));
-                    dataDump.add(str);
-                    if (verbose) System.out.print(str);
+            if (alphaRankDetails) {
+                String str = "B matrix for alpha = " + alpha;
+                dataDump.add(str + "\n");
+                if (verbose) System.out.println(str);
+                for (int i = 0; i < agents.size(); i++) {
+                    for (int j = 0; j < agents.size(); j++) {
+                        str = String.format("%.3f\t", B.getEntry(i, j));
+                        dataDump.add(str);
+                        if (verbose) System.out.print(str);
+                    }
+                    dataDump.add("\n");
+                    if (verbose) System.out.println();
                 }
-                dataDump.add("\n");
-                if (verbose) System.out.println();
             }
+
+            // Now we cluster based on the bibliometrically symmetrised matrix B
+            double thresholdForCluster = 0.2 * sqrt(agents.size());
+            String[] clusterMembership = new String[agents.size()];
             for (int i = 0; i < agents.size(); i++) {
                 for (int j = i; j < agents.size(); j++) {
-                    if (i != j && B.getEntry(i, j) > 0.5) { // a somewhat arbitrary threshold
-                        str = String.format("\tAgents %s and %s have similar profiles\n", agents.get(i), agents.get(j));
+                    if (i != j) {
+                        // we look at the Euclidean distance between the two rows
+                        double distance = 0.0;
+                        for (int k = 0; k < agents.size(); k++) {
+                            distance += (B.getEntry(i, k) - B.getEntry(j, k)) * (B.getEntry(i, k) - B.getEntry(j, k));
+                        }
+                        distance = sqrt(distance);
+                        if (distance < thresholdForCluster) {
+                            if (clusterMembership[i] == null) {
+                                if (clusterMembership[j] == null) {
+                                    // neither in cluster, so new cluster
+                                    clusterMembership[i] = agents.get(i).toString();
+                                    clusterMembership[j] = agents.get(i).toString();
+                                } else {
+                                    // j is in a cluster, so i joins it
+                                    clusterMembership[i] = clusterMembership[j];
+                                }
+                            } else {
+                                if (clusterMembership[j] == null) {
+                                    // i is in a cluster, so j joins it
+                                    clusterMembership[j] = clusterMembership[i];
+                                } else {
+                                    // both in clusters, so merge
+                                    String cluster = clusterMembership[i];
+                                    for (int k = 0; k < agents.size(); k++) {
+                                        if (clusterMembership[k] != null && clusterMembership[k].equals(clusterMembership[j])) {
+                                            clusterMembership[k] = cluster;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // print the cluster membership
+            String str = "The following agents cluster together, and may be considered equivalent: ";
+            dataDump.add(str + "\n");
+            if (verbose) System.out.println(str);
+            for (int i = 0; i < agents.size(); i++) {
+                // get all agents in this cluster
+                boolean clusterExists = false;
+                for (int j = 0; j < agents.size(); j++) {
+                    if (clusterMembership[j] != null && clusterMembership[j].equals(agents.get(i).toString())) {
+                        if (!clusterExists) {
+                            str = String.format("\tCluster for %s%n", agents.get(i));
+                            dataDump.add(str);
+                            if (verbose) System.out.print(str);
+                        }
+                        clusterExists = true;
+                        str = String.format("\t\t%s%n", agents.get(j));
                         dataDump.add(str);
                         if (verbose) System.out.print(str);
                     }
                 }
             }
+
             dataDump.add("\n");
             if (verbose) System.out.println();
         }
+        return retValue;
     }
 
     public double getWinRate(int agentID) {
