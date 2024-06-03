@@ -47,7 +47,6 @@ public class RoundRobinTournament extends AbstractTournament {
     protected LinkedHashMap<Integer, Pair<Double, Double>> finalOrdinalRanking; // contains index of agent in agents
     LinkedList<Integer> allAgentIds;
     private int totalGamesRun;
-    private int budget;
     protected boolean randomGameParams;
     public String name;
     public boolean byTeam;
@@ -82,10 +81,10 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
         this.tournamentMode = tournamentMode;
-        this.budget = (int) config.get(RunArg.budget);
+        int budget = (int) config.get(RunArg.budget);
         for (AbstractPlayer player : agents) {
             if (player instanceof IAnyTimePlayer) {
-                ((IAnyTimePlayer) player).setBudget(this.budget);
+                ((IAnyTimePlayer) player).setBudget(budget);
             }
         }
         this.pointsPerPlayer = new double[agents.size()];
@@ -402,20 +401,24 @@ public class RoundRobinTournament extends AbstractTournament {
         List<String> dataDump = new ArrayList<>();
         dataDump.add(name + "\n");
 
-        dataDump.add("Alpha calculations using Delta Ordinal\n");
-        if (verbose)
-            System.out.println("Alpha calculations using Delta Ordinal");
-        alphaRankByOrdinal = reportAlphaRank(dataDump, ordinalDeltaPerOpponent);
-        dataDump.add("Alpha calculations using Win Rate\n");
-        if (verbose)
-            System.out.println("Alpha calculations using Win Rate");
-        int[][] symmetrisedWins = new int[agents.size()][agents.size()];
-        for (int i = 0; i < agents.size(); i++) {
-            for (int j = 0; j < agents.size(); j++) {
-                symmetrisedWins[i][j] = (winsPerPlayerPerOpponent[i][j] - winsPerPlayerPerOpponent[j][i]);
+        if (agents.size() > game.getGameState().getNPlayers()) {
+            // We only calculate alpha-rank if we have more agents than players
+            // otherwise the Transition matrix is singular
+            dataDump.add("Alpha calculations using Delta Ordinal\n");
+            if (verbose)
+                System.out.println("Alpha calculations using Delta Ordinal");
+            alphaRankByOrdinal = reportAlphaRank(dataDump, ordinalDeltaPerOpponent);
+            dataDump.add("Alpha calculations using Win Rate\n");
+            if (verbose)
+                System.out.println("Alpha calculations using Win Rate");
+            int[][] symmetrisedWins = new int[agents.size()][agents.size()];
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = 0; j < agents.size(); j++) {
+                    symmetrisedWins[i][j] = (winsPerPlayerPerOpponent[i][j] - winsPerPlayerPerOpponent[j][i]);
+                }
             }
+            alphaRankByWin = reportAlphaRank(dataDump, symmetrisedWins);
         }
-        alphaRankByWin = reportAlphaRank(dataDump, symmetrisedWins);
 
         // To console
         if (verbose)
@@ -461,34 +464,37 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.print(str);
         }
 
-        // now report alpha-rank
-        str = "\nAlpha-rank by Win Rate\n";
-        if (toFile) dataDump.add(str);
-        if (verbose) System.out.print(str);
-        List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
-                .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
-                .sorted((o1, o2) -> o2.b.compareTo(o1.b))
-                .toList();
-        for (Pair<String, Double> pair : sortedAlphaRank) {
-            str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+        if (agents.size() > game.getGameState().getNPlayers()) {
+            // now report alpha-rank as long as we have more agents than players
+            // otherwise the Transition matrix is singular and we get no additional information
+            // compared the the simple win rates
+            str = "\nAlpha-rank by Win Rate\n";
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
-        }
+            List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
+                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
+                    .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                    .toList();
+            for (Pair<String, Double> pair : sortedAlphaRank) {
+                str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+                if (toFile) dataDump.add(str);
+                if (verbose) System.out.print(str);
+            }
 
-        // and then by ordinal
-        str = "\nAlpha-rank by Ordinal Position\n";
-        if (toFile) dataDump.add(str);
-        if (verbose) System.out.print(str);
-        sortedAlphaRank = IntStream.range(0, agents.size())
-                .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
-                .sorted((o1, o2) -> o2.b.compareTo(o1.b))
-                .toList();
-        for (Pair<String, Double> pair : sortedAlphaRank) {
-            str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+            // and then by ordinal
+            str = "\nAlpha-rank by Ordinal Position\n";
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
+            sortedAlphaRank = IntStream.range(0, agents.size())
+                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
+                    .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                    .toList();
+            for (Pair<String, Double> pair : sortedAlphaRank) {
+                str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+                if (toFile) dataDump.add(str);
+                if (verbose) System.out.print(str);
+            }
         }
-
         // To file
         if (toFile) {
             try {
@@ -507,9 +513,8 @@ public class RoundRobinTournament extends AbstractTournament {
         // alpha-rank calculations
         double[] alphaValues = new double[]{30.0};
         double[] retValue = new double[agents.size()];
-        for (int alphaIndex = 0; alphaIndex < alphaValues.length; alphaIndex++) {
+        for (double alpha : alphaValues) {
             // T is our transition matrix
-            double alpha = alphaValues[alphaIndex];
             double[][] T = new double[agents.size()][agents.size()];
             for (int i = 0; i < agents.size(); i++) {
                 for (int j = 0; j < agents.size(); j++) {
