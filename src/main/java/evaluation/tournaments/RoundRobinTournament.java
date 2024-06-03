@@ -604,7 +604,7 @@ public class RoundRobinTournament extends AbstractTournament {
             }
 
             // Now we cluster based on the bibliometrically symmetrised matrix B
-            double thresholdForCluster = 0.2 * sqrt(agents.size());
+            double thresholdForCluster = 0.15 * sqrt(agents.size());
             String[] clusterMembership = new String[agents.size()];
             for (int i = 0; i < agents.size(); i++) {
                 for (int j = i; j < agents.size(); j++) {
