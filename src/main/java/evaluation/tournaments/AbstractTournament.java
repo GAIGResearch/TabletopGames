@@ -5,6 +5,8 @@ import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IGameRunner;
 import games.GameType;
+import players.IAnyTimePlayer;
+
 import java.util.List;
 
 public abstract class AbstractTournament implements IGameRunner {

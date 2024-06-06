@@ -10,6 +10,7 @@ import evaluation.listeners.IGameListener;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
 import games.GameType;
+import players.IAnyTimePlayer;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -156,6 +157,12 @@ public class GameEvaluator implements SolutionEvaluator {
             } else {
                 AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
                 allPlayers.add(tunedPlayer);
+            }
+        }
+        if (params.budget > 0) {
+            for (AbstractPlayer player : allPlayers) {
+                if (player instanceof IAnyTimePlayer anyTime)
+                    anyTime.setBudget(params.budget);
             }
         }
         return allPlayers;

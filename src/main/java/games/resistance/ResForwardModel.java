@@ -60,7 +60,7 @@ public class ResForwardModel extends StandardForwardModel {
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = false;
-            PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", visible);
+            PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", i, visible);
             if (spies.get(i)) {
                 ResPlayerCards idCard = new ResPlayerCards(ResPlayerCards.CardType.SPY);
                 idCard.setOwnerId(i);

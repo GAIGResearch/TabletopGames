@@ -3,18 +3,13 @@ package evaluation;
 import org.json.simple.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;
 
 public enum RunArg {
-
-
     NTBEAMode("Defaults to NTBEA. The other options are StableNTBEA, MultiNTBEA and CoopNTBEA.\n" +
             "The default runs a single game for each iteration. CoopNTBEA uses the same agent for all players.\n" +
             "StableNTBEA runs P (number of players) for a given random seed, with the tuned agent in each position.\n" +
@@ -26,6 +21,10 @@ public enum RunArg {
             "\t This may be useful if you want to use the same destDir for multiple experiments.",
             false,
             new Usage[]{Usage.RunGames}),
+    budget("The budget to be used by all agent (if they support the IAnyTime interface). \n" +
+            "\t If non-zero then this will override the value in any JSON definitions.\n",
+            0,
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     byTeam("If true (the default) and the game supports teams, then one player type will be assigned to all players on a team.\n" +
             "\t If false, then each player will be assigned a player type independently.",
             true,
@@ -39,6 +38,11 @@ public enum RunArg {
             "\t will be created for each game, and then within that for  each player count combination.",
             "metrics" + File.separator + "out",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
+            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
+            "\t If a seedFile is specified, then this is ignored.",
+            0,
+            new Usage[]{Usage.RunGames}),
     evalGames("The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations)",
             -1,
             new Usage[]{Usage.ParameterSearch}),
@@ -63,9 +67,24 @@ public enum RunArg {
     gameParams("(Optional) A JSON file from which the game parameters will be initialised.",
             "",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    grid("If true, then we compare the current best agent against all previous budget levels. \n" +
+            "\t If false, then we just compare against the previous budget level.\n",
+            false,
+            new Usage[]{Usage.SkillLadder}),
+    gridMinorStart("""
+            Only relevant if grid is true, and gridStart != 0
+            \tThis is the minor grid budget start level.\s
+            """,
+            0,
+            new Usage[]{Usage.SkillLadder}),
+    gridStart("If provided we start calculating from the specified budget level. \n" +
+            "\tThe default is to start from the startBudget, which is always where\n" +
+            "\t the number of iterations are calculated from.\n",
+            0,
+            new Usage[]{Usage.SkillLadder}),
     iterations("The number of iterations of NTBEA to run (default is 1000)",
             1000,
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.SkillLadder}),
     kExplore("The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
             "\tFor scores with larger ranges, we recommend scaling kExplore appropriately.",
             1.0,
@@ -81,7 +100,7 @@ public enum RunArg {
             "\t...or the number of matchups to run per combination of players if mode=exhaustive\n" +
             "\tfor NTBEA this will be used as a final tournament between the recommended agents from each run.",
             1,
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+            new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
     metrics("(Optional) The full class name of an IMetricsCollection implementation. " +
             "\t The recommended usage is to include these in the JSON file that defines the listener,\n" +
             "\t but this option is here for quick and dirty tests.",
@@ -97,6 +116,9 @@ public enum RunArg {
             "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
+    multiplier("The multiplier for budget at each iteration of the SkillLadder process. \n",
+            2,
+            new Usage[]{Usage.SkillLadder}),
     nPlayers("The number of players in each game. Overrides playerRange.",
             -1,
             new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
@@ -131,11 +153,6 @@ public enum RunArg {
             "\t Defaults to the end of the tournament (-1)",
             -1,
             new Usage[]{Usage.RunGames}),
-    distinctRandomSeeds("If non-zero, then this defines the number of distinct random seeds to use for each game.\n" +
-            "\t For tournament will be run for each individual random seed individually, using the other specified parameters.\n" +
-            "\t If a seedFile is specified, then this is ignored.",
-            0,
-            new Usage[]{Usage.RunGames}),
     searchSpace("The json-format file of the search space to use. No default.",
             "",
             new Usage[]{Usage.ParameterSearch}),
@@ -144,7 +161,7 @@ public enum RunArg {
             System.currentTimeMillis(),
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     seedFile("(Optional) A file containing a list of random seeds to use for individual games. \n" +
-            "\t If this is specified, then the 'seed' and `distinctRandomSeed` arguments are ignored. \n"+
+            "\t If this is specified, then the 'seed' and `distinctRandomSeed` arguments are ignored. \n" +
             "\t Each seed will be used in turn for a full tournament run, as defined by the other parameters.",
             "",
             new Usage[]{Usage.RunGames}),
@@ -152,10 +169,17 @@ public enum RunArg {
             "\t Defaults to false",
             false,
             new Usage[]{Usage.RunGames}),
+    startBudget("The starting budget for the SkillLadder process. \n",
+            8,
+            new Usage[]{Usage.SkillLadder}),
     tuneGame("If true, then we will tune the game instead of tuning the agent.\n" +
             "\tIn this case the searchSpace file must be relevant for the game.",
             false,
             new Usage[]{Usage.ParameterSearch}),
+    tuningBudget("The number of games to be played in total for each tuning process. \n" +
+            "\t One tuning process is run for each iteration of SkillLadder.\n",
+            1000,
+            new Usage[]{Usage.SkillLadder}),
     useThreeTuples("If true then we use 3-tuples as well as 1-, 2- and N-tuples",
             false,
             new Usage[]{Usage.ParameterSearch}),
@@ -170,7 +194,7 @@ public enum RunArg {
 
 
     public enum Usage {
-        RunGames, ParameterSearch
+        RunGames, ParameterSearch, SkillLadder
     }
 
     RunArg(String helpText, Object defaultValue, Usage[] when) {
@@ -203,24 +227,24 @@ public enum RunArg {
         return value;
     }
 
-    public static Map<RunArg, Object> parseConfig(String[] args, Usage usage) {
-        return RunArg.parseConfig(args, usage, true);
+    public static Map<RunArg, Object> parseConfig(String[] args, List<Usage> usages) {
+        return RunArg.parseConfig(args, usages, true);
     }
 
-    public static Map<RunArg, Object> parseConfig(String[] args, Usage usage, boolean checkUnknownArgs) {
+    public static Map<RunArg, Object> parseConfig(String[] args, List<Usage> usages, boolean checkUnknownArgs) {
         if (checkUnknownArgs)
-            checkUnknownArgs(args, usage);
+            checkUnknownArgs(args, usages);
         return Arrays.stream(RunArg.values())
-                .filter(arg -> arg.isUsedIn(usage))
+                .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(args)));
     }
 
-    public static void checkUnknownArgs(String[] args, Usage usage) {
+    public static void checkUnknownArgs(String[] args, List<Usage> usages) {
         List<String> possibleArgs = Arrays.stream(RunArg.values())
-                .filter(arg -> arg.isUsedIn(usage))
+                .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .map(RunArg::name)
-                .collect(toList());
-        List<String> keys = Arrays.stream(args).map(s -> s.split("=")[0]).collect(toList());
+                .toList();
+        List<String> keys = Arrays.stream(args).map(s -> s.split("=")[0]).toList();
         keys.stream().filter(arg -> !possibleArgs.contains(arg))
                 .forEach(arg -> System.out.println("Unknown argument: " + arg));
     }
@@ -228,9 +252,18 @@ public enum RunArg {
     @SuppressWarnings("unchecked")
     public static Map<RunArg, Object> parseConfig(JSONObject json, Usage usage) {
         String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
-        checkUnknownArgs(keyNames, usage);
+        checkUnknownArgs(keyNames, Collections.singletonList(usage));
         return Arrays.stream(RunArg.values())
                 .filter(arg -> arg.isUsedIn(usage))
+                .collect(toMap(arg -> arg, arg -> arg.parse(json)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<RunArg, Object> parseConfig(JSONObject json, List<Usage> usages) {
+        String[] keyNames = (String[]) json.keySet().stream().map(Object::toString).toArray(String[]::new);
+        checkUnknownArgs(keyNames, usages);
+        return Arrays.stream(RunArg.values())
+                .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(json)));
     }
 

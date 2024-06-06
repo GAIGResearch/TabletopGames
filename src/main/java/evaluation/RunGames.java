@@ -58,10 +58,10 @@ public class RunGames implements IGameRunner {
 
         /* 1. Settings for the tournament */
         RunGames runGames = new RunGames();
-        runGames.config = parseConfig(args, Usage.RunGames);
+        runGames.config = parseConfig(args, Collections.singletonList(Usage.RunGames));
 
         String setupFile = runGames.config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.equals("")) {
+        if (!setupFile.isEmpty()) {
             // Read from file instead
             try {
                 FileReader reader = new FileReader(setupFile);

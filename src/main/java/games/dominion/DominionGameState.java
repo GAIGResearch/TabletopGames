@@ -263,7 +263,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // need to shuffle drawpile separately
                 retValue.playerHands[p] = playerHands[p].copy();
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
-                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, p, false);
+                retValue.playerDrawPiles[p].redeterminiseUnknown(redeterminisationRnd, p);
             } else {
                 // need to combine and shuffle hands and drawpiles
                 retValue.playerDrawPiles[p] = playerDrawPiles[p].copy();
@@ -278,7 +278,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 // we have now moved all the non-visible Hand cards into the Draw pile to reshuffle
                 retValue.playerHands[p].clear(); // we will need to reconstruct this, including visibility status in a sec
                 // we then reshuffle all the non-visible cards
-                retValue.playerDrawPiles[p].shuffleVisible(redeterminisationRnd, playerId, false);
+                retValue.playerDrawPiles[p].redeterminiseUnknown(redeterminisationRnd, playerId);
                 // we then remove cards from the top of the shuffled draw pile (in the region we know is not visible)
                 for (int i = 0; i < playerHands[p].getSize(); i++) {
                     if (!playerHands[p].getVisibilityForPlayer(i, playerId)) {
@@ -380,10 +380,10 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         for (int i = 0; i < nPlayers; i++) {
             boolean[] handVisibility = new boolean[nPlayers];
             handVisibility[i] = true;
-            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
-            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, new boolean[nPlayers]);
-            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, VISIBLE_TO_ALL);
-            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, VISIBLE_TO_ALL);
+            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, i, handVisibility);
+            playerDrawPiles[i] = new PartialObservableDeck<>("Drawpile of Player " + i + 1, i, new boolean[nPlayers]);
+            playerDiscards[i] = new Deck<>("Discard of Player " + i + 1, i, VISIBLE_TO_ALL);
+            playerTableaux[i] = new Deck<>("Tableau of Player " + i + 1, i, VISIBLE_TO_ALL);
         }
         super.reset();
     }

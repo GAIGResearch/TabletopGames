@@ -3,6 +3,7 @@ package players.rhea;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import players.IAnyTimePlayer;
 import players.PlayerConstants;
 import players.mcts.MASTPlayer;
 import players.simple.RandomPlayer;
@@ -13,7 +14,7 @@ import utilities.Utils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RHEAPlayer extends AbstractPlayer {
+public class RHEAPlayer extends AbstractPlayer implements IAnyTimePlayer {
     private static final AbstractPlayer randomPlayer = new RandomPlayer();
     List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     protected List<RHEAIndividual> population = new ArrayList<>();
@@ -286,4 +287,14 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
 
+    @Override
+    public void setBudget(int budget) {
+        parameters.budget = budget;
+        parameters.setParameterValue("budget", budget);
+    }
+
+    @Override
+    public int getBudget() {
+        return parameters.budget;
+    }
 }

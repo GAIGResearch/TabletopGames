@@ -25,7 +25,7 @@ public class ParameterSearch {
         }
 
         // Config
-        Map<RunArg, Object> config = parseConfig(args, RunArg.Usage.ParameterSearch);
+        Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(RunArg.Usage.ParameterSearch));
 
         String setupFile = config.getOrDefault(RunArg.config, "").toString();
         if (!setupFile.isEmpty()) {
@@ -57,7 +57,7 @@ public class ParameterSearch {
             return;
         }
         String searchSpaceFile = config.get(RunArg.searchSpace).toString();
-        if (searchSpaceFile.equals("")) {
+        if (searchSpaceFile.isEmpty()) {
             System.out.println("No search space file provided. Please provide a search space file.");
             return;
         }

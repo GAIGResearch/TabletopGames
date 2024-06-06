@@ -7,6 +7,11 @@ import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
 import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import players.IAnyTimePlayer;
 import utilities.LinearRegression;
 import utilities.Pair;
 
@@ -18,6 +23,7 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
+import static java.lang.Math.sqrt;
 import static java.util.stream.Collectors.toList;
 
 public class RoundRobinTournament extends AbstractTournament {
@@ -26,10 +32,14 @@ public class RoundRobinTournament extends AbstractTournament {
     final int gamesPerMatchUp;
     protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
+    public boolean alphaRankDetails = true;
     double[] pointsPerPlayer, winsPerPlayer;
-    double[][] winsPerPlayerPerOpponent;
     int[] nGamesPlayed, gamesPerPlayer;
     int[][] nGamesPlayedPerOpponent;
+    int[][] winsPerPlayerPerOpponent;
+    int[][] ordinalDeltaPerOpponent;
+    double[] alphaRankByWin;
+    double[] alphaRankByOrdinal;
     double[] pointsPerPlayerSquared;
     double[] rankPerPlayer;
     double[] rankPerPlayerSquared;
@@ -42,7 +52,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public boolean byTeam;
 
     protected long randomSeed = System.currentTimeMillis();
-    List<Integer> gameSeeds = new ArrayList();
+    List<Integer> gameSeeds = new ArrayList<>();
     int tournamentSeeds;
     String seedFile;
     Random seedRnd = new Random(randomSeed);
@@ -71,15 +81,23 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
         this.tournamentMode = tournamentMode;
+        int budget = (int) config.get(RunArg.budget);
+        for (AbstractPlayer player : agents) {
+            if (player instanceof IAnyTimePlayer) {
+                ((IAnyTimePlayer) player).setBudget(budget);
+            }
+        }
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
         this.nGamesPlayed = new int[agents.size()];
         this.nGamesPlayedPerOpponent = new int[agents.size()][];
-        this.winsPerPlayerPerOpponent = new double[agents.size()][];
+        this.ordinalDeltaPerOpponent = new int[agents.size()][];
+        this.winsPerPlayerPerOpponent = new int[agents.size()][];
         for (int i = 0; i < agents.size(); i++) {
-            this.winsPerPlayerPerOpponent[i] = new double[agents.size()];
+            this.winsPerPlayerPerOpponent[i] = new int[agents.size()];
             this.nGamesPlayedPerOpponent[i] = new int[agents.size()];
+            this.ordinalDeltaPerOpponent[i] = new int[agents.size()];
         }
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
@@ -106,7 +124,6 @@ public class RoundRobinTournament extends AbstractTournament {
         if (verbose)
             System.out.println("Playing " + game.getGameType().name());
 
-
         Set<String> agentNames = agents.stream()
                 //           .peek(a -> System.out.println(a.toString()))
                 .map(AbstractPlayer::toString).collect(Collectors.toSet());
@@ -123,7 +140,7 @@ public class RoundRobinTournament extends AbstractTournament {
             if (tournamentSeeds > 0) {
                 // use the same seed for each game in the tournament
                 // allSeeds contains the ones loaded from file - if empty then use a random one
-                int nextRnd =  allSeeds.isEmpty() ? seedRnd.nextInt() : allSeeds.get(iter);
+                int nextRnd = allSeeds.isEmpty() ? seedRnd.nextInt() : allSeeds.get(iter);
                 gameSeeds = IntStream.range(0, gamesPerMatchUp).mapToObj(i -> nextRnd).collect(toList());
             } else {
                 // use a seed per matchup
@@ -147,7 +164,6 @@ public class RoundRobinTournament extends AbstractTournament {
             }
             return new ArrayList<>(seeds);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Could not load seeds from file " + seedFile);
         }
 
@@ -332,6 +348,13 @@ public class RoundRobinTournament extends AbstractTournament {
         rankPerPlayer[j] += ordinalPos;
         rankPerPlayerSquared[j] += ordinalPos * ordinalPos;
 
+        for (int playerPos = 0; playerPos < game.getGameState().getNPlayers(); playerPos++) {
+            if (playerPos != player) {
+                int ordinalOther = game.getGameState().getOrdinalPosition(playerPos);
+                ordinalDeltaPerOpponent[j][matchUpPlayers.get(playerPos)] += ordinalOther - ordinalPos;
+            }
+        }
+
         if (results[player] == GameResult.WIN_GAME) {
             pointsPerPlayer[j] += 1;
             winsPerPlayer[j] += 1;
@@ -354,11 +377,11 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.agents.size(); i++) {
             // We calculate the standard deviation, and hence the standard error on the mean value
             // (using a normal approximation, which is valid for large N)
-            double stdDev = pointsPerPlayerSquared[i] / nGamesPlayed[i] - (pointsPerPlayer[i] / nGamesPlayed[i])
-                    * (pointsPerPlayer[i] / nGamesPlayed[i]);
-            finalWinRanking.put(i, new Pair<>(pointsPerPlayer[i] / nGamesPlayed[i], stdDev / Math.sqrt(nGamesPlayed[i])));
-            stdDev = rankPerPlayerSquared[i] / nGamesPlayed[i] - (rankPerPlayer[i] / nGamesPlayed[i]) * (rankPerPlayer[i] / nGamesPlayed[i]);
-            finalOrdinalRanking.put(i, new Pair<>(rankPerPlayer[i] / nGamesPlayed[i], stdDev / Math.sqrt(nGamesPlayed[i])));
+            double stdDev = Math.sqrt(pointsPerPlayerSquared[i] / nGamesPlayed[i] - (pointsPerPlayer[i] / nGamesPlayed[i])
+                    * (pointsPerPlayer[i] / nGamesPlayed[i]));
+            finalWinRanking.put(i, new Pair<>(pointsPerPlayer[i] / nGamesPlayed[i], stdDev / sqrt(nGamesPlayed[i])));
+            stdDev = Math.sqrt(rankPerPlayerSquared[i] / nGamesPlayed[i] - (rankPerPlayer[i] / nGamesPlayed[i]) * (rankPerPlayer[i] / nGamesPlayed[i]));
+            finalOrdinalRanking.put(i, new Pair<>(rankPerPlayer[i] / nGamesPlayed[i], stdDev / sqrt(nGamesPlayed[i])));
         }
         // Sort by points.
         finalWinRanking = finalWinRanking.entrySet().stream()
@@ -369,13 +392,33 @@ public class RoundRobinTournament extends AbstractTournament {
                 .sorted(Map.Entry.comparingByValue((o1, o2) -> o2.a.compareTo(o1.a)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
                         LinkedHashMap::new));
+
     }
 
     protected void reportResults() {
         calculateFinalResults();
-        boolean toFile = resultsFile != null && !resultsFile.equals("");
-        ArrayList<String> dataDump = new ArrayList<>();
+        boolean toFile = resultsFile != null && !resultsFile.isEmpty();
+        List<String> dataDump = new ArrayList<>();
         dataDump.add(name + "\n");
+
+        if (agents.size() > game.getGameState().getNPlayers()) {
+            // We only calculate alpha-rank if we have more agents than players
+            // otherwise the Transition matrix is singular
+            dataDump.add("Alpha calculations using Delta Ordinal\n");
+            if (verbose)
+                System.out.println("Alpha calculations using Delta Ordinal");
+            alphaRankByOrdinal = reportAlphaRank(dataDump, ordinalDeltaPerOpponent);
+            dataDump.add("Alpha calculations using Win Rate\n");
+            if (verbose)
+                System.out.println("Alpha calculations using Win Rate");
+            int[][] symmetrisedWins = new int[agents.size()][agents.size()];
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = 0; j < agents.size(); j++) {
+                    symmetrisedWins[i][j] = (winsPerPlayerPerOpponent[i][j] - winsPerPlayerPerOpponent[j][i]);
+                }
+            }
+            alphaRankByWin = reportAlphaRank(dataDump, symmetrisedWins);
+        }
 
         // To console
         if (verbose)
@@ -421,6 +464,37 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.print(str);
         }
 
+        if (agents.size() > game.getGameState().getNPlayers()) {
+            // now report alpha-rank as long as we have more agents than players
+            // otherwise the Transition matrix is singular and we get no additional information
+            // compared the the simple win rates
+            str = "\nAlpha-rank by Win Rate\n";
+            if (toFile) dataDump.add(str);
+            if (verbose) System.out.print(str);
+            List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
+                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
+                    .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                    .toList();
+            for (Pair<String, Double> pair : sortedAlphaRank) {
+                str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+                if (toFile) dataDump.add(str);
+                if (verbose) System.out.print(str);
+            }
+
+            // and then by ordinal
+            str = "\nAlpha-rank by Ordinal Position\n";
+            if (toFile) dataDump.add(str);
+            if (verbose) System.out.print(str);
+            sortedAlphaRank = IntStream.range(0, agents.size())
+                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
+                    .sorted((o1, o2) -> o2.b.compareTo(o1.b))
+                    .toList();
+            for (Pair<String, Double> pair : sortedAlphaRank) {
+                str = String.format("\t%-30s\t%.2f\n", pair.a, pair.b);
+                if (toFile) dataDump.add(str);
+                if (verbose) System.out.print(str);
+            }
+        }
         // To file
         if (toFile) {
             try {
@@ -433,6 +507,171 @@ public class RoundRobinTournament extends AbstractTournament {
                 e.printStackTrace();
             }
         }
+    }
+
+    protected double[] reportAlphaRank(List<String> dataDump, int[][] values) {
+        // alpha-rank calculations
+        double[] alphaValues = new double[]{30.0};
+        double[] retValue = new double[agents.size()];
+        for (double alpha : alphaValues) {
+            // T is our transition matrix
+            double[][] T = new double[agents.size()][agents.size()];
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = 0; j < agents.size(); j++) {
+                    if (i == j) {
+                        T[i][j] = Math.exp(0);
+                    } else {
+                        double baseValue = values[i][j] / (double) nGamesPlayedPerOpponent[i][j];
+                        T[i][j] = Math.exp(-alpha * baseValue);
+                    }
+                }
+                // then normalise the row
+                double rowSum = Arrays.stream(T[i]).sum();
+                for (int j = 0; j < agents.size(); j++) {
+                    T[i][j] /= rowSum;
+                }
+            }
+            RealMatrix transitionMatrix = MatrixUtils.createRealMatrix(T);
+
+            // We now find the stationary distribution of this transition matrix
+            // i.e. the pi for which T^T pi = pi
+            try {
+                EigenDecomposition eig = new EigenDecomposition(transitionMatrix.transpose());
+                double[] eigenValues = eig.getRealEigenvalues();
+                // we now expect one of these to have a value of +1.0
+                for (int eigenIndex = 0; eigenIndex < eigenValues.length; eigenIndex++) {
+                    if (Math.abs(eigenValues[eigenIndex] - 1.0) < 1e-6) {
+                        // we have found the eigenvector we want
+                        double[] pi = eig.getEigenvector(eigenIndex).toArray();
+                        // normalise pi
+                        double piSum = Arrays.stream(pi).sum();
+                        for (int i = 0; i < agents.size(); i++) {
+                            pi[i] /= piSum;
+                        }
+                        String str = "Alpha: " + alpha;
+                        dataDump.add(str + "\n");
+                        if (verbose) System.out.println(str);
+                        for (int i = 0; i < agents.size(); i++) {
+                            retValue[i] = pi[i];
+                            str = String.format("\t%.3f\t%s%n", pi[i], agents.get(i));
+                            dataDump.add(str);
+                            if (verbose) System.out.print(str);
+                        }
+                        dataDump.add("\n");
+                        if (verbose) System.out.println();
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Error in eigen decomposition - unable to calculate alpha-rank.");
+                return new double[agents.size()];
+            }
+
+            // print the transition matrix
+            if (alphaRankDetails) {
+                String str = "Transition matrix for alpha = " + alpha;
+                dataDump.add(str + "\n");
+                if (verbose) System.out.println(str);
+                for (int i = 0; i < agents.size(); i++) {
+                    for (int j = 0; j < agents.size(); j++) {
+                        str = String.format("%.3f\t", T[i][j]);
+                        dataDump.add(str);
+                        if (verbose) System.out.print(str);
+                    }
+                    dataDump.add("\n");
+                    if (verbose) System.out.println();
+                }
+            }
+
+            // B = A^TA + A A^T
+            RealMatrix B = transitionMatrix.transpose().multiply(transitionMatrix).add(transitionMatrix.multiply(transitionMatrix.transpose()));
+            // This provides useful clustering information
+
+            // print the B matrix
+            if (alphaRankDetails) {
+                String str = "B matrix for alpha = " + alpha;
+                dataDump.add(str + "\n");
+                if (verbose) System.out.println(str);
+                for (int i = 0; i < agents.size(); i++) {
+                    for (int j = 0; j < agents.size(); j++) {
+                        str = String.format("%.3f\t", B.getEntry(i, j));
+                        dataDump.add(str);
+                        if (verbose) System.out.print(str);
+                    }
+                    dataDump.add("\n");
+                    if (verbose) System.out.println();
+                }
+            }
+
+            // Now we cluster based on the bibliometrically symmetrised matrix B
+            double thresholdForCluster = 0.15 * sqrt(agents.size());
+            String[] clusterMembership = new String[agents.size()];
+            for (int i = 0; i < agents.size(); i++) {
+                for (int j = i; j < agents.size(); j++) {
+                    if (i != j) {
+                        // we look at the Euclidean distance between the two rows
+                        double distance = 0.0;
+                        for (int k = 0; k < agents.size(); k++) {
+                            distance += (B.getEntry(i, k) - B.getEntry(j, k)) * (B.getEntry(i, k) - B.getEntry(j, k));
+                        }
+                        distance = sqrt(distance);
+                        if (distance < thresholdForCluster) {
+                            if (clusterMembership[i] == null) {
+                                if (clusterMembership[j] == null) {
+                                    // neither in cluster, so new cluster
+                                    clusterMembership[i] = agents.get(i).toString();
+                                    clusterMembership[j] = agents.get(i).toString();
+                                } else {
+                                    // j is in a cluster, so i joins it
+                                    clusterMembership[i] = clusterMembership[j];
+                                }
+                            } else {
+                                if (clusterMembership[j] == null) {
+                                    // i is in a cluster, so j joins it
+                                    clusterMembership[j] = clusterMembership[i];
+                                } else {
+                                    // both in clusters, so merge
+                                    String cluster = clusterMembership[i];
+                                    for (int k = 0; k < agents.size(); k++) {
+                                        if (clusterMembership[k] != null && clusterMembership[k].equals(clusterMembership[j])) {
+                                            clusterMembership[k] = cluster;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // print the cluster membership
+            if (alphaRankDetails && Arrays.stream(clusterMembership).anyMatch(Objects::nonNull)) {
+
+                String str = "The following agents cluster together, and may be considered equivalent: ";
+                dataDump.add(str + "\n");
+                if (verbose) System.out.println(str);
+                for (int i = 0; i < agents.size(); i++) {
+                    // get all agents in this cluster
+                    boolean clusterExists = false;
+                    for (int j = 0; j < agents.size(); j++) {
+                        if (clusterMembership[j] != null && clusterMembership[j].equals(agents.get(i).toString())) {
+                            if (!clusterExists) {
+                                str = String.format("\tCluster for %s%n", agents.get(i));
+                                dataDump.add(str);
+                                if (verbose) System.out.print(str);
+                            }
+                            clusterExists = true;
+                            str = String.format("\t\t%s%n", agents.get(j));
+                            dataDump.add(str);
+                            if (verbose) System.out.print(str);
+                        }
+                    }
+                }
+                dataDump.add("\n");
+                if (verbose) System.out.println();
+            }
+        }
+        return retValue;
     }
 
     public double getWinRate(int agentID) {

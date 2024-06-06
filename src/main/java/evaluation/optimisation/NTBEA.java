@@ -12,6 +12,8 @@ import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
+import org.json.simple.JSONObject;
+import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -81,7 +83,6 @@ public class NTBEA {
                 } catch (NoSuchMethodException e) {
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " has no no-arg constructor");
                 } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " reflection error");
                 }
             }
@@ -118,6 +119,17 @@ public class NTBEA {
         elites.add(settings);
     }
 
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        try(FileWriter writer = new FileWriter(fileName)) {
+            JSONObject json = params.searchSpace.getAgentJSON(settings);
+            json.put("budget", params.budget);
+            writer.write(JSONUtils.prettyPrint(json, 1));
+        } catch (IOException e) {
+            throw new AssertionError("Error writing agent settings to file " + fileName);
+        }
+    }
+
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *
@@ -127,6 +139,8 @@ public class NTBEA {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
+            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
+                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
         }
 
         // After all runs are complete, if tournamentGames are specified, then we allow all the
@@ -164,6 +178,7 @@ public class NTBEA {
                 config.put(matchups, gamesPerMatchup);
                 config.put(byTeam, false);
                 config.put(RunArg.distinctRandomSeeds, 0);
+                config.put(RunArg.budget, params.budget);
                 RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
                         NO_SELF_PLAY, config);
                 tournament.verbose = false;
@@ -211,6 +226,8 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
+        writeAgentJSON(bestResult.b,
+                params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
     }
 

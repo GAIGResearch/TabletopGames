@@ -36,7 +36,6 @@ public class CatanForwardModel extends StandardForwardModel {
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters) state.getGameParameters();
-        firstState.getCoreGameParameters().setMaxRounds(params.maxRounds);
 
         state.setBoard(generateBoard(params, state.getRnd()));
         state.setGraph(extractGraphFromBoard(state.getBoard(), params, state.getRnd()));
@@ -134,7 +133,7 @@ public class CatanForwardModel extends StandardForwardModel {
         else if (gs.getGamePhase() == Main) {
 
             // Win condition
-            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win || gs.getRoundCounter() >= gs.getCoreGameParameters().getMaxRounds()) {
+            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win) {
                 endGame(currentState);
                 if (gs.getCoreGameParameters().verbose) {
                     System.out.println("Game over! winner = " + player);
@@ -267,7 +266,7 @@ public class CatanForwardModel extends StandardForwardModel {
             mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
 
             // Trade With other players, unless already too many trades this turn
-            if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
+            if (cp.tradingAllowed && cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
                 mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
             }
 
