@@ -9,6 +9,7 @@
     "size": ["String", "1x1"],
     "img": ["String", "monsters/goblin-archer.png"],
     "attackType": ["String", "ranged"],
+    "description": ["String", "Goblins are a small, nimble race with sharp features and vile dispositions. Often underestimated due to their small size, goblins are dangerous, if cowardly, fighters."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -59,6 +60,7 @@
     "size": ["String", "1x2"],
     "img": ["String", "monsters/barghest.png"],
     "attackType": ["String", "melee"],
+    "description": ["String", "Variously called \"yeth hounds,\" \"black dogs,\" or \"barghests\" depending on local tradition, these creatures are well known and feared throughout Terrinoth. A thousand stories are told about them, but they all agree on one thing: when they have the scent of their quarry, they will never stop chasing him until he is dead."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -113,6 +115,7 @@
     "size": ["String", "1x1"],
     "img": ["String", "monsters/zombie.png"],
     "attackType": ["String", "melee"],
+    "description": ["String", "Created from the still-rotting corpse of a dead man, zombies are common both as minions of vile necromancers and unfortunate side-effects of dark magic. All zombies can carry noxious disease, and the stronger, cleverer sort have been known to seize their prey and hold it in place, waiting for the slow-moving horde to catch up."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -165,6 +168,7 @@
     "size": ["String", "1x1"],
     "img": ["String", "monsters/cave-spider.png"],
     "attackType": ["String", "melee"],
+    "description": ["String", "Large, aggressive, and frequently hunting in packs, there are few monsters more dangerous than the venomous cave spiders of the Shadow Peaks. In recent years they have spread far beyond their usual territory, and some of the spiders now hunt with numerous sticky webs... "],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -215,6 +219,7 @@
     "size": ["String", "1x1"],
     "img": ["String", "monsters/flesh-moulder.png"],
     "attackType": ["String", "ranged"],
+    "description": ["String", "Necromancers study the dead, animating their flesh and bones to fight for them. Flesh Moulders study the living, and are capable of rending or knitting living flesh as it suits them. Only the most insane or depraved spellcasters are willing to cut open living beings to gain true mastery of the flesh, but those who do are rewarded with the ability to shape others into forms more pleasing, repairing their wounds and keeping them fighting."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -267,6 +272,7 @@
     "size": ["String", "2x2"],
     "img": ["String", "monsters/ettin.png"],
     "attackType": ["String", "melee"],
+    "description": ["String", "One might think that a giant with two heads would be twice as smart as any other giant. Sadly, this is not true of most ettins, who find their two heads can seldom agree on anything. One thing all ettins do agree on, however, is that heroes taste delicious."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -319,6 +325,7 @@
     "size": ["String", "2x2"],
     "img": ["String", "monsters/elemental.png"],
     "attackType": ["String", "ranged"],
+    "description": ["String", "Beings comprised of all four primal elements are dangerous and impossible to control. Their warring primal natures make these elementals lethal to all around them."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -369,6 +376,7 @@
     "size": ["String", "2x2"],
     "img": ["String", "monsters/merriod.png"],
     "attackType": ["String", "melee"],
+    "description": ["String", "Lurking beneath the lakes, streams, and swamps of Terrinoth, merriods use their powerful, flexible tentacles to immobilize their prey. They then squeeze the life out of them or, if feeling particularly cruel, eat them while still alive. The flailing tentacles of a merriod are a hazard to even the most seasoned adventurer."],
     "act1": [
       {
         "instance": ["String", "Minion"],
@@ -417,8 +425,9 @@
     "setup": ["Integer[]", [1, 0, 1]],
     "traits": ["String[]", ["Dark", "Cave"]],
     "size": ["String", "2x3"],
-    "img": ["String", "monsters/merriod.png"],
+    "img": ["String", "monsters/shadow-dragon.png"],
     "attackType": ["String", "melee"],
+    "description": ["String", "Some fragmented records from the Dragon Wars speak of dragons that shrouded themselves in darkness, emerging from the blackness only to kindle their flames. The idea of such a large enemy moving with such stealth and secrecy is obviously terrifying. Fortunately, Shadow Dragons are nothing more than legend."],
     "act1": [
       {
         "instance": ["String", "Minion"],
