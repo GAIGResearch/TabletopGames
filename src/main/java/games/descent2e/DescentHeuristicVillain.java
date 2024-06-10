@@ -89,6 +89,16 @@ public class DescentHeuristicVillain extends DescentHeuristic {
 
         List<Double> heuristics = new ArrayList<>();
 
+        heuristics.add(FACTOR_SKILL * getPlayerSkill() / dgs.heroes.size());
+        //heuristics.add(FACTOR_REWARDING);
+        heuristics.add(FACTOR_CONTROL * getControl() / dgs.heroes.size());
+        heuristics.add(FACTOR_FEEDBACK * getFeedback() / dgs.heroes.size());
+        heuristics.add(FACTOR_COMPETENCE * getCompetence() / dgs.heroes.size());
+        heuristics.add(FACTOR_AUTONOMY * getAutonomy() / dgs.heroes.size());
+        heuristics.add(FACTOR_DIVERSITY * getDiversity() / dgs.heroes.size());
+        heuristics.add(FACTOR_UNCERTAINTY_GAME * getUncertaintyGame() / dgs.heroes.size());
+        heuristics.add(FACTOR_UNCERTAINTY_SUCCESS * getUncertaintySuccess() / dgs.heroes.size());
+
         return heuristics;
     }
 
@@ -105,4 +115,90 @@ public class DescentHeuristicVillain extends DescentHeuristic {
         ret.add(FACTOR_UNCERTAINTY_SUCCESS);
         return ret;
     }
+
+    public double getPlayerSkill() {
+        // Need to assess the combined skill levels of the Heroes players
+        double skill = 0.0;
+
+        // Get the Hero's HP, how close/far away they are from the nearest monster/objective
+        // And the Heroes' current Heuristic value
+
+        return skill;
+    }
+
+    public double getRewarding() {
+        // Not relevant for Descent, the Heuristics already cover this to good extent
+        double rewarding = 0.0;
+
+        // Might do later if needed
+
+        return rewarding;
+    }
+
+    public double getControl() {
+        // May be more important for movement than attacks? Most actions already have obvious impacts
+        double control = 0.0;
+
+        // Assess the Hero's current position and the possible actions they can take
+        // If they are in a position to react better to the Overlord's minions, then they have more control
+
+        return control;
+    }
+
+    public double getFeedback() {
+        // Could be the variants in the rewards that the heroes are seeing?
+        double feedback = 0.0;
+
+        // Maybe take the average of the Heroes' Heuristic values over the past 5-10 states?
+
+        return feedback;
+    }
+
+    public double getCompetence() {
+        // Relevant more for human players than AI players, maybe if their scores are on a negative gradient?
+        double competence = 0.0;
+
+        // Go through each Hero player and assess their current Heuristic value
+        // If it is on a negative gradient for the past 10 turns, then they are losing competence
+
+        return competence;
+    }
+
+    public double getAutonomy() {
+        // Size of the action space? If they have more actions available, they will have higher autonomy
+        double autonomy = 0.0;
+
+        // Compare the size of each Hero's action space at the start of their turns over the past 5-10 turns
+
+        return autonomy;
+    }
+
+    public double getDiversity() {
+        // Compare similarities of game states, e.g. window of past 5-10 states and how different the new next state will be
+        double diversity = 0.0;
+
+        // Compare the past 5-10 game states and see what actions are common between them and which are not
+
+        return diversity;
+    }
+
+    public double getUncertaintyGame() {
+        // An approximate/surprise search, how different the end result is to the expected result
+
+        double uncertaintyGame = 0.0;
+
+
+
+        return uncertaintyGame;
+    }
+
+    public double getUncertaintySuccess() {
+        // Win prediction research will fit well into this section
+        double uncertaintySuccess = 0.0;
+
+        // Insert win prediction algorithm here
+
+        return uncertaintySuccess;
+    }
+
 }

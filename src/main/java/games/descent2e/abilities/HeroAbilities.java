@@ -152,7 +152,7 @@ public class HeroAbilities {
     // Tomble Burrowell's Hero Ability
     // If we are targeted by an attack, and we are adjacent to an ally
     // We can add their defense pool to our own defense pool before we roll
-    public static DicePool tomble (DescentGameState dgs, int tomble, int ally)
+    public static DicePool tomble(DescentGameState dgs, int tomble, int ally)
     {
         Hero hero = (Hero) dgs.getComponentById(tomble);
         Figure other = (Figure) dgs.getComponentById(ally);
