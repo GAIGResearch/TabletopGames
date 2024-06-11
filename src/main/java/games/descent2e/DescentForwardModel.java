@@ -35,6 +35,7 @@ import static games.descent2e.DescentHelper.*;
 import static games.descent2e.actions.archetypeskills.ArchetypeSkills.getArchetypeSkillActions;
 import static games.descent2e.actions.monsterfeats.MonsterAbilities.getMonsterActions;
 import static games.descent2e.components.DicePool.constructDicePool;
+import static games.descent2e.components.Figure.Attribute.Health;
 import static games.descent2e.components.Figure.Attribute.MovePoints;
 import static utilities.Utils.getNeighbourhood;
 
@@ -284,11 +285,23 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         dgs.searchCards = _data.searchCards;
         dgs.searchCards.shuffle(r);
 
+        // Announce all figures in play, including their stats and starting positions
+        // Primarily for debug purposes
+        boolean announce = true;
+        if (announce) {
+            for (Hero hero : dgs.heroes) {
+                System.out.println(hero.getComponentName().replace("Hero: ", "") + " - " + hero.getProperty("archetype") + " (" + hero.getProperty("class") + ") - " +
+                        hero.getAttributeValue(Health) + " HP - " + hero.getHandEquipment().toString() + " - " + hero.getPosition().toString());
+            }
+            for (List<Monster> monsters : dgs.getMonsters()) {
+                for (Monster monster : monsters) {
+                    System.out.println(monster.getComponentName() + " - " + monster.getAttributeValue(Health) + " HP - " + monster.getPosition().toString());
+                }
+            }
+        }
+
         // Ready to start playing!
         System.out.println("Game begin!");
-        for (Hero hero: dgs.heroes) {
-            System.out.println(hero.getComponentName() + " is controlled by Player " + hero.getOwnerId());
-        }
     }
 
     @Override
