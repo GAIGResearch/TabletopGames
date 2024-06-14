@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.bots.Bot;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
@@ -72,6 +73,8 @@ public class Game {
     int snapsPerSecond = 10;
     private int turnPause;
 
+    private Bot commentator;
+
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
      * IDs to all players in the game, and performs initialisation of the game state and forward model objects.
@@ -121,6 +124,12 @@ public class Game {
         if (game == null)
             System.out.println("Error game: " + gameToPlay);
 
+        if(game.getCoreParameters().commentatorOn)
+        {
+            if(listeners == null) listeners = new ArrayList<>();
+            listeners.add(new Bot());
+        }
+
         if (listeners != null) {
             Set<String> agentNames = players.stream()
                     //           .peek(a -> System.out.println(a.toString()))
@@ -131,6 +140,7 @@ public class Game {
                 game.addListener(gameTracker);
             }
         }
+
 
         // Randomize parameters
         if (randomizeParameters) {

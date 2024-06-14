@@ -17,6 +17,8 @@ public class CoreParameters extends TunableParameters {
     public boolean alwaysDisplayCurrentPlayer = false;
     public long frameSleepMS = 100L;
 
+    public boolean commentatorOn = true;
+
     // Action space type for this game
     public ActionSpace actionSpace = new ActionSpace(ActionSpace.Structure.Flat, ActionSpace.Flexibility.Default, ActionSpace.Context.Dependent);
 
@@ -33,6 +35,7 @@ public class CoreParameters extends TunableParameters {
         addTunableParameter("actionSpaceStructure", ActionSpace.Structure.Default, Arrays.asList(ActionSpace.Structure.values()));
         addTunableParameter("actionSpaceFlexibility", ActionSpace.Flexibility.Default, Arrays.asList(ActionSpace.Flexibility.values()));
         addTunableParameter("actionSpaceContext", ActionSpace.Context.Default, Arrays.asList(ActionSpace.Context.values()));
+        addTunableParameter("commentatorOn", commentatorOn, Arrays.asList(false, true));
     }
 
     @Override
@@ -46,12 +49,16 @@ public class CoreParameters extends TunableParameters {
         if (!(o instanceof CoreParameters)) return false;
         if (!super.equals(o)) return false;
         CoreParameters that = (CoreParameters) o;
-        return verbose == that.verbose && recordEventHistory == that.recordEventHistory && partialObservable == that.partialObservable && competitionMode == that.competitionMode && disqualifyPlayerOnIllegalActionPlayed == that.disqualifyPlayerOnIllegalActionPlayed && disqualifyPlayerOnTimeout == that.disqualifyPlayerOnTimeout && alwaysDisplayFullObservable == that.alwaysDisplayFullObservable && alwaysDisplayCurrentPlayer == that.alwaysDisplayCurrentPlayer && frameSleepMS == that.frameSleepMS && Objects.equals(actionSpace, that.actionSpace);
+        return verbose == that.verbose && recordEventHistory == that.recordEventHistory && partialObservable == that.partialObservable &&
+                competitionMode == that.competitionMode && disqualifyPlayerOnIllegalActionPlayed == that.disqualifyPlayerOnIllegalActionPlayed &&
+                disqualifyPlayerOnTimeout == that.disqualifyPlayerOnTimeout && alwaysDisplayFullObservable == that.alwaysDisplayFullObservable &&
+                alwaysDisplayCurrentPlayer == that.alwaysDisplayCurrentPlayer && frameSleepMS == that.frameSleepMS &&
+                Objects.equals(actionSpace, that.actionSpace) && commentatorOn == that.commentatorOn;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), verbose, recordEventHistory, partialObservable, competitionMode, disqualifyPlayerOnIllegalActionPlayed, disqualifyPlayerOnTimeout, alwaysDisplayFullObservable, alwaysDisplayCurrentPlayer, frameSleepMS, actionSpace);
+        return Objects.hash(super.hashCode(), verbose, recordEventHistory, partialObservable, competitionMode, disqualifyPlayerOnIllegalActionPlayed, disqualifyPlayerOnTimeout, alwaysDisplayFullObservable, alwaysDisplayCurrentPlayer, frameSleepMS, actionSpace, commentatorOn);
     }
 
     @Override
@@ -73,5 +80,6 @@ public class CoreParameters extends TunableParameters {
         actionSpace = new ActionSpace ((ActionSpace.Structure) getParameterValue("actionSpaceStructure"),
                 (ActionSpace.Flexibility) getParameterValue("actionSpaceFlexibility"),
                 (ActionSpace.Context) getParameterValue("actionSpaceContext"));
+        commentatorOn = (boolean) getParameterValue("commentatorOn");
     }
 }
