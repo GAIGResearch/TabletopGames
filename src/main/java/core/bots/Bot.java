@@ -1,5 +1,6 @@
 package core.bots;
 
+import core.AbstractGameState;
 import core.Game;
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
@@ -24,6 +25,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 
+import static evaluation.metrics.Event.GameEvent.ACTION_CHOSEN;
+
 public class Bot implements IGameListener
 {
 
@@ -35,32 +38,19 @@ public class Bot implements IGameListener
 
     private final int CONNECT_WAIT_TIME = 10000;
 
+    private Game game; // Game being played.
+
+    private TextChannel botChannel; //Main discord channel where this bot writes to.
+
     public Bot()
     {
         try (FileReader reader = new FileReader(".env")) {
             String discordToken = new BufferedReader(reader).readLine();
-//            client = DiscordClient.create(discordToken).login().block();
             client = DiscordClient.create(discordToken).login().block();
-
 
             client.on(ReadyEvent.class)
                     .flatMap(Bot::receiveMessage)
                     .subscribe();
-
-//            Mono<Void> login = client.withGateway((GatewayDiscordClient gateway) ->
-//                    gateway.on(MessageCreateEvent.class, event -> {
-//                        server = event.getGuild().block();
-//                        return Mono.empty();
-//                    }));
-
-//            login.block();
-
-
-//            if(client != null)
-//                client.onDisconnect().block();
-//            else
-//                throw new RuntimeException("Couldn't not create client and log in.");
-
 
             long now = System.currentTimeMillis();
             long stop = now + CONNECT_WAIT_TIME;
@@ -88,8 +78,9 @@ public class Bot implements IGameListener
     }
 
 
-        public void init(Game game, int nPlayersPerGame, Set<String> playerNames)
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames)
     {
+        this.game = game;
         Calendar c = Calendar.getInstance();
         String gameName = game.getGameType().name();
 
@@ -97,17 +88,26 @@ public class Bot implements IGameListener
         TextChannelCreateSpec spec = TextChannelCreateSpec.builder()
                 .name(channelName)
                 .build();
-        TextChannel archiveChannel = server.createTextChannel(spec).block();
+        botChannel = server.createTextChannel(spec).block();
 
-        String output = "Welcome of this " + nPlayersPerGame + "-player game of " + gameName;
+        StringBuilder output = new StringBuilder("Welcome of this " + nPlayersPerGame + "-player game of " + gameName + ". Players are: \n");
+        for(String name : playerNames)
+            output.append("-").append(name).append("\n");
 
-        archiveChannel.createMessage(output).block();
+        botChannel.createMessage(output.toString()).block();
     }
 
 
     @Override
     public void onEvent(Event event) {
-
+        if(event.type == ACTION_CHOSEN)
+        {
+            AbstractGameState state = event.state;
+            String player = game.getPlayers().get(state.getCurrentPlayer()).toString();
+            StringBuilder sb = new StringBuilder("[Round: " + state.getRoundCounter() + ", Turn: " + state.getTurnCounter() +"]\n");
+            sb.append(player).append(" plays ").append(event.action);
+            botChannel.createMessage(sb.toString()).block();
+        }
     }
 
     @Override
