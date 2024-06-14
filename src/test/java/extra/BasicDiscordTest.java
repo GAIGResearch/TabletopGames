@@ -8,15 +8,26 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
+import org.json.simple.parser.ParseException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class BasicDiscordTest {
 
     public static void main(String[] args) {
-        String discordToken = "TOKEN"; //TODO: Read from file that is not in repo
 
-        DiscordClient client = DiscordClient.create(discordToken);
+        DiscordClient client;
+        try (FileReader reader = new FileReader(".env")) {
+            String discordToken = new BufferedReader(reader).readLine();
+            client = DiscordClient.create(discordToken);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
 
 //        Mono<Void> login = client.withGateway((GatewayDiscordClient gateway) -> Mono.empty());
 //

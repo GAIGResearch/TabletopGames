@@ -37,3 +37,4 @@ src/main/java/META-INF/MANIFEST.MF
 src/pytag/env/
 metrics/out/*
 treeRecorder*
+.env
