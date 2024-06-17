@@ -1,6 +1,7 @@
 package games.descent2e;
 
 import core.CoreConstants;
+import core.actions.LogEvent;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -695,6 +696,97 @@ public class DescentMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             HashMap<String, Class<?>> retVal = new HashMap<>();
             retVal.put("WinnerType", String.class);
+            return retVal;
+        }
+    }
+
+    public static class TurnActions extends AbstractMetric {
+
+        public TurnActions() {
+            super();
+        }
+
+        public TurnActions(Event.GameEvent... args) {
+            super(args);
+        }
+
+        public TurnActions(Set<IGameEvent> events) {
+            super(events);
+        }
+
+        public TurnActions(String[] args) {
+            super(args);
+        }
+
+        public TurnActions(String[] args, Event.GameEvent... events) {
+            super(args, events);
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == Event.GameEvent.GAME_EVENT) {
+                String[] text = ((LogEvent)e.action).text.split(":")[1].split(";");
+                String figure = text[0].trim().replace("Hero: ", "");
+                int componentID = Integer.parseInt(text[1].trim());
+                String position = text[2].trim();
+
+                records.put("Name", figure);
+                records.put("ID", componentID);
+                records.put("Position", position);
+
+                DescentGameState dgs = (DescentGameState) e.state;
+                Figure f = (Figure) dgs.getComponentById(componentID);
+                records.put("Actions Taken", getActionsTaken(dgs, f).toString());
+            }
+            return true;
+        }
+
+        private List<String> getActionsTaken(DescentGameState dgs, Figure f) {
+
+            List<String> actionsTaken = f.getActionsTaken();
+            // Remove Move to X references, except the last one
+            List<Integer> moves = new ArrayList<>();
+            for (int i = 0; i < actionsTaken.size(); i++)
+            {
+                if (actionsTaken.get(i).contains("Move by"))
+                {
+                    moves.add(i);
+                }
+            }
+            if (!moves.isEmpty()) {
+
+                String lastMove = actionsTaken.get(moves.get(moves.size() - 1));
+                actionsTaken.set(moves.get(moves.size() - 1), "Move to " + lastMove.split("to ")[1]);
+
+                // Get rid of all the Move actions except the last one
+                if (moves.size() > 1) {
+                    for (int i = moves.size() - 1; i > 0; i--) {
+                        actionsTaken.remove(moves.get(i - 1).intValue());
+                    }
+                }
+            }
+            // Remove gaining Movement Point references
+            actionsTaken.removeIf(s -> s.contains("Movement Point"));
+            // Remove Surge references
+            actionsTaken.removeIf(s -> s.contains("Surge"));
+            return actionsTaken;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
+                add(Event.GameEvent.GAME_EVENT);
+                add(Event.GameEvent.ROUND_OVER);
+            }};
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            HashMap<String, Class<?>> retVal = new HashMap<>();
+            retVal.put("Name", String.class);
+            retVal.put("ID", Integer.class);
+            retVal.put("Position", String.class);
+            retVal.put("Actions Taken", String.class);
             return retVal;
         }
     }

@@ -16,6 +16,7 @@
       {"class": "games.descent2e.DescentMetrics$Kills"},
       {"class": "games.descent2e.DescentMetrics$Positions"},
       {"class": "games.descent2e.DescentMetrics$Distances"},
+      {"class": "games.descent2e.DescentMetrics$TurnActions"},
       {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
       {"class": "evaluation.metrics.GameMetrics$Winner" },
       {"class": "evaluation.metrics.GameMetrics$ActionsReduced" },
