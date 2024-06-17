@@ -743,11 +743,37 @@ public class DescentMetrics implements IMetricsCollection {
 
         private List<String> getActionsTaken(DescentGameState dgs, Figure f) {
 
+            // The list needs to stay in approximately the same order as it was originally
+
             List<String> actionsTaken = f.getActionsTaken();
-            // Remove Move to X references, except the last one
             List<Integer> moves = new ArrayList<>();
             for (int i = 0; i < actionsTaken.size(); i++)
             {
+                if (actionsTaken.get(i).contains("Attack by"))
+                {
+                    String attack = actionsTaken.get(i);
+                    String attackType = attack.split("by")[0].replace("Free", "").replace("Heroic Feat:", "").trim();
+                    String result = attack.split("Result:")[1].split(";")[0].trim();
+                    String damage = attack.split("Damage:")[1].split(";")[0].trim();
+
+                    int targetID = Integer.parseInt(attack.split("on")[1].split("-")[0].trim());
+                    String target = ((Figure) dgs.getComponentById(targetID)).getName().replace("Hero: ", "");
+
+
+                    String newAttack = attackType + " on " + target;
+                    switch (result){
+                        case "Miss":
+                            newAttack += ", Missed";
+                            break;
+                        case "Kill":
+                            newAttack += ", Defeated";
+                            break;
+                            case "Hit":
+                            newAttack += ", Hit (" + damage + " Damage)";
+                    }
+                    actionsTaken.set(i, newAttack);
+                }
+
                 if (actionsTaken.get(i).contains("Move by"))
                 {
                     moves.add(i);
@@ -769,6 +795,7 @@ public class DescentMetrics implements IMetricsCollection {
             actionsTaken.removeIf(s -> s.contains("Movement Point"));
             // Remove Surge references
             actionsTaken.removeIf(s -> s.contains("Surge"));
+
             return actionsTaken;
         }
 
