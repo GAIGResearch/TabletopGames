@@ -110,14 +110,16 @@ public class PlayCard extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PlayCard)) return false;
-        PlayCard playCard = (PlayCard) o;
-        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardIdx == playCard.cardIdx && cardType == playCard.cardType && forcedCountessCardType == playCard.forcedCountessCardType && targetCardType == playCard.targetCardType && otherCardInHand == playCard.otherCardInHand;
+        if (!(o instanceof PlayCard playCard)) return false;
+
+        // cardidx not included because it is ignored for some action space structures
+        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardType == playCard.cardType && forcedCountessCardType == playCard.forcedCountessCardType && targetCardType == playCard.targetCardType && otherCardInHand == playCard.otherCardInHand;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, targetPlayer, cardType, forcedCountessCardType, canExecuteEffect, discard, cardIdx, targetCardType, otherCardInHand);
+        // cardidx not included because it is ignored for some action space structures
+        return Objects.hash(playerID, targetPlayer, cardType, forcedCountessCardType, canExecuteEffect, discard, targetCardType, otherCardInHand);
     }
 
     @Override

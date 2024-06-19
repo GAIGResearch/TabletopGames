@@ -1,5 +1,6 @@
 package games.loveletter.actions;
 
+import core.AbstractGameState;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
@@ -52,5 +53,10 @@ public class BaronAction extends PlayCard implements IPrintable {
         copy.targetCardType = targetCardType;
         copy.otherCardInHand = otherCardInHand;
         return copy;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Baron: compare with p" + targetPlayer;
     }
 }

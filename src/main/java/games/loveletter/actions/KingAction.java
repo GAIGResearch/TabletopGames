@@ -1,5 +1,6 @@
 package games.loveletter.actions;
 
+import core.AbstractGameState;
 import core.CoreConstants.VisibilityMode;
 import core.components.Deck;
 import core.interfaces.IPrintable;
@@ -41,5 +42,10 @@ public class KingAction extends PlayCard implements IPrintable {
     @Override
     public KingAction copy() {
         return this;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "King: swap with p" + targetPlayer;
     }
 }
