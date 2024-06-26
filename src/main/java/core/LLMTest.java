@@ -3,9 +3,10 @@ package core;
 import games.GameType;
 import players.basicMCTS.BasicMCTSParams;
 import players.basicMCTS.BasicMCTSPlayer;
+import players.heuristics.StateHeuristicType;
 import players.heuristics.StringHeuristic;
 import players.human.ActionController;
-import players.simple.LLMPlayer;
+import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import utilities.Utils;
 
@@ -23,7 +24,10 @@ public class LLMTest {
 
         public AbstractPlayer createPlayer() {
             if (this == OSLA){
-                return new OSLAPlayer(new StringHeuristic("llm/TicTacToeEvaluator.java"));
+                OSLAParameters params = new OSLAParameters();
+                params.heuristicFunc = new StringHeuristic("llm/TicTacToeEvaluator.java");
+                params.heuristic = StateHeuristicType.StringHeuristic;
+                return new OSLAPlayer(params);
             }
             else if (this == MCTS){
                 BasicMCTSParams params = new BasicMCTSParams();

@@ -95,7 +95,8 @@ public class LLMFrontend extends GUI {
                 gameParameterEditWindow[i].getContentPane().add(buttons);
             }
         }
-        GameType firstGameType = GameType.valueOf(gameNames[0]);
+//        GameType firstGameType = GameType.valueOf(gameNames[0]);
+        GameType firstGameType = GameType.TicTacToe;
         nPlayersText.setText("  # players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
 
         JComboBox<String> gameOptions = new JComboBox<>(gameNames);  // index of this selection is game
