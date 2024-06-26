@@ -19,25 +19,42 @@ import java.util.Arrays;
 
 public class StringHeuristic implements IStateHeuristic {
 
-    //private String fileName = "llm/TicTacToeEvaluator.java";
+    private String fileName = "llm/TicTacToeEvaluator.java";
     private String str;
 
     Object heuristicClass;
     Method heuristicFunction;
 
-    public StringHeuristic(String filename) {
-        setup(filename);
+    public String getFileName() {
+        return fileName;
+    }
+    public String getHeuristicCode() {
+        return str;
     }
 
-    private void setup(String fileName)
-    {
+    public void setHeuristicCode(String s) {
+        this.str = s;
+        init();
+    }
+
+    public StringHeuristic(String fileName) {
+        this.fileName = fileName;
+        init();
+    }
+
+    public StringHeuristic() {
+        init();
+    }
+
+    private void init() {
+
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             StringBuilder stringBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
+                stringBuilder.append(line).append("\n");
             }
             str = stringBuilder.toString();
             reader.close();
@@ -90,7 +107,7 @@ public class StringHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         try {
-            return (double) heuristicFunction.invoke(heuristicClass, (TicTacToeGameState)gs, playerId);
+            return (double) heuristicFunction.invoke(heuristicClass, (TicTacToeGameState)gs, 10); // Example arguments
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
