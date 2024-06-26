@@ -88,13 +88,8 @@ def run_jar(jar_path, args):
         return e.stderr
 
 
-def evaluate(prompt: str):
-    # Generate code
-    # generated_code = ""
-    generated_code = generate_python_code(prompt)
-    #print("Generated Code:\n", generated_code)
-
-    lines = generated_code.split('\n')
+def print_to_file(code:str, file_path:str):
+    lines = code.split('\n')
 
     # Write the prompt response to file
     with open(file_path, 'w') as file:
@@ -105,6 +100,14 @@ def evaluate(prompt: str):
             # if not stripped_line.startswith('//'):
             #     # Write the line to the file
             #     file.write(line + '\n')
+
+def evaluate(prompt: str):
+    # Generate code
+    # generated_code = ""
+    generated_code = generate_python_code(prompt)
+    #print("Generated Code:\n", generated_code)
+
+    print_to_file(generated_code, file_path)
 
     # run Java code and extract win percentage from output
     jar_path = "llm.jar"
@@ -167,7 +170,8 @@ feedback_prompt = task_prompt
 # Iterate if necessary
 iteration = 0
 max_iters = 10
-while win_rate + ties < 0.75 and iteration < max_iters:  # Set your performance threshold
+# while win_rate + ties < 0.75 and iteration < max_iters:  # Set your performance threshold
+while win_rate + ties < 1.0 and iteration < max_iters:  # Set your performance threshold
     #print(f"\nIteration {iteration}: Providing feedback and requesting optimization...\n")
 
     h, win_rate, ties, error = evaluate(feedback_prompt)
@@ -211,3 +215,6 @@ best_tierate = heuristic_list.best().ties * 100
 best_lossrate = 100 - best_winrate - best_tierate
 
 print(f"\nBest fitness: {best_fit:.2f}, win_rate: {best_winrate:.2f}%, ties: {best_tierate:.2f}%, losses: {best_lossrate:.2f}%")
+
+best_file_path = "llm/Best-TicTacToeEvaluator.java"
+print_to_file(heuristic_list.best().code, best_file_path)
