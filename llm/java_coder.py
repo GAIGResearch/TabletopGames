@@ -9,7 +9,6 @@ from config import api_key
 # Set your API key
 os.environ['OPENAI_API_KEY'] = api_key
 
-
 def extract_code(response: str) -> str:
     # Use regex to extract code between ```java and ```
     code_match = re.search(r'```java(.*?)```', response, re.DOTALL)
