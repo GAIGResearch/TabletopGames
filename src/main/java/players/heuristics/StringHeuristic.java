@@ -2,6 +2,7 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
+import games.loveletter.LoveLetterGameState;
 import games.tictactoe.TicTacToeGameState;
 
 import javax.tools.*;
@@ -25,11 +26,11 @@ public class StringHeuristic implements IStateHeuristic {
     Object heuristicClass;
     Method heuristicFunction;
 
-    public StringHeuristic(String filename) {
-        setup(filename);
+    public StringHeuristic(String filename, String className) {
+        setup(filename, className);
     }
 
-    private void setup(String fileName)
+    private void setup(String fileName, String className)
     {
         // Read 'str' as whole text in fileName file:
         try {
@@ -46,7 +47,6 @@ public class StringHeuristic implements IStateHeuristic {
         }
 
         // Method string
-        String className = "TicTacToeEvaluator";
         String sourceCode = str;
 
         // Compile source code
@@ -79,7 +79,10 @@ public class StringHeuristic implements IStateHeuristic {
             heuristicClass = dynamicClass.getDeclaredConstructor().newInstance();
 
             // Find and invoke the method using reflection
-            heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
+            if(className.equalsIgnoreCase("TicTacToeEvaluator"))
+                heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
+            else if(className.equalsIgnoreCase("LoveLetterEvaluator"))
+                heuristicFunction = dynamicClass.getMethod("evaluateState", LoveLetterGameState.class, int.class);
 
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException | MalformedURLException e) {
@@ -90,7 +93,7 @@ public class StringHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         try {
-            return (double) heuristicFunction.invoke(heuristicClass, (TicTacToeGameState)gs, playerId);
+            return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
