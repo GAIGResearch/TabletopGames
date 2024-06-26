@@ -65,6 +65,12 @@ public class LLMPlayer extends AbstractPlayer {
             }
         }
 
+        if(bestAction == null)
+        {
+            bestAction = actions.get(rnd.nextInt(actions.size()));
+        }
+
+
         return bestAction;
     }
 
