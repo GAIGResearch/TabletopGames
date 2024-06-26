@@ -39,7 +39,7 @@ public class LLMPlayer extends AbstractPlayer {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
         double[] valState = new double[actions.size()];
-        int playerID = gs.getCurrentPlayer();
+        //int playerID = gs.getCurrentPlayer();
 
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
             AbstractAction action = actions.get(actionIndex);
@@ -47,13 +47,13 @@ public class LLMPlayer extends AbstractPlayer {
             getForwardModel().next(gsCopy, action);
 
             if (gs instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gsCopy).getTurnOrder() instanceof StandardTurnOrder) {
-                advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
+                advanceToEndOfRoundWithRandomActions(gsCopy, getPlayerID());
             }
 
             if (heuristic != null) {
-                valState[actionIndex] = heuristic.evaluateState(gsCopy, playerID);
+                valState[actionIndex] = heuristic.evaluateState(gsCopy, getPlayerID());
             } else {
-                valState[actionIndex] = gsCopy.getHeuristicScore(playerID);
+                valState[actionIndex] = gsCopy.getHeuristicScore(getPlayerID());
             }
 
             double Q = noise(valState[actionIndex], getParameters().noiseEpsilon, rnd.nextDouble());

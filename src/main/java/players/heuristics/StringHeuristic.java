@@ -85,7 +85,7 @@ public class StringHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         try {
-            return (double) heuristicFunction.invoke(heuristicClass, (TicTacToeGameState)gs, 10); // Example arguments
+            return (double) heuristicFunction.invoke(heuristicClass, (TicTacToeGameState)gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

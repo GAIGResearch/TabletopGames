@@ -95,29 +95,35 @@ file_path = "llm/TicTacToeEvaluator.java"
 
 # Initial task prompt
 task_prompt = """
-You are playing Tic Tac Toe.
-Write a java class called TicTacToeEvaluator class, with only a single function with this signature: 
- - public double evaluateState(TicTacToeGameState gs, int playerId)
-Then, write the contents of this function. This is a heuristic function to play Tic Tac Toe, so that with any given game 
-state and our player ID, we return a double value between 0 and 1. The value should be closer to 0 if we lose the game, 
-and closer to 1 if we are closer to winning the game.  The function should consider both situations when we are 
-player ID 0 (starting the game), and player ID 1. 
-Take into account the whole board position and possible opponent moves. 
-Write all the code I've asked for in a single function. Assume all the other classes are implemented, no need for a main function either. Just write the evaluation function.
-Add all the import statements required, in addition to importing games.tictactoe.TicTacToeGameState, core.components.GridBoard and core.components.Token
-Do not add any comments in the code. 
+You are playing Tic Tac Toe. Your job is to write the evaluation logic to help an AI play this game. Don't leave parts unfinished or TODOs.
+First, write a java class called TicTacToeEvaluator class, with only a single function with this signature: 
+ - public double evaluateState(TicTacToeGameState gameState, int playerId)
+This is a heuristic function to play Tic Tac Toe. The variable gameState is the current state of the game, and playerId 
+is the ID of the player we evaluate the state for. Write the contents of this function, so that we give a higher numeric 
+evaluation to those game states that are beneficial to the player with the received playerId as id. Return:
+  - 0.0 if player playerId lost the game.
+  - 1.0 if player playerId won the game.
+ If the game is not over, return a value between 0.0 and 1.0 so that the value is close to 0.0 if player playerId is close to losing,
+ and closer to 1.0 if playerId is about to win the game.
+Take into account the whole board position, checking for lines that are about to be completed, and possible opponent moves. 
 You can use the following API:
- - GridBoard<Token> getGridBoard(), to access the board of the game.
- - GridBoard has the following functions you can also use:
+ - In TicTacToeGameState, you can use the following functions:
+    - GridBoard<Token> getGridBoard(), to access the board of the game.
+    - Token getPlayerToken(int playerId), to get the Token of the player passed as a parameter.
+    - boolean isGameOver(), returns true if the game is finished.
+    - boolean getWinner(), returns the Id of the player that won the game, or -1 if the game is not over.
+    - int getCurrentPlayer(), returns the Id of the player that moves next.
+ - GridBoard<Token> has the following functions you can also use:
    - int getWidth(), to return the width of the board.
    - int getHeight(), to return the height of the board.
    - Token getElement(int x, int y), that returns the Token on the position of the board with row x and column y. 
- - Token represents a piece placed by a player. 
-   - With player the token belongs to is represented with a string. This string is "x" for player ID 0, and "o" for player ID 1. 
+ - Token represents a piece placed by a player. Which player the token belongs to is represented with a string. This string 
+   is "x" for player ID 0, and "o" for player ID 1. 
    - Token(String) allows your to create token objects for any comparisons. 
    - String getTokenType() returns the string representation of the token type.
+Assume all the other classes are implemented, and do not include a main function. Add all the import statements required, 
+in addition to importing games.tictactoe.TicTacToeGameState, core.components.GridBoard and core.components.Token
 """
-
 win_rate, ties, error = evaluate(task_prompt)
 execution_time = 1
 

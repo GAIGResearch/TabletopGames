@@ -92,4 +92,9 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         System.out.println(gridBoard.toString());
     }
 
+    public Token getPlayerToken(int playerId)
+    {
+        return TicTacToeConstants.playerMapping.get(playerId);
+    }
+
 }
