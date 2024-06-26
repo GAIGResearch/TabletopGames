@@ -1,13 +1,43 @@
 import os
 import re
 import subprocess
+from bisect import insort
 
 from openai import OpenAI
 
 from config import api_key
 
 # Set your API key
-os.environ['OPENAI_API_KEY'] = api_key
+os.environ['OPENAI_API_KEY']    = api_key
+
+
+class Heuristic:
+    def __init__(self, fitness: float, code: str):
+        self.fitness = fitness
+        self.code = code
+
+    def __repr__(self):
+        return f"Heuristic(fitness={self.fitness}, code='{self.code}')"
+
+
+class HeuristicList:
+    def __init__(self):
+        self.heuristics = []
+
+    def add_program(self, heuristic: Heuristic):
+        # Use insort to insert the program in the sorted position based on double_value
+        insort(self.heuristics, heuristic, key=lambda x: x.fitness)
+
+    def __repr__(self):
+        return repr(self.heuristics)
+
+    def size(self):
+        return len(self.heuristics)
+
+    def best(self):
+        if self.heuristics:
+            return self.heuristics[-1]
+        return None
 
 
 def extract_code(response: str) -> str:
@@ -60,7 +90,7 @@ def evaluate(prompt: str):
     # Generate code
     # generated_code = ""
     generated_code = generate_python_code(prompt)
-    print("Generated Code:\n", generated_code)
+    #print("Generated Code:\n", generated_code)
 
     lines = generated_code.split('\n')
 
@@ -81,13 +111,12 @@ def evaluate(prompt: str):
 
     out = run_jar(jar_path, args)
     if "Error" in out or "error" in out:
-        return -1,-1,out
-
+        return -1, -1, out
 
     output = out.split("\n")[-2].split(',')
     wr = float(output[0])
     t = float(output[1])
-    return wr, t, ""
+    return generated_code, wr, t, ""
 
 
 # Output test file path
@@ -124,27 +153,44 @@ You can use the following API:
 Assume all the other classes are implemented, and do not include a main function. Add all the import statements required, 
 in addition to importing games.tictactoe.TicTacToeGameState, core.components.GridBoard and core.components.Token
 """
-win_rate, ties, error = evaluate(task_prompt)
-execution_time = 1
+# h, win_rate, ties, error = evaluate(task_prompt)
+execution_time = 0
+win_rate = 0
+ties = 0
+
+heuristic_list = HeuristicList()
+# heuristic_list.add_program(Heuristic(win_rate, h))
+feedback_prompt = task_prompt
 
 # Iterate if necessary
-iteration = 1
-max_iters = 1
-while win_rate + ties < 0.4 and iteration < max_iters:  # Set your performance threshold
+iteration = 0
+max_iters = 2
+while win_rate + ties < 0.75 and iteration < max_iters:  # Set your performance threshold
     #print(f"\nIteration {iteration}: Providing feedback and requesting optimization...\n")
-    feedback_prompt = f"""
-    The initial implementation of the heuristic needs improvements.
-    Please optimize the code for better performance. Aim for higher ties or wins. Here are the results:
 
-    Wins: {win_rate:.2f}.
-    Ties: {ties:.2f}.
-    """
+    h, win_rate, ties, error = evaluate(feedback_prompt)
+    heuristic_list.add_program(Heuristic(win_rate, h))
+
     if error:
-        feedback_prompt = f"Remove comments from the code. Compilation error, fix it: {error}"
+        feedback_prompt = f"""Remove comments from the code. Compilation error, fix it: {error}.
+        {task_prompt}    
+        """
+    else:
+        feedback_prompt = f"""
+        The initial implementation of the heuristic needs improvements.
+        Please optimize the code for better performance. Aim for higher ties or wins. Here are the results:
+    
+        Wins: {win_rate:.2f}.
+        Ties: {ties:.2f}.
+        
+        {task_prompt}
+        """
 
-    win_rate, ties, error = evaluate(feedback_prompt)
-    optimized_code = generate_python_code(feedback_prompt)
+    # optimized_code = generate_python_code(feedback_prompt)
+    # heuristic_list.add_program(Heuristic(win_rate, h))
 
     iteration += 1
+    print(f"\nIteration: {iteration}, win_rate: {win_rate*100:.2f}")
 
 print(f"\nFinished! Final results: {win_rate:.2f} wins and {ties:.2f} ties.")
+print(f"\nBest agent: {heuristic_list.best()}")
