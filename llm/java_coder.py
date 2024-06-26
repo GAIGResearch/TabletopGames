@@ -52,18 +52,25 @@ def run_jar(jar_path, args):
         return result.stdout
     except subprocess.CalledProcessError as e:
         # Handle errors in the called process
-        #print(f"Error running jar: {e.stderr}")
+        print(f"Error running jar: {e.stderr}")
         return e.stderr
 
 
 def evaluate(prompt: str):
     # Generate code
+    # generated_code = ""
     generated_code = generate_python_code(prompt)
-    #print("Generated Code:\n", generated_code)
+    print("Generated Code:\n", generated_code)
+
+    lines = generated_code.split('\n')
 
     # Write the prompt response to file
     with open(file_path, 'w') as file:
-        file.write(generated_code)
+        for line in lines:
+            stripped_line = line.lstrip()
+            if not stripped_line.startswith('//'):
+                # Write the line to the file
+                file.write(line + '\n')
 
     # run Java code and extract win percentage from output
     jar_path = "llm.jar"
@@ -74,14 +81,15 @@ def evaluate(prompt: str):
     if "Error" in out or "error" in out:
         return -1,-1,out
 
-    output = out.split("\n")[-1].split(',')
+
+    output = out.split("\n")[-2].split(',')
     wr = float(output[0])
     t = float(output[1])
     return wr, t, ""
 
 
 # Output test file path
-file_path = "TicTacToeEvaluator.java"
+file_path = "llm/TicTacToeEvaluator.java"
 
 # Initial task prompt
 task_prompt = """
@@ -89,7 +97,9 @@ You are playing Tic Tac Toe.
 Write a heuristic function within a TicTacToeEvaluator class, such that with any given game state and our player ID, we return a double value between 0 and 1. 
 The value should be closer to 0 if we lose the game, and closer to 1 if we are closer to winning the game. 
 Take into account the whole board position and possible opponent moves. 
-The board is accessible from the game state object through the getGridBoard() method, which returns an object of type GridBoard<Token>. This object has functions to getWidth(), getHeight(), and getElement(x,y) which returns a Token object equal to "x" for player ID 0, and "o" for player ID 1. You can use new Token("x") to create token objects for any comparisons. 
+The board is accessible from the game state object through the getGridBoard() method, which returns an object of type GridBoard<Token>. 
+This object has functions to getWidth(), getHeight(), and getElement(x,y) which returns a Token object equal to "x" for player ID 0, and "o" for player ID 1. 
+You can use new Token("x") to create token objects for any comparisons. 
 The function should consider both situations when we are player ID 0 (starting the game), and player ID 1.
 
 The function should be written in Java, return a double, with this signature: public double evaluateState(TicTacToeGameState gs, int playerId)
