@@ -80,5 +80,7 @@ public class LLMAccess {
     public static void main(String[] args) {
         LLMAccess llm = new LLMAccess(LLM_MODEL.MISTRAL);
         llm.getResponse("What is the average lifespan of a Spanish Armadillo?");
+
+        llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.GEMINI);
     }
 }
