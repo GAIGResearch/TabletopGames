@@ -8,6 +8,7 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
+import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
@@ -108,6 +109,8 @@ public enum PlayerType {
 
     public PlayerParameters createParameterSet() {
         switch(this) {
+            case OSLA:
+                return new OSLAParameters();
             case MCTS:
                 return new MCTSParams();
             case RMHC:

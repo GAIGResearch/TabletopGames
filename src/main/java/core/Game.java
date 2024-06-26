@@ -12,7 +12,7 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
-import players.heuristics.StringHeuristic;
+import players.heuristics.StateHeuristicType;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
@@ -835,7 +835,7 @@ public class Game {
         players.add(new LLMPlayer());
 
         MCTSParams params = new MCTSParams();
-        params.heuristic = new StringHeuristic("llm/TicTacToeEvaluator.java");
+        params.heuristic = StateHeuristicType.StringHeuristic;
 //        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();

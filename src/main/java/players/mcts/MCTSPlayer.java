@@ -4,22 +4,17 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IActionHeuristic;
 import evaluation.listeners.IGameListener;
-import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import players.IAnyTimePlayer;
 import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 
 public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
@@ -261,8 +256,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);
         if (getParameters().getRolloutStrategy() instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().getRolloutStrategy()).process(root);
-        if (getParameters().heuristic instanceof ITreeProcessor)
-            ((ITreeProcessor) getParameters().heuristic).process(root);
+        if (getParameters().getHeuristic() instanceof ITreeProcessor)
+            ((ITreeProcessor) getParameters().getHeuristic()).process(root);
         if (getParameters().getOpponentModel() instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().getOpponentModel()).process(root);
 
@@ -284,8 +279,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     public void finalizePlayer(AbstractGameState state) {
         getParameters().getRolloutStrategy().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
         getParameters().getOpponentModel().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
-        if (getParameters().heuristic instanceof IGameListener)
-            ((IGameListener) getParameters().heuristic).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        if (getParameters().getHeuristic() instanceof IGameListener)
+            ((IGameListener) getParameters().getHeuristic()).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
         if (getParameters().actionHeuristic instanceof IGameListener)
             ((IGameListener) getParameters().actionHeuristic).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
 
@@ -318,7 +313,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
                 double meanValue = stats == null || visits == 0 ? 0.0 : stats.totValue[root.decisionPlayer] / visits;
-                double heuristicValue = getParameters().heuristic.evaluateState(root.state, root.decisionPlayer);
+                double heuristicValue = getParameters().getHeuristic().evaluateState(root.state, root.decisionPlayer);
                 double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state);
 
                 Map<String, Object> actionValues = new HashMap<>();

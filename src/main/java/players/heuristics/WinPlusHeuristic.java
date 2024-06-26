@@ -10,6 +10,9 @@ public class WinPlusHeuristic implements IStateHeuristic {
     public WinPlusHeuristic(double scale) {
         this.scale = scale;
     }
+    public WinPlusHeuristic() {
+        this.scale = 1000.0;
+    }
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         if (gs.isNotTerminalForPlayer(playerId))
