@@ -67,10 +67,12 @@ def evaluate(prompt: str):
     # Write the prompt response to file
     with open(file_path, 'w') as file:
         for line in lines:
-            stripped_line = line.lstrip()
-            if not stripped_line.startswith('//'):
-                # Write the line to the file
-                file.write(line + '\n')
+            # Split the line at the first occurrence of "//"
+            cleaned_line = line.split('//', 1)[0]
+            file.write(cleaned_line.rstrip() + '\n')
+            # if not stripped_line.startswith('//'):
+            #     # Write the line to the file
+            #     file.write(line + '\n')
 
     # run Java code and extract win percentage from output
     jar_path = "llm.jar"
@@ -94,20 +96,27 @@ file_path = "llm/TicTacToeEvaluator.java"
 # Initial task prompt
 task_prompt = """
 You are playing Tic Tac Toe.
-Write a heuristic function within a TicTacToeEvaluator class, such that with any given game state and our player ID, we return a double value between 0 and 1. 
-The value should be closer to 0 if we lose the game, and closer to 1 if we are closer to winning the game. 
+Write a java class called TicTacToeEvaluator class, with only a single function with this signature: 
+ - public double evaluateState(TicTacToeGameState gs, int playerId)
+Then, write the contents of this function. This is a heuristic function to play Tic Tac Toe, so that with any given game 
+state and our player ID, we return a double value between 0 and 1. The value should be closer to 0 if we lose the game, 
+and closer to 1 if we are closer to winning the game.  The function should consider both situations when we are 
+player ID 0 (starting the game), and player ID 1. 
 Take into account the whole board position and possible opponent moves. 
-The board is accessible from the game state object through the getGridBoard() method, which returns an object of type GridBoard<Token>. 
-This object has functions to getWidth(), getHeight(), and getElement(x,y) which returns a Token object equal to "x" for player ID 0, and "o" for player ID 1. 
-You can use new Token("x") to create token objects for any comparisons. 
-The function should consider both situations when we are player ID 0 (starting the game), and player ID 1.
-
-The function should be written in Java, return a double, with this signature: public double evaluateState(TicTacToeGameState gs, int playerId)
 Write all the code I've asked for in a single function. Assume all the other classes are implemented, no need for a main function either. Just write the evaluation function.
 Add all the import statements required, in addition to importing games.tictactoe.TicTacToeGameState, core.components.GridBoard and core.components.Token
 Do not add any comments in the code. 
+You can use the following API:
+ - GridBoard<Token> getGridBoard(), to access the board of the game.
+ - GridBoard has the following functions you can also use:
+   - int getWidth(), to return the width of the board.
+   - int getHeight(), to return the height of the board.
+   - Token getElement(int x, int y), that returns the Token on the position of the board with row x and column y. 
+ - Token represents a piece placed by a player. 
+   - With player the token belongs to is represented with a string. This string is "x" for player ID 0, and "o" for player ID 1. 
+   - Token(String) allows your to create token objects for any comparisons. 
+   - String getTokenType() returns the string representation of the token type.
 """
-
 
 win_rate, ties, error = evaluate(task_prompt)
 execution_time = 1
