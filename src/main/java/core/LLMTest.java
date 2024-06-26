@@ -1,6 +1,9 @@
 package core;
 
 import games.GameType;
+import players.basicMCTS.BasicMCTSParams;
+import players.basicMCTS.BasicMCTSPlayer;
+import players.heuristics.StringHeuristic;
 import players.human.ActionController;
 import players.simple.LLMPlayer;
 import players.simple.OSLAPlayer;
@@ -10,6 +13,31 @@ import java.util.ArrayList;
 
 
 public class LLMTest {
+
+    public enum Agent
+    {
+        OSLA,
+        MCTS;
+
+        Agent(){}
+
+        public AbstractPlayer createPlayer() {
+            if (this == OSLA){
+                return new OSLAPlayer(new StringHeuristic("llm/TicTacToeEvaluator.java"));
+            }
+            else if (this == MCTS){
+                BasicMCTSParams params = new BasicMCTSParams();
+                params.heuristic = new StringHeuristic("llm/Best-TicTacToeEvaluator.java");
+                return new BasicMCTSPlayer(params);
+            }
+            return null;
+        }
+    }
+
+    public static void main(String[] args) {
+        evaluate(args, "TicTacToe", Agent.OSLA);
+    }
+
 
     /**
      * The recommended way to run a game is via evaluations.Frontend, however that may not work on
@@ -23,8 +51,9 @@ public class LLMTest {
      * 5. Mode of running
      * and then run this class.
      */
-    public static void main(String[] args) {
-        GameType gameType = GameType.valueOf(Utils.getArg(args, "game", "TicTacToe"));
+    private static void evaluate (String args[], String gameStr, Agent agent)
+    {
+        GameType gameType = GameType.valueOf(Utils.getArg(args, "game", gameStr));
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -34,7 +63,7 @@ public class LLMTest {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
-        players.add(new LLMPlayer());
+        players.add(agent.createPlayer());
 
 //        MCTSParams params = new MCTSParams();
 //        params.heuristic = new StringHeuristic();
@@ -59,5 +88,7 @@ public class LLMTest {
 
         // TODO human in the loop with GUI
     }
+
+
 
 }

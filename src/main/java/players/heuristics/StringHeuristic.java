@@ -19,13 +19,18 @@ import java.util.Arrays;
 
 public class StringHeuristic implements IStateHeuristic {
 
-    private String fileName = "llm/TicTacToeEvaluator.java";
+    //private String fileName = "llm/TicTacToeEvaluator.java";
     private String str;
 
     Object heuristicClass;
     Method heuristicFunction;
 
-    public StringHeuristic() {
+    public StringHeuristic(String filename) {
+        setup(filename);
+    }
+
+    private void setup(String fileName)
+    {
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));

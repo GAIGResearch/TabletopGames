@@ -192,6 +192,8 @@ while win_rate + ties < 1.0 and iteration < max_iters:  # Set your performance t
         Ties: {new_heuristic.ties:.2f}.
         Losses: {losses:.2f}.
         
+        Your best attempt so far is this: {heuristic_list.best().code}
+        
         {task_prompt}
         """
 
@@ -207,7 +209,7 @@ while win_rate + ties < 1.0 and iteration < max_iters:  # Set your performance t
     print(f"{iteration}, {best_fit:.2f}, {new_heuristic.fitness:.2f}")
 
 
-print(f"\nBest agent: {heuristic_list.best().code}")
+print(f"\nBest agent:\n{heuristic_list.best().code}")
 
 best_fit = heuristic_list.best().fitness
 best_winrate = heuristic_list.best().wins * 100

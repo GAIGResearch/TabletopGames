@@ -835,7 +835,7 @@ public class Game {
         players.add(new LLMPlayer());
 
         MCTSParams params = new MCTSParams();
-        params.heuristic = new StringHeuristic();
+        params.heuristic = new StringHeuristic("llm/TicTacToeEvaluator.java");
 //        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();
