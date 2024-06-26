@@ -1,0 +1,11 @@
+{
+	"class" : "players.basicMCTS.BasicMCTSParams",
+	"K" : 1.0,
+	"rolloutLength" : 0,
+	"maxTreeDepth" : 30,
+	"heuristic" : {
+ 		"class" : "players.heuristics.ScoreHeuristic"
+	},
+	"budgetType" : "BUDGET_TIME",
+	"budget" : 40
+}

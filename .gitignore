@@ -21,4 +21,19 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
-replay_pid*
+
+.idea/
+target/
+*.iml
+*.kotlin_module
+target/classes/META-INF/ModernBoardGame.kotlin_module
+
+out/production/ModernBoardGame/META-INF/
+
+javadoc/
+
+src/main/java/META-INF/MANIFEST.MF
+
+src/pytag/env/
+metrics/out/*
+treeRecorder*

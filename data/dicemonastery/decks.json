@@ -1,0 +1,304 @@
+ [
+   {
+     "name": ["String","Short Pilgrimages"],
+     "visibility" : "FIRST_VISIBLE_TO_ALL",
+     "cards":
+     [
+      {
+        "destination": ["String","Rome"],
+        "cost": ["Integer", 3],
+        "minPiety": ["Integer", 3],
+        "reward": ["String", "VIVID_GREEN_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      },
+      {
+        "destination": ["String","Santiago"],
+        "cost": ["Integer", 3],
+        "minPiety": ["Integer", 3],
+        "reward": ["String", "VIVID_RED_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      }
+     ]
+   },
+   {
+     "name": ["String","Long Pilgrimages"],
+     "visibility" : "FIRST_VISIBLE_TO_ALL",
+     "cards":
+     [
+         {
+        "destination": ["String","Alexandria"],
+        "cost": ["Integer", 6],
+        "minPiety": ["Integer", 5],
+        "reward": ["String", "VIVID_BLUE_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      },
+      {
+        "destination": ["String","Jerusalem"],
+        "cost": ["Integer", 6],
+        "minPiety": ["Integer", 5],
+        "reward": ["String", "VIVID_PURPLE_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      }
+    ]
+  },
+  {
+  "name" : ["String", "Forage"],
+  "visibility" : "FIRST_VISIBLE_TO_ALL",
+  "cards" : 
+  [
+  	{
+     	"green" : ["Integer[]", [2, 2, 2]],
+     	"red"   : ["Integer[]", [0, 0, 1]],
+     	"blue"  : ["Integer[]", [0, 1, 1]]
+   	},
+   	{
+     	"green" : ["Integer[]", [0, 0, 0]],
+     	"red"   : ["Integer[]", [1, 1, 2]],
+     	"blue"  : ["Integer[]", [1, 2, 2]]
+   	},
+   	{
+     	"green" : ["Integer[]", [1, 1, 2]],
+     	"red"   : ["Integer[]", [0, 0, 0]],
+     	"blue"  : ["Integer[]", [1, 2, 2]]
+   	},
+    	{
+     	"green" : ["Integer[]", [1, 2, 2]],
+     	"red"   : ["Integer[]", [1, 1, 2]],
+     	"blue"  : ["Integer[]", [0, 0, 0]]
+   	},
+  	{
+     	"green" : ["Integer[]", [0, 1, 1]],
+     	"red"   : ["Integer[]", [2, 2, 2]],
+     	"blue"  : ["Integer[]", [0, 0, 1]]
+   	},
+   	{
+     	"green" : ["Integer[]", [0, 1, 1]],
+     	"red"   : ["Integer[]", [1, 1, 2]],
+     	"blue"  : ["Integer[]", [1, 1, 1]]
+   	},
+   	{
+     	"green" : ["Integer[]", [1, 1, 1]],
+     	"red"   : ["Integer[]", [0, 1, 1]],
+     	"blue"  : ["Integer[]", [1, 1, 2]]
+   	},
+  	{
+     	"green" : ["Integer[]", [1, 1, 2]],
+     	"red"   : ["Integer[]", [1, 1, 1]],
+     	"blue"  : ["Integer[]", [0, 1, 1]]
+   	},
+  	{
+     	"green" : ["Integer[]", [0, 0, 1]],
+     	"red"   : ["Integer[]", [0, 1, 1]],
+     	"blue"  : ["Integer[]", [2, 2, 2]]
+   	}
+  ]
+  },
+  {
+  "name" : ["String", "Market"],
+  "visibility" : "FIRST_VISIBLE_TO_ALL",
+  "cards" : 
+  [
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 4],
+  	"inkType" : ["String", "PALE_GREEN_INK"]
+  	},
+   	{
+  	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 5],
+  	"inkType" : ["String", "PALE_BLUE_INK"]
+  	},
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 5],
+  	"inkType" : ["String", "PALE_RED_INK"]
+  	},
+   	{
+  	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 0],
+  	"inkType" : ["String", ""]
+  	},
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 4],
+  	"inkType" : ["String", "PALE_RED_INK"]
+  	},
+  	{
+   	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 5],
+  	"inkType" : ["String", "PALE_GREEN_INK"]
+  	},
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 0],
+  	"inkType" : ["String", ""]
+  	},
+  	{
+   	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 4],
+  	"inkType" : ["String", "PALE_BLUE_INK"]
+  	}
+  ]
+},
+{
+  "name" : ["String", "Texts"],
+  "visibility" : "VISIBLE_TO_ALL",
+  "cards" : 
+  [
+  	{
+  	"name" : ["String", "Psalm"],
+  	"rewards" : ["Integer[]", [4, 3, 3, 2, 2, 2]],
+  	"minPiety" : ["Integer", 3],
+  	"vellum" : ["Integer", 1],
+  	"candles" : ["Integer", 1],
+  	"inks" : ["Integer", 1],
+  	"specialInks" : ["String[]", []]
+  	},
+  	{
+  	"name" : ["String", "Epistle"],
+  	"rewards" : ["Integer[]", [5, 4, 4, 3, 3]],
+  	"minPiety" : ["Integer", 4],
+  	"vellum" : ["Integer", 1],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", []]
+  	},
+  	{
+  	"name" : ["String", "Liturgy"],
+  	"rewards" : ["Integer[]", [6, 5, 5, 4]],
+  	"minPiety" : ["Integer", 5],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 3],
+  	"specialInks" : ["String[]", []]
+  	},
+    	{
+  	"name" : ["String", "Gospel of Mark"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_GREEN_INK", "VIVID_BLUE_INK"]]
+  	},
+    	{
+  	"name" : ["String", "Gospel of Luke"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_RED_INK", "VIVID_BLUE_INK"]]
+  	},
+    	{
+  	"name" : ["String", "Gospel of John"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_RED_INK", "VIVID_PURPLE_INK"]]
+  	},
+    	{
+  	"name" : ["String", "Gospel of Matthew"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_GREEN_INK", "VIVID_PURPLE_INK"]]
+  	}
+  ]
+},
+{
+  "name" : ["String", "Treasures"],
+  "visibility" : "VISIBLE_TO_ALL",
+  "cards" : 
+  [
+    {
+    "name" : ["String", "Cape"],
+    "vp" : ["Integer", 1],
+    "cost" : ["Integer", 3],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Robe"],
+    "vp" : ["Integer", 2],
+    "cost" : ["Integer", 5],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Candlestick"],
+    "vp" : ["Integer", 3],
+    "cost" : ["Integer", 8],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Lectern"],
+    "vp" : ["Integer", 4],
+    "cost" : ["Integer", 11],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Chalice"],
+    "vp" : ["Integer", 5],
+    "cost" : ["Integer", 15],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Mitre"],
+    "vp" : ["Integer", 6],
+    "cost" : ["Integer", 19],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Plate"],
+    "vp" : ["Integer", 7],
+    "cost" : ["Integer", 24],
+    "limit" : ["Integer", 1]
+    },
+    {
+    "name" : ["String", "Altar Cross"],
+    "vp" : ["Integer", 8],
+    "cost" : ["Integer", 29],
+    "limit" : ["Integer", 1]
+    }
+  ]
+}  
+]

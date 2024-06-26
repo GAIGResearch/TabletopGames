@@ -1,0 +1,661 @@
+ [
+   {
+     "name": ["String","Cities"],
+     "visibility" : "HIDDEN_TO_ALL",
+     "cards":
+     [
+      {
+        "name": ["String","Atlanta"],
+        "color": ["Color", "blue"],
+        "country": ["String", "United States"],
+        "population": ["Long", 4715000],
+        "density": ["Integer", 700]
+      },
+      {
+        "name": ["String","Washington"],
+        "color": ["Color", "blue"],
+        "country": ["String", "United States"],
+        "population": ["Long", 4679000],
+        "density": ["Integer", 1400]
+      },
+      {
+        "name": ["String","San Francisco"],
+        "color": ["Color", "blue"],
+        "country": ["String", "United States"],
+        "population": ["Long", 5864000],
+        "density": ["Integer", 2100]
+      },
+      {
+        "name": ["String","Chicago"],
+        "color": ["Color", "blue"],
+        "country": ["String", "United States"],
+        "population": ["Long", 9121000],
+        "density": ["Integer", 1300]
+      },
+      {
+        "name": ["String","Montreal"],
+        "color": ["Color", "blue"],
+        "country": ["String", "Canada"],
+        "population": ["Long", 3429000],
+        "density": ["Integer", 2200]
+      },
+      {
+        "name": ["String","New York"],
+        "color": ["Color", "blue"],
+        "country": ["String", "United States"],
+        "population": ["Long", 20464000],
+        "density": ["Integer", 1800]
+      },
+      {
+        "name": ["String","London"],
+        "color": ["Color", "blue"],
+        "country": ["String", "United Kingdom"],
+        "population": ["Long", 8586000],
+        "density": ["Integer", 5300]
+      },
+      {
+        "name": ["String","Madrid"],
+        "color": ["Color", "blue"],
+        "country": ["String", "Spain"],
+        "population": ["Long", 5427000],
+        "density": ["Integer", 5700]
+      },
+      {
+        "name": ["String","Paris"],
+        "color": ["Color", "blue"],
+        "country": ["String", "France"],
+        "population": ["Long", 10755000],
+        "density": ["Integer", 3800]
+      },
+      {
+        "name": ["String","Essen"],
+        "color": ["Color", "blue"],
+        "country": ["String", "Germany"],
+        "population": ["Long", 575000],
+        "density": ["Integer", 2800]
+      },
+      {
+        "name": ["String","Milan"],
+        "color": ["Color", "blue"],
+        "country": ["String", "Italy"],
+        "population": ["Long", 5232000],
+        "density": ["Integer", 2800]
+      },
+      {
+        "name": ["String","St Petersburg"],
+        "color": ["Color", "blue"],
+        "country": ["String", "Russia"],
+        "population": ["Long", 4879000],
+        "density": ["Integer", 4100]
+      },
+      {
+        "name": ["String","Algiers"],
+        "color": ["Color", "black"],
+        "country": ["String", "Algeria"],
+        "population": ["Long", 2946000],
+        "density": ["Integer", 6500]
+      },
+      {
+        "name": ["String","Cairo"],
+        "color": ["Color", "black"],
+        "country": ["String", "Egypt"],
+        "population": ["Long", 14718000],
+        "density": ["Integer", 8900]
+      },
+      {
+        "name": ["String","Istanbul"],
+        "color": ["Color", "black"],
+        "country": ["String", "Turkey"],
+        "population": ["Long", 13576000],
+        "density": ["Integer", 9700]
+      },
+      {
+        "name": ["String","Moscow"],
+        "color": ["Color", "black"],
+        "country": ["String", "Russia"],
+        "population": ["Long", 15512000],
+        "density": ["Integer", 3500]
+      },
+      {
+        "name": ["String","Tehran"],
+        "color": ["Color", "black"],
+        "country": ["String", "Iran"],
+        "population": ["Long", 7419000],
+        "density": ["Integer", 9500]
+      },
+      {
+        "name": ["String","Baghdad"],
+        "color": ["Color", "black"],
+        "country": ["String", "Iraq"],
+        "population": ["Long", 6204000],
+        "density": ["Integer", 10400]
+      },
+      {
+        "name": ["String","Riyadh"],
+        "color": ["Color", "black"],
+        "country": ["String", "Saudi Arabia"],
+        "population": ["Long", 5037000],
+        "density": ["Integer", 3400]
+      },
+      {
+        "name": ["String","Karachi"],
+        "color": ["Color", "black"],
+        "country": ["String", "Pakistan"],
+        "population": ["Long", 20711000],
+        "density": ["Integer", 25800]
+      },
+      {
+        "name": ["String","Delhi"],
+        "color": ["Color", "black"],
+        "country": ["String", "India"],
+        "population": ["Long", 22242000],
+        "density": ["Integer", 11500]
+      },
+      {
+        "name": ["String","Mumbai"],
+        "color": ["Color", "black"],
+        "country": ["String", "India"],
+        "population": ["Long", 16910000],
+        "density": ["Integer", 30900]
+      },
+      {
+        "name": ["String","Kolkata"],
+        "color": ["Color", "black"],
+        "country": ["String", "India"],
+        "population": ["Long", 14374000],
+        "density": ["Integer", 11900]
+      },
+      {
+        "name": ["String","Chennai"],
+        "color": ["Color", "black"],
+        "country": ["String", "India"],
+        "population": ["Long", 8865000],
+        "density": ["Integer", 14600]
+      },
+      {
+        "name": ["String","Beijing"],
+        "color": ["Color", "red"],
+        "country": ["String", "People's Republic of China"],
+        "population": ["Long", 17311000],
+        "density": ["Integer", 5000]
+      },
+      {
+        "name": ["String","Seoul"],
+        "color": ["Color", "red"],
+        "country": ["String", "South Korea"],
+        "population": ["Long", 22537000],
+        "density": ["Integer", 10400]
+      },
+      {
+        "name": ["String","Shanghai"],
+        "color": ["Color", "red"],
+        "country": ["String", "People's Republic of China"],
+        "population": ["Long", 13482000],
+        "density": ["Integer", 2200]
+      },
+      {
+        "name": ["String","Tokyo"],
+        "color": ["Color", "red"],
+        "country": ["String", "Japan"],
+        "population": ["Long", 13189000],
+        "density": ["Integer", 6030]
+      },
+      {
+        "name": ["String","Osaka"],
+        "color": ["Color", "red"],
+        "country": ["String", "Japan"],
+        "population": ["Long", 2871000],
+        "density": ["Integer", 13000]
+      },
+      {
+        "name": ["String","Taipei"],
+        "color": ["Color", "red"],
+        "country": ["String", "Taiwan"],
+        "population": ["Long", 8338000],
+        "density": ["Integer", 7300]
+      },
+      {
+        "name": ["String","Hong Kong"],
+        "color": ["Color", "red"],
+        "country": ["String", "People's Republic of China"],
+        "population": ["Long", 7106000],
+        "density": ["Integer", 25900]
+      },
+      {
+        "name": ["String","Bangkok"],
+        "color": ["Color", "red"],
+        "country": ["String", "Thailand"],
+        "population": ["Long", 7151000],
+        "density": ["Integer", 3200]
+      },
+      {
+        "name": ["String","Ho Chi Minh City"],
+        "color": ["Color", "red"],
+        "country": ["String", "Vietnam"],
+        "population": ["Long", 8314000],
+        "density": ["Integer", 9900]
+      },
+      {
+        "name": ["String","Manila"],
+        "color": ["Color", "red"],
+        "country": ["String", "Philippines"],
+        "population": ["Long", 20767000],
+        "density": ["Integer", 14400]
+      },
+      {
+        "name": ["String","Sydney"],
+        "color": ["Color", "red"],
+        "country": ["String", "Australia"],
+        "population": ["Long", 3785000],
+        "density": ["Integer", 2100]
+      },
+      {
+        "name": ["String","Jakarta"],
+        "color": ["Color", "red"],
+        "country": ["String", "Indonesia"],
+        "population": ["Long", 26063000],
+        "density": ["Integer", 9400]
+      },
+      {
+        "name": ["String","Khartoum"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Sudan"],
+        "population": ["Long", 4887000],
+        "density": ["Integer", 4500]
+      },
+      {
+        "name": ["String","Lagos"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Nigeria"],
+        "population": ["Long", 11547000],
+        "density": ["Integer", 12700]
+      },
+      {
+        "name": ["String","Johannesburg"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "South Africa"],
+        "population": ["Long", 3888000],
+        "density": ["Integer", 2400]
+      },
+      {
+        "name": ["String","Kinshasa"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Democratic Republic of the Congo"],
+        "population": ["Long", 9046000],
+        "density": ["Integer", 15500]
+      },
+      {
+        "name": ["String","Sao Paolo"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Brazil"],
+        "population": ["Long", 20186000],
+        "density": ["Integer", 6400]
+      },
+      {
+        "name": ["String","Bogota"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Colombia"],
+        "population": ["Long", 8702000],
+        "density": ["Integer", 21000]
+      },
+      {
+        "name": ["String","Miami"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "United States"],
+        "population": ["Long", 558200],
+        "density": ["Integer", 1700]
+      },
+      {
+        "name": ["String","Mexico City"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Mexico"],
+        "population": ["Long", 19463000],
+        "density": ["Integer", 9500]
+      },
+      {
+        "name": ["String","Los Angeles"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "United States"],
+        "population": ["Long", 14900000],
+        "density": ["Integer", 2400]
+      },
+      {
+        "name": ["String","Lima"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Peru"],
+        "population": ["Long", 9121000],
+        "density": ["Integer", 14100]
+      },
+      {
+        "name": ["String","Santiago"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Chile"],
+        "population": ["Long", 6015000],
+        "density": ["Integer", 6500]
+      },
+      {
+        "name": ["String","Buenos Aires"],
+        "color": ["Color", "yellow"],
+        "country": ["String", "Argentina"],
+        "population": ["Long", 13639000],
+        "density": ["Integer", 5200]
+      }
+     ]
+   },
+   {
+     "name": ["String", "Infections"],
+     "visibility" : "HIDDEN_TO_ALL",
+     "cards":
+     [
+       {
+         "name": ["String", "Atlanta"],
+         "color": ["Color", "blue"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "Washington"],
+         "color": ["Color", "blue"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "San Francisco"],
+         "color": ["Color", "blue"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "Chicago"],
+         "color": ["Color", "blue"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "Montreal"],
+         "color": ["Color", "blue"],
+         "country": ["String", "Canada"]
+       },
+       {
+         "name": ["String", "New York"],
+         "color": ["Color", "blue"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "London"],
+         "color": ["Color", "blue"],
+         "country": ["String", "United Kingdom"]
+       },
+       {
+         "name": ["String", "Madrid"],
+         "color": ["Color", "blue"],
+         "country": ["String", "Spain"]
+       },
+       {
+         "name": ["String", "Paris"],
+         "color": ["Color", "blue"],
+         "country": ["String", "France"]
+       },
+       {
+         "name": ["String", "Essen"],
+         "color": ["Color", "blue"],
+         "country": ["String", "Germany"]
+       },
+       {
+         "name": ["String", "Milan"],
+         "color": ["Color", "blue"],
+         "country": ["String", "Italy"]
+       },
+       {
+         "name": ["String", "St Petersburg"],
+         "color": ["Color", "blue"],
+         "country": ["String", "Russia"]
+       },
+       {
+         "name": ["String", "Algiers"],
+         "color": ["Color", "black"],
+         "country": ["String", "Algeria"]
+       },
+       {
+         "name": ["String", "Cairo"],
+         "color": ["Color", "black"],
+         "country": ["String", "Egypt"]
+       },
+       {
+         "name": ["String", "Istanbul"],
+         "color": ["Color", "black"],
+         "country": ["String", "Turkey"]
+       },
+       {
+         "name": ["String", "Moscow"],
+         "color": ["Color", "black"],
+         "country": ["String", "Russia"]
+       },
+       {
+         "name": ["String", "Tehran"],
+         "color": ["Color", "black"],
+         "country": ["String", "Iran"]
+       },
+       {
+         "name": ["String", "Baghdad"],
+         "color": ["Color", "black"],
+         "country": ["String", "Iran"]
+       },
+       {
+         "name": ["String", "Riyadh"],
+         "color": ["Color", "black"],
+         "country": ["String", "Saudi Arabia"]
+       },
+       {
+         "name": ["String", "Karachi"],
+         "color": ["Color", "black"],
+         "country": ["String", "Pakistan"]
+       },
+       {
+         "name": ["String", "Delhi"],
+         "color": ["Color", "black"],
+         "country": ["String", "India"]
+       },
+       {
+         "name": ["String", "Mumbai"],
+         "color": ["Color", "black"],
+         "country": ["String", "India"]
+       },
+       {
+         "name": ["String", "Kolkata"],
+         "color": ["Color", "black"],
+         "country": ["String", "India"]
+       },
+       {
+         "name": ["String", "Chennai"],
+         "color": ["Color", "black"],
+         "country": ["String", "India"]
+       },
+       {
+         "name": ["String", "Beijing"],
+         "color": ["Color", "red"],
+         "country": ["String", "People's Republic of China"]
+       },
+       {
+         "name": ["String", "Seoul"],
+         "color": ["Color", "red"],
+         "country": ["String", "South Korea"]
+       },
+       {
+         "name": ["String", "Shanghai"],
+         "color": ["Color", "red"],
+         "country": ["String", "People's Republic of China"]
+       },
+       {
+         "name": ["String", "Tokyo"],
+         "color": ["Color", "red"],
+         "country": ["String", "Japan"]
+       },
+       {
+         "name": ["String", "Osaka"],
+         "color": ["Color", "red"],
+         "country": ["String", "Japan"]
+       },
+       {
+         "name": ["String", "Taipei"],
+         "color": ["Color", "red"],
+         "country": ["String", "Taiwan"]
+       },
+       {
+         "name": ["String", "Hong Kong"],
+         "color": ["Color", "red"],
+         "country": ["String", "People's Republic of China"]
+       },
+       {
+         "name": ["String", "Bangkok"],
+         "color": ["Color", "red"],
+         "country": ["String", "Thailand"]
+       },
+       {
+         "name": ["String", "Ho Chi Minh City"],
+         "color": ["Color", "red"],
+         "country": ["String", "Vietnam"]
+       },
+       {
+         "name": ["String", "Manila"],
+         "color": ["Color", "red"],
+         "country": ["String", "Philippines"]
+       },
+       {
+         "name": ["String", "Sydney"],
+         "color": ["Color", "red"],
+         "country": ["String", "Australia"]
+       },
+       {
+         "name": ["String", "Jakarta"],
+         "color": ["Color", "red"],
+         "country": ["String", "Indonesia"]
+       },
+       {
+         "name": ["String", "Khartoum"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Sudan"]
+       },
+       {
+         "name": ["String", "Lagos"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Nigeria"]
+       },
+       {
+         "name": ["String", "Johannesburg"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "South Africa"]
+       },
+       {
+         "name": ["String", "Kinshasa"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Dem. Republic of the Congo"]
+       },
+       {
+         "name": ["String", "Sao Paolo"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Brazil"]
+       },
+       {
+         "name": ["String", "Bogota"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Colombia"]
+       },
+       {
+         "name": ["String", "Miami"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "Mexico City"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Mexico"]
+       },
+       {
+         "name": ["String", "Los Angeles"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "United States"]
+       },
+       {
+         "name": ["String", "Lima"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Peru"]
+       },
+       {
+         "name": ["String", "Santiago"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Chile"]
+       },
+       {
+         "name": ["String", "Buenos Aires"],
+         "color": ["Color", "yellow"],
+         "country": ["String", "Argentina"]
+       }
+     ]
+   },
+   {
+     "name": ["String","Events"],
+     "visibility" : "HIDDEN_TO_ALL",
+     "cards":
+      [
+       {
+       "name": ["String","Resilient Population"],
+       "effect": ["String","Remove any 1 card in the Infection Discard Pile from the game. You may play this between the Infect and Intensify steps of an epidemic."]
+       },
+       {
+         "name": ["String","Airlift"],
+         "effect": ["String","Move any 1 pawn to any city. Get permission before moving another player's pawn."]
+       },
+       {
+         "name": ["String","Government Grant"],
+         "effect": ["String","Add 1 research station to any city (no City card needed)."]
+       },
+       {
+         "name": ["String","One quiet night"],
+         "effect": ["String","Skip the next Infect Cities step (do not flip over any Infection cards)."]
+       },
+       {
+         "name": ["String","Forecast"],
+         "effect": ["String","Draw, look at, and rearrange the top 6 cards of the Infection Deck. Put them back on top."]
+       }
+      ]
+   },
+   {
+     "name": ["String", "Player Roles"],
+     "visibility" : "VISIBLE_TO_ALL",
+     "cards":
+     [
+       {
+         "name": ["String", "Scientist"],
+         "color": ["Color", "white"],
+         "action": ["String", "You need only 4 cards of the same color to do the Discover a Cure action."]
+       },
+       {
+         "name": ["String", "Quarantine Specialist"],
+         "color": ["Color", "green"],
+         "action": ["String", "Prevent disease cube placements (and outbreaks) in the city you are in and all cities connected to it."]
+       },
+       {
+         "name": ["String", "Researcher"],
+         "color": ["Color", "brown"],
+         "action": ["String", "As an action, you may give (or a player can take) any City card from your hand. You must both be in the same city. The card does not have to match the city you are in."]
+       },
+       {
+         "name": ["String", "Dispatcher"],
+         "color": ["Color", "pink"],
+         "action": ["String", "Move another player's pawn as if it were yours. As an action, move any pawn to a city with another pawn. Get permission before moving another player's pawn"]
+       },
+       {
+         "name": ["String", "Contingency Planner"],
+         "color": ["Color", "blue"],
+         "action": ["String", "As an action, take any discarded Event card and store it on this card. When you play the stored Event card, remove it from the game. Limit: 1 Event card on this card at a time, which is not part of your hand."]
+       },
+       {
+         "name": ["String", "Medic"],
+         "color": ["Color", "orange"],
+         "action": ["String", "Remove all cubes of one color when doing Treat Disease. Automatically remove cubes of cured diseases from the city you are in (and prevent them from being placed there)."]
+       },
+       {
+         "name": ["String", "Operations Expert"],
+         "color": ["Color", "light green"],
+         "action": ["String", "As an action, build a research station in the city you are in (no City card needed). Once per turn as an action, move from a research station to any city by discarding any City card."]
+       }
+     ]
+   }
+]

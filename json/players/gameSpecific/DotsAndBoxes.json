@@ -1,0 +1,14 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 0,
+  "opponentTreePolicy": "OneTree",
+  "heuristic": {
+    "class": "players.heuristics.LeaderHeuristic"
+  },
+  "exploreEpsilon": 0.3,
+  "treePolicy": "RegretMatching",
+  "rolloutType": "RANDOM",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "budget": 40
+}

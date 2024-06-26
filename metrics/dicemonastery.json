@@ -1,0 +1,18 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.SummaryLogger"
+    },
+    [
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$Timing"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$Piety"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$Location"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$Thing"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$Value"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$ActionPointsLeft"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$Turn"},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$RoundOverCounts"}
+    ]
+  ]
+}

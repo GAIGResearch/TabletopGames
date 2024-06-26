@@ -1,0 +1,498 @@
+[
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "cured diseases",
+    "nodes" :
+    [
+      {
+        "name": ["String","Yellow Cured"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Yellow Erradicated"]]
+      },
+      {
+        "name": ["String","Red Cured"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Red Erradicated"]]
+      },
+      {
+        "name": ["String","Blue Cured"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Blue Erradicated"]]
+      },
+      {
+        "name": ["String","Black Cured"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Black Erradicated"]]
+      },
+      {
+        "name": ["String","Yellow Erradicated"],
+        "color": ["Color","yellow"]
+      },
+      {
+        "name": ["String","Red Erradicated"],
+        "color": ["Color","red"]
+      },
+      {
+        "name": ["String","Blue Erradicated"],
+        "color": ["Color","blue"]
+      },
+      {
+        "name": ["String","Black Erradicated"],
+        "color": ["Color","black"]
+      }
+    ]
+  },
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "cities",
+    "img": "pandemicBG.jpg",
+    "size": ["Vector2D", [1200, 849]],
+    "nodes" :
+    [
+      {
+        "name": ["String","Atlanta"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Miami", "Washington", "Chicago"]],
+        "coordinates": ["Vector2D",[236, 325]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Washington"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Atlanta", "Miami", "New York", "Montreal"]],
+        "coordinates": ["Vector2D",[324, 321]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","San Francisco"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Los Angeles", "Chicago", "Tokyo", "Manila"]],
+        "coordinates": ["Vector2D",[100, 295]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []],
+        "edge": ["Boolean", true]
+      },
+      {
+        "name": ["String","Chicago"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["San Francisco", "Los Angeles", "Atlanta", "Mexico City", "Montreal"]],
+        "coordinates": ["Vector2D",[205, 265]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Montreal"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["New York", "Washington", "Chicago"]],
+        "coordinates": ["Vector2D",[288, 262]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","New York"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Montreal", "Washington", "London", "Madrid"]],
+        "coordinates": ["Vector2D",[352, 271]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","London"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["New York", "Madrid", "Paris", "Essen"]],
+        "coordinates": ["Vector2D",[506, 222]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Madrid"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["New York", "London", "Paris", "Algiers", "Sao Paolo"]],
+        "coordinates": ["Vector2D",[494, 303]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Paris"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["London", "Madrid", "Milan", "Essen", "Algiers"]],
+        "coordinates": ["Vector2D",[568, 263]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Essen"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["London", "Milan", "Paris", "St Petersburg"]],
+        "coordinates": ["Vector2D",[588, 207]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Milan"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Paris", "Essen", "Algiers", "Istanbul"]],
+        "coordinates": ["Vector2D",[622, 247]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","St Petersburg"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["Essen", "Moscow", "Istanbul"]],
+        "coordinates": ["Vector2D",[680, 190]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Algiers"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Madrid", "Paris", "Istanbul", "Cairo"]],
+        "coordinates": ["Vector2D",[585, 350]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Cairo"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Algiers", "Baghdad", "Istanbul", "Riyadh", "Khartoum"]],
+        "coordinates": ["Vector2D",[648, 365]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Istanbul"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Algiers", "Baghdad", "Cairo", "Moscow", "Milan", "St Petersburg"]],
+        "coordinates": ["Vector2D",[660, 295]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Moscow"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["St Petersburg", "Tehran", "Istanbul"]],
+        "coordinates": ["Vector2D",[725, 245]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Tehran"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Moscow", "Baghdad", "Karachi", "Delhi"]],
+        "coordinates": ["Vector2D",[781, 286]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Baghdad"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Karachi", "Cairo", "Istanbul", "Riyadh", "Tehran"]],
+        "coordinates": ["Vector2D",[718, 337]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Riyadh"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Cairo", "Karachi", "Baghdad"]],
+        "coordinates": ["Vector2D",[728, 412]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Karachi"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Tehran", "Baghdad", "Delhi", "Riyadh", "Mumbai"]],
+        "coordinates": ["Vector2D",[797, 364]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Delhi"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Tehran", "Karachi", "Kolkata", "Mumbai", "Chennai"]],
+        "coordinates": ["Vector2D",[858, 341]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Mumbai"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Karachi", "Delhi", "Chennai"]],
+        "coordinates": ["Vector2D",[805, 425]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Kolkata"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Delhi", "Chennai", "Bangkok", "Hong Kong"]],
+        "coordinates": ["Vector2D",[916, 361]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Chennai"],
+        "color": ["Color","black"],
+        "neighbours": ["String[]",["Mumbai", "Delhi", "Kolkata", "Bangkok", "Jakarta"]],
+        "coordinates": ["Vector2D",[870, 470]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Beijing"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Shanghai", "Seoul"]],
+        "coordinates": ["Vector2D",[963, 266]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Seoul"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Beijing", "Shanghai", "Tokyo"]],
+        "coordinates": ["Vector2D",[1037, 263]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Shanghai"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Hong Kong", "Taipei", "Tokyo", "Seoul", "Beijing"]],
+        "coordinates": ["Vector2D",[968, 325]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Tokyo"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Osaka", "Seoul", "San Francisco", "Shanghai"]],
+        "coordinates": ["Vector2D",[1094, 296]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []],
+        "edge": ["Boolean", true]
+      },
+      {
+        "name": ["String","Osaka"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Taipei", "Tokyo"]],
+        "coordinates": ["Vector2D",[1102, 359]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Taipei"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Hong Kong", "Manila", "Osaka", "Shanghai"]],
+        "coordinates": ["Vector2D",[1042, 383]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Hong Kong"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Bangkok", "Kolkata", "Shanghai", "Taipei", "Manila", "Ho Chi Minh City"]],
+        "coordinates": ["Vector2D",[976, 394]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Bangkok"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Ho Chi Minh City", "Jakarta", "Chennai", "Kolkata", "Hong Kong"]],
+        "coordinates": ["Vector2D",[928, 431]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Ho Chi Minh City"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Jakarta", "Bangkok", "Hong Kong", "Manila"]],
+        "coordinates": ["Vector2D",[979, 490]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Manila"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Sydney", "Ho Chi Minh City", "Hong Kong", "Taipei", "San Francisco"]],
+        "coordinates": ["Vector2D",[1060, 485]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []],
+        "edge": ["Boolean", true]
+      },
+      {
+        "name": ["String","Sydney"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Jakarta", "Manila", "Los Angeles"]],
+        "coordinates": ["Vector2D",[1108, 655]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []],
+        "edge": ["Boolean", true]
+      },
+      {
+        "name": ["String","Jakarta"],
+        "color": ["Color","red"],
+        "neighbours": ["String[]",["Chennai", "Sydney", "Ho Chi Minh City", "Bangkok"]],
+        "coordinates": ["Vector2D",[928, 543]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Khartoum"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Lagos", "Johannesburg", "Cairo"]],
+        "coordinates": ["Vector2D",[665, 447]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Lagos"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Kinshasa", "Khartoum", "Sao Paolo"]],
+        "coordinates": ["Vector2D",[559, 462]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Johannesburg"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Kinshasa", "Khartoum"]],
+        "coordinates": ["Vector2D",[659, 603]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Kinshasa"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Lagos", "Johannesburg", "Khartoum"]],
+        "coordinates": ["Vector2D",[612, 520]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Sao Paolo"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Buenos Aires", "Bogota", "Lagos", "Madrid"]],
+        "coordinates": ["Vector2D",[399, 579]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Bogota"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Buenos Aires", "Lima", "Sao Paolo", "Miami", "Mexico City"]],
+        "coordinates": ["Vector2D",[282, 477]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Miami"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Atlanta", "Washington", "Mexico City", "Bogota"]],
+        "coordinates": ["Vector2D",[289, 393]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Mexico City"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Los Angeles", "Lima", "Chicago", "Miami", "Bogota"]],
+        "coordinates": ["Vector2D",[194, 406]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Los Angeles"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["San Francisco", "Chicago", "Mexico City", "Sydney"]],
+        "coordinates": ["Vector2D",[117, 379]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []],
+        "edge": ["Boolean", true]
+      },
+      {
+        "name": ["String","Lima"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Santiago", "Bogota", "Mexico City"]],
+        "coordinates": ["Vector2D",[253, 566]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Santiago"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Lima"]],
+        "coordinates": ["Vector2D",[264, 658]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      },
+      {
+        "name": ["String","Buenos Aires"],
+        "color": ["Color","yellow"],
+        "neighbours": ["String[]",["Sao Paolo", "Bogota"]],
+        "coordinates": ["Vector2D",[350, 642]],
+        "Research Stations": ["Boolean", false],
+        "infection": ["Integer[]", [0, 0, 0, 0]],
+        "players": ["Integer<>", []]
+      }
+
+    ]
+  }
+]
