@@ -8,13 +8,15 @@ from openai import OpenAI
 from config import api_key
 
 # Set your API key
-os.environ['OPENAI_API_KEY']    = api_key
+os.environ['OPENAI_API_KEY'] = api_key
 
 
 class Heuristic:
-    def __init__(self, fitness: float, code: str):
+    def __init__(self, wins : float, ties: float, fitness: float, code: str):
         self.fitness = fitness
         self.code = code
+        self.wins = wins
+        self.ties = ties
 
     def __repr__(self):
         return f"Heuristic(fitness={self.fitness}, code='{self.code}')"
@@ -111,7 +113,7 @@ def evaluate(prompt: str):
 
     out = run_jar(jar_path, args)
     if "Error" in out or "error" in out:
-        return -1, -1, out
+        return "", -1, -1, out
 
     output = out.split("\n")[-2].split(',')
     wr = float(output[0])
@@ -164,12 +166,14 @@ feedback_prompt = task_prompt
 
 # Iterate if necessary
 iteration = 0
-max_iters = 2
+max_iters = 10
 while win_rate + ties < 0.75 and iteration < max_iters:  # Set your performance threshold
     #print(f"\nIteration {iteration}: Providing feedback and requesting optimization...\n")
 
     h, win_rate, ties, error = evaluate(feedback_prompt)
-    heuristic_list.add_program(Heuristic(win_rate, h))
+    new_heuristic = Heuristic(win_rate, ties, win_rate, h)
+    losses = 1 - new_heuristic.wins - new_heuristic.ties
+    heuristic_list.add_program(new_heuristic)
 
     if error:
         feedback_prompt = f"""Remove comments from the code. Compilation error, fix it: {error}.
@@ -177,11 +181,12 @@ while win_rate + ties < 0.75 and iteration < max_iters:  # Set your performance 
         """
     else:
         feedback_prompt = f"""
-        The initial implementation of the heuristic needs improvements.
-        Please optimize the code for better performance. Aim for higher ties or wins. Here are the results:
+        The initial implementation of the heuristic needs improvements. It obtained a score of {new_heuristic.fitness:.2f}, but we want it higher.
+        Please optimize the code so the evaluation of a game state leads to more wins in the game. Here are the results:
     
-        Wins: {win_rate:.2f}.
-        Ties: {ties:.2f}.
+        Wins: {new_heuristic.wins:.2f}.
+        Ties: {new_heuristic.ties:.2f}.
+        Losses: {losses:.2f}.
         
         {task_prompt}
         """
@@ -190,7 +195,19 @@ while win_rate + ties < 0.75 and iteration < max_iters:  # Set your performance 
     # heuristic_list.add_program(Heuristic(win_rate, h))
 
     iteration += 1
-    print(f"\nIteration: {iteration}, win_rate: {win_rate*100:.2f}")
+    best_fit = heuristic_list.best().fitness
+    best_winrate = heuristic_list.best().wins*100
+    best_tierate = heuristic_list.best().ties*100
+    best_lossrate = 100 - best_winrate - best_tierate
 
-print(f"\nFinished! Final results: {win_rate:.2f} wins and {ties:.2f} ties.")
-print(f"\nBest agent: {heuristic_list.best()}")
+    print(f"{iteration}, {best_fit:.2f}, {new_heuristic.fitness:.2f}")
+
+
+print(f"\nBest agent: {heuristic_list.best().code}")
+
+best_fit = heuristic_list.best().fitness
+best_winrate = heuristic_list.best().wins * 100
+best_tierate = heuristic_list.best().ties * 100
+best_lossrate = 100 - best_winrate - best_tierate
+
+print(f"\nBest fitness: {best_fit:.2f}, win_rate: {best_winrate:.2f}%, ties: {best_tierate:.2f}%, losses: {best_lossrate:.2f}%")
