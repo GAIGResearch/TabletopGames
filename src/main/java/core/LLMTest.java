@@ -40,7 +40,7 @@ public class LLMTest {
 //        params.heuristic = new StringHeuristic();
 //        players.add(new MCTSPlayer(params));
 
-        int nGames = 5;
+        int nGames = 20;
         int wins = 0;
         int ties = 0;
         int playerToMonitor = 1;
