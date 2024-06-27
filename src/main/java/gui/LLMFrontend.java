@@ -669,6 +669,20 @@ public class LLMFrontend extends GUI {
 
     public static void main(String[] args) {
         new LLMFrontend();
+
+        // todo pipeline, frontend-controlled.
+        //  - some way of getting the base prompt for a game, and allow edit (maybe in GameType, have a file with the prompt)
+        //      - for new games where we don't have this... input game manual (external doc) + API (game-specific) + structure (general)
+        //  - select heuristic player, have button for 'attach LLM'. This will call the LLM with the initial prompt and load up the heuristic generated
+        //  - we play the game, maybe several times, with human/other player, then submit feedback
+        //  - the 'submit feedback' button not only prints feedback, but also iterates on heuristic function with LLM
+        //  - print to console the extra fluff text generated maybe?
+        //  - repeat!
+
+        // todo
+        //  - log interactions to file with timestamp (feedback sent, LLM complete output, game results). get some people to play
+        //  - alternative: submit feedback mid-game. Pause game, iterate heuristic, resume game.
+        //  - alternative: have the LLM iterate by itself for some generations, using automatic evaluation of heuristic
     }
 
     private void initialisePlayerParameterWindow(int playerIndex, int agentIndex) {
