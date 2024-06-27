@@ -98,7 +98,8 @@ public class LLMFrontend extends GUI {
             }
         }
 //        GameType firstGameType = GameType.valueOf(gameNames[0]);
-        GameType firstGameType = GameType.TicTacToe;
+        GameType firstGameType = GameType.LoveLetter;
+
         nPlayersText.setText("  # players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
 
         JComboBox<String> gameOptions = new JComboBox<>(gameNames);  // index of this selection is game
@@ -848,5 +849,4 @@ public class LLMFrontend extends GUI {
 
         return paramValueOptions;
     }
-
 }
