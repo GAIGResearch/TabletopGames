@@ -56,16 +56,28 @@ public class GamePromptGenerator {
         // Extract Javadocs using JavaParser
         Map<String, String> javadocs = extractJavadocs(sourceFile);
 
+        Map<String, String> fullClasses = new HashMap<>();
+
+        for (String cl : methods.keySet()) {
+            for (Method method : methods.get(cl)) {
+                String fullMethod = method.toString().substring(method.toString().lastIndexOf(" "), method.toString().lastIndexOf("("));
+                String methodAndPackage = fullMethod.substring(0, fullMethod.lastIndexOf("."));
+                fullClasses.put(cl, methodAndPackage.trim());
+            }
+        }
+
         // Map methods to Javadocs
         for (String cl : methods.keySet()) {
-            result += "From class " + cl + ":\n";
+            result += "From class " + fullClasses.get(cl) + ":\n";
             for (Method method : methods.get(cl)) {
+
                 String signature = getMethodSignature(method);
                 if (javadocs != null && javadocs.containsKey(signature)) {
                     result += " - " + signature + ": " + javadocs.get(signature) + "\n";
                 } else {
                     result += " - " + signature + "\n";
                 }
+
             }
         }
 
@@ -107,7 +119,8 @@ public class GamePromptGenerator {
 
     public static Map<String, List<Method>> getAllMethods(Class<?> clazz) {
         Map<String, List<Method>> methods = new HashMap<>();
-        extractMethods(clazz, methods, new ArrayList<>());
+        ArrayList<Class<?>> clazzez = new ArrayList<>();
+        extractMethods(clazz, methods, clazzez);
         return methods;
     }
 
