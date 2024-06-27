@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult;
+import static evaluation.RunArg.*;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
 import static java.lang.Math.sqrt;
 import static java.util.stream.Collectors.toList;
@@ -88,6 +89,13 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
             }
         }
+        // run tournament
+        // TODO: We should ideally parse the config within the tournament?
+        setRandomSeed((Number) config.get(RunArg.seed));
+        this.verbose = (boolean) config.get(RunArg.verbose);
+        setResultsFile((String) config.get(output));
+        this.randomGameParams = (boolean) config.get(RunArg.randomGameParams);
+
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
@@ -703,17 +711,9 @@ public class RoundRobinTournament extends AbstractTournament {
         listeners.add(gameTracker);
     }
 
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
-
     public void setRandomSeed(Number randomSeed) {
         this.randomSeed = randomSeed.longValue();
         seedRnd = new Random(this.randomSeed);
-    }
-
-    public void setRandomGameParams(boolean randomGameParams) {
-        this.randomGameParams = randomGameParams;
     }
 
     public void setResultsFile(String resultsFile) {

@@ -4,11 +4,9 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
 import evaluation.RunArg;
-import evaluation.RunGames;
 import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import org.apache.spark.sql.catalyst.expressions.Round;
 import players.heuristics.StringHeuristic;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
@@ -18,13 +16,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-import static evaluation.RunArg.gameParams;
-
 public class JavaCoder {
 
     public static void main(String[] args) {
 
         String fileStem = "llm/TicTacToeEvaluator";
+        String javaSourceFileStem = fileStem.replaceAll(".*/(.*?)", "$1");
         String task_prompt = """
                  You are playing Tic Tac Toe. Your job is to write the evaluation logic to help an AI play this game. Don't leave parts unfinished or TODOs.
                  First, write a java class called TicTacToeEvaluator class, with only a single function with this signature:\s
@@ -57,6 +54,14 @@ public class JavaCoder {
                 Do not include any explanation of the code. Just the raw Java code is needed.
                 Do not include any comments in the code.
                                 """;
+        String feedbackPrompt = """
+                The current best heuristic code is below.
+                ```java
+                %s
+                ```
+                Your task is to generate a new heuristic function that is better than the current one.
+                A better heuristic will have a higher win rate and/or have shorter and less complex code.
+                """;
 
         int iteration = 0;
         int max_iters = 3;
@@ -70,21 +75,27 @@ public class JavaCoder {
         while (iteration < max_iters) {
             try {
                 String fileName = fileStem + String.format("%03d.java", iteration);
-                // Use regex to extract code between ```java and ```
 
-                String llmPrompt = error.isEmpty() ? task_prompt
-                        : String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);
+                String llmPrompt = task_prompt;
+                if (iteration > 0) {
+                    llmPrompt = String.format(feedbackPrompt, generatedCode);
+                }
+                if (!error.isEmpty())
+                    llmPrompt = String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);
                 error = "";
+                // Use regex to extract code between ```java and ```
+                // and remove any comments
                 generatedCode = llm.getResponse(llmPrompt)
                         .replaceAll("```java\\s*(.*?)", "$1")
                         .replaceAll("(.*?)```", "$1")
                         .replaceAll("//.*\\n", "")
-                        .replaceAll("TicTacToeEvaluator", String.format("TicTacToeEvaluator%03d", iteration));
+                        .replaceAll(javaSourceFileStem, String.format("%s%03d", javaSourceFileStem, iteration));
                 writeGeneratedCodeToFile(generatedCode, fileName);
 
                 // We now create a StringHeuristic and OSLA player from the generated code
                 StringHeuristic heuristic = new StringHeuristic(fileName);
                 OSLAPlayer player = new OSLAPlayer(heuristic);
+                player.setName(String.format("OSLA_%03d", iteration));
                 playerList.add(player);
 
             } catch (RuntimeException e) {
@@ -99,14 +110,18 @@ public class JavaCoder {
                 // in this case we failed to compile the code, so we don't run the tournament
                 continue;
             }
-            Map<RunArg, Object> tournamentConfig = Map.of(
+            // set up defaults
+            Map<RunArg, Object> tournamentConfig = RunArg.parseConfig(new String[]{},
+                    Collections.singletonList(RunArg.Usage.RunGames));
+            // then override the ones we really want
+            tournamentConfig.putAll(Map.of(
                     RunArg.game, GameType.TicTacToe,
                     RunArg.matchups, 100,
                     RunArg.listener, Collections.emptyList(),
                     RunArg.mode, "exhaustive",
                     RunArg.output, String.format("%s_%03d_Results.txt", fileStem, iteration),
-                    RunArg.verbose, true
-            );
+                    RunArg.verbose, false
+            ));
             GameType gameType = GameType.TicTacToe;
             AbstractParameters params = GameType.TicTacToe.createParameters(System.currentTimeMillis());
 
