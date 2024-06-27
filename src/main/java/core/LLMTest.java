@@ -39,8 +39,8 @@ public class LLMTest {
     }
 
     public static void main(String[] args) {
-        evaluate(args, "LoveLetter", "llm/LoveLetterEvaluator.java", "LoveLetterEvaluator", Agent.OSLA);
-//        evaluate(args, "TicTacToe", Agent.OSLA);
+//        evaluate(args, "LoveLetter", "llm/LoveLetterEvaluator.java", "LoveLetterEvaluator", Agent.OSLA);
+        evaluate(args, "TicTacToe", "llm/TicTacToeEvaluator.java", "TicTacToeEvaluator", Agent.OSLA);
     }
 
 
