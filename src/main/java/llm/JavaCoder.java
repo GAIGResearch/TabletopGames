@@ -11,6 +11,7 @@ import players.heuristics.StringHeuristic;
 import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -19,13 +20,28 @@ import java.util.*;
 
 public class JavaCoder {
 
+    /**
+     * Args:
+     *  [0]: game name
+     *  dir: working dir
+     *  [2]: evaluator name
+     * @param args
+     */
     public static void main(String[] args) {
 
-        // log file to write all traffic to and from the LLM (for debugging / auditing)
-        String llmLogFile = "llm/llm_log.txt";
-        String fileStem = "llm/TicTacToeEvaluator";
-        String javaSourceFileStem = fileStem.replaceAll(".*/(.*?)", "$1");
-        String task_prompt = """
+        // dir=llm
+        String workingDir = Utils.getArg(args, "dir", "llm");
+        String gameName = Utils.getArg(args, "gameName", "TicTacToe");
+        String evaluatorName = Utils.getArg(args, "evaluator", "TicTacToeEvaluator");
+        String promptsDir = workingDir + "/prompts/" + gameName + "/";
+        String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
+        String fileStem = workingDir + "/" + evaluatorName;
+
+        TaskPrompter tp = new TaskPrompter(gameName, promptsDir);
+        String task_prompt = tp.getTaskPrompt();
+        String feedback_prompt = tp.getFeedbackPrompt();
+
+        task_prompt = """
                  You are playing Tic Tac Toe. Your job is to write the evaluation logic to help an AI play this game. Don't leave parts unfinished or TODOs.
                  First, write a java class called TicTacToeEvaluator class, with only a single function with this signature:\s
                  - public double evaluateState(TicTacToeGameState gameState, int playerId)
@@ -57,7 +73,7 @@ public class JavaCoder {
                 Do not include any explanation of the code. Just the raw Java code is needed.
                 Do not include any comments in the code.
                                 """;
-        String feedbackPrompt = """
+        feedback_prompt = """
                 The current best heuristic code is below.
                 ```java
                 %s
@@ -69,6 +85,7 @@ public class JavaCoder {
         int iteration = 0;
         int max_iters = 3;
 
+        String javaSourceFileStem = fileStem.replaceAll(".*/(.*?)", "$1");
         LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.OPENAI, llmLogFile);
         List<AbstractPlayer> playerList = new ArrayList<>();
         playerList.add(new RandomPlayer());
@@ -81,7 +98,7 @@ public class JavaCoder {
 
                 String llmPrompt = task_prompt;
                 if (iteration > 0) {
-                    llmPrompt = String.format(feedbackPrompt, generatedCode);
+                    llmPrompt = String.format(feedback_prompt, generatedCode);
                 }
                 if (!error.isEmpty())
                     llmPrompt = String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);
