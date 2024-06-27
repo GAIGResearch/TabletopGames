@@ -18,4 +18,9 @@ public class MultiLeaderHeuristic implements IStateHeuristic {
 
         return retValue;
     }
+
+    @Override
+    public StateHeuristicType getType() {
+        return StateHeuristicType.LeaderHeuristic;
+    }
 }

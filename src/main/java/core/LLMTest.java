@@ -25,8 +25,7 @@ public class LLMTest {
         public AbstractPlayer createPlayer(String evaluatorFileName, String className) {
             if (this == OSLA){
                 OSLAParameters params = new OSLAParameters();
-                params.heuristicFunc = new StringHeuristic(evaluatorFileName, className);
-                params.heuristic = StateHeuristicType.StringHeuristic;
+                params.heuristic = new StringHeuristic(evaluatorFileName, className);
                 return new OSLAPlayer(params);
             }
             else if (this == MCTS){

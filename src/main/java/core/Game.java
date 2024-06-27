@@ -834,7 +834,7 @@ public class Game {
         players.add(new OSLAPlayer());
 
         MCTSParams params = new MCTSParams();
-        params.heuristic = StateHeuristicType.StringHeuristic;
+   //     params.heuristic = StateHeuristicType.StringHeuristic;
 //        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();

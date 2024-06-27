@@ -53,8 +53,8 @@ public class OSLAPlayer extends AbstractPlayer {
                 advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
             }
 
-            if (params.getHeuristic() != null) {
-                valState[actionIndex] = params.getHeuristic().evaluateState(gsCopy, playerID);
+            if (params.getStateHeuristic() != null) {
+                valState[actionIndex] = params.getStateHeuristic().evaluateState(gsCopy, playerID);
             } else {
                 valState[actionIndex] = gsCopy.getHeuristicScore(playerID);
             }

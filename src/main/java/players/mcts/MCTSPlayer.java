@@ -256,8 +256,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);
         if (getParameters().getRolloutStrategy() instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().getRolloutStrategy()).process(root);
-        if (getParameters().getHeuristic() instanceof ITreeProcessor)
-            ((ITreeProcessor) getParameters().getHeuristic()).process(root);
+        if (getParameters().getStateHeuristic() instanceof ITreeProcessor)
+            ((ITreeProcessor) getParameters().getStateHeuristic()).process(root);
         if (getParameters().getOpponentModel() instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().getOpponentModel()).process(root);
 
@@ -279,8 +279,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     public void finalizePlayer(AbstractGameState state) {
         getParameters().getRolloutStrategy().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
         getParameters().getOpponentModel().onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
-        if (getParameters().getHeuristic() instanceof IGameListener)
-            ((IGameListener) getParameters().getHeuristic()).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        if (getParameters().getStateHeuristic() instanceof IGameListener)
+            ((IGameListener) getParameters().getStateHeuristic()).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
         if (getParameters().actionHeuristic instanceof IGameListener)
             ((IGameListener) getParameters().actionHeuristic).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
 
@@ -313,7 +313,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 int visits = stats == null ? 0 : stats.nVisits;
                 double visitProportion = visits / (double) root.getVisits();
                 double meanValue = stats == null || visits == 0 ? 0.0 : stats.totValue[root.decisionPlayer] / visits;
-                double heuristicValue = getParameters().getHeuristic().evaluateState(root.state, root.decisionPlayer);
+                double heuristicValue = getParameters().getStateHeuristic().evaluateState(root.state, root.decisionPlayer);
                 double actionValue = getParameters().actionHeuristic.evaluateAction(action, root.state);
 
                 Map<String, Object> actionValues = new HashMap<>();

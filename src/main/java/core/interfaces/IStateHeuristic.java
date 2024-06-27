@@ -2,6 +2,7 @@
 package core.interfaces;
 
 import core.AbstractGameState;
+import players.heuristics.StateHeuristicType;
 
 public interface IStateHeuristic {
 
@@ -20,5 +21,9 @@ public interface IStateHeuristic {
     default double maxValue() {
         return +1;
     }
+
+    default StateHeuristicType getType() {
+        return StateHeuristicType.GameSpecificHeuristic;
+    };
 
 }
