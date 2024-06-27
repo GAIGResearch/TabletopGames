@@ -44,7 +44,7 @@ public class JavaCoder {
         int max_iters = 3;
 
         //String javaSourceFileStem = fileStem.replaceAll(".*/(.*?)", "$1");
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.OPENAI, llmLogFile);
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, llmLogFile);
         List<AbstractPlayer> playerList = new ArrayList<>();
         playerList.add(new RandomPlayer());
         String generatedCode = "";
@@ -73,6 +73,8 @@ public class JavaCoder {
                         .replaceAll("//.*\\n", "");
                 writeGeneratedCodeToFile(generatedCode, fileName);
 
+                System.out.printf("Iteration %d has generated code%n", iteration);
+
                 // We now create a StringHeuristic and OSLA player from the generated code
                 StringHeuristic heuristic = new StringHeuristic(fileName, className);
                 OSLAParameters params = new OSLAParameters();
@@ -91,6 +93,7 @@ public class JavaCoder {
 
             if (!error.isEmpty()) {
                 // in this case we failed to compile the code, so we don't run the tournament
+                System.out.println("Compilation error, re-asking LLM");
                 continue;
             }
             // set up defaults
@@ -113,6 +116,9 @@ public class JavaCoder {
                     playerList, gameType, 2, params,
                     AbstractTournament.TournamentMode.NO_SELF_PLAY, tournamentConfig);
             tournament.run();
+            for (int index = 0; index < playerList.size(); index++) {
+                System.out.printf("Player %s has score %.2f%n", playerList.get(index).toString(), tournament.getWinRate(index));
+            }
 
             iteration++;
         }
