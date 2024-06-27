@@ -210,7 +210,10 @@ public enum RunArg {
     public Object parse(String[] args) {
         value = getArg(args, name(), defaultValue);
         if (this == listener) {
-            value = new ArrayList<>(Arrays.asList(((String) value).split("\\|")));
+            String listenerName = (String) value;
+            if (listenerName.isEmpty())
+                return Collections.emptyList();
+            value = new ArrayList<>(Arrays.asList((listenerName).split("\\|")));
         }
         return value;
     }

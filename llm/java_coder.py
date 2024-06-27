@@ -41,7 +41,6 @@ class HeuristicList:
             return self.heuristics[-1]
         return None
 
-
 def extract_code(response: str) -> str:
     # Use regex to extract code between ```java and ```
     code_match = re.search(r'```java(.*?)```', response, re.DOTALL)

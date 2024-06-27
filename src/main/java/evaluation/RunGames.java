@@ -45,6 +45,13 @@ public class RunGames implements IGameRunner {
     private String timeDir;
     AbstractTournament.TournamentMode tournamentMode;
 
+    private RunGames() {
+    }
+
+    public RunGames(List<AbstractPlayer> players, Map<RunArg, Object> config) {
+        this.agents = new LinkedList<>(players);
+        this.config = config;
+    }
     /**
      * Main function, creates and runs the tournament with the given settings and players.
      */

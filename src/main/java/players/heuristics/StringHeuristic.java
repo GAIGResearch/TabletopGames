@@ -22,10 +22,12 @@ public class StringHeuristic implements IStateHeuristic {
 
     private String className = "TicTacToeEvaluator";
     private String fileName = "llm/" + className + ".java";
+
     private String str;
 
     Object heuristicClass;
     Method heuristicFunction;
+
 
     public String getFileName() {
         return fileName;
@@ -57,6 +59,7 @@ public class StringHeuristic implements IStateHeuristic {
     }
 
     private void loadFile() {
+
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -74,6 +77,7 @@ public class StringHeuristic implements IStateHeuristic {
 
     private void compile() {
         // Method string
+        String className = fileName.replaceAll(".*/(.*?)\\.java", "$1");
         String sourceCode = str;
 
         // Compile source code
