@@ -13,6 +13,7 @@ import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
 import players.heuristics.StateHeuristicType;
+import players.heuristics.StringHeuristic;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;

@@ -2,6 +2,7 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
+import games.loveletter.LoveLetterGameState;
 import games.tictactoe.TicTacToeGameState;
 
 import javax.tools.*;
@@ -19,7 +20,8 @@ import java.util.List;
 
 public class StringHeuristic implements IStateHeuristic {
 
-    private String fileName = "llm/TicTacToeEvaluator.java";
+    private String className = "TicTacToeEvaluator";
+    private String fileName = "llm/" + className + ".java";
     private String str;
 
     Object heuristicClass;
@@ -42,8 +44,9 @@ public class StringHeuristic implements IStateHeuristic {
         compile();
     }
 
-    public StringHeuristic(String fileName) {
+    public StringHeuristic(String fileName, String className) {
         this.fileName = fileName;
+        this.className = className;
         loadFile();
         compile();
     }
@@ -71,7 +74,6 @@ public class StringHeuristic implements IStateHeuristic {
 
     private void compile() {
         // Method string
-        String className = "TicTacToeEvaluator";
         String sourceCode = str;
 
         // Compile source code
@@ -115,7 +117,10 @@ public class StringHeuristic implements IStateHeuristic {
             heuristicClass = dynamicClass.getDeclaredConstructor().newInstance();
 
             // Find and invoke the method using reflection
-            heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
+            if(className.equalsIgnoreCase("TicTacToeEvaluator"))
+                heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
+            else if(className.equalsIgnoreCase("LoveLetterEvaluator"))
+                heuristicFunction = dynamicClass.getMethod("evaluateState", LoveLetterGameState.class, int.class);
 
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException | MalformedURLException e) {
@@ -126,7 +131,7 @@ public class StringHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         try {
-            return (double) heuristicFunction.invoke(heuristicClass, (TicTacToeGameState)gs, 10); // Example arguments
+            return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }

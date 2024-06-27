@@ -21,7 +21,7 @@ public class LLMPlayer extends AbstractPlayer {
     public LLMPlayer(Random random) {
         super(null, "LLMPLayer");
         this.rnd = random;
-        this.heuristic = new StringHeuristic("llm/TicTacToeEvaluator.java");
+        this.heuristic = new StringHeuristic("llm/TicTacToeEvaluator.java", "TicTacToe");
     }
 
     public LLMPlayer() {

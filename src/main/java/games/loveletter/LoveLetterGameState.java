@@ -217,6 +217,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         return playerHandCards;
     }
 
+    public PartialObservableDeck<LoveLetterCard> getPlayerHandCards(int playerId) {
+        return playerHandCards.get(playerId);
+    }
+
     public List<Deck<LoveLetterCard>> getPlayerDiscardCards() {
         return playerDiscardCards;
     }
