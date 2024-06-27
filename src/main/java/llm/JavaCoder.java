@@ -58,9 +58,9 @@ public class JavaCoder {
                 String fileName = fileStem + String.format("%03d.java", iteration);
                 String className = evaluatorName + String.format("%03d", iteration);
 
-                String llmPrompt = tp.getTaskPrompt(className);
+                String llmPrompt = GamePromptGenerator.createLLMTaskPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, playerCount, className);
                 if (iteration > 0) {
-                    llmPrompt = tp.getFeedbackPrompt(generatedCode);
+                    GamePromptGenerator.createLLMFeedbackPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, playerCount, className, generatedCode);
 
                     if (!error.isEmpty())
                         llmPrompt = tp.getCompilationErrorFeedbackPrompt(generatedCode, error);
