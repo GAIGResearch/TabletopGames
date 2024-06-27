@@ -5,6 +5,7 @@ import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
+import players.heuristics.PureScoreHeuristic;
 import players.heuristics.StateHeuristicType;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
@@ -56,7 +57,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
-    public StateHeuristicType heuristic = StateHeuristicType.PureScoreHeuristic;
+    public IStateHeuristic heuristic = new PureScoreHeuristic();
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
@@ -72,9 +73,6 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveBias = 0.0;
     public boolean reuseTree = false;
     public int maxBackupThreshold = 1000000;
-
-    IStateHeuristic heuristicFunc = null;
-
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -97,8 +95,9 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", StateHeuristicType.PureScoreHeuristic, Arrays.asList(StateHeuristicType.values()));
-        addTunableParameter("opponentHeuristic", StateHeuristicType.PureScoreHeuristic, Arrays.asList(StateHeuristicType.values()));
+        addTunableParameter("heuristic",
+                StateHeuristicType.PureScoreHeuristic.getExemplarHeuristic(),
+                Arrays.stream(StateHeuristicType.values()).map(StateHeuristicType::getExemplarHeuristic).toList());        addTunableParameter("opponentHeuristic", StateHeuristicType.PureScoreHeuristic, Arrays.asList(StateHeuristicType.values()));
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
@@ -169,10 +168,7 @@ public class MCTSParams extends PlayerParameters {
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
         actionHeuristic = (IActionHeuristic) getParameterValue("actionHeuristic");
-        if (heuristic != getParameterValue("heuristic")) {
-            heuristic = (StateHeuristicType) getParameterValue("heuristic");
-            heuristicFunc = heuristic.getHeuristic();
-        }
+        heuristic = (IStateHeuristic) getParameterValue("heuristic");
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
@@ -195,7 +191,6 @@ public class MCTSParams extends PlayerParameters {
         // Note that any *local* changes of parameters will not be copied
         // unless they have been 'registered' with setParameterValue("name", value)
         MCTSParams p = new MCTSParams();
-        p.heuristicFunc = heuristicFunc;
         return p;
     }
 
@@ -239,10 +234,6 @@ public class MCTSParams extends PlayerParameters {
         }
     }
 
-    public IStateHeuristic getHeuristic() {
-        return heuristicFunc;
-    }
-
     @Override
     public MCTSPlayer instantiate() {
         if (!useMAST && (useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST)) {
@@ -253,7 +244,7 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     public IStateHeuristic getStateHeuristic() {
-        return getHeuristic();
+        return heuristic;
     }
 
 }

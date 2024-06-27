@@ -4,6 +4,7 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
+import players.heuristics.NullHeuristic;
 
 import java.util.*;
 
@@ -211,5 +212,5 @@ public abstract class AbstractParameters {
         }
     }
 
-    public IStateHeuristic getStateHeuristic() { return null; }
+    public IStateHeuristic getStateHeuristic() { return new NullHeuristic(); }
 }

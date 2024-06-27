@@ -140,4 +140,9 @@ public class StringHeuristic implements IStateHeuristic {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public StateHeuristicType getType() {
+        return StateHeuristicType.StringHeuristic;
+    }
 }

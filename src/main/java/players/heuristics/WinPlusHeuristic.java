@@ -30,4 +30,9 @@ public class WinPlusHeuristic implements IStateHeuristic {
     public double maxValue() {
         return 1.0;
     }
+
+    @Override
+    public StateHeuristicType getType() {
+        return StateHeuristicType.WinPlusHeuristic;
+    }
 }

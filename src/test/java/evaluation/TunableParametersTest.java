@@ -125,8 +125,8 @@ public class TunableParametersTest {
         MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
         MCTSParams params = agent.getParameters();
         assertEquals(10.0, params.MASTBoltzmann, 0.001);
-        assertTrue(params.getHeuristic() instanceof  CoarseTunableHeuristic);
-        //assertEquals(SCORE_PLUS, ((CoarseTunableHeuristic) params.heuristic).getHeuristicType());
+        assertTrue(params.getStateHeuristic() instanceof  CoarseTunableHeuristic);
+        assertEquals(SCORE_PLUS, ((CoarseTunableHeuristic) params.heuristic).getHeuristicType());
     }
 
     @Test

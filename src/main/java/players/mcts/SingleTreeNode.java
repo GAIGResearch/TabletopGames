@@ -891,7 +891,7 @@ public class SingleTreeNode {
         double[] retValue = new double[rolloutState.getNPlayers()];
 
         for (int i = 0; i < retValue.length; i++) {
-            retValue[i] = params.getHeuristic().evaluateState(rolloutState, i);
+            retValue[i] = params.getStateHeuristic().evaluateState(rolloutState, i);
             if (Double.isNaN(retValue[i]))
                 throw new AssertionError("Illegal heuristic value - should be a number");
         }

@@ -130,7 +130,7 @@ public class MultiTreeNode extends SingleTreeNode {
         double[] finalValues = new double[state.getNPlayers()];
 
         for (int i = 0; i < finalValues.length; i++) {
-            finalValues[i] = params.getHeuristic().evaluateState(currentState, i);
+            finalValues[i] = params.getStateHeuristic().evaluateState(currentState, i);
         }
         for (int p = 0; p < roots.length; p++) {
             if (currentLocation[p] != null) { // the currentLocation will be null if the player has not acted at all (if, say they have been eliminated)

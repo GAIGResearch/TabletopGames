@@ -6,6 +6,7 @@ import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import players.heuristics.StateHeuristicType;
 import utilities.Utils;
 
 import static games.dominion.DominionConstants.*;

@@ -39,5 +39,4 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         return 0;
     }
 
-
 }
