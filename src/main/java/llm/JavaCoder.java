@@ -94,10 +94,10 @@ public class JavaCoder {
                 writeGeneratedCodeToFile(generatedCode, fileName);
 
                 // We now create a StringHeuristic and OSLA player from the generated code
-                StringHeuristic heuristic = new StringHeuristic(fileName);
+                StringHeuristic heuristic = new StringHeuristic(fileName, "TicTacToeEvaluator");
                 OSLAParameters params = new OSLAParameters();
                 params.heuristicFunc = heuristic;
-                OSLAPlayer player = new OSLAPlayer(heuristic);
+                OSLAPlayer player = new OSLAPlayer(params);
                 player.setName(String.format("OSLA_%03d", iteration));
                 playerList.add(player);
 
