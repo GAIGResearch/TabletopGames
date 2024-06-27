@@ -107,8 +107,18 @@ public class StringHeuristic implements IStateHeuristic {
 
         // Compile the source code
         JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, List.of(javaFileObject));
-        if (!task.call()) {
-            throw new RuntimeException("Compilation failed.");
+
+        boolean success = task.call();
+        if (!success) {
+            StringBuilder sb = new StringBuilder();
+            DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<JavaFileObject>();
+            List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+                // read error dertails from the diagnostic object
+                sb.append(diagnostic.getMessage(null)).append("\n");
+            }
+            String error =String.format("Compilation error: %s", sb);
+            throw new RuntimeException(error);
         }
 
         // Load the compiled class
@@ -121,9 +131,9 @@ public class StringHeuristic implements IStateHeuristic {
             heuristicClass = dynamicClass.getDeclaredConstructor().newInstance();
 
             // Find and invoke the method using reflection
-            if(className.equalsIgnoreCase("TicTacToeEvaluator"))
+            if(className.contains("TicTacToeEvaluator"))
                 heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
-            else if(className.equalsIgnoreCase("LoveLetterEvaluator"))
+            else if(className.contains("LoveLetterEvaluator"))
                 heuristicFunction = dynamicClass.getMethod("evaluateState", LoveLetterGameState.class, int.class);
 
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
