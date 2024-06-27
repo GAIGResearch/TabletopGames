@@ -7,18 +7,13 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.interfaces.IStateFeatureJSON;
-import core.interfaces.IStateFeatureNormVector;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import org.apache.spark.internal.config.R;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 
 public class DiamantGameState extends AbstractGameState implements IPrintable {

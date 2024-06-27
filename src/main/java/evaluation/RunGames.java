@@ -45,6 +45,13 @@ public class RunGames implements IGameRunner {
     private String timeDir;
     AbstractTournament.TournamentMode tournamentMode;
 
+    private RunGames() {
+    }
+
+    public RunGames(List<AbstractPlayer> players, Map<RunArg, Object> config) {
+        this.agents = new LinkedList<>(players);
+        this.config = config;
+    }
     /**
      * Main function, creates and runs the tournament with the given settings and players.
      */
@@ -132,7 +139,8 @@ public class RunGames implements IGameRunner {
                         new RandomRRTournament(agents, gameType, playerCount, params, tournamentMode, config);
 
                 // Add listeners
-                //noinspection unchecked
+                // TODO: Move this to within Tournament?
+                // noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
                     IGameListener gameTracker = IGameListener.createListener(listenerClass, (String) config.get(metrics));
                     tournament.addListener(gameTracker);
@@ -146,13 +154,6 @@ public class RunGames implements IGameRunner {
                         directories.add(timeDir);
                     gameTracker.setOutputDirectory(directories.toArray(new String[0]));
                 }
-
-                // run tournament
-                tournament.setRandomSeed((Number) config.get(RunArg.seed));
-                tournament.setVerbose((boolean) config.get(verbose));
-                tournament.setResultsFile((String) config.get(output));
-                tournament.setRandomGameParams((boolean) config.get(randomGameParams));
-                tournament.run();
             }
         }
     }
