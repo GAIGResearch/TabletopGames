@@ -87,6 +87,11 @@
             <version>3.4.1</version>
         </dependency>
         <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.26.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-mllib_2.13</artifactId>
             <version>3.5.1</version>

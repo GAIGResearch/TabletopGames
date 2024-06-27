@@ -1,27 +1,50 @@
 package games;
 
-import core.*;
+import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
-import games.battlelore.*;
+import games.battlelore.BattleloreForwardModel;
+import games.battlelore.BattleloreGameParameters;
+import games.battlelore.BattleloreGameState;
 import games.battlelore.gui.BattleloreGUI;
-import games.blackjack.*;
+import games.blackjack.BlackjackForwardModel;
+import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
-import games.cantstop.*;
+import games.cantstop.CantStopForwardModel;
+import games.cantstop.CantStopGameState;
+import games.cantstop.CantStopParameters;
 import games.cantstop.gui.CantStopGUIManager;
-import games.catan.*;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.gui.CatanGUI;
 import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
-import games.coltexpress.*;
+import games.coltexpress.ColtExpressForwardModel;
+import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUIManager;
-import games.connect4.*;
+import games.connect4.Connect4ForwardModel;
+import games.connect4.Connect4GameParameters;
+import games.connect4.Connect4GameState;
 import games.connect4.gui.Connect4GUIManager;
-import games.diamant.*;
+import games.diamant.DiamantForwardModel;
+import games.diamant.DiamantGameState;
+import games.diamant.DiamantParameters;
+import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
-import games.dotsboxes.*;
-import games.explodingkittens.*;
+import games.dotsboxes.DBForwardModel;
+import games.dotsboxes.DBGUIManager;
+import games.dotsboxes.DBGameState;
+import games.dotsboxes.DBParameters;
+import games.explodingkittens.ExplodingKittensForwardModel;
+import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
@@ -31,30 +54,49 @@ import games.hearts.HeartsForwardModel;
 import games.hearts.HeartsGameState;
 import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
-import games.loveletter.*;
+import games.loveletter.LoveLetterForwardModel;
+import games.loveletter.LoveLetterGameState;
+import games.loveletter.LoveLetterParameters;
 import games.loveletter.gui.LoveLetterGUIManager;
-import games.pandemic.*;
+import games.pandemic.PandemicForwardModel;
+import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUIManager;
-import games.puertorico.*;
+import games.poker.PokerForwardModel;
+import games.poker.PokerGameParameters;
+import games.poker.PokerGameState;
+import games.poker.gui.PokerGUIManager;
+import games.puertorico.PuertoRicoForwardModel;
+import games.puertorico.PuertoRicoGameState;
+import games.puertorico.PuertoRicoParameters;
 import games.puertorico.gui.PuertoRicoGUI;
 import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
-import games.terraformingmars.*;
-import games.terraformingmars.gui.TMGUI;
-import games.poker.*;
-import games.poker.gui.*;
-import games.stratego.*;
+import games.stratego.StrategoForwardModel;
+import games.stratego.StrategoGameState;
+import games.stratego.StrategoParams;
 import games.stratego.gui.StrategoGUIManager;
-import games.sushigo.*;
+import games.sushigo.SGForwardModel;
+import games.sushigo.SGGameState;
+import games.sushigo.SGParameters;
 import games.sushigo.gui.SGGUIManager;
-import games.tictactoe.*;
-import games.tictactoe.gui.*;
-import games.uno.*;
-import games.uno.gui.*;
-import games.virus.*;
-import games.dominion.*;
+import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameParameters;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.gui.TMGUI;
+import games.tictactoe.TicTacToeForwardModel;
+import games.tictactoe.TicTacToeGameParameters;
+import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.gui.TicTacToeGUIManager;
+import games.uno.UnoForwardModel;
+import games.uno.UnoGameParameters;
+import games.uno.UnoGameState;
+import games.uno.gui.UnoGUIManager;
+import games.virus.VirusForwardModel;
+import games.virus.VirusGameParameters;
+import games.virus.VirusGameState;
 import games.wonders7.Wonders7ForwardModel;
 import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
@@ -63,17 +105,22 @@ import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
-import gui.*;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static core.CoreConstants.*;
-import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 
@@ -240,6 +287,59 @@ public enum GameType {
         this(minPlayers, maxPlayers, categories, mechanics, gameStateClass, forwardModelClass, parameterClass, guiManagerClass, null);
     }
 
+    public String loadRulebook() {
+        String pdfFilePath = "data/" + this.name().toLowerCase() + "/rulebook.pdf";
+        try {
+            // Load the PDF document
+            PDDocument document = PDDocument.load(new File(pdfFilePath));
+
+            // Instantiate PDFTextStripper to extract text
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+
+            // Retrieve text from the PDF
+            String text = processText(pdfStripper.getText(document));
+            // todo summarise with LLMs?
+
+            // Close the document
+            document.close();
+
+            // Print the extracted text
+            return text;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Removes page numbers and replaces with new paragraphs instead. Removes line breaks otherwise
+    // to avoid artificial PDF line breaks. Caveat: also removes line breaks we might want...
+    public static String processText(String text) {
+        StringBuilder result = new StringBuilder();
+        String[] lines = text.split("\r?\n");
+        Pattern numberPattern = Pattern.compile("\\d+");
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (numberPattern.matcher(line).matches()) {
+                // If the line contains only a number, keep the line break only
+                result.append("\n");
+            } else {
+                // If the line does not contain only a number, remove the line break
+                result.append(line);
+                // Check if the next line exists and is not a number, if so, add a space
+                if (i + 1 < lines.length && !numberPattern.matcher(lines[i + 1].trim()).matches()) {
+                    result.append(" ");
+                }
+            }
+        }
+        String ret = result.toString();
+        if (ret.startsWith("\n")) {
+            ret = ret.substring(1);
+        }
+        return ret;
+    }
+
     // Getters
     public int getMinPlayers() {
         return minPlayers;
@@ -259,6 +359,22 @@ public enum GameType {
 
     public String getDataPath() {
         return dataPath;
+    }
+
+    public Class<? extends AbstractGameState> getGameStateClass() {
+        return gameStateClass;
+    }
+
+    public Class<? extends AbstractForwardModel> getForwardModelClass() {
+        return forwardModelClass;
+    }
+
+    public Class<? extends AbstractGUIManager> getGuiManagerClass() {
+        return guiManagerClass;
+    }
+
+    public Class<? extends AbstractParameters> getParameterClass() {
+        return parameterClass;
     }
 
     public AbstractGameState createGameState(AbstractParameters params, int nPlayers) {
