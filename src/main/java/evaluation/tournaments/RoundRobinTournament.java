@@ -82,9 +82,12 @@ public class RoundRobinTournament extends AbstractTournament {
         this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
         this.tournamentMode = tournamentMode;
         int budget = (int) config.get(RunArg.budget);
-        for (AbstractPlayer player : agents) {
-            if (player instanceof IAnyTimePlayer) {
-                ((IAnyTimePlayer) player).setBudget(budget);
+        if (budget > 0) {
+            // in this case we set the budget of the players
+            for (AbstractPlayer player : agents) {
+                if (player instanceof IAnyTimePlayer) {
+                    ((IAnyTimePlayer) player).setBudget(budget);
+                }
             }
         }
         this.pointsPerPlayer = new double[agents.size()];
