@@ -2,7 +2,6 @@ package llm;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.Game;
 import evaluation.RunArg;
 import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
@@ -10,7 +9,6 @@ import games.GameType;
 import players.heuristics.StringHeuristic;
 import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.io.BufferedWriter;
@@ -38,8 +36,6 @@ public class JavaCoder {
         String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
         String fileStem = workingDir + "/" + evaluatorName;
 
-        TaskPrompter tp = new TaskPrompter(gameName, gameStateClassName, promptsDir);
-
         int iteration = 0;
         int max_iters = 3;
 
@@ -54,13 +50,12 @@ public class JavaCoder {
             try {
                 String fileName = fileStem + String.format("%03d.java", iteration);
                 String className = evaluatorName + String.format("%03d", iteration);
-
-                String llmPrompt = tp.getTaskPrompt(className);
+                String llmPrompt = GamePromptGenerator.createLLMTaskPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className);
                 if (iteration > 0) {
-                    llmPrompt = tp.getFeedbackPrompt(className, generatedCode);
+                    GamePromptGenerator.createLLMFeedbackPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className, generatedCode);
 
                     if (!error.isEmpty())
-                        llmPrompt = tp.getCompilationErrorFeedbackPrompt(generatedCode, error);
+                        llmPrompt = GamePromptGenerator.createLLMErrorPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className, generatedCode, error);
                 }
 
                 //String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);

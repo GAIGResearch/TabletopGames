@@ -16,7 +16,7 @@ import java.util.*;
 public class GamePromptGenerator {
     public enum TaskType {
         Heuristic;
-        public String getText(GameType gameType, int nPlayers, String className) {
+        public String getTaskTest(GameType gameType, int nPlayers, String className) {
             if (this == Heuristic) {
                 return "You are playing the board game " + gameType.name() + ". Your job is to write the evaluation logic to help an AI play this game. Don't leave parts unfinished or TODOs.\n" +
                         "Write it all in a Java class called " + className + ", with only a single function with this signature:\n" +
@@ -35,11 +35,11 @@ public class GamePromptGenerator {
         }
     }
 
-    public static String createLLMPrompt(TaskType taskType, GameType gameType, int nPlayers, String className) {
+    public static String createLLMTaskPrompt(TaskType taskType, GameType gameType, int nPlayers, String className) {
         String result = "";
 
         // Task information
-        result += "This is your task: " + taskType.getText(gameType, nPlayers, className);
+        result += "This is your task: " + taskType.getTaskTest(gameType, nPlayers, className);
 
         // Rulebook manual
         String rules = gameType.loadRulebook();
@@ -72,6 +72,37 @@ public class GamePromptGenerator {
         result += "Assume all the other classes are implemented, and do not include a main function. Add all the import statements required.\n";
 
         return result;
+    }
+
+    public static String createLLMFeedbackPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code) {
+        String text = """
+                The current best heuristic code is below.
+                ```java
+                %s
+                ```
+                Your task is to generate a new heuristic function that is better than the current one.
+                A better heuristic will have a higher win rate and/or have shorter and less complex code.
+                
+                """;
+        String result = String.format(text, code);
+        String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className);
+        return result+taskText;
+    }
+
+    public static String createLLMErrorPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code, String error) {
+        String text = """
+                This class had failed to compile correctly.
+                ```java
+                %s
+                ```
+                The error message is:
+                %s
+                
+                Rewrite this code to compile correctly
+                """;
+        String result = String.format(text, code, error);
+        String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className);
+        return result+taskText;
     }
 
     public static Map<String, List<Method>> getAllMethods(Class<?> clazz) {
