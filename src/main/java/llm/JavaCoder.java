@@ -67,7 +67,7 @@ public class JavaCoder {
         int iteration = 0;
         int max_iters = 3;
 
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI);
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.OPENAI);
         List<AbstractPlayer> playerList = new ArrayList<>();
         playerList.add(new RandomPlayer());
         String generatedCode = "";
