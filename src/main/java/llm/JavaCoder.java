@@ -42,8 +42,6 @@ public class JavaCoder {
         String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
         String fileStem = workingDir + "/" + evaluatorName;
 
-        TaskPrompter tp = new TaskPrompter(gameName, gameStateClassName, promptsDir);
-
         int iteration = 0;
         int max_iters = 3;
 
