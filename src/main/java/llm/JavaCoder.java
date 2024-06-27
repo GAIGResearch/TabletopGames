@@ -21,6 +21,8 @@ public class JavaCoder {
 
     public static void main(String[] args) {
 
+        // log file to write all traffic to and from the LLM (for debugging / auditing)
+        String llmLogFile = "llm/llm_log.txt";
         String fileStem = "llm/TicTacToeEvaluator";
         String javaSourceFileStem = fileStem.replaceAll(".*/(.*?)", "$1");
         String task_prompt = """
@@ -67,7 +69,7 @@ public class JavaCoder {
         int iteration = 0;
         int max_iters = 3;
 
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.OPENAI);
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.OPENAI, llmLogFile);
         List<AbstractPlayer> playerList = new ArrayList<>();
         playerList.add(new RandomPlayer());
         String generatedCode = "";

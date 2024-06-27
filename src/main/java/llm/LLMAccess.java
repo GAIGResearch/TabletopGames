@@ -6,6 +6,9 @@ import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 //import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 
+import java.io.File;
+import java.io.FileWriter;
+
 public class LLMAccess {
 
     static ChatLanguageModel geminiModel;
@@ -15,6 +18,9 @@ public class LLMAccess {
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
     String openaiToken = System.getenv("OPENAI_TOKEN");
+
+    File logFile;
+    FileWriter logWriter;
 
     String geminiLocation = "europe-west2";
 
@@ -27,7 +33,15 @@ public class LLMAccess {
     }
 
 
-    public LLMAccess(LLM_MODEL modelType) {
+    public LLMAccess(LLM_MODEL modelType, String logFileName) {
+        if (logFileName != null && !logFileName.isEmpty()) {
+            logFile = new File(logFileName);
+            try {
+                logWriter = new FileWriter(logFile);
+            } catch (Exception e) {
+                System.out.println("Error creating log file: " + e.getMessage());
+            }
+        }
         this.modelType = modelType;
         if (geminiProject != null && !geminiProject.isEmpty()) {
             try {
@@ -69,18 +83,22 @@ public class LLMAccess {
         String response = "";
         if (modelType == LLM_MODEL.MISTRAL && mistralModel != null) {
             response = mistralModel.generate(query);
-            String output = String.format("\nModel: %s\nQuery: %s\nResponse: %s\n", "Mistral", query, response);
-            System.out.println(output);
         }
         if (modelType == LLM_MODEL.GEMINI && geminiModel != null) {
             response = geminiModel.generate(query);
-            String output = String.format("\nModel: %s\nQuery: %s\nResponse: %s\n", "Gemini", query, response);
-            System.out.println(output);
         }
         if (modelType == LLM_MODEL.OPENAI && openaiModel != null) {
             response = openaiModel.generate(query);
-            String output = String.format("\nModel: %s\nQuery: %s\nResponse: %s\n", "OpenAI", query, response);
-            System.out.println(output);
+        }
+        // Write to file (if log file is specified)
+        if (logWriter != null) {
+            String output = String.format("\nModel: %s\nQuery: %s\nResponse: %s\n", modelType, query, response);
+            try {
+                logWriter.write(output);
+                logWriter.flush();
+            } catch (Exception e) {
+                System.out.println("Error writing to log file: " + e.getMessage());
+            }
         }
         return response;
     }
@@ -95,9 +113,8 @@ public class LLMAccess {
     }
 
     public static void main(String[] args) {
-        LLMAccess llm = new LLMAccess(LLM_MODEL.OPENAI);
+        LLMAccess llm = new LLMAccess(LLM_MODEL.OPENAI, "");
         llm.getResponse("What is the average lifespan of a Spanish Armadillo?");
-
         llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.OPENAI);
     }
 }
