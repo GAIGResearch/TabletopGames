@@ -10,6 +10,7 @@ import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import org.apache.spark.sql.catalyst.expressions.Round;
 import players.heuristics.StringHeuristic;
+import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
@@ -83,8 +84,10 @@ public class JavaCoder {
                 writeGeneratedCodeToFile(generatedCode, fileName);
 
                 // We now create a StringHeuristic and OSLA player from the generated code
-                StringHeuristic heuristic = new StringHeuristic(fileName);
-                OSLAPlayer player = new OSLAPlayer(heuristic);
+
+                OSLAParameters oslap = new OSLAParameters();
+                oslap.heuristicFunc = new StringHeuristic(fileName, "TicTacToe");
+                OSLAPlayer player = new OSLAPlayer(oslap);
                 playerList.add(player);
 
             } catch (RuntimeException e) {
