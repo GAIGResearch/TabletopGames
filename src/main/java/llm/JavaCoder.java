@@ -44,9 +44,9 @@ public class JavaCoder {
         int max_iters = 3;
 
         //String javaSourceFileStem = fileStem.replaceAll(".*/(.*?)", "$1");
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, llmLogFile);
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.OPENAI, llmLogFile);
         List<AbstractPlayer> playerList = new ArrayList<>();
-        playerList.add(new RandomPlayer());
+        playerList.add(new OSLAPlayer());
         String generatedCode = "";
         String error = "";
 
@@ -57,7 +57,7 @@ public class JavaCoder {
 
                 String llmPrompt = tp.getTaskPrompt(className);
                 if (iteration > 0) {
-                    llmPrompt = tp.getFeedbackPrompt(generatedCode);
+                    llmPrompt = tp.getFeedbackPrompt(className, generatedCode);
 
                     if (!error.isEmpty())
                         llmPrompt = tp.getCompilationErrorFeedbackPrompt(generatedCode, error);

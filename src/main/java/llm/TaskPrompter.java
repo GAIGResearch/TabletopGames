@@ -62,7 +62,7 @@ public class TaskPrompter {
         return mainTask + api;
         }
 
-    public String getFeedbackPrompt(String code) {
+    public String getFeedbackPrompt(String className, String code) {
         String text = """
                 The current best heuristic code is below.
                 ```java
@@ -71,7 +71,9 @@ public class TaskPrompter {
                 Your task is to generate a new heuristic function that is better than the current one.
                 A better heuristic will have a higher win rate and/or have shorter and less complex code.
                 """;
-        return String.format(text, code);
+        String mainTask = getTaskPrompt(className);
+
+        return String.format(text+mainTask, code);
     }
 
     public String getCompilationErrorFeedbackPrompt(String code, String errorMessage)

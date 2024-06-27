@@ -117,7 +117,7 @@ public class StringHeuristic implements IStateHeuristic {
                 // read error dertails from the diagnostic object
                 sb.append(diagnostic.getMessage(null)).append("\n");
             }
-            String error =String.format("Compilation error: %s", sb);
+            String error = String.format("Compilation error: %s", sb);
             throw new RuntimeException(error);
         }
 
