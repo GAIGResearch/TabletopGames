@@ -70,8 +70,7 @@ public class JavaCoder {
                 generatedCode = llm.getResponse(llmPrompt)
                         .replaceAll("```java\\s*(.*?)", "$1")
                         .replaceAll("(.*?)```", "$1")
-                        .replaceAll("//.*\\n", "")
-                        .replaceAll(evaluatorName, String.format("%s%03d", evaluatorName, iteration));
+                        .replaceAll("//.*\\n", "");
                 writeGeneratedCodeToFile(generatedCode, fileName);
 
                 // We now create a StringHeuristic and OSLA player from the generated code

@@ -17,7 +17,7 @@ public class TaskPrompter {
     private String getMainTask(String className) {
         return String.format("""
                 You are playing %s. Your job is to write the evaluation logic to help an AI play this game. Don't leave parts unfinished or TODOs.
-                 First, write a java class called %s class, with only a single function with this signature:\s
+                 First, write a java class whose name is exactly %s. It must have only a single function with this signature:\s
                  - public double evaluateState(%s gameState, int playerId)
                 This is a heuristic function to play %s. The variable gameState is the current state of the game, and playerId\s
                 is the ID of the player we evaluate the state for. Write the contents of this function, so that we give a higher numeric\s
