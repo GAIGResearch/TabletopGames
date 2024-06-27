@@ -1,14 +1,18 @@
 package players.mcts;
 
-import core.*;
+import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.interfaces.IActionHeuristic;
 import players.PlayerConstants;
-import utilities.*;
+import utilities.ElapsedCpuTimer;
+import utilities.Pair;
+import utilities.Utils;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -17,8 +21,10 @@ import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.TreePolicy.*;
-import static utilities.Utils.*;
+import static players.mcts.MCTSEnums.TreePolicy.EXP3;
+import static players.mcts.MCTSEnums.TreePolicy.RegretMatching;
+import static utilities.Utils.noise;
+import static utilities.Utils.normalise;
 
 public class SingleTreeNode {
 
@@ -885,7 +891,7 @@ public class SingleTreeNode {
         double[] retValue = new double[rolloutState.getNPlayers()];
 
         for (int i = 0; i < retValue.length; i++) {
-            retValue[i] = params.heuristic.evaluateState(rolloutState, i);
+            retValue[i] = params.getHeuristic().evaluateState(rolloutState, i);
             if (Double.isNaN(retValue[i]))
                 throw new AssertionError("Illegal heuristic value - should be a number");
         }

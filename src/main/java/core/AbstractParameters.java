@@ -1,5 +1,6 @@
 package core;
 
+import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
@@ -209,4 +210,6 @@ public abstract class AbstractParameters {
             throw new AssertionError("JSON parameter initialisation not supported for " + game);
         }
     }
+
+    public IStateHeuristic getStateHeuristic() { return null; }
 }

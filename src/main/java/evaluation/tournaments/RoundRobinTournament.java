@@ -5,14 +5,11 @@ import core.AbstractPlayer;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.TournamentMetricsGameListener;
-import evaluation.tournaments.AbstractTournament.TournamentMode;
 import games.GameType;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import players.IAnyTimePlayer;
-import utilities.LinearRegression;
 import utilities.Pair;
 
 import java.io.File;
@@ -273,7 +270,7 @@ public class RoundRobinTournament extends AbstractTournament {
             StringBuffer sb = new StringBuffer();
             sb.append("[");
             for (int agentID : agentIDsInThisGame)
-                sb.append(this.agents.get(agentID).toString()).append(",");
+                sb.append(this.agents.get(agentID).toString()+"-"+agentID).append(",");
             sb.setCharAt(sb.length() - 1, ']');
             System.out.println(sb);
         }
@@ -433,24 +430,24 @@ public class RoundRobinTournament extends AbstractTournament {
         if (verbose)
             System.out.printf("============= %s - %d games played ============= \n", game.getGameType().name(), totalGamesRun);
         for (int i = 0; i < this.agents.size(); i++) {
-            String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
+            String str = String.format("%s got %.2f points. ", agents.get(i)+"-"+i, pointsPerPlayer[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games of the tournament. ",
-                    agents.get(i), 100.0 * winsPerPlayer[i] / totalGamesRun, totalGamesRun);
+                    agents.get(i)+"-"+i, 100.0 * winsPerPlayer[i] / totalGamesRun, totalGamesRun);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games it played during the tournament.\n",
-                    agents.get(i), 100.0 * winsPerPlayer[i] / nGamesPlayed[i], nGamesPlayed[i]);
+                    agents.get(i)+"-"+i, 100.0 * winsPerPlayer[i] / nGamesPlayed[i], nGamesPlayed[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
             for (int j = 0; j < this.agents.size(); j++) {
                 if (i != j) {
                     str = String.format("%s won %.1f%% of the %d games against %s.\n",
-                            agents.get(i), 100.0 * winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j], nGamesPlayedPerOpponent[i][j], agents.get(j));
+                            agents.get(i)+"-"+i, 100.0 * winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j], nGamesPlayedPerOpponent[i][j], agents.get(j)+"-"+j);
                     if (toFile) dataDump.add(str);
                     if (verbose) System.out.print(str);
                 }
@@ -466,7 +463,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         for (Integer i : finalWinRanking.keySet()) {
             str = String.format("%s: Win rate %.2f +/- %.3f\tMean Ordinal %.2f +/- %.2f\n",
-                    agents.get(i).toString(),
+                    agents.get(i).toString() + "-" + i,
                     finalWinRanking.get(i).a, finalWinRanking.get(i).b,
                     finalOrdinalRanking.get(i).a, finalOrdinalRanking.get(i).b);
             if (toFile) dataDump.add(str);
@@ -481,7 +478,7 @@ public class RoundRobinTournament extends AbstractTournament {
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
             List<Pair<String, Double>> sortedAlphaRank = IntStream.range(0, agents.size())
-                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByWin[i]))
+                    .mapToObj(i -> new Pair<>(agents.get(i).toString()+"-"+i, alphaRankByWin[i]))
                     .sorted((o1, o2) -> o2.b.compareTo(o1.b))
                     .toList();
             for (Pair<String, Double> pair : sortedAlphaRank) {
@@ -495,7 +492,7 @@ public class RoundRobinTournament extends AbstractTournament {
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
             sortedAlphaRank = IntStream.range(0, agents.size())
-                    .mapToObj(i -> new Pair<>(agents.get(i).toString(), alphaRankByOrdinal[i]))
+                    .mapToObj(i -> new Pair<>(agents.get(i).toString()+"-"+i, alphaRankByOrdinal[i]))
                     .sorted((o1, o2) -> o2.b.compareTo(o1.b))
                     .toList();
             for (Pair<String, Double> pair : sortedAlphaRank) {
@@ -562,7 +559,7 @@ public class RoundRobinTournament extends AbstractTournament {
                         if (verbose) System.out.println(str);
                         for (int i = 0; i < agents.size(); i++) {
                             retValue[i] = pi[i];
-                            str = String.format("\t%.3f\t%s%n", pi[i], agents.get(i));
+                            str = String.format("\t%.3f\t%s%n", pi[i], agents.get(i)+"-"+i);
                             dataDump.add(str);
                             if (verbose) System.out.print(str);
                         }
@@ -628,8 +625,8 @@ public class RoundRobinTournament extends AbstractTournament {
                             if (clusterMembership[i] == null) {
                                 if (clusterMembership[j] == null) {
                                     // neither in cluster, so new cluster
-                                    clusterMembership[i] = agents.get(i).toString();
-                                    clusterMembership[j] = agents.get(i).toString();
+                                    clusterMembership[i] = agents.get(i).toString()+"-"+i;
+                                    clusterMembership[j] = agents.get(i).toString()+"-"+i;
                                 } else {
                                     // j is in a cluster, so i joins it
                                     clusterMembership[i] = clusterMembership[j];
@@ -663,14 +660,14 @@ public class RoundRobinTournament extends AbstractTournament {
                     // get all agents in this cluster
                     boolean clusterExists = false;
                     for (int j = 0; j < agents.size(); j++) {
-                        if (clusterMembership[j] != null && clusterMembership[j].equals(agents.get(i).toString())) {
+                        if (clusterMembership[j] != null && clusterMembership[j].equals(agents.get(i).toString()+"-"+i)) {
                             if (!clusterExists) {
-                                str = String.format("\tCluster for %s%n", agents.get(i));
+                                str = String.format("\tCluster for %s%n", agents.get(i)+"-"+i);
                                 dataDump.add(str);
                                 if (verbose) System.out.print(str);
                             }
                             clusterExists = true;
-                            str = String.format("\t\t%s%n", agents.get(j));
+                            str = String.format("\t\t%s%n", agents.get(j)+"-"+j);
                             dataDump.add(str);
                             if (verbose) System.out.print(str);
                         }

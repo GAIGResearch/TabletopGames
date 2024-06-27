@@ -1,23 +1,25 @@
 package players.mcts;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
+import players.heuristics.StateHeuristicType;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import static players.mcts.MCTSEnums.Information.*;
-import static players.mcts.MCTSEnums.MASTType.*;
+import static players.mcts.MCTSEnums.Information.Closed_Loop;
+import static players.mcts.MCTSEnums.Information.Information_Set;
+import static players.mcts.MCTSEnums.MASTType.None;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
-import static players.mcts.MCTSEnums.Strategies.*;
+import static players.mcts.MCTSEnums.Strategies.PARAMS;
+import static players.mcts.MCTSEnums.Strategies.RANDOM;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
@@ -54,7 +56,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
-    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public StateHeuristicType heuristic = StateHeuristicType.PureScoreHeuristic;
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
@@ -70,6 +72,8 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveBias = 0.0;
     public boolean reuseTree = false;
     public int maxBackupThreshold = 1000000;
+
+    IStateHeuristic heuristicFunc = null;
 
 
     public MCTSParams() {
@@ -93,8 +97,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", StateHeuristicType.PureScoreHeuristic, Arrays.asList(StateHeuristicType.values()));
+        addTunableParameter("opponentHeuristic", StateHeuristicType.PureScoreHeuristic, Arrays.asList(StateHeuristicType.values()));
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
@@ -165,7 +169,10 @@ public class MCTSParams extends PlayerParameters {
         MASTDefaultValue = (double) getParameterValue("MASTDefaultValue");
 
         actionHeuristic = (IActionHeuristic) getParameterValue("actionHeuristic");
-        heuristic = (IStateHeuristic) getParameterValue("heuristic");
+        if (heuristic != getParameterValue("heuristic")) {
+            heuristic = (StateHeuristicType) getParameterValue("heuristic");
+            heuristicFunc = heuristic.getHeuristic();
+        }
         MCGSStateKey = (IStateKey) getParameterValue("MCGSStateKey");
         MCGSExpandAfterClash = (boolean) getParameterValue("MCGSExpandAfterClash");
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
@@ -187,7 +194,9 @@ public class MCTSParams extends PlayerParameters {
         // All the copying is done in TunableParameters.copy()
         // Note that any *local* changes of parameters will not be copied
         // unless they have been 'registered' with setParameterValue("name", value)
-        return new MCTSParams();
+        MCTSParams p = new MCTSParams();
+        p.heuristicFunc = heuristicFunc;
+        return p;
     }
 
     public AbstractPlayer getOpponentModel() {
@@ -231,7 +240,7 @@ public class MCTSParams extends PlayerParameters {
     }
 
     public IStateHeuristic getHeuristic() {
-        return heuristic;
+        return heuristicFunc;
     }
 
     @Override
@@ -240,6 +249,11 @@ public class MCTSParams extends PlayerParameters {
             throw new AssertionError("MAST data not being collected, but MAST is being used as the rollout policy or as the action heuristic. Set MAST parameter.");
         }
         return new MCTSPlayer((MCTSParams) this.copy());
+    }
+
+    @Override
+    public IStateHeuristic getStateHeuristic() {
+        return getHeuristic();
     }
 
 }

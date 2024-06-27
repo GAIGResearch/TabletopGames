@@ -12,6 +12,8 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import players.heuristics.StateHeuristicType;
+import players.heuristics.StringHeuristic;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
@@ -832,7 +834,7 @@ public class Game {
         players.add(new OSLAPlayer());
 
         MCTSParams params = new MCTSParams();
-//        params.heuristic = new StringHeuristic();
+        params.heuristic = StateHeuristicType.StringHeuristic;
 //        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();

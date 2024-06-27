@@ -83,7 +83,7 @@ public class RHEAPlayer extends AbstractPlayer implements IAnyTimePlayer {
             for (int i = 0; i < params.populationSize; ++i) {
                 if (!budgetLeft(timer)) break;
                 population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs,
-                        getPlayerID(), rnd, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
+                        getPlayerID(), rnd, params.heuristic.getHeuristic(), params.useMAST ? mastPlayer : randomPlayer));
                 fmCalls += population.get(i).length;
                 copyCalls += population.get(i).length;
             }

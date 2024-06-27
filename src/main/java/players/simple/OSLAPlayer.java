@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 import core.turnorders.StandardTurnOrder;
 
 import java.util.List;
@@ -15,26 +14,26 @@ import static utilities.Utils.noise;
 
 public class OSLAPlayer extends AbstractPlayer {
 
-    // Heuristics used for the agent
-    IStateHeuristic heuristic;
-
-    public OSLAPlayer(Random random) {
-        super(null, "OSLA");
-        this.rnd = random;
-    }
-
     public OSLAPlayer() {
         this(new Random());
     }
 
-    public OSLAPlayer(IStateHeuristic heuristic) {
-        this(heuristic, new Random());
+    public OSLAPlayer(Random random) {
+        super(null, "OSLA");
+        this.rnd = random;
+        this.parameters = new OSLAParameters();
     }
 
-    public OSLAPlayer(IStateHeuristic heuristic, Random random) {
-        this(random);
-        this.heuristic = heuristic;
-        setName("OSLA");
+    public OSLAPlayer(OSLAParameters params) {
+        super(null, "OSLA");
+        this.rnd = new Random();
+        this.parameters = params;
+    }
+
+    public OSLAPlayer(Random random, OSLAParameters params) {
+        super(null, "OSLA");
+        this.rnd = random;
+        this.parameters = params;
     }
 
     @Override
@@ -43,6 +42,7 @@ public class OSLAPlayer extends AbstractPlayer {
         AbstractAction bestAction = null;
         double[] valState = new double[actions.size()];
         int playerID = gs.getCurrentPlayer();
+        OSLAParameters params = (OSLAParameters) getParameters();
 
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
             AbstractAction action = actions.get(actionIndex);
@@ -53,8 +53,8 @@ public class OSLAPlayer extends AbstractPlayer {
                 advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
             }
 
-            if (heuristic != null) {
-                valState[actionIndex] = heuristic.evaluateState(gsCopy, playerID);
+            if (params.getHeuristic() != null) {
+                valState[actionIndex] = params.getHeuristic().evaluateState(gsCopy, playerID);
             } else {
                 valState[actionIndex] = gsCopy.getHeuristicScore(playerID);
             }
@@ -76,7 +76,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
     @Override
     public OSLAPlayer copy() {
-        OSLAPlayer retValue = new OSLAPlayer(heuristic, new Random(rnd.nextInt()));
+        OSLAPlayer retValue = new OSLAPlayer(new Random(rnd.nextInt()), (OSLAParameters) parameters.copy());
         retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }

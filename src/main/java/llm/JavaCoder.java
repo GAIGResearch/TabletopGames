@@ -8,6 +8,7 @@ import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.heuristics.StringHeuristic;
+import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 

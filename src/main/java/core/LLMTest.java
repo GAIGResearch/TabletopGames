@@ -1,7 +1,12 @@
 package core;
 
 import games.GameType;
+import players.basicMCTS.BasicMCTSParams;
+import players.basicMCTS.BasicMCTSPlayer;
+import players.heuristics.StateHeuristicType;
+import players.heuristics.StringHeuristic;
 import players.human.ActionController;
+import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import utilities.Utils;
 
@@ -9,6 +14,35 @@ import java.util.ArrayList;
 
 
 public class LLMTest {
+
+    public enum Agent
+    {
+        OSLA,
+        MCTS;
+
+        Agent(){}
+
+        public AbstractPlayer createPlayer(String evaluatorFileName, String className) {
+            if (this == OSLA){
+                OSLAParameters params = new OSLAParameters();
+                params.heuristicFunc = new StringHeuristic(evaluatorFileName, className);
+                params.heuristic = StateHeuristicType.StringHeuristic;
+                return new OSLAPlayer(params);
+            }
+            else if (this == MCTS){
+                BasicMCTSParams params = new BasicMCTSParams();
+                params.heuristic = new StringHeuristic(evaluatorFileName, className);
+                return new BasicMCTSPlayer(params);
+            }
+            return null;
+        }
+    }
+
+    public static void main(String[] args) {
+//        evaluate(args, "LoveLetter", "llm/LoveLetterEvaluator.java", "LoveLetterEvaluator", Agent.OSLA);
+        evaluate(args, "TicTacToe", "llm/TicTacToeEvaluator.java", "TicTacToeEvaluator", Agent.OSLA);
+    }
+
 
     /**
      * The recommended way to run a game is via evaluations.Frontend, however that may not work on
@@ -22,8 +56,9 @@ public class LLMTest {
      * 5. Mode of running
      * and then run this class.
      */
-    public static void main(String[] args) {
-        GameType gameType = GameType.valueOf(Utils.getArg(args, "game", "TicTacToe"));
+    private static void evaluate (String args[], String gameStr, String evaluatorFileName, String className, Agent agent)
+    {
+        GameType gameType = GameType.valueOf(Utils.getArg(args, "game", gameStr));
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -33,7 +68,7 @@ public class LLMTest {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
-  //     players.add(new LLMPlayer());
+        players.add(agent.createPlayer(evaluatorFileName, className));
 
 //        MCTSParams params = new MCTSParams();
 //        params.heuristic = new StringHeuristic();
@@ -58,5 +93,7 @@ public class LLMTest {
 
         // TODO human in the loop with GUI
     }
+
+
 
 }

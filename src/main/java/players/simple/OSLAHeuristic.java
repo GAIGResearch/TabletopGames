@@ -1,9 +1,9 @@
 package players.simple;
 
-import core.*;
-import core.interfaces.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
-import org.json.simple.JSONObject;
 
 
 /**
@@ -48,7 +48,9 @@ public class OSLAHeuristic extends TunableParameters {
 
     @Override
     public Object instantiate() {
-        return new OSLAPlayer(heuristic);
+        OSLAParameters params = new OSLAParameters();
+        params.heuristicFunc = heuristic;
+        return new OSLAPlayer(params);
     }
 
 }
