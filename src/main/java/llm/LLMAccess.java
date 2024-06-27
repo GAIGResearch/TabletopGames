@@ -1,6 +1,7 @@
 package llm;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModelName;
@@ -9,15 +10,20 @@ public class LLMAccess {
 
     static ChatLanguageModel geminiModel;
     static ChatLanguageModel mistralModel;
+
+    static ChatLanguageModel openaiModel;
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
+    String openaiToken = System.getenv("OPENAI_TOKEN");
+
     String geminiLocation = "europe-west2";
 
     LLM_MODEL modelType;
 
     public enum LLM_MODEL {
         GEMINI,
-        MISTRAL
+        MISTRAL,
+        OPENAI
     }
 
 
@@ -45,6 +51,12 @@ public class LLMAccess {
                     .apiKey(mistralToken)
                     .build();
         }
+
+        if (!openaiToken.isEmpty()) {
+            openaiModel = OpenAiChatModel.builder()
+                    .apiKey(openaiToken)
+                    .build();
+        }
     }
 
     /**
@@ -63,6 +75,11 @@ public class LLMAccess {
         if (modelType == LLM_MODEL.GEMINI && geminiModel != null) {
             response = geminiModel.generate(query);
             String output = String.format("\nModel: %s\nQuery: %s\nResponse: %s\n", "Gemini", query, response);
+            System.out.println(output);
+        }
+        if (modelType == LLM_MODEL.OPENAI && openaiModel != null) {
+            response = openaiModel.generate(query);
+            String output = String.format("\nModel: %s\nQuery: %s\nResponse: %s\n", "OpenAI", query, response);
             System.out.println(output);
         }
         return response;
