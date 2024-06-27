@@ -6,94 +6,57 @@ public class TicTacToeEvaluator {
 
     public double evaluateState(TicTacToeGameState gameState, int playerId) {
         if (gameState.isGameOver()) {
-            int winnerId = gameState.getWinner();
-            if (winnerId == playerId) {
+            if (gameState.getWinner() == playerId) {
                 return 1.0;
             } else {
                 return 0.0;
             }
         } else {
-            GridBoard<Token> board = gameState.getGridBoard();
-            int width = board.getWidth();
-            int height = board.getHeight();
-            double evaluation = 0.5;
 
+            double playerScore = calculateScore(gameState, playerId);
 
-            for (int i = 0; i < height; i++) {
-                double rowValue = evaluateLine(board.getElement(0, i), board.getElement(1, i), board.getElement(2, i), playerId);
-                if (rowValue == 1.0) {
-                    return 1.0;
-                } else if (rowValue == 0.0) {
-                    return 0.0;
-                } else {
-                    evaluation = Math.max(evaluation, rowValue);
-                }
-            }
+            double opponentScore = calculateScore(gameState, 1 - playerId);
 
-
-            for (int i = 0; i < width; i++) {
-                double colValue = evaluateLine(board.getElement(i, 0), board.getElement(i, 1), board.getElement(i, 2), playerId);
-                if (colValue == 1.0) {
-                    return 1.0;
-                } else if (colValue == 0.0) {
-                    return 0.0;
-                } else {
-                    evaluation = Math.max(evaluation, colValue);
-                }
-            }
-
-
-            double diag1Value = evaluateLine(board.getElement(0, 0), board.getElement(1, 1), board.getElement(2, 2), playerId);
-            double diag2Value = evaluateLine(board.getElement(0, 2), board.getElement(1, 1), board.getElement(2, 0), playerId);
-
-            if (diag1Value == 1.0) {
-                return 1.0;
-            } else if (diag1Value == 0.0) {
-                return 0.0;
-            } else {
-                evaluation = Math.max(evaluation, diag1Value);
-            }
-
-            if (diag2Value == 1.0) {
-                return 1.0;
-            } else if (diag2Value == 0.0) {
-                return 0.0;
-            } else {
-                evaluation = Math.max(evaluation, diag2Value);
-            }
-
-            return evaluation;
+            return playerScore - opponentScore;
         }
     }
 
-    private double evaluateLine(Token token1, Token token2, Token token3, int playerId) {
-        int playerCount = 0;
-        int opponentCount = 0;
+    private double calculateScore(TicTacToeGameState gameState, int playerId) {
 
-        if (token1.getTokenType().equals(String.valueOf(playerId))) {
-            playerCount++;
-        } else if (!token1.getTokenType().equals(".")) {
-            opponentCount++;
+        GridBoard<Token> board = gameState.getGridBoard();
+        Token playerToken = gameState.getPlayerToken(playerId);
+        double score = 0.0;
+
+
+        for (int i = 0; i < board.getHeight(); i++) {
+            if (checkLine(board, i, 0, 0, 1, playerToken)) {
+                score += 0.3;
+            }
         }
 
-        if (token2.getTokenType().equals(String.valueOf(playerId))) {
-            playerCount++;
-        } else if (!token2.getTokenType().equals(".")) {
-            opponentCount++;
+
+        for (int i = 0; i < board.getWidth(); i++) {
+            if (checkLine(board, 0, i, 1, 0, playerToken)) {
+                score += 0.3;
+            }
         }
 
-        if (token3.getTokenType().equals(String.valueOf(playerId))) {
-            playerCount++;
-        } else if (!token3.getTokenType().equals(".")) {
-            opponentCount++;
+
+        if (checkLine(board, 0, 0, 1, 1, playerToken) || checkLine(board, 0, board.getWidth() - 1, 1, -1, playerToken)) {
+            score += 0.3;
         }
 
-        if (opponentCount == 3) {
-            return 0.0;
-        } else if (playerCount == 3) {
-            return 1.0;
-        } else {
-            return (double) playerCount / 3;
+        return score;
+    }
+
+    private boolean checkLine(GridBoard<Token> board, int startX, int startY, int deltaX, int deltaY, Token playerToken) {
+        for (int i = 0; i < 3; i++) {
+            int x = startX + i * deltaX;
+            int y = startY + i * deltaY;
+            if (!board.getElement(x, y).equals(playerToken)) {
+                return false;
+            }
         }
+        return true;
     }
 }

@@ -77,7 +77,7 @@ public class StringHeuristic implements IStateHeuristic {
 
     private void compile() {
         // Method string
-        String className = fileName.replaceAll(".*/(.*?)\\.java", "$1");
+        //String className = fileName.replaceAll(".*/(.*?)\\.java", "$1");
         String sourceCode = str;
 
         // Compile source code
