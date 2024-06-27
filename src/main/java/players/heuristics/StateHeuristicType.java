@@ -20,4 +20,8 @@ public enum StateHeuristicType {
     public IStateHeuristic getHeuristic() {
         return heuristicFunc;
     }
+
+    public static StringHeuristic createStringHeuristic(String fileName, String className) {
+        return new StringHeuristic(fileName, className);
+    }
 }
