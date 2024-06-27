@@ -95,6 +95,8 @@ public class JavaCoder {
 
                 // We now create a StringHeuristic and OSLA player from the generated code
                 StringHeuristic heuristic = new StringHeuristic(fileName);
+                OSLAParameters params = new OSLAParameters();
+                params.heuristicFunc = heuristic;
                 OSLAPlayer player = new OSLAPlayer(heuristic);
                 player.setName(String.format("OSLA_%03d", iteration));
                 playerList.add(player);
