@@ -4,7 +4,7 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
-import dev.langchain4j.model.mistralai.MistralAiChatModelName;
+//import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 
 public class LLMAccess {
 
@@ -29,7 +29,7 @@ public class LLMAccess {
 
     public LLMAccess(LLM_MODEL modelType) {
         this.modelType = modelType;
-        if (!geminiProject.isEmpty()) {
+        if (geminiProject != null && !geminiProject.isEmpty()) {
             try {
                 geminiModel = VertexAiGeminiChatModel.builder()
                         .project(geminiProject)
@@ -45,14 +45,14 @@ public class LLMAccess {
             }
         }
 
-        if (!mistralToken.isEmpty()) {
-            mistralModel = MistralAiChatModel.builder()
-                    .modelName(MistralAiChatModelName.MISTRAL_MEDIUM_LATEST)
-                    .apiKey(mistralToken)
-                    .build();
+        if (mistralToken != null && !mistralToken.isEmpty()) {
+//            mistralModel = MistralAiChatModel.builder()
+//                    .modelName(MistralAiChatModelName.MISTRAL_MEDIUM_LATEST)
+//                    .apiKey(mistralToken)
+//                    .build();
         }
 
-        if (!openaiToken.isEmpty()) {
+        if (openaiToken != null && !openaiToken.isEmpty()) {
             openaiModel = OpenAiChatModel.builder()
                     .apiKey(openaiToken)
                     .build();
@@ -95,9 +95,9 @@ public class LLMAccess {
     }
 
     public static void main(String[] args) {
-        LLMAccess llm = new LLMAccess(LLM_MODEL.MISTRAL);
+        LLMAccess llm = new LLMAccess(LLM_MODEL.OPENAI);
         llm.getResponse("What is the average lifespan of a Spanish Armadillo?");
 
-        llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.GEMINI);
+        llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.OPENAI);
     }
 }
