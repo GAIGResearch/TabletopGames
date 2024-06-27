@@ -12,12 +12,10 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
-import players.heuristics.StringHeuristic;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
-import players.simple.LLMPlayer;
 import players.simple.OSLAPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -832,10 +830,9 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
-        players.add(new LLMPlayer());
 
         MCTSParams params = new MCTSParams();
-        params.heuristic = new StringHeuristic();
+//        params.heuristic = new StringHeuristic();
 //        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();

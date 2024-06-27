@@ -19,13 +19,13 @@ import java.util.Arrays;
 
 public class StringHeuristic implements IStateHeuristic {
 
-    private String fileName = "llm/TicTacToeEvaluator.java";
+    private String fileName;
     private String str;
 
     Object heuristicClass;
     Method heuristicFunction;
 
-    public StringHeuristic() {
+    public StringHeuristic(String fileName) {
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -41,7 +41,7 @@ public class StringHeuristic implements IStateHeuristic {
         }
 
         // Method string
-        String className = "TicTacToeEvaluator";
+        String className = fileName.replaceAll(".*/(.*?)\\.java", "$1");
         String sourceCode = str;
 
         // Compile source code

@@ -2,7 +2,6 @@ package core;
 
 import games.GameType;
 import players.human.ActionController;
-import players.simple.LLMPlayer;
 import players.simple.OSLAPlayer;
 import utilities.Utils;
 
@@ -34,7 +33,7 @@ public class LLMTest {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new MCTSPlayer());
         players.add(new OSLAPlayer());
-        players.add(new LLMPlayer());
+  //     players.add(new LLMPlayer());
 
 //        MCTSParams params = new MCTSParams();
 //        params.heuristic = new StringHeuristic();

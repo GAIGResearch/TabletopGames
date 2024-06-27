@@ -31,7 +31,7 @@ public class LLMAccess {
                         //      .temperature(1.0f)  // between 0 and 2; default 1.0 for pro-1.5
                         //       .topK(40) // some models have a three-stage sampling process. topK; then topP; then temperature
                         //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
-                        .maxOutputTokens(1000)  // max replay size (max is 8192)
+                   //     .maxOutputTokens(1000)  // max replay size (max is 8192)
                         .modelName("gemini-1.5-flash-001")
                         .build();
             } catch (Error e) {

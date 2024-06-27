@@ -57,7 +57,6 @@ public class RoundRobinTournament extends AbstractTournament {
     String seedFile;
     Random seedRnd = new Random(randomSeed);
 
-
     /**
      * Create a round robin tournament, which plays all agents against all others.
      *
@@ -81,10 +80,12 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = (int) config.getOrDefault(RunArg.matchups, 100);
         this.tournamentMode = tournamentMode;
-        int budget = (int) config.get(RunArg.budget);
-        for (AbstractPlayer player : agents) {
-            if (player instanceof IAnyTimePlayer) {
-                ((IAnyTimePlayer) player).setBudget(budget);
+        int budget = (int) config.getOrDefault(RunArg.budget, 0);
+        if (budget > 0) {
+            for (AbstractPlayer player : agents) {
+                if (player instanceof IAnyTimePlayer) {
+                    ((IAnyTimePlayer) player).setBudget(budget);
+                }
             }
         }
         this.pointsPerPlayer = new double[agents.size()];

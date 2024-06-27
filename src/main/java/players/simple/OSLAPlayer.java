@@ -67,6 +67,9 @@ public class OSLAPlayer extends AbstractPlayer {
                 bestAction = action;
             }
         }
+        // if nothing picked, take one at random
+        if (bestAction == null)
+            bestAction = actions.get(rnd.nextInt(actions.size()));
 
         return bestAction;
     }
