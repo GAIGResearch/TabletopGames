@@ -51,13 +51,13 @@ public class GamePromptGenerator {
         File sourceFile = new File("src/main/java/games/" + gameType.name().toLowerCase() + "/" + gameType.getGameStateClass().getSimpleName() + ".java");  // todo check
 
         // Extract methods using reflection
+        // TODO: Have a specific list for core methods and enums (i.e. GameResult) + extract from game package.
         Map<String, List<Method>> methods = getAllMethods(gameType.getGameStateClass());
 
         // Extract Javadocs using JavaParser
         Map<String, String> javadocs = extractJavadocs(sourceFile);
 
         Map<String, String> fullClasses = new HashMap<>();
-
         for (String cl : methods.keySet()) {
             for (Method method : methods.get(cl)) {
                 String fullMethod = method.toString().substring(method.toString().lastIndexOf(" "), method.toString().lastIndexOf("("));

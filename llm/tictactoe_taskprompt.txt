@@ -14,7 +14,7 @@ You can use the following API:
     - GridBoard<Token> getGridBoard(), to access the board of the game.
     - Token getPlayerToken(int playerId), to get the Token of the player passed as a parameter.
     - boolean isGameOver(), returns true if the game is finished.
-    - boolean getWinner(), returns the Id of the player that won the game, or -1 if the game is not over.
+    - int getWinner(), returns the Id of the player that won the game, or -1 if the game is not over.
     - int getCurrentPlayer(), returns the Id of the player that moves next.
  - GridBoard<Token> has the following functions you can also use:
    - int getWidth(), to return the width of the board.

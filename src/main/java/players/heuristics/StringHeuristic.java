@@ -93,32 +93,25 @@ public class StringHeuristic implements IStateHeuristic {
             }
         };
 
-        // Prepare a custom diagnostic listener that ignores notes on annotations
-        DiagnosticListener<JavaFileObject> diagnosticListener = new DiagnosticListener<JavaFileObject>() {
-            @Override
-            public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
-                if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
-                    System.out.println(diagnostic.getMessage(null));
-                } else {
-                    System.out.println("Heuristic loaded: " + fileName);
-                }
-            }
-        };
-
         // Compile the source code
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, List.of(javaFileObject));
+        DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<JavaFileObject>();
+
+        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticsCollector, null, null, List.of(javaFileObject));
 
         boolean success = task.call();
         if (!success) {
-            StringBuilder sb = new StringBuilder();
-            DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<JavaFileObject>();
-            List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
-            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
-                // read error dertails from the diagnostic object
-                sb.append(diagnostic.getMessage(null)).append("\n");
-            }
-            String error = String.format("Compilation error: %s", sb);
+                StringBuilder sb = new StringBuilder();
+                List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
+                for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+                    if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
+                        // read error details from the diagnostic object
+                        sb.append(diagnostic.getMessage(null)).append("\n");
+                    }
+                }
+                String error = String.format("Compilation error: %s", sb);
             throw new RuntimeException(error);
+        }else{
+            System.out.println("Heuristic loaded: " + fileName);
         }
 
         // Load the compiled class
