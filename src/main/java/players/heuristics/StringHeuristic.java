@@ -15,7 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
+import java.util.List;
 
 public class StringHeuristic implements IStateHeuristic {
 
@@ -28,26 +28,32 @@ public class StringHeuristic implements IStateHeuristic {
     public String getFileName() {
         return fileName;
     }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     public String getHeuristicCode() {
         return str;
     }
 
     public void setHeuristicCode(String s) {
         this.str = s;
-        init();
+        compile();
     }
 
     public StringHeuristic(String fileName) {
         this.fileName = fileName;
-        init();
+        loadFile();
+        compile();
     }
 
     public StringHeuristic() {
-        init();
+        loadFile();
+        compile();
     }
 
-    private void init() {
-
+    private void loadFile() {
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -61,7 +67,9 @@ public class StringHeuristic implements IStateHeuristic {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private void compile() {
         // Method string
         String className = "TicTacToeEvaluator";
         String sourceCode = str;
@@ -79,14 +87,25 @@ public class StringHeuristic implements IStateHeuristic {
             }
         };
 
+        // Prepare a custom diagnostic listener that ignores notes on annotations
+        DiagnosticListener<JavaFileObject> diagnosticListener = new DiagnosticListener<JavaFileObject>() {
+            @Override
+            public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
+                if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
+                    System.out.println(diagnostic.getMessage(null));
+                } else {
+                    System.out.println("Heuristic loaded: " + fileName);
+                }
+            }
+        };
+
         // Compile the source code
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, null, null, null, Arrays.asList(javaFileObject));
+        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticListener, null, null, List.of(javaFileObject));
         if (!task.call()) {
             throw new RuntimeException("Compilation failed.");
         }
 
         // Load the compiled class
-//        ClassLoader classLoader = ToolProvider.getSystemToolClassLoader();
         try {
             URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { new File("").toURI().toURL() });
 

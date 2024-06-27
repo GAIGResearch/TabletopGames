@@ -20,6 +20,8 @@ import players.human.ActionController;
 
 import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.*;
@@ -168,6 +170,7 @@ public class LLMFrontend extends GUI {
                         scrollPane.getVerticalScrollBar().setBlockIncrement(100);
                         editFrame.getContentPane().add(scrollPane);
                         JButton saveButton = new JButton("Save");
+                        saveButton.setEnabled(false);
                         saveButton.setAlignmentX(Component.CENTER_ALIGNMENT);
                         saveButton.addActionListener(e1 -> {
                             BufferedWriter writer = null;
@@ -186,8 +189,26 @@ public class LLMFrontend extends GUI {
                                 }
                             }
                             heuristic.setHeuristicCode(textArea.getText());
+                            saveButton.setEnabled(false);
                         });
                         editFrame.getContentPane().add(saveButton);
+
+                        textArea.getDocument().addDocumentListener(new DocumentListener() {
+                            @Override
+                            public void insertUpdate(DocumentEvent e) {
+                                saveButton.setEnabled(true);
+                            }
+
+                            @Override
+                            public void removeUpdate(DocumentEvent e) {
+                                saveButton.setEnabled(true);
+                            }
+
+                            @Override
+                            public void changedUpdate(DocumentEvent e) {
+                                saveButton.setEnabled(true);
+                            }
+                        });
 
                         editFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                         editFrame.setSize(800, 600);
