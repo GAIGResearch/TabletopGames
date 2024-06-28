@@ -107,14 +107,14 @@ import gametemplate.GTGameState;
 import gametemplate.GTParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -241,7 +241,7 @@ public enum GameType {
             Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
             Arrays.asList(Memory, GridMovement),
             ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
-    Hearts(3,7,Arrays.asList(Cards, Number),
+    Hearts(3, 7, Arrays.asList(Cards, Number),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
@@ -289,56 +289,31 @@ public enum GameType {
 
     public String loadRulebook() {
         String pdfFilePath = "data/" + this.name().toLowerCase() + "/rulebook.pdf";
-        try {
-            // Load the PDF document
-            PDDocument document = PDDocument.load(new File(pdfFilePath));
+        String ruleSummaryPath = "data/" + this.name().toLowerCase() + "/ruleSummary.txt";
+        String strategySummaryPath = "data/" + this.name().toLowerCase() + "/strategySummary.txt";
+        // The first time we process the rulebook we create rule and strategy summaries for use
+        // with LLM-created heuristics (etc.)
+        // If these files exist then we skip the processing
 
-            // Instantiate PDFTextStripper to extract text
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-
-            // Retrieve text from the PDF
-            String text = processText(pdfStripper.getText(document));
-            // todo summarise with LLMs?
-
-            // Close the document
-            document.close();
-
-            // Print the extracted text
-            return text;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // Removes page numbers and replaces with new paragraphs instead. Removes line breaks otherwise
-    // to avoid artificial PDF line breaks. Caveat: also removes line breaks we might want...
-    public static String processText(String text) {
-        StringBuilder result = new StringBuilder();
-        String[] lines = text.split("\r?\n");
-        Pattern numberPattern = Pattern.compile("\\d+");
-
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i].trim();
-            if (numberPattern.matcher(line).matches()) {
-                // If the line contains only a number, keep the line break only
-                result.append("\n");
-            } else {
-                // If the line does not contain only a number, remove the line break
-                result.append(line);
-                // Check if the next line exists and is not a number, if so, add a space
-                if (i + 1 < lines.length && !numberPattern.matcher(lines[i + 1].trim()).matches()) {
-                    result.append(" ");
+        File ruleSummaryFile = new File(ruleSummaryPath);
+        if (ruleSummaryFile.exists()) {
+            try {
+                Scanner scanner = new Scanner(ruleSummaryFile);
+                StringBuilder sb = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    sb.append(scanner.nextLine()).append("\n");
                 }
+                return sb.toString();
+            } catch (FileNotFoundException e) {
+                throw new AssertionError("File exists but could not be read: " + ruleSummaryPath);
             }
         }
-        String ret = result.toString();
-        if (ret.startsWith("\n")) {
-            ret = ret.substring(1);
-        }
-        return ret;
+
+        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+        return summariser.processText();
+
     }
+
 
     // Getters
     public int getMinPlayers() {

@@ -31,14 +31,13 @@ public class JavaCoder {
      */
     public static void main(String[] args) {
 
-        //Arg. Example:  dir=llm gameName=TicTacToe evaluator=TicTacToeEvaluator
+        //Arg. Example:  dir=llm game=TicTacToe evaluator=TicTacToeEvaluator
+        // evaluator will default to <gameName>Evaluator if not provided
         String gameName = Utils.getArg(args, "game", "TicTacToe");
         GameType gameType = GameType.valueOf(gameName);
         int playerCount = Utils.getArg(args, "players", 2);
         String workingDir = Utils.getArg(args, "dir", "llm");
-        String gameStateClassName = Utils.getArg(args, "gameStateClassName", gameName + "GameState");
         String evaluatorName = Utils.getArg(args, "evaluator", gameName + "Evaluator");
-        String promptsDir = workingDir + "/prompts/" + gameName + "/";
         String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
         String fileStem = workingDir + "/" + evaluatorName;
 
