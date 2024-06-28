@@ -303,6 +303,14 @@ public enum GameType {
                 while (scanner.hasNextLine()) {
                     sb.append(scanner.nextLine()).append("\n");
                 }
+                File strategySummaryFile = new File(strategySummaryPath);
+                if (strategySummaryFile.exists()) {
+                    scanner = new Scanner(strategySummaryFile);
+                    sb.append("\n\nStrategy Summary:\n");
+                    while (scanner.hasNextLine()) {
+                        sb.append(scanner.nextLine()).append("\n");
+                    }
+                }
                 return sb.toString();
             } catch (FileNotFoundException e) {
                 throw new AssertionError("File exists but could not be read: " + ruleSummaryPath);
@@ -310,8 +318,26 @@ public enum GameType {
         }
 
         DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
-        return summariser.processText();
+        String rulesText = summariser.processText("Core Game Rules (not including strategy)", 500);
+        // Then write this to file
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
+            writer.write(rulesText);
+            writer.close();
+        } catch (IOException e) {
+            throw new AssertionError("Error writing rule summary file: " + ruleSummaryPath);
+        }
 
+        String strategyText = summariser.processText("strategy to play the game well (not including core game rules)", 500);
+        // Then write this to file
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(strategySummaryPath));
+            writer.write(strategyText);
+            writer.close();
+        } catch (IOException e) {
+            throw new AssertionError("Error writing strategy summary file: " + strategySummaryPath);
+        }
+        return rulesText + "\n\nStrategy Summary:\n" + strategyText;
     }
 
 

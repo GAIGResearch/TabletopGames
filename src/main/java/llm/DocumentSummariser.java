@@ -1,5 +1,6 @@
 package llm;
 
+import games.GameType;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
@@ -67,7 +68,7 @@ public class DocumentSummariser {
     }
 
     public String processText() {
-        return processText("Game Rules", 1000);
+        return processText("Game Rules", 500);
     }
 
     // Removes page numbers and replaces with new paragraphs instead. Removes line breaks otherwise
@@ -119,8 +120,10 @@ public class DocumentSummariser {
     }
 
     public static void main(String[] args) {
-        DocumentSummariser summariser = new DocumentSummariser("data/loveletter/rulebook.pdf");
-        System.out.println(summariser.processText());
+//        DocumentSummariser summariser = new DocumentSummariser("data/loveletter/rulebook.pdf");
+//        System.out.println(summariser.processText());
+
+        System.out.println(GameType.LoveLetter.loadRulebook());
     }
 }
 
