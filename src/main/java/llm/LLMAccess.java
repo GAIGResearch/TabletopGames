@@ -1,10 +1,10 @@
 package llm;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
-//import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -60,10 +60,10 @@ public class LLMAccess {
         }
 
         if (mistralToken != null && !mistralToken.isEmpty()) {
-//            mistralModel = MistralAiChatModel.builder()
-//                    .modelName(MistralAiChatModelName.MISTRAL_MEDIUM_LATEST)
-//                    .apiKey(mistralToken)
-//                    .build();
+            mistralModel = MistralAiChatModel.builder()
+                    .modelName(MistralAiChatModelName.MISTRAL_MEDIUM_LATEST)
+                    .apiKey(mistralToken)
+                    .build();
         }
 
         if (openaiToken != null && !openaiToken.isEmpty()) {

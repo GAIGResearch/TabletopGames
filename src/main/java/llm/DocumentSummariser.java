@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 public class DocumentSummariser {
 
     private String documentFullText;
+    private String documentProcessedText;
 
     public DocumentSummariser(String filePath) {
 
@@ -38,15 +39,9 @@ public class DocumentSummariser {
             }
             documentFullText = sb.toString();
         }
-    }
 
-    public String processText() {
-        return processText("");
-    }
+        // Process for line breaks
 
-    // Removes page numbers and replaces with new paragraphs instead. Removes line breaks otherwise
-    // to avoid artificial PDF line breaks. Caveat: also removes line breaks we might want...
-    public String processText(String prompt) {
         StringBuilder result = new StringBuilder();
         String[] lines = documentFullText.split("\r?\n");
         Pattern numberPattern = Pattern.compile("\\d+");
@@ -65,11 +60,67 @@ public class DocumentSummariser {
                 }
             }
         }
-        String ret = result.toString();
-        if (ret.startsWith("\n")) {
-            ret = ret.substring(1);
+        documentProcessedText = result.toString();
+        if (documentProcessedText.startsWith("\n")) {
+            documentProcessedText = documentProcessedText.substring(1);
         }
-        return ret;
+    }
+
+    public String processText() {
+        return processText("Game Rules", 1000);
+    }
+
+    // Removes page numbers and replaces with new paragraphs instead. Removes line breaks otherwise
+    // to avoid artificial PDF line breaks. Caveat: also removes line breaks we might want...
+    public String processText(String areaOfInterest, int wordLimit) {
+
+        String queryPrompt = String.format("""
+                Does this section of the document contain information about %s?
+                Rate this section from 1 to 5, where 1 is not at all and 5 is very much.
+                Just return a single number between 1 and 5.
+                """, areaOfInterest);
+
+        String summaryPrompt = String.format("""
+                Summarise the information about %s in this text in 1-2 sentences.
+                """, areaOfInterest);
+
+        String finalSummary = String.format("""
+                Summarise the information about %s below in no more than %d words.
+                """, areaOfInterest, wordLimit);
+
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.MISTRAL, "RulesSummary_LLM_Log.txt");
+
+        int charactersPerRequest = 2500;
+        int characterOverlap = 500;
+        int totalLength = documentProcessedText.length();
+        int start = 0;
+        StringBuilder summary = new StringBuilder();
+        while (start < totalLength) {
+            int end = start + charactersPerRequest;
+            String text = documentProcessedText.substring(start, Math.min(end, totalLength));
+            String prompt = queryPrompt + "\n" + text;
+            String response = llm.getResponse(prompt);
+            int responseInt = 0;
+            try {
+                responseInt = Integer.parseInt(response.trim().substring(0, 1));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid response: " + response);
+                responseInt = 1;
+            }
+            if (responseInt >= 3) {
+                response = llm.getResponse(summaryPrompt + "\n" + text);
+                summary.append(response);
+            }
+            start = end - characterOverlap;
+        }
+
+        // Now ask for the final summary
+        return llm.getResponse(finalSummary + "\n" + summary);
+    }
+
+    public static void main(String[] args) {
+        DocumentSummariser summariser = new DocumentSummariser("data/loveletter/rulebook.pdf");
+        System.out.println(summariser.processText());
     }
 }
 
