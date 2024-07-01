@@ -136,7 +136,8 @@ public class SkillLadder {
                 finalConfig.put(RunArg.matchups, matchups);
                 finalConfig.put(RunArg.byTeam, false);
                 finalConfig.put(RunArg.budget, newBudget);
-                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, ONE_VS_ALL, finalConfig);
+                finalConfig.put(RunArg.mode, "onevsall");
+                RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, finalConfig);
                 RRT.verbose = false;
                 for (String listenerClass : listenerClasses) {
                     if (listenerClass.isEmpty()) continue;

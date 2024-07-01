@@ -11,12 +11,20 @@ import java.util.List;
 
 public abstract class AbstractTournament implements IGameRunner {
 
+    /**
+     * Enum to specify the mode of the tournament
+     * RANDOM - Randomly select players to play against each other. This will only have two identical agents
+     *          in one game if there are fewer agents than the number of players in the game.
+     * EXHAUSTIVE - Play all agents against each other. With every permutation of agents to player positions.
+     * EXHAUSTIVE_SELF_PLAY - Play all agents against each other, but allow for self-play.
+     * ONE_VS_ALL - Play one agent against all others. The one (focus) agent will be the only agent of its type in each game.
+     */
     public enum TournamentMode {
-        SELF_PLAY,
-        NO_SELF_PLAY,
+        RANDOM,
+        EXHAUSTIVE,
+        EXHAUSTIVE_SELF_PLAY,
         ONE_VS_ALL
     }
-    public final TournamentMode tournamentMode;
     // List of players taking part in the tournament
     protected List<? extends AbstractPlayer> agents;
     // Games to play
@@ -35,9 +43,8 @@ public abstract class AbstractTournament implements IGameRunner {
      * @param gameToPlay     - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(TournamentMode mode, List<? extends AbstractPlayer> agents, GameType gameToPlay,
+    public AbstractTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay,
                               int nPlayerPerGame, AbstractParameters gameParams) {
-        this.tournamentMode = mode;
         this.agents = agents;
 
         this.game = gameParams == null ?

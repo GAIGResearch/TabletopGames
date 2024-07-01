@@ -5,16 +5,12 @@ import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.listeners.*;
 import evaluation.loggers.FileStatsLogger;
-import evaluation.metrics.Event;
-import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
-import players.learners.AbstractLearner;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +19,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static evaluation.tournaments.AbstractTournament.TournamentMode.SELF_PLAY;
 import static utilities.JSONUtils.loadClassFromFile;
 import static utilities.Utils.getArg;
 
@@ -150,12 +145,7 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        Map<RunArg, Object> config = new HashMap<>();
-        config.put(RunArg.matchups, finalMatchups);
-        config.put(RunArg.seed, System.currentTimeMillis());
-        config.put(RunArg.byTeam, false);
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, params, SELF_PLAY,
-                config);
+        RoundRobinTournament tournament = configSetup(finalAgents);
 
         tournament.setListeners(new ArrayList<>());
         tournament.run();
@@ -229,12 +219,7 @@ public class ProgressiveLearner {
             currentElite = IntStream.range(0, agents.size()).boxed().collect(Collectors.toList());
         }
         List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
-        Map<RunArg, Object> config = new HashMap<>();
-        config.put(RunArg.matchups, finalMatchups);
-        config.put(RunArg.seed, System.currentTimeMillis());
-        config.put(RunArg.byTeam, false);
-        RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, params, SELF_PLAY,
-                config);
+        RoundRobinTournament tournament = configSetup(agentsToPlay);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
@@ -272,6 +257,16 @@ public class ProgressiveLearner {
             currentElite = newElite;
         }
         currentElite.add(iter + 1); // add the new agent
+    }
+
+    private RoundRobinTournament configSetup(List<AbstractPlayer> agentsToPlay) {
+        Map<RunArg, Object> config = new HashMap<>();
+        config.put(RunArg.matchups, finalMatchups);
+        config.put(RunArg.seed, System.currentTimeMillis());
+        config.put(RunArg.byTeam, false);
+        config.put(RunArg.mode, "exhaustive");
+
+        return new RoundRobinTournament(agentsToPlay, gameToPlay, nPlayers, params, config);
     }
 
     private void learnFromNewData() {

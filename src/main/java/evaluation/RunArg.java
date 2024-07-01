@@ -1,5 +1,6 @@
 package evaluation;
 
+import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.json.simple.JSONObject;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public enum RunArg {
             new Usage[]{Usage.ParameterSearch}),
     focusPlayer("(Optional) A JSON file that defines the 'focus' of the tournament.\n" +
             "\t The 'focus' player will be present in every single game.\n" +
-            "\t In this case 'matchups' defines the number of games to be run with the focusPlayer\n" +
+            "\t In this case an equal number of games will be run with the focusPlayer\n" +
             "\t in each position. The other positions will be filled randomly from players.",
             "",
             new Usage[]{Usage.RunGames}),
@@ -96,9 +97,10 @@ public enum RunArg {
             "\t from the same set of games.",
             "evaluation.listeners.MetricsGameListener",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
-    matchups("The total number of matchups to run in a tournament if mode=random...\n" +
-            "\t...or the number of matchups to run per combination of players if mode=exhaustive\n" +
-            "\tfor NTBEA this will be used as a final tournament between the recommended agents from each run.",
+    matchups("The total number of matchups to run in a tournament.\n" +
+            "\tIf the mode is 'exhaustive', then this will be the maximum number of games run. TAG will divide\n" +
+            "\tthis by the total number of permutations, and run an equal number of games for each permutation.\n" +
+            "\tFor NTBEA this will be used as a final tournament between the recommended agents from each run.",
             1,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
     metrics("(Optional) The full class name of an IMetricsCollection implementation. " +
@@ -106,13 +108,15 @@ public enum RunArg {
             "\t but this option is here for quick and dirty tests.",
             "evaluation.metrics.GameMetrics",
             new Usage[]{Usage.RunGames}),
-    mode("exhaustive|random|sequential - defaults to random.\n" +
+    mode("exhaustive|exhaustiveSP|random|sequential\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
-            "\t every possible player in every possible position, and run a number of games equal to 'matchups'\n" +
-            "\t for each. This can be excessive for a large number of players." +
+            "\t every possible player in every possible position, and run an equal number of games'\n" +
+            "\t for each. This can be unworkable for a given matchup budget for a large number of players.\n" +
+            "\t 'exhaustiveSP' is the same as exhaustive, but allows for self-play; 'exhaustive' will not duplicate agents in any game.\n"+
             "\t 'random' will have a random matchup, while ensuring no duplicates, and that all players get the\n" +
-            "\t the same number of games in total.\n" +
-            "\t 'sequential' will run tournament on a ONE_VS_ALL basis between each pair of agents.\n" +
+            "\t the same number of games in total. (Unless the number of agents is less than the number of players, \n" +
+            "\t in which case self-play will be allowed.)\n" +
+            "\t 'sequential' will run tournaments on a ONE_VS_ALL basis between each pair of agents.\n" +
             "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
@@ -164,10 +168,6 @@ public enum RunArg {
             "\t If this is specified, then the 'seed' and `distinctRandomSeed` arguments are ignored. \n" +
             "\t Each seed will be used in turn for a full tournament run, as defined by the other parameters.",
             "",
-            new Usage[]{Usage.RunGames}),
-    selfPlay("(Optional) If true, then multiple copies of the same agent can be in one game.\n" +
-            "\t Defaults to false",
-            false,
             new Usage[]{Usage.RunGames}),
     startBudget("The starting budget for the SkillLadder process. \n",
             8,

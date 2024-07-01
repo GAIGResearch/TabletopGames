@@ -27,6 +27,7 @@ public class SkillGrid {
     public void run() {
         // sort in alphabetical order
         agents.sort(Comparator.comparing(AbstractPlayer::toString));
+        config.put(RunArg.mode, "onevsall");
 
         // We iterate through each pair of agents
         // agentTwo is the player that will have a single copy against multiple copies of agentOne
@@ -41,7 +42,6 @@ public class SkillGrid {
                         gameType,
                         (Integer) config.get(RunArg.nPlayers),
                         params,
-                        AbstractTournament.TournamentMode.ONE_VS_ALL,
                         config);
 
                 // Add listeners
