@@ -171,7 +171,12 @@ public class NTBEA {
             } else {
                 Map<RunArg, Object> config = new HashMap<>();
                 config.put(matchups, params.tournamentGames);
-                config.put(RunArg.mode, "exhaustive");
+                if (players.size() < nPlayers) {
+                    // if we don't have enough players to fill the game, then we just run random matchups
+                    config.put(RunArg.mode, "random");
+                } else {
+                    config.put(RunArg.mode, "exhaustive");
+                }
                 config.put(byTeam, true);
                 config.put(RunArg.distinctRandomSeeds, 0);
                 config.put(RunArg.budget, params.budget);

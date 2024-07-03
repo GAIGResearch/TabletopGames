@@ -134,7 +134,7 @@ public class SkillLadder {
                 List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1), allAgents.get(agentIndex));
                 Map<RunArg, Object> finalConfig = new HashMap<>();
                 finalConfig.put(RunArg.matchups, matchups);
-                finalConfig.put(RunArg.byTeam, false);
+                finalConfig.put(RunArg.byTeam, true);
                 finalConfig.put(RunArg.budget, newBudget);
                 finalConfig.put(RunArg.mode, "onevsall");
                 finalConfig.put(RunArg.verbose, false);
