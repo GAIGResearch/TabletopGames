@@ -84,6 +84,18 @@ public class RunGamesTest {
     }
 
     @Test
+    public void randomModeWithSP() {
+        agents = agents.subList(0, 2);  // only two agents
+        config.put(RunArg.mode, "random");
+        tournament = new RoundRobinTournament(agents, GameType.Poker, 3, null, config);
+        tournament.run();
+
+        // We expect 100 games to be run; with each agent playing150 of the 300 positions
+        for (int i = 0; i < agents.size(); i++)
+            assertEquals(150, tournament.getNGamesPlayed()[i]);
+    }
+
+    @Test
     public void oneVsAll2Agents() {
         agents = agents.subList(0, 2);  // only two agents
         config.put(RunArg.mode, "oneVsAll");
