@@ -103,11 +103,6 @@ public enum RunArg {
             "\tFor NTBEA this will be used as a final tournament between the recommended agents from each run.",
             1,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
-    metrics("(Optional) The full class name of an IMetricsCollection implementation. " +
-            "\t The recommended usage is to include these in the JSON file that defines the listener,\n" +
-            "\t but this option is here for quick and dirty tests.",
-            "evaluation.metrics.GameMetrics",
-            new Usage[]{Usage.RunGames}),
     mode("exhaustive|exhaustiveSP|random|sequential\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
             "\t every possible player in every possible position, and run an equal number of games'\n" +

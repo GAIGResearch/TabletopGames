@@ -125,7 +125,7 @@ public class RunGames implements IGameRunner {
                 // Add listeners
                 //noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
-                    IGameListener gameTracker = IGameListener.createListener(listenerClass, (String) config.get(metrics));
+                    IGameListener gameTracker = IGameListener.createListener(listenerClass);
                     tournament.addListener(gameTracker);
                     String outputDir = (String) config.get(destDir);
                     List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));

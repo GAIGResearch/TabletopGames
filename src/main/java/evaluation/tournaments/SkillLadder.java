@@ -141,7 +141,7 @@ public class SkillLadder {
                 RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, finalConfig);
                 for (String listenerClass : listenerClasses) {
                     if (listenerClass.isEmpty()) continue;
-                    IGameListener gameTracker = IGameListener.createListener(listenerClass, null);
+                    IGameListener gameTracker = IGameListener.createListener(listenerClass);
                     RRT.getListeners().add(gameTracker);
                     if (runAgainstAllAgents) {
                         String[] nestedDirectories = new String[]{destDir, "Budget_" + newBudget + " vs Budget_" + otherBudget};
