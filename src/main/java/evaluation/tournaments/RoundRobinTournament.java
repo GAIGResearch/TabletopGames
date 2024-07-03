@@ -140,6 +140,9 @@ public class RoundRobinTournament extends AbstractTournament {
             default:
                 throw new IllegalArgumentException("Unknown tournament mode " + config.get(RunArg.mode));
         }
+        this.randomSeed = (long) config.getOrDefault(RunArg.seed, System.currentTimeMillis());
+        this.randomGameParams = (boolean) config.getOrDefault(RunArg.randomGameParams, false);
+        this.resultsFile = (String) config.getOrDefault(RunArg.output, "");
 
         this.name = String.format("Game: %s, Players: %d, Mode: %s, TotalGames: %d, GamesPerMatchup: %d",
                 gameToPlay.name(), playersPerGame, tournamentMode, actualGames, gamesPerMatchup);
@@ -735,29 +738,8 @@ public class RoundRobinTournament extends AbstractTournament {
         return listeners;
     }
 
-    public void setListeners(List<IGameListener> listeners) {
-        this.listeners = listeners;
-    }
-
     public void addListener(IGameListener gameTracker) {
         listeners.add(gameTracker);
-    }
-
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
-
-    public void setRandomSeed(Number randomSeed) {
-        this.randomSeed = randomSeed.longValue();
-        seedRnd = new Random(this.randomSeed);
-    }
-
-    public void setRandomGameParams(boolean randomGameParams) {
-        this.randomGameParams = randomGameParams;
-    }
-
-    public void setResultsFile(String resultsFile) {
-        this.resultsFile = resultsFile;
     }
 
     public int getNumberOfAgents() {

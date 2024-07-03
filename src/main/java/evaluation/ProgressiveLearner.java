@@ -30,7 +30,7 @@ public class ProgressiveLearner {
     List<AbstractPlayer> agents;
     EpsilonRandom randomExplorer;
     ILearner learner;
-    FeatureListener listener;
+    FeatureListener featureListener;
     int nPlayers, matchups, iterations, iter, finalMatchups;
     double maxExplore;
     AbstractPlayer basePlayer;
@@ -65,10 +65,10 @@ public class ProgressiveLearner {
         if (learnerDefinition.equals(""))
             throw new IllegalArgumentException("Must specify a learner file");
         learner = loadClassFromFile(learnerDefinition);
-        String listenerDefinition = getArg(args, "listener", "");
-        if (listenerDefinition.equals(""))
+        String listenerString = getArg(args, "listener", "");
+        if (listenerString.equals(""))
             throw new IllegalArgumentException("Must specify a listener file");
-        listener = loadClassFromFile(listenerDefinition);
+        featureListener = loadClassFromFile(listenerString);
         prefix = getArg(args, "prefix", "ProgLearn");
 
         learnedFilesByIteration = new String[iterations];
@@ -145,10 +145,11 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = configSetup(finalAgents);
+        Map<RunArg, Object>  config = configSetup();
 
-        tournament.setListeners(new ArrayList<>());
+        RoundRobinTournament tournament = new RoundRobinTournament(finalAgents, gameToPlay, nPlayers, params, config);
         tournament.run();
+
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
             // if the basePlayer won, then meh!
@@ -208,7 +209,7 @@ public class ProgressiveLearner {
     }
 
     private String injectAgentAttributes(String rawJSON, String fileName) {
-        return listener.injectAgentAttributes(rawJSON.replaceAll(Pattern.quote("*FILE*"), fileName)
+        return featureListener.injectAgentAttributes(rawJSON.replaceAll(Pattern.quote("*FILE*"), fileName)
                 .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic));
     }
 
@@ -219,15 +220,17 @@ public class ProgressiveLearner {
             currentElite = IntStream.range(0, agents.size()).boxed().collect(Collectors.toList());
         }
         List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
-        RoundRobinTournament tournament = configSetup(agentsToPlay);
+        Map<RunArg, Object> config = configSetup();
+
+        RoundRobinTournament tournament = new RoundRobinTournament(agentsToPlay, gameToPlay, nPlayers, params, config);
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
         randomExplorer.setEpsilon(exploreEpsilon);
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
-        listener.setLogger(new FileStatsLogger(fileName, "\t", false));
-        tournament.setListeners(Collections.singletonList(listener));
+        featureListener.setLogger(new FileStatsLogger(fileName, "\t", false));
+        tournament.addListener(featureListener);
         tournament.run();
 
         if (verbose) {
@@ -258,15 +261,16 @@ public class ProgressiveLearner {
         currentElite.add(iter + 1); // add the new agent
     }
 
-    private RoundRobinTournament configSetup(List<AbstractPlayer> agentsToPlay) {
-        Map<RunArg, Object> config = new HashMap<>();
+    private Map<RunArg, Object> configSetup() {
+        Map<RunArg, Object> config = RunArg.parseConfig(new String[]{}, Collections.singletonList(RunArg.Usage.RunGames));
         config.put(RunArg.matchups, finalMatchups);
         config.put(RunArg.seed, System.currentTimeMillis());
         config.put(RunArg.byTeam, false);
         config.put(RunArg.mode, "exhaustive");
         config.put(RunArg.verbose, false);
+        config.put(RunArg.listener, new ArrayList<String>());
 
-        return new RoundRobinTournament(agentsToPlay, gameToPlay, nPlayers, params, config);
+        return config;
     }
 
     private void learnFromNewData() {

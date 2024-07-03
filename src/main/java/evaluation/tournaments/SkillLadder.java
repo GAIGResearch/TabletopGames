@@ -138,6 +138,7 @@ public class SkillLadder {
                 finalConfig.put(RunArg.budget, newBudget);
                 finalConfig.put(RunArg.mode, "onevsall");
                 finalConfig.put(RunArg.verbose, false);
+                finalConfig.put(RunArg.output, (destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
                 RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, params, finalConfig);
                 for (String listenerClass : listenerClasses) {
                     if (listenerClass.isEmpty()) continue;
@@ -153,7 +154,6 @@ public class SkillLadder {
                 }
 
                 long startTime = System.currentTimeMillis();
-                RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
                 RRT.run();
                 long endTime = System.currentTimeMillis();
                 System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
