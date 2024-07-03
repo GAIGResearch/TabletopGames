@@ -175,8 +175,8 @@ public class NTBEA {
                 config.put(byTeam, true);
                 config.put(RunArg.distinctRandomSeeds, 0);
                 config.put(RunArg.budget, params.budget);
+                config.put(RunArg.verbose, false);
                 RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
-                tournament.verbose = false;
                 createListeners().forEach(tournament::addListener);
                 tournament.run();
                 // create a new list of results in descending order of score

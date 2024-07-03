@@ -220,7 +220,6 @@ public class ProgressiveLearner {
         }
         List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
         RoundRobinTournament tournament = configSetup(agentsToPlay);
-        tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
         randomExplorer.setEpsilon(exploreEpsilon);
@@ -265,6 +264,7 @@ public class ProgressiveLearner {
         config.put(RunArg.seed, System.currentTimeMillis());
         config.put(RunArg.byTeam, false);
         config.put(RunArg.mode, "exhaustive");
+        config.put(RunArg.verbose, false);
 
         return new RoundRobinTournament(agentsToPlay, gameToPlay, nPlayers, params, config);
     }

@@ -29,10 +29,10 @@ public class RoundRobinTournament extends AbstractTournament {
     final int totalGameBudget;
     int gamesPerMatchup;
     protected List<IGameListener> listeners = new ArrayList<>();
-    public boolean verbose = true;
+    private boolean verbose;
     public boolean alphaRankDetails = true;
     double[] pointsPerPlayer, winsPerPlayer;
-    int[] nGamesPlayed, gamesPerPlayer;
+    int[] nGamesPlayed;
     int[][] nGamesPlayedPerOpponent;
     int[][] winsPerPlayerPerOpponent;
     int[][] ordinalDeltaPerOpponent;
@@ -67,6 +67,13 @@ public class RoundRobinTournament extends AbstractTournament {
                                 AbstractParameters gameParams, Map<RunArg, Object> config) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         int nTeams = game.getGameState().getNTeams();
+        this.verbose = (boolean) config.getOrDefault(RunArg.verbose, false);
+        this.tournamentMode = switch (config.get(RunArg.mode).toString().toUpperCase()) {
+            case "EXHAUSTIVE" -> EXHAUSTIVE;
+            case "EXHAUSTIVESP" -> EXHAUSTIVE_SELF_PLAY;
+            case "ONEVSALL" -> ONE_VS_ALL;
+            default -> RANDOM;
+        };
         if (tournamentMode == EXHAUSTIVE && nTeams > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or switch to RANDOM mode.");
@@ -100,7 +107,6 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
-        this.gamesPerPlayer = new int[agents.size()];
         this.byTeam = (boolean) config.getOrDefault(RunArg.byTeam, false);
         this.tournamentSeeds = (int) config.getOrDefault(RunArg.distinctRandomSeeds, 0);
         this.seedFile = (String) config.getOrDefault(RunArg.seedFile, "");
@@ -111,22 +117,16 @@ public class RoundRobinTournament extends AbstractTournament {
             }
             this.tournamentSeeds = gameSeeds.size();
         }
-        TournamentMode mode = switch (config.get(RunArg.mode).toString().toUpperCase()) {
-            case "EXHAUSTIVE" -> EXHAUSTIVE;
-            case "EXHAUSTIVESP" -> EXHAUSTIVE_SELF_PLAY;
-            case "ONEVSALL" -> ONE_VS_ALL;
-            default -> RANDOM;
-        };
         int agentPositions = byTeam ? nTeams : playersPerGame;
         int actualGames = this.totalGameBudget;
-        switch (mode) {
+        switch (tournamentMode) {
             case ONE_VS_ALL:
                 gamesPerMatchup = totalGameBudget / agentPositions;
                 actualGames = this.gamesPerMatchup * agentPositions;
                 break;
             case EXHAUSTIVE_SELF_PLAY:
             case EXHAUSTIVE:
-                boolean selfPlay = mode == EXHAUSTIVE_SELF_PLAY;
+                boolean selfPlay = tournamentMode == EXHAUSTIVE_SELF_PLAY;
                 this.gamesPerMatchup = Utils.gamesPerMatchup(agentPositions, agents.size(), totalGameBudget, selfPlay);
                 if (this.gamesPerMatchup < 1) {
                     throw new IllegalArgumentException(String.format("Higher budget needed. There are %d permutations of agents to positions in exhaustive mode, which is less than %d",
@@ -142,7 +142,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
         this.name = String.format("Game: %s, Players: %d, Mode: %s, TotalGames: %d, GamesPerMatchup: %d",
-                gameToPlay.name(), playersPerGame, mode, actualGames, gamesPerMatchup);
+                gameToPlay.name(), playersPerGame, tournamentMode, actualGames, gamesPerMatchup);
     }
 
     /**
@@ -223,12 +223,13 @@ public class RoundRobinTournament extends AbstractTournament {
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
         switch (tournamentMode) {
             case RANDOM:
+                // In the RANDOM case we use a new seed for each game
                 PermutationCycler idStream = new PermutationCycler(agents.size(), seedRnd, nTeams);
                 for (int i = 0; i < totalGameBudget; i++) {
                     List<Integer> matchup = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
                         matchup.add(idStream.getAsInt());
-                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(i)));
+                    evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
                 }
                 break;
             case ONE_VS_ALL:
@@ -251,7 +252,7 @@ public class RoundRobinTournament extends AbstractTournament {
                         // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
                         evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds);
                     } else {
-                        for (int m = 0; m < this.totalGameBudget; m++) {
+                        for (int m = 0; m < this.totalGameBudget / nTeams; m++) {
                             Collections.shuffle(agentOrder, seedRnd);
                             List<Integer> matchup = new ArrayList<>(nTeams);
                             for (int j = 0; j < nTeams; j++) {
@@ -761,5 +762,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
     public int getNumberOfAgents() {
         return agents.size();
+    }
+    public int[] getNGamesPlayed() {
+        return nGamesPlayed;
     }
 }
