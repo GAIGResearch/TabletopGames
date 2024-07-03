@@ -734,10 +734,6 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalOrdinalRanking.get(agentID).b;
     }
 
-    public List<IGameListener> getListeners() {
-        return listeners;
-    }
-
     public void addListener(IGameListener gameTracker) {
         listeners.add(gameTracker);
     }

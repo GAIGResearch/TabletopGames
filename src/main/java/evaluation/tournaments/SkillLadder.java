@@ -143,7 +143,7 @@ public class SkillLadder {
                 for (String listenerClass : listenerClasses) {
                     if (listenerClass.isEmpty()) continue;
                     IGameListener gameTracker = IGameListener.createListener(listenerClass);
-                    RRT.getListeners().add(gameTracker);
+                    RRT.addListener(gameTracker);
                     if (runAgainstAllAgents) {
                         String[] nestedDirectories = new String[]{destDir, "Budget_" + newBudget + " vs Budget_" + otherBudget};
                         gameTracker.setOutputDirectory(nestedDirectories);
