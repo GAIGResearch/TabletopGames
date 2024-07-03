@@ -41,6 +41,9 @@ import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
+import games.seasaltpaper.SeaSaltPaperForwardModel;
+import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -115,6 +118,10 @@ public enum GameType {
             Arrays.asList(Cards, Deduction, Renaissance),
             Arrays.asList(HandManagement, PlayerElimination),
             LoveLetterGameState.class, LoveLetterForwardModel.class, LoveLetterParameters.class, LoveLetterGUIManager.class),
+    SeaSaltPaper(2, 4,
+            Arrays.asList(Cards, Deduction),
+            Arrays.asList(HandManagement, SetCollection),
+            SeaSaltPaperGameState.class, SeaSaltPaperForwardModel.class, SeaSaltPaperParameters.class, null),
     Uno(2, 10,
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
