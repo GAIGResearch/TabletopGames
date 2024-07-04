@@ -49,12 +49,11 @@ public class RoundRobinTournament extends AbstractTournament {
     public String name;
     public boolean byTeam;
 
-    protected long randomSeed = System.currentTimeMillis();
+    protected long randomSeed;
     List<Integer> gameSeeds = new ArrayList<>();
     int tournamentSeeds;
     String seedFile;
-    Random seedRnd = new Random(randomSeed);
-
+    Random seedRnd;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -140,12 +139,15 @@ public class RoundRobinTournament extends AbstractTournament {
             default:
                 throw new IllegalArgumentException("Unknown tournament mode " + config.get(RunArg.mode));
         }
-        this.randomSeed = (long) config.getOrDefault(RunArg.seed, System.currentTimeMillis());
+        this.randomSeed = ((Number) config.getOrDefault(RunArg.seed, System.currentTimeMillis())).longValue();
+        this.seedRnd = new Random(randomSeed);
         this.randomGameParams = (boolean) config.getOrDefault(RunArg.randomGameParams, false);
-        this.resultsFile = (String) config.getOrDefault(RunArg.output, "");
 
         this.name = String.format("Game: %s, Players: %d, Mode: %s, TotalGames: %d, GamesPerMatchup: %d",
                 gameToPlay.name(), playersPerGame, tournamentMode, actualGames, gamesPerMatchup);
+        String destDir = (String) config.getOrDefault(RunArg.destDir, "");
+        if (!destDir.isEmpty())
+            this.resultsFile = destDir + File.separator + resultsFile;
     }
 
     /**
