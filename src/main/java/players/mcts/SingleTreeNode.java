@@ -238,13 +238,13 @@ public class SingleTreeNode {
                     // in this case we construct a Boltzmann
                     double[] actionValues = actionsFromOpenLoopState.stream().
                             mapToDouble(a -> actionValueEstimates.getOrDefault(a, 0.0)).toArray();
-                    pdf = Utils.pdf(Utils.exponentiatePotentials(actionValues, params.pUCTTemperature));
+                    pdf = pdf(exponentiatePotentials(actionValues, params.pUCTTemperature));
 
                 } else {
                     // in this case, we first set any negative values to zero, and then construct the pdf directly
                     double[] actionValues = actionsFromOpenLoopState.stream().
                             mapToDouble(a -> Math.max(0.0, actionValueEstimates.getOrDefault(a, 0.0))).toArray();
-                    pdf = Utils.pdf(actionValues);
+                    pdf = pdf(actionValues);
                 }
                 for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
                     actionPDFEstimates.put(actionsFromOpenLoopState.get(i), pdf[i]);
@@ -631,7 +631,7 @@ public class SingleTreeNode {
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
-                    double[] pdf = Utils.pdf(actionValues);
+                    double[] pdf = pdf(actionValues);
                     if (this == root && params.treePolicy == RegretMatching && nVisits > actionValues.length && nVisits % Math.min(actionValues.length, 10) == 1) {
                         // we update the average policy each time we have had the opportunity to take each action once
                         for (int i = 0; i < actionValues.length; i++) {
@@ -643,7 +643,7 @@ public class SingleTreeNode {
                         // if we have no non-zero values, then we just pick one at random
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
-                    yield availableActions.get(Utils.sampleFrom(pdf, rnd.nextDouble()));
+                    yield availableActions.get(sampleFrom(pdf, rnd.nextDouble()));
                 }
                 default -> throw new AssertionError("Unknown treePolicy: " + params.treePolicy);
             };
@@ -937,7 +937,7 @@ public class SingleTreeNode {
     protected void normaliseRewardsAfterIteration(double[] result) {
         // after each iteration we update the min and max rewards seen, to be used in future iterations.
         // These are only stored on the root
-        if (params.normaliseRewards || params.treePolicy == MCTSEnums.TreePolicy.UCB_Tuned) {
+        if (params.normaliseRewards || params.treePolicy == UCB_Tuned) {
             DoubleSummaryStatistics stats = Arrays.stream(result).summaryStatistics();
             if (root.lowReward > stats.getMin())
                 root.lowReward = stats.getMin();
@@ -1016,37 +1016,67 @@ public class SingleTreeNode {
 
         stats.update(result);
 
-        if (nVisits > params.maxBackupThreshold) {
-            double resultToPropagateUpwards[] = result.clone();
-            // in this case we mix in a max backup
-            // *if* we took an action other than the one with the current best estimate
-            AbstractAction bestAction = null;
-            double maxValue = -Double.MAX_VALUE;
-            for (AbstractAction action : actionsToConsider) {
-                ActionStats temp = actionValues.get(action);
-                double value = temp.nVisits == 0 ? -Double.MAX_VALUE :
-                        temp.totValue[decisionPlayer] / temp.nVisits;
-                if (value > maxValue) {
-                    maxValue = value;
-                    bestAction = action;
-                }
-            }
-            if (bestAction == null) {
-                // this can happen for low maxBackupCounts with no actions available
-                // we default to ignoring Max functionality
-                bestAction = actionTaken;
-            }
-            if (!bestAction.equals(actionTaken)) {
-                double maxWeight = (nVisits - params.maxBackupThreshold) / (double) nVisits;
-                // we mix for all players, based on the counterfactual decision of the acting player
-                for (int i = 0; i < result.length; i++) {
-                    resultToPropagateUpwards[i] = (1 - maxWeight) * result[i] + maxWeight * maxValue;
-                }
-            }
-            return resultToPropagateUpwards;
-        } else {
+        if (params.backupPolicy == MCTSEnums.BackupPolicy.MonteCarlo)
             return result;
+
+        // otherwise we do some more complex backup
+        double resultToPropagateUpwards[] = result.clone();
+        AbstractAction bestAction = bestAction(actionsToConsider);
+        double[] maxValue = actionValues.get(bestAction).totValue.clone();
+        for (int i = 0; i < maxValue.length; i++) {
+            maxValue[i] /= actionValues.get(bestAction).nVisits;
         }
+        return switch (params.backupPolicy) {
+            case MonteCarlo:
+                yield result;
+            case Lambda:
+                // SARSA-style on-policy update. We weight the action average by 1 - lambda
+                for (int i = 0; i < result.length; i++) {
+                    resultToPropagateUpwards[i] = params.backupLambda * result[i] + (1.0 - params.backupLambda) * stats.totValue[i] / stats.nVisits;
+                }
+                yield resultToPropagateUpwards;
+            case MaxLambda:
+                // SARSA-style off-policy update.
+                for (int i = 0; i < result.length; i++) {
+                    resultToPropagateUpwards[i] = params.backupLambda * result[i] + (1.0 - params.backupLambda) * maxValue[i];
+                }
+                yield resultToPropagateUpwards;
+            case MaxMC:
+                if (nVisits > params.maxBackupThreshold) {
+                    // in this case we mix in a max backup
+                    // *if* we took an action other than the one with the current best estimate
+                    if (bestAction == null) {
+                        // this can happen for low maxBackupCounts with no actions available
+                        // we default to ignoring Max functionality
+                        bestAction = actionTaken;
+                    }
+                    if (!bestAction.equals(actionTaken)) {
+                        double maxWeight = (nVisits - params.maxBackupThreshold) / (double) nVisits;
+                        // we mix for all players, based on the counterfactual decision of the acting player
+                        for (int i = 0; i < result.length; i++) {
+                            resultToPropagateUpwards[i] = (1 - maxWeight) * result[i] + maxWeight * maxValue[i];
+                        }
+                    }
+                    yield resultToPropagateUpwards;
+                } else {
+                    yield result;
+                }
+        };
+
+    }
+    private AbstractAction bestAction(List<AbstractAction> actionsToConsider) {
+        AbstractAction bestAction = null;
+        double maxValue = -Double.MAX_VALUE;
+        for (AbstractAction action : actionsToConsider) {
+            ActionStats temp = actionValues.get(action);
+            double value = temp.nVisits == 0 ? -Double.MAX_VALUE :
+                    temp.totValue[decisionPlayer] / temp.nVisits;
+            if (value > maxValue) {
+                maxValue = value;
+                bestAction = action;
+            }
+        }
+        return bestAction;
     }
 
 
@@ -1128,8 +1158,8 @@ public class SingleTreeNode {
             potentials[count] = regretMatchingAverage.get(action);
             count++;
         }
-        double[] pdf = Utils.pdf(potentials);
-        int index = Utils.sampleFrom(pdf, rnd.nextDouble());
+        double[] pdf = pdf(potentials);
+        int index = sampleFrom(pdf, rnd.nextDouble());
         return regretMatchingAverage.keySet().stream().skip(index).findFirst().orElseThrow(() -> new AssertionError("No action found"));
     }
 

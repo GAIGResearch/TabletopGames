@@ -69,6 +69,8 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveWideningExponent = 0.0;
     public double progressiveBias = 0.0;
     public boolean reuseTree = false;
+    public MCTSEnums.BackupPolicy backupPolicy = MCTSEnums.BackupPolicy.MonteCarlo;
+    public double backupLambda = 1.0;
     public int maxBackupThreshold = 1000000;
 
 
@@ -117,6 +119,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
         addTunableParameter("reuseTree", false);
+        addTunableParameter("backupPolicy", MCTSEnums.BackupPolicy.MonteCarlo, Arrays.asList(MCTSEnums.BackupPolicy.values()));
+        addTunableParameter("backupLambda", 1.0);
         addTunableParameter("maxBackupThreshold", 1000000);
     }
 
@@ -175,6 +179,8 @@ public class MCTSParams extends PlayerParameters {
         initialiseVisits = (int) getParameterValue("initialiseVisits");
         actionHeuristicRecalculationThreshold = (int) getParameterValue("actionHeuristicRecalculation");
         reuseTree = (boolean) getParameterValue("reuseTree");
+        backupPolicy = (MCTSEnums.BackupPolicy) getParameterValue("backupPolicy");
+        backupLambda = (double) getParameterValue("backupLambda");
         maxBackupThreshold = (int) getParameterValue("maxBackupThreshold");
         opponentModel = null;
         rolloutPolicy = null;
