@@ -69,12 +69,11 @@ public class NTBEAParameters {
                 AbstractParameters.createFromFile(game, (String) args.get(RunArg.gameParams));
 
         mode = Mode.valueOf((String) args.get(RunArg.NTBEAMode));
-        logFile = (String) args.get(RunArg.output);
-        if (logFile.isEmpty()) logFile = "NTBEA.log";
+        logFile = "NTBEA.log";
         listenerClasses = (List<String>) args.get(RunArg.listener);
         destDir = (String) args.get(RunArg.destDir);
         if (destDir.isEmpty()) destDir = "NTBEA";
-        if (tuningGame && opponentDescriptor.equals("")) {
+        if (tuningGame && opponentDescriptor.isEmpty()) {
             throw new IllegalArgumentException("Must specify opponent descriptor when tuning a game");
         }
 

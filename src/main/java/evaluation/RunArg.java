@@ -95,7 +95,7 @@ public enum RunArg {
             "\t Defaults to evaluation.metrics.MetricsGameListener. \n" +
             "\t A pipe-delimited string can be provided to gather many types of statistics \n" +
             "\t from the same set of games.",
-            "evaluation.listeners.MetricsGameListener",
+            "metrics/MetricsGameListener.json",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     matchups("The total number of matchups to run in a tournament.\n" +
             "\tIf the mode is 'exhaustive', then this will be the maximum number of games run. TAG will divide\n" +
@@ -128,9 +128,6 @@ public enum RunArg {
             "\t If not specified, then a random player will be used.",
             "random",
             new Usage[]{Usage.ParameterSearch}),
-    output("(Optional) If specified, the summary results will be written to a file with this name.",
-            "",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     playerDirectory("The directory containing agent JSON files for the competing Players\n" +
             "\t If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.",
             "",

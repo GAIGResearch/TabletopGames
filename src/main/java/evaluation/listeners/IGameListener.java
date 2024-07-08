@@ -52,7 +52,7 @@ public interface IGameListener {
         if (listenerName == null || listenerName.isEmpty())
             throw new IllegalArgumentException("A listenerName must be specified");
         // first we check to see if listenerName is a file or not
-        IGameListener listener = null;
+        IGameListener listener;
         File listenerDetails = new File(listenerName);
         if (listenerDetails.exists()) {
             // in this case we construct from file

@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
+import java.io.File;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -122,6 +123,5 @@ public class RunGamesTest {
         assertEquals(66, tournament.getNGamesPlayed()[2], 15);
         assertEquals(66, tournament.getNGamesPlayed()[3], 15);
     }
-
 
 }

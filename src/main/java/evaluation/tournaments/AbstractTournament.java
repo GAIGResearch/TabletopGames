@@ -31,7 +31,7 @@ public abstract class AbstractTournament implements IGameRunner {
     protected Game game;
     // Number of players in the games, index matches the games list
     protected int nPlayers;
-    protected String resultsFile;
+    protected String resultsFile = "TournamentResults.txt";
     // Filename to write the results of the tournament
 
 
