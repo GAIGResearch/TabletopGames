@@ -56,25 +56,28 @@ public class MCTSTreeSelectionTests {
 
 
     private void first10Visits(STNWithTestInstrumentation node) {
-        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
-        node.currentNodeTrajectory = List.of(node);
-        node.backUp(new double[]{-1.0});
-
-        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
-        node.currentNodeTrajectory = List.of(node);
-        for (int i = 0; i < 5; i++) {
-            node.backUp(new double[]{0.5});
-        }
-        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
-        node.currentNodeTrajectory = List.of(node);
-        for (int i = 0; i < 4; i++) {
-            node.backUp(new double[]{0.4});
-        }
-
+        tenVisits(node, new double[]{-1.0, 0.5, 0.4});
         assertEquals(10, node.nVisits);
         assertEquals(1, node.getActionStats(new LMRAction("Left")).nVisits);
         assertEquals(5, node.getActionStats(new LMRAction("Middle")).nVisits);
         assertEquals(4, node.getActionStats(new LMRAction("Right")).nVisits);
+    }
+
+    private void tenVisits(STNWithTestInstrumentation node, double[] rewards) {
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.currentNodeTrajectory = List.of(node);
+        node.backUp(new double[]{rewards[0]});
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        node.currentNodeTrajectory = List.of(node);
+        for (int i = 0; i < 5; i++) {
+            node.backUp(new double[]{rewards[1]});
+        }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        node.currentNodeTrajectory = List.of(node);
+        for (int i = 0; i < 4; i++) {
+            node.backUp(new double[]{rewards[2]});
+        }
     }
 
     @Test
@@ -185,7 +188,14 @@ public class MCTSTreeSelectionTests {
 
     @Test
     public void rm10VisitsFinalSelection() {
-        rm10Visits();
+        // we need this to be the same as the tree policy action after ten visits as
+        // we only update every 10 visits
+        params.treePolicy = RegretMatching;
+        params.exploreEpsilon = 0.0;
+        params.normaliseRewards = false;
+        setupPlayer();
+        first10Visits(node);
+
         int[] counts = new int[3];
         for (int i = 0; i < 1000; i++) {
             AbstractAction action = node.bestAction();
@@ -201,6 +211,44 @@ public class MCTSTreeSelectionTests {
         assertEquals(0, counts[0], 0);
         assertEquals(679, counts[1], 100);
         assertEquals(321, counts[2], 100);
+
+        // this should then change after another 10 visits
+        // we now make the third action much more attractive
+        tenVisits(node, new double[]{0.0, 0.0, 1.0});
+        counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        // We now have 100% Right after 20 visits
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0, counts[0], 0);
+        assertEquals(680 / 2, counts[1], 100);
+        assertEquals((320 + 1000) / 2, counts[2], 100);
+
+        tenVisits(node, new double[]{4.0, 0.5, 0.4});
+        counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        // New policy is 84% Left, 16% Right...so we average that in with the previous two
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals( (840)/3, counts[0], 50);
+        assertEquals(680 / 3, counts[1], 50);
+        assertEquals((320 + 1000 + 160) / 3, counts[2], 100);
     }
 
     @Test

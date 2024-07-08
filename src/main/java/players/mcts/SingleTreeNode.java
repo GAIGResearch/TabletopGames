@@ -632,12 +632,6 @@ public class SingleTreeNode {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
                     }
                     double[] pdf = pdf(actionValues);
-                    if (this == root && params.treePolicy == RegretMatching && nVisits > actionValues.length && nVisits % Math.min(actionValues.length, 10) == 1) {
-                        // we update the average policy each time we have had the opportunity to take each action once
-                        for (int i = 0; i < actionValues.length; i++) {
-                            root.regretMatchingAverage.merge(availableActions.get(i), pdf[i], Double::sum);
-                        }
-                    }
                     long nonZeroActions = Arrays.stream(actionValues).filter(v -> v > 0.0).count();
                     if (nonZeroActions == 0) {
                         // if we have no non-zero values, then we just pick one at random
@@ -932,6 +926,9 @@ public class SingleTreeNode {
                 throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
             result = n.backUpSingleNode(action, result);
         }
+        // then we update the RM average policy; we only do this for the root
+
+
     }
 
     protected void normaliseRewardsAfterIteration(double[] result) {
@@ -1015,6 +1012,15 @@ public class SingleTreeNode {
             throw new AssertionError("We have somehow failed to find the action taken in the list of valid actions");
 
         stats.update(result);
+
+        if (params.treePolicy == RegretMatching && this == root && nVisits >= actionsToConsider.size() && nVisits % Math.max(actionsToConsider.size(), 10) == 0) {
+            // we update the average policy each time we have had the opportunity to take each action once (or every 10 visits, if that is greater)
+            double[] av = actionValues(actionsToConsider);
+            double[] pdf = pdf(av);
+            for (int i = 0; i < actionsToConsider.size(); i++) {
+                root.regretMatchingAverage.merge(actionsToConsider.get(i), pdf[i], Double::sum);
+            }
+        }
 
         if (params.backupPolicy == MCTSEnums.BackupPolicy.MonteCarlo)
             return result;
