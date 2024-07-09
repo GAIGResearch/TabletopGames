@@ -72,13 +72,13 @@ public class SkillLadder {
         int timeBudgetMultiplier = (int) config.get(RunArg.multiplier);
         int startGridBudget = (int) config.get(RunArg.gridStart);
         int startMinorGridBudget = (int) config.get(RunArg.gridMinorStart);
-        int NTBEABudget = (int) config.get(RunArg.tuningBudget);
+        boolean runNTBEA = (int) config.get(RunArg.tuningBudget) > 0;
         String destDir = (String) config.get(RunArg.destDir);
 
         String player = (String) config.get(RunArg.opponent);
         List<AbstractPlayer> allAgents = new ArrayList<>(iterations);
         AbstractPlayer firstAgent;
-        if (NTBEABudget > 0) {
+        if (runNTBEA) {
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, startingTimeBudget);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
             ntbeaParameters.printSearchSpaceDetails();
@@ -96,7 +96,7 @@ public class SkillLadder {
 
         for (int i = 0; i < iterations; i++) {
             int newBudget = (int) (Math.pow(timeBudgetMultiplier, i + 1) * startingTimeBudget);
-            if (NTBEABudget > 0) {
+            if (runNTBEA) {
                 NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, newBudget);
                 // ensure we have one repeat for each player position (to make the tournament easier)
                 // we will have one from the elite set, so we need nPlayers-1 more
@@ -169,7 +169,7 @@ public class SkillLadder {
     }
 
     private static NTBEAParameters constructNTBEAParameters(Map<RunArg, Object> config, int budget) {
-        double NTBEABudgetOnTournament = 0.50; // the complement will be spent on NTBEA runs
+        double NTBEABudgetOnTournament = (double) config.get(RunArg.finalPercent); // the complement will be spent on NTBEA runs
 
         NTBEAParameters ntbeaParameters = new NTBEAParameters(config);
         int gameBudget = (int) config.get(RunArg.tuningBudget);

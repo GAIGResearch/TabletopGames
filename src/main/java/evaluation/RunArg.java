@@ -172,6 +172,10 @@ public enum RunArg {
             "\t One tuning process is run for each iteration of SkillLadder.\n",
             1000,
             new Usage[]{Usage.SkillLadder}),
+    finalPercent("The proportion of the tuningBudget used to determine the best agent across each iteration. \n" +
+            "\t The remainder is divided amongst the iterations.\n",
+            0.5,
+            new Usage[]{Usage.SkillLadder}),
     useThreeTuples("If true then we use 3-tuples as well as 1-, 2- and N-tuples",
             false,
             new Usage[]{Usage.ParameterSearch}),
