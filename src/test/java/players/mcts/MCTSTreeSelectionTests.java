@@ -666,4 +666,53 @@ public class MCTSTreeSelectionTests {
         assertEquals(1.0, actionValues[1], 0.01);
         assertEquals(1.4 / 1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
     }
+
+    @Test
+    public void uniformSelection() {
+        params.treePolicy = Uniform;
+        setupPlayer();
+        first10Visits(node);
+        //regardless of the data, we expect a uniform distribution
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(333, counts[0], 75);
+        assertEquals(333, counts[1], 75);
+        assertEquals(333, counts[2], 75);
+    }
+
+
+    @Test
+    public void greedySelection() {
+        params.treePolicy = Greedy;
+        params.exploreEpsilon = 0.21;
+        setupPlayer();
+        first10Visits(node);
+        //  we expect a 21% exploration (7% each)
+        // and then 80% focused on the greedy Middle option
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(70, counts[0], 25);
+        assertEquals(860, counts[1], 75);
+        assertEquals(70, counts[2], 25);
+    }
 }

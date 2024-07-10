@@ -611,12 +611,27 @@ public class SingleTreeNode {
             double[] actionValues = actionValues(availableActions);
             // then pick the best one
             actionChosen = switch (params.treePolicy) {
+                case Uniform -> availableActions.get(rnd.nextInt(availableActions.size()));
+                case Greedy -> {
+                    // check exploration first
+                    if (explore && rnd.nextDouble() < params.exploreEpsilon) {
+                        yield availableActions.get(rnd.nextInt(availableActions.size()));
+                    }
+                    AbstractAction bestAction = null;
+                    double bestValue = -Double.MAX_VALUE;
+                    for (int i = 0; i < availableActions.size(); i++) {
+                        if (actionValues[i] > bestValue) {
+                            bestValue = actionValues[i];
+                            bestAction = availableActions.get(i);
+                        }
+                    }
+                    yield bestAction;
+                }
                 case UCB, AlphaGo, UCB_Tuned -> {
                     // These take the max
                     // Find child with highest UCB value
                     AbstractAction bestAction = null;
                     double bestValue = -Double.MAX_VALUE;
-                    // no need to shuffle, as ucbValue() adds some random noise
                     for (AbstractAction availableAction : availableActions) {
                         double uctValue = ucbValue(availableAction);
                         if (uctValue > bestValue) {
@@ -684,6 +699,8 @@ public class SingleTreeNode {
         for (int i = 0; i < actionsToConsider.size(); i++) {
             AbstractAction action = actionsToConsider.get(i);
             retValue[i] = switch (params.treePolicy) {
+                case Uniform -> 1.0;
+                case Greedy -> getFullValue(action);
                 case UCB, AlphaGo, UCB_Tuned -> ucbValue(action);
                 case RegretMatching -> rmValue(action);
                 case EXP3 -> exp3Value(action);
@@ -692,21 +709,22 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    private double ucbValue(AbstractAction action) {
-
-        // Find 'UCB' value
-        double uctValue = 0;
+    private double getFullValue(AbstractAction action) {
+        double value = getActionValue(action);
         int actionVisits = actionVisits(action);
-        // Find child value
-        double childValue = getActionValue(action);
-
         if (params.normaliseRewards && actionVisits > 0) {
-            childValue = normalise(childValue, root.lowReward, root.highReward);
+            value = normalise(value, root.lowReward, root.highReward);
         }
         if (params.progressiveBias > 0)
-            childValue += getBiasValue(action);
+            value += getBiasValue(action);
+        // apply OMA
+        value = getOMAValue(action, value);
+        return value;
+    }
 
-
+    private double getOMAValue(AbstractAction action, double childValue) {
+        int actionVisits = actionVisits(action);
+        double retValue = childValue;
         // consider OMA term
         if (params.omaVisits > 0 && (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA)) {
             OMATreeNode oma = ((OMATreeNode) this).OMAParent.orElse(null);
@@ -733,12 +751,21 @@ public class SingleTreeNode {
                     OMATreeNode.OMAStats stats = tmp.get(action);
                     if (stats != null && stats.OMAVisits > 0) {
                         double omaValue = stats.OMATotValue / stats.OMAVisits;
-                        childValue = (1.0 - beta) * childValue + beta * omaValue;
+                        retValue = (1.0 - beta) * childValue + beta * omaValue;
                     }
                 }
             }
         }
+        return retValue;
+    }
 
+    private double ucbValue(AbstractAction action) {
+
+        // Find 'UCB' value - this is the base to which we then add exploration
+        double childValue = getFullValue(action);
+        int actionVisits = actionVisits(action);
+
+        // Now for the exploration term
         // default to standard UCB
         int effectiveTotalVisits = validVisitsFor(action);
         // use first play urgency as replacement for exploration term if action not previously taken
@@ -778,7 +805,7 @@ public class SingleTreeNode {
 
         // Paranoid/SelfOnly control determines childValue here
         // If we are Paranoid, then the back-propagation will ensure that childValue is minus our score for opponent nodes
-        uctValue = childValue + explorationTerm;
+        double uctValue = childValue + explorationTerm;
         if (Double.isNaN(uctValue))
             throw new AssertionError("Numeric error calculating uctValue");
 
@@ -841,6 +868,7 @@ public class SingleTreeNode {
         int actionVisits = actionVisits(action);
         return params.progressiveBias * actionValueEstimates.getOrDefault(action, 0.0) / (actionVisits + 1);
     }
+
     /**
      * Perform a Monte Carlo rollout from this node.
      *
@@ -1070,6 +1098,7 @@ public class SingleTreeNode {
         };
 
     }
+
     private AbstractAction bestAction(List<AbstractAction> actionsToConsider) {
         AbstractAction bestAction = null;
         double maxValue = -Double.MAX_VALUE;
@@ -1115,7 +1144,7 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-        if (params.selectionPolicy == TREE || params.treePolicy == EXP3) {
+        if (params.treePolicy == EXP3) {
             // EXP3 uses the tree policy (without exploration)
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
