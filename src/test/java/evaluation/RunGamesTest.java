@@ -4,8 +4,7 @@ import core.AbstractPlayer;
 import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import players.simple.RandomPlayer;
 
 import java.io.File;
@@ -35,6 +34,16 @@ public class RunGamesTest {
         config.put(RunArg.verbose, false);  // no verbose output
         config.put(RunArg.destDir, "src/test/java/evaluation/output");
         config.put(RunArg.listener, new ArrayList<String>());  // no listeners
+    }
+
+    @After
+    public void teardown() {
+        // After each test we should clean up the directory
+        File dir = new File("src/test/java/evaluation/output");
+        for (File file : dir.listFiles())
+            if (!file.isDirectory())
+                file.delete();
+
     }
 
     @Test
@@ -107,7 +116,6 @@ public class RunGamesTest {
         assertEquals(99, tournament.getNGamesPlayed()[0]);
         assertEquals(198, tournament.getNGamesPlayed()[1]);
     }
-
 
 
     @Test
