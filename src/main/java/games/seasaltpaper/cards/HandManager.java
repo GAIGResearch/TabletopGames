@@ -6,7 +6,6 @@ import games.seasaltpaper.SeaSaltPaperGameState;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO change this class to be a collection of static function rather than a wrapper
 public class HandManager {
 
     private HandManager(){}
