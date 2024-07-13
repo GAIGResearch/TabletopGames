@@ -145,6 +145,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.name = String.format("Game: %s, Players: %d, Mode: %s, TotalGames: %d, GamesPerMatchup: %d",
                 gameToPlay.name(), playersPerGame, tournamentMode, actualGames, gamesPerMatchup);
+        System.out.println(name);
         String destDir = (String) config.getOrDefault(RunArg.destDir, "");
         if (!destDir.isEmpty())
             this.resultsFile = destDir + File.separator + resultsFile;
