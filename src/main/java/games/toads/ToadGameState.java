@@ -222,6 +222,7 @@ public class ToadGameState extends AbstractGameState {
                     playerDiscards.equals(toadGameState.playerDiscards) &&
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
                     Arrays.equals(tieBreakers, toadGameState.tieBreakers) &&
+                    Arrays.equals(battlesTied, toadGameState.battlesTied) &&
                     Arrays.equals(fieldCards, toadGameState.fieldCards);
         }
         return false;
@@ -230,7 +231,7 @@ public class ToadGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return Objects.hash(playerDecks, playerHands, playerDiscards) + Arrays.deepHashCode(battlesWon) +
-                Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers);
+                Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers) + Arrays.hashCode(battlesTied);
     }
 
     @Override
@@ -240,6 +241,7 @@ public class ToadGameState extends AbstractGameState {
                 playerHands.hashCode() + "|" +
                 playerDiscards.hashCode() + "|" +
                 Arrays.deepHashCode(battlesWon) + "|" +
+                Arrays.hashCode(battlesTied) + "|" +
                 Arrays.hashCode(hiddenFlankCards) + "|" +
                 Arrays.hashCode(fieldCards) + "|" +
                 Arrays.hashCode(tieBreakers) + "|";

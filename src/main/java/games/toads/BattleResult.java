@@ -19,7 +19,6 @@ public class BattleResult {
     }
 
     /**
-     *
      * @param state Game State
      * @return int[] with the number of battles won by each player (in player order)
      */
@@ -29,61 +28,44 @@ public class BattleResult {
         int round = state.getRoundCounter();
 
         boolean[] tricksterUsed = new boolean[2];
+        if (params.useTactics) {
+            // assassins copy their opponent's tactics
+            if (attackerFlank.tactics instanceof Assassin) {
+                attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, attackerFlank.ability, defenderFlank.tactics);
+            }
+            if (defenderFlank.tactics instanceof Assassin) {
+                defenderFlank = new ToadCard("Assassin with copied tactics", defenderFlank.value, defenderFlank.ability, attackerFlank.tactics);
+            }
+        }
+        boolean saboteurStopsTactics = (attackerFlank.ability instanceof Saboteur || defenderFlank.ability instanceof Saboteur);
 
-        if (params.useTactics && !(attackerFlank.ability instanceof Assassin) && !(defenderFlank.ability instanceof Assassin)) {
-            // we apply tactics if this is enabled, and neither player has played an Assassin (which negates the tactics of the other side)
+        if (params.useTactics && !saboteurStopsTactics) {
+            // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
+
+            // we first swap cards with Trickster before recording the base values
 
             // For the moment (given small number of cards), I'll hard-code this
-            if (attackerFlank.value == 3) { // Trickster
+            if (attackerFlank.tactics instanceof Trickster) { // Trickster
                 ToadCard temp = attackerField;
                 attackerField = attackerFlank;
                 attackerFlank = temp;
                 tricksterUsed[0] = true;
             }
-            if (defenderFlank.value == 3) { // Trickster
+            if (defenderFlank.tactics instanceof Trickster) { // Trickster
                 ToadCard temp = defenderField;
                 defenderField = defenderFlank;
                 defenderFlank = temp;
                 tricksterUsed[1] = true;
             }
-
-            if (attackerFlank.value == 2 && !tricksterUsed[0]) { // Scout
-                state.seeOpponentsHand(attacker);
-            }
-            if (defenderFlank.value == 2 && !tricksterUsed[1]) { // Scout
-                state.seeOpponentsHand(1 - attacker);
-            }
         }
 
-
+        // then we record the base battle results
         int[] result = new int[2];
         int AField = attackerField.value;
         int AFlank = attackerFlank.value;
         int DField = defenderField.value;
         int DFlank = defenderFlank.value;
 
-        if (params.useTactics && !(attackerFlank.ability instanceof Assassin) && !(defenderFlank.ability instanceof Assassin)) {
-            // we apply tactics if this is enabled, and neither player has played an Assassin (which negates the tactics of the other side)
-
-            // For the moment (given small number of cards), I'll hard-code this
-            if (!tricksterUsed[0]) {
-                if (attackerFlank.value == 5) { // Berserker
-                    AFlank += state.battlesWon[round][1 - attacker];
-                }
-                if (attackerFlank.value == 6 && !(attackerField.ability instanceof Bomb)) { // Icon Bearer
-                    AField += 1;
-                }
-            }
-
-            if (!tricksterUsed[1]) {
-                if (defenderFlank.value == 5) { // Berserker
-                    DFlank += state.battlesWon[round][attacker];
-                }
-                if (defenderFlank.value == 6 && !(defenderField.ability instanceof AssaultCannon)) { // Icon Bearer
-                    DField += 1;
-                }
-            }
-        }
         if (attackerField.ability != null) {
             AField += attackerField.ability.deltaToValue(attackerField.value, defenderField.value, true);
         }
@@ -96,6 +78,77 @@ public class BattleResult {
         if (defenderFlank.ability != null) {
             DFlank += defenderFlank.ability.deltaToValue(defenderFlank.value, attackerFlank.value, false);
         }
+
+        if (params.useTactics && !saboteurStopsTactics) {
+            // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
+            // For the moment (given small number of cards), I'll hard-code this
+
+            if (tricksterUsed[0]) {
+                AField += attackerFlank.value / 2;
+            }
+            if (tricksterUsed[1]) {
+                DField += defenderFlank.value / 2;
+            }
+
+            if (!tricksterUsed[0]) {
+                if (attackerFlank.tactics instanceof Scout) { // Scout
+                    state.seeOpponentsHand(attacker);
+                    AField++;
+                }
+                if (attackerFlank.tactics instanceof Berserker) { // Berserker
+                    AFlank += state.battlesWon[round][1 - attacker];
+                }
+                if (attackerFlank.tactics instanceof GeneralTwo) {
+                    AField += state.battlesTied[round];
+                }
+                // Now we apply the IconBearer's tie-creation ability
+                if (attackerFlank.tactics instanceof IconBearer) {
+                    if (AField == DField - 1)
+                        AField++;
+
+                    if (attackerField.tactics instanceof Berserker) {
+                        AField += state.battlesWon[round][1 - attacker];
+                    }
+                    if (attackerField.tactics instanceof Scout) {
+                        state.seeOpponentsHand(attacker);
+                        AFlank++;
+                    }
+                    if (attackerField.tactics instanceof GeneralTwo) {
+                        AFlank += state.battlesTied[round];
+                    }
+                }
+            }
+
+            if (!tricksterUsed[1]) {
+                if (defenderFlank.tactics instanceof Scout) { // Scout
+                    state.seeOpponentsHand(1 - attacker);
+                    DField++;
+                }
+                if (defenderFlank.tactics instanceof Berserker) { // Berserker
+                    DFlank += state.battlesWon[round][attacker];
+                }
+                if (defenderFlank.tactics instanceof GeneralTwo) {
+                    DField += state.battlesTied[round];
+                }
+
+                if (defenderFlank.tactics instanceof IconBearer) {
+                    if (DField == AField - 1)
+                        DField++;
+
+                    if (defenderField.tactics instanceof Berserker) {
+                        DField += state.battlesWon[round][attacker];
+                    }
+                    if (defenderField.tactics instanceof Scout) {
+                        state.seeOpponentsHand(1 - attacker);
+                        DFlank++;
+                    }
+                    if (defenderField.tactics instanceof GeneralTwo) {
+                        DFlank += state.battlesTied[round];
+                    }
+                }
+            }
+        }
+
         if (AField > DField) {
             result[0]++;
         } else if (AField < DField) {

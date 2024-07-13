@@ -5,25 +5,31 @@ import core.components.Card;
 public class ToadCard extends Card {
 
     public final int value;
-    protected final ToadAbility ability;  // TODO: Don't know what this does yet
+    protected final ToadAbility ability;
+    protected final ToadAbility tactics;
 
 
-    public ToadCard(String name, int value, ToadAbility ability) {
+    public ToadCard(String name, int value, ToadAbility ability, ToadAbility tactics) {
         super(name);
         this.value = value;
         this.ability = ability;
+        this.tactics = tactics;
     }
     public ToadCard(String name, int value) {
-        this(name, value, null);
+        this(name, value, null, null);
     }
 
-    public ToadCard(String name, int value, ToadAbility ability, int ID) {
+    public ToadCard(String name, int value, ToadAbility ability, ToadAbility tactics, int ID) {
         super(name, ID);
         this.value = value;
         this.ability = ability;
+        this.tactics = tactics;
+    }
+    public ToadCard(String name, int value, ToadAbility ability) {
+        this(name, value, ability, ability);
     }
     public ToadCard(String name, int value, int ID) {
-        this(name, value, null, ID);
+        this(name, value, null, null, ID);
     }
 
     @Override
