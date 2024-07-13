@@ -208,6 +208,19 @@ public class GameFlow {
     }
 
     @Test
+    public void tiedBattlesAreUpdated() {
+        playCards(
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Six", 6),  // Flank
+                new ToadCard("Five", 5), // field
+                new ToadCard("Six", 6) // flank
+        );
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
+        assertEquals(2, state.battlesTied[0]);
+    }
+
+    @Test
     public void assassinAgainstSeven() {
         playCards(
                 new ToadCard("Three", 3), // field

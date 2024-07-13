@@ -85,6 +85,8 @@ public class ToadForwardModel extends StandardForwardModel {
                     state.hiddenFlankCards[attacker], state.hiddenFlankCards[1-attacker]);
 
             int[] scoreDiff = battle.calculate(state);
+            int battlesTied = 2 - scoreDiff[0] - scoreDiff[1];
+            state.battlesTied[state.getRoundCounter()] += battlesTied;
 
             // convert back to scores for each player
             int round = state.getRoundCounter();
