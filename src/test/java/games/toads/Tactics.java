@@ -120,22 +120,22 @@ public class Tactics {
     }
 
     @Test
-    public void assassinCopiesBerserker() {
-        state.battlesWon[0][1] = 2;
+    public void assassinCopiesScout() {
+        state.battlesWon[0][0] = 2;
         state.fieldCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.fieldCards[1] = new ToadCard("Berserker", 5, new Berserker());
+        state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
         state.hiddenFlankCards[0] = new ToadCard("Assassin", 0, new Assassin());
         state.hiddenFlankCards[1] = new ToadCard("Scout", 2, new Scout());
 
-        // without tactics this would be 1 : 1
+        // without tactics this would be 0 : 2
 
-        // With tactics, the Scout adds +1 to p1 IconBearer
-        // but Assassin copies Berserker, adding +2 to itself, equalling the Scout
-        // Field is now 7 : 5 (p0 wins)
-        // Flank is now 2 : 2 (draw)
+        // With tactics Assassin copies Scout, adding +1 as well
+        // Field is now 7 : 7 (draw)
+        // Flank is now 0 : 2 (p1)
         fm._afterAction(state, null);
-        assertEquals(1, state.battlesWon[0][0]);
-        assertEquals(2, state.battlesWon[0][1]);
+        assertEquals(2, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
+        assertEquals(1, state.battlesTied[0]);
     }
 
     @Test
@@ -158,7 +158,7 @@ public class Tactics {
         state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
         state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
         state.hiddenFlankCards[0] = new ToadCard("General", 7, new GeneralOne());
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6);
 
         // This is 2 : 0...so a Frog...that becomes 2 points
 
@@ -201,9 +201,11 @@ public class Tactics {
         // this checks that the General special ability still holds (even though defeated by Assassin)
         state.battlesTied[0] = 2;
 
+        // This is a test-only hack, so that the Assassin does not copy the tactics of the General
+
         state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
+        state.fieldCards[1] = new ToadCard("Four", 4);
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 0, new Assassin(), null);
         state.hiddenFlankCards[1] = new ToadCard("Seven", 7, new GeneralTwo());
 
         // with no tactics this is 2 : 0
@@ -315,28 +317,37 @@ public class Tactics {
 
     @Test
     public void iconBearerWithoutSaboteur() {
-        state.battlesWon[0][1] = 1;
-        state.fieldCards[0] = new ToadCard("Two", 2, new Scout());
+        state.fieldCards[0] = new ToadCard("One", 1);
         state.fieldCards[1] = new ToadCard("Two", 2, new Scout());
         state.hiddenFlankCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
         state.hiddenFlankCards[1] = new ToadCard("Five", 5, new Berserker());
 
-        // without Tactics this is 1 : 0
+        // without Tactics this is 1 : 1
 
-        // IconBearer turns the Field battle into a Win, for  2 : 0
+        // IconBearer turns the Field battle into a Draw for 0 : 1
 
         fm._afterAction(state, null);
-        assertEquals(2, state.battlesWon[0][0]);
-        assertEquals(1, state.battlesWon[0][1]);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
+    /**
+     *
+     * @param n Number of cards to skip
+     * @param p0 Can p0 see p1's cards
+     * @param p1 Can p1 see p0's cards
+     */
+    private void checkVisibilityOfHands(int n, boolean p0, boolean p1) {
+        for (int i = n; i < state.playerHands.get(0).getSize(); i++) {
+            assertEquals(p0, state.playerHands.get(0).isComponentVisible(i, 1));
+        }
+        for (int i = n; i < state.playerHands.get(1).getSize(); i++)
+            assertEquals(p1, state.playerHands.get(1).isComponentVisible(i, 0));
+    }
 
     @Test
     public void scoutI() {
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertFalse(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertFalse(state.playerHands.get(1).isComponentVisible(i, 0));
+        checkVisibilityOfHands(0, false, false);
         state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
         state.fieldCards[1] = new ToadCard("Two", 2, new Scout());
         state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
@@ -346,21 +357,14 @@ public class Tactics {
         // which is also true here, as the Saboteur cancels the Scout
 
         fm._afterAction(state, null);
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertFalse(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertFalse(state.playerHands.get(1).isComponentVisible(i, 0));
-
+        checkVisibilityOfHands(0, false, false);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
     public void iconBearerActivatesScout() {
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertFalse(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertFalse(state.playerHands.get(1).isComponentVisible(i, 0));
+        checkVisibilityOfHands(0, false, false);
         state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
         state.fieldCards[1] = new ToadCard("Scout", 2, new Scout());
         state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
@@ -371,10 +375,7 @@ public class Tactics {
         // Flank is now 2 : 7 (p1 wins)
 
         fm._afterAction(state, null);
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertTrue(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertTrue(state.playerHands.get(1).isComponentVisible(i, 0));
+        checkVisibilityOfHands(2, true, true);
 
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
@@ -382,10 +383,7 @@ public class Tactics {
 
     @Test
     public void scoutIII() {
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertFalse(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertFalse(state.playerHands.get(1).isComponentVisible(i, 0));
+        checkVisibilityOfHands(0, false, false);
         state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
         state.fieldCards[1] = new ToadCard("One", 1);
         state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
@@ -396,10 +394,7 @@ public class Tactics {
         // Flank is now 2 : 1 (p0 wins)
 
         fm._afterAction(state, null);
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertFalse(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertTrue(state.playerHands.get(1).isComponentVisible(i, 0));
+        checkVisibilityOfHands(0, false, true);
 
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
@@ -413,19 +408,21 @@ public class Tactics {
         state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
 
         fm._afterAction(state, null);
-        for (int i = 0; i < state.playerHands.get(0).getSize(); i++)
-            assertFalse(state.playerHands.get(0).isComponentVisible(i, 1));
-        for (int i = 0; i < state.playerHands.get(1).getSize(); i++)
-            assertTrue(state.playerHands.get(1).isComponentVisible(i, 0));
+        checkVisibilityOfHands(0, false, true);
     }
 
     @Test
     public void cardMovedWithTricksterDoesNotTriggerTacticsII() {
-        state.battlesWon[0][0] = 1;
-        state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Seven", 7);
         state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
         state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
         state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+
+        // Trickster swaps, giving:
+        // Field is now 7 : 6 (p0 wins)
+        // Flank is now 2 : 6 (p1 wins)
+
+        // If the IconBearer were active, this would be 0 : 1 instead
 
         fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);

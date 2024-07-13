@@ -2,6 +2,8 @@ package games.toads;
 
 import games.toads.abilities.*;
 
+import java.util.Arrays;
+
 public class BattleResult {
 
     private ToadCard attackerField;
@@ -9,6 +11,7 @@ public class BattleResult {
     private ToadCard attackerFlank;
     private ToadCard defenderFlank;
     private final int attacker;
+    public boolean[] frogOverride = new boolean[2];
 
     public BattleResult(int attacker, ToadCard attackerField, ToadCard defenderField, ToadCard attackerFlank, ToadCard defenderFlank) {
         this.attackerField = attackerField;
@@ -98,6 +101,9 @@ public class BattleResult {
                 if (attackerFlank.tactics instanceof Berserker) { // Berserker
                     AFlank += state.battlesWon[round][1 - attacker];
                 }
+                if (attackerFlank.tactics instanceof GeneralOne) {
+                    frogOverride[0] = true;
+                }
                 if (attackerFlank.tactics instanceof GeneralTwo) {
                     AField += state.battlesTied[round];
                 }
@@ -113,6 +119,9 @@ public class BattleResult {
                         state.seeOpponentsHand(attacker);
                         AFlank++;
                     }
+                    if (attackerField.tactics instanceof GeneralOne) {
+                        frogOverride[0] = true;
+                    }
                     if (attackerField.tactics instanceof GeneralTwo) {
                         AFlank += state.battlesTied[round];
                     }
@@ -126,6 +135,9 @@ public class BattleResult {
                 }
                 if (defenderFlank.tactics instanceof Berserker) { // Berserker
                     DFlank += state.battlesWon[round][attacker];
+                }
+                if (defenderFlank.tactics instanceof GeneralOne) {
+                    frogOverride[1] = true;
                 }
                 if (defenderFlank.tactics instanceof GeneralTwo) {
                     DField += state.battlesTied[round];
@@ -141,6 +153,9 @@ public class BattleResult {
                     if (defenderField.tactics instanceof Scout) {
                         state.seeOpponentsHand(1 - attacker);
                         DFlank++;
+                    }
+                    if (defenderField.tactics instanceof GeneralOne) {
+                        frogOverride[1] = true;
                     }
                     if (defenderField.tactics instanceof GeneralTwo) {
                         DFlank += state.battlesTied[round];
@@ -163,6 +178,9 @@ public class BattleResult {
         // now put in correct player order (result is attacker/defender)
         retValue[attacker] = result[0];
         retValue[1 - attacker] = result[1];
+        boolean[] temp = Arrays.copyOf(frogOverride, 2);
+        frogOverride[attacker] = temp[0];
+        frogOverride[1 - attacker] = temp[1];
         return retValue;
     }
 

@@ -90,10 +90,10 @@ public class ToadForwardModel extends StandardForwardModel {
 
             // convert back to scores for each player
             int round = state.getRoundCounter();
-            // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead)
-            if (scoreDiff[0] == 2 && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
+            // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead - or override is set)
+            if (scoreDiff[0] == 2 && !battle.frogOverride[0] && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
                 scoreDiff[0]--;
-            } else if (scoreDiff[1] == 2 && state.battlesWon[round][1] >= state.battlesWon[round][0]) {
+            } else if (scoreDiff[1] == 2 && !battle.frogOverride[1] && state.battlesWon[round][1] >= state.battlesWon[round][0]) {
                 scoreDiff[1]--;
             }
             // and increment scores
