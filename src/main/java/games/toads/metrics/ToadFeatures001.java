@@ -17,13 +17,16 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
                 "THEIR_FIELD",
                 "KNOWN_HAND_1", "KNOWN_HAND_2",
                 "TIEBREAK_US", "TIEBREAK_THEM",
-                "DISCARD_US", "DISCARD_THEM"
+                "DISCARD_US", "DISCARD_THEM",
+                "IS_SECOND_ROUND",
+                "FIRST_ROUND_WIN",
+                "FIRST_ROUND_LOSS"
         };
     }
 
     @Override
     public double[] featureVector(AbstractGameState gs, int playerID) {
-        double[] features = new double[16];
+        double[] features = new double[19];
         ToadGameState state = (ToadGameState) gs;
         features[0] = state.getGameTick();
         int handSize = state.getPlayerHand(playerID).getSize();
@@ -50,6 +53,9 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
         for (int i = 0; i < state.getDiscards(1 - playerID).getSize(); i++) {
             features[15] += state.getDiscards(1 - playerID).get(i).value * (i + 11);
         }
+        features[16] = state.getRoundCounter() == 1 ? 1 : 0;
+        features[17] = state.getBattlesWon(playerID, 0) > state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
+        features[18] = state.getBattlesWon(playerID, 0) < state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
 
         return features;
     }

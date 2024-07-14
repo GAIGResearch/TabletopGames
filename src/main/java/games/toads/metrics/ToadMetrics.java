@@ -24,6 +24,7 @@ public class ToadMetrics implements IMetricsCollection {
             for (int i = 0; i < 2; i++) {
                 records.put("P" + i + "_Battles", state.getBattlesWon(i, state.getRoundCounter()));
             }
+            records.put("Tied_Battles", state.getBattlesTied(state.getRoundCounter()));
             return true;
         }
 
@@ -38,6 +39,7 @@ public class ToadMetrics implements IMetricsCollection {
             for (int i = 0; i < 2; i++) {
                 columns.put("P" + i + "_Battles", Integer.class);
             }
+            columns.put("Tied_Battles", Integer.class);
             return columns;
         }
     }

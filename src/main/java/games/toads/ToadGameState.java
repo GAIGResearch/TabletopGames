@@ -139,6 +139,9 @@ public class ToadGameState extends AbstractGameState {
     public int getBattlesWon(int playerId, int round) {
         return battlesWon[round][playerId];
     }
+    public int getBattlesTied(int round) {
+        return battlesTied[round];
+    }
     public int getScoreInBattle(int battle, int playerId) {
         return roundWinners[battle][playerId];
     }
