@@ -37,4 +37,9 @@ public class RandomPlayer extends AbstractPlayer {
     public RandomPlayer copy() {
         return new RandomPlayer(new Random(rnd.nextInt()));
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof RandomPlayer;
+    }
 }

@@ -7,11 +7,14 @@ import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
+import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
+import org.json.simple.JSONObject;
+import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -32,7 +35,6 @@ import java.util.stream.IntStream;
 
 import static evaluation.RunArg.byTeam;
 import static evaluation.RunArg.matchups;
-import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
 import static java.util.stream.Collectors.joining;
 
 public class NTBEA {
@@ -81,7 +83,6 @@ public class NTBEA {
                 } catch (NoSuchMethodException e) {
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " has no no-arg constructor");
                 } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " reflection error");
                 }
             }
@@ -118,6 +119,17 @@ public class NTBEA {
         elites.add(settings);
     }
 
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            JSONObject json = params.searchSpace.getAgentJSON(settings);
+            json.put("budget", params.budget);
+            writer.write(JSONUtils.prettyPrint(json, 1));
+        } catch (IOException e) {
+            throw new AssertionError("Error writing agent settings to file " + fileName);
+        }
+    }
+
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *
@@ -127,6 +139,8 @@ public class NTBEA {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
+            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
+                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
         }
 
         // After all runs are complete, if tournamentGames are specified, then we allow all the
@@ -155,18 +169,20 @@ public class NTBEA {
                 System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
                         "check the repeats options is at least equal to the number of players.");
             } else {
-                long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nTeams);
-                int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
-                if (params.verbose)
-                    System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
-                            gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
                 Map<RunArg, Object> config = new HashMap<>();
-                config.put(matchups, gamesPerMatchup);
-                config.put(byTeam, false);
+                config.put(matchups, params.tournamentGames);
+                if (players.size() < nPlayers) {
+                    // if we don't have enough players to fill the game, then we will need to use self-play
+                    config.put(RunArg.mode, "exhaustiveSP");
+                } else {
+                    config.put(RunArg.mode, "exhaustive");
+                }
+                config.put(byTeam, true);
                 config.put(RunArg.distinctRandomSeeds, 0);
-                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams,
-                        NO_SELF_PLAY, config);
-                tournament.verbose = false;
+                config.put(RunArg.budget, params.budget);
+                config.put(RunArg.verbose, false);
+                config.put(RunArg.destDir, params.destDir);
+                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
                 createListeners().forEach(tournament::addListener);
                 tournament.run();
                 // create a new list of results in descending order of score
@@ -193,16 +209,17 @@ public class NTBEA {
                         new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
                         new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
 
-            // We then want to check the win rate against the elite agent (if one was provided)
-            // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
-            if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
-                // The elite agent is always the last one (and if the elite won fair and square, then we skip this
-                double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
-                double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
-                    if (params.verbose)
-                        System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
-                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));}
+                // We then want to check the win rate against the elite agent (if one was provided)
+                // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
+                if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
+                    // The elite agent is always the last one (and if the elite won fair and square, then we skip this
+                    double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
+                    double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                    if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
+                        if (params.verbose)
+                            System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
+                        bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
+                    }
                 }
             }
         }
@@ -211,6 +228,8 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
+        writeAgentJSON(bestResult.b,
+                params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
     }
 

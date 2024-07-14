@@ -29,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
 
     private static boolean debug = false;
+    private JSONObject rawJSON;
     protected boolean resetOn = true; // if set to false while setting many parameter values, the _reset() method will not be called (for efficiency)
     List<String> parameterNames = new ArrayList<>();
     Map<String, List<Object>> possibleValues = new HashMap<>();
@@ -48,7 +49,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             JSONObject rawData = (JSONObject) jsonParser.parse(reader);
             loadFromJSON(params, rawData);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
         }
     }
@@ -72,7 +72,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
         }
         params._reset();
-
+        params.rawJSON = rawData;
         // We should also check that there are no other properties in there
         allParams.add("class");
         allParams.add("args"); // this may be present if there are non-configurable parameters needed for the constructor
@@ -98,8 +98,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
         if (finalData instanceof JSONObject subJson) {
             T retValue = JSONUtils.loadClassFromJSON(subJson);
-            if (retValue instanceof TunableParameters) {
-                TunableParameters subParams = (TunableParameters) retValue;
+            if (retValue instanceof TunableParameters subParams) {
                 TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
@@ -132,6 +131,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return (json.get(name) instanceof Map);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> List<T> getParamList(String name, JSONObject json, T defaultValue) {
         Object data = json.getOrDefault(name, defaultValue);
         if (!(data instanceof List))
@@ -381,6 +381,55 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return retValue.toJSONString();
     }
 
+
+    @Override
+    public ITunableParameters instanceFromJSON(JSONObject jsonObject) {
+        return JSONUtils.loadClassFromJSON(jsonObject);
+    }
+
+    public void setRawJSON(JSONObject json) {
+        rawJSON = json;
+    }
+
+    @Override
+    public JSONObject instanceToJSON(boolean excludeDefaults) {
+        // this is very similar to getJSONDescription(), but only
+        // considers the current Parameter settings
+        // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
+        JSONObject retValue = new JSONObject();
+        retValue.put("class", this.getClass().getName());
+        for (String name : parameterNames) {
+            if (name.contains(".")) {
+                // we don't want to include these in the top level
+                continue;
+            }
+            Object value = getParameterValue(name);
+            if (value != null) {
+                // check for defaults
+                if (excludeDefaults && value.equals(getDefaultParameterValue(name))) {
+                    continue;
+                }
+                if (value instanceof ITunableParameters tp) {
+                    value = tp.instanceToJSON(excludeDefaults);
+                } else if (value instanceof Enum) {
+                    value = value.toString();
+                } else if (!(value instanceof Integer || value instanceof Long ||
+                        value instanceof Double || value instanceof String ||
+                        value instanceof Boolean)) {
+                    // in this case we need to extract from the original rawJSON
+                    if (rawJSON == null) {
+                        if (getDefaultParameterValue(name).equals(value))
+                            continue; // in this case we have the default, so no need to pull in
+                        throw new AssertionError("No rawJSON available to extract value for " + name);
+                    }
+                    value = rawJSON.get(name);
+                }
+                retValue.put(name, value);
+            }
+        }
+        return retValue;
+    }
+
     /**
      * Retrieve the values of all parameters.
      *
@@ -423,14 +472,28 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TunableParameters)) return false;
-        TunableParameters that = (TunableParameters) o;
+        if (!(o instanceof TunableParameters that)) return false;
         // getRandomSeed() == that.getRandomSeed() && removed, so that equals (and hashcode) covers parameters only
         return _equals(o)
                 && that.parameterNames.equals(parameterNames)
                 && that.possibleValues.equals(possibleValues)
                 && that.currentValues.equals(currentValues)
                 && that.defaultValues.equals(defaultValues);
+    }
+
+    public boolean allParametersAndValuesEqual(TunableParameters other) {
+        for (String name : parameterNames) {
+            if (name.equals("randomSeed")) continue; // we don't care about the random seed
+            if (currentValues.get(name) == null && other.currentValues.get(name) == null) continue;
+            if (currentValues.get(name) instanceof TunableParameters subParams) {
+                if (!subParams.allParametersAndValuesEqual((TunableParameters) other.currentValues.get(name))) {
+                    return false;
+                }
+            } else if (!currentValues.get(name).equals(other.currentValues.get(name))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

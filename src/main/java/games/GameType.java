@@ -311,6 +311,7 @@ public enum GameType {
                 return (AbstractParameters) constructorGS.newInstance(seed);
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

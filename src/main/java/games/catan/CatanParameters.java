@@ -1,7 +1,10 @@
 package games.catan;
 
 import core.AbstractParameters;
+import core.Game;
 import core.components.Dice;
+import evaluation.optimisation.TunableParameters;
+import games.GameType;
 import games.catan.actions.build.BuyAction;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
@@ -12,9 +15,8 @@ import java.util.HashMap;
 import static games.catan.actions.build.BuyAction.BuyType.*;
 import static games.catan.CatanParameters.Resource.*;
 
-public class CatanParameters extends AbstractParameters {
-    private String dataPath;
-    public int maxRounds = 1000;
+public class CatanParameters extends TunableParameters {
+    private String dataPath = "data/catan/";
 
     public int n_resource_cards = 19;
     public int n_tiles_per_row = 7;
@@ -46,6 +48,8 @@ public class CatanParameters extends AbstractParameters {
     public int n_settlements_setup = 2;
     public int nResourcesYoP = 2;
     public int nRoadsRB = 2;
+
+    public boolean tradingAllowed = true;
 
     public HashMap<Building.Type, Integer> buildingValue = new HashMap<Building.Type, Integer>() {{
         put(Building.Type.Settlement, 1);
@@ -167,12 +171,25 @@ public class CatanParameters extends AbstractParameters {
     }};
 
     public CatanParameters(){
-        setMaxRounds(1000);
+        addTunableParameter("tradingAllowed", true);
+        addTunableParameter("maxRounds", 100);
+        addTunableParameter("dataPath", "data/catan/");
+        _reset();
     }
 
-    public CatanParameters(String dataPath){
-        this.dataPath = dataPath;
+
+    @Override
+    public Object instantiate() {
+        return new Game(GameType.Catan, new CatanForwardModel(), new CatanGameState(this, GameType.Catan.getMinPlayers()));
     }
+
+    @Override
+    public void _reset() {
+        tradingAllowed = (boolean) getParameterValue("tradingAllowed");
+        setMaxRounds((int) getParameterValue("maxRounds"));
+        dataPath = (String) getParameterValue("dataPath");
+    }
+
 
     public String getDataPath(){
         return dataPath;
@@ -181,8 +198,6 @@ public class CatanParameters extends AbstractParameters {
     @Override
     protected AbstractParameters _copy() {
         CatanParameters retValue =  new CatanParameters();
-        retValue.dataPath = dataPath;
-        retValue.maxRounds = maxRounds;
         retValue.n_resource_cards = n_resource_cards;
         retValue.n_tiles_per_row = n_tiles_per_row;
         retValue.dieType = dieType;

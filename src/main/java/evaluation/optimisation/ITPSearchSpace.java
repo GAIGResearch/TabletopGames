@@ -2,6 +2,7 @@ package evaluation.optimisation;
 
 import core.interfaces.ITunableParameters;
 import evodef.AgentSearchSpace;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -69,6 +70,9 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         super(convertToSuperFormatJSON(json, tunableParameters),
                 allParameterTypesWithRecursion(json, tunableParameters));
         initialiseITP(tunableParameters);
+        if (tunableParameters instanceof TunableParameters tp) {
+            tp.setRawJSON(json);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -186,15 +190,24 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         return getSearchKeys().indexOf(parameter);
     }
 
-    public Object getAgent(int[] settings) {
+    public Object getAgent(@NotNull int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
+        setTo(settings);
+        return itp.instantiate();
+    }
+    public JSONObject getAgentJSON(int[] settings) {
+        // we first need to update itp with the specified parameters, and then instantiate
+        setTo(settings);
+        return itp.instanceToJSON(true);
+    }
+
+    private void setTo(int[] settings) {
         for (int i = 0; i < settings.length; i++) {
             String pName = tunedIndexToParameterName.get(i);
             Object value = value(i, settings[i]);
             //   Object value = itp.getPossibleValues(pName).get(settings[i]);
             itp.setParameterValue(pName, value);
         }
-        return itp.instantiate();
     }
 
 }
