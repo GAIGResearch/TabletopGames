@@ -32,15 +32,15 @@ public class BattleResult {
 
         boolean[] tricksterUsed = new boolean[2];
         if (params.useTactics) {
-            // assassins copy their opponent's tactics
+            // assassins copy their ally's tactics
             if (attackerFlank.tactics instanceof Assassin) {
-                attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, attackerFlank.ability, defenderFlank.tactics);
+                attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, attackerFlank.ability, attackerField.tactics);
             }
             if (defenderFlank.tactics instanceof Assassin) {
-                defenderFlank = new ToadCard("Assassin with copied tactics", defenderFlank.value, defenderFlank.ability, attackerFlank.tactics);
+                defenderFlank = new ToadCard("Assassin with copied tactics", defenderFlank.value, defenderFlank.ability, defenderField.tactics);
             }
         }
-        boolean saboteurStopsTactics = (attackerFlank.ability instanceof Saboteur || defenderFlank.ability instanceof Saboteur);
+        boolean saboteurStopsTactics = (attackerFlank.tactics instanceof Saboteur || defenderFlank.tactics instanceof Saboteur);
 
         if (params.useTactics && !saboteurStopsTactics) {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
@@ -107,11 +107,8 @@ public class BattleResult {
                 if (attackerFlank.tactics instanceof GeneralTwo) {
                     AField += state.battlesTied[round];
                 }
-                // Now we apply the IconBearer's tie-creation ability
+                // Now we apply the IconBearer's Ally activation ability
                 if (attackerFlank.tactics instanceof IconBearer) {
-                    if (AField == DField - 1)
-                        AField++;
-
                     if (attackerField.tactics instanceof Berserker) {
                         AField += state.battlesWon[round][1 - attacker];
                     }
@@ -160,6 +157,26 @@ public class BattleResult {
                     if (defenderField.tactics instanceof GeneralTwo) {
                         DFlank += state.battlesTied[round];
                     }
+                }
+            }
+
+            // then we apply the IconBearer's tie-breaking (which must be done after everything else)
+            if (!tricksterUsed[0] && attackerFlank.tactics instanceof IconBearer) {
+                if (AField == DField - 1)
+                    AField++;
+
+                if (attackerField.tactics instanceof IconBearer) {
+                    if (AFlank == DFlank - 1)
+                        AFlank++;
+                }
+            }
+            if (!tricksterUsed[1] && defenderFlank.tactics instanceof IconBearer) {
+                if (DField == AField - 1)
+                    DField++;
+
+                if (defenderField.tactics instanceof IconBearer) {
+                    if (DFlank == AFlank - 1)
+                        DFlank++;
                 }
             }
         }

@@ -100,7 +100,7 @@ public class Tactics {
     }
 
     @Test
-    public void assassinVersusTrickster() {
+    public void assassinVersusTricksterI() {
         state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
         state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
         state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
@@ -108,19 +108,41 @@ public class Tactics {
 
         // with no tactics this is 0 : 2
 
-        // Trickster swaps with Five, gaining 2 points
-        // And Assassin copies it, swaps with 5, gaining 2 points...
+        // Trickster swaps with Four, gaining 2 points
+        // And Assassin copies Five, to no effect
 
-        // Field is now 3 : 5 (p1 wins)
-        // Flank is now 5 : 4 (p0 wins)
+        // Field is now 5 : 5 (draw)
+        // Flank is now 0 : 4 (p1 wins)
 
         fm._afterAction(state, null);
-        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
-    public void assassinCopiesScout() {
+    public void assassinVersusTricksterII() {
+        state.battlesWon[0][1] = 4;
+        // we adapt the previous test to check that the Assassin copies the tactics of the Berserker
+        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
+        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+
+        // with no tactics this is 0 : 2
+
+        // Trickster swaps with Four, gaining 2 points
+        // And Assassin copies Five, gaining 4 points
+
+        // Field is now 9 : 5 (p0 wins)
+        // Flank is now 4 : 4 (draw)
+
+        fm._afterAction(state, null);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(4, state.battlesWon[0][1]);
+    }
+
+    @Test
+    public void assassinCopiesIconBearerI() {
         state.battlesWon[0][0] = 2;
         state.fieldCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
         state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
@@ -129,13 +151,33 @@ public class Tactics {
 
         // without tactics this would be 0 : 2
 
-        // With tactics Assassin copies Scout, adding +1 as well
-        // Field is now 7 : 7 (draw)
+        // With tactics Assassin copies IconBearer, which counters the +1 from the Scout
+        // Field is now 6 : 7 (draw)
         // Flank is now 0 : 2 (p1)
         fm._afterAction(state, null);
         assertEquals(2, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
         assertEquals(1, state.battlesTied[0]);
+    }
+
+    @Test
+    public void assassinCopiesIconBearerII() {
+        state.battlesWon[0][0] = 2;
+        state.fieldCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
+        state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
+        state.hiddenFlankCards[1] = new ToadCard("Scout", 2, new Scout());
+
+        // without tactics this would be 0 : 2
+
+        // With tactics Assassin copies IconBearer, which counters the +1 from the Scout
+        // And also makes the Flank a draw from the original Iconbearer
+        // Field is now 6 : 7 (draw)
+        // Flank is now 1 : 2 (draw)
+        fm._afterAction(state, null);
+        assertEquals(2, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
+        assertEquals(2, state.battlesTied[0]);
     }
 
     @Test
