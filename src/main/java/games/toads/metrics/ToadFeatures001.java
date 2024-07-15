@@ -65,7 +65,7 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
         int retValue = state.getCurrentPlayer();
         double[] features = featureVector(state, state.getCurrentPlayer());
         for (int i = 0; i < features.length; i++) {
-            retValue += (int) (features[i] * ((i+1) * 31));
+            retValue += (int) (features[i] * Math.pow(31, i+1));
         }
         return retValue;
     }
