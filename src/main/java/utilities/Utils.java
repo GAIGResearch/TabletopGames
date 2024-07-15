@@ -1,5 +1,6 @@
 package utilities;
 
+import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -74,6 +75,32 @@ public abstract class Utils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Given a total budget of games, and number of players and agents, calculates how many games should be played
+     * For each possible permutation of players.
+     * This is a helper function to avoid the need for users of Tournaments to (mis-)calculate this themselves.
+     * @param nPlayers - the number of players in each game
+     * @param nAgents - the number of agents we are comparing
+     * @param totalGameBudget - the desired total number of games to play
+//     * @param allowBudgetBreach - if true then we will return the value closest to the totalGameBudget, even if it exceeds it
+//     *                         if false then we will return the value that is less than or equal to the totalGameBudget
+     * @return the number of permutations possible
+     */
+    public static int gamesPerMatchup(int nPlayers, int nAgents, int totalGameBudget, boolean selfPlay) {
+        long permutationsOfPlayers = playerPermutations(nPlayers, nAgents, selfPlay);
+        return (int) (totalGameBudget / permutationsOfPlayers);
+        // line below is if we are happy to breach the budget limit
+        // int gamesPerMatchupHigh = (int) Math.ceil((double) totalGameBudget / permutationsOfPlayers);
+    }
+
+    public static int playerPermutations(int nPlayers, int nAgents, boolean selfPlay) {
+        if (selfPlay) {
+            return (int) Math.pow(nAgents, nPlayers);
+        } else {
+            return (int) (CombinatoricsUtils.factorial(nAgents) / CombinatoricsUtils.factorial(nAgents - nPlayers));
+        }
     }
 
     /**
