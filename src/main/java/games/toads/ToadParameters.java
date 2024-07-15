@@ -23,7 +23,7 @@ public class ToadParameters extends TunableParameters {
     boolean useTactics = true;
     int firstRoundHandicap = 0;
     int secondRoundHandicap = 0;
-    SecondRoundStart secondRoundStart = SecondRoundStart.ONE;
+    SecondRoundStart secondRoundStart = SecondRoundStart.WINNER;
 
     enum SecondRoundStart {
         ONE, TWO, LOSER, WINNER
@@ -38,7 +38,7 @@ public class ToadParameters extends TunableParameters {
         addTunableParameter("useTactics", true);
         addTunableParameter("firstRoundHandicap", 0);
         addTunableParameter("secondRoundHandicap", 0);
-        addTunableParameter("secondRoundStart", SecondRoundStart.ONE);
+        addTunableParameter("secondRoundStart", SecondRoundStart.WINNER);
     }
 
     @Override
