@@ -558,7 +558,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
     protected double[] reportAlphaRank(List<String> dataDump, int[][] values) {
         // alpha-rank calculations
-        double[] alphaValues = new double[]{30.0};
+        double[] alphaValues = new double[]{10.0};
         double[] retValue = new double[agents.size()];
         for (double alpha : alphaValues) {
             // T is our transition matrix
