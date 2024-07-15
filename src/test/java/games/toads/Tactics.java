@@ -82,6 +82,25 @@ public class Tactics {
     }
 
     @Test
+    public void iconBearerActivatesTrickster() {
+        state.battlesWon[0][0] = 1;
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.hiddenFlankCards[0] = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+
+        // with no tactics this is 2 : 0
+
+        // p1 - Iconbearer activates, then activates Trickster, which gains 3 points and Swaps with IconBearer
+        // Field is now 5 : 6  (p1 wins)
+        // Flank is now 7 : 6  (draw, due to activated IconBearer)
+
+        fm._afterAction(state, null);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
+    }
+
+    @Test
     public void tricksterSaboteurIconBearer() {
         state.fieldCards[0] = new ToadCard("Four", 4, new Saboteur());
         state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
