@@ -491,6 +491,27 @@ public class Tactics {
     }
 
     @Test
+    public void assaultCannonInRound2() {
+        state.fieldCards[0] = new ToadCard("Assassin", 1, new Assassin());
+        state.fieldCards[1] =  new ToadCard("Berserker", 5, new Berserker());
+        state.hiddenFlankCards[0] =new ToadCard("General2", 7, new GeneralTwo());
+        state.hiddenFlankCards[1] = new ToadCard("General1", 7, new GeneralOne());
+
+        fm._afterAction(state, null);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
+
+        state.fieldCards[0] = new ToadCard("AC", 0, new AssaultCannon());
+        state.fieldCards[1] = new ToadCard("General2", 7, new GeneralTwo());
+        state.hiddenFlankCards[0] = new ToadCard("Saboteur", 4, new Saboteur());
+        state.hiddenFlankCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
+
+        fm._afterAction(state, null);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(2, state.battlesWon[0][1]);
+    }
+
+    @Test
     public void assaultCannonNamesCard() {
         fail("Not implemented yet");
     }

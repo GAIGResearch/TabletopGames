@@ -2,8 +2,7 @@ package games.toads;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import games.toads.abilities.Assassin;
-import games.toads.abilities.Bomb;
+import games.toads.abilities.*;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import org.junit.Before;
@@ -152,6 +151,7 @@ public class GameFlow {
 
     @Test
     public void winInRoundTwoIsCorrectlyAllocated() {
+        params.secondRoundStart = ToadParameters.SecondRoundStart.ONE;
         for (int i = 0; i < 16; i++) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
@@ -271,12 +271,12 @@ public class GameFlow {
 
 
     @Test
-    public void bombAgainstSixAttack() {
+    public void assaultCannonAgainstSixAttack() {
         playCards(
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6), // flank
                 new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb()) // Flank
+                new ToadCard("Bomb", 0, new AssaultCannon()) // Flank
         );
 
         assertEquals(1, state.battlesWon[0][0]);
@@ -284,10 +284,10 @@ public class GameFlow {
     }
 
     @Test
-    public void bombAgainstSixDefense() {
+    public void assaultCannonAgainstSixDefense() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb()), // Flank
+                new ToadCard("AC", 0, new AssaultCannon()), // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6) // flank
         );

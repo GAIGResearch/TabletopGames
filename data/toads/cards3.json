@@ -2,7 +2,7 @@
   "cards": [
     {
       "name": "Assassin",
-      "value": 0,
+      "value": 1,
       "special": "Assassin",
       "count": 1
     },
