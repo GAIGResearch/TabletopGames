@@ -58,9 +58,9 @@ public class TunableGLMHeuristic extends TunableParameters implements IActionHeu
     }
 
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+    public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         if (heuristic instanceof IActionHeuristic actionHeuristic)
-            return actionHeuristic.evaluateAction(action, state);
+            return actionHeuristic.evaluateAction(action, state, contextActions);
         throw new AssertionError("Heuristic is not an IActionHeuristic");
     }
 

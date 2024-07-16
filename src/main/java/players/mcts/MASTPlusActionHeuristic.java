@@ -5,6 +5,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
 import core.interfaces.IActionKey;
 
+import java.util.List;
+
 public class MASTPlusActionHeuristic extends MASTActionHeuristic {
 
     // This takes the MAST value of an action, and blends it with an external (fixed) action heuristic
@@ -18,11 +20,11 @@ public class MASTPlusActionHeuristic extends MASTActionHeuristic {
     }
 
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+    public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> actions) {
         if (beta > 0.0)  // avoid potentially expensive computation if beta is 0
-            return (1 - beta) * super.evaluateAction(action, state) + beta * externalHeuristic.evaluateAction(action, state);
+            return (1 - beta) * super.evaluateAction(action, state, actions) + beta * externalHeuristic.evaluateAction(action, state, actions);
         else
-            return super.evaluateAction(action, state);
+            return super.evaluateAction(action, state, actions);
     }
 
 }
