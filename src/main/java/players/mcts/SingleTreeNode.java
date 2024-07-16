@@ -218,7 +218,7 @@ public class SingleTreeNode {
                         // we just initialise the new actions
                         for (AbstractAction action : actionsFromOpenLoopState) {
                             if (!actionValueEstimates.containsKey(action)) {
-                                actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState));
+                                actionValueEstimates.put(action, params.actionHeuristic.evaluateAction(action, actionState, actionsFromOpenLoopState));
                             }
                         }
                     }

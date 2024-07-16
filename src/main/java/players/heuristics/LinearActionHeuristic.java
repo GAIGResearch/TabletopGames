@@ -71,7 +71,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
     }
 
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+    public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
         double[] phi = features.featureVector(state, state.getCurrentPlayer());

@@ -12,14 +12,14 @@ public class MASTPlayerParams extends TunableParameters {
 
     // Use this class if blending in some other heuristic; or if it iis necessary to have different MAST parameterisations
     // for rollout policy and opponent models
-    public IActionHeuristic externalHeuristic = (gameState, action) -> 0.0;
+    public IActionHeuristic externalHeuristic = (gameState, action, actions) -> 0.0;
     public double weightOfExternal = 0.5;
     public double temperature = 1.0;
     public double epsilon = 0.0;
     public double defaultValue = 0.0;
     public IActionKey actionKey;
     public MASTPlayerParams() {
-        addTunableParameter("externalHeuristic", (IActionHeuristic) (gameState, action) -> 0.0);
+        addTunableParameter("externalHeuristic", (IActionHeuristic) (gameState, action, actions) -> 0.0);
         addTunableParameter("weightOfExternal", 0.5);
         addTunableParameter("temperature", 1.0);
         addTunableParameter("epsilon", 0.0);
