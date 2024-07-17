@@ -107,8 +107,12 @@ public class ToadGameState extends AbstractGameState {
             // then put hidden flank card back
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
-            // tieBreakers are always known to both players
-
+            // and tiebreaker is shuffled with our as yet undrawn deck
+            if (tieBreakers[playerId] != null)
+                copy.playerDecks.get(playerId).add(tieBreakers[playerId]);
+            copy.playerDecks.get(playerId).shuffle(redeterminisationRnd);
+            if (tieBreakers[playerId] != null)
+                copy.tieBreakers[playerId] = copy.playerDecks.get(playerId).draw();
         }
         return copy;
     }
