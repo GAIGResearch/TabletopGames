@@ -363,6 +363,20 @@ public class GameFlow {
     }
 
     @Test
+    public void redeterminisationShuffleOwnDeck() {
+        ToadGameState copy = (ToadGameState) state.copy(1);
+        assertEquals(state.getPlayerHand(1), copy.getPlayerHand(1));
+        assertNotEquals(state.getPlayerDeck(1), copy.getPlayerDeck(1));
+    }
+
+    @Test
+    public void redeterminisationShuffleOtherDeck() {
+        ToadGameState copy = (ToadGameState) state.copy(1);
+        assertNotEquals(state.getPlayerHand(0), copy.getPlayerHand(0));
+        assertNotEquals(state.getPlayerDeck(0), copy.getPlayerDeck(0));
+    }
+
+    @Test
     public void winFirstLoseSecondLosesGame() {
         state.battlesWon[0][0] = 10;
         state.battlesWon[0][1] = 0;

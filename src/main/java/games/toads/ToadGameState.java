@@ -2,16 +2,11 @@ package games.toads;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
-import games.toads.actions.FlankCardPlayed;
-import games.toads.actions.PlayFlankCard;
-import scala.concurrent.impl.FutureConvertersImpl;
 import utilities.DeterminisationUtilities;
-import utilities.Pair;
 
 import java.util.*;
 
@@ -97,7 +92,7 @@ public class ToadGameState extends AbstractGameState {
             int playerToShuffle = 1 - playerId;
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
-            DeterminisationUtilities.reshuffle(playerToShuffle,
+            DeterminisationUtilities.reshuffle(playerId,
                     List.of(
                             copy.playerDecks.get(playerToShuffle),
                             copy.playerHands.get(playerToShuffle)
@@ -107,12 +102,12 @@ public class ToadGameState extends AbstractGameState {
             // then put hidden flank card back
             if (hiddenFlankCards[playerToShuffle] != null)
                 copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
-            // and tiebreaker is shuffled with our as yet undrawn deck
-            if (tieBreakers[playerId] != null)
-                copy.playerDecks.get(playerId).add(tieBreakers[playerId]);
+            // and their tiebreaker is shuffled with *our* as yet undrawn deck
+            if (tieBreakers[playerToShuffle] != null)
+                copy.playerDecks.get(playerId).add(tieBreakers[playerToShuffle]);
             copy.playerDecks.get(playerId).shuffle(redeterminisationRnd);
-            if (tieBreakers[playerId] != null)
-                copy.tieBreakers[playerId] = copy.playerDecks.get(playerId).draw();
+            if (tieBreakers[playerToShuffle] != null)
+                copy.tieBreakers[playerToShuffle] = copy.playerDecks.get(playerId).draw();
         }
         return copy;
     }
@@ -121,6 +116,9 @@ public class ToadGameState extends AbstractGameState {
         return playerHands.get(playerId);
     }
 
+    public Deck<ToadCard> getPlayerDeck(int playerId) {
+        return playerDecks.get(playerId);
+    }
 
     public void seeOpponentsHand(int player) {
         PartialObservableDeck<ToadCard> handToSee = playerHands.get(1 - player);
