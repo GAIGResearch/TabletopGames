@@ -10,8 +10,14 @@ public class BattleResult {
     private ToadCard defenderField;
     private ToadCard attackerFlank;
     private ToadCard defenderFlank;
+    private int AField;
+    private int AFlank;
+    private int DField;
+    private int DFlank;
     private final int attacker;
     public boolean[] frogOverride = new boolean[2];
+    private boolean[] activatedFields = new boolean[2];
+    private boolean[] activatedFlanks = new boolean[2];
 
     public BattleResult(int attacker, ToadCard attackerField, ToadCard defenderField, ToadCard attackerFlank, ToadCard defenderFlank) {
         this.attackerField = attackerField;
@@ -30,7 +36,6 @@ public class BattleResult {
         ToadParameters params = (ToadParameters) state.getGameParameters();
         int round = state.getRoundCounter();
 
-        boolean[] tricksterUsed = new boolean[2];
         if (params.useTactics) {
             // assassins copy their ally's tactics
             if (attackerFlank.tactics instanceof Assassin) {
@@ -41,6 +46,15 @@ public class BattleResult {
             }
         }
         boolean saboteurStopsTactics = (attackerFlank.tactics instanceof Saboteur || defenderFlank.tactics instanceof Saboteur);
+        activatedFlanks[0] = true;
+        activatedFlanks[1] = true;
+
+        // then we record the base battle results
+        int[] result = new int[2];
+        AField = attackerField.value;
+        AFlank = attackerFlank.value;
+        DField = defenderField.value;
+        DFlank = defenderFlank.value;
 
         if (params.useTactics && !saboteurStopsTactics) {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
@@ -49,25 +63,19 @@ public class BattleResult {
 
             // For the moment (given small number of cards), I'll hard-code this
             if (attackerFlank.tactics instanceof Trickster) { // Trickster
-                ToadCard temp = attackerField;
-                attackerField = attackerFlank;
-                attackerFlank = temp;
-                tricksterUsed[0] = true;
+                swapFieldAndFlank(0);
+            } else if (attackerFlank.tactics instanceof IconBearer && attackerField.tactics instanceof Trickster) {
+                swapFieldAndFlank(0);
+                activatedFlanks[0] = true;
             }
+
             if (defenderFlank.tactics instanceof Trickster) { // Trickster
-                ToadCard temp = defenderField;
-                defenderField = defenderFlank;
-                defenderFlank = temp;
-                tricksterUsed[1] = true;
+                swapFieldAndFlank(1);
+            } else if (defenderFlank.tactics instanceof IconBearer && defenderField.tactics instanceof Trickster) {
+                swapFieldAndFlank(1);
+                activatedFlanks[1] = true;
             }
         }
-
-        // then we record the base battle results
-        int[] result = new int[2];
-        int AField = attackerField.value;
-        int AFlank = attackerFlank.value;
-        int DField = defenderField.value;
-        int DFlank = defenderFlank.value;
 
         if (attackerField.ability != null) {
             AField += attackerField.ability.deltaToValue(attackerField.value, defenderField.value, true);
@@ -86,14 +94,20 @@ public class BattleResult {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
             // For the moment (given small number of cards), I'll hard-code this
 
-            if (tricksterUsed[0]) {
+            if (activatedFields[0] && attackerField.tactics instanceof Trickster) { // Trickster
                 AField += attackerFlank.value / 2;
             }
-            if (tricksterUsed[1]) {
+            if (activatedFields[1] && defenderField.tactics instanceof Trickster) { // Trickster
                 DField += defenderFlank.value / 2;
             }
+            if (activatedFlanks[0] && attackerFlank.tactics instanceof Trickster) { // Trickster
+                AFlank += attackerField.value / 2;
+            }
+            if (activatedFlanks[1] && defenderFlank.tactics instanceof Trickster) { // Trickster
+                DFlank += defenderField.value / 2;
+            }
 
-            if (!tricksterUsed[0]) {
+            if (activatedFlanks[0]) {
                 if (attackerFlank.tactics instanceof Scout) { // Scout
                     state.seeOpponentsHand(attacker);
                     AField++;
@@ -109,6 +123,7 @@ public class BattleResult {
                 }
                 // Now we apply the IconBearer's Ally activation ability
                 if (attackerFlank.tactics instanceof IconBearer) {
+                    activatedFields[0] = true;
                     if (attackerField.tactics instanceof Berserker) {
                         AField += state.battlesWon[round][1 - attacker];
                     }
@@ -125,7 +140,7 @@ public class BattleResult {
                 }
             }
 
-            if (!tricksterUsed[1]) {
+            if (activatedFlanks[1]) {
                 if (defenderFlank.tactics instanceof Scout) { // Scout
                     state.seeOpponentsHand(1 - attacker);
                     DField++;
@@ -141,6 +156,7 @@ public class BattleResult {
                 }
 
                 if (defenderFlank.tactics instanceof IconBearer) {
+                    activatedFields[1] = true;
                     if (DField == AField - 1)
                         DField++;
 
@@ -161,7 +177,7 @@ public class BattleResult {
             }
 
             // then we apply the IconBearer's tie-breaking (which must be done after everything else)
-            if (!tricksterUsed[0] && attackerFlank.tactics instanceof IconBearer) {
+            if (activatedFlanks[0] && attackerFlank.tactics instanceof IconBearer) {
                 if (AField == DField - 1)
                     AField++;
 
@@ -170,7 +186,7 @@ public class BattleResult {
                         AFlank++;
                 }
             }
-            if (!tricksterUsed[1] && defenderFlank.tactics instanceof IconBearer) {
+            if (activatedFlanks[1] && defenderFlank.tactics instanceof IconBearer) {
                 if (DField == AField - 1)
                     DField++;
 
@@ -178,6 +194,15 @@ public class BattleResult {
                     if (DFlank == AFlank - 1)
                         DFlank++;
                 }
+            }
+
+            if (activatedFields[0] && attackerField.tactics instanceof IconBearer) {
+                if (AFlank == DFlank - 1)
+                    AFlank++;
+            }
+            if (activatedFields[1] && defenderField.tactics instanceof IconBearer) {
+                if (DFlank == AFlank - 1)
+                    DFlank++;
             }
         }
 
@@ -191,6 +216,7 @@ public class BattleResult {
         } else if (AFlank < DFlank) {
             result[1]++;
         }
+
         int[] retValue = new int[2];
         // now put in correct player order (result is attacker/defender)
         retValue[attacker] = result[0];
@@ -201,4 +227,29 @@ public class BattleResult {
         return retValue;
     }
 
+    private void swapFieldAndFlank(int player) {
+
+        // then activation state
+        boolean tempBool = activatedFields[player];
+        activatedFields[player] = activatedFlanks[player];
+        activatedFlanks[player] = tempBool;
+
+        // then also swap the values
+        if (player == 0) {
+            ToadCard temp = attackerField;
+            attackerField = attackerFlank;
+            attackerFlank = temp;
+            int tempVal = AField;
+            AField = AFlank;
+            AFlank = tempVal;
+        } else if (player == 1) {
+            ToadCard temp = defenderField;
+            defenderField = defenderFlank;
+            defenderFlank = temp;
+            int tempVal = DField;
+            DField = DFlank;
+            DFlank = tempVal;
+        }
+
+    }
 }

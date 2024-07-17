@@ -296,6 +296,30 @@ public class GameFlow {
         assertEquals(0, state.battlesWon[0][1]);
     }
 
+
+    @Test
+    public void assaultCannonInRound2() {
+        playCards(
+                new ToadCard("Assassin", 0, new Assassin()), // field
+                new ToadCard("G2", 7, new GeneralTwo()), // Flank
+                new ToadCard("Berserker", 5, new Berserker()),  // Field
+                new ToadCard("G1", 7, new GeneralOne()) // flank
+        );
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
+
+        assertEquals(1, state.getCurrentPlayer());
+        playCards(
+                new ToadCard("G2", 7, new GeneralTwo()), // field
+                new ToadCard("Saboteur", 4, new Saboteur()), // Flank
+                new ToadCard("AC", 0, new AssaultCannon()),  // Field
+                new ToadCard("IconBearer", 6, new IconBearer()) // flank
+        );
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(2, state.battlesWon[0][1]);
+    }
+
+
     @Test
     public void overcommit() {
         playCards(
