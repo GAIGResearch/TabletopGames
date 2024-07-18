@@ -1,8 +1,9 @@
 package games.toads;
 
+import core.interfaces.IExtendedSequence;
 import games.toads.abilities.*;
 
-import java.util.Arrays;
+import java.util.*;
 
 public class BattleResult {
 
@@ -15,9 +16,11 @@ public class BattleResult {
     private int DField;
     private int DFlank;
     private final int attacker;
-    public boolean[] frogOverride = new boolean[2];
-    private boolean[] activatedFields = new boolean[2];
-    private boolean[] activatedFlanks = new boolean[2];
+    private final boolean[] frogOverride = new boolean[2];
+    private final boolean[] activatedFields = new boolean[2];
+    private final boolean[] activatedFlanks = new boolean[2];
+    private final List<IExtendedSequence> postBattleActions = new ArrayList<>();
+    private boolean battleComplete = false;
 
     public BattleResult(int attacker, ToadCard attackerField, ToadCard defenderField, ToadCard attackerFlank, ToadCard defenderFlank) {
         this.attackerField = attackerField;
@@ -32,6 +35,10 @@ public class BattleResult {
      * @return int[] with the number of battles won by each player (in player order)
      */
     int[] calculate(ToadGameState state) {
+
+        if (battleComplete)
+            throw new AssertionError("BattleResult object can only be used once");
+        battleComplete = true;
 
         ToadParameters params = (ToadParameters) state.getGameParameters();
         int round = state.getRoundCounter();
@@ -121,6 +128,9 @@ public class BattleResult {
                 if (attackerFlank.tactics instanceof GeneralTwo) {
                     AField += state.battlesTied[round];
                 }
+                if (attackerFlank.tactics instanceof AssaultCannon) {
+                    postBattleActions.add(new AssaultCannonInterrupt(attacker));
+                }
                 // Now we apply the IconBearer's Ally activation ability
                 if (attackerFlank.tactics instanceof IconBearer) {
                     activatedFields[0] = true;
@@ -136,6 +146,9 @@ public class BattleResult {
                     }
                     if (attackerField.tactics instanceof GeneralTwo) {
                         AFlank += state.battlesTied[round];
+                    }
+                    if (attackerField.tactics instanceof AssaultCannon) {
+                        postBattleActions.add(new AssaultCannonInterrupt(attacker));
                     }
                 }
             }
@@ -153,6 +166,9 @@ public class BattleResult {
                 }
                 if (defenderFlank.tactics instanceof GeneralTwo) {
                     DField += state.battlesTied[round];
+                }
+                if (defenderFlank.tactics instanceof AssaultCannon) {
+                    postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));
                 }
 
                 if (defenderFlank.tactics instanceof IconBearer) {
@@ -172,6 +188,9 @@ public class BattleResult {
                     }
                     if (defenderField.tactics instanceof GeneralTwo) {
                         DFlank += state.battlesTied[round];
+                    }
+                    if (defenderField.tactics instanceof AssaultCannon) {
+                        postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));
                     }
                 }
             }
@@ -251,5 +270,13 @@ public class BattleResult {
             DFlank = tempVal;
         }
 
+    }
+
+    public boolean getFrogOverride(int player) {
+        return frogOverride[player];
+    }
+
+    public List<IExtendedSequence> getPostBattleActions() {
+        return postBattleActions;
     }
 }

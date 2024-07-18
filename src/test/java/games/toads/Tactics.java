@@ -1,9 +1,14 @@
 package games.toads;
 
+import core.actions.AbstractAction;
 import games.toads.abilities.*;
+import games.toads.actions.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import static games.toads.ToadConstants.ToadGamePhase.POST_BATTLE;
 import static org.junit.Assert.*;
 
 public class Tactics {
@@ -393,8 +398,7 @@ public class Tactics {
     }
 
     /**
-     *
-     * @param n Number of cards to skip
+     * @param n  Number of cards to skip
      * @param p0 Can p0 see p1's cards
      * @param p1 Can p1 see p0's cards
      */
@@ -492,6 +496,53 @@ public class Tactics {
 
     @Test
     public void assaultCannonNamesCard() {
-        fail("Not implemented yet");
+        playCards(
+                new ToadCard("Five", 5), // field
+                new ToadCard("AC", 0, new AssaultCannon()), // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Six", 6) // flank
+        );
+
+        assertEquals(0, state.getCurrentPlayer());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(8, actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
+        fm.next(state, actions.get(0));
+        assertEquals(1, state.getCurrentPlayer());
+        actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlayFieldCard));
+    }
+
+    @Test
+    public void assaultCannonActivatedByIconBearer() {
+        playCards(
+                new ToadCard("Five", 5), // field
+                new ToadCard("Scout", 2, new Scout()), // Flank
+                new ToadCard("AC", 0, new AssaultCannon()),  // Field
+                new ToadCard("Six", 6, new IconBearer()) // flank
+        );
+
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(POST_BATTLE, state.getGamePhase());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(8, actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
+        fm.next(state, actions.get(0));
+        assertEquals(1, state.getCurrentPlayer());
+        actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlayFieldCard));
+    }
+
+    @Test
+    public void assaultCannonShiftIsToBottomAndVisible() {
+        fail("Not yet implemented");
+    }
+
+    private void playCards(ToadCard... cardsInOrder) {
+        for (int i = 0; i < cardsInOrder.length; i++) {
+            state.getPlayerHand(state.getCurrentPlayer()).add(cardsInOrder[i]);
+            AbstractAction action = i % 2 == 0 ? new PlayFieldCard(cardsInOrder[i]) : new PlayFlankCard(cardsInOrder[i]);
+            fm.next(state, action);
+        }
     }
 }

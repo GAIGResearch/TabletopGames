@@ -4,12 +4,14 @@ import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IExtendedSequence;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
-import gametemplate.actions.GTAction;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static games.toads.ToadConstants.ToadGamePhase.*;
 
 
 public class ToadForwardModel extends StandardForwardModel {
@@ -33,7 +35,7 @@ public class ToadForwardModel extends StandardForwardModel {
         state.playerDecks = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
             state.playerDecks.add(new Deck<>("Player " + i + " Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            state.playerHands.add(new PartialObservableDeck<>("Player " + i + " Hand", i, 2,  CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            state.playerHands.add(new PartialObservableDeck<>("Player " + i + " Hand", i, 2, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             state.playerDiscards.add(new Deck<>("Player " + i + " Discard", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             List<ToadCard> cards = params.getCardDeck();
             state.playerDecks.get(i).add(cards);
@@ -42,6 +44,7 @@ public class ToadForwardModel extends StandardForwardModel {
                 state.playerHands.get(i).add(state.playerDecks.get(i).draw());
             }
         }
+        state.setGamePhase(PLAY);
     }
 
     @Override
@@ -71,7 +74,9 @@ public class ToadForwardModel extends StandardForwardModel {
         // then we reveal the hidden cards and resolve the two battles
         int currentPlayer = gameState.getCurrentPlayer();
         ToadGameState state = (ToadGameState) gameState;
-        ToadParameters params = (ToadParameters) state.getGameParameters();
+        if (state.getGamePhase() == POST_BATTLE) {
+            afterBattle(state);
+        }
         if (state.hiddenFlankCards[currentPlayer] == null) {
             // continue with the same player
         } else if (state.fieldCards[1 - currentPlayer] == null) {
@@ -80,9 +85,9 @@ public class ToadForwardModel extends StandardForwardModel {
         } else {
             // we reveal cards and resolve
             // not the most elegant solution, but with 2 cards each no need to generalise yet
-            int attacker =  1 - currentPlayer; // attacker always goes first; so the second person to play (the current player) is the defender
-            BattleResult battle = new BattleResult(attacker, state.fieldCards[attacker], state.fieldCards[1-attacker],
-                    state.hiddenFlankCards[attacker], state.hiddenFlankCards[1-attacker]);
+            int attacker = 1 - currentPlayer; // attacker always goes first; so the second person to play (the current player) is the defender
+            BattleResult battle = new BattleResult(attacker, state.fieldCards[attacker], state.fieldCards[1 - attacker],
+                    state.hiddenFlankCards[attacker], state.hiddenFlankCards[1 - attacker]);
 
             int[] scoreDiff = battle.calculate(state);
             int battlesTied = 2 - scoreDiff[0] - scoreDiff[1];
@@ -91,18 +96,20 @@ public class ToadForwardModel extends StandardForwardModel {
             // convert back to scores for each player
             int round = state.getRoundCounter();
             // Overcommit rule (only counts as one victory if you win by 2 and are currently ahead - or override is set)
-            if (scoreDiff[0] == 2 && !battle.frogOverride[0] && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
+            if (scoreDiff[0] == 2 && !battle.getFrogOverride(0) && state.battlesWon[round][0] >= state.battlesWon[round][1]) {
                 scoreDiff[0]--;
-            } else if (scoreDiff[1] == 2 && !battle.frogOverride[1] && state.battlesWon[round][1] >= state.battlesWon[round][0]) {
+            } else if (scoreDiff[1] == 2 && !battle.getFrogOverride(1) && state.battlesWon[round][1] >= state.battlesWon[round][0]) {
                 scoreDiff[1]--;
             }
             // and increment scores
             state.battlesWon[round][0] += scoreDiff[0];
             state.battlesWon[round][1] += scoreDiff[1];
 
-            // First 4 ticks are the first set of battles, and so on
-            state.roundWinners[state.getGameTick() / 4][0] = scoreDiff[0];
-            state.roundWinners[state.getGameTick() / 4][1] = scoreDiff[1];
+            int turn = state.getTurnCounter();
+            int battleNumber = turn / 2;
+            // First 2 turns are the first set of battles, and so on
+            state.roundWinners[battleNumber][0] = scoreDiff[0];
+            state.roundWinners[battleNumber][1] = scoreDiff[1];
 
             // move cards to discard
             state.playerDiscards.get(0).add(state.fieldCards[0]);
@@ -113,49 +120,63 @@ public class ToadForwardModel extends StandardForwardModel {
             state.fieldCards = new ToadCard[state.getNPlayers()];
             state.hiddenFlankCards = new ToadCard[state.getNPlayers()];
 
-            // if all cards played, then we keep the same player as the attacker for the next round
-            // Then check for end of round
-            if (state.playerHands.get(0).getSize() <= 1) {
-                // one card left in hand each
-                if (state.playerDecks.get(0).getSize() != 0 || state.playerDecks.get(1).getSize() != 0) {
-                    throw new AssertionError("Should have no cards left in either deck at this point");
-                }
-                // no more cards to draw so end of round
-                if (state.getRoundCounter() == 1) {
-                    // end of game
-                    // we need to modify the final scores due to the rules
-
-                    endGame(gameState);
-                } else {
-                    // set tie breakers
-                    state.tieBreakers[0] = state.playerHands.get(0).draw();
-                    state.tieBreakers[1] = state.playerHands.get(1).draw();
-                    // then discards become the other players decks
-                    state.playerDecks.get(0).add(state.playerDiscards.get(1));
-                    state.playerDecks.get(1).add(state.playerDiscards.get(0));
-                    for (Deck<ToadCard> discard : state.playerDiscards) {
-                        discard.clear();
-                    }
-                    // shuffle
-                    state.playerDecks.get(0).shuffle(state.getRnd());
-                    state.playerDecks.get(1).shuffle(state.getRnd());
-                    // and draw new hands
-                    for (int i = 0; i < params.handSize; i++) {
-                        state.playerHands.get(0).add(state.playerDecks.get(0).draw());
-                        state.playerHands.get(1).add(state.playerDecks.get(1).draw());
-                    }
-                    int firstPlayerOfSecondRound = switch(params.secondRoundStart) {
-                        case ONE -> 0;
-                        case TWO -> 1;
-                        case LOSER -> state.battlesWon[0][0] >= state.battlesWon[0][1] ? 1 : 0;
-                        case WINNER -> state.battlesWon[0][0] > state.battlesWon[0][1] ? 0 : 1;
-                    };
-                    endRound(gameState, firstPlayerOfSecondRound);
-                }
+            // we then process any actions that need to be done after the battle
+            if (battle.getPostBattleActions().isEmpty()) {
+                afterBattle(state);
             } else {
-                // the
-                endTurn(gameState, currentPlayer);
+                state.setGamePhase(POST_BATTLE);
+                for (IExtendedSequence sequence : battle.getPostBattleActions()) {
+                    state.setActionInProgress(sequence);
+                }
             }
+        }
+    }
+
+    private void afterBattle(ToadGameState state) {
+        // if all cards played, then we keep the same player as the attacker for the next round
+        // Then check for end of round
+        state.setGamePhase(PLAY); // always move to this, regardless of previous phase
+
+        if (state.playerHands.get(0).getSize() <= 1) {
+            ToadParameters params = (ToadParameters) state.getGameParameters();
+
+            // one card left in hand each
+            if (state.playerDecks.get(0).getSize() != 0 || state.playerDecks.get(1).getSize() != 0) {
+                throw new AssertionError("Should have no cards left in either deck at this point");
+            }
+            // no more cards to draw so end of round
+            if (state.getRoundCounter() == 1) {
+                // end of game
+                endGame(state);
+            } else {
+                // set tie breakers
+                state.tieBreakers[0] = state.playerHands.get(0).draw();
+                state.tieBreakers[1] = state.playerHands.get(1).draw();
+                // then discards become the other players decks
+                state.playerDecks.get(0).add(state.playerDiscards.get(1));
+                state.playerDecks.get(1).add(state.playerDiscards.get(0));
+                for (Deck<ToadCard> discard : state.playerDiscards) {
+                    discard.clear();
+                }
+                // shuffle
+                state.playerDecks.get(0).shuffle(state.getRnd());
+                state.playerDecks.get(1).shuffle(state.getRnd());
+                // and draw new hands
+                for (int i = 0; i < params.handSize; i++) {
+                    state.playerHands.get(0).add(state.playerDecks.get(0).draw());
+                    state.playerHands.get(1).add(state.playerDecks.get(1).draw());
+                }
+                int firstPlayerOfSecondRound = switch (params.secondRoundStart) {
+                    case ONE -> 0;
+                    case TWO -> 1;
+                    case LOSER -> state.battlesWon[0][0] >= state.battlesWon[0][1] ? 1 : 0;
+                    case WINNER -> state.battlesWon[0][0] > state.battlesWon[0][1] ? 0 : 1;
+                };
+                endRound(state, firstPlayerOfSecondRound);
+            }
+        } else {
+            // the defender in this battle always starts the next one as Attacker
+            endTurn(state, state.getCurrentPlayer());
         }
     }
 
