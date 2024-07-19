@@ -552,11 +552,15 @@ public class Tactics {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.contains(new ForceOpponentDiscard(card.value)));
         fm.next(state, new ForceOpponentDiscard(card.value));
-        assertEquals(state.getPlayerDeck(1).get(0), card);
-        assertTrue(state.getPlayerDeck(1).isComponentVisible(0, 0));
-        assertTrue(state.getPlayerDeck(1).isComponentVisible(0, 1));
-        assertFalse(state.getPlayerDeck(1).isComponentVisible(1, 0));
-        assertFalse(state.getPlayerDeck(1).isComponentVisible(1, 1));
+        assertEquals(state.getPlayerDeck(1).peek(2), card);
+        assertEquals(3, state.getPlayerDeck(1).getSize());
+        assertEquals(3, state.getPlayerDeck(0).getSize());
+        assertTrue(state.getPlayerDeck(1).isComponentVisible(2, 0));
+        assertTrue(state.getPlayerDeck(1).isComponentVisible(2, 1));
+        assertFalse(state.getPlayerDeck(1).isComponentVisible(0, 0));
+        assertFalse(state.getPlayerDeck(1).isComponentVisible(0, 1));
+
+        // TODO: And check reshuffle preserves visibility
     }
 
 

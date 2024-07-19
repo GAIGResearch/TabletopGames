@@ -1,8 +1,10 @@
 package games.toads.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.toads.ToadCard;
 import games.toads.ToadGameState;
 
@@ -22,8 +24,11 @@ public class ForceOpponentDiscard extends AbstractAction {
         Deck<ToadCard> opponentHand = state.getPlayerHand(opponent).copy();
         for (ToadCard card : opponentHand) {
             if (card.value == value) {
+                PartialObservableDeck<ToadCard> opponentDeck = state.getPlayerDeck(opponent);
                 state.getPlayerHand(opponent).remove(card);  // remove card
-                state.getPlayerDeck(opponent).add(card, 0); // put at bottom of deck
+                opponentDeck.addToBottom(card); // put at bottom of deck
+                opponentDeck.setVisibilityOfComponent(opponentDeck.getSize() - 1, 0, true);
+                opponentDeck.setVisibilityOfComponent(opponentDeck.getSize() - 1, 1, true);
                 state.getPlayerHand(opponent).add(state.getPlayerDeck(opponent).draw()); // draw a new card
                 break;
             }
