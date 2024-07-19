@@ -561,6 +561,12 @@ public class Tactics {
         assertFalse(state.getPlayerDeck(1).isComponentVisible(0, 1));
 
         // TODO: And check reshuffle preserves visibility
+        ToadGameState copy = (ToadGameState) state.copy(0);
+        assertEquals(copy.getPlayerDeck(1).peek(2), card);
+        assertTrue(copy.getPlayerDeck(1).isComponentVisible(2, 0));
+        assertTrue(copy.getPlayerDeck(1).isComponentVisible(2, 1));
+        assertFalse(copy.getPlayerDeck(1).isComponentVisible(0, 0));
+        assertFalse(copy.getPlayerDeck(1).isComponentVisible(0, 1));
     }
 
 
