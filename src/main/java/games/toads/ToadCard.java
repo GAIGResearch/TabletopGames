@@ -37,6 +37,13 @@ public class ToadCard extends Card {
         return this;  // currently immutable
     }
 
+    public ToadAbility getAbility() {
+        return ability;
+    }
+    public ToadAbility getTactics() {
+        return tactics;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
