@@ -1,5 +1,6 @@
 package games.toads;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import games.toads.abilities.*;
 import games.toads.actions.*;
@@ -7,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Random;
 
 import static games.toads.ToadConstants.ToadGamePhase.POST_BATTLE;
 import static org.junit.Assert.*;
@@ -17,6 +19,7 @@ public class Tactics {
     ToadParameters params;
     ToadGameState state;
     ToadForwardModel fm;
+    Random rnd;
 
     @Before
     public void setUp() {
@@ -25,6 +28,7 @@ public class Tactics {
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
+        rnd = new Random(933);
     }
 
     @Test
@@ -535,7 +539,51 @@ public class Tactics {
 
     @Test
     public void assaultCannonShiftIsToBottomAndVisible() {
-        fail("Not yet implemented");
+        // if we ForceOpponentDiscard for a card they have, then we should be able to see it at the bottom of the pile
+        // and it should stay there after a redeterminisation
+        playCards(
+                new ToadCard("Five", 5), // field
+                new ToadCard("AC", 0, new AssaultCannon()), // Flank
+                new ToadCard("Five", 5),  // Field
+                new ToadCard("Six", 6) // flank
+        );
+        // now find a card in the player's hand
+        ToadCard card = state.playerHands.get(1).peek();
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.contains(new ForceOpponentDiscard(card.value)));
+        fm.next(state, new ForceOpponentDiscard(card.value));
+        assertEquals(state.getPlayerDeck(1).get(0), card);
+        assertTrue(state.getPlayerDeck(1).isComponentVisible(0, 0));
+        assertTrue(state.getPlayerDeck(1).isComponentVisible(0, 1));
+        assertFalse(state.getPlayerDeck(1).isComponentVisible(1, 0));
+        assertFalse(state.getPlayerDeck(1).isComponentVisible(1, 1));
+    }
+
+
+    @Test
+    public void firstPlayerCorrectlySet() {
+        // This checks that inclusion of Tactics interrupts does not change the correct resetting of the player for each new battle
+        params.secondRoundStart = ToadParameters.SecondRoundStart.ONE;
+        for (int gameLoop = 0; gameLoop < 10; gameLoop++) {
+            fm.setup(state);
+            assertEquals(0, state.getCurrentPlayer());
+            int nextPlayer = 0;
+            do {
+                int startingTurn = state.getTurnCounter() + 8 * state.getRoundCounter();
+                nextPlayer = 1 - nextPlayer;
+                do {
+                    // sub loop
+                    AbstractAction action = fm.computeAvailableActions(state).get(rnd.nextInt(fm.computeAvailableActions(state).size()));
+                    System.out.println(action + " " + state.getCurrentPlayer() + " Turn " + state.getTurnCounter());
+                    fm.next(state, action);
+                } while (state.getTurnCounter() + 8 * state.getRoundCounter() <= startingTurn + 1 && state.isNotTerminal());
+                // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
+                if (state.getGameStatus() != CoreConstants.GameResult.GAME_END) {
+                    System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + nextPlayer);
+                    assertEquals(nextPlayer, state.getCurrentPlayer());
+                }
+            } while (state.getGameStatus() != CoreConstants.GameResult.GAME_END);
+        }
     }
 
     private void playCards(ToadCard... cardsInOrder) {

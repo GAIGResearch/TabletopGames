@@ -34,7 +34,7 @@ public class ToadForwardModel extends StandardForwardModel {
         state.playerHands = new ArrayList<>();
         state.playerDecks = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++) {
-            state.playerDecks.add(new Deck<>("Player " + i + " Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            state.playerDecks.add(new PartialObservableDeck<>("Player " + i + " Deck", i, 2, CoreConstants.VisibilityMode.HIDDEN_TO_ALL));
             state.playerHands.add(new PartialObservableDeck<>("Player " + i + " Hand", i, 2, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             state.playerDiscards.add(new Deck<>("Player " + i + " Discard", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             List<ToadCard> cards = params.getCardDeck();
@@ -69,6 +69,9 @@ public class ToadForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
+
+        if (gameState.isActionInProgress())
+            return;
         // Player 0 takes two turns (field and flank) [well, turn-owner to be more precise]
         // then Player 1 does the same
         // then we reveal the hidden cards and resolve the two battles

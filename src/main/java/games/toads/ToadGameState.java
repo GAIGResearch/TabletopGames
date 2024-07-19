@@ -18,7 +18,7 @@ public class ToadGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
     }
 
-    List<Deck<ToadCard>> playerDecks;
+    List<PartialObservableDeck<ToadCard>> playerDecks;
     List<PartialObservableDeck<ToadCard>> playerHands;
     int[][] battlesWon;
     int[] battlesTied;
@@ -48,7 +48,7 @@ public class ToadGameState extends AbstractGameState {
         ToadParameters params = (ToadParameters) this.gameParameters;
         ToadGameState copy = new ToadGameState(params.shallowCopy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
-        for (Deck<ToadCard> deck : playerDecks) {
+        for (PartialObservableDeck<ToadCard> deck : playerDecks) {
             copy.playerDecks.add(deck.copy());
         }
         copy.playerHands = new ArrayList<>();
@@ -116,7 +116,7 @@ public class ToadGameState extends AbstractGameState {
         return playerHands.get(playerId);
     }
 
-    public Deck<ToadCard> getPlayerDeck(int playerId) {
+    public PartialObservableDeck<ToadCard> getPlayerDeck(int playerId) {
         return playerDecks.get(playerId);
     }
 

@@ -8,6 +8,8 @@ import games.toads.actions.PlayFlankCard;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Random;
+
 import static org.junit.Assert.*;
 
 public class GameFlow {
@@ -15,6 +17,7 @@ public class GameFlow {
     ToadParameters params;
     ToadGameState state;
     ToadForwardModel fm;
+    Random rnd;
 
     @Before
     public void setUp() {
@@ -24,6 +27,7 @@ public class GameFlow {
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
+        rnd = new Random(933);
     }
 
     @Test
