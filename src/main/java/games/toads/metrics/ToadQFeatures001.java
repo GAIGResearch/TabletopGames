@@ -31,7 +31,6 @@ public class ToadQFeatures001 implements IActionFeatureVector {
     public double[] featureVector(AbstractAction action, AbstractGameState ags, int playerID) {
         double[] retValue = new double[names().length];
         ToadGameState state = (ToadGameState) ags;
-        ToadCard ownField = state.getFieldCard(playerID);
         ToadCard oppField = state.getFieldCard(1 - playerID);
         // attacker goes first, so turn is even (starting with 0)
         retValue[1] = ags.getTurnCounter() % 2 == 0 ? 1 : 0;
@@ -42,25 +41,30 @@ public class ToadQFeatures001 implements IActionFeatureVector {
             cardPlayed = pfc.card.type;
             int indexOfCard = allValues.indexOf(cardPlayed);
             retValue[2 + indexOfCard] = 1;
+            if (oppField != null) {
+                int indexOfOppField = allValues.indexOf(oppField.type);
+                retValue[2 + allValues.size() + indexOfOppField] = 1;
+            }
         } else if (action instanceof PlayFlankCard pfc) {
             retValue[0] = 1;
             cardPlayed = pfc.card.type;
             int indexOfCard = allValues.indexOf(cardPlayed);
             retValue[2 + indexOfCard] = 1;
+            if (oppField != null) {
+                int indexOfOppField = allValues.indexOf(oppField.type);
+                retValue[2 + 2 * allValues.size() + indexOfOppField] = 1;
+            }
         } else if (action instanceof ForceOpponentDiscard fod) {
             cardPlayed = fod.type;
             int indexOfCard = allValues.indexOf(cardPlayed);
             retValue[2 + 3 * allValues.size() + indexOfCard] = 1;
         }
 
-        if (action instanceof PlayFlankCard || action instanceof PlayFieldCard) {
-
-        }
         return retValue;
     }
 
     @Override
     public String[] names() {
-        return new String[0];
+        return localNames;
     }
 }
