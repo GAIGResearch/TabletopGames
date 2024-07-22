@@ -46,10 +46,10 @@ public class BattleResult {
         if (params.useTactics) {
             // assassins copy their ally's tactics
             if (attackerFlank.tactics instanceof Assassin) {
-                attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, attackerFlank.ability, attackerField.tactics);
+                attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, ToadConstants.ToadCardType.ASSASSIN, attackerFlank.ability, attackerField.tactics);
             }
             if (defenderFlank.tactics instanceof Assassin) {
-                defenderFlank = new ToadCard("Assassin with copied tactics", defenderFlank.value, defenderFlank.ability, defenderField.tactics);
+                defenderFlank = new ToadCard("Assassin with copied tactics", defenderFlank.value, ToadConstants.ToadCardType.ASSASSIN, defenderFlank.ability, defenderField.tactics);
             }
         }
         boolean saboteurStopsTactics = (attackerFlank.tactics instanceof Saboteur || defenderFlank.tactics instanceof Saboteur);

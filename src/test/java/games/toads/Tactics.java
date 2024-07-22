@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Random;
 
+import static games.toads.ToadConstants.ToadCardType.*;
 import static games.toads.ToadConstants.ToadGamePhase.POST_BATTLE;
 import static org.junit.Assert.*;
 
@@ -33,10 +34,10 @@ public class Tactics {
 
     @Test
     public void tricksterI() {
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Six", 6, new IconBearer());
-        state.hiddenFlankCards[0] = new ToadCard("Six", 6, new IconBearer());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Six", 6, ICON_BEARER);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6, ICON_BEARER);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // with no tactics this is a 1 : 1 draw
 
@@ -51,10 +52,10 @@ public class Tactics {
 
     @Test
     public void tricksterII() {
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Six", 6, new IconBearer());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6, ICON_BEARER);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // with no tactics this is 2 : 0
 
@@ -72,10 +73,10 @@ public class Tactics {
         state.battlesWon[0][0] = 1;
         state.battlesWon[0][1] = 2;
 
-        state.fieldCards[0] = new ToadCard("Six", 6, new IconBearer());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Six", 6, ICON_BEARER);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // with no tactics this is 2 : 0
 
@@ -93,10 +94,10 @@ public class Tactics {
     @Test
     public void iconBearerActivatesTrickster() {
         state.battlesWon[0][0] = 1;
-        state.fieldCards[0] = new ToadCard("Five", 5);
-        state.fieldCards[1] = new ToadCard("Trickster", 3, new Trickster());
-        state.hiddenFlankCards[0] = new ToadCard("Seven", 7);
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+        state.fieldCards[0] = new ToadCard("Five", 5, null);
+        state.fieldCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
+        state.hiddenFlankCards[0] = new ToadCard("Seven", 7, null);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, ICON_BEARER);
 
         // with no tactics this is 2 : 0
 
@@ -111,10 +112,10 @@ public class Tactics {
 
     @Test
     public void tricksterSaboteurIconBearer() {
-        state.fieldCards[0] = new ToadCard("Four", 4, new Saboteur());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Six", 6, new IconBearer());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Four", 4, SABOTEUR);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Six", 6, ICON_BEARER);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // with no tactics this is 1 : 0
 
@@ -129,10 +130,10 @@ public class Tactics {
 
     @Test
     public void assassinVersusTricksterI() {
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, ASSASSIN);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // with no tactics this is 0 : 2
 
@@ -151,10 +152,10 @@ public class Tactics {
     public void assassinVersusTricksterII() {
         state.battlesWon[0][1] = 4;
         // we adapt the previous test to check that the Assassin copies the tactics of the Berserker
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, ASSASSIN);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // with no tactics this is 0 : 2
 
@@ -172,10 +173,10 @@ public class Tactics {
     @Test
     public void assassinCopiesIconBearerI() {
         state.battlesWon[0][0] = 2;
-        state.fieldCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 0, new Assassin());
-        state.hiddenFlankCards[1] = new ToadCard("Scout", 2, new Scout());
+        state.fieldCards[0] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.fieldCards[1] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 0, ASSASSIN);
+        state.hiddenFlankCards[1] = new ToadCard("Scout", 2, SCOUT);
 
         // without tactics this would be 0 : 2
 
@@ -191,10 +192,10 @@ public class Tactics {
     @Test
     public void assassinCopiesIconBearerII() {
         state.battlesWon[0][0] = 2;
-        state.fieldCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
-        state.hiddenFlankCards[1] = new ToadCard("Scout", 2, new Scout());
+        state.fieldCards[0] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.fieldCards[1] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, ASSASSIN);
+        state.hiddenFlankCards[1] = new ToadCard("Scout", 2, SCOUT);
 
         // without tactics this would be 0 : 2
 
@@ -211,10 +212,10 @@ public class Tactics {
     @Test
     public void generalAbilityOneI() {
         state.battlesWon[0][1] = 1;
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Five", 5, new Berserker());
-        state.hiddenFlankCards[0] = new ToadCard("General", 7, new GeneralOne());
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Five", 5, BERSERKER);
+        state.hiddenFlankCards[0] = new ToadCard("General", 7, GENERAL_ONE);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, ICON_BEARER);
 
         // This is 1 : 0...so not a Frog
 
@@ -225,10 +226,10 @@ public class Tactics {
 
     @Test
     public void generalAbilityOneII() {
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("General", 7, new GeneralOne());
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6);
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("General", 7, GENERAL_ONE);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, null);
 
         // This is 2 : 0...so a Frog...that becomes 2 points
 
@@ -239,10 +240,10 @@ public class Tactics {
 
     @Test
     public void generalAbilityTwoI() {
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Five", 5, new Berserker());
-        state.hiddenFlankCards[0] = new ToadCard("General", 7, new GeneralTwo());
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Five", 5, BERSERKER);
+        state.hiddenFlankCards[0] = new ToadCard("General", 7, GENERAL_TWO);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7, null);
 
         // This is a tie
 
@@ -254,10 +255,10 @@ public class Tactics {
     @Test
     public void generalAbilityTwoII() {
         state.battlesTied[0] = 2;
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Five", 5, new Berserker());
-        state.hiddenFlankCards[0] = new ToadCard("General", 7, new GeneralTwo());
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.fieldCards[0] = new ToadCard("Five", 5, BERSERKER);
+        state.fieldCards[1] = new ToadCard("Five", 5, BERSERKER);
+        state.hiddenFlankCards[0] = new ToadCard("General", 7, GENERAL_TWO);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7, null);
 
         // This is now not a tie
 
@@ -272,12 +273,12 @@ public class Tactics {
         state.battlesTied[0] = 2;
 
         // This is a test-only hack, so that the Assassin does not copy the tactics of the General
-
-        state.fieldCards[0] = new ToadCard("Five", 5, new Berserker());
-        state.fieldCards[1] = new ToadCard("Four", 4);
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 0, new Assassin(), null);
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7, new GeneralTwo());
-
+        playCards(
+                new ToadCard("Five", 5, BERSERKER), // field
+                new ToadCard("Assassin", 0, ASSASSIN, new Assassin(), null), // Flank
+                new ToadCard("Four", 4, null),  // Field
+                new ToadCard("Seven", 7, GENERAL_TWO)// flank
+        );
         // with no tactics this is 2 : 0
 
         // With tactics the 4 becomes a 6, so we are 1 : 1
@@ -294,10 +295,10 @@ public class Tactics {
         state.battlesWon[0][1] = 1;
         state.battlesTied[0] = 2;
 
-        state.fieldCards[0] = new ToadCard("Four", 4, new Saboteur());
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, new Assassin());
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7, new GeneralTwo());
+        state.fieldCards[0] = new ToadCard("Four", 4, SABOTEUR);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Assassin", 1, ASSASSIN);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7, GENERAL_TWO);
 
         // with no tactics this is 1 : 0
 
@@ -311,10 +312,10 @@ public class Tactics {
     @Test
     public void berserkerWithOneBonus() {
         state.battlesWon[0][1] = 1;
-        state.fieldCards[0] = new ToadCard("One", 1);
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Berserker", 5, new Berserker());
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+        state.fieldCards[0] = new ToadCard("One", 1, null);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Berserker", 5, BERSERKER);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, ICON_BEARER);
 
         // Without tactics this is 0 : 2
 
@@ -330,10 +331,10 @@ public class Tactics {
     @Test
     public void berserkerFieldWithTwoBonusToNotMakeADraw() {
         state.battlesWon[0][1] = 2;
-        state.fieldCards[0] = new ToadCard("One", 1);
-        state.fieldCards[1] = new ToadCard("Four", 4, new Saboteur());
-        state.hiddenFlankCards[0] = new ToadCard("Berserker", 5, new Berserker());
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+        state.fieldCards[0] = new ToadCard("One", 1, null);
+        state.fieldCards[1] = new ToadCard("Four", 4, SABOTEUR);
+        state.hiddenFlankCards[0] = new ToadCard("Berserker", 5, BERSERKER);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, ICON_BEARER);
 
         // Without tactics this is 0 : 2
 
@@ -350,10 +351,10 @@ public class Tactics {
     public void berserkerFlankWithTwoBonusToMakeADraw() {
         state.battlesWon[0][1] = 2;
         state.battlesWon[1][1] = 1;
-        state.fieldCards[0] = new ToadCard("Two", 2, new Scout());
-        state.fieldCards[1] = new ToadCard("Two", 2, new Scout());
-        state.hiddenFlankCards[0] = new ToadCard("Berserker", 5, new Berserker());
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
+        state.fieldCards[0] = new ToadCard("Two", 2, SCOUT);
+        state.fieldCards[1] = new ToadCard("Two", 2, SCOUT);
+        state.hiddenFlankCards[0] = new ToadCard("Berserker", 5, BERSERKER);
+        state.hiddenFlankCards[1] = new ToadCard("Seven", 7, null);
 
         // without tactics this is 0 : 1
 
@@ -369,10 +370,10 @@ public class Tactics {
     @Test
     public void iconBearerWithSaboteur() {
         state.battlesWon[0][1] = 1;
-        state.fieldCards[0] = new ToadCard("Two", 2, new Scout());
-        state.fieldCards[1] = new ToadCard("Two", 2, new Scout());
-        state.hiddenFlankCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.hiddenFlankCards[1] = new ToadCard("Saboteur", 4, new Saboteur());
+        state.fieldCards[0] = new ToadCard("Two", 2, SCOUT);
+        state.fieldCards[1] = new ToadCard("Two", 2, SCOUT);
+        state.hiddenFlankCards[0] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.hiddenFlankCards[1] = new ToadCard("Saboteur", 4, SABOTEUR);
 
         // without Tactics this is 1 : 0
 
@@ -387,10 +388,10 @@ public class Tactics {
 
     @Test
     public void iconBearerWithoutSaboteur() {
-        state.fieldCards[0] = new ToadCard("One", 1);
-        state.fieldCards[1] = new ToadCard("Two", 2, new Scout());
-        state.hiddenFlankCards[0] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.hiddenFlankCards[1] = new ToadCard("Five", 5, new Berserker());
+        state.fieldCards[0] = new ToadCard("One", 1, null);
+        state.fieldCards[1] = new ToadCard("Two", 2, SCOUT);
+        state.hiddenFlankCards[0] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.hiddenFlankCards[1] = new ToadCard("Five", 5, BERSERKER);
 
         // without Tactics this is 1 : 1
 
@@ -417,10 +418,10 @@ public class Tactics {
     @Test
     public void scoutI() {
         checkVisibilityOfHands(0, false, false);
-        state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
-        state.fieldCards[1] = new ToadCard("Two", 2, new Scout());
-        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[1] = new ToadCard("Four", 4, new Saboteur());
+        state.fieldCards[0] = new ToadCard("Three", 3, TRICKSTER);
+        state.fieldCards[1] = new ToadCard("Two", 2, SCOUT);
+        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[1] = new ToadCard("Four", 4, SABOTEUR);
 
         // without tactics this is 1 : 1
         // which is also true here, as the Saboteur cancels the Scout
@@ -434,10 +435,10 @@ public class Tactics {
     @Test
     public void iconBearerActivatesScout() {
         checkVisibilityOfHands(0, false, false);
-        state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
-        state.fieldCards[1] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[1] = new ToadCard("Six", 6, new IconBearer());
+        state.fieldCards[0] = new ToadCard("Three", 3, TRICKSTER);
+        state.fieldCards[1] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6, ICON_BEARER);
 
         // without tactics this is 1 : 1
         // Field is now 4 : 2 (p0 wins) Iconbearer cannot help; but it does activate the Scout ability
@@ -453,10 +454,10 @@ public class Tactics {
     @Test
     public void scoutIII() {
         checkVisibilityOfHands(0, false, false);
-        state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
-        state.fieldCards[1] = new ToadCard("One", 1);
-        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Three", 3, TRICKSTER);
+        state.fieldCards[1] = new ToadCard("One", 1, null);
+        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // without tactics this is 1 : 1
         // Field is now 4 : 3 (p0 wins)
@@ -471,10 +472,10 @@ public class Tactics {
 
     @Test
     public void cardMovedWithTricksterDoesNotTriggerTacticsI() {
-        state.fieldCards[0] = new ToadCard("Three", 3, new Trickster());
-        state.fieldCards[1] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Three", 3, TRICKSTER);
+        state.fieldCards[1] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         fm._afterAction(state, null);
         checkVisibilityOfHands(0, false, true);
@@ -482,10 +483,10 @@ public class Tactics {
 
     @Test
     public void cardMovedWithTricksterDoesNotTriggerTacticsII() {
-        state.fieldCards[0] = new ToadCard("Seven", 7);
-        state.fieldCards[1] = new ToadCard("IconBearer", 6, new IconBearer());
-        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, new Scout());
-        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, new Trickster());
+        state.fieldCards[0] = new ToadCard("Seven", 7, null);
+        state.fieldCards[1] = new ToadCard("IconBearer", 6, ICON_BEARER);
+        state.hiddenFlankCards[0] = new ToadCard("Scout", 2, SCOUT);
+        state.hiddenFlankCards[1] = new ToadCard("Trickster", 3, TRICKSTER);
 
         // Trickster swaps, giving:
         // Field is now 7 : 6 (p0 wins)
@@ -501,10 +502,10 @@ public class Tactics {
     @Test
     public void assaultCannonNamesCard() {
         playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("AC", 0, new AssaultCannon()), // Flank
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Six", 6) // flank
+                new ToadCard("Five", 5, null), // field
+                new ToadCard("AC", 0, ASSAULT_CANNON), // Flank
+                new ToadCard("Five", 5, null),  // Field
+                new ToadCard("Six", 6, null) // flank
         );
 
         assertEquals(0, state.getCurrentPlayer());
@@ -520,10 +521,10 @@ public class Tactics {
     @Test
     public void assaultCannonActivatedByIconBearer() {
         playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("Scout", 2, new Scout()), // Flank
-                new ToadCard("AC", 0, new AssaultCannon()),  // Field
-                new ToadCard("Six", 6, new IconBearer()) // flank
+                new ToadCard("Five", 5, null), // field
+                new ToadCard("Scout", 2, SCOUT), // Flank
+                new ToadCard("AC", 0, ASSAULT_CANNON),  // Field
+                new ToadCard("Six", 6, ICON_BEARER) // flank
         );
 
         assertEquals(1, state.getCurrentPlayer());
@@ -542,10 +543,10 @@ public class Tactics {
         // if we ForceOpponentDiscard for a card they have, then we should be able to see it at the bottom of the pile
         // and it should stay there after a redeterminisation
         playCards(
-                new ToadCard("Five", 5), // field
-                new ToadCard("AC", 0, new AssaultCannon()), // Flank
-                new ToadCard("Five", 5),  // Field
-                new ToadCard("Six", 6) // flank
+                new ToadCard("Five", 5, null), // field
+                new ToadCard("AC", 0, ASSAULT_CANNON), // Flank
+                new ToadCard("Five", 5, null),  // Field
+                new ToadCard("Six", 6, null) // flank
         );
         // now find a card in the player's hand
         ToadCard card = state.playerHands.get(1).peek();

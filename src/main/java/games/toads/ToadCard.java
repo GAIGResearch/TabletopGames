@@ -1,36 +1,36 @@
 package games.toads;
 
 import core.components.Card;
+import games.toads.ToadConstants.ToadCardType;
 
 public class ToadCard extends Card {
 
     public final int value;
     protected final ToadAbility ability;
     protected final ToadAbility tactics;
+    protected final ToadCardType type;
 
 
-    public ToadCard(String name, int value, ToadAbility ability, ToadAbility tactics) {
+    public ToadCard(String name, int value, ToadCardType type, ToadAbility ability, ToadAbility tactics) {
         super(name);
         this.value = value;
         this.ability = ability;
         this.tactics = tactics;
-    }
-    public ToadCard(String name, int value) {
-        this(name, value, null, null);
+        this.type = type;
     }
 
-    public ToadCard(String name, int value, ToadAbility ability, ToadAbility tactics, int ID) {
-        super(name, ID);
-        this.value = value;
-        this.ability = ability;
-        this.tactics = tactics;
+    public ToadCard(String name, int value) {
+        this(name, value, null, null, null);
     }
-    public ToadCard(String name, int value, ToadAbility ability) {
-        this(name, value, ability, ability);
+    public ToadCard(String name, int value, ToadCardType type) {
+        this(name, value, type, type == null ? null : type.defaultAbility, type == null ? null : type.defaultAbility);
     }
-    public ToadCard(String name, int value, int ID) {
-        this(name, value, null, null, ID);
+    public ToadCard(String name, int value, ToadCardType type, ToadAbility ability) {
+        this(name, value, type, ability, ability);
     }
+//    public ToadCard(String name, int value, int ID) {
+//        this(name, value, null, null, ID);
+//    }
 
     @Override
     public ToadCard copy() {

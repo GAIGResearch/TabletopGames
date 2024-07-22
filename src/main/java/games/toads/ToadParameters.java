@@ -66,6 +66,7 @@ public class ToadParameters extends TunableParameters {
             for (Object o : data) {
                 JSONObject card = (JSONObject) o;
                 String name = (String) card.get("name");
+                ToadConstants.ToadCardType type = ToadConstants.ToadCardType.fromString(name);
                 int value = ((Long) card.get("value")).intValue();
                 int count = ((Long) card.get("count")).intValue();
                 String cardClass = (String) card.get("special");
@@ -74,7 +75,7 @@ public class ToadParameters extends TunableParameters {
                                 .asSubclass(ToadAbility.class).getDeclaredConstructor().newInstance();
 
                 for (int i = 0; i < count; i++)
-                    retValue.add(new ToadCard(name, value, actionClass, actionClass));
+                    retValue.add(new ToadCard(name, value, type, actionClass, actionClass));
             }
 
         } catch (IOException | ParseException e) {

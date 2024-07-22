@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import static games.toads.ToadConstants.ToadCardType.*;
 import static org.junit.Assert.*;
 
 public class GameFlow {
@@ -228,7 +229,7 @@ public class GameFlow {
     public void assassinAgainstSeven() {
         playCards(
                 new ToadCard("Three", 3), // field
-                new ToadCard("Assassin", 0, new Assassin()),  // Flank
+                new ToadCard("Assassin", 0, ASSASSIN),  // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Seven", 7) // flank
         );
@@ -240,7 +241,7 @@ public class GameFlow {
     public void assassinAgainstSix() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("Assassin", 0, new Assassin()),  // Flank
+                new ToadCard("Assassin", 0, ASSASSIN),  // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6) // flank
         );
@@ -254,7 +255,7 @@ public class GameFlow {
                 new ToadCard("Five", 5), // field
                 new ToadCard("Four", 4), // flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Bomb", 0, new Bomb())
+                new ToadCard("Bomb", 0, BOMB)
         );
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
@@ -264,7 +265,7 @@ public class GameFlow {
     public void bombAgainstFourDefense() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new Bomb()),  // Flank
+                new ToadCard("Bomb", 0, BOMB),  // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Four", 4)  // flank
         );
@@ -280,7 +281,7 @@ public class GameFlow {
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6), // flank
                 new ToadCard("Five", 5), // field
-                new ToadCard("Bomb", 0, new AssaultCannon()) // Flank
+                new ToadCard("Bomb", 0, ASSAULT_CANNON) // Flank
         );
 
         assertEquals(1, state.battlesWon[0][0]);
@@ -291,7 +292,7 @@ public class GameFlow {
     public void assaultCannonAgainstSixDefense() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("AC", 0, new AssaultCannon()), // Flank
+                new ToadCard("AC", 0, ASSAULT_CANNON), // Flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6) // flank
         );
@@ -304,20 +305,20 @@ public class GameFlow {
     @Test
     public void assaultCannonInRound2() {
         playCards(
-                new ToadCard("Assassin", 0, new Assassin()), // field
-                new ToadCard("G2", 7, new GeneralTwo()), // Flank
-                new ToadCard("Berserker", 5, new Berserker()),  // Field
-                new ToadCard("G1", 7, new GeneralOne()) // flank
+                new ToadCard("Assassin", 0, ASSASSIN), // field
+                new ToadCard("G2", 7, GENERAL_TWO), // Flank
+                new ToadCard("Berserker", 5, BERSERKER),  // Field
+                new ToadCard("G1", 7, GENERAL_ONE) // flank
         );
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
 
         assertEquals(1, state.getCurrentPlayer());
         playCards(
-                new ToadCard("G2", 7, new GeneralTwo()), // field
-                new ToadCard("Saboteur", 4, new Saboteur()), // Flank
-                new ToadCard("AC", 0, new AssaultCannon()),  // Field
-                new ToadCard("IconBearer", 6, new IconBearer()) // flank
+                new ToadCard("G2", 7, GENERAL_TWO), // field
+                new ToadCard("Saboteur", 4, SABOTEUR), // Flank
+                new ToadCard("AC", 0, ASSAULT_CANNON),  // Field
+                new ToadCard("IconBearer", 6, ICON_BEARER) // flank
         );
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(2, state.battlesWon[0][1]);
