@@ -3,6 +3,7 @@ package games.toads.metrics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
+import games.toads.ToadCard;
 import games.toads.ToadGameState;
 import games.toads.abilities.GeneralOne;
 import games.toads.abilities.GeneralTwo;
@@ -79,25 +80,27 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
         features[11] = state.getBattlesWon(playerID, 0) > state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
         features[12] = state.getBattlesWon(playerID, 0) < state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
 
-        features[13] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 0) ? 1 : 0;
-        features[14] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 1) ? 1 : 0;
-        features[15] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 2) ? 1 : 0;
-        features[16] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 3) ? 1 : 0;
-        features[17] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 4) ? 1 : 0;
-        features[18] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 5) ? 1 : 0;
-        features[19] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 6) ? 1 : 0;
-        features[20] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.getTactics() instanceof GeneralOne) ? 1 : 0;
-        features[21] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.getTactics() instanceof GeneralTwo) ? 1 : 0;
-
-        features[22] = state.getDiscards(playerID).stream().anyMatch(c -> c.value == 0) ? 1 : 0;
-        features[23] = state.getDiscards(playerID).stream().anyMatch(c -> c.value == 1) ? 1 : 0;
-        features[24] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 2) ? 1 : 0;
-        features[25] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 3) ? 1 : 0;
-        features[26] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 4) ? 1 : 0;
-        features[27] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 5) ? 1 : 0;
-        features[28] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.value == 6) ? 1 : 0;
-        features[29] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.getTactics() instanceof GeneralOne) ? 1 : 0;
-        features[30] = state.getPlayerHand(playerID).stream().anyMatch(c -> c.getTactics() instanceof GeneralTwo) ? 1 : 0;
+        for (int i = 0; i < state.getPlayerHand(playerID).getSize(); i++) {
+            ToadCard card = state.getPlayerHand(playerID).get(i);
+            if (card.value < 7) {
+                features[13 + i] = 1;
+            } else if (card.getTactics() instanceof GeneralOne) {
+                features[20] = 1;
+            } else if (card.getTactics() instanceof GeneralTwo) {
+                features[21] = 1;
+            }
+        }
+        // then for discards
+        for (int i = 0; i < state.getDiscards(playerID).getSize(); i++) {
+            ToadCard card = state.getDiscards(playerID).get(i);
+            if (card.value < 7) {
+                features[22 + i] = 1;
+            } else if (card.getTactics() instanceof GeneralOne) {
+                features[29] = 1;
+            } else if (card.getTactics() instanceof GeneralTwo) {
+                features[30] = 1;
+            }
+        }
 
         return features;
     }
