@@ -8,7 +8,14 @@ import players.mcts.*;
 
 import java.util.List;
 
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+
 public class ToadMCTSPlayer extends MCTSPlayer {
+
+    public ToadMCTSPlayer(MCTSParams params){
+        super(params);
+    }
 
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
@@ -16,7 +23,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // if not, then we delegate to the super() method
         ToadGameState state = (ToadGameState) gameState;
         MCTSParams params = getParameters();
-        if (params.opponentTreePolicy.selfOnlyTree) {
+        if (params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MCGSSelfOnly) {
             return super._getAction(gameState, actions);
         }
 
@@ -38,12 +45,20 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // and then return the bestAction from the next state in the tree
         // How?
 
+        AbstractAction actualAction;
         if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree) {
             // in this case we use the root node for the decision player
+            SingleTreeNode ourRoot = ((MultiTreeNode) root).getRoot(currentPlayer);
+            actualAction = ourRoot.bestAction();
         } else if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MCGS) {
             // in this case we look up the node for the new state after applying the flank action
+            Object stateKey = params.MCGSStateKey.getKey(state);
+            actualAction = ((MCGSNode) root).getTranspositionMap().get(stateKey).bestAction();
         } else {
             // we have OMA or OneTree or something...we navigate manually down the tree and take the best action from the node we reach
+            SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];
+            actualAction = childNode.bestAction();
         }
+        return actualAction;
     }
 }

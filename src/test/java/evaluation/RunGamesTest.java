@@ -32,16 +32,16 @@ public class RunGamesTest {
         config = RunArg.parseConfig(new String[]{}, Collections.singletonList(RunArg.Usage.RunGames));  // empty config
         config.put(RunArg.matchups, 100);
         config.put(RunArg.verbose, false);  // no verbose output
-        config.put(RunArg.destDir, "src/test/java/evaluation/output");
+        config.put(RunArg.destDir, "src/test/java/evaluation");
         config.put(RunArg.listener, new ArrayList<String>());  // no listeners
     }
 
     @After
     public void teardown() {
         // After each test we should clean up the directory
-        File dir = new File("src/test/java/evaluation/output");
+        File dir = new File("src/test/java/evaluation");
         for (File file : dir.listFiles())
-            if (!file.isDirectory())
+            if (!file.isDirectory() && file.getName().endsWith(".txt"))
                 file.delete();
 
     }

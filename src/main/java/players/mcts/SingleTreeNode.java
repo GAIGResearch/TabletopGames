@@ -1152,8 +1152,13 @@ public class SingleTreeNode {
             bestAction = regretMatchingAverage();
         } else {
             // We iterate through all actions valid in the original root state
-            // as openLoopState may be different if using MCGS (not an issue with SingleTreeNode or MultiTreeNode)
-            for (AbstractAction action : forwardModel.computeAvailableActions(state, params.actionSpace)) {
+            // as openLoopState is fine with SingleTreeNode or MultiTreeNode
+            List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState);
+            if (state != null && (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)) {
+                // in this case we need to consider all actions, as we may have looped in the graph
+                availableActions = actionsToConsider(forwardModel.computeAvailableActions(state, params.actionSpace));
+            }
+            for (AbstractAction action : availableActions) {
                 if (!actionValues.containsKey(action)) {
                     throw new AssertionError("Hashcode / equals contract issue for " + action);
                 }
