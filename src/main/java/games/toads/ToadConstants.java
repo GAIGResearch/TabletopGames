@@ -28,7 +28,7 @@ public class ToadConstants {
             this.defaultAbility = ability;
         }
 
-        public String toString() {
+        public String prettyString() {
             // replace underscores with spaces and capitalize the first letter of each word only
             String[] words = this.name().split("_");
             StringBuilder sb = new StringBuilder();

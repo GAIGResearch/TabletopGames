@@ -22,7 +22,7 @@ public class ToadQFeatures001 implements IActionFeatureVector {
             names.add(cardName + "_PLAY");
             names.add(cardName + "_OPPOSITE");
             names.add(cardName + "_DIAGONAL");
-            names.add(cardName + "_GUESS"); // for AssaultCannon
+            names.add(cardName + "_GUESS"); // for AssaultCannon tactics
         }
         localNames = names.toArray(new String[0]);
     }

@@ -171,6 +171,9 @@ public class ToadGameState extends AbstractGameState {
         else
             throw new AssertionError("Card not in hand");
     }
+    public void unsetHiddenFlankCard(int playerId) {
+        hiddenFlankCards[playerId] = null;
+    }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
