@@ -8,7 +8,7 @@ public class ToadCard extends Card {
     public final int value;
     protected final ToadAbility ability;
     protected final ToadAbility tactics;
-    protected final ToadCardType type;
+    public final ToadCardType type;
 
 
     public ToadCard(String name, int value, ToadCardType type, ToadAbility ability, ToadAbility tactics) {

@@ -510,7 +510,7 @@ public class Tactics {
 
         assertEquals(0, state.getCurrentPlayer());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(8, actions.size());
+        assertEquals(10, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
         fm.next(state, actions.get(0));
         assertEquals(1, state.getCurrentPlayer());
@@ -530,7 +530,7 @@ public class Tactics {
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(POST_BATTLE, state.getGamePhase());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(8, actions.size());
+        assertEquals(10, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
         fm.next(state, actions.get(0));
         assertEquals(1, state.getCurrentPlayer());
@@ -551,8 +551,8 @@ public class Tactics {
         // now find a card in the player's hand
         ToadCard card = state.playerHands.get(1).peek();
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertTrue(actions.contains(new ForceOpponentDiscard(card.value)));
-        fm.next(state, new ForceOpponentDiscard(card.value));
+        assertTrue(actions.contains(new ForceOpponentDiscard(card.type)));
+        fm.next(state, new ForceOpponentDiscard(card.type));
         assertEquals(state.getPlayerDeck(1).peek(2), card);
         assertEquals(3, state.getPlayerDeck(1).getSize());
         assertEquals(3, state.getPlayerDeck(0).getSize());

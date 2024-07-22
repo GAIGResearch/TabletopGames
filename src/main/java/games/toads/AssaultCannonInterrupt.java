@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.toads.actions.ForceOpponentDiscard;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -19,7 +20,9 @@ public class AssaultCannonInterrupt implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        List<ForceOpponentDiscard> retValue = IntStream.rangeClosed(0, 7).mapToObj(ForceOpponentDiscard::new).toList();
+        List<ForceOpponentDiscard> retValue = Arrays.stream(ToadConstants.ToadCardType.values())
+                .map(ForceOpponentDiscard::new)
+                .toList();
         return retValue.stream().map(a -> (AbstractAction) a).toList();
     }
 

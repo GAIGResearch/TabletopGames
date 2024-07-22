@@ -1,19 +1,17 @@
 package games.toads.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.toads.ToadCard;
-import games.toads.ToadGameState;
+import games.toads.*;
 
 public class ForceOpponentDiscard extends AbstractAction {
 
-    final int value;
+    public final ToadConstants.ToadCardType type;
 
-    public ForceOpponentDiscard(int value) {
-        this.value = value;
+    public ForceOpponentDiscard(ToadConstants.ToadCardType type) {
+        this.type = type;
     }
 
     @Override
@@ -23,7 +21,7 @@ public class ForceOpponentDiscard extends AbstractAction {
         int opponent = 1 - state.getCurrentPlayer();
         Deck<ToadCard> opponentHand = state.getPlayerHand(opponent).copy();
         for (ToadCard card : opponentHand) {
-            if (card.value == value) {
+            if (card.type == type) {
                 PartialObservableDeck<ToadCard> opponentDeck = state.getPlayerDeck(opponent);
                 state.getPlayerHand(opponent).remove(card);  // remove card
                 opponentDeck.addToBottom(card); // put at bottom of deck
@@ -43,18 +41,18 @@ public class ForceOpponentDiscard extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ForceOpponentDiscard && ((ForceOpponentDiscard) obj).value == value;
+        return obj instanceof ForceOpponentDiscard && ((ForceOpponentDiscard) obj).type == type;
     }
 
     @Override
     public int hashCode() {
-        return value - 3031134;
+        return type.ordinal() - 3031134;
     }
 
 
     @Override
     public String toString() {
-        return "Force opponent to discard " + value;
+        return "Force opponent to discard " + type;
     }
     @Override
     public String getString(AbstractGameState gameState) {
