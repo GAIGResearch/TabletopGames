@@ -14,6 +14,10 @@ import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
+import games.cluedo.CluedoForwardModel;
+import games.cluedo.CluedoGameState;
+import games.cluedo.CluedoParameters;
+import games.cluedo.gui.CluedoGUIManager;
 import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
@@ -33,6 +37,8 @@ import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;
@@ -200,7 +206,15 @@ public enum GameType {
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
+    Cluedo(2,5,
+            Arrays.asList(Strategy, Cards, Deduction),
+            Arrays.asList(),
+            CluedoGameState.class, CluedoForwardModel.class, CluedoParameters.class, CluedoGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -432,7 +446,8 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient;
+        Wargame, Civilization, Ancient,
+        CodeBreaking;
 
         /**
          * @return a list of all games within this category.
