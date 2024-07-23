@@ -52,6 +52,7 @@ public class SingleTreeNode {
     protected int depth;
     // the id of the player who makes the decision at this node
     protected int decisionPlayer;
+    protected int redeterminisationPlayer = -1;
     protected int round, turn, turnOwner;
     boolean terminalNode;
     double timeTaken;
@@ -325,7 +326,9 @@ public class SingleTreeNode {
                     copyCount++;
                     break;
                 case Information_Set:
-                    setActionsFromOpenLoopState(state.copy(decisionPlayer));
+                    if (redeterminisationPlayer == -1)
+                        redeterminisationPlayer = decisionPlayer;
+                    setActionsFromOpenLoopState(state.copy(redeterminisationPlayer));
                     copyCount++;
                     break;
             }
@@ -1154,8 +1157,12 @@ public class SingleTreeNode {
             // We iterate through all actions valid in the original root state
             // as openLoopState is fine with SingleTreeNode or MultiTreeNode
             List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState);
-            if (state != null && (params.opponentTreePolicy == MCGS || params.opponentTreePolicy == MCGSSelfOnly)) {
-                // in this case we need to consider all actions, as we may have looped in the graph
+            if (state != null && (
+                    (redeterminisationPlayer != -1 && redeterminisationPlayer != decisionPlayer)
+                            || params.opponentTreePolicy == MCGS
+                            || params.opponentTreePolicy == MCGSSelfOnly)) {
+                // In these cases we need to recompute the available actions from the root state to ensure that
+                // we only consider the ones that are valid in the caller (in MCGS case it is possible that we have a loop round to the root)
                 availableActions = actionsToConsider(forwardModel.computeAvailableActions(state, params.actionSpace));
             }
             for (AbstractAction action : availableActions) {
@@ -1209,6 +1216,10 @@ public class SingleTreeNode {
 
     public int getDepth() {
         return depth;
+    }
+
+    public void setRedeterminisationPlayer(int player) {
+        redeterminisationPlayer = player;
     }
 
     public Map<AbstractAction, SingleTreeNode[]> getChildren() {

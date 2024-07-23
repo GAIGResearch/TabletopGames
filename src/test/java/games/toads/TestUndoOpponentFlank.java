@@ -3,13 +3,12 @@ package games.toads;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.toads.actions.*;
+import games.toads.metrics.ToadFeatures001;
 import games.toads.metrics.ToadFeatures002;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
-import players.mcts.MCTSEnums;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
+import players.mcts.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -171,7 +170,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         mctsParams.budget = 1000;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        mctsParams.MCGSStateKey = new ToadFeatures002();
+        mctsParams.MCGSStateKey = new ToadFeatures001();
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
         player.setForwardModel(fm);
         moveStateForwardToFirstDefenderMove();
@@ -182,6 +181,21 @@ public class TestUndoOpponentFlank {
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
         assertEquals(1, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void MCGSShufflesCorrectly() {
+        mctsParams.budgetType = PlayerConstants.BUDGET_ITERATIONS;
+        mctsParams.budget = 1000;
+        mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
+        mctsParams.MCGSStateKey = new ToadFeatures001();
+        ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
+        player.setForwardModel(fm);
+        moveStateForwardToFirstDefenderMove();
+        AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
+        MCGSNode root = (MCGSNode) player.getRoot();
+        int levelOneNodes = (int) root.getTranspositionMap().values().stream().filter(n -> n.getDepth() == 1).count();
+        assertEquals(1, levelOneNodes); // there should be no change in IS at all from the opponent's 'move'
     }
 
     @Test

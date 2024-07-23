@@ -5,16 +5,29 @@ import core.actions.AbstractAction;
 import games.toads.actions.PlayFlankCard;
 import games.toads.actions.UndoOpponentFlank;
 import players.mcts.*;
+import utilities.Utils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 
 public class ToadMCTSPlayer extends MCTSPlayer {
 
-    public ToadMCTSPlayer(MCTSParams params){
+    int actingPlayer;
+    boolean functionalityApplies;
+
+    public ToadMCTSPlayer(MCTSParams params) {
         super(params);
+    }
+
+    private boolean functionalityApplies(AbstractGameState gameState) {
+        MCTSParams params = getParameters();
+        if (params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MCGSSelfOnly) {
+            return false;
+        }
+        ToadGameState state = (ToadGameState) gameState;
+        return state.getHiddenFlankCard(1 - actingPlayer) != null;
     }
 
     @Override
@@ -23,12 +36,12 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // if not, then we delegate to the super() method
         ToadGameState state = (ToadGameState) gameState;
         MCTSParams params = getParameters();
-        if (params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MCGSSelfOnly) {
-            return super._getAction(gameState, actions);
-        }
 
         int currentPlayer = state.getCurrentPlayer();
-        if (state.getHiddenFlankCard(1 - currentPlayer) == null) {
+        actingPlayer = currentPlayer;
+
+        functionalityApplies = functionalityApplies(state);
+        if (!functionalityApplies) {
             return super._getAction(state, actions);
         }
         // otherwise, we add an UndoOpponentFlank
@@ -65,5 +78,20 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             actualAction = childNode.bestAction();
         }
         return actualAction;
+    }
+
+    @Override
+    protected void createRootNode(AbstractGameState gameState) {
+        super.createRootNode(gameState);
+        // we then just override the root so that redeterminisations occur from perspective of the correct player
+        // otherwise we redeterminise from the root player (i.e. our opponent), which is very bad
+        if (functionalityApplies)
+            root.setRedeterminisationPlayer(actingPlayer);
+    }
+
+
+    // for testing
+    public SingleTreeNode getRoot() {
+        return root;
     }
 }
