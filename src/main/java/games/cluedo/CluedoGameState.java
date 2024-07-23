@@ -5,7 +5,6 @@ import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.cluedo.cards.CluedoCard;
 
@@ -17,7 +16,7 @@ import java.util.Objects;
 public class CluedoGameState extends AbstractGameState {
 
     // Map of playerId to character index
-    // Character index is defined by 0:Scarlett, 1:Mustard, 2:Orchid etc in turn order
+    // Character index is defined by 0:Scarlett, 1:Mustard, 2:Orchid etc. in turn order
     public HashMap<Integer, Integer> characterToPlayerMap = new HashMap<>();
     // Room (Node) where each character is at, index corresponds to character index as defined above
     List<BoardNode> characterLocations;
@@ -40,14 +39,13 @@ public class CluedoGameState extends AbstractGameState {
 
     /**
      * @param gameParameters - game parameters.
-     * @param nPlayers
+     * @param nPlayers - number of players
      */
     public CluedoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         turnOrder = _createTurnOrder(nPlayers);
     }
 
-    @Override
     protected ReactiveTurnOrder _createTurnOrder(int nPlayers){
         return new ReactiveTurnOrder(nPlayers);
     }
@@ -59,7 +57,7 @@ public class CluedoGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(caseFile);
             add(gameBoard);
         }};
@@ -67,7 +65,6 @@ public class CluedoGameState extends AbstractGameState {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        CluedoParameters cp = (CluedoParameters) getGameParameters();
         CluedoGameState copy = new CluedoGameState(gameParameters, playerId);
 
         copy.allCards = allCards.copy();
