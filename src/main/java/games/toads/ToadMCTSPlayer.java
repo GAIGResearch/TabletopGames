@@ -40,6 +40,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         if (!(flankAction instanceof PlayFlankCard)) {
             throw new AssertionError("Expected a PlayFlankCard action");
         }
+        ToadGameState oldState = (ToadGameState) state.copy();
         getForwardModel().next(state, flankAction);
 
         // and then return the bestAction from the next state in the tree
@@ -53,7 +54,11 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         } else if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MCGS) {
             // in this case we look up the node for the new state after applying the flank action
             Object stateKey = params.MCGSStateKey.getKey(state);
-            actualAction = ((MCGSNode) root).getTranspositionMap().get(stateKey).bestAction();
+            MCGSNode node = ((MCGSNode) root).getTranspositionMap().get(stateKey);
+            if (node == null) {
+                throw new AssertionError("No node found for state key " + stateKey);
+            }
+            actualAction = node.bestAction();
         } else {
             // we have OMA or OneTree or something...we navigate manually down the tree and take the best action from the node we reach
             SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];

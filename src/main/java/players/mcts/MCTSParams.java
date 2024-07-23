@@ -71,7 +71,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.BackupPolicy backupPolicy = MCTSEnums.BackupPolicy.MonteCarlo;
     public double backupLambda = 1.0;
     public int maxBackupThreshold = 1000000;
-
+    public Class<?> instantiationClass;
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
@@ -120,6 +120,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("backupPolicy", MCTSEnums.BackupPolicy.MonteCarlo, Arrays.asList(MCTSEnums.BackupPolicy.values()));
         addTunableParameter("backupLambda", 1.0);
         addTunableParameter("maxBackupThreshold", 1000000);
+        addTunableParameter("instantiationClass", "players.mcts.MCTSPlayer");
     }
 
     @Override
@@ -174,6 +175,11 @@ public class MCTSParams extends PlayerParameters {
         backupPolicy = (MCTSEnums.BackupPolicy) getParameterValue("backupPolicy");
         backupLambda = (double) getParameterValue("backupLambda");
         maxBackupThreshold = (int) getParameterValue("maxBackupThreshold");
+        try {
+            instantiationClass = Class.forName((String) getParameterValue("instantiationClass"));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
@@ -213,19 +219,15 @@ public class MCTSParams extends PlayerParameters {
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
-        switch (type) {
-            case RANDOM:
-                return new RandomPlayer(new Random(getRandomSeed()));
-            case MAST:
-                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
-            case CLASS:
+        return switch (type) {
+            case RANDOM -> new RandomPlayer(new Random(getRandomSeed()));
+            case MAST -> new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
+            case CLASS ->
                 // we have a bespoke Class to instantiate
-                return JSONUtils.loadClassFromString(details);
-            case PARAMS:
-                throw new AssertionError("PolicyParameters have not been set");
-            default:
-                throw new AssertionError("Unknown strategy type : " + type);
-        }
+                    JSONUtils.loadClassFromString(details);
+            case PARAMS -> throw new AssertionError("PolicyParameters have not been set");
+            default -> throw new AssertionError("Unknown strategy type : " + type);
+        };
     }
 
     public IStateHeuristic getHeuristic() {
@@ -237,7 +239,17 @@ public class MCTSParams extends PlayerParameters {
         if (!useMAST && (useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST)) {
             throw new AssertionError("MAST data not being collected, but MAST is being used as the rollout policy or as the action heuristic. Set MAST parameter.");
         }
-        return new MCTSPlayer((MCTSParams) this.copy());
+        if (instantiationClass == null || instantiationClass == MCTSPlayer.class)
+            return new MCTSPlayer((MCTSParams) this.copy());
+        else {
+            // the instantiation Class should implement a constructor that takes a MCTSParams object
+            // which we find and then instantiate
+            try {
+                return (MCTSPlayer) instantiationClass.getConstructor(MCTSParams.class).newInstance(this);
+            } catch (Exception e) {
+                throw new AssertionError("Could not instantiate class : " + instantiationClass.getName());
+            }
+        }
     }
 
 }
