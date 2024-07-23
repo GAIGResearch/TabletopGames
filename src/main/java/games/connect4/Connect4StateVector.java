@@ -28,7 +28,6 @@ public class Connect4StateVector implements IStateFeatureVector, IStateKey {
                 return -1.0;
             }
         }).toArray();
-
     }
 
     @Override
@@ -37,8 +36,8 @@ public class Connect4StateVector implements IStateFeatureVector, IStateKey {
     }
 
     @Override
-    public String getKey(AbstractGameState state) {
-        double[] retValue = featureVector(state, state.getCurrentPlayer());
+    public String getKey(AbstractGameState state, int playerId) {
+        double[] retValue = featureVector(state, playerId);
         return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(retValue));
     }
 }

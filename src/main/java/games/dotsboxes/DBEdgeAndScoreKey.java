@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 public class DBEdgeAndScoreKey implements IStateKey {
 
     @Override
-    public String getKey(AbstractGameState state) {
+    public String getKey(AbstractGameState state, int playerID) {
+        // in this case playerID is irrelevant
         DBGameState dbgs = (DBGameState) state;
         String edgeString = dbgs.edgeToOwnerMap.keySet().stream()
                 .map(e -> 100.0 * ((e.from.getX() + e.to.getX()) / 2.0) +

@@ -5,6 +5,9 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
 import games.toads.ToadGameState;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
 
     @Override
@@ -29,9 +32,9 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
         double[] features = new double[18];
         ToadGameState state = (ToadGameState) gs;
         features[0] = state.getGameTick();
-        int handSize = state.getPlayerHand(playerID).getSize();
-        for (int i = 0; i < handSize; i++) {
-            features[i + 1] = state.getPlayerHand(playerID).get(i).value;
+        List<Integer> handValuesInOrder = state.getPlayerHand(playerID).stream().map(c -> c.value).sorted().toList();
+        for (int i = 0; i < handValuesInOrder.size(); i++) {
+            features[i + 1] = handValuesInOrder.get(i);
         }
         features[5] = state.getGameScore(playerID);
         features[6] = state.getGameScore(1 - playerID);
@@ -60,9 +63,9 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
     }
 
     @Override
-    public Integer getKey(AbstractGameState state) {
+    public Integer getKey(AbstractGameState state, int playerID) {
         int retValue = state.getCurrentPlayer();
-        double[] features = featureVector(state, state.getCurrentPlayer());
+        double[] features = featureVector(state, playerID);
         for (int i = 0; i < features.length; i++) {
             retValue += (int) (features[i] * Math.pow(31, i+1));
         }

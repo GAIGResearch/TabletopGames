@@ -90,6 +90,7 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
         assertTrue(actionChosen instanceof PlayFieldCard);
+        assertTrue(player.functionalityApplies);
         assertEquals(3, state.getHistory().size());
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
@@ -107,6 +108,7 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
         assertTrue(actionChosen instanceof PlayFieldCard);
+        assertTrue(player.functionalityApplies);
         assertEquals(3, state.getHistory().size());
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
@@ -124,6 +126,7 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
         assertTrue(actionChosen instanceof PlayFieldCard);
+        assertFalse(player.functionalityApplies);
         assertEquals(2, state.getHistory().size());
         assertEquals(0, (int) state.getHistory().get(1).a);
         assertTrue(state.getHistory().get(1).b instanceof PlayFlankCard);
@@ -142,6 +145,7 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
         assertTrue(actionChosen instanceof PlayFieldCard);
+        assertTrue(player.functionalityApplies);
         assertEquals(3, state.getHistory().size());
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
@@ -159,6 +163,7 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
         assertTrue(actionChosen instanceof PlayFieldCard);
+        assertTrue(player.functionalityApplies);
         assertEquals(3, state.getHistory().size());
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
@@ -177,6 +182,7 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
         assertTrue(actionChosen instanceof PlayFieldCard);
+        assertTrue(player.functionalityApplies);
         assertEquals(3, state.getHistory().size());
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
@@ -192,7 +198,7 @@ public class TestUndoOpponentFlank {
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
         player.setForwardModel(fm);
         moveStateForwardToFirstDefenderMove();
-        AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
+        player.getAction(state, fm._computeAvailableActions(state));
         MCGSNode root = (MCGSNode) player.getRoot();
         int levelOneNodes = (int) root.getTranspositionMap().values().stream().filter(n -> n.getDepth() == 1).count();
         assertEquals(1, levelOneNodes); // there should be no change in IS at all from the opponent's 'move'

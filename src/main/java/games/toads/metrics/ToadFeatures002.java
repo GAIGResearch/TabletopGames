@@ -106,9 +106,9 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
     }
 
     @Override
-    public Integer getKey(AbstractGameState state) {
+    public Integer getKey(AbstractGameState state, int playerID) {
         int retValue = state.getCurrentPlayer();
-        double[] features = featureVector(state, state.getCurrentPlayer());
+        double[] features = featureVector(state, playerID);
         for (int i = 0; i < features.length; i++) {
             retValue += (int) (features[i] * Math.pow(31, i+1));
         }

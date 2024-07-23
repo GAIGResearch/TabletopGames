@@ -47,17 +47,21 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // otherwise, we add an UndoOpponentFlank
 
         new UndoOpponentFlank(state);
-        AbstractAction flankAction = super._getAction(state, getForwardModel().computeAvailableActions(gameState));
+        List<AbstractAction> validActionsForOpponent = getForwardModel().computeAvailableActions(gameState);
+        AbstractAction flankAction = super._getAction(state, validActionsForOpponent);
 
         // we then apply the bestAction (which should be w PlayFlankCard)
         if (!(flankAction instanceof PlayFlankCard)) {
             throw new AssertionError("Expected a PlayFlankCard action");
         }
-        ToadGameState oldState = (ToadGameState) state.copy();
-        getForwardModel().next(state, flankAction);
 
-        // and then return the bestAction from the next state in the tree
-        // How?
+        // and then return the bestAction from the *next* state in the tree
+
+        // in this case we look up the node for the new state after applying the flank action
+        // and we don't actually need to apply the flank action as this cannot affect our information state
+        // (except for the currentPlayer...)
+        // So we can apply *any* valid flank action
+        getForwardModel().next(state, validActionsForOpponent.get(0));
 
         AbstractAction actualAction;
         if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree) {
@@ -65,7 +69,6 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             SingleTreeNode ourRoot = ((MultiTreeNode) root).getRoot(currentPlayer);
             actualAction = ourRoot.bestAction();
         } else if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MCGS) {
-            // in this case we look up the node for the new state after applying the flank action
             Object stateKey = params.MCGSStateKey.getKey(state);
             MCGSNode node = ((MCGSNode) root).getTranspositionMap().get(stateKey);
             if (node == null) {
@@ -85,8 +88,14 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         super.createRootNode(gameState);
         // we then just override the root so that redeterminisations occur from perspective of the correct player
         // otherwise we redeterminise from the root player (i.e. our opponent), which is very bad
-        if (functionalityApplies)
+        if (functionalityApplies) {
             root.setRedeterminisationPlayer(actingPlayer);
+            // then we need to correct the transposition table
+            if (root instanceof MCGSNode mcgsRoot) {
+                mcgsRoot.getTranspositionMap().clear();
+                mcgsRoot.getTranspositionMap().put(getParameters().MCGSStateKey.getKey(gameState, actingPlayer), mcgsRoot);
+            }
+        }
     }
 
 

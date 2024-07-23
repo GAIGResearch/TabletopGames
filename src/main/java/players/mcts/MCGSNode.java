@@ -79,6 +79,11 @@ public class MCGSNode extends SingleTreeNode {
             // of featureVector calculations
             MCGSNode mcgsRoot = (MCGSNode) root;
             Object key = params.MCGSStateKey.getKey(gs);
+            // special case at root when we *expect* the key to be different on several iterations through
+            // because we are redeterminising from a perspective other than the decisionPlayer
+            if (this == mcgsRoot && mcgsRoot.trajectory.isEmpty() && decisionPlayer != redeterminisationPlayer && redeterminisationPlayer != -1) {
+                key = params.MCGSStateKey.getKey(gs, redeterminisationPlayer);
+            }
             mcgsRoot.trajectory.add(key);
 //            System.out.println("Adding to trajectory: " + key);
         }

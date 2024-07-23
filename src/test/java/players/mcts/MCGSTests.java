@@ -104,7 +104,7 @@ public class MCGSTests {
     @Test
     public void OneIterationHasDepthOne() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateKey = s -> String.valueOf(s.hashCode());
+        params.MCGSStateKey = (s, i) -> String.valueOf(s.hashCode());
         params.budget = 1;
         Game game = createDotsAndBoxes(params);
         do {

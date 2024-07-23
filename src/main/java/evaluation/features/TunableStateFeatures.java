@@ -85,8 +85,8 @@ public abstract class TunableStateFeatures extends TunableParameters implements 
     }
 
     @Override
-    public String getKey(AbstractGameState state) {
-        double[] retValue = featureVector(state, state.getCurrentPlayer());
+    public String getKey(AbstractGameState state, int playerId) {
+        double[] retValue = featureVector(state, playerId);
         return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(retValue));
     }
 }
