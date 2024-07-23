@@ -5,25 +5,25 @@ import games.cluedo.CluedoConstants;
 
 public class CluedoCard extends Card {
 
-    public CluedoConstants.Card cardType;
+    public Object cardName;
 
-    public CluedoCard(CluedoConstants.Card cardType) {
-        super(cardType.toString());
-        this.cardType = cardType;
+    protected CluedoCard(Object cardName) {
+        super(cardName.toString());
+        this.cardName = cardName;
     }
 
-    public CluedoCard(CluedoConstants.Card cardType, int ID) {
+    protected CluedoCard(Object cardType, int ID) {
         super(cardType.toString(), ID);
-        this.cardType = cardType;
+        this.cardName = cardType;
     }
 
     @Override
     public Card copy() {
-        return new CluedoCard(cardType, componentID);
+        return new CluedoCard(cardName, componentID);
     }
 
     @Override
     public String toString() {
-        return cardType.name();
+        return cardName.toString();
     }
 }
