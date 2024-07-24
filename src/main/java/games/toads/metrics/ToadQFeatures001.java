@@ -18,12 +18,15 @@ public class ToadQFeatures001 implements IActionFeatureVector {
         List<String> names = new ArrayList<>();
         names.add("FLANK");
         names.add("ATTACKER");
-        for (ToadCardType cardName : ToadCardType.values()) {
+        for (ToadCardType cardName : ToadCardType.values())
             names.add(cardName + "_PLAY");
+        for (ToadCardType cardName : ToadCardType.values())
             names.add(cardName + "_OPPOSITE");
+        for (ToadCardType cardName : ToadCardType.values())
             names.add(cardName + "_DIAGONAL");
+        for (ToadCardType cardName : ToadCardType.values())
             names.add(cardName + "_GUESS"); // for AssaultCannon tactics
-        }
+
         localNames = names.toArray(new String[0]);
     }
 
