@@ -65,23 +65,26 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         List<AbstractAction> validActionsForOpponent = getForwardModel().computeAvailableActions(gameState);
         flankAction = super._getAction(state, validActionsForOpponent);
 
-        // we then apply the bestAction (which should be a PlayFlankCard)
         if (!(flankAction instanceof PlayFlankCard)) {
             throw new AssertionError("Expected a PlayFlankCard action");
         }
-        if (!validActionsForOpponent.contains(flankAction)) {
-            flankAction = validActionsForOpponent.get(0);
-            // this may be true due to redeterminisation of the game state
-            // we store the actual action taken
+        // We then actually apply the action that gives us the most information (as they all have the same information set from
+        // the perspective of the acting player)
+        int highestCount = 0;
+        for (AbstractAction action : getRoot().getChildren().keySet()) {
+            int thisCount = getRoot().actionVisits(action);
+            if (thisCount > highestCount) {
+                highestCount = thisCount;
+                flankAction = action;
+            }
         }
-
         // and then return the bestAction from the *next* state in the tree
 
         // in this case we look up the node for the new state after applying the flank action
         // and we don't actually need to apply the flank action as this cannot affect our information state
         // (except for the currentPlayer...)
         // So we can apply *any* valid flank action
-        getForwardModel().next(state, flankAction);
+        getForwardModel().next(state, validActionsForOpponent.get(0));
 
         AbstractAction actualAction;
         if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree) {

@@ -10,10 +10,12 @@ import org.junit.Test;
 import players.PlayerConstants;
 import players.mcts.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import static java.util.Comparator.comparingInt;
 import static org.junit.Assert.*;
 
 public class TestUndoOpponentFlank {
@@ -27,6 +29,7 @@ public class TestUndoOpponentFlank {
     @Before
     public void setup() {
         params = new ToadParameters();
+        params.setParameterValue("useTactics", false);
         params.setRandomSeed(933);
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
@@ -114,11 +117,30 @@ public class TestUndoOpponentFlank {
         assertTrue(dummyAction instanceof PlayFlankCard);
         // at this stage we have a tree that has an invalid root node
         // this should be removed before the next action
-        SingleTreeNode expectedNewRoot = player.getRoot().getChildren().get(dummyAction)[1];
+
+        // for the next action, we are playing our flank card, so we ignore the kept tree
+        // as we insert the new dummy node
+        actions = fm._computeAvailableActions(state);
+        actionChosen = player.getAction(state, actions);
+        assertEquals(1000, player.getRoot().getVisits());
+        fm.next(state, actionChosen);
+
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(2, state.getTurnCounter());
+        // however for the next action by p1, we are in attack, so we should keep the tree
+
+        // we take the p0 action with most visits
+        SingleTreeNode firstMove = player.getRoot().getChildren().keySet().stream()
+                .max(comparingInt(player.getRoot()::actionVisits))
+                .map(a -> player.getRoot().getChildren().get(a)[1])
+                .orElseThrow();
+
+        SingleTreeNode expectedNewRoot = firstMove.getChildren().get(actionChosen)[1];
+
         actions = fm._computeAvailableActions(state);
         actionChosen = player.getAction(state, actions);
         assertSame(expectedNewRoot, player.getRoot());
-        fm.next(state, actionChosen);
+
     }
 
     @Test

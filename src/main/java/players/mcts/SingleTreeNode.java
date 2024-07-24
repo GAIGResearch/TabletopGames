@@ -154,7 +154,7 @@ public class SingleTreeNode {
         lowReward = template.lowReward;
         inheritedVisits = nVisits;
         MASTStatistics = new ArrayList<>();
-        for (int i = 0; i < template.state.getNPlayers(); i++)
+        for (int i = 0; i < template.MASTStatistics.size(); i++)
             MASTStatistics.add(new HashMap<>());
     }
 
