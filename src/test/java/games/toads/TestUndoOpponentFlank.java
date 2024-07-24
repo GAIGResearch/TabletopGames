@@ -97,6 +97,30 @@ public class TestUndoOpponentFlank {
         assertEquals(1, state.getCurrentPlayer());
     }
 
+
+    @Test
+    public void oneTreeWorksWithReuse() {
+        mctsParams.budgetType = PlayerConstants.BUDGET_ITERATIONS;
+        mctsParams.budget = 1000;
+        mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        mctsParams.reuseTree = true;
+        ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
+        player.setForwardModel(fm);
+        moveStateForwardToFirstDefenderMove();
+        List<AbstractAction> actions = fm._computeAvailableActions(state);
+        AbstractAction actionChosen = player.getAction(state, actions);
+        fm.next(state, actionChosen);
+        AbstractAction dummyAction = state.getHistory().get(2).b;
+        assertTrue(dummyAction instanceof PlayFlankCard);
+        // at this stage we have a tree that has an invalid root node
+        // this should be removed before the next action
+        SingleTreeNode expectedNewRoot = player.getRoot().getChildren().get(dummyAction)[1];
+        actions = fm._computeAvailableActions(state);
+        actionChosen = player.getAction(state, actions);
+        assertSame(expectedNewRoot, player.getRoot());
+        fm.next(state, actionChosen);
+    }
+
     @Test
     public void tinyBudgetWorksRandomly() {
         mctsParams.budgetType = PlayerConstants.BUDGET_ITERATIONS;
@@ -150,6 +174,31 @@ public class TestUndoOpponentFlank {
         assertEquals(0, (int) state.getHistory().get(2).a);
         assertTrue(state.getHistory().get(2).b instanceof PlayFlankCard);
         assertEquals(1, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void multiTreeWorksWithReuse() {
+        mctsParams.budgetType = PlayerConstants.BUDGET_ITERATIONS;
+        mctsParams.budget = 1000;
+        mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        mctsParams.reuseTree = true;
+        ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
+        player.setForwardModel(fm);
+        moveStateForwardToFirstDefenderMove();
+        List<AbstractAction> actions = fm._computeAvailableActions(state);
+        AbstractAction actionChosen = player.getAction(state, actions);
+        fm.next(state, actionChosen);
+        AbstractAction dummyAction = state.getHistory().get(2).b;
+        assertTrue(dummyAction instanceof PlayFlankCard);
+        // at this stage we have a tree that has an invalid root node
+        // this should be removed before the next action
+        SingleTreeNode expectedNewRootP1 = ((MultiTreeNode)player.getRoot()).getRoot(1).getChildren().get(actionChosen)[1];
+        actions = fm._computeAvailableActions(state);
+        actionChosen = player.getAction(state, actions);
+        assertSame(expectedNewRootP1, ((MultiTreeNode)player.getRoot()).getRoot(1));
+        // and the opponent node is always reset
+        assertEquals(1000, ((MultiTreeNode)player.getRoot()).getRoot(0).getVisits());
+        fm.next(state, actionChosen);
     }
 
     @Test

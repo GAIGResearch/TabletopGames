@@ -26,7 +26,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     // Heuristics used for the agent
     protected boolean debug = false;
     protected SingleTreeNode root;
-    protected AbstractAction lastAction;
+    protected Pair<Integer, AbstractAction> lastAction;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
     Map<Object, Integer> oldGraphKeys = new HashMap<>();
 
@@ -189,15 +189,17 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     protected SingleTreeNode backtrack(SingleTreeNode startingRoot, AbstractGameState gameState) {
         List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
-        Pair<Integer, AbstractAction> lastExpected = new Pair<>(gameState.getCurrentPlayer(), lastAction);
+        Pair<Integer, AbstractAction> lastExpected = lastAction;
         MCTSParams params = getParameters();
         boolean selfOnly = params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MultiTree;
         SingleTreeNode newRoot = startingRoot;
         int rootPlayer = startingRoot.decisionPlayer;
+        boolean foundPointInHistory = false;
         for (int backwardLoop = history.size() - 1; backwardLoop >= 0; backwardLoop--) {
             if (history.get(backwardLoop).equals(lastExpected)) {
                 // We can reuse the tree from this point
                 // We now work forward through the actions
+                foundPointInHistory = true;
                 if (debug)
                     System.out.println("Matching action found at " + backwardLoop + " of " + history.size() + " - tracking forward");
                 for (int forwardLoop = backwardLoop; forwardLoop < history.size(); forwardLoop++) {
@@ -219,6 +221,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 }
                 break;
             }
+        }
+        if (!foundPointInHistory) {
+            throw new AssertionError("Unable to find matching action in history : " + lastExpected);
         }
         if (debug)
             System.out.println("\tBacktracking complete : " + (newRoot == null ? "no matching node found" : "node found"));
@@ -276,8 +281,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
         if (root.children.size() > 2 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
-        lastAction = root.bestAction();
-        return lastAction.copy();
+        lastAction = new Pair<>(gameState.getCurrentPlayer(), root.bestAction());
+        return lastAction.b.copy();
     }
 
     @Override

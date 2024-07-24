@@ -1311,7 +1311,7 @@ public class SingleTreeNode {
         List<AbstractAction> sortedActions = actionValues.keySet().stream()
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingInt(a -> -actionVisits(a)))
-                .collect(toList());
+                .toList();
 
         for (AbstractAction action : sortedActions) {
             String actionName = action.toString();
@@ -1321,7 +1321,8 @@ public class SingleTreeNode {
                 actionName = actionName.substring(0, 50);
             valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
             if (params.opponentTreePolicy == OneTree) {
-                valueString = IntStream.range(0, openLoopState.getNPlayers())
+                int players = children.get(actionsFromOpenLoopState.get(0)).length;
+                valueString = IntStream.range(0, players)
                         .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
                         .collect(joining(", "));
             }

@@ -185,5 +185,9 @@ public class MultiTreeNode extends SingleTreeNode {
         return roots[player];
     }
 
+    public void resetRoot(int player) {
+        roots[player] = null;
+    }
+
 }
 
