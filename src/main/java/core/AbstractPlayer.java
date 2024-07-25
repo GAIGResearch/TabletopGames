@@ -86,12 +86,12 @@ public abstract class AbstractPlayer {
         // TODO: We currently have no way of specifying a Decorator to only apply
         // TODO: to the 'top-level' of getAction(), without also being used in the search algorithm.
         // This could be useful if we want to take random actions at the top level (but not in search)
-        if (decorators.isEmpty()) {
-            this.forwardModel = model;
-        } else {
-            this.forwardModel = new DecoratedForwardModel(model, new ArrayList<>(decorators), playerID);
+        this.forwardModel = model;
+        for (IPlayerDecorator decorator : decorators) {
+            model.addPlayerDecorator(decorator);
         }
     }
+
     /**
      * Retrieves the forward model for current game being played.
      *

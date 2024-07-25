@@ -392,7 +392,7 @@ public class MCTSTreeSelectionTests {
         params.treePolicy = UCB;
         params.normaliseRewards = true;
         params.progressiveBias = 2.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -422,7 +422,7 @@ public class MCTSTreeSelectionTests {
     public void pUCT10VisitsNoTemperature() {
         params.pUCT = true;
         params.pUCTTemperature = 0.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -449,7 +449,7 @@ public class MCTSTreeSelectionTests {
     public void pUCT10VisitsWithTemperature() {
         params.pUCT = true;
         params.pUCTTemperature = 2.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -476,7 +476,7 @@ public class MCTSTreeSelectionTests {
     public void actionSeeding10Visits() {
         params.initialiseVisits = 4;
         params.normaliseRewards = false;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -524,7 +524,7 @@ public class MCTSTreeSelectionTests {
     public void progressiveWideningI() {
         params.progressiveWideningConstant = 1.0;
         params.progressiveWideningExponent = 0.5;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -577,7 +577,7 @@ public class MCTSTreeSelectionTests {
     public void progressiveWideningII() {
         params.progressiveWideningConstant = 2.0;
         params.progressiveWideningExponent = 0.1;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -608,7 +608,7 @@ public class MCTSTreeSelectionTests {
         // check that only the available actions are used up to the point of widening
         params.progressiveWideningConstant = 1.0;
         params.progressiveWideningExponent = 0.2;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -643,7 +643,7 @@ public class MCTSTreeSelectionTests {
         params.firstPlayUrgency = 2.0;
         params.pUCT = true;
         params.pUCTTemperature = 0.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {

@@ -114,7 +114,7 @@ public class MASTRolloutMixture {
         MASTPlayerParams mastParams = new MASTPlayerParams();
         mastParams.setParameterValue("defaultValue", 0.25);
         mastParams.setParameterValue("temperature", 0.6);
-        mastParams.setParameterValue("externalHeuristic", (IActionHeuristic) (action, state) -> 47.0);
+        mastParams.setParameterValue("externalHeuristic", (IActionHeuristic) (action, state, list) -> 47.0);
         mastParams.setParameterValue("weightOfExternal",  0.5);
         params.setParameterValue("rolloutPolicyParams", mastParams);
         initialiseMCTSPlayer();
