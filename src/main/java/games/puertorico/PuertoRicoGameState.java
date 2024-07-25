@@ -31,7 +31,6 @@ public class PuertoRicoGameState extends AbstractGameState {
     int colonistsInSupply;
     int colonistsOnShip;
     int vpSupply;
-    Random rnd;
     boolean gameEndTriggered;
 
     /**
@@ -40,7 +39,6 @@ public class PuertoRicoGameState extends AbstractGameState {
      */
     public PuertoRicoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -285,10 +283,12 @@ public class PuertoRicoGameState extends AbstractGameState {
         PuertoRicoGameState retValue = new PuertoRicoGameState(gameParameters.copy(), nPlayers);
         retValue.ships = ships.stream().map(Ship::copy).collect(toList());
         retValue.plantationDeck = plantationDeck.copy();
+        if (playerId != -1) {
+            retValue.plantationDeck.shuffle(redeterminisationRnd);
+        }
         retValue.visiblePlantations = visiblePlantations.copy();
         retValue.plantationDiscards = plantationDiscards.copy();
         retValue.playerBoards = playerBoards.stream().map(PRPlayerBoard::copy).collect(toList());
-        retValue.rnd = new Random(rnd.nextLong());
         retValue.cropSupply = new EnumMap<>(cropSupply);
         retValue.rolesAvailable = new EnumMap<>(rolesAvailable);
         retValue.colonistsInSupply = colonistsInSupply;

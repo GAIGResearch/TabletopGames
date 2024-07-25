@@ -38,11 +38,9 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters) state.getGameParameters();
-        firstState.getCoreGameParameters().setMaxRounds(params.maxRounds);
-        state.rnd = new Random(params.getRandomSeed());
 
-        state.setBoard(generateBoard(params));
-        state.setGraph(extractGraphFromBoard(state.getBoard(), params));
+        state.setBoard(generateBoard(params, state.getRnd()));
+        state.setGraph(extractGraphFromBoard(state.getBoard(), params, state.getRnd()));
 
         state.scores = new int[state.getNPlayers()];
         state.victoryPoints = new int[state.getNPlayers()];
@@ -99,7 +97,7 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
                 state.devCards.add(card);
             }
         }
-        state.devCards.shuffle(state.rnd);
+        state.devCards.shuffle(state.getRnd());
         state.setGamePhase(Setup);
     }
 
@@ -137,7 +135,7 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
         else if (gs.getGamePhase() == Main) {
 
             // Win condition
-            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win || gs.getRoundCounter() >= gs.getCoreGameParameters().getMaxRounds()) {
+            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win) {
                 endGame(currentState);
                 if (gs.getCoreGameParameters().verbose) {
                     System.out.println("Game over! winner = " + player);
@@ -193,7 +191,7 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
         int nDice = cp.nDice;
         int rollValue = 0;
         for (int i = 0; i < nDice; i++) {
-            rollValue += gs.rnd.nextInt(n) + 1;
+            rollValue += gs.getRnd().nextInt(n) + 1;
         }
         gs.setRollValue(rollValue);
 
@@ -270,7 +268,7 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
             mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
 
             // Trade With other players, unless already too many trades this turn
-            if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
+            if (cp.tradingAllowed && cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
                 mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
             }
 
@@ -288,7 +286,7 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
         return mainActions;
     }
 
-    private CatanTile[][] generateBoard(CatanParameters params) {
+    private CatanTile[][] generateBoard(CatanParameters params, Random rnd) {
         // Shuffle the tile types
         ArrayList<CatanTile.TileType> tileList = new ArrayList<>();
         for (Map.Entry<CatanTile.TileType, Integer> tileCount : params.tileCounts.entrySet()) {
@@ -304,8 +302,8 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
             }
         }
         // shuffle collections, so we get randomized tiles and tokens on them
-        Collections.shuffle(tileList);
-        Collections.shuffle(numberList);
+        Collections.shuffle(tileList, rnd);
+        Collections.shuffle(numberList, rnd);
 
         CatanTile[][] board = new CatanTile[params.n_tiles_per_row][params.n_tiles_per_row];
         int midX = board.length / 2;
@@ -335,7 +333,7 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
         return board;
     }
 
-    private GraphBoardWithEdges extractGraphFromBoard(CatanTile[][] board, CatanParameters cp) {
+    private GraphBoardWithEdges extractGraphFromBoard(CatanTile[][] board, CatanParameters cp, Random rnd) {
         GraphBoardWithEdges graph = new GraphBoardWithEdges();
 
         // Create vertices and add references in tiles
@@ -389,19 +387,19 @@ public class CatanForwardModel extends StandardForwardModel implements ITreeActi
         }
 
         // Finally set Harbors types
-        setHarbors(board, graph, cp);
+        setHarbors(board, graph, cp, rnd);
 
         return graph;
     }
 
-    private void setHarbors(CatanTile[][] board, GraphBoardWithEdges graphBoard, CatanParameters cp) {
+    private void setHarbors(CatanTile[][] board, GraphBoardWithEdges graphBoard, CatanParameters cp, Random rnd) {
         // set harbors along the tiles where the SEA borders the land
         ArrayList<CatanParameters.Resource> harbors = new ArrayList<>();
         for (Map.Entry<CatanParameters.Resource, Integer> entry : cp.harborCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++)
                 harbors.add(entry.getKey());
         }
-        Collections.shuffle(harbors);
+        Collections.shuffle(harbors, rnd);
 
         int radius = board.length / 2;
         // todo edge 4 can work, but random would be better, the math changes with different directions.

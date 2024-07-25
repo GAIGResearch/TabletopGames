@@ -12,6 +12,7 @@ public class HumanGUIPlayer extends AbstractPlayer {
     ActionController ac;
 
     public HumanGUIPlayer(ActionController ac){
+        super(null, "HumanGUIPlayer");
         this.ac = ac;
     }
 

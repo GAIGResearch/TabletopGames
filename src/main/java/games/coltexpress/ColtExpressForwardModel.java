@@ -12,6 +12,7 @@ import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.ColtExpressTypes.LootType;
 import games.coltexpress.actions.*;
 import games.coltexpress.cards.ColtExpressCard;
+import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Group;
@@ -25,16 +26,15 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     public void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
-
+        //       System.out.println("Game " + cegs.getGameID() + ", seed: " + cep.getRandomSeed() + ", rnd: " + cegs.getRnd().nextInt(10000));
         cegs.bulletsLeft = new int[cegs.getNPlayers()];
         cegs.playerCharacters = new HashMap<>();
         cegs.playerPlayingBelle = -1;
         cegs.plannedActions = null;
         cegs.trainCompartments = new LinkedList<>();
-        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.TOP_VISIBLE_TO_ALL);
 
         setupRounds(cegs, cep);
         setupTrain(cegs);
@@ -47,12 +47,13 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         cegs.playerHandCards = new ArrayList<>(cegs.getNPlayers());
         cegs.playerLoot = new ArrayList<>(cegs.getNPlayers());
         cegs.bulletsLeft = new int[cegs.getNPlayers()];
-        cegs.plannedActions = new PartialObservableDeck<>("plannedActions", -1, cegs.getNPlayers());
+        cegs.plannedActions = new PartialObservableDeck<>("plannedActions", -1, cegs.getNPlayers(), VisibilityMode.MIXED_VISIBILITY);
 
         Arrays.fill(cegs.bulletsLeft, cep.nBulletsPerPlayer);
 
         for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
-            CharacterType characterType = pickRandomCharacterType(rnd, characters);
+            Random rndForCharacters = cep.initialCharacterShuffleSeed != -1 ? new Random(cep.initialCharacterShuffleSeed) : cegs.getRnd();
+            CharacterType characterType = pickRandomCharacterType(rndForCharacters, characters);
             cegs.playerCharacters.put(playerIndex, characterType);
             if (characterType == CharacterType.Belle)
                 cegs.playerPlayingBelle = playerIndex;
@@ -64,7 +65,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
             cegs.playerDecks.add(playerCards);
-            playerCards.shuffle(new Random(cep.getRandomSeed() + playerIndex));
+            playerCards.shuffle(cegs.getRnd());
 
             Deck<ColtExpressCard> playerHand = new Deck<>("playerHand" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
 
@@ -89,28 +90,29 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         cegs.distributeCards();
 
         firstState.setGamePhase(PlanActions);
+        //       System.out.println("\tr\tseed: " + cep.getRandomSeed() + ", rnd: " + cegs.getRnd().nextInt(10000));
+
     }
 
     private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep) {
-        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers(), VisibilityMode.TOP_VISIBLE_TO_ALL);
 
         // Add 1 random end round card
         // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck
 
-        cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
+        Random rndForRoundCards = cep.roundDeckShuffleSeed != -1 ? new Random(cep.roundDeckShuffleSeed) : cegs.getRnd();
 
         // Add random round cards
         ArrayList<ColtExpressTypes.RegularRoundCard> availableRounds = new ArrayList<>(Arrays.asList(cep.roundCards));
         for (int i = 0; i < cep.nMaxRounds - 1; i++) {
-            Random r = new Random(cep.getRandomSeed() + cegs.getTurnOrder().getRoundCounter() + i);
-            int choice = r.nextInt(availableRounds.size());
+            int choice = rndForRoundCards.nextInt(availableRounds.size());
             cegs.rounds.add(cegs.getRoundCard(availableRounds.get(choice), cegs.getNPlayers()));
             availableRounds.remove(availableRounds.get(choice));
         }
-        // set first card to be visible
-        boolean[] allTrue = new boolean[cegs.getNPlayers()];
-        Arrays.fill(allTrue, true);
-        cegs.rounds.setVisibilityOfComponent(0, allTrue);
+        cegs.rounds.shuffle(rndForRoundCards);
+
+        RoundCard endCard = cegs.getRandomEndRoundCard(cep, rndForRoundCards);
+        cegs.rounds.addToBottom(endCard);
     }
 
     @Override
@@ -331,7 +333,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
         int playerCompartmentIndex = 0;
         Compartment playerCompartment = null;
-        HashSet<Integer> availableTargets = new HashSet<>();
+        Set<Integer> availableTargets = new HashSet<>();
 
         for (int i = 0; i < cegs.trainCompartments.size(); i++) {
             Compartment compartment = cegs.trainCompartments.get(i);
@@ -493,18 +495,19 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
     private void setupTrain(ColtExpressGameState cegs) {
         // Choose random compartment configurations
-        Random random = new Random(cegs.getGameParameters().getRandomSeed());
+        ColtExpressParameters cep = (ColtExpressParameters) cegs.getGameParameters();
+        Random rndForTrain = cep.trainShuffleSeed != -1 ? new Random(cep.trainShuffleSeed) : cegs.getRnd();
         ArrayList<Integer> availableCompartments = new ArrayList<>();
-        for (int i = 0; i < ((ColtExpressParameters) cegs.getGameParameters()).trainCompartmentConfigurations.size() - 1; i++) {
+        for (int i = 0; i < cep.trainCompartmentConfigurations.size() - 1; i++) {
             availableCompartments.add(i);
         }
         for (int i = 0; i < cegs.getNPlayers(); i++) {
-            int which = random.nextInt(availableCompartments.size());
-            cegs.trainCompartments.add(new Compartment(cegs.getNPlayers(), i, which, (ColtExpressParameters) cegs.getGameParameters()));
+            int which = cegs.getRnd().nextInt(availableCompartments.size());
+            cegs.trainCompartments.add(new Compartment(cegs.getNPlayers(), i, which, cep, rndForTrain));
             availableCompartments.remove(Integer.valueOf(which));
         }
 
         // Add locomotive
-        cegs.trainCompartments.add(Compartment.createLocomotive(cegs.getNPlayers(), (ColtExpressParameters) cegs.getGameParameters()));
+        cegs.trainCompartments.add(Compartment.createLocomotive(cegs.getNPlayers(), cep, rndForTrain));
     }
 }

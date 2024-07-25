@@ -43,4 +43,9 @@ public class PriestAction extends PlayCard implements IPrintable {
         copy.targetCardType = targetCardType;
         return copy;
     }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Priest: see p" + targetPlayer;
+    }
 }

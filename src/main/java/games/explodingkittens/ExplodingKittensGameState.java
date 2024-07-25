@@ -9,7 +9,6 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.interfaces.IStateFeatureJSON;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
@@ -90,10 +89,9 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
                     }
                 }
             }
-            Random r = new Random(ekgs.gameParameters.getRandomSeed());
 
             // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
-            ekgs.drawPile.shuffleVisible(r, playerId, false);
+            ekgs.drawPile.redeterminiseUnknown(redeterminisationRnd, playerId);
             Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {

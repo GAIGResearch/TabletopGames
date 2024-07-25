@@ -48,7 +48,7 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
             if (options.isEmpty()) {
                 // this is possible if we throne room a throne room (etc.) and then have no action cards
                 executionCount = 2; // and we are done
-                options.add(new EndPhase());
+                options.add(new EndPhase(DominionGameState.DominionGamePhase.Play));
             }
             return options;
         } else {

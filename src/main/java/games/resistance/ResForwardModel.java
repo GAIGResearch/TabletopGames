@@ -5,7 +5,6 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
-import core.interfaces.IGameEvent;
 import games.resistance.actions.*;
 import games.resistance.components.ResPlayerCards;
 import utilities.Utils;
@@ -43,7 +42,6 @@ public class ResForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         ResGameState resgs = (ResGameState) firstState;
-        resgs.rnd = new Random(firstState.getGameParameters().getRandomSeed());
         ResParameters resp = (ResParameters) firstState.getGameParameters();
         resgs.votingChoice = new ResPlayerCards.CardType[firstState.getNPlayers()];
         resgs.gameBoardValues = new ArrayList<>(5);
@@ -58,11 +56,11 @@ public class ResForwardModel extends StandardForwardModel {
         }
         resgs.factions = resp.getFactions(firstState.getNPlayers());
 
-        List<Boolean> spies = ResForwardModel.randomiseSpies(resgs.factions[1], resgs, -1);
+        List<Boolean> spies = ResForwardModel.randomiseSpies(resgs.factions[1], resgs, -1, firstState.getRnd());
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = false;
-            PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", visible);
+            PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", i, visible);
             if (spies.get(i)) {
                 ResPlayerCards idCard = new ResPlayerCards(ResPlayerCards.CardType.SPY);
                 idCard.setOwnerId(i);
@@ -275,7 +273,7 @@ public class ResForwardModel extends StandardForwardModel {
     }
 
 
-    public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID) {
+    public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID, Random rnd) {
         // We want to randomly assign the number of spies across the total number of players
         // and return a boolean[] with length of total, and spies number of true values
         // we also need to ensure that there is at least one spy per historically failed mission
@@ -289,7 +287,7 @@ public class ResForwardModel extends StandardForwardModel {
                 boolean done = false;
 
                 while (!done) {
-                    int rndIndex = state.rnd.nextInt(total);
+                    int rndIndex = rnd.nextInt(total);
                     if (!retValue[rndIndex] && rndIndex != playerID) {
                         retValue[rndIndex] = true;
                         done = true;

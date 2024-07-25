@@ -9,6 +9,7 @@ import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static games.catan.stats.CatanMetrics.CatanEvent.PortSettle;
@@ -52,7 +53,7 @@ public class BuildSettlement extends AbstractAction {
             if(settlement.getHarbour() != null){
                 gs.logEvent(PortSettle, String.valueOf(playerID));
 
-                HashMap<CatanParameters.Resource, Counter> exchangeRates = cgs.getExchangeRates(playerID);
+                Map<CatanParameters.Resource, Counter> exchangeRates = cgs.getExchangeRates(playerID);
                 CatanParameters.Resource harbour = settlement.getHarbour();
                 int newRate = cp.harbour_exchange_rate;
                 if (harbour == CatanParameters.Resource.WILD) newRate = cp.harbour_wild_exchange_rate;

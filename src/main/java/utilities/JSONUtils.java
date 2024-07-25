@@ -1,14 +1,17 @@
 package utilities;
 
+import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import scala.util.parsing.json.JSON;
 
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -58,6 +61,13 @@ public class JSONUtils {
                 return (T) Enum.valueOf(enumClass, val);
             }
             Class<T> outputClass = (Class<T>) Class.forName(cl);
+            if (TunableParameters.class.isAssignableFrom(outputClass)) {
+                // in this case we do not look for the Constructor arguments, as
+                // the parameters are defined directly as name-value pairs in JSON
+                T t = outputClass.getConstructor().newInstance();
+                TunableParameters.loadFromJSON((TunableParameters) t, json);
+                return t;
+            }
             JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
             Class<?>[] argClasses = new Class[argArray.size()];
             Object[] args = new Object[argArray.size()];
@@ -114,21 +124,23 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-            //       System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+       //     System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
+        } catch (InvocationTargetException e) {
+            System.out.println(e.getTargetException().getMessage());
+            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
             throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static Class<?> determineArrayClass(JSONArray array) {
         if (array.size() > 1) {
             JSONObject first = (JSONObject) array.get(0);
@@ -173,7 +185,6 @@ public class JSONUtils {
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + filename);
         }
     }
@@ -201,13 +212,10 @@ public class JSONUtils {
             return loadClassFromJSON(json);
 
         } catch (ParseException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + rawData);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem processing String in " + rawData);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
         }
     }
@@ -285,7 +293,6 @@ public class JSONUtils {
             }
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem writing to file " + filename);
         }
     }
@@ -331,6 +338,50 @@ public class JSONUtils {
         }
     }
 
+    public static String prettyPrint(JSONObject json, int tabDepth) {
+        StringBuilder sb = new StringBuilder("{\n");
+        Object[] keys = json.keySet().toArray();
+        for (int keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+            String keyName = keys[keyIndex].toString();
+            Object value = json.get(keyName);
+            sb.append("\t".repeat(Math.max(0, tabDepth)));
+            sb.append("\"").append(keyName).append("\"").append(" : ");
+            if (value instanceof JSONObject subJSON) {
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
+            } else if (value instanceof JSONArray array) {
+                sb.append("[\n");
+                tabDepth++;
+                for (int index = 0; index < array.size(); index++) {
+                    Object v = array.get(index);
+                    sb.append("\t".repeat(Math.max(0, tabDepth)));
+                    if (v instanceof JSONObject subJSON) {
+                        sb.append(prettyPrint(subJSON, tabDepth + 1));
+                    } else {
+                        sb.append(v);
+                    }
+                    if (index < array.size() - 1)
+                        sb.append(",");
+                    sb.append("\n");
+                }
+                tabDepth--;
+            } else if (value instanceof String){
+                sb.append("\"").append(value).append("\"");
+            } else if (value instanceof Long || value instanceof Integer ||
+                    value instanceof Double || value instanceof Boolean) {
+                sb.append(value);
+            } else {
+                throw new AssertionError("Unexpected value type in prettyPrint : " + value);
+            }
+            if (keyIndex < keys.length - 1)
+                sb.append(",");
+            sb.append("\n");
+        }
+        sb.append("\t".repeat(Math.max(0, tabDepth-1)));
+        sb.append("}");
+        return sb.toString();
+    }
+
+    @SuppressWarnings("unchecked")
     public static JSONObject createJSONFromMap(Map<String, String> stuff) {
         // first of all we partition the keys by the contents of the key before the first '.'
         Map<String, List<String>> partitioned = stuff.keySet().stream()
@@ -343,7 +394,7 @@ public class JSONUtils {
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
             if (subMap.size() == 0)
                 throw new AssertionError("Empty subMap for key " + key);
-            if (subMap.size() == 1) {
+            if (subMap.size() == 1 && subMap.containsKey(key)) {
                 // this is a single entry, so we just add it as a String
                 String value = subMap.get(key);
                 if (!value.isEmpty()) {

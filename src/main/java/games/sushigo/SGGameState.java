@@ -20,7 +20,7 @@ public class SGGameState extends AbstractGameState {
     int nCardsInHand = 0;
 
     List<List<ChooseCard>> cardChoices;  // one list per player, per turn, indicates the actions chosen by the player, saved for simultaneous execution
-    HashMap<SGCard.SGCardType, Counter>[] playedCardTypes;
+    Map<SGCard.SGCardType, Counter>[] playedCardTypes;
     List<Deck<SGCard>> playedCards;
     Counter[] playerScore;
 
@@ -28,7 +28,6 @@ public class SGGameState extends AbstractGameState {
     HashMap<SGCard.SGCardType, Counter>[] playedCardTypesAllGame;
     HashMap<SGCard.SGCardType, Counter>[] pointsPerCardType;
 
-    Random rnd;
     int deckRotations = 0;
 
     /**
@@ -39,7 +38,6 @@ public class SGGameState extends AbstractGameState {
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -115,7 +113,7 @@ public class SGGameState extends AbstractGameState {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
-            copy.drawPile.shuffle(rnd);
+            copy.drawPile.shuffle(redeterminisationRnd);
 
             // Now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {
@@ -203,15 +201,15 @@ public class SGGameState extends AbstractGameState {
         return playerScore[playerId].getValue();
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
+    public Map<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
         return playedCardTypes;
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
+    public Map<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
         return playedCardTypesAllGame;
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
+    public Map<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
         return pointsPerCardType;
     }
 
@@ -249,8 +247,7 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) &&
                 Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) &&
-                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) &&
-                Objects.equals(rnd, that.rnd);
+                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class VirusForwardModel extends StandardForwardModel {
         vgs.drawDeck = new Deck<>("DrawDeck", -1, VisibilityMode.HIDDEN_TO_ALL);
         createCards(vgs);
 
-        vgs.drawDeck.shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
+        vgs.drawDeck.shuffle(vgs.getRnd());
 
         // Create the discard deck, at the beginning it is empty
         vgs.discardDeck = new Deck<>("DiscardDeck", -1, VisibilityMode.VISIBLE_TO_ALL);
@@ -145,7 +145,7 @@ public class VirusForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         VirusGameState vgs = (VirusGameState) gameState;
-        ArrayList<AbstractAction> actions = new ArrayList<>();
+        List<AbstractAction> actions = new ArrayList<>();
         VirusGameParameters vgp = (VirusGameParameters) vgs.getGameParameters();
         int player = vgs.getCurrentPlayer();
         Deck<VirusCard> playerHand = vgs.playerDecks.get(player);
@@ -157,7 +157,7 @@ public class VirusForwardModel extends StandardForwardModel {
         }
 
         // Playable cards actions
-        Set<VirusCard> uniqueCards = new HashSet<>(playerHand.getComponents());
+        Set<VirusCard> uniqueCards = new LinkedHashSet<>(playerHand.getComponents());
         for (VirusCard card : uniqueCards)
             addActionsForCard(vgs, card, actions, playerHand);
 
@@ -196,7 +196,7 @@ public class VirusForwardModel extends StandardForwardModel {
      * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
-    private void addActionForTreatmentCard(VirusGameState gameState, VirusTreatmentCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionForTreatmentCard(VirusGameState gameState, VirusTreatmentCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
         switch (card.treatmentType) {
             case OrganThief:
                 addActionForOrganThief(gameState, card, actions, playerHand);
@@ -224,7 +224,7 @@ public class VirusForwardModel extends StandardForwardModel {
      * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
-    private void addActionForOrganThief(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionForOrganThief(VirusGameState gameState, VirusCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
         int playerId = gameState.getCurrentPlayer();
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
@@ -247,7 +247,7 @@ public class VirusForwardModel extends StandardForwardModel {
         }
     }
 
-    private void addActionForLatexGlove(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionForLatexGlove(VirusGameState gameState, VirusCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
         int playerId = gameState.getCurrentPlayer();
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
@@ -273,7 +273,7 @@ public class VirusForwardModel extends StandardForwardModel {
      * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
-    private void addActionForSpreading(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionForSpreading(VirusGameState gameState, VirusCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
         int playerId = gameState.getCurrentPlayer();
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
@@ -316,7 +316,7 @@ public class VirusForwardModel extends StandardForwardModel {
         }
     }
 
-    private void addActionForTransplant(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionForTransplant(VirusGameState gameState, VirusCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
         int playerId = gameState.getCurrentPlayer();
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
@@ -349,7 +349,7 @@ public class VirusForwardModel extends StandardForwardModel {
         }
     }
 
-    private void addActionForMedicalError(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionForMedicalError(VirusGameState gameState, VirusCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
         int playerId = gameState.getCurrentPlayer();
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
@@ -380,7 +380,7 @@ public class VirusForwardModel extends StandardForwardModel {
      * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
-    private void addActionsForCard(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
+    private void addActionsForCard(VirusGameState gameState, VirusCard card, List<AbstractAction> actions, Deck<VirusCard> playerHand) {
 
         if (card.type == VirusCard.VirusCardType.Treatment) {
             addActionForTreatmentCard(gameState, (VirusTreatmentCard) card, actions, playerHand);

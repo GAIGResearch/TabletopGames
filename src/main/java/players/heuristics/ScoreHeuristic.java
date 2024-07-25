@@ -23,4 +23,12 @@ public class ScoreHeuristic implements IStateHeuristic {
             return score * 0.5;
         return score;
     }
+    @Override
+    public double minValue() {
+        return Double.NEGATIVE_INFINITY;
+    }
+    @Override
+    public double maxValue() {
+        return Double.POSITIVE_INFINITY;
+    }
 }

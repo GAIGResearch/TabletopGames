@@ -45,7 +45,6 @@ import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
 import games.poker.gui.*;
-import games.dicemonastery.gui.*;
 import games.stratego.*;
 import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.*;
@@ -55,7 +54,6 @@ import games.tictactoe.gui.*;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
-import games.dicemonastery.*;
 import games.dominion.*;
 import games.wonders7.Wonders7ForwardModel;
 import games.wonders7.Wonders7GameParameters;
@@ -146,10 +144,6 @@ public enum GameType {
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
             DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, null),
-    DiceMonastery(2, 4,
-            Arrays.asList(Strategy, Medieval),
-            Arrays.asList(SetCollection, WorkerPlacement, EngineBuilding),
-            DiceMonasteryGameState.class, DiceMonasteryForwardModel.class, DiceMonasteryParams.class, DiceMonasteryGUI.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -298,6 +292,10 @@ public enum GameType {
         try {
             if (dataPath != null) {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class, Long.class);
+                if (constructorGS == null) {
+                    constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class);
+                    return (AbstractParameters) constructorGS.newInstance(dataPath);
+                }
                 return (AbstractParameters) constructorGS.newInstance(dataPath, seed);
             } else {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);
@@ -308,6 +306,7 @@ public enum GameType {
                 return (AbstractParameters) constructorGS.newInstance(seed);
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

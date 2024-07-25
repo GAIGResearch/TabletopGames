@@ -34,11 +34,9 @@ public class HeartsGameState extends AbstractGameState {
     public Map<Integer, Integer> playerPoints;
     public List<Map.Entry<Integer, FrenchCard>> currentPlayedCards = new ArrayList<>();
     public FrenchCard.Suite firstCardSuit;
-    Random rnd;
 
     public HeartsGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -169,7 +167,7 @@ public class HeartsGameState extends AbstractGameState {
                     copy.pendingPasses.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(rnd);
+            copy.drawDeck.shuffle(redeterminisationRnd);
 
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {

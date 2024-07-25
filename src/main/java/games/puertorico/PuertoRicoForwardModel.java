@@ -61,7 +61,7 @@ public class PuertoRicoForwardModel extends StandardForwardModel {
             pgs.plantationDeck.add(new Plantation(COFFEE));
         }
 
-        pgs.plantationDeck.shuffle(pgs.rnd);
+        pgs.plantationDeck.shuffle(pgs.getRnd());
 
         for (int i = 0; i < params.extraVisiblePlantations + pgs.getNPlayers(); i++)
             pgs.visiblePlantations.add(pgs.plantationDeck.draw());

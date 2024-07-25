@@ -28,7 +28,7 @@ public class ColtExpressGame extends Game {
         agents.add(new RandomPlayer());
 
         for (int i=0; i<1; i++) {
-            ColtExpressParameters params = new ColtExpressParameters(System.currentTimeMillis());
+            ColtExpressParameters params = new ColtExpressParameters();
             AbstractForwardModel forwardModel = new ColtExpressForwardModel();
             ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, agents.size());
 

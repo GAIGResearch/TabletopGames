@@ -22,7 +22,7 @@ public class PlayCard extends DrawCard {
     public final boolean free;
 
     // Player chooses card to play
-    public PlayCard(int player, String cardName, boolean free){
+    public PlayCard(int player, String cardName, boolean free) {
         super();
         this.cardName = cardName;
         this.player = player;
@@ -39,8 +39,8 @@ public class PlayCard extends DrawCard {
 
         // Finds the played card
         Wonder7Card card = null;
-        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
-            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
+        for (Wonder7Card cardSearch : wgs.getPlayerHand(player).getComponents()) { // Goes through each card in the playerHand
+            if (cardName.equals(cardSearch.cardName)) { // If cardName is the one searching for (being played)
                 card = cardSearch;
                 break;
             }
@@ -53,84 +53,68 @@ public class PlayCard extends DrawCard {
         cardId = card.getComponentID();
 
         // Removes coins paid for card
-        if (!free && card.constructionCost.get(Coin) != null) {
-            int cardValue = card.getNCost(Coin); // Number of coins the card costs
-            int playerCoins = playerResources.get(Coin); // Number of coins the player owns
-            playerResources.put(Coin, playerCoins - cardValue);// Subtracts coins
-        }
+        if (!free) {
+            // TODO may vary if yellow (commercial) cards played - however these are not yet implemented
+            // TODO So all resources cost the same
 
-        // Collects the resources player may not have
-        Set<Wonders7Constants.Resource> key = card.constructionCost.keySet();
-        HashMap<Wonders7Constants.Resource, Integer> neededResources = new HashMap<>();
-        int coinCost = 0;
-        int nCostNeighbourResource = ((Wonders7GameParameters)wgs.getGameParameters()).nCostNeighbourResource;  // TODO may vary if yellow cards played
-        for (Wonders7Constants.Resource resource : key) { // Goes through every resource the player needs
-            if ((playerResources.get(resource)) < card.constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
-                neededResources.put(resource, card.getNCost(resource)-playerResources.get(resource));
-                coinCost += nCostNeighbourResource * neededResources.get(resource); // For each unit of the resource needed
-            }
-        }
-        if (!neededResources.isEmpty()) {
-            HashMap<Wonders7Constants.Resource, Integer> neighbourLResources = wgs.getPlayerResources((wgs.getNPlayers()+player-1)%wgs.getNPlayers()); // Resources available to the neighbour on left
-            HashMap<Wonders7Constants.Resource, Integer> neighbourRResources = wgs.getPlayerResources((player+1)%wgs.getNPlayers()); // Resources available to the neighbour on right
-
-            // Calculates combined resources of neighbour and player
-            Set<Wonders7Constants.Resource> extendedChoice = new HashSet<>();
-            for (Wonders7Constants.Resource resource : neededResources.keySet()) { // Goes through every resource provided by the neighbour
-                boolean leftHasResource = neighbourLResources.get(resource) != null && neighbourLResources.get(resource) > 0;
-                boolean rightHasResource = neighbourRResources.get(resource) != null && neighbourRResources.get(resource) > 0;
-                if (leftHasResource && rightHasResource) {
-                    // Both neighbours have this resource, may have to choose which neighbour to buy from.
-                    // But, check if we don't need to buy all from both neighbours.
-                    int combined = wgs.getPlayerResources(player).get(resource)
-                            + neighbourLResources.get(resource)
-                            + neighbourRResources.get(resource);
-                    if (combined == card.constructionCost.get(resource)) {
-                        // No choice, we need to buy all from both neighbours.
-                        int neighbourLCoins = neighbourLResources.get(Coin); // Neighbour's coin count
-                        neighbourLResources.put(Coin, neighbourLCoins + nCostNeighbourResource * neighbourLResources.get(resource)); // Neighbour receives coins from player
-                        int neighbourRCoins = neighbourRResources.get(Coin); // Neighbour's coin count
-                        neighbourRResources.put(Coin, neighbourRCoins + nCostNeighbourResource * neighbourRResources.get(resource)); // Neighbour receives coins from player
-
-                        playerResources.put(Coin, playerResources.get(Coin) - coinCost); // Player pays coins to neighbour
-                        continue;
+            // Collects the resources player may not have
+            Set<Wonders7Constants.Resource> key = card.constructionCost.keySet();
+            int nCostNeighbourResource = ((Wonders7GameParameters) wgs.getGameParameters()).nCostNeighbourResource;
+            for (Wonders7Constants.Resource resource : key) { // Goes through every resource the player needs
+                if (resource == Coin) {
+                    int cardValue = card.getNCost(Coin); // Number of coins the card costs
+                    int playerCoins = playerResources.get(Coin); // Number of coins the player owns
+                    if (playerCoins < cardValue) {
+                        throw new AssertionError("We cannot afford this card so should not be here");
                     }
-                    extendedChoice.add(resource);
-                } else {
-                    // Only one neighbour has this resource, we need to buy all from them.
-                    if (leftHasResource) {
-                        int neighbourCoins = neighbourLResources.get(Coin);
-                        neighbourLResources.put(Coin, neighbourCoins + coinCost); // Neighbour receives coins from player
-                    } else {
-                        int neighbourCoins = neighbourRResources.get(Coin);
-                        neighbourRResources.put(Coin, neighbourCoins + coinCost); // Neighbour receives coins from player
+                    playerResources.put(Coin, playerCoins - cardValue);// Subtracts coins
+                } else if ((playerResources.get(resource)) < card.constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
+                    int amountToBuy = card.getNCost(resource) - playerResources.get(resource);
+                    int coinCost = nCostNeighbourResource * amountToBuy;
+                    if (coinCost > playerResources.get(Coin)) {
+                        throw new AssertionError("We cannot afford this card so should not be here");
                     }
-                    playerResources.put(Coin, playerResources.get(Coin) - coinCost); // Player pays coins to neighbour
+
+                    HashMap<Wonders7Constants.Resource, Integer> neighbourLResources = wgs.getPlayerResources((wgs.getNPlayers() + player - 1) % wgs.getNPlayers()); // Resources available to the neighbour on left
+                    HashMap<Wonders7Constants.Resource, Integer> neighbourRResources = wgs.getPlayerResources((player + 1) % wgs.getNPlayers()); // Resources available to the neighbour on right
+
+                    int combined = neighbourLResources.get(resource) + neighbourRResources.get(resource);
+                    if (combined < amountToBuy) {
+                        throw new AssertionError("We cannot buy the resources for this card so should not be here");
+                    }
+                    // we buy preferentially from one of the players
+                    int randomNumber = wgs.getRnd().nextInt(2); // Randomly chooses which neighbour to buy from
+                    HashMap<Wonders7Constants.Resource, Integer> firstPreference = (randomNumber == 0) ? neighbourLResources : neighbourRResources;
+                    HashMap<Wonders7Constants.Resource, Integer> secondPreference = (randomNumber == 0) ? neighbourRResources : neighbourLResources;
+
+                    int amountFromFirstPreference = Math.min(firstPreference.get(resource), amountToBuy);
+                    if (amountFromFirstPreference > 0) {
+                        firstPreference.put(Coin, firstPreference.get(Coin) + nCostNeighbourResource * amountFromFirstPreference); // Neighbour receives coins from player
+                        playerResources.put(Coin, playerResources.get(Coin) - amountFromFirstPreference * nCostNeighbourResource); // Player pays coins to neighbour
+                    }
+                    amountToBuy -= amountFromFirstPreference;
+                    if (amountToBuy > 0) {
+                        secondPreference.put(Coin, secondPreference.get(Coin) + nCostNeighbourResource * amountToBuy); // Neighbour receives coins from player
+                        playerResources.put(Coin, playerResources.get(Coin) - amountToBuy * nCostNeighbourResource); // Player pays coins to neighbour
+                    }
                 }
             }
-            if (!extendedChoice.isEmpty()) {
-                // The player has a choice as to how to distribute payment
-//                wgs.setActionInProgress(this);  // TODO set this up for distribution of resources to neighbours
-                return false;
-            }
-
-            // Gives player to the right their money and removes coins from current player
-            int currentPlayerCoins = playerResources.get(Wonders7Constants.Resource.Coin); // Current players coin count
-            int neighbourCoins = wgs.getPlayerResources((player + 1) % wgs.getNPlayers()).get(Wonders7Constants.Resource.Coin); // Neighbour's coin count
-            playerResources.put(Wonders7Constants.Resource.Coin, currentPlayerCoins - coinCost); // Player pays coins to neighbour
-            wgs.getPlayerResources((player + 1) % wgs.getNPlayers()).put(Wonders7Constants.Resource.Coin, neighbourCoins + coinCost); // Neighbour receives coins for player
         }
 
         // Gives player resources produced from card
         Set<Wonders7Constants.Resource> keys = card.resourcesProduced.keySet(); // Gets all the resources the card provides
-        for (Wonders7Constants.Resource resource: keys){  // Goes through all keys for each resource
+        for (
+                Wonders7Constants.Resource resource : keys) {  // Goes through all keys for each resource
             int cardValue = card.getNProduced(resource); // Number of resource the card provides
             int playerValue = playerResources.get(resource); // Number of resource the player owns
             playerResources.put(resource, playerValue + cardValue); // Adds the resources provided by the card to the players resource count
         }
 
         // remove the card from the players hand to the playedDeck
-        playerHand.remove(card);
+        boolean cardFound = playerHand.remove(card);
+        if (!cardFound) {
+            throw new AssertionError("Card not found in player hand");
+        }
         wgs.getPlayedCards(player).add(card);
         return true;
     }
@@ -160,5 +144,7 @@ public class PlayCard extends DrawCard {
     }
 
     @Override
-    public PlayCard copy(){ return this; }
+    public PlayCard copy() {
+        return this;
+    }
 }

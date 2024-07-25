@@ -53,10 +53,15 @@ public class GTGameState extends AbstractGameState {
      * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
      * of other players or a face-down deck), then these components should instead be randomized (in the previous examples,
      * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
-     * for the other players).</p>
+     * for the other players). This process is also called 'redeterminisation'.</p>
+     * <p>There are some utilities to assist with this in utilities.DeterminisationUtilities. One firm is guideline is
+     * that the standard random number generator from getRnd() should not be used in this method. A separate Random is provided
+     * for this purpose - redeterminisationRnd.
+     *  This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)</p>
      * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
      *
      * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
+     *
      *
      * @param playerId - player observing this game state.
      */
@@ -128,4 +133,20 @@ public class GTGameState extends AbstractGameState {
     // TODO: as soon as a player achieves a winning condition, and has some bespoke method for determining 1st, 2nd, 3rd etc.
     // TODO: Then you *may* want to implement:.
     //public int getOrdinalPosition(int playerId);
+
+    // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
+    // TODO: So you do not (and generally should not) implement your own versions - take advantage of the framework!
+    // public Random getRnd() returns a Random number generator for the game. This will be derived from the seed
+    // in game parameters, and will be updated correctly on a reset
+
+    // Ths following provide access to the id of the current player; the first player in the Round (if that is relevant to a game)
+    // and the current Turn and Round numbers.
+    // public int getCurrentPlayer()
+    // public int getFirstPlayer()
+    // public int getRoundCounter()
+    // public int getTurnCounter()
+    // also make sure you check out the standard endPlayerTurn() and endRound() methods in StandardForwardModel
+
+    // This method can be used to log a game event (e.g. for something game-specific that you want to include in the metrics)
+    // public void logEvent(IGameEvent...)
 }

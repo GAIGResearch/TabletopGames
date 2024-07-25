@@ -18,6 +18,8 @@ public class Fold extends AbstractAction implements IPrintable {
         PokerGameState pgs = (PokerGameState) gameState;
         pgs.getPlayerFold()[playerId] = true;
         pgs.getPlayerNeedsToCall()[playerId] = false;
+        if (pgs.getPlayerAllIn()[playerId])
+            throw new AssertionError("Should not be able to Fold if AllIn");
         return true;
     }
 

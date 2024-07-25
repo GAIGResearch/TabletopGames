@@ -33,15 +33,13 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      * @param firstState - the state to be modified to the initial game state.
      */
     protected void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
-
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
         ExplodingKittensParameters ekp = (ExplodingKittensParameters)firstState.getGameParameters();
         ekgs.playerHandCards = new ArrayList<>();
         ekgs.playerGettingAFavor = -1;
         ekgs.actionStack = null;
         // Set up draw pile deck
-        PartialObservableDeck<ExplodingKittensCard> drawPile = new PartialObservableDeck<>("Draw Pile", firstState.getNPlayers());
+        PartialObservableDeck<ExplodingKittensCard> drawPile = new PartialObservableDeck<>("Draw Pile", -1, firstState.getNPlayers(), VisibilityMode.HIDDEN_TO_ALL);
         ekgs.setDrawPile(drawPile);
 
         // Add all cards but defuse and exploding kittens
@@ -53,14 +51,14 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                 drawPile.add(card);
             }
         }
-        ekgs.getDrawPile().shuffle(rnd);
+        ekgs.getDrawPile().shuffle(ekgs.getRnd());
 
         // Set up player hands
         List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards = new ArrayList<>(firstState.getNPlayers());
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = true;
-            PartialObservableDeck<ExplodingKittensCard> playerCards = new PartialObservableDeck<>("Player Cards", visible);
+            PartialObservableDeck<ExplodingKittensCard> playerCards = new PartialObservableDeck<>("Player Cards", i, visible);
             playerHandCards.add(playerCards);
 
             // Add defuse card
@@ -87,7 +85,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
             ExplodingKittensCard explodingKitten = new ExplodingKittensCard(ExplodingKittensCard.CardType.EXPLODING_KITTEN);
             drawPile.add(explodingKitten);
         }
-        drawPile.shuffle(rnd);
+        drawPile.shuffle(ekgs.getRnd());
 
         ekgs.setActionStack(new Stack<>());
         ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];

@@ -32,8 +32,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
 
     boolean[] playerNeedsToCall;  // True if player needs to call (can't just check)
     boolean[] playerFold;  // True if player folded
+    boolean[] playerAllIn; // True if player is all-in
     boolean[] playerActStreet;  // true if player acted this street, false otherwise
     boolean bet;  // True if a bet was made this street
+    protected int bigId; // Stores the id of the previous big blind
 
     enum PokerGamePhase implements IGamePhase {
         Preflop,
@@ -68,19 +70,6 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
             this.addAll(Arrays.asList(playerMoney));
             this.addAll(Arrays.asList(playerBet));
         }};
-    }
-
-    public int getNextPlayer() {
-        int next = (nPlayers + turnOwner + 1) % nPlayers;
-        int nTries = 1;
-        while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME) && nTries <= getNPlayers()) {
-            next = (nPlayers + next + 1) % nPlayers;
-            nTries++;
-        }
-//        if (nTries > getNPlayers()) {
-//            endGame(gameState);
-//        }
-        return next;
     }
 
     public void placeBet(int amount, int player) {
@@ -170,6 +159,10 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         return playerNeedsToCall;
     }
 
+    public boolean[] getPlayerAllIn() {
+        return playerAllIn;
+    }
+
     public boolean[] getPlayerFold() {
         return playerFold;
     }
@@ -188,6 +181,72 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
 
     public void setBet(boolean bet) {
         this.bet = bet;
+    }
+
+    public int getBigId() {
+        return bigId;
+    }
+
+    /***
+     * Player to the right of big blind is small blind
+     *
+     * @return the id of the player with small blind
+     */
+    public int getSmallId() {
+        return getNextNonBankruptPlayer(getBigId(), -1);
+    }
+
+    public boolean playersLeftToAct() {
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (playerFold[p] || playerAllIn[p] || getPlayerResults()[p] == LOSE_GAME)
+                continue;
+            if (playerNeedsToCall[p] || !playerActStreet[p])
+                return true;
+        }
+        return false;
+    }
+
+    public boolean checkRoundOver() {
+        int stillAlive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (getPlayerResults()[i] != LOSE_GAME && !playerFold[i] && !playerAllIn[i]) {
+                stillAlive++;
+            }
+        }
+        if (stillAlive <= 1) {
+            return true;
+        }
+        return false;
+    }
+
+    public int getNextActingPlayer(int fromPlayer, int direction) {
+        int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        int nTries = 0;
+        while ((playerFold[next] || playerAllIn[next] || getPlayerResults()[next] == LOSE_GAME)) {
+            next = (nPlayers + next + direction) % nPlayers;
+            nTries++;
+            if (nTries > getNPlayers()) {
+                return -1;
+            }
+        }
+        return next;
+    }
+
+    public int getNextNonBankruptPlayer(int fromPlayer, int direction) {
+        int next = (nPlayers + fromPlayer + direction) % nPlayers;
+        while (getPlayerResults()[next] == LOSE_GAME) {
+            next = (nPlayers + next + direction) % nPlayers;
+        }
+        return next;
+    }
+
+    public void otherPlayerMustCall(int playerId) {
+        // Others can't check
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (i != playerId && !playerFold[i] && !playerAllIn[i] && getPlayerResults()[i] != LOSE_GAME) {
+                playerNeedsToCall[i] = true;
+            }
+        }
     }
 
     @Override
@@ -214,7 +273,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
                     copy.playerDecks.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(new Random(copy.gameParameters.getRandomSeed()));
+            copy.drawDeck.shuffle(redeterminisationRnd);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
@@ -225,6 +284,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         }
         copy.playerNeedsToCall = playerNeedsToCall.clone();
         copy.playerFold = playerFold.clone();
+        copy.playerAllIn = playerAllIn.clone();
         copy.playerActStreet = playerActStreet.clone();
         copy.bet = bet;
         return copy;
@@ -264,7 +324,15 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Arrays.equals(playerMoney, that.playerMoney) && Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Objects.equals(moneyPots, that.moneyPots) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet);
+        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) &&
+                Arrays.equals(playerMoney, that.playerMoney) &&
+                Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck)
+                && Objects.equals(communityCards, that.communityCards) &&
+                Objects.equals(moneyPots, that.moneyPots) &&
+                Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) &&
+                Arrays.equals(playerFold, that.playerFold) &&
+                Arrays.equals(playerActStreet, that.playerActStreet) &&
+                Arrays.equals(playerAllIn, that.playerAllIn);
     }
 
     @Override

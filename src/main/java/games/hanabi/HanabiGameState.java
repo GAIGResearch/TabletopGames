@@ -64,6 +64,9 @@ public class HanabiGameState extends AbstractGameState implements IPrintable {
         copy.discardDeck = discardDeck.copy();
         copy.hintCounter = hintCounter.copy();
         copy.failCounter = failCounter.copy();
+
+        // TODO: This needs to redeterminise the hidden information
+        // As currently implemented all players will see the same information
         return copy;
     }
     public Deck<HanabiCard> getDrawDeck() {

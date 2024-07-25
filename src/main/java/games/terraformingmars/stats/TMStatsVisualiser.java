@@ -98,7 +98,7 @@ public class TMStatsVisualiser extends StatsVisualiser {
 
         // Custom TM Heatmap (percentage of times the tile was placed out of all games played)
         //  - Construct heatmap view
-        TMGameState gs = new TMGameState(new TMGameParameters(0), 2);
+        TMGameState gs = new TMGameState(new TMGameParameters(), 2);
         TMForwardModel fm = new TMForwardModel();
         fm.setup(gs);
         TAGOccurrenceStatSummary stats2 = (TAGOccurrenceStatSummary)getStats("MapTiles", Event.GameEvent.GAME_OVER);

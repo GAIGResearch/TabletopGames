@@ -1,0 +1,14 @@
+{
+        "game" : "Dominion",
+        "nPlayers" : 3,
+        "playerDirectory" : "Dominion_Agents",
+        "focusPlayer" : "Dominion_Agent.json",
+        "selfPlay" : false,
+        "mode" : "sequential",
+        "matchups" : 10,
+        "distinctRandomSeeds" : 0,
+        "verbose" : false,
+        "listener" : "GameResultsListener.json",
+        "destDir" : "SeedTest\\Focus",
+        "seed" : 740334
+}

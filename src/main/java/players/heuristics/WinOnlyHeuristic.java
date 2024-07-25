@@ -11,4 +11,12 @@ public class WinOnlyHeuristic implements IStateHeuristic {
                 return 0.5;
         return  gs.getPlayerResults()[playerId].value;
     }
+    @Override
+    public double minValue() {
+        return 0.0;
+    }
+    @Override
+    public double maxValue() {
+        return 1.0;
+    }
 }

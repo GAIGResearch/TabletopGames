@@ -6,6 +6,7 @@ import games.GameType;
 import games.dominion.DominionFGParameters;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
+import games.dominion.DominionParameters;
 import org.junit.*;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
@@ -22,11 +23,12 @@ public class MCTSNodesAndVisitsTests {
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
-        params.maxTreeDepth = 20;
+        params.maxTreeDepth = 50;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
@@ -41,7 +43,9 @@ public class MCTSNodesAndVisitsTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(244)));
-        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(new DominionFGParameters(330245), players.size()));
+        DominionParameters dp = new DominionParameters();
+        dp.setRandomSeed(330245);
+        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(dp, players.size()));
     }
 
     @Test
@@ -64,12 +68,13 @@ public class MCTSNodesAndVisitsTests {
     }
 
     @Test
-    public void maxN() {
+    public void oneTree() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};
         int[] errorMargin = {10, 10, 10, 10};
-        runGame(game, 4, expectedNodes, errorMargin);    }
+        runGame(game, 4, expectedNodes, errorMargin);
+    }
 
     @Test
     public void RegretMatching() {
@@ -86,7 +91,8 @@ public class MCTSNodesAndVisitsTests {
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};
         int[] errorMargin = {10, 10, 10, 10};
-        runGame(game, 4, expectedNodes, errorMargin);    }
+        runGame(game, 4, expectedNodes, errorMargin);
+    }
 
     @Test
     public void reducedDepth3MaxN() {
@@ -118,6 +124,17 @@ public class MCTSNodesAndVisitsTests {
             if (state.getCurrentPlayer() == 0) {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
                 assertEquals(200, mctsPlayer.getRoot(0).getVisits());
+                int childVisits = mctsPlayer.getRoot(0).actionValues.values().stream()
+                        .mapToInt(actionStats -> actionStats.nVisits).sum();
+                assertEquals(200, childVisits);
+                for (AbstractAction child : mctsPlayer.getRoot(0).actionValues.keySet()) {
+                    int timesActionTaken = mctsPlayer.getRoot(0).actionValues.get(child).nVisits;
+                    if (timesActionTaken > 0)
+                        assertEquals(timesActionTaken - 1,
+                                Arrays.stream(mctsPlayer.getRoot(0).children.get(child))
+                                        .filter(Objects::nonNull)
+                                        .mapToInt(SingleTreeNode::getVisits).sum());
+                }
                 if (params.maxTreeDepth == 3)
                     assertEquals(3, stats.depthReached);
                 else {

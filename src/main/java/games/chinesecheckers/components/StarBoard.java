@@ -102,7 +102,7 @@ public class StarBoard extends Component implements IComponentContainer<CCNode> 
     private void loadNodeBaseColours(){
         // technically we would not have access to CCParameters here...but it prettifies the code
         // enough to be warranted
-        CCParameters params = new CCParameters(0);
+        CCParameters params = new CCParameters();
         // Load Purple Nodes
         for (Peg.Colour colour : params.colourIndices.keySet()) {
             for (int i : params.colourIndices.get(colour)) {

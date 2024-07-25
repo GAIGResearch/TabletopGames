@@ -5,12 +5,16 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
+import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
+import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
+import org.json.simple.JSONObject;
+import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -29,7 +33,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
+import static evaluation.RunArg.byTeam;
+import static evaluation.RunArg.matchups;
 import static java.util.stream.Collectors.joining;
 
 public class NTBEA {
@@ -78,7 +83,6 @@ public class NTBEA {
                 } catch (NoSuchMethodException e) {
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " has no no-arg constructor");
                 } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
                     throw new AssertionError("evaluation.heuristics." + params.evalMethod + " reflection error");
                 }
             }
@@ -98,15 +102,12 @@ public class NTBEA {
         // Initialise the GameEvaluator that will do all the heavy lifting
         evaluator = new GameEvaluator(
                 game,
-                params.searchSpace,
-                params.gameParams,
+                params,
                 nPlayers,
                 opponents,
-                params.seed,
                 stateHeuristic,
                 gameHeuristic,
-                true
-        );
+                true);
     }
 
     public void setOpponents(List<AbstractPlayer> opponents) {
@@ -118,6 +119,17 @@ public class NTBEA {
         elites.add(settings);
     }
 
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            JSONObject json = params.searchSpace.getAgentJSON(settings);
+            json.put("budget", params.budget);
+            writer.write(JSONUtils.prettyPrint(json, 1));
+        } catch (IOException e) {
+            throw new AssertionError("Error writing agent settings to file " + fileName);
+        }
+    }
+
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *
@@ -127,6 +139,8 @@ public class NTBEA {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
+            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
+                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
         }
 
         // After all runs are complete, if tournamentGames are specified, then we allow all the
@@ -155,14 +169,20 @@ public class NTBEA {
                 System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
                         "check the repeats options is at least equal to the number of players.");
             } else {
-                long permutationsOfPlayers = CombinatoricsUtils.factorial(players.size()) / CombinatoricsUtils.factorial(players.size() - nTeams);
-                int gamesPerMatchup = (int) Math.ceil((double) params.tournamentGames / permutationsOfPlayers);  // we round up.
-                if (params.verbose)
-                    System.out.printf("Running %d games per matchup, %d total games, %d permutations%n",
-                            gamesPerMatchup, gamesPerMatchup * permutationsOfPlayers, permutationsOfPlayers);
-
-                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, params.gameParams, params.byTeam);
-                tournament.verbose = false;
+                Map<RunArg, Object> config = new HashMap<>();
+                config.put(matchups, params.tournamentGames);
+                if (players.size() < nPlayers) {
+                    // if we don't have enough players to fill the game, then we will need to use self-play
+                    config.put(RunArg.mode, "exhaustiveSP");
+                } else {
+                    config.put(RunArg.mode, "exhaustive");
+                }
+                config.put(byTeam, true);
+                config.put(RunArg.distinctRandomSeeds, 0);
+                config.put(RunArg.budget, params.budget);
+                config.put(RunArg.verbose, false);
+                config.put(RunArg.destDir, params.destDir);
+                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
                 createListeners().forEach(tournament::addListener);
                 tournament.run();
                 // create a new list of results in descending order of score
@@ -208,6 +228,8 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
+        writeAgentJSON(bestResult.b,
+                params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
     }
 
