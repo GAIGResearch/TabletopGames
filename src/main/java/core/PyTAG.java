@@ -12,15 +12,20 @@ import games.GameType;
 import games.catan.CatanFeatures;
 import games.diamant.DiamantFeatures;
 import games.dotsboxes.DBFeatures;
-import games.loveletter.LLStateFeaturesReduced;
+import games.loveletter.features.LLStateFeaturesReduced;
+import games.loveletter.features.LoveLetterFeatures;
 import games.stratego.StrategoFeatures;
 import games.sushigo.SGFeatures;
 import games.tictactoe.TTTFeatures;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
 import org.json.simple.JSONObject;
 import players.heuristics.LeaderHeuristic;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
 import players.heuristics.WinOnlyHeuristic;
+import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
@@ -29,7 +34,10 @@ import utilities.ActionTreeNode;
 import games.explodingkittens.*;
 
 
+import javax.swing.Timer;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -48,7 +56,7 @@ enum FeatureExtractors {
     /* Every game implementing the RL interfaces should be registered here, PyTAG uses this to reference the correct features extractors and action spaces
     * In case that an interface is not implemented they can be set to null*/
     ExplodingKittens( ExplodingKittensFeatures.class, null),
-    LoveLetter(LLStateFeaturesReduced.class, null),
+    LoveLetter(LLStateFeaturesReduced.class, null), // LoveLetterFeatures.class), // todo lost
     Stratego(StrategoFeatures.class, null),
     SushiGo(null, SGFeatures.class),
     TicTacToe(TTTFeatures.class, TTTFeatures.class),
@@ -254,6 +262,14 @@ public class PyTAG {
         return leaves.stream()
                 .mapToInt(ActionTreeNode::getValue)
                 .toArray();
+    }
+
+    public String[] getActionMaskNames(){
+        // todo this actually returns a lot of low-level information
+        // check on the action tree
+        return leaves.stream()
+                .map(ActionTreeNode::getName)
+                .toArray(String[]::new);
     }
 
     // gets the whole action tree as an array (tree can be reconstructed using the getTreeShape() function)
@@ -479,7 +495,7 @@ public class PyTAG {
 
         try {
             // Initialise the game
-            PyTAG env = new PyTAG(GameType.valueOf("Catan"), null, players, 343,
+            PyTAG env = new PyTAG(GameType.valueOf("SushiGo"), null, players, 343,
                     true, RewardType.SCORE);
             if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
