@@ -1,32 +1,39 @@
 package games.cluedo;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.BoardNode;
-import core.components.Deck;
 import core.components.GraphBoard;
 import core.components.PartialObservableDeck;
 import games.cluedo.actions.*;
 import games.cluedo.cards.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-public class CluedoForwardModel extends AbstractForwardModel {
+public class CluedoForwardModel extends StandardForwardModel {
+
+    HashMap<String, BoardNode> roomNameToNode = new HashMap<>();
+    HashMap<String, Integer> characterNameToIndex = new HashMap<>() {{
+        int i=0;
+        for (CluedoConstants.Character character : CluedoConstants.Character.values()) {
+            put(character.name(), i);
+            i++;
+        }
+    }};
+
     @Override
     protected void _setup(AbstractGameState firstState) {
         CluedoGameState cgs = (CluedoGameState) firstState;
 
         cgs.characterToPlayerMap = new HashMap<>();
-        cgs.playerHandCards = new ArrayList<PartialObservableDeck<CluedoCard>>();
-        cgs.caseFile = new PartialObservableDeck<CluedoCard>("Case File", -1, new boolean[cgs.getNPlayers()]);
+        cgs.playerHandCards = new ArrayList<>();
+        cgs.caseFile = new PartialObservableDeck<>("Case File", -1, new boolean[cgs.getNPlayers()]);
         cgs.gameBoard = new GraphBoard("Game Board");
-        cgs.characterLocations = new ArrayList<BoardNode>();
-        cgs.currentGuess = new PartialObservableDeck<CluedoCard>("Current Guess", -1, new boolean[cgs.getNPlayers()]);
+        cgs.characterLocations = new ArrayList<>();
+        cgs.currentGuess = new PartialObservableDeck<>("Current Guess", -1, new boolean[cgs.getNPlayers()]);
 
         // Initialise the board // TODO change the initialisation so that we can include 'corridor' segments
         BoardNode startNode = new BoardNode(CluedoConstants.Room.values().length, "START");
@@ -34,6 +41,7 @@ public class CluedoForwardModel extends AbstractForwardModel {
         // For each room, create a BoardNode
         for (CluedoConstants.Room room : CluedoConstants.Room.values()) {
             BoardNode roomNode = new BoardNode(CluedoConstants.Room.values().length, room.name());
+            roomNameToNode.put(roomNode.getComponentName(), roomNode);
             cgs.gameBoard.addBoardNode(roomNode);
             // Add an edge to all previous nodes in the GraphBoard
             for (BoardNode node : cgs.gameBoard.getBoardNodes()) {
@@ -64,7 +72,7 @@ public class CluedoForwardModel extends AbstractForwardModel {
         cgs.caseFile.add(randomWeaponCard, new boolean[cgs.getNPlayers()]);
 
         // Create the deck of all cards (Characters, Weapons and Rooms) without the 3 cards in the caseFile
-        cgs.allCards = new PartialObservableDeck<CluedoCard>("All Cards", -1, new boolean[cgs.getNPlayers()]);
+        cgs.allCards = new PartialObservableDeck<>("All Cards", -1, new boolean[cgs.getNPlayers()]);
         for (CluedoConstants.Character character : CluedoConstants.Character.values()) {
             if (!character.equals(randomCharacter)) {
                 cgs.allCards.add(new CharacterCard(character));
@@ -111,15 +119,6 @@ public class CluedoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action) {
-        CluedoGameState cgs = (CluedoGameState) gameState;
-        // TODO _next
-        // Note! once chooseCharacter gamePhase ends, set currentTurnPlayerId to cgs.characterToPlayerMap.get(0);
-        // ie first player is the person playing Scarlett
-        // OR be smarter and set it to the first character in the turn order that has an associated player
-    }
-
-    @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         CluedoGameState cgs = (CluedoGameState) gameState;
         List<AbstractAction> actions = new ArrayList<>();
@@ -128,7 +127,7 @@ public class CluedoForwardModel extends AbstractForwardModel {
             // Player can choose any unchosen character
             for (int i=0; i<CluedoConstants.Character.values().length; i++) {
                 if (!cgs.characterToPlayerMap.containsKey(i)) {
-                    actions.add(new ChooseCharacter(i, cgs.getCurrentPlayer()));
+                    actions.add(new ChooseCharacter(cgs.turnOrder.getTurnOwner(), i));
                 }
             }
 
@@ -151,10 +150,10 @@ public class CluedoForwardModel extends AbstractForwardModel {
             }
 
         } else if (cgs.getGamePhase() == CluedoGameState.CluedoGamePhase.revealCards) {
-            PartialObservableDeck<CluedoCard> playerHand = cgs.getPlayerHandCards().get(cgs.getCurrentPlayer());
+            PartialObservableDeck<CluedoCard> playerHand = cgs.getPlayerHandCards().get(cgs.turnOrder.getTurnOwner());
             for (int i=0; i<playerHand.getSize(); i++) {
                 if (cgs.currentGuess.contains(playerHand.get(i))) {
-                    actions.add(new ShowHintCard(cgs.getCurrentPlayer(), cgs.currentTurnPlayerId, i));
+                    actions.add(new ShowHintCard(cgs.turnOrder.getTurnOwner(), cgs.currentTurnPlayerId, i));
                 }
             }
             if (actions.isEmpty()) {
@@ -162,17 +161,108 @@ public class CluedoForwardModel extends AbstractForwardModel {
             }
         }
 
+        if (cgs.getGamePhase() == CluedoGameState.CluedoGamePhase.makeAccusation
+                && cgs.currentGuess.getSize() == 0) {
+            actions.add(new DoNothing()); // choose to not accuse
+        }
+
         return actions;
     }
 
     @Override
-    protected void endPlayerTurn(AbstractGameState state) {
-        CluedoGameState cgs = (CluedoGameState) state;
-        cgs.getTurnOrder().endPlayerTurn(cgs);
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
+        CluedoGameState cgs = (CluedoGameState) gameState;
+
+        if (cgs.getGamePhase() == CluedoGameState.CluedoGamePhase.chooseCharacter) {
+            cgs.turnOrder.setTurnOwner(cgs.turnOrder.nextPlayer(cgs));
+            if (cgs.characterToPlayerMap.size() == cgs.getNPlayers()) {
+                // Change turn order to be in order of character index, rather than playerId
+                cgs.turnOrder.setTurnOrder(cgs.characterToPlayerMap);
+
+                // set the next player
+                cgs.turnOrder.setTurnOwner(cgs.turnOrder.getNextPlayer());
+
+                cgs.setGamePhase(CluedoGameState.CluedoGamePhase.makeSuggestion);
+            }
+
+        } else if (cgs.getGamePhase() == CluedoGameState.CluedoGamePhase.makeSuggestion) {
+            cgs.currentTurnPlayerId = cgs.turnOrder.getTurnOwner();
+            if (cgs.currentGuess.getSize() == 1) { // last action was to suggest a room
+                // Get current character index
+                Integer currentCharacterIndex = getKeyByValue(cgs.characterToPlayerMap, cgs.turnOrder.getTurnOwner());
+                // Get the boardNode corresponding to the suggested room
+                BoardNode destinationRoomNode = roomNameToNode.get(cgs.currentGuess.get(0).getName());
+                // Move the character to the room
+                cgs.characterLocations.set(currentCharacterIndex, destinationRoomNode);
+            }
+            if (cgs.currentGuess.getSize() == 2) { // last action was to suggest a character
+                // Get suggested character index
+                Integer suggestedCharacterIndex = characterNameToIndex.get(cgs.currentGuess.get(0).getName());
+                // Get the boardNode corresponding to the suggested room
+                BoardNode destinationRoomNode = roomNameToNode.get(cgs.currentGuess.get(1).getName());
+                // Move the character to the room
+                cgs.characterLocations.set(suggestedCharacterIndex, destinationRoomNode);
+            }
+            if (cgs.currentGuess.getSize() == 3) { // last action was to suggest a weapon
+                // add all players to reactive turn order (excluding current player) in order of character index
+                for (int playerId : cgs.turnOrder.playerQueue) {
+                    if (playerId != cgs.turnOrder.playerQueue.peek()) {
+                        cgs.turnOrder.addReactivePlayer(playerId);
+                    }
+                }
+                // set the next player
+                cgs.turnOrder.setTurnOwner(cgs.turnOrder.getNextPlayer());
+
+                cgs.setGamePhase(CluedoGameState.CluedoGamePhase.revealCards);
+            }
+
+        } else if (cgs.getGamePhase() == CluedoGameState.CluedoGamePhase.revealCards) {
+            if (action instanceof DoNothing) {
+                cgs.turnOrder.setTurnOwner(cgs.turnOrder.getNextPlayer());
+            } else {
+                cgs.turnOrder.resetReactivePlayers();
+                cgs.turnOrder.setTurnOwner(cgs.currentTurnPlayerId);
+                cgs.setGamePhase(CluedoGameState.CluedoGamePhase.makeAccusation);
+                cgs.currentGuess.clear();
+            }
+
+        } else if (cgs.getGamePhase() == CluedoGameState.CluedoGamePhase.makeAccusation) {
+            if (action instanceof DoNothing) {
+                cgs.turnOrder.setTurnOwner(cgs.turnOrder.getNextPlayer());
+                cgs.setGamePhase(CluedoGameState.CluedoGamePhase.makeSuggestion);
+            }
+            if (cgs.currentGuess.getSize() == 3) {
+                if (guessMatchesCaseFile(cgs)) {
+                    cgs.setGameStatus(CoreConstants.GameResult.GAME_END);
+                    for (int i=0; i < cgs.getNPlayers(); i++) {
+                        cgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
+                    }
+                    cgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, cgs.turnOrder.getTurnOwner());
+                } else {
+                    cgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, cgs.turnOrder.getTurnOwner());
+                }
+            }
+        }
+
+
     }
 
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new CluedoForwardModel();
+    private boolean guessMatchesCaseFile(AbstractGameState gameState) {
+        CluedoGameState cgs = (CluedoGameState) gameState;
+
+        System.out.println(cgs.currentGuess);
+        System.out.println(cgs.caseFile);
+
+        return cgs.currentGuess.equals(cgs.caseFile);
     }
+
+    private static <T, E> T getKeyByValue(HashMap<T, E> map, E value) {
+        for (T key : map.keySet()) {
+            if (Objects.equals(value, map.get(key))) {
+                return key;
+            }
+        }
+        return null;
+    }
+
 }

@@ -211,7 +211,7 @@ public enum GameType {
             Arrays.asList(Simple, Abstract, CodeBreaking),
             Arrays.asList(),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
-    Cluedo(2,5,
+    Cluedo(2,6,
             Arrays.asList(Strategy, Cards, Deduction),
             Arrays.asList(),
             CluedoGameState.class, CluedoForwardModel.class, CluedoParameters.class, CluedoGUIManager.class);

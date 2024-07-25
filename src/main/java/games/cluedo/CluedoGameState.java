@@ -35,7 +35,7 @@ public class CluedoGameState extends AbstractGameState {
 
     int currentTurnPlayerId;
 
-    ReactiveTurnOrder turnOrder;
+    CluedoTurnOrder turnOrder;
 
     /**
      * @param gameParameters - game parameters.
@@ -46,8 +46,8 @@ public class CluedoGameState extends AbstractGameState {
         turnOrder = _createTurnOrder(nPlayers);
     }
 
-    protected ReactiveTurnOrder _createTurnOrder(int nPlayers){
-        return new ReactiveTurnOrder(nPlayers);
+    protected CluedoTurnOrder _createTurnOrder(int nPlayers){
+        return new CluedoTurnOrder(nPlayers);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CluedoGameState extends AbstractGameState {
         copy.gameBoard = gameBoard.copy();
         copy.characterLocations = new ArrayList<>();
         copy.currentTurnPlayerId = currentTurnPlayerId;
-        copy.turnOrder = (ReactiveTurnOrder) turnOrder.copy();
+        copy.turnOrder = (CluedoTurnOrder) turnOrder.copy();
 
         for (int i = 0; i < nPlayers; i++) {
             copy.characterToPlayerMap.put(i, characterToPlayerMap.get(i));
@@ -134,10 +134,6 @@ public class CluedoGameState extends AbstractGameState {
 
     public PartialObservableDeck<CluedoCard> getAllCards() {
         return allCards;
-    }
-
-    public ReactiveTurnOrder getTurnOrder() {
-        return turnOrder;
     }
 
 }

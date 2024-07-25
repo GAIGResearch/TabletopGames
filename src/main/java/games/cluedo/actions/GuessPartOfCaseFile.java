@@ -4,46 +4,40 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.cluedo.CluedoConstants;
 import games.cluedo.CluedoGameState;
-import games.cluedo.cards.CharacterCard;
 import games.cluedo.cards.CluedoCard;
-import games.cluedo.cards.RoomCard;
-import games.cluedo.cards.WeaponCard;
 
 import java.util.Objects;
 
 public class GuessPartOfCaseFile extends AbstractAction  {
     CluedoCard guessCard;
+    String guessName;
 
     public GuessPartOfCaseFile(AbstractGameState gameState, CluedoConstants.Character guess) {
+        guessPartOfCaseFile(gameState, guess);
+    }
+
+    public GuessPartOfCaseFile(AbstractGameState gameState, CluedoConstants.Weapon guess) {
+        guessPartOfCaseFile(gameState, guess);
+    }
+
+    public GuessPartOfCaseFile(AbstractGameState gameState, CluedoConstants.Room guess) {
+        guessPartOfCaseFile(gameState, guess);
+    }
+
+    private void guessPartOfCaseFile(AbstractGameState gameState, Object guess) {
         CluedoGameState cgs = (CluedoGameState) gameState;
+        guessName = guess.toString();
         for (CluedoCard card : cgs.getAllCards()) {
-            if (Objects.equals(card.getComponentName(), guess.name())) {
+            if (Objects.equals(card.getComponentName(), guess.toString())) {
                 guessCard = card;
                 break;
             }
         }
     }
 
-    public GuessPartOfCaseFile(AbstractGameState gameState, CluedoConstants.Weapon guess) {
-        CluedoGameState cgs = (CluedoGameState) gameState;
-        for (CluedoCard card : cgs.getAllCards()) {
-            if (Objects.equals(card.getComponentName(), guess.name())) {
-                guessCard = card;
-                break;
-            }
-        }    }
-
-    public GuessPartOfCaseFile(AbstractGameState gameState, CluedoConstants.Room guess) {
-        CluedoGameState cgs = (CluedoGameState) gameState;
-        for (CluedoCard card : cgs.getAllCards()) {
-            if (Objects.equals(card.getComponentName(), guess.name())) {
-                guessCard = card;
-                break;
-            }
-        }    }
-
-    private GuessPartOfCaseFile(CluedoCard card) {
+    private GuessPartOfCaseFile(CluedoCard card, String cardName) {
         guessCard = card;
+        guessName = cardName;
     }
 
     @Override
@@ -58,7 +52,7 @@ public class GuessPartOfCaseFile extends AbstractAction  {
 
     @Override
     public AbstractAction copy() {
-        return new GuessPartOfCaseFile(guessCard);
+        return new GuessPartOfCaseFile(guessCard, guessName);
     }
 
     @Override
@@ -66,17 +60,23 @@ public class GuessPartOfCaseFile extends AbstractAction  {
         if (this == o) return true;
         if (!(o instanceof GuessPartOfCaseFile)) return false;
         GuessPartOfCaseFile that = (GuessPartOfCaseFile) o;
-        return guessCard == that.guessCard;
+        return Objects.equals(guessCard, that.guessCard)
+                && Objects.equals(guessName, that.guessName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(guessCard);
+        return Objects.hash(guessCard, guessName);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         return "GuessPartOfCaseFile{" +
-                "guessCard=" + (guessCard != null? guessCard : "guess-card-not-found");
+                "guessCard=" + (guessCard != null? guessCard : "guess-card-not-found") +
+                "guessName=" + (guessName != null? guessName : "guess-name-not-found");
+    }
+
+    public String getGuessName() {
+        return guessName;
     }
 }

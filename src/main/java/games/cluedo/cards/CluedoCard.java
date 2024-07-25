@@ -1,7 +1,6 @@
 package games.cluedo.cards;
 
 import core.components.Card;
-import games.cluedo.CluedoConstants;
 
 public class CluedoCard extends Card {
 
@@ -26,4 +25,9 @@ public class CluedoCard extends Card {
     public String toString() {
         return cardName.toString();
     }
+
+    public String getName() {
+        return null;
+    }
+
 }

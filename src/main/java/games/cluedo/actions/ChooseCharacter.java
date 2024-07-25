@@ -19,7 +19,7 @@ public class ChooseCharacter extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CluedoGameState cgs = (CluedoGameState) gs;
         if (player != -1 && character != -1) {
-            cgs.characterToPlayerMap.put(player, character);
+            cgs.characterToPlayerMap.put(character, player);
             return true;
         }
         return false;
@@ -48,5 +48,9 @@ public class ChooseCharacter extends AbstractAction {
         return "ChooseCharacterAction{" +
                 "player=" + (player != -1? player : "player-not-found") +
                 "character=" + (character != -1? character : "character-not-found");
+    }
+
+    public Integer getCharacter() {
+        return character;
     }
 }

@@ -8,7 +8,14 @@ public class CluedoConstants {
         DR_ORCHID,
         REV_GREEN,
         MRS_PEACOCK,
-        PROF_PLUM
+        PROF_PLUM;
+
+        public static boolean contains(String test) {
+            for (Character character : Character.values()) {
+                if (character.name().equals(test)) { return true; }
+            }
+            return false;
+        }
     }
 
     public enum Weapon {
@@ -17,7 +24,14 @@ public class CluedoConstants {
         WRENCH,
         REVOLVER,
         CANDLESTICK,
-        LEAD_PIPE
+        LEAD_PIPE;
+
+        public static boolean contains(String test) {
+            for (Weapon weapon : Weapon.values()) {
+                if (weapon.name().equals(test)) { return true; }
+            }
+            return false;
+        }
     }
 
     public enum Room {
@@ -29,7 +43,14 @@ public class CluedoConstants {
         LIBRARY,
         BILLIARD_ROOM,
         CONSERVATORY,
-        BALLROOM
+        BALLROOM;
+
+        public static boolean contains(String test) {
+            for (Room room : Room.values()) {
+                if (room.name().equals(test)) { return true; }
+            }
+            return false;
+        }
     }
 
 }
