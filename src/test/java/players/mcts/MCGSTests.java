@@ -143,6 +143,7 @@ public class MCGSTests {
         Game game = createDotsAndBoxes(params);
         do {
             int p = game.getGameState().getCurrentPlayer();
+            System.out.println(game.getTick());
             game.oneAction();
             if (p == 0 && game.getTick() < 50) {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));

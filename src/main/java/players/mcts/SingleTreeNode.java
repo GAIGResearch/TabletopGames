@@ -1044,12 +1044,12 @@ public class SingleTreeNode {
 
         stats.update(result);
 
-        if (params.treePolicy == RegretMatching && this == root && nVisits >= actionsToConsider.size() && nVisits % Math.max(actionsToConsider.size(), 10) == 0) {
+        if (params.treePolicy == RegretMatching && nVisits >= actionsToConsider.size() && nVisits % Math.max(actionsToConsider.size(), 10) == 0) {
             // we update the average policy each time we have had the opportunity to take each action once (or every 10 visits, if that is greater)
             double[] av = actionValues(actionsToConsider);
             double[] pdf = pdf(av);
             for (int i = 0; i < actionsToConsider.size(); i++) {
-                root.regretMatchingAverage.merge(actionsToConsider.get(i), pdf[i], Double::sum);
+                regretMatchingAverage.merge(actionsToConsider.get(i), pdf[i], Double::sum);
             }
         }
 
@@ -1321,7 +1321,7 @@ public class SingleTreeNode {
                 actionName = actionName.substring(0, 50);
             valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
             if (params.opponentTreePolicy == OneTree) {
-                int players = children.get(actionsFromOpenLoopState.get(0)).length;
+                int players = state == null ? children.get(action).length : state.getNPlayers();
                 valueString = IntStream.range(0, players)
                         .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
                         .collect(joining(", "));

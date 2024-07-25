@@ -13,12 +13,16 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 
 public class ToadMCTSPlayer extends MCTSPlayer {
 
-    int actingPlayer;
     boolean functionalityApplies;
     AbstractAction flankAction;
 
     public ToadMCTSPlayer(MCTSParams params) {
         super(params);
+        playerID = -1; // not initialised
+        if (params.opponentTreePolicy == MultiTree && params.reuseTree) {
+            System.out.println("Warning: MultiTree with reuseTree is not supported in ToadMCTSPlayer");
+            params.setParameterValue("reuseTree", false);
+        }
     }
 
     private boolean functionalityApplies(AbstractGameState gameState) {
@@ -27,7 +31,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             return false;
         }
         ToadGameState state = (ToadGameState) gameState;
-        return state.getHiddenFlankCard(1 - actingPlayer) != null;
+        return state.getHiddenFlankCard(1 - playerID) != null;
     }
 
     @Override
@@ -38,12 +42,19 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         MCTSParams params = getParameters();
 
         int currentPlayer = state.getCurrentPlayer();
-        actingPlayer = currentPlayer;
+        if (playerID == -1) // first time through (we don't know our playerID yet
+            playerID = currentPlayer;
+        else if (playerID != currentPlayer)
+            throw new AssertionError("Player ID mismatch in ToadMCTSPlayer");
+
         if (flankAction != null) { // from the last action; we may have some clean up to do
+            if (root == null) {
+                throw new AssertionError("Root node is null");
+            }
             if (params.opponentTreePolicy == MultiTree) {
                 // null out the root node for the opponent as it has dummy data in
                 MultiTreeNode multiTreeNode = (MultiTreeNode) root;
-                multiTreeNode.resetRoot(1 - actingPlayer);
+                multiTreeNode.resetRoot(1 - playerID);
             } else if (params.opponentTreePolicy == MCGS) {
                 // nothing to do in this case
             } else {
@@ -57,7 +68,15 @@ public class ToadMCTSPlayer extends MCTSPlayer {
 
         functionalityApplies = functionalityApplies(state);
         if (!functionalityApplies) {
-            return super._getAction(state, actions);
+            if (params.opponentTreePolicy == MultiTree) {
+                // hack. the MultiTree root node has the wrong decisionPlayer on it; so we have to override
+                super._getAction(state, actions);
+                AbstractAction actualAction =  ((MultiTreeNode) root).getRoot(playerID).bestAction();
+                this.lastAction = new Pair<>(playerID, actualAction);
+                return actualAction;
+            } else {
+                return super._getAction(state, actions);
+            }
         }
         // otherwise, we add an UndoOpponentFlank
         new UndoOpponentFlank(state);
@@ -90,7 +109,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree) {
             // in this case we use the root node for the decision player
             SingleTreeNode ourRoot = ((MultiTreeNode) root).getRoot(currentPlayer);
-            actualAction = ourRoot.bestAction();
+            actualAction = ourRoot != null ? ourRoot.bestAction() : actions.get(rnd.nextInt(actions.size()));
         } else if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MCGS) {
             Object stateKey = params.MCGSStateKey.getKey(state);
             MCGSNode node = ((MCGSNode) root).getTranspositionMap().get(stateKey);
@@ -103,7 +122,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];
             actualAction = childNode.bestAction();
         }
-        this.lastAction = new Pair<>(actingPlayer, actualAction);
+        this.lastAction = new Pair<>(playerID, actualAction);
         return actualAction;
     }
 
@@ -113,11 +132,11 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // we then just override the root so that redeterminisations occur from perspective of the correct player
         // otherwise we redeterminise from the root player (i.e. our opponent), which is very bad
         if (functionalityApplies) {
-            root.setRedeterminisationPlayer(actingPlayer);
+            root.setRedeterminisationPlayer(playerID);
             // then we need to correct the transposition table
             if (root instanceof MCGSNode mcgsRoot) {
                 mcgsRoot.getTranspositionMap().clear();
-                mcgsRoot.getTranspositionMap().put(getParameters().MCGSStateKey.getKey(gameState, actingPlayer), mcgsRoot);
+                mcgsRoot.getTranspositionMap().put(getParameters().MCGSStateKey.getKey(gameState, playerID), mcgsRoot);
             }
         }
     }
@@ -127,4 +146,5 @@ public class ToadMCTSPlayer extends MCTSPlayer {
     public SingleTreeNode getRoot() {
         return root;
     }
+
 }

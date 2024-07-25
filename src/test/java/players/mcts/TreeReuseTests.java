@@ -12,6 +12,7 @@ import games.dominion.cards.CardType;
 import games.tictactoe.TicTacToeForwardModel;
 import org.junit.Before;
 import org.junit.Test;
+import org.netlib.lapack.Dgetrf;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 
@@ -156,6 +157,11 @@ public class TreeReuseTests {
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
             STNWithTestInstrumentation newRoot = (STNWithTestInstrumentation) (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
+            if (currentPlayer < 2 && newRoot != null) {
+                assertEquals(currentPlayer, newRoot.decisionPlayer);
+                SingleTreeNode topRoot =  (currentPlayer == 0 ? playerOne.getRoot() : playerTwo.getRoot());
+                assertEquals(currentPlayer, topRoot.decisionPlayer);
+            }
             if (currentPlayer == 0 && !oneAction) {
                 if (newRoot != null) {
                     assertEquals(preActionCopy.getGamePhase(), newRoot.state.getGamePhase());

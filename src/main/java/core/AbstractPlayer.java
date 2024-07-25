@@ -10,7 +10,7 @@ import java.util.*;
 public abstract class AbstractPlayer {
 
     // ID of this player, assigned by the game
-    int playerID;
+    protected int playerID;
     String name;
     protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
