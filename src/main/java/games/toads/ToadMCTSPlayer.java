@@ -47,7 +47,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         else if (playerID != currentPlayer)
             throw new AssertionError("Player ID mismatch in ToadMCTSPlayer");
 
-        if (flankAction != null) { // from the last action; we may have some clean up to do
+        if (flankAction != null && params.reuseTree) { // from the last action; we may have some clean up to do
             if (root == null) {
                 throw new AssertionError("Root node is null");
             }
@@ -63,8 +63,8 @@ public class ToadMCTSPlayer extends MCTSPlayer {
                 childNode.rootify(root);
                 root = childNode;
             }
-            flankAction = null;
         }
+        flankAction = null;
 
         functionalityApplies = functionalityApplies(state);
         if (!functionalityApplies) {
