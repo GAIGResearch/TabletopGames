@@ -57,7 +57,7 @@ public class TestUndoOpponentFlank {
     public void basicInstantiation() {
         moveStateForwardToFirstDefenderMove();
         ToadCard flankCard = state.getHiddenFlankCard(0);
-        assertEquals(4, state.getPlayerHand(0).getSize());
+        assertEquals(5, state.getPlayerHand(0).getSize());
         Deck<ToadCard> p0Hand = state.getPlayerHand(0).copy();
 
         assertEquals(1, state.getCurrentPlayer());

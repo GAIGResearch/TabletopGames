@@ -80,6 +80,8 @@ public class ToadGameState extends AbstractGameState {
         for (int i = 0; i < hiddenFlankCards.length; i++) {
             if (hiddenFlankCards[i] != null)
                 copy.hiddenFlankCards[i] = hiddenFlankCards[i].copy();
+        }
+        for (int i = 0; i < fieldCards.length; i++) {
             if (fieldCards[i] != null)
                 copy.fieldCards[i] = fieldCards[i].copy();
         }
@@ -90,8 +92,8 @@ public class ToadGameState extends AbstractGameState {
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // shuffle the other player's deck and hand, including the hidden flank card
             int playerToShuffle = 1 - playerId;
-            if (hiddenFlankCards[playerToShuffle] != null)
-                copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
+//            if (hiddenFlankCards[playerToShuffle] != null)
+//                copy.playerDecks.get(playerToShuffle).add(hiddenFlankCards[playerToShuffle]);
             DeterminisationUtilities.reshuffle(playerId,
                     List.of(
                             copy.playerDecks.get(playerToShuffle),
@@ -100,8 +102,10 @@ public class ToadGameState extends AbstractGameState {
                     i -> true,  // no special conditions
                     redeterminisationRnd);
             // then put hidden flank card back
-            if (hiddenFlankCards[playerToShuffle] != null)
-                copy.hiddenFlankCards[playerToShuffle] = copy.playerDecks.get(playerToShuffle).draw();
+            if (hiddenFlankCards[playerToShuffle] != null) {
+                int deckSize = copy.playerHands.get(playerToShuffle).getSize();
+                copy.hiddenFlankCards[playerToShuffle] = copy.playerHands.get(playerToShuffle).peek(redeterminisationRnd.nextInt(deckSize));
+            }
             // and their tiebreaker is shuffled with *our* as yet undrawn deck
             if (tieBreakers[playerToShuffle] != null)
                 copy.playerDecks.get(playerId).add(tieBreakers[playerToShuffle]);
@@ -166,10 +170,18 @@ public class ToadGameState extends AbstractGameState {
         if (hiddenFlankCards[playerId] != null)
             throw new AssertionError("Flank card already played");
         hiddenFlankCards[playerId] = card;
-        if (playerHands.get(playerId).contains(card))
-            playerHands.get(playerId).remove(card);
-        else
+        if (!playerHands.get(playerId).contains(card))
             throw new AssertionError("Card not in hand");
+    }
+
+    public void revealFlankCards() {
+        for (int i = 0; i < 2; i++) {
+            if (hiddenFlankCards[i] != null) {
+                if (!playerHands.get(i).remove(hiddenFlankCards[i])) {
+                    throw new AssertionError("Flank card not in hand");
+                }
+            }
+        }
     }
     public void unsetHiddenFlankCard(int playerId) {
         hiddenFlankCards[playerId] = null;

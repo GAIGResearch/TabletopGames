@@ -834,7 +834,7 @@ public class SingleTreeNode {
         double retValue = Math.exp(actionValue / params.exp3Boltzmann);
 
         if (Double.isNaN(retValue) || Double.isInfinite(retValue)) {
-            System.out.printf("We have a non-number %s in EXP3 somewhere from %s %n", retValue, action);
+            System.out.printf("We have a non-number %s in EXP3 (from %.0f) somewhere from %s %n", retValue, actionValue, action);
             retValue = 1e6;  // to avoid numeric issues later
         }
         // We add FPU after exponentiation for safety (as it likely a large number)
@@ -1188,7 +1188,7 @@ public class SingleTreeNode {
         }
 
         if (bestAction == null) {
-            if (nVisits == 1) {
+            if (nVisits < 2) {
 //                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
                 bestAction = actionValues.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else

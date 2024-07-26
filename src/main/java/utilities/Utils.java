@@ -211,7 +211,7 @@ public abstract class Utils {
         // convert potentials into legal pdf
         double[] pdf = new double[potentials.length];
         double sum = Arrays.stream(potentials).sum();
-        if (sum <= 0.0 || Double.isNaN(sum))  // default to uniform distribution
+        if (Double.isNaN(sum) || Double.isInfinite(sum) || sum <= 0.0)  // default to uniform distribution
             return Arrays.stream(potentials).map(d -> 1.0 / potentials.length).toArray();
         for (int i = 0; i < potentials.length; i++) {
             if (potentials[i] < 0.0) {

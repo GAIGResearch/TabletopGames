@@ -59,7 +59,7 @@ public class GameFlow {
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(1, state.getCurrentPlayer());
 
-        assertEquals(4, state.playerHands.get(0).getSize());
+        assertEquals(5, state.playerHands.get(0).getSize());
         assertEquals(4, state.playerHands.get(1).getSize());
         assertEquals(3, state.playerDecks.get(0).getSize());
         assertEquals(5, state.playerDecks.get(1).getSize());
@@ -428,8 +428,14 @@ public class GameFlow {
 
         state.fieldCards[0] = new ToadCard("Five", 5);
         state.fieldCards[1] = new ToadCard("Three", 3);
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
-        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+
+        ToadCard flank0 = new ToadCard("Six", 6);
+        ToadCard flank1 = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[1] = flank1;
+        state.hiddenFlankCards[0] = flank0;
+        state.playerHands.get(0).add(flank0);
+        state.playerHands.get(1).add(flank1);
+
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(0.0, state.getGameScore(0), 0.001);
@@ -456,8 +462,13 @@ public class GameFlow {
 
         state.fieldCards[0] = new ToadCard("Five", 5);
         state.fieldCards[1] = new ToadCard("Three", 3);
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
-        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+
+        ToadCard flank0 = new ToadCard("Six", 6);
+        ToadCard flank1 = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[1] = flank1;
+        state.hiddenFlankCards[0] = flank0;
+        state.playerHands.get(0).add(flank0);
+        state.playerHands.get(1).add(flank1);
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(5.0, state.getGameScore(0), 0.001);
@@ -485,8 +496,14 @@ public class GameFlow {
 
         state.fieldCards[0] = new ToadCard("Five", 5);
         state.fieldCards[1] = new ToadCard("Three", 3);
-        state.hiddenFlankCards[1] = new ToadCard("Seven", 7);
-        state.hiddenFlankCards[0] = new ToadCard("Six", 6);
+
+        ToadCard flank0 = new ToadCard("Six", 6);
+        ToadCard flank1 = new ToadCard("Seven", 7);
+        state.hiddenFlankCards[1] = flank1;
+        state.hiddenFlankCards[0] = flank0;
+        state.playerHands.get(0).add(flank0);
+        state.playerHands.get(1).add(flank1);
+
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(5.0, state.getGameScore(0), 0.001);

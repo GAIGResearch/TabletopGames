@@ -20,7 +20,7 @@ public class UndoOpponentFlank  implements IExtendedSequence {
         if (flankCard == null) {
             throw new AssertionError("No flank card to undo");
         }
-        state.getPlayerHand(1 - decisionPlayer).add(flankCard);
+   //     state.getPlayerHand(1 - decisionPlayer).add(flankCard);
         state.unsetHiddenFlankCard(1 - decisionPlayer);
 
         // we have now hacked the state to undo the flank

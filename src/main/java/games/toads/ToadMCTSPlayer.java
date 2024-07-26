@@ -103,6 +103,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // and we don't actually need to apply the flank action as this cannot affect our information state
         // (except for the currentPlayer...)
         // So we can apply *any* valid flank action
+        ToadGameState stateCopy = (ToadGameState) state.copy();
         getForwardModel().next(state, validActionsForOpponent.get(0));
 
         AbstractAction actualAction;
@@ -131,12 +132,13 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         super.createRootNode(gameState);
         // we then just override the root so that redeterminisations occur from perspective of the correct player
         // otherwise we redeterminise from the root player (i.e. our opponent), which is very bad
-        if (functionalityApplies) {
+        if (functionalityApplies) {  // this is from last time
             root.setRedeterminisationPlayer(playerID);
             // then we need to correct the transposition table
             if (root instanceof MCGSNode mcgsRoot) {
                 mcgsRoot.getTranspositionMap().clear();
                 mcgsRoot.getTranspositionMap().put(getParameters().MCGSStateKey.getKey(gameState, playerID), mcgsRoot);
+                this.oldGraphKeys.clear();
             }
         }
     }

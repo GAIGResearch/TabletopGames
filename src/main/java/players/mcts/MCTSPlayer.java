@@ -28,7 +28,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     protected SingleTreeNode root;
     protected Pair<Integer, AbstractAction> lastAction;
     List<Map<Object, Pair<Integer, Double>>> MASTStats;
-    Map<Object, Integer> oldGraphKeys = new HashMap<>();
+    protected Map<Object, Integer> oldGraphKeys = new HashMap<>();
 
     public MCTSPlayer() {
         this(new MCTSParams());
