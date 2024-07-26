@@ -3,8 +3,11 @@ package games.toads.metrics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
+import games.toads.ToadCard;
 import games.toads.ToadGameState;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,12 +44,18 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
         features[7] = state.getFieldCard(playerID) == null ? 0 : state.getFieldCard(playerID).value;
         features[8] = state.getHiddenFlankCard(playerID) == null ? 0 : state.getHiddenFlankCard(playerID).value;
         features[9] = state.getFieldCard(1 - playerID) == null ? 0 : state.getFieldCard(1 - playerID).value;
-        int visibleCount = 0;
+        List<ToadCard> oppHand = new ArrayList<>();
         for (int i = 0; i < state.getPlayerHand(1 - playerID).getSize(); i++) {
             if (state.getPlayerHand(1 - playerID).getVisibilityForPlayer(i, playerID)) {
-                features[10 + visibleCount] = state.getPlayerHand(1 - playerID).get(i).value;
+                oppHand.add(state.getPlayerHand(1 - playerID).get(i));
             }
-            visibleCount++;
+        }
+        if (!oppHand.isEmpty()) {
+            oppHand.sort(Comparator.comparingInt(c -> c.value));
+            features[10] = oppHand.get(0).value;
+            if (oppHand.size() > 1) {
+                features[11] = oppHand.get(1).value;
+            }
         }
         features[12] = state.getTieBreaker(playerID) == null ? 0 : state.getTieBreaker(playerID).value;
         for (int i = 0; i < state.getDiscards(playerID).getSize(); i++) {
