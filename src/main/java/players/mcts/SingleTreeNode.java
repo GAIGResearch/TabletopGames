@@ -1202,7 +1202,11 @@ public class SingleTreeNode {
         double[] potentials = new double[regretMatchingAverage.size()];
         int count = 0;
         for (AbstractAction action : regretMatchingAverage.keySet()) {
-            potentials[count] = regretMatchingAverage.get(action);
+            if (actionsFromOpenLoopState.contains(action)) {
+                potentials[count] = regretMatchingAverage.get(action);
+            } else {
+                potentials[count] = 0.0;
+            }
             count++;
         }
         double[] pdf = pdf(potentials);
