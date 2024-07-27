@@ -25,6 +25,13 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         }
     }
 
+    @Override
+    public void initializePlayer(AbstractGameState state) {
+        super.initializePlayer(state);
+        flankAction = null;
+        functionalityApplies = false;
+    }
+
     private boolean functionalityApplies(AbstractGameState gameState) {
         MCTSParams params = getParameters();
         if (params.opponentTreePolicy == SelfOnly || params.opponentTreePolicy == MCGSSelfOnly) {
