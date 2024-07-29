@@ -97,4 +97,9 @@ public class ForwardModelTestsWithRandom {
     public void testMastermind() {
         ForwardModelTester fmt = new ForwardModelTester("game=Mastermind", "nGames=10", "nPlayers=1");
     }
+
+    @Test
+    public void testCluedo() { 
+        ForwardModelTester fmt = new ForwardModelTester("game=Cluedo", "nGames=10", "nPlayers=3");
+    }
 }

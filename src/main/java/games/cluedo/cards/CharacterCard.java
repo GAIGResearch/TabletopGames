@@ -11,9 +11,4 @@ public class CharacterCard extends CluedoCard {
         super(cardName);
         this.cardName = cardName;
     }
-
-    @Override
-    public String getName() {
-        return cardName.name();
-    }
 }

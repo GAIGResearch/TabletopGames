@@ -26,8 +26,4 @@ public class CluedoCard extends Card {
         return cardName.toString();
     }
 
-    public String getName() {
-        return null;
-    }
-
 }

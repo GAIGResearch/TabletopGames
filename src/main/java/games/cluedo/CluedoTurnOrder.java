@@ -3,19 +3,14 @@ package games.cluedo;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.TreeMap;
+import java.util.*;
 
 public class CluedoTurnOrder extends ReactiveTurnOrder {
 
-    HashMap<Integer, Integer> characterToPlayerMap;
     Queue<Integer> playerQueue;
 
     public CluedoTurnOrder(int nPlayers) {
         super(nPlayers);
-        characterToPlayerMap = new HashMap<>();
         playerQueue = new LinkedList<>();
     }
 
@@ -29,8 +24,6 @@ public class CluedoTurnOrder extends ReactiveTurnOrder {
     }
 
     public void setTurnOrder(HashMap<Integer, Integer> characterToPlayerMap) {
-        TreeMap<Integer, Integer> sortedMap = new TreeMap<>(characterToPlayerMap);
-        this.characterToPlayerMap = new HashMap<>(sortedMap);
         for (int i=0; i<6; i++) {
             if (characterToPlayerMap.containsKey(i)) {
                 playerQueue.add(characterToPlayerMap.get(i));
@@ -41,12 +34,24 @@ public class CluedoTurnOrder extends ReactiveTurnOrder {
     @Override
     protected TurnOrder _copy() {
         CluedoTurnOrder copy = new CluedoTurnOrder(nPlayers);
-        copy.characterToPlayerMap = new HashMap<>(characterToPlayerMap);
+
+        copy.playerQueue = new LinkedList<>();
+        copy.playerQueue.addAll(playerQueue);
+        copy.reactivePlayers = new LinkedList<>(reactivePlayers);
         return copy;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerQueue);
     }
 
     protected void resetReactivePlayers() {
         reactivePlayers.clear();
+    }
+
+    public void addReactivePlayer(Queue<Integer> playerQueue) {
+        reactivePlayers.addAll(playerQueue);
     }
 
 }

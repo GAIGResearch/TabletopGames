@@ -8,7 +8,6 @@ import core.components.BoardNode;
 import games.GameType;
 import games.cluedo.actions.ChooseCharacter;
 import games.cluedo.actions.GuessPartOfCaseFile;
-import games.cluedo.cards.CluedoCard;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -16,8 +15,7 @@ import players.simple.RandomPlayer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.testng.AssertJUnit.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TestCluedo {
     Game cluedo;
@@ -32,8 +30,8 @@ public class TestCluedo {
         players = List.of(
 //                new RandomPlayer(),
 //                new RandomPlayer(),
-                new RandomPlayer(),
-                new RandomPlayer(),
+//                new RandomPlayer(),
+//                new RandomPlayer(),
                 new RandomPlayer(),
                 new RandomPlayer()
         );
@@ -48,10 +46,9 @@ public class TestCluedo {
 
         // Assert caseFile has 3 cards: 1 Room card, 1 Character card, 1 Weapon card
         assertEquals(3, cgs.caseFile.getSize());
-        assert(CluedoConstants.Weapon.contains(cgs.caseFile.get(0).getName()));
-        assert(CluedoConstants.Character.contains(cgs.caseFile.get(1).getName()));
-        assert(CluedoConstants.Room.contains(cgs.caseFile.get(2).getName()));
-
+        CluedoConstants.Weapon.valueOf(cgs.caseFile.get(0).toString()); // Will throw an exception if cgs.caseFile.get(0) is not in the enum of Weapons
+        CluedoConstants.Character.valueOf(cgs.caseFile.get(1).toString());
+        CluedoConstants.Room.valueOf(cgs.caseFile.get(2).toString());
     }
 
     @Test
@@ -96,12 +93,8 @@ public class TestCluedo {
         CluedoGameState cgs = (CluedoGameState) cluedo.getGameState();
 
         // Assert all characters start in the START node
-        List<String> actualCharacterLocations = new ArrayList<>();
-        for (int i=0; i<CluedoConstants.Character.values().length; i++) {
-            actualCharacterLocations.add(cgs.characterLocations.get(i).getComponentName());
-        }
         List<String> expectedCharacterLocations = List.of("START", "START", "START", "START", "START", "START");
-        assertEquals(expectedCharacterLocations, actualCharacterLocations);
+        assertEquals(expectedCharacterLocations, cgs.characterLocations);
     }
 
     @Test
@@ -179,15 +172,13 @@ public class TestCluedo {
             cgs.characterToPlayerMap.put(playerToCharacter.get(i), i);
         }
         cgs.turnOrder.setTurnOrder(cgs.characterToPlayerMap);
-        if (players.size() == 2) { cgs.turnOrder.setTurnOwner(1); }
-        else { cgs.turnOrder.setTurnOwner(2); }
+        cgs.turnOrder.setTurnOwner(cgs.turnOrder.getNextPlayer());
         cgs.setGamePhase(CluedoGameState.CluedoGamePhase.makeSuggestion);
 
         // ^^^^^ SETUP ^^^^^
 
         // Assert player can choose any room
         List<AbstractAction> actions0 = cfm.computeAvailableActions(cgs);
-        System.out.println(computeAvailableGuessNames(actions0));
         for (CluedoConstants.Room room : CluedoConstants.Room.values()) {
             assert(computeAvailableGuessNames(actions0).contains(room.name()));
         }
@@ -209,9 +200,9 @@ public class TestCluedo {
 
         // Assert currentGuess contains the expected 3 cards
         assertEquals(3, cgs.currentGuess.getSize());
-        assertEquals(CluedoConstants.Weapon.CANDLESTICK.name(), cgs.currentGuess.get(0).getName());
-        assertEquals(CluedoConstants.Character.DR_ORCHID.name(), cgs.currentGuess.get(1).getName());
-        assertEquals(CluedoConstants.Room.LOUNGE.name(), cgs.currentGuess.get(2).getName());
+        assertEquals(CluedoConstants.Weapon.CANDLESTICK.name(), cgs.currentGuess.get(0).toString());
+        assertEquals(CluedoConstants.Character.DR_ORCHID.name(), cgs.currentGuess.get(1).toString());
+        assertEquals(CluedoConstants.Room.LOUNGE.name(), cgs.currentGuess.get(2).toString());
 
         // Assert the next player to have a turn is the one playing the character with the second-lowest index
         int expectedNextPlayer;
@@ -227,6 +218,5 @@ public class TestCluedo {
         }
         return availableGuessNames;
     }
-
 
 }
