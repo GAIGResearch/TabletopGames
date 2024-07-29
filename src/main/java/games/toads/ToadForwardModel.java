@@ -7,6 +7,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
+import games.toads.components.ToadCard;
 
 import java.util.ArrayList;
 import java.util.List;

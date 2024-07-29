@@ -3,7 +3,7 @@ package games.toads.metrics;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
-import games.toads.ToadCard;
+import games.toads.components.ToadCard;
 import games.toads.ToadConstants.ToadCardType;
 import games.toads.ToadGameState;
 import games.toads.actions.*;

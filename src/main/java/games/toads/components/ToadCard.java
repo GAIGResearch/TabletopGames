@@ -1,13 +1,14 @@
-package games.toads;
+package games.toads.components;
 
 import core.components.Card;
 import games.toads.ToadConstants.ToadCardType;
+import games.toads.abilities.ToadAbility;
 
 public class ToadCard extends Card {
 
     public final int value;
-    protected final ToadAbility ability;
-    protected final ToadAbility tactics;
+    public final ToadAbility ability;
+    public final ToadAbility tactics;
     public final ToadCardType type;
 
 

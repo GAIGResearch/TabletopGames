@@ -2,6 +2,8 @@ package games.toads;
 
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
+import games.toads.abilities.ToadAbility;
+import games.toads.components.ToadCard;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

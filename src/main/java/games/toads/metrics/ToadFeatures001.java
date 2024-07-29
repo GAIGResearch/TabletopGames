@@ -3,13 +3,12 @@ package games.toads.metrics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateKey;
-import games.toads.ToadCard;
+import games.toads.components.ToadCard;
 import games.toads.ToadGameState;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
 

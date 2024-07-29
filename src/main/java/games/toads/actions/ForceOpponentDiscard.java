@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.toads.*;
+import games.toads.components.ToadCard;
 
 public class ForceOpponentDiscard extends AbstractAction {
 

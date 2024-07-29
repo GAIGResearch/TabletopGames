@@ -3,7 +3,7 @@ package games.toads.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
-import games.toads.ToadCard;
+import games.toads.components.ToadCard;
 import games.toads.ToadGameState;
 
 import java.util.List;

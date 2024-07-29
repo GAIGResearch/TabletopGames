@@ -1,4 +1,4 @@
-package games.toads;
+package games.toads.abilities;
 
 public interface ToadAbility {
 

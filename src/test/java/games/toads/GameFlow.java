@@ -2,9 +2,9 @@ package games.toads;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import games.toads.abilities.*;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
+import games.toads.components.ToadCard;
 import org.junit.Before;
 import org.junit.Test;
 

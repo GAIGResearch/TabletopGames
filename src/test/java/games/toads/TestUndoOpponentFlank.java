@@ -3,6 +3,7 @@ package games.toads;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.toads.actions.*;
+import games.toads.components.ToadCard;
 import games.toads.metrics.ToadFeatures001;
 import games.toads.metrics.ToadFeatures002;
 import org.junit.Before;
@@ -10,9 +11,7 @@ import org.junit.Test;
 import players.PlayerConstants;
 import players.mcts.*;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import static java.util.Comparator.comparingInt;

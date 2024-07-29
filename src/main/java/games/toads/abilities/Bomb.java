@@ -1,7 +1,5 @@
 package games.toads.abilities;
 
-import games.toads.ToadAbility;
-
 public class Bomb implements ToadAbility {
     @Override
     public int deltaToValue(int myValue, int theirValue, boolean isAttacker) {

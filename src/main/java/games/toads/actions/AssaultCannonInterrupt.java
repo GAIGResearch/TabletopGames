@@ -1,13 +1,12 @@
-package games.toads;
+package games.toads.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
-import games.toads.actions.ForceOpponentDiscard;
+import games.toads.ToadConstants;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class AssaultCannonInterrupt implements IExtendedSequence {
 
