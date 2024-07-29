@@ -99,7 +99,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         if (finalData instanceof JSONObject subJson) {
             T retValue = JSONUtils.loadClassFromJSON(subJson);
             if (retValue instanceof TunableParameters subParams) {
-                TunableParameters.loadFromJSON(subParams, subJson);
+         //       TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
             }

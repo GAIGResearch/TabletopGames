@@ -63,6 +63,9 @@ public class JSONUtils {
             if (TunableParameters.class.isAssignableFrom(outputClass)) {
                 // in this case we do not look for the Constructor arguments, as
                 // the parameters are defined directly as name-value pairs in JSON
+                // But first we check for any args, and log an error if they exist
+                if (json.containsKey("args"))
+                    throw new AssertionError("TunableParameters should not have args in JSON : " + json.toJSONString());
                 T t = outputClass.getConstructor().newInstance();
                 TunableParameters.loadFromJSON((TunableParameters) t, json);
                 return t;
@@ -123,7 +126,7 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-       //     System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+         //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
