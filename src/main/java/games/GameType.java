@@ -33,6 +33,8 @@ import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;
@@ -200,7 +202,11 @@ public enum GameType {
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -432,7 +438,8 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient;
+        Wargame, Civilization, Ancient,
+        CodeBreaking;
 
         /**
          * @return a list of all games within this category.
