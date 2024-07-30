@@ -14,10 +14,6 @@ import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
-import games.cluedo.CluedoForwardModel;
-import games.cluedo.CluedoGameState;
-import games.cluedo.CluedoParameters;
-import games.cluedo.gui.CluedoGUIManager;
 import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
@@ -210,11 +206,7 @@ public enum GameType {
     Mastermind(1,1,
             Arrays.asList(Simple, Abstract, CodeBreaking),
             Arrays.asList(),
-            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
-    Cluedo(2,6,
-            Arrays.asList(Strategy, Cards, Deduction),
-            Arrays.asList(),
-            CluedoGameState.class, CluedoForwardModel.class, CluedoParameters.class, CluedoGUIManager.class);
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class);
 
 
     // Core classes where the game is defined

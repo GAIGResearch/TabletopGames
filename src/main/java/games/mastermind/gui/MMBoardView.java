@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import static gui.GUI.defaultItemSize;
 
 public class MMBoardView extends ComponentView implements IScreenHighlight {
-    int scaledDefaultItemSize = (int) (defaultItemSize * 0.5);
+    int scaledDefaultItemSize = defaultItemSize;
+    // int scaledDefaultItemSize = (int) (defaultItemSize * 0.5);
+
     Rectangle[] rects; // For highlights + action trimming
     ArrayList<Rectangle> highlight;
 

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class MMConstants {
     public static final ArrayList<Token> resultColours = new ArrayList<Token>() {{
-            add(new Token("w"));
             add(new Token("b"));
+            add(new Token("w"));
             add(new Token("x"));
     }};
 

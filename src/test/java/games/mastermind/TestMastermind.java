@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
-import static games.mastermind.MMMethods.checkGuessAgainstAnswer;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class TestMastermind {
@@ -88,7 +87,7 @@ public class TestMastermind {
             answerCode.add(MMConstants.guessColours.get(Character.getNumericValue(answerString.charAt(3-i))));
         }
 
-        List<Integer> result = checkGuessAgainstAnswer(mmgs, answerCode, 0);
+        List<Integer> result = mmgs.checkGuessAgainstAnswer(answerCode, 0);
         List<Integer> expectedResultList = expectedResult.chars().map(Character::getNumericValue).boxed().toList();
         return result.equals(expectedResultList);
     }

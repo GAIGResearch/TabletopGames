@@ -1,19 +1,25 @@
 package games.mastermind;
 
 import core.AbstractParameters;
+import evaluation.optimisation.TunableParameters;
+import games.GameType;
 
+import java.util.Arrays;
 import java.util.Objects;
 
-public class MMParameters extends AbstractParameters {
-    int boardWidth = 4;
-    int boardHeight = 12;
+public class MMParameters extends TunableParameters {
+    public int boardWidth = 4;
+    public int boardHeight = 12;
+
+    public MMParameters() {
+        addTunableParameter("boardWidth", 4, Arrays.asList(2,3,4,5,6,7));
+        addTunableParameter("boardHeight", 12, Arrays.asList(5,6,7,8,9,10,11,12));
+        _reset();
+    }
 
     @Override
     protected AbstractParameters _copy() {
-        MMParameters copy = new MMParameters();
-        copy.boardWidth = boardWidth;
-        copy.boardHeight = boardHeight;
-        return copy;
+        return new MMParameters();
     }
 
     @Override
@@ -28,5 +34,16 @@ public class MMParameters extends AbstractParameters {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), boardWidth, boardHeight);
+    }
+
+    @Override
+    public Object instantiate() {
+        return GameType.Mastermind.createGameInstance(1, this);
+    }
+
+    @Override
+    public void _reset() {
+        boardWidth = (int) getParameterValue("boardWidth");
+        boardHeight = (int) getParameterValue("boardHeight");
     }
 }

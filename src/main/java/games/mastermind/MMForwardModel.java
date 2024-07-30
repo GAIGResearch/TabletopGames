@@ -10,9 +10,6 @@ import core.components.Token;
 
 import java.util.*;
 
-import static games.mastermind.MMMethods.checkGuessAgainstAnswer;
-import static games.mastermind.MMMethods.generateRandomShuffledAnswerCode;
-
 public class MMForwardModel extends StandardForwardModel {
 
     @Override
@@ -24,7 +21,7 @@ public class MMForwardModel extends StandardForwardModel {
         mmgs.resultBoard = new GridBoard<>(mmp.boardWidth, mmp.boardHeight, new Token(MMConstants.emptyPeg));
         mmgs.activeRow = 0;
         mmgs.activeCol = 0;
-        mmgs.answerCode = generateRandomShuffledAnswerCode(mmp.boardWidth, mmgs.getRnd());
+        mmgs.answerCode = mmgs.generateRandomShuffledAnswerCode(mmp.boardWidth, mmgs.getRnd());
     }
 
     @Override
@@ -67,7 +64,7 @@ public class MMForwardModel extends StandardForwardModel {
             // 0 = colour in correct position
             // 1 = colour in incorrect position
             // 2 = colour not in code
-            List<Integer> rowResult = checkGuessAgainstAnswer(mmgs, mmgs.answerCode, mmgs.activeRow);
+            List<Integer> rowResult = mmgs.checkGuessAgainstAnswer(mmgs.answerCode, mmgs.activeRow);
 
             // Update result board with respectively coloured pegs
             for (int i=0; i<rowResult.size(); i++) {
