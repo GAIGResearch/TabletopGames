@@ -197,7 +197,7 @@ public class BattleResult {
                 }
             }
 
-            // then we apply the IconBearer's tie-breaking (which must be done after everything else)
+            // then we apply the IconBearer's tie-creation
             if (activatedFlanks[0] && attackerFlank.tactics instanceof IconBearer) {
                 if (AField == DField - 1)
                     AField++;
@@ -224,6 +224,30 @@ public class BattleResult {
             if (activatedFields[1] && defenderField.tactics instanceof IconBearer) {
                 if (DFlank == AFlank - 1)
                     DFlank++;
+            }
+
+            // and finally the SaboteurII's tie-breaking
+            if (
+                    (activatedFlanks[0] && attackerFlank.tactics instanceof SaboteurII)
+                            ||
+                            (activatedFields[0] && attackerField.tactics instanceof SaboteurII)) {
+                if (AField == DField) {
+                    AField++;
+                }
+                if (AFlank == DFlank) {
+                    AFlank++;
+                }
+            }
+            if (
+                    (activatedFlanks[1] && defenderFlank.tactics instanceof SaboteurII)
+                            ||
+                            (activatedFields[1] && defenderField.tactics instanceof SaboteurII)) {
+                if (DField == AField) {
+                    DField++;
+                }
+                if (DFlank == AFlank) {
+                    DFlank++;
+                }
             }
         }
 

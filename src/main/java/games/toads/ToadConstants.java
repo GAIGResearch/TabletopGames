@@ -18,6 +18,7 @@ public class ToadConstants {
         SCOUT (new Scout()),
         TRICKSTER (new Trickster()),
         SABOTEUR (new Saboteur()),
+        SABOTEURII(new SaboteurII()),
         BERSERKER (new Berserker()),
         ICON_BEARER (new IconBearer()),
         GENERAL_ONE (new GeneralOne()),

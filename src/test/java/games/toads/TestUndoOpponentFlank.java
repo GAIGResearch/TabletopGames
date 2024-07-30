@@ -30,6 +30,7 @@ public class TestUndoOpponentFlank {
         params = new ToadParameters();
         params.setParameterValue("useTactics", false);
         params.setRandomSeed(933);
+        params.discardOption = false;
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);

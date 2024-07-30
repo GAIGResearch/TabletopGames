@@ -18,7 +18,7 @@ import java.util.List;
 public class ToadParameters extends TunableParameters {
 
     String dataPath = "data/toads/";
-    String cardFile = "cards3.json";
+    String cardFile = "cards.json";
     int nRounds = 2;
     int nCards = 2;
     int handSize = 4;
@@ -34,7 +34,7 @@ public class ToadParameters extends TunableParameters {
 
     public ToadParameters() {
         addTunableParameter("dataPath", "data/toads/");
-        addTunableParameter("cardFile", "cards3.json");
+        addTunableParameter("cardFile", "cards.json");
         addTunableParameter("nRounds", 2);
         addTunableParameter("nCards", 2);
         addTunableParameter("handSize", 4);

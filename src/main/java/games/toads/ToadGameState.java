@@ -29,6 +29,7 @@ public class ToadGameState extends AbstractGameState {
     ToadCard[] hiddenFlankCards;
     ToadCard[] fieldCards;
     ToadCard[] tieBreakers;
+    Set<ToadConstants.ToadCardType> cardTypesInPlay;
 
     @Override
     protected GameType _getGameType() {
@@ -67,6 +68,7 @@ public class ToadGameState extends AbstractGameState {
         }
         copy.battlesTied = Arrays.copyOf(battlesTied, 2);
         copy.discardOptions = discardOptions;
+        copy.cardTypesInPlay = cardTypesInPlay; // this is immutable
 
         // battlesWon tracks the win/loss rates over all 8 Battles
         copy.roundWinners = new int[8][2];
@@ -132,6 +134,10 @@ public class ToadGameState extends AbstractGameState {
         for (int i = 0; i < handToSee.getSize(); i++) {
             handToSee.setVisibilityOfComponent(i, player, true);
         }
+    }
+
+    public Set<ToadConstants.ToadCardType> getCardTypesInPlay() {
+        return cardTypesInPlay;
     }
 
     public ToadCard getFieldCard(int playerId) {

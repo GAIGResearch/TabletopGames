@@ -351,7 +351,7 @@ public class Tactics {
         state.battlesWon[0][1] = 1;
 
         playCards(
-                new ToadCard("One" , 1, null),
+                new ToadCard("One", 1, null),
                 new ToadCard("Berserker", 5, BERSERKER),
                 new ToadCard("Four", 4, SABOTEUR),
                 new ToadCard("Six", 6, ICON_BEARER)
@@ -450,6 +450,70 @@ public class Tactics {
         fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
+    }
+
+    @Test
+    public void saboteurIIBreaksTies() {
+        state.battlesWon[0][0] = 1;
+        playCards(
+                new ToadCard("Four", 4, SABOTEURII),
+                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("IconBearer", 6, null),
+                new ToadCard("Five", 4, SABOTEURII)
+        );
+        // Trickster swaps with Saboteur II (which is not activated)
+        // Trickster is now value 5, not enough to beat 6
+        fm._afterAction(state, null);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(2, state.battlesWon[0][1]);
+    }
+
+
+    @Test
+    public void saboteurIIHasNoEffectInField() {
+        playCards(
+                new ToadCard("Four", 4, SABOTEURII),
+                new ToadCard("Three", 2, SCOUT),
+                new ToadCard("Five", 5, BERSERKER),
+                new ToadCard("IconBearer", 6, null)
+        );
+        // Scount increases the SaboteurII to 5, which ties with the Berserker
+        fm._afterAction(state, null);
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
+    }
+
+    @Test
+    public void saboteurIIWithIconBearerOppositeBerserker() {
+        playCards(
+                new ToadCard("Sab", 4, SABOTEURII),
+                new ToadCard("IconBearer", 6, ICON_BEARER),
+                new ToadCard("Berserker", 5, BERSERKER),
+                new ToadCard("Gen", 7, GENERAL_ONE)
+
+        );
+
+        // Icon Bearer activates itself and the SaboteurII.
+        // Saboteur now wins against Berserker
+        // Icon Bearer itself loses against GeneralOne
+        fm._afterAction(state, null);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
+
+    }
+
+    @Test
+    public void saboteurIIBreaksTiesInField() {
+        playCards(
+                new ToadCard("Two", 2, null),
+                new ToadCard("IconBearer", 6, null),
+                new ToadCard("Two", 2, SCOUT),
+                new ToadCard("Five", 4, SABOTEURII)
+        );
+        // Saboteur loses, but the Scout in Field will win
+        fm._afterAction(state, null);
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     /**
@@ -573,7 +637,7 @@ public class Tactics {
 
         assertEquals(0, state.getCurrentPlayer());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(10, actions.size());
+        assertEquals(9, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
         fm.next(state, actions.get(0));
         assertEquals(1, state.getCurrentPlayer());
@@ -593,7 +657,7 @@ public class Tactics {
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(POST_BATTLE, state.getGamePhase());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(10, actions.size());
+        assertEquals(9, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
         fm.next(state, actions.get(0));
         assertEquals(1, state.getCurrentPlayer());
