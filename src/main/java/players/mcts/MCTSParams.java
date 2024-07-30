@@ -46,7 +46,7 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
-    public int omaVisits = 0;
+    public int omaVisits = 30;
     public boolean normaliseRewards = true;  // This will automatically normalise rewards to be in the range [0,1]
     // so that K does not need to be tuned to the precise scale of reward in a game
     // It also means that at the end of the game (when rewards are possibly closer to each other, they are still scaled to [0, 1]
@@ -103,7 +103,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
-        addTunableParameter("omaVisits", 0);
+        addTunableParameter("omaVisits", 30);
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
