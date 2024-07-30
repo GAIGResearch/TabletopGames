@@ -6,6 +6,7 @@ import games.toads.abilities.*;
 public class ToadConstants {
 
     public enum ToadGamePhase implements IGamePhase {
+        DISCARD,
         PLAY,
         POST_BATTLE
     }

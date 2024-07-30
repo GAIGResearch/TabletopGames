@@ -23,6 +23,7 @@ public class ToadParameters extends TunableParameters {
     int nCards = 2;
     int handSize = 4;
     boolean useTactics = true;
+    boolean discardOption = true;
     int firstRoundHandicap = 0;
     int secondRoundHandicap = 0;
     SecondRoundStart secondRoundStart = SecondRoundStart.WINNER;
@@ -38,6 +39,7 @@ public class ToadParameters extends TunableParameters {
         addTunableParameter("nCards", 2);
         addTunableParameter("handSize", 4);
         addTunableParameter("useTactics", true);
+        addTunableParameter("discardOption", true);
         addTunableParameter("firstRoundHandicap", 0);
         addTunableParameter("secondRoundHandicap", 0);
         addTunableParameter("secondRoundStart", SecondRoundStart.WINNER);
@@ -51,6 +53,7 @@ public class ToadParameters extends TunableParameters {
         cardFile = (String) getParameterValue("cardFile");
         handSize = (int) getParameterValue("handSize");
         useTactics = (boolean) getParameterValue("useTactics");
+        discardOption = (boolean) getParameterValue("discardOption");
         firstRoundHandicap = (int) getParameterValue("firstRoundHandicap");
         secondRoundHandicap = (int) getParameterValue("secondRoundHandicap");
         secondRoundStart = (SecondRoundStart) getParameterValue("secondRoundStart");

@@ -27,6 +27,7 @@ public class Tactics {
     public void setUp() {
         params = new ToadParameters();
         params.setRandomSeed(933);
+        params.discardOption = false;
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);

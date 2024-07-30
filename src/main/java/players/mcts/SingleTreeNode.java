@@ -957,9 +957,6 @@ public class SingleTreeNode {
                 throw new AssertionError("We have a mismatch between the player who took the action and the player who should be acting");
             result = n.backUpSingleNode(action, result);
         }
-        // then we update the RM average policy; we only do this for the root
-
-
     }
 
     protected void normaliseRewardsAfterIteration(double[] result) {

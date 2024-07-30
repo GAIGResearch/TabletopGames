@@ -2,15 +2,14 @@ package games.toads;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.components.Deck;
-import core.components.PartialObservableDeck;
+import core.components.*;
 import core.interfaces.IExtendedSequence;
-import games.toads.actions.PlayFieldCard;
-import games.toads.actions.PlayFlankCard;
+import games.toads.actions.*;
 import games.toads.components.ToadCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static games.toads.ToadConstants.ToadGamePhase.*;
 
@@ -23,6 +22,7 @@ public class ToadForwardModel extends StandardForwardModel {
         ToadGameState state = (ToadGameState) firstState;
         ToadParameters params = (ToadParameters) state.getGameParameters();
 
+        state.discardOptions = 0;
         state.battlesWon = new int[2][2];
         state.battlesTied = new int[2];
         state.roundWinners = new int[8][2];
@@ -45,14 +45,26 @@ public class ToadForwardModel extends StandardForwardModel {
                 state.playerHands.get(i).add(state.playerDecks.get(i).draw());
             }
         }
-        state.setGamePhase(PLAY);
+        if (params.discardOption)
+            state.setGamePhase(DISCARD);
+        else
+            state.setGamePhase(PLAY);
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        List<AbstractAction> actions = new ArrayList<>();
-        int player = gameState.getCurrentPlayer();
         ToadGameState state = (ToadGameState) gameState;
+        if (state.getGamePhase().equals(DISCARD)) {
+            return computeDiscardActions(state);
+        } else if (state.getGamePhase().equals(PLAY)) {
+            return computePlayActions(state);
+        }
+        throw new AssertionError("Unknown game phase: " + state.getGamePhase());
+    }
+
+    private List<AbstractAction> computePlayActions(ToadGameState state) {
+        List<AbstractAction> actions = new ArrayList<>();
+        int player = state.getCurrentPlayer();
         if (state.fieldCards[player] == null) {
             for (ToadCard card : state.playerHands.get(player)) {
                 actions.add(new PlayFieldCard(card));
@@ -68,6 +80,15 @@ public class ToadForwardModel extends StandardForwardModel {
         return actions.stream().distinct().toList();
     }
 
+    private List<AbstractAction> computeDiscardActions(ToadGameState state) {
+        List<AbstractAction> actions = state.getPlayerHand(state.getCurrentPlayer()).stream()
+                .map(RecycleCard::new)
+                .distinct()
+                .collect(Collectors.toList());
+        actions.add(new RecycleCard(null));
+        return actions;
+    }
+
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
 
@@ -78,6 +99,21 @@ public class ToadForwardModel extends StandardForwardModel {
         // then we reveal the hidden cards and resolve the two battles
         int currentPlayer = gameState.getCurrentPlayer();
         ToadGameState state = (ToadGameState) gameState;
+        if (state.getGamePhase() == DISCARD) {
+            // in this case we check if both players have DISCARDED (or had the option to)
+            if (action instanceof RecycleCard) {
+                state.discardOptions++;
+                if (state.discardOptions == 2) {
+                    state.discardOptions = 0;
+                    state.setGamePhase(PLAY);
+                }
+                endPlayerTurn(state, 1 - currentPlayer);
+                return;
+
+            } else {
+                throw new AssertionError("Unknown action for DISCARD phase : " + action);
+            }
+        }
         if (state.getGamePhase() == POST_BATTLE) {
             afterBattle(state);
         }
@@ -142,11 +178,14 @@ public class ToadForwardModel extends StandardForwardModel {
     private void afterBattle(ToadGameState state) {
         // if all cards played, then we keep the same player as the attacker for the next round
         // Then check for end of round
-        state.setGamePhase(PLAY); // always move to this, regardless of previous phase
+        ToadParameters params = (ToadParameters) state.getGameParameters();
+        if (params.discardOption) {
+            state.setGamePhase(DISCARD);
+        } else {
+            state.setGamePhase(PLAY);
+        }
 
         if (state.playerHands.get(0).getSize() <= 1) {
-            ToadParameters params = (ToadParameters) state.getGameParameters();
-
             // one card left in hand each
             if (state.playerDecks.get(0).getSize() != 0 || state.playerDecks.get(1).getSize() != 0) {
                 throw new AssertionError("Should have no cards left in either deck at this point");

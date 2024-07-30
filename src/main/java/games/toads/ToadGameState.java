@@ -21,6 +21,7 @@ public class ToadGameState extends AbstractGameState {
 
     List<PartialObservableDeck<ToadCard>> playerDecks;
     List<PartialObservableDeck<ToadCard>> playerHands;
+    int discardOptions;
     int[][] battlesWon;
     int[] battlesTied;
     protected int[][] roundWinners;
@@ -65,6 +66,7 @@ public class ToadGameState extends AbstractGameState {
             copy.battlesWon[i] = Arrays.copyOf(battlesWon[i], 2);
         }
         copy.battlesTied = Arrays.copyOf(battlesTied, 2);
+        copy.discardOptions = discardOptions;
 
         // battlesWon tracks the win/loss rates over all 8 Battles
         copy.roundWinners = new int[8][2];
@@ -239,6 +241,7 @@ public class ToadGameState extends AbstractGameState {
         if (o instanceof ToadGameState toadGameState) {
             return playerDecks.equals(toadGameState.playerDecks) &&
                     playerHands.equals(toadGameState.playerHands) &&
+                    discardOptions == toadGameState.discardOptions &&
                     Arrays.deepEquals(battlesWon, toadGameState.battlesWon) &&
                     playerDiscards.equals(toadGameState.playerDiscards) &&
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
@@ -251,7 +254,7 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerDecks, playerHands, playerDiscards) + Arrays.deepHashCode(battlesWon) +
+        return Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions) + Arrays.deepHashCode(battlesWon) +
                 Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers) + Arrays.hashCode(battlesTied);
     }
 
@@ -261,6 +264,7 @@ public class ToadGameState extends AbstractGameState {
                 playerDecks.hashCode() + "|" +
                 playerHands.hashCode() + "|" +
                 playerDiscards.hashCode() + "|" +
+                discardOptions + "|" +
                 Arrays.deepHashCode(battlesWon) + "|" +
                 Arrays.hashCode(battlesTied) + "|" +
                 Arrays.hashCode(hiddenFlankCards) + "|" +
