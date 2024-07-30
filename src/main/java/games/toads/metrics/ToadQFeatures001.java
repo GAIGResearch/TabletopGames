@@ -26,6 +26,8 @@ public class ToadQFeatures001 implements IActionFeatureVector {
             names.add(cardName + "_DIAGONAL");
         for (ToadCardType cardName : ToadCardType.values())
             names.add(cardName + "_GUESS"); // for AssaultCannon tactics
+        for (ToadCardType cardName : ToadCardType.values())
+            names.add(cardName + "_RECYCLE");
 
         localNames = names.toArray(new String[0]);
     }
@@ -61,6 +63,12 @@ public class ToadQFeatures001 implements IActionFeatureVector {
             cardPlayed = fod.type;
             int indexOfCard = allValues.indexOf(cardPlayed);
             retValue[2 + 3 * allValues.size() + indexOfCard] = 1;
+        } else if (action instanceof RecycleCard rc) {
+            if (rc.discardedCard != null ) {
+                cardPlayed = rc.discardedCard.type;
+                int indexOfCard = allValues.indexOf(cardPlayed);
+                retValue[2 + 4 * allValues.size() + indexOfCard] = 1;
+            }
         }
 
         return retValue;
