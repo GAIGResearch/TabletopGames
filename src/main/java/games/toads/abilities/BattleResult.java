@@ -9,20 +9,20 @@ import java.util.*;
 
 public class BattleResult {
 
-    private ToadCard attackerField;
-    private ToadCard defenderField;
-    private ToadCard attackerFlank;
-    private ToadCard defenderFlank;
-    private int AField;
-    private int AFlank;
-    private int DField;
-    private int DFlank;
-    private final int attacker;
-    private final boolean[] frogOverride = new boolean[2];
-    private final boolean[] activatedFields = new boolean[2];
-    private final boolean[] activatedFlanks = new boolean[2];
-    private final List<IExtendedSequence> postBattleActions = new ArrayList<>();
-    private boolean battleComplete = false;
+    ToadCard attackerField;
+    ToadCard defenderField;
+    ToadCard attackerFlank;
+    ToadCard defenderFlank;
+    int AField;
+    int AFlank;
+    int DField;
+    int DFlank;
+    final int attacker;
+    final boolean[] frogOverride = new boolean[2];
+    final boolean[] activatedFields = new boolean[2];
+    final boolean[] activatedFlanks = new boolean[2];
+    final List<IExtendedSequence> postBattleActions = new ArrayList<>();
+    boolean battleComplete = false;
 
     public BattleResult(int attacker, ToadCard attackerField, ToadCard defenderField, ToadCard attackerFlank, ToadCard defenderFlank) {
         this.attackerField = attackerField;
@@ -87,18 +87,29 @@ public class BattleResult {
             }
         }
 
+        // apply CardModifiers
         if (attackerField.ability != null) {
-            AField += attackerField.ability.deltaToValue(attackerField.value, defenderField.value, true);
+            for (ToadAbility.CardModifier modifier : attackerField.ability.attributes()) {
+                AField += modifier.apply(true, false, this);
+            }
         }
         if (attackerFlank.ability != null) {
-            AFlank += attackerFlank.ability.deltaToValue(attackerFlank.value, defenderFlank.value, true);
+            for (ToadAbility.CardModifier modifier : attackerFlank.ability.attributes()) {
+                AFlank += modifier.apply(true, true, this);
+            }
         }
         if (defenderField.ability != null) {
-            DField += defenderField.ability.deltaToValue(defenderField.value, attackerField.value, false);
+            for (ToadAbility.CardModifier modifier : defenderField.ability.attributes()) {
+                DField += modifier.apply(false, false, this);
+            }
         }
         if (defenderFlank.ability != null) {
-            DFlank += defenderFlank.ability.deltaToValue(defenderFlank.value, attackerFlank.value, false);
+            for (ToadAbility.CardModifier modifier : defenderFlank.ability.attributes()) {
+                DFlank += modifier.apply(false, true, this);
+            }
         }
+
+
 
         if (useTactics && !saboteurStopsTactics) {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
@@ -297,6 +308,10 @@ public class BattleResult {
             DFlank = tempVal;
         }
 
+    }
+
+    public ToadCard getCardOpposite(boolean isAttacker, boolean isFlank) {
+        return isAttacker ? (isFlank ? defenderFlank : defenderField) : (isFlank ? attackerFlank : attackerField);
     }
 
     public boolean getFrogOverride(int player) {

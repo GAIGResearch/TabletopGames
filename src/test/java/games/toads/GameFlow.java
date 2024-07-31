@@ -254,7 +254,7 @@ public class GameFlow {
     public void bombAgainstFourAttack() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("Four", 4), // flank
+                new ToadCard("Four", 4, SABOTEUR), // flank
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Bomb", 0, BOMB)
         );
@@ -268,7 +268,7 @@ public class GameFlow {
                 new ToadCard("Five", 5), // field
                 new ToadCard("Bomb", 0, BOMB),  // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Four", 4)  // flank
+                new ToadCard("Four", 4, SABOTEURII)  // flank
         );
 
         assertEquals(0, state.battlesWon[0][0]);
