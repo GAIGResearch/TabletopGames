@@ -42,6 +42,8 @@ public class RangedAttack extends MeleeAttack {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+
         if (defender instanceof Monster) {
             if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
             {

@@ -39,6 +39,8 @@ public class FreeAttack extends RangedAttack{
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+
         // This is only applicable for Ranged Attacks
         if (!isMelee) {
             if (defender instanceof Monster) {

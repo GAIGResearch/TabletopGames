@@ -51,6 +51,12 @@ public class MultiAttack extends RangedAttack {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        result = "Target: " + defender.getComponentName().replace("Hero: ", "");
+        for (int i = 1; i < defendingFigures.size(); i++) {
+            result += ", " + (state.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
+        }
+        result += "; Result: ";
+
         if (defender instanceof Monster) {
             if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
             {
@@ -98,7 +104,7 @@ public class MultiAttack extends RangedAttack {
                 {
                     index++;
                     setNewTarget(state, index);
-                    result += "; ";
+                    result += "; Result: ";
                     // For MultiAttacks, we use the same Attack dice results
                     // But each defender is allowed to roll their own Defence dice
                     phase = PRE_DEFENCE_ROLL;
