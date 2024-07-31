@@ -4,6 +4,7 @@ import core.interfaces.IExtendedSequence;
 import games.toads.*;
 import games.toads.actions.AssaultCannonInterrupt;
 import games.toads.components.ToadCard;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -23,20 +24,32 @@ public class BattleResult {
     final boolean[] activatedFlanks = new boolean[2];
     final List<IExtendedSequence> postBattleActions = new ArrayList<>();
     boolean battleComplete = false;
+    boolean useTactics = false;
+    ToadGameState state;
+    PriorityQueue<Tactic> tacticsToApply = new PriorityQueue<>(Comparator.comparingInt(t -> t.priority));
 
-    public BattleResult(int attacker, ToadCard attackerField, ToadCard defenderField, ToadCard attackerFlank, ToadCard defenderFlank) {
+    record Tactic(int priority, boolean isAttacker, boolean isFlank, ToadAbility.BattleEffect effect) {
+    }
+
+    public BattleResult(ToadGameState state, int attacker, ToadCard attackerField, ToadCard defenderField, ToadCard attackerFlank, ToadCard defenderFlank) {
         this.attackerField = attackerField;
         this.defenderField = defenderField;
         this.attackerFlank = attackerFlank;
         this.defenderFlank = defenderFlank;
         this.attacker = attacker;
+        this.state = state;
     }
 
     /**
-     * @param state Game State
+     * BattleResults is a combination data and logic class that calculates the result of a battle.
+     * It returns the number of battles won by each player, and also stores any post-battle actions that need to be taken.
+     * It is designed not to be copyable, with the main calculate method treated as 'atomic' from the
+     * perspective of the forward model - so it does not support the taking of Actions during a battle.
+     * These need to be taken before or after resolution.
+     *
      * @return int[] with the number of battles won by each player (in player order)
      */
-    public int[] calculate(ToadGameState state) {
+    public int[] calculate() {
 
         if (battleComplete)
             throw new AssertionError("BattleResult object can only be used once");
@@ -44,20 +57,8 @@ public class BattleResult {
 
         ToadParameters params = (ToadParameters) state.getGameParameters();
         int round = state.getRoundCounter();
-        boolean useTactics = (boolean) params.getParameterValue("useTactics");
+        useTactics = (boolean) params.getParameterValue("useTactics");
 
-        if (useTactics) {
-            // assassins copy their ally's tactics
-            if (attackerFlank.tactics instanceof Assassin) {
-                attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, ToadConstants.ToadCardType.ASSASSIN, attackerFlank.ability, attackerField.tactics);
-            }
-            if (defenderFlank.tactics instanceof Assassin) {
-                defenderFlank = new ToadCard("Assassin with copied tactics", defenderFlank.value, ToadConstants.ToadCardType.ASSASSIN, defenderFlank.ability, defenderField.tactics);
-            }
-        }
-        boolean saboteurStopsTactics = (attackerFlank.tactics instanceof Saboteur || defenderFlank.tactics instanceof Saboteur);
-        activatedFlanks[0] = true;
-        activatedFlanks[1] = true;
 
         // then we record the base battle results
         int[] result = new int[2];
@@ -66,26 +67,30 @@ public class BattleResult {
         DField = defenderField.value;
         DFlank = defenderFlank.value;
 
-        if (useTactics && !saboteurStopsTactics) {
-            // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
 
-            // we first swap cards with Trickster before recording the base values
-
-            // For the moment (given small number of cards), I'll hard-code this
-            if (attackerFlank.tactics instanceof Trickster) { // Trickster
-                swapFieldAndFlank(0);
-            } else if (attackerFlank.tactics instanceof IconBearer && attackerField.tactics instanceof Trickster) {
-                swapFieldAndFlank(0);
-                activatedFlanks[0] = true;
+        if (useTactics) {
+            activatedFlanks[0] = true;
+            activatedFlanks[1] = true;
+            // activate flank cards and add their tactics
+            if (attackerFlank.tactics != null) {
+                for (Pair<Integer, ToadAbility.BattleEffect> effect : attackerFlank.tactics.tactics()) {
+                    tacticsToApply.add(new Tactic(effect.a, true, true, effect.b));
+                }
             }
-
-            if (defenderFlank.tactics instanceof Trickster) { // Trickster
-                swapFieldAndFlank(1);
-            } else if (defenderFlank.tactics instanceof IconBearer && defenderField.tactics instanceof Trickster) {
-                swapFieldAndFlank(1);
-                activatedFlanks[1] = true;
+            if (defenderFlank.tactics != null) {
+                for (Pair<Integer, ToadAbility.BattleEffect> effect : defenderFlank.tactics.tactics()) {
+                    tacticsToApply.add(new Tactic(effect.a, false, true, effect.b));
+                }
             }
         }
+
+        // then apply tactics
+        while (!tacticsToApply.isEmpty() && tacticsToApply.peek().priority < 0) {
+            Tactic tactic = tacticsToApply.poll();
+            tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
+        }
+
+        boolean saboteurStopsTactics = false; // (attackerFlank.tactics instanceof Saboteur || defenderFlank.tactics instanceof Saboteur);
 
         // apply CardModifiers
         if (attackerField.ability != null) {
@@ -109,33 +114,17 @@ public class BattleResult {
             }
         }
 
-
+        // then apply tactics that occur after Card Modifiers
+        while (!tacticsToApply.isEmpty()) {
+            Tactic tactic = tacticsToApply.poll();
+            tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
+        }
 
         if (useTactics && !saboteurStopsTactics) {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
             // For the moment (given small number of cards), I'll hard-code this
 
-            if (activatedFields[0] && attackerField.tactics instanceof Trickster) { // Trickster
-                AField += attackerFlank.value / 2;
-            }
-            if (activatedFields[1] && defenderField.tactics instanceof Trickster) { // Trickster
-                DField += defenderFlank.value / 2;
-            }
-            if (activatedFlanks[0] && attackerFlank.tactics instanceof Trickster) { // Trickster
-                AFlank += attackerField.value / 2;
-            }
-            if (activatedFlanks[1] && defenderFlank.tactics instanceof Trickster) { // Trickster
-                DFlank += defenderField.value / 2;
-            }
-
             if (activatedFlanks[0]) {
-                if (attackerFlank.tactics instanceof Scout) { // Scout
-                    state.seeOpponentsHand(attacker);
-                    AField++;
-                }
-                if (attackerFlank.tactics instanceof Berserker) { // Berserker
-                    AFlank += state.getBattlesWon(round, 1 - attacker);
-                }
                 if (attackerFlank.tactics instanceof GeneralOne) {
                     frogOverride[0] = true;
                 }
@@ -145,36 +134,9 @@ public class BattleResult {
                 if (attackerFlank.tactics instanceof AssaultCannon) {
                     postBattleActions.add(new AssaultCannonInterrupt(attacker));
                 }
-                // Now we apply the IconBearer's Ally activation ability
-                if (attackerFlank.tactics instanceof IconBearer) {
-                    activatedFields[0] = true;
-                    if (attackerField.tactics instanceof Berserker) {
-                        AField += state.getBattlesWon(round, 1 - attacker);
-                    }
-                    if (attackerField.tactics instanceof Scout) {
-                        state.seeOpponentsHand(attacker);
-                        AFlank++;
-                    }
-                    if (attackerField.tactics instanceof GeneralOne) {
-                        frogOverride[0] = true;
-                    }
-                    if (attackerField.tactics instanceof GeneralTwo) {
-                        AFlank += state.getBattlesTied(round);
-                    }
-                    if (attackerField.tactics instanceof AssaultCannon) {
-                        postBattleActions.add(new AssaultCannonInterrupt(attacker));
-                    }
-                }
             }
 
             if (activatedFlanks[1]) {
-                if (defenderFlank.tactics instanceof Scout) { // Scout
-                    state.seeOpponentsHand(1 - attacker);
-                    DField++;
-                }
-                if (defenderFlank.tactics instanceof Berserker) { // Berserker
-                    DFlank += state.getBattlesWon(round, attacker);
-                }
                 if (defenderFlank.tactics instanceof GeneralOne) {
                     frogOverride[1] = true;
                 }
@@ -184,58 +146,6 @@ public class BattleResult {
                 if (defenderFlank.tactics instanceof AssaultCannon) {
                     postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));
                 }
-
-                if (defenderFlank.tactics instanceof IconBearer) {
-                    activatedFields[1] = true;
-                    if (DField == AField - 1)
-                        DField++;
-
-                    if (defenderField.tactics instanceof Berserker) {
-                        DField += state.getBattlesWon(round, attacker);
-                    }
-                    if (defenderField.tactics instanceof Scout) {
-                        state.seeOpponentsHand(1 - attacker);
-                        DFlank++;
-                    }
-                    if (defenderField.tactics instanceof GeneralOne) {
-                        frogOverride[1] = true;
-                    }
-                    if (defenderField.tactics instanceof GeneralTwo) {
-                        DFlank += state.getBattlesTied(round);
-                    }
-                    if (defenderField.tactics instanceof AssaultCannon) {
-                        postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));
-                    }
-                }
-            }
-
-            // then we apply the IconBearer's tie-creation
-            if (activatedFlanks[0] && attackerFlank.tactics instanceof IconBearer) {
-                if (AField == DField - 1)
-                    AField++;
-
-                if (attackerField.tactics instanceof IconBearer) {
-                    if (AFlank == DFlank - 1)
-                        AFlank++;
-                }
-            }
-            if (activatedFlanks[1] && defenderFlank.tactics instanceof IconBearer) {
-                if (DField == AField - 1)
-                    DField++;
-
-                if (defenderField.tactics instanceof IconBearer) {
-                    if (DFlank == AFlank - 1)
-                        DFlank++;
-                }
-            }
-
-            if (activatedFields[0] && attackerField.tactics instanceof IconBearer) {
-                if (AFlank == DFlank - 1)
-                    AFlank++;
-            }
-            if (activatedFields[1] && defenderField.tactics instanceof IconBearer) {
-                if (DFlank == AFlank - 1)
-                    DFlank++;
             }
 
             // and finally the SaboteurII's tie-breaking
@@ -284,7 +194,7 @@ public class BattleResult {
         return retValue;
     }
 
-    private void swapFieldAndFlank(int player) {
+    void swapFieldAndFlank(int player) {
 
         // then activation state
         boolean tempBool = activatedFields[player];
@@ -308,10 +218,91 @@ public class BattleResult {
             DFlank = tempVal;
         }
 
+        // we map any tactic for the cards to be identical, but with isFlank marker reversed
+        List<Tactic> newTactics = tacticsToApply.stream().map(t -> {
+            if (t.isAttacker() == (player == 0)) {
+                return new Tactic(t.priority, t.isAttacker, !t.isFlank, t.effect);
+            } else {
+                return t;
+            }
+        }).toList();
+        tacticsToApply.clear();
+        tacticsToApply.addAll(newTactics);
     }
 
-    public ToadCard getCardOpposite(boolean isAttacker, boolean isFlank) {
-        return isAttacker ? (isFlank ? defenderFlank : defenderField) : (isFlank ? attackerFlank : attackerField);
+    public void addValue(boolean isAttacker, boolean isFlank, int value) {
+        if (isAttacker) {
+            if (isFlank) {
+                AFlank += value;
+            } else {
+                AField += value;
+            }
+        } else {
+            if (isFlank) {
+                DFlank += value;
+            } else {
+                DField += value;
+            }
+        }
+    }
+
+    public boolean isActivated(boolean isAttacker, boolean isFlank) {
+        return isAttacker ? (isFlank ? activatedFlanks[0] : activatedFields[0]) : (isFlank ? activatedFlanks[1] : activatedFields[1]);
+    }
+
+    public void setActivation(boolean isAttacker, boolean isFlank, boolean value) {
+        if (isAttacker) {
+            if (isFlank) {
+                activatedFlanks[0] = value;
+            } else {
+                activatedFields[0] = value;
+            }
+        } else {
+            if (isFlank) {
+                activatedFlanks[1] = value;
+            } else {
+                activatedFields[1] = value;
+            }
+        }
+        // and also add/remove the tactics
+        if (useTactics) {
+            if (value && getCard(isAttacker, isFlank).tactics != null)
+                getCard(isAttacker, isFlank).tactics.tactics().forEach(effect -> tacticsToApply.add(new Tactic(effect.a, isAttacker, isFlank, effect.b)));
+            else
+                tacticsToApply.removeIf(t -> t.isAttacker() == isAttacker && t.isFlank() == isFlank);
+        }
+    }
+
+    public ToadCard getOpponent(boolean isAttacker, boolean isFlank) {
+        return getCard(!isAttacker, isFlank);
+    }
+
+    public ToadCard getAlly(boolean isAttacker, boolean isFlank) {
+        return getCard(isAttacker, !isFlank);
+    }
+
+    public ToadCard getCard(boolean isAttacker, boolean isFlank) {
+        return isAttacker ? (isFlank ? attackerFlank : attackerField) : (isFlank ? defenderFlank : defenderField);
+    }
+
+    public void setCard(boolean isAttacker, boolean isFlank, ToadCard card) {
+        if (isAttacker) {
+            if (isFlank) {
+                AFlank += card.value - attackerFlank.value;
+                attackerFlank = card;
+            } else {
+                AField += card.value - attackerField.value;
+                attackerField = card;
+            }
+        } else {
+            if (isFlank) {
+                DFlank += card.value - defenderFlank.value;
+                defenderFlank = card;
+            } else {
+                DField += card.value - defenderField.value;
+                defenderField = card;
+            }
+        }
     }
 
     public boolean getFrogOverride(int player) {

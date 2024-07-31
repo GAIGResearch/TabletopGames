@@ -9,7 +9,7 @@ public class AssaultCannon implements ToadAbility {
     @Override
     public List<CardModifier> attributes() {
         return List.of((isAttacker, isFlank, br) -> {
-            ToadCard card = br.getCardOpposite(isAttacker, isFlank);
+            ToadCard card = br.getOpponent(isAttacker, isFlank);
             // if we are not attacking, then our value is unchanged
             if (!isAttacker)
                 return 0;

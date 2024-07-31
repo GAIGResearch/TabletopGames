@@ -1,5 +1,7 @@
 package games.toads.abilities;
 
+import utilities.Pair;
+
 import java.util.List;
 import java.util.Map;
 
@@ -29,14 +31,17 @@ public interface ToadAbility {
 
     /**
      * This returns a tactical effects implemented by this card (when Activated)
-     * The Integer in the map is the priority order of the Effect
-     * All BattleEffects will be applied in increasing order of priority (so 0 will be applied first)
+     * The Integer in the Pair is the priority order of the Effect
+     * All BattleEffects will be applied in increasing order of priority (so lower numbers will be applied first)
      * It is possible that a BattleEffect adds more BattleEffects to the BattleResult, so this can be recursive
      * (for example if a card Activates another one)
      * Currently ALL such BattleEffects added will be applied, even if we have passed that point in the priority order
+     *
+     * There is one fixed point in this priory order:
+     * Any CardModifiers will be implemented at Priority = 10.
      */
-    default Map<Integer, BattleEffect> tactics() {
-        return Map.of();
+    default List<Pair<Integer, BattleEffect>> tactics() {
+        return List.of();
     }
 
     /**

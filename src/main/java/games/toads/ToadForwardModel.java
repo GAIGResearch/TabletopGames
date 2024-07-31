@@ -131,10 +131,10 @@ public class ToadForwardModel extends StandardForwardModel {
             // and then resolve battle
             // not the most elegant solution, but with 2 cards each no need to generalise yet
             int attacker = 1 - currentPlayer; // attacker always goes first; so the second person to play (the current player) is the defender
-            BattleResult battle = new BattleResult(attacker, state.fieldCards[attacker], state.fieldCards[1 - attacker],
+            BattleResult battle = new BattleResult(state, attacker, state.fieldCards[attacker], state.fieldCards[1 - attacker],
                     state.hiddenFlankCards[attacker], state.hiddenFlankCards[1 - attacker]);
 
-            int[] scoreDiff = battle.calculate(state);
+            int[] scoreDiff = battle.calculate();
             int battlesTied = 2 - scoreDiff[0] - scoreDiff[1];
             state.battlesTied[state.getRoundCounter()] += battlesTied;
 
