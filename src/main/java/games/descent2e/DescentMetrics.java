@@ -700,25 +700,25 @@ public class DescentMetrics implements IMetricsCollection {
         }
     }
 
-    public static class TurnActions extends AbstractMetric {
+    public static class NarrativeActions extends AbstractMetric {
 
-        public TurnActions() {
+        public NarrativeActions() {
             super();
         }
 
-        public TurnActions(Event.GameEvent... args) {
+        public NarrativeActions(Event.GameEvent... args) {
             super(args);
         }
 
-        public TurnActions(Set<IGameEvent> events) {
+        public NarrativeActions(Set<IGameEvent> events) {
             super(events);
         }
 
-        public TurnActions(String[] args) {
+        public NarrativeActions(String[] args) {
             super(args);
         }
 
-        public TurnActions(String[] args, Event.GameEvent... events) {
+        public NarrativeActions(String[] args, Event.GameEvent... events) {
             super(args, events);
         }
 
@@ -726,7 +726,7 @@ public class DescentMetrics implements IMetricsCollection {
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             if (e.type == Event.GameEvent.GAME_EVENT) {
                 String[] text = ((LogEvent)e.action).text.split(":")[1].split(";");
-                String figure = text[0].trim().replace("Hero: ", "");
+                String figure = text[0].trim();
                 int componentID = Integer.parseInt(text[1].trim());
                 String position = text[2].trim();
 
@@ -737,8 +737,10 @@ public class DescentMetrics implements IMetricsCollection {
                 DescentGameState dgs = (DescentGameState) e.state;
                 Figure f = (Figure) dgs.getComponentById(componentID);
                 records.put("Actions Taken", getActionsTaken(dgs, f).toString());
+
+                return true;
             }
-            return true;
+            return false;
         }
 
         private List<String> getActionsTaken(DescentGameState dgs, Figure f) {
@@ -753,23 +755,24 @@ public class DescentMetrics implements IMetricsCollection {
                 {
                     String attack = actionsTaken.get(i);
                     String attackType = attack.split("by")[0].replace("Free", "").replace("Heroic Feat:", "").trim();
+                    String target = attack.split("Target:")[1].split(";")[0].trim();
                     String result = attack.split("Result:")[1].split(";")[0].trim();
                     String damage = attack.split("Damage:")[1].split(";")[0].trim();
 
-                    int targetID = Integer.parseInt(attack.split("on")[1].split("-")[0].trim());
-                    String target = ((Figure) dgs.getComponentById(targetID)).getName().replace("Hero: ", "");
-
-
                     String newAttack = attackType + " on " + target;
                     switch (result){
-                        case "Miss":
-                            newAttack += ", Missed";
+                        case "Missed":
+                            newAttack += " - Missed";
                             break;
                         case "Kill":
-                            newAttack += ", Defeated";
+                            newAttack += " - Defeated";
                             break;
-                            case "Hit":
-                            newAttack += ", Hit (" + damage + " Damage)";
+                        case "Hit":
+                            if (damage.equals("0"))
+                                newAttack += " - Blocked (No Damage)";
+                            else
+                                newAttack += " - Hit (" + damage + " Damage)";
+                            break;
                     }
                     actionsTaken.set(i, newAttack);
                 }
@@ -796,6 +799,11 @@ public class DescentMetrics implements IMetricsCollection {
             // Remove Surge references
             actionsTaken.removeIf(s -> s.contains("Surge"));
 
+            // For some reason, the End Turn action is added twice sometimes
+            // TODO: Figure out why this is happening
+            actionsTaken.removeIf(s -> s.contains("End Turn"));
+            actionsTaken.add("End Turn");
+
             return actionsTaken;
         }
 
@@ -803,6 +811,7 @@ public class DescentMetrics implements IMetricsCollection {
         public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<IGameEvent>() {{
                 add(Event.GameEvent.GAME_EVENT);
+                add(Event.GameEvent.TURN_OVER);
                 add(Event.GameEvent.ROUND_OVER);
             }};
         }
