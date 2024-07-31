@@ -24,8 +24,8 @@ public class GameFlow {
     public void setUp() {
         params = new ToadParameters();
         params.setRandomSeed(933);
-        params.useTactics = false;
-        params.discardOption = false;
+        params.setParameterValue("useTactics", false);
+        params.setParameterValue("discardOption", false);
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);

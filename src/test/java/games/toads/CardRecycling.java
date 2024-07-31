@@ -23,8 +23,8 @@ public class CardRecycling {
     public void setUp() {
         params = new ToadParameters();
         params.setRandomSeed(933);
-        params.discardOption = true;
-        params.useTactics = false;
+        params.setParameterValue("discardOption", true);
+        params.setParameterValue("useTactics", false);
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);

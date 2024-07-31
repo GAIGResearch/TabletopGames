@@ -1,7 +1,7 @@
-package games.toads;
+package games.toads.abilities;
 
 import core.interfaces.IExtendedSequence;
-import games.toads.abilities.*;
+import games.toads.*;
 import games.toads.actions.AssaultCannonInterrupt;
 import games.toads.components.ToadCard;
 
@@ -36,7 +36,7 @@ public class BattleResult {
      * @param state Game State
      * @return int[] with the number of battles won by each player (in player order)
      */
-    int[] calculate(ToadGameState state) {
+    public int[] calculate(ToadGameState state) {
 
         if (battleComplete)
             throw new AssertionError("BattleResult object can only be used once");
@@ -44,8 +44,9 @@ public class BattleResult {
 
         ToadParameters params = (ToadParameters) state.getGameParameters();
         int round = state.getRoundCounter();
+        boolean useTactics = (boolean) params.getParameterValue("useTactics");
 
-        if (params.useTactics) {
+        if (useTactics) {
             // assassins copy their ally's tactics
             if (attackerFlank.tactics instanceof Assassin) {
                 attackerFlank = new ToadCard("Assassin with copied tactics", attackerFlank.value, ToadConstants.ToadCardType.ASSASSIN, attackerFlank.ability, attackerField.tactics);
@@ -65,7 +66,7 @@ public class BattleResult {
         DField = defenderField.value;
         DFlank = defenderFlank.value;
 
-        if (params.useTactics && !saboteurStopsTactics) {
+        if (useTactics && !saboteurStopsTactics) {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
 
             // we first swap cards with Trickster before recording the base values
@@ -99,7 +100,7 @@ public class BattleResult {
             DFlank += defenderFlank.ability.deltaToValue(defenderFlank.value, attackerFlank.value, false);
         }
 
-        if (params.useTactics && !saboteurStopsTactics) {
+        if (useTactics && !saboteurStopsTactics) {
             // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
             // For the moment (given small number of cards), I'll hard-code this
 
@@ -122,13 +123,13 @@ public class BattleResult {
                     AField++;
                 }
                 if (attackerFlank.tactics instanceof Berserker) { // Berserker
-                    AFlank += state.battlesWon[round][1 - attacker];
+                    AFlank += state.getBattlesWon(round, 1 - attacker);
                 }
                 if (attackerFlank.tactics instanceof GeneralOne) {
                     frogOverride[0] = true;
                 }
                 if (attackerFlank.tactics instanceof GeneralTwo) {
-                    AField += state.battlesTied[round];
+                    AField += state.getBattlesTied(round);
                 }
                 if (attackerFlank.tactics instanceof AssaultCannon) {
                     postBattleActions.add(new AssaultCannonInterrupt(attacker));
@@ -137,7 +138,7 @@ public class BattleResult {
                 if (attackerFlank.tactics instanceof IconBearer) {
                     activatedFields[0] = true;
                     if (attackerField.tactics instanceof Berserker) {
-                        AField += state.battlesWon[round][1 - attacker];
+                        AField += state.getBattlesWon(round, 1 - attacker);
                     }
                     if (attackerField.tactics instanceof Scout) {
                         state.seeOpponentsHand(attacker);
@@ -147,7 +148,7 @@ public class BattleResult {
                         frogOverride[0] = true;
                     }
                     if (attackerField.tactics instanceof GeneralTwo) {
-                        AFlank += state.battlesTied[round];
+                        AFlank += state.getBattlesTied(round);
                     }
                     if (attackerField.tactics instanceof AssaultCannon) {
                         postBattleActions.add(new AssaultCannonInterrupt(attacker));
@@ -161,13 +162,13 @@ public class BattleResult {
                     DField++;
                 }
                 if (defenderFlank.tactics instanceof Berserker) { // Berserker
-                    DFlank += state.battlesWon[round][attacker];
+                    DFlank += state.getBattlesWon(round, attacker);
                 }
                 if (defenderFlank.tactics instanceof GeneralOne) {
                     frogOverride[1] = true;
                 }
                 if (defenderFlank.tactics instanceof GeneralTwo) {
-                    DField += state.battlesTied[round];
+                    DField += state.getBattlesTied(round);
                 }
                 if (defenderFlank.tactics instanceof AssaultCannon) {
                     postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));
@@ -179,7 +180,7 @@ public class BattleResult {
                         DField++;
 
                     if (defenderField.tactics instanceof Berserker) {
-                        DField += state.battlesWon[round][attacker];
+                        DField += state.getBattlesWon(round, attacker);
                     }
                     if (defenderField.tactics instanceof Scout) {
                         state.seeOpponentsHand(1 - attacker);
@@ -189,7 +190,7 @@ public class BattleResult {
                         frogOverride[1] = true;
                     }
                     if (defenderField.tactics instanceof GeneralTwo) {
-                        DFlank += state.battlesTied[round];
+                        DFlank += state.getBattlesTied(round);
                     }
                     if (defenderField.tactics instanceof AssaultCannon) {
                         postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));

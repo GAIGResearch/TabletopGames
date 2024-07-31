@@ -64,8 +64,8 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
             features[14] += state.getDiscards(1 - playerID).get(i).value * (i + 11);
         }
         features[15] = state.getRoundCounter() == 1 ? 1 : 0;
-        features[16] = state.getBattlesWon(playerID, 0) > state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
-        features[17] = state.getBattlesWon(playerID, 0) < state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
+        features[16] = state.getBattlesWon(0, playerID) > state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
+        features[17] = state.getBattlesWon(0, playerID) < state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
 
         return features;
     }

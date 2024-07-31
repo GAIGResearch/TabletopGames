@@ -4,6 +4,7 @@ import core.*;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IExtendedSequence;
+import games.toads.abilities.BattleResult;
 import games.toads.actions.*;
 import games.toads.components.ToadCard;
 

@@ -49,7 +49,6 @@ public class Tactics {
         // Field is now 5 : 6  (draw - due to the IconBearer of p0 (not cancelled))
         // Flank is now 6 : 6  (draw)
 
-        fm._afterAction(state, null);
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[1][0]);
     }
@@ -69,7 +68,6 @@ public class Tactics {
         // Field is now 5 : 5  (draw)
         // Flank is now 6 : 4  (p0 wins) - IconBearer is not cancelled; but has no effect
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[1][0]);
     }
@@ -94,7 +92,6 @@ public class Tactics {
 
         // p0 started behind, so gains 2 points
 
-        fm._afterAction(state, null);
         assertEquals(3, state.battlesWon[0][0]);
         assertEquals(2, state.battlesWon[0][1]);
     }
@@ -117,7 +114,6 @@ public class Tactics {
         // Field is now 5 : 6  (p1 wins)
         // Flank is now 7 : 6  (draw, due to activated IconBearer)
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -137,7 +133,6 @@ public class Tactics {
         // Field is now 4 : 5  (draw) IconBearer flank ability is not cancelled by the Saboteur opposite
         // Flank is now 6 : 4  (p0 wins)
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
     }
@@ -160,7 +155,6 @@ public class Tactics {
         // Field is now 5 : 5 (draw)
         // Flank is now 0 : 4 (p1 wins)
 
-        fm._afterAction(state, null);
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -182,10 +176,9 @@ public class Tactics {
         // Trickster swaps with Four, gaining 2 points
         // And Assassin copies Five, gaining 4 points
 
-        // Field is now 9 : 5 (p0 wins)
-        // Flank is now 4 : 4 (draw)
+        // Field is now 5 : 5 (draw)
+        // Flank is now 5 : 4 (p0 wins)
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(4, state.battlesWon[0][1]);
     }
@@ -205,7 +198,6 @@ public class Tactics {
         // With tactics Assassin copies IconBearer, which counters the +1 from the Scout
         // Field is now 6 : 7 (draw)
         // Flank is now 0 : 2 (p1)
-        fm._afterAction(state, null);
         assertEquals(2, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
         assertEquals(1, state.battlesTied[0]);
@@ -228,7 +220,6 @@ public class Tactics {
         // And also makes the Flank a draw from the original Iconbearer
         // Field is now 6 : 7 (draw)
         // Flank is now 1 : 2 (draw)
-        fm._afterAction(state, null);
         assertEquals(2, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
         assertEquals(2, state.battlesTied[0]);
@@ -247,7 +238,6 @@ public class Tactics {
 
         // This is 1 : 0...so not a Frog
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -263,7 +253,6 @@ public class Tactics {
 
         // This is 2 : 0...so a Frog...that becomes 2 points
 
-        fm._afterAction(state, null);
         assertEquals(2, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
     }
@@ -279,7 +268,6 @@ public class Tactics {
 
         // This is a tie
 
-        fm._afterAction(state, null);
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
     }
@@ -297,7 +285,6 @@ public class Tactics {
 
         // This is now not a tie
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
     }
@@ -318,7 +305,6 @@ public class Tactics {
 
         // With tactics the 4 becomes a 6, so we are 1 : 1
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -341,7 +327,6 @@ public class Tactics {
 
         // With tactics this is still 1 : 0, because the Assassin copies the Saboteur, and the GeneralTwo is negated
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -363,7 +348,6 @@ public class Tactics {
         // Field is 1 : 4 (p1 wins)
         // Flank is 6 : 6 (draw)
 
-        fm._afterAction(state, null);
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(2, state.battlesWon[0][1]);
     }
@@ -385,7 +369,6 @@ public class Tactics {
         // Field is 1 : 4 (p1 wins)
         // Flank is 7 : 6 (p0 wins)
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(3, state.battlesWon[0][1]);
     }
@@ -408,7 +391,6 @@ public class Tactics {
         // Field is 2 : 2 (draw)
         // Flank is 7 : 7 (draw)
 
-        fm._afterAction(state, null);
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(2, state.battlesWon[0][1]);
     }
@@ -428,7 +410,6 @@ public class Tactics {
         // IconBearer is cancelled by Saboteur, so does not turn the Field battle into a Win
         // This is hence 1 : 0
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -447,7 +428,6 @@ public class Tactics {
 
         // IconBearer turns the Field battle into a Draw for 0 : 1
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
     }
@@ -463,7 +443,6 @@ public class Tactics {
         );
         // Trickster swaps with Saboteur II (which is not activated)
         // Trickster is now value 5, not enough to beat 6
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(2, state.battlesWon[0][1]);
     }
@@ -478,7 +457,6 @@ public class Tactics {
                 new ToadCard("IconBearer", 6, null)
         );
         // Scount increases the SaboteurII to 5, which ties with the Berserker
-        fm._afterAction(state, null);
         assertEquals(0, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -496,7 +474,6 @@ public class Tactics {
         // Icon Bearer activates itself and the SaboteurII.
         // Saboteur now wins against Berserker
         // Icon Bearer itself loses against GeneralOne
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
 
@@ -511,7 +488,6 @@ public class Tactics {
                 new ToadCard("Five", 4, SABOTEURII)
         );
         // Saboteur loses, but the Scout in Field will win
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }
@@ -543,7 +519,6 @@ public class Tactics {
         // without tactics this is 1 : 1
         // which is also true here, as the Saboteur cancels the Scout
 
-        fm._afterAction(state, null);
         checkVisibilityOfHands(0, false, false);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
@@ -564,7 +539,6 @@ public class Tactics {
         // Field is now 4 : 2 (p0 wins) Iconbearer cannot help; but it does activate the Scout ability
         // Flank is now 2 : 7 (p1 wins)
 
-        fm._afterAction(state, null);
         checkVisibilityOfHands(2, true, true);
 
         assertEquals(1, state.battlesWon[0][0]);
@@ -586,7 +560,6 @@ public class Tactics {
         // Field is now 4 : 3 (p0 wins)
         // Flank is now 2 : 1 (p0 wins)
 
-        fm._afterAction(state, null);
         checkVisibilityOfHands(2, false, true);
 
         assertEquals(1, state.battlesWon[0][0]);
@@ -602,7 +575,6 @@ public class Tactics {
                 new ToadCard("Trickster", 3, TRICKSTER)
         );
 
-        fm._afterAction(state, null);
         checkVisibilityOfHands(2, false, true);
     }
 
@@ -621,7 +593,6 @@ public class Tactics {
 
         // If the IconBearer were active, this would be 0 : 1 instead
 
-        fm._afterAction(state, null);
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
     }

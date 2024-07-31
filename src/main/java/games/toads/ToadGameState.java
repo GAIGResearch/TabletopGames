@@ -151,7 +151,7 @@ public class ToadGameState extends AbstractGameState {
     public ToadCard getTieBreaker(int playerId) {
         return tieBreakers[playerId];
     }
-    public int getBattlesWon(int playerId, int round) {
+    public int getBattlesWon(int round, int playerId) {
         return battlesWon[round][playerId];
     }
     public int getBattlesTied(int round) {

@@ -53,8 +53,8 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
         features[1] = state.getTurnCounter();
         features[2] = state.getRoundCounter();
 
-        features[3] = state.getBattlesWon(playerID, state.getRoundCounter());
-        features[4] = state.getBattlesWon(1 - playerID, state.getRoundCounter());
+        features[3] = state.getBattlesWon(state.getRoundCounter(), playerID);
+        features[4] = state.getBattlesWon(state.getRoundCounter(), 1 - playerID);
         features[5] = features[3] - features[4];
         features[6] = features[3] > features[4] ? 1 : 0;
         features[7] = features[3] == features[4] ? 1 : 0;
@@ -77,8 +77,8 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
 
         features[9] = visibleCount;
         features[10] = state.getTieBreaker(playerID) == null ? 0 : state.getTieBreaker(playerID).value;
-        features[11] = state.getBattlesWon(playerID, 0) > state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
-        features[12] = state.getBattlesWon(playerID, 0) < state.getBattlesWon(1 - playerID, 0) ? 1 : 0;
+        features[11] = state.getBattlesWon(0, playerID) > state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
+        features[12] = state.getBattlesWon(0, playerID) < state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
 
         for (int i = 0; i < state.getPlayerHand(playerID).getSize(); i++) {
             ToadCard card = state.getPlayerHand(playerID).get(i);
