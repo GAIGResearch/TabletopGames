@@ -18,6 +18,7 @@ public class SeaSaltPaperCard extends Card {
         this.color = color;
         this.cardSuite = cardSuite;
         this.cardType = cardType;
+        this.componentName = color + " " + cardSuite + " " + cardType;
     }
 
     @Override
@@ -37,5 +38,10 @@ public class SeaSaltPaperCard extends Card {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), color, cardSuite, cardType, isPlayed);
+    }
+
+    @Override
+    public SeaSaltPaperCard copy() {
+        return new SeaSaltPaperCard(color, cardSuite, cardType);
     }
 }

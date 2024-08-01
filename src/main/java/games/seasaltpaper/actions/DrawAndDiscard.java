@@ -57,7 +57,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
             List<Integer> discardPiles = new ArrayList<>();
             // TODO Make this more general for any number of discard piles
             if (sspgs.getDiscardPile2().getSize() == 0 && sspgs.getDiscardPile1().getSize() == 0) {
-                System.out.println("BOTH DISCARD PILES ARE EMPTY FOR SOME REASON!!!!");
+                System.out.println("BOTH DISCARD PILES ARE EMPTY!!!!");
                 discardPiles.add(sspgs.getDiscardPile1().getComponentID());
                 discardPiles.add(sspgs.getDiscardPile2().getComponentID());
             }

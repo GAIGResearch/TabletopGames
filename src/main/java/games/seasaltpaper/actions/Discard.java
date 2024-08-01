@@ -47,10 +47,11 @@ public class Discard extends AbstractAction implements IPrintable {
         return 0;
     }
 
+    // TODO CANT DO "gameState.getComponentById(discardCardId).toString()" for some reason???
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Discard card " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();
-//        return "Discard card " + discardCardId + " to pile " + gameState.getComponentById(discardPileId).getComponentName();
+//        return "Discard card " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();
+        return "Discard card " + discardCardId + " to pile " + gameState.getComponentById(discardPileId).getComponentName();
     }
 
     @Override
