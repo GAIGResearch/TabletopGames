@@ -2,15 +2,16 @@ package games.seasaltpaper.cards;
 
 import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
 import games.seasaltpaper.actions.PlayDuo;
 
 import java.util.List;
 import java.util.function.BiFunction;
 
-public enum SuiteType {
+public enum CardSuite {
 
     //TODO move the collectorbonus and duoBonus to parameters
-    BOAT(new int[]{1, 2, 3}, 1),
+    BOAT(new SeaSaltPaperParameters().boatCollectorBonus, 1),
     FISH(new int[]{1, 2, 3}, 1),
     SHELL(new int[]{1, 2, 3}, 1),
     OCTOPUS(new int[]{1, 2, 3}, 1),
@@ -22,7 +23,7 @@ public enum SuiteType {
 
     private final int duoBonus;
 
-    SuiteType(int[] collectorBonus, int duoBonus) {
+    CardSuite(int[] collectorBonus, int duoBonus) {
         this.collectorBonus = collectorBonus;
         this.duoBonus = duoBonus;
     }

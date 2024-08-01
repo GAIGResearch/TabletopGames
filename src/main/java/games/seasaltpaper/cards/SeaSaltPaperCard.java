@@ -2,25 +2,40 @@ package games.seasaltpaper.cards;
 
 import core.components.Card;
 
+import java.util.Objects;
+
 
 public class SeaSaltPaperCard extends Card {
 
     protected final CardColor color;
-    protected final SuiteType suiteType;
+    protected final CardSuite cardSuite;
 
     protected final CardType cardType;
 
     protected boolean isPlayed = false;
 
-    public SeaSaltPaperCard(CardColor color, SuiteType suiteType, CardType cardType) {
+    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType) {
         this.color = color;
-        this.suiteType = suiteType;
+        this.cardSuite = cardSuite;
         this.cardType = cardType;
     }
 
     @Override
     public String toString() {
-        return "{" + color + ", " + suiteType + ", " + cardType + "}";
+        return "{" + color + ", " + cardSuite + ", " + cardType + "}";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SeaSaltPaperCard that = (SeaSaltPaperCard) o;
+        return isPlayed == that.isPlayed && color == that.color && cardSuite == that.cardSuite && cardType == that.cardType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), color, cardSuite, cardType, isPlayed);
+    }
 }

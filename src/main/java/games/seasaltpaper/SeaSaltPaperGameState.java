@@ -18,9 +18,9 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     public static final int DISCARD_PILE_COUNT = 2; // TODO move this to parameter?
 
     public enum TurnPhase {
+        START,
         DRAW,
         DUO,
-        STOP,
         FINISH;
 
         public TurnPhase next()
@@ -29,9 +29,9 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         }
         private Supplier<TurnPhase> next;
         static {
+            START.next = () -> TurnPhase.DRAW;
             DRAW.next = () -> TurnPhase.DUO;
-            DUO.next = () -> TurnPhase.STOP;
-            STOP.next = () -> TurnPhase.FINISH;
+            DUO.next = () -> TurnPhase.FINISH;
             FINISH.next = () -> TurnPhase.DRAW;
         }
     }
@@ -39,6 +39,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     TurnPhase currentPhase = TurnPhase.DRAW;
 
     List<PartialObservableDeck<SeaSaltPaperCard>> playerHands;
+
+    // TODO make this partially observable (only top card visible) and for whoever playing ShellDuo
     Deck<SeaSaltPaperCard> discardPile1, discardPile2;  // TODO make this a list to generalize different number of discard piles
     Deck<SeaSaltPaperCard> drawPile;
 
@@ -139,6 +141,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     public int[] getPlayerPoints() { return playerPoints; }
     public TurnPhase getCurrentPhase() { return currentPhase;}
+    public void resetTurn() { currentPhase = TurnPhase.START; }
 
 
 }

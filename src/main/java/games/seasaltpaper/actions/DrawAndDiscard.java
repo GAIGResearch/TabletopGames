@@ -34,7 +34,12 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        //TODO Draw multiple cards here
+        DrawMultiple drawMultiple = new DrawMultiple(NUMBER_OF_CARDS_DRAWN, playerId);
+        if (!(drawMultiple.execute(gs))) {
+            return false;
+        }
+        drawnCardsId = drawMultiple.getDrawnCardsId();
+        currentStep = Step.DISCARD;
         gs.setActionInProgress(this);
         return true;
     }
@@ -44,7 +49,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
         List<AbstractAction> actions = new ArrayList<>();
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) state;
         if (currentStep == Step.DRAW) { // TODO move this to execute()
-            actions.add(new DrawMultiple(NUMBER_OF_CARDS_DRAWN, playerId));
+            //actions.add(new DrawMultiple(NUMBER_OF_CARDS_DRAWN, playerId));
         }
         else if (currentStep == Step.DISCARD)
         {
@@ -86,13 +91,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) state;
-
-        if (currentStep == Step.DRAW) {
-            drawnCardsId = ((DrawMultiple)action).getDrawnCardsId();    // is this copy or reference??
-            currentStep = Step.DISCARD;
-        }
-        else if (currentStep == Step.DISCARD) {
+        if (currentStep == Step.DISCARD) {
             currentStep = Step.DONE;
         }
     }

@@ -20,8 +20,7 @@ public class Discard extends AbstractAction implements IPrintable {
         this.playerID = playerID;
     }
 
-
-
+    // TODO add an add function to make the top card hidden then add a new top card.
     @Override
     public boolean execute(AbstractGameState gameState) {
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gameState;

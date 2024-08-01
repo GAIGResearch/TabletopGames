@@ -2,17 +2,16 @@ package games.seasaltpaper;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.GameType;
 import games.seasaltpaper.actions.DrawAndDiscard;
+import games.seasaltpaper.actions.LastChance;
 import games.seasaltpaper.actions.PlayDuo;
+import games.seasaltpaper.actions.Stop;
 import games.seasaltpaper.cards.*;
 import games.seasaltpaper.SeaSaltPaperGameState.TurnPhase;
-import scala.Array;
 
 import java.util.*;
 
@@ -49,7 +48,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
         // Placeholder
         for (int i = 0; i < 10; i++) {
-            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, SuiteType.PENGUIN, CardType.COLLECTOR));
+            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, CardSuite.PENGUIN, CardType.COLLECTOR));
         }
         sspgs.drawPile.shuffle(sspgs.getRnd());
 
@@ -104,15 +103,15 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 // Draw 2 from draw pile, then discard 1 to one of the discard pile
                 actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer()));
                 break;
-            case DUO:   // TODO Can play as many duo cards as they want
-                System.out.println("this is duo phase");
-                actions.add(new PlayDuo());
+            case DUO:
+                System.out.println("this is duo/stop phase");
+                actions.addAll(HandManager.generateDuoActions(sspgs, sspgs.getCurrentPlayer()));
                 actions.add(new DoNothing());
+                actions.add(new Stop(gameState.getCurrentPlayer()));
+                actions.add(new LastChance(gameState.getCurrentPlayer()));
                 break;
-            case STOP:  // TODO merge this with DUO phase
-                System.out.println("this is stop phase");
-                actions.add(new PlayDuo());
-                actions.add(new PlayDuo());
+            default:
+                actions.add(new DoNothing());
         }
         return actions;
     }
@@ -123,7 +122,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
         System.out.println("ACTIONS EXECUTED XD!!");
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gameState;
-        if (action instanceof PlayDuo) {
+        if (!(action instanceof PlayDuo)) {
             sspgs.currentPhase = sspgs.currentPhase.next();
         }
         if (sspgs.currentPhase == TurnPhase.FINISH) // Current player's turn is finished, end the turn
