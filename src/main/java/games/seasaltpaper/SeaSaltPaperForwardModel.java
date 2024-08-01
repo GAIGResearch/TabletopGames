@@ -49,7 +49,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         //TODO ADD ACTUAL CARDs
         // Placeholder
         for (int i = 0; i < 10; i++) {
-            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, CardSuite.PENGUIN, CardType.COLLECTOR));
+            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, CardSuite.SHELL, CardType.DUO));
         }
         sspgs.drawPile.shuffle(sspgs.getRnd());
 
