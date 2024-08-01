@@ -18,26 +18,8 @@ public class IconBearer implements ToadAbility {
                 }),
                 new Pair<>(5, (isAttacker, isFlank, br) -> {
                     // ally gains 1 value if this would create a tie
-                    if (isAttacker) {
-                        if (isFlank) {
-                            if (br.DField - br.AField == 1) {
-                                br.AField++;
-                            }
-                        } else {
-                            if (br.DFlank - br.AFlank == 1) {
-                                br.AFlank++;
-                            }
-                        }
-                    } else {
-                        if (isFlank) {
-                            if (br.AField - br.DField == 1) {
-                                br.DField++;
-                            }
-                        } else {
-                            if (br.AFlank - br.DFlank == 1) {
-                                br.DFlank++;
-                            }
-                        }
+                    if (br.getCurrentValue(isAttacker, !isFlank) == br.getCurrentValue(!isAttacker, !isFlank) - 1) {
+                        br.addValue(isAttacker, !isFlank, 1);
                     }
                 }));
     }

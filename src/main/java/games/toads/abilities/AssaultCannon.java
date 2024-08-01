@@ -1,7 +1,9 @@
 package games.toads.abilities;
 
 import games.toads.ToadConstants;
+import games.toads.actions.AssaultCannonInterrupt;
 import games.toads.components.ToadCard;
+import utilities.Pair;
 
 import java.util.List;
 
@@ -19,5 +21,12 @@ public class AssaultCannon implements ToadAbility {
             // otherwise we are the attacker, and are not facing the Saboteur, so we win
             return 20;
         });
+    }
+
+    @Override
+    public List<Pair<Integer, BattleEffect>> tactics() {
+        return List.of(
+                new Pair<>(10, (isAttacker, isFlank, br) -> br.postBattleActions.add(new AssaultCannonInterrupt(isAttacker ? 0 : 1))
+                ));
     }
 }

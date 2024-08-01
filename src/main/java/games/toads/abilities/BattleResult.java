@@ -56,7 +56,6 @@ public class BattleResult {
         battleComplete = true;
 
         ToadParameters params = (ToadParameters) state.getGameParameters();
-        int round = state.getRoundCounter();
         useTactics = (boolean) params.getParameterValue("useTactics");
 
 
@@ -90,9 +89,7 @@ public class BattleResult {
             tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
         }
 
-        boolean saboteurStopsTactics = false; // (attackerFlank.tactics instanceof Saboteur || defenderFlank.tactics instanceof Saboteur);
-
-        // apply CardModifiers
+        // apply CardModifiers at priority 0
         if (attackerField.ability != null) {
             for (ToadAbility.CardModifier modifier : attackerField.ability.attributes()) {
                 AField += modifier.apply(true, false, this);
@@ -118,59 +115,6 @@ public class BattleResult {
         while (!tacticsToApply.isEmpty()) {
             Tactic tactic = tacticsToApply.poll();
             tactic.effect.apply(tactic.isAttacker, tactic.isFlank, this);
-        }
-
-        if (useTactics && !saboteurStopsTactics) {
-            // we apply tactics if this is enabled, and neither player has played a Saboteur (which negates the tactics of the other side)
-            // For the moment (given small number of cards), I'll hard-code this
-
-            if (activatedFlanks[0]) {
-                if (attackerFlank.tactics instanceof GeneralOne) {
-                    frogOverride[0] = true;
-                }
-                if (attackerFlank.tactics instanceof GeneralTwo) {
-                    AField += state.getBattlesTied(round);
-                }
-                if (attackerFlank.tactics instanceof AssaultCannon) {
-                    postBattleActions.add(new AssaultCannonInterrupt(attacker));
-                }
-            }
-
-            if (activatedFlanks[1]) {
-                if (defenderFlank.tactics instanceof GeneralOne) {
-                    frogOverride[1] = true;
-                }
-                if (defenderFlank.tactics instanceof GeneralTwo) {
-                    DField += state.getBattlesTied(round);
-                }
-                if (defenderFlank.tactics instanceof AssaultCannon) {
-                    postBattleActions.add(new AssaultCannonInterrupt(1 - attacker));
-                }
-            }
-
-            // and finally the SaboteurII's tie-breaking
-            if (
-                    (activatedFlanks[0] && attackerFlank.tactics instanceof SaboteurII)
-                            ||
-                            (activatedFields[0] && attackerField.tactics instanceof SaboteurII)) {
-                if (AField == DField) {
-                    AField++;
-                }
-                if (AFlank == DFlank) {
-                    AFlank++;
-                }
-            }
-            if (
-                    (activatedFlanks[1] && defenderFlank.tactics instanceof SaboteurII)
-                            ||
-                            (activatedFields[1] && defenderField.tactics instanceof SaboteurII)) {
-                if (DField == AField) {
-                    DField++;
-                }
-                if (DFlank == AFlank) {
-                    DFlank++;
-                }
-            }
         }
 
         if (AField > DField) {
@@ -228,6 +172,10 @@ public class BattleResult {
         }).toList();
         tacticsToApply.clear();
         tacticsToApply.addAll(newTactics);
+    }
+
+    public int getCurrentValue(boolean isAttacker, boolean isFlank) {
+        return isAttacker ? (isFlank ? AFlank : AField) : (isFlank ? DFlank : DField);
     }
 
     public void addValue(boolean isAttacker, boolean isFlank, int value) {
