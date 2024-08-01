@@ -24,6 +24,7 @@ public class ToadGameState extends AbstractGameState {
     int discardOptions;
     int[][] battlesWon;
     int[] battlesTied;
+    int nextBattle = 0;
     protected int[][] roundWinners;
     List<Deck<ToadCard>> playerDiscards;
     ToadCard[] hiddenFlankCards;
@@ -69,6 +70,7 @@ public class ToadGameState extends AbstractGameState {
         copy.battlesTied = Arrays.copyOf(battlesTied, 2);
         copy.discardOptions = discardOptions;
         copy.cardTypesInPlay = cardTypesInPlay; // this is immutable
+        copy.nextBattle = nextBattle;
 
         // battlesWon tracks the win/loss rates over all 8 Battles
         copy.roundWinners = new int[8][2];
@@ -248,6 +250,7 @@ public class ToadGameState extends AbstractGameState {
             return playerDecks.equals(toadGameState.playerDecks) &&
                     playerHands.equals(toadGameState.playerHands) &&
                     discardOptions == toadGameState.discardOptions &&
+                    nextBattle == toadGameState.nextBattle &&
                     Arrays.deepEquals(battlesWon, toadGameState.battlesWon) &&
                     playerDiscards.equals(toadGameState.playerDiscards) &&
                     Arrays.equals(hiddenFlankCards, toadGameState.hiddenFlankCards) &&
@@ -260,7 +263,7 @@ public class ToadGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions) + Arrays.deepHashCode(battlesWon) +
+        return Objects.hash(playerDecks, playerHands, playerDiscards, discardOptions, nextBattle) + Arrays.deepHashCode(battlesWon) +
                 Arrays.hashCode(hiddenFlankCards) + Arrays.hashCode(fieldCards) + Arrays.hashCode(tieBreakers) + Arrays.hashCode(battlesTied);
     }
 
@@ -270,7 +273,7 @@ public class ToadGameState extends AbstractGameState {
                 playerDecks.hashCode() + "|" +
                 playerHands.hashCode() + "|" +
                 playerDiscards.hashCode() + "|" +
-                discardOptions + "|" +
+                discardOptions + nextBattle * 31 + "|" +
                 Arrays.deepHashCode(battlesWon) + "|" +
                 Arrays.hashCode(battlesTied) + "|" +
                 Arrays.hashCode(hiddenFlankCards) + "|" +

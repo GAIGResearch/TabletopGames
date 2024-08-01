@@ -23,6 +23,7 @@ public class ToadForwardModel extends StandardForwardModel {
         ToadParameters params = (ToadParameters) state.getGameParameters();
 
         state.discardOptions = 0;
+        state.nextBattle = 0;
         state.battlesWon = new int[2][2];
         state.battlesTied = new int[2];
         state.roundWinners = new int[8][2];
@@ -150,11 +151,9 @@ public class ToadForwardModel extends StandardForwardModel {
             state.battlesWon[round][0] += scoreDiff[0];
             state.battlesWon[round][1] += scoreDiff[1];
 
-            int turn = state.getTurnCounter();
-            int battleNumber = turn / 2;
-            // First 2 turns are the first set of battles, and so on
-            state.roundWinners[battleNumber][0] = scoreDiff[0];
-            state.roundWinners[battleNumber][1] = scoreDiff[1];
+            state.roundWinners[state.nextBattle][0] = scoreDiff[0];
+            state.roundWinners[state.nextBattle][1] = scoreDiff[1];
+            state.nextBattle++;
 
             // move cards to discard
             state.playerDiscards.get(0).add(state.fieldCards[0]);
