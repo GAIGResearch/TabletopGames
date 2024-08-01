@@ -146,7 +146,9 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 oldGraphKeys = new HashMap<>();
                 return null;
             }
+            int oldDepth = retValue.depth;
             retValue.instantiate(null, null, gameState);
+            retValue.depth = oldDepth;
             retValue.setTranspositionMap(mcgsRoot.getTranspositionMap());
             retValue.rootify(root);
             return retValue;
