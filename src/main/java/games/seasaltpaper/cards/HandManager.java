@@ -27,7 +27,7 @@ public class HandManager {
         PartialObservableDeck<SeaSaltPaperCard> playerHand =  gs.getPlayerHands().get(playerId);
         // get duo cards
         for (int i = 0; i < playerHand.getSize(); i++) {
-            SeaSaltPaperCard card = (SeaSaltPaperCard) playerHand.get(i); //TODO WHY CANT I CAST?????
+            SeaSaltPaperCard card = playerHand.get(i);
             if (card.cardType != CardType.DUO) {
                 continue;
             }
