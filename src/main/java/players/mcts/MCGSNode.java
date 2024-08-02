@@ -94,7 +94,6 @@ public class MCGSNode extends SingleTreeNode {
     protected void resetDepth(SingleTreeNode newRoot) {
         int depthDelta = depth;
         root = this;
-        depth = 0;
         for (MCGSNode node : transpositionMap.values()) {
             node.depth -= depthDelta;
             node.root = this;

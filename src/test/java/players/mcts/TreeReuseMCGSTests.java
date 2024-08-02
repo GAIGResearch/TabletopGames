@@ -139,25 +139,25 @@ public class TreeReuseMCGSTests {
             oldDepthMap.remove(currentPlayer);
             oldDepthMap.add(currentPlayer, new HashMap<>(depthMap.get(currentPlayer)));
             if (player.root != null) {
-                oldVisits[currentPlayer] = ((MCGSNode) playerOne.getRoot(0)).getTranspositionMap().getOrDefault(oldKeys[currentPlayer], new MCGSNode()).nVisits;
+                oldVisits[currentPlayer] = ((MCGSNode) player.getRoot(0)).getTranspositionMap().getOrDefault(oldKeys[currentPlayer], new MCGSNode()).nVisits;
                 visitsMap.remove(currentPlayer);
-                visitsMap.add(currentPlayer, ((MCGSNode) playerOne.getRoot(0)).getTranspositionMap().entrySet().stream()
+                visitsMap.add(currentPlayer, ((MCGSNode) player.getRoot(0)).getTranspositionMap().entrySet().stream()
                         .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll));
                 depthMap.remove(currentPlayer);
-                depthMap.add(currentPlayer, ((MCGSNode) playerOne.getRoot(0)).getTranspositionMap().entrySet().stream()
+                depthMap.add(currentPlayer, ((MCGSNode) player.getRoot(0)).getTranspositionMap().entrySet().stream()
                         .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().depth), HashMap::putAll));
             }
             // when we take the next action we should first prune any states that were not updated last time
             // so we check that states in both trees have monotonic increasing visits
             // and that the depth has been decreased correctly
             Object newKey = paramsOne.MCGSStateKey.getKey(state);
+            int depthChange = depthMap.get(currentPlayer).getOrDefault(newKey, 0);
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
             // newRoot is the root of the tree just used - i.e. it is rooted at the state before the action was taken
             MCGSNode newRoot = (MCGSNode) (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
             // to find the depth of newRoot in the old tree, we need to find its key (from before the action was taken)
-            int depthChange = depthMap.get(currentPlayer).getOrDefault(newKey, 0);
             if (!oneAction) {
                 // check tree reuse
                 if (oldRoots[currentPlayer] != null) {
