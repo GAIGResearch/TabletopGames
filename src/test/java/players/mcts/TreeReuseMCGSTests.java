@@ -115,15 +115,12 @@ public class TreeReuseMCGSTests {
         List<Map<Object, Integer>> oldVisitsMap = new ArrayList<>(2);
         oldVisitsMap.add(new HashMap<>());
         oldVisitsMap.add(new HashMap<>());
-        List<Map<Object, Integer>> oldDepthMap = new ArrayList<>(2);
-        oldDepthMap.add(new HashMap<>());
-        oldDepthMap.add(new HashMap<>());
-        List<Map<Object, Integer>> visitsMap = new ArrayList<>(2);
-        visitsMap.add(new HashMap<>());
-        visitsMap.add(new HashMap<>());
-        List<Map<Object, Integer>> depthMap = new ArrayList<>(2);
-        depthMap.add(new HashMap<>());
-        depthMap.add(new HashMap<>());
+        List<Map<Object, Integer>> visitMapBeforeAction = new ArrayList<>(2);
+        visitMapBeforeAction.add(new HashMap<>());
+        visitMapBeforeAction.add(new HashMap<>());
+        List<Map<Object, Integer>> depthMapBeforeAction = new ArrayList<>(2);
+        depthMapBeforeAction.add(new HashMap<>());
+        depthMapBeforeAction.add(new HashMap<>());
         int[] oldVisits = new int[2];
         do {
             System.out.println("Current Player: " + state.getCurrentPlayer() + ", Turn: " + state.getTurnCounter() + ", Phase: " + state.getGamePhase());
@@ -135,23 +132,21 @@ public class TreeReuseMCGSTests {
             TestMCTSPlayer player = currentPlayer == 0 ? playerOne : playerTwo;
             oldRoots[currentPlayer] = (MCGSNode) player.root; // root from last action taken
             oldVisitsMap.remove(currentPlayer);
-            oldVisitsMap.add(currentPlayer, new HashMap<>(visitsMap.get(currentPlayer)));
-            oldDepthMap.remove(currentPlayer);
-            oldDepthMap.add(currentPlayer, new HashMap<>(depthMap.get(currentPlayer)));
+            oldVisitsMap.add(currentPlayer, new HashMap<>(visitMapBeforeAction.get(currentPlayer)));
             if (player.root != null) {
                 oldVisits[currentPlayer] = ((MCGSNode) player.getRoot(0)).getTranspositionMap().getOrDefault(oldKeys[currentPlayer], new MCGSNode()).nVisits;
-                visitsMap.remove(currentPlayer);
-                visitsMap.add(currentPlayer, ((MCGSNode) player.getRoot(0)).getTranspositionMap().entrySet().stream()
+                visitMapBeforeAction.remove(currentPlayer);
+                visitMapBeforeAction.add(currentPlayer, ((MCGSNode) player.getRoot(0)).getTranspositionMap().entrySet().stream()
                         .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll));
-                depthMap.remove(currentPlayer);
-                depthMap.add(currentPlayer, ((MCGSNode) player.getRoot(0)).getTranspositionMap().entrySet().stream()
+                depthMapBeforeAction.remove(currentPlayer);
+                depthMapBeforeAction.add(currentPlayer, ((MCGSNode) player.getRoot(0)).getTranspositionMap().entrySet().stream()
                         .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().depth), HashMap::putAll));
             }
             // when we take the next action we should first prune any states that were not updated last time
             // so we check that states in both trees have monotonic increasing visits
             // and that the depth has been decreased correctly
             Object newKey = paramsOne.MCGSStateKey.getKey(state);
-            int depthChange = depthMap.get(currentPlayer).getOrDefault(newKey, 0);
+            int depthChange = depthMapBeforeAction.get(currentPlayer).getOrDefault(newKey, 0);
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
@@ -176,15 +171,15 @@ public class TreeReuseMCGSTests {
                             assertFalse(newRoot.getTranspositionMap().containsKey(oldOldOldKeys[currentPlayer]));
                         }
                         // then for each node that was
-                        Map<Object, Integer> newVisitsMap = newRoot.getTranspositionMap().entrySet().stream()
+                        Map<Object, Integer> visitMapAfterAction = newRoot.getTranspositionMap().entrySet().stream()
                                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().nVisits), HashMap::putAll);
-                        Map<Object, Integer> newDepthMap = newRoot.getTranspositionMap().entrySet().stream()
+                        Map<Object, Integer> depthMapAfterAction = newRoot.getTranspositionMap().entrySet().stream()
                                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().depth), HashMap::putAll);
                         for (Object key : oldVisitsMap.get(currentPlayer).keySet()) {
-                            if (newVisitsMap.containsKey(key)) {
-                                assertTrue(newVisitsMap.get(key) > oldVisitsMap.get(currentPlayer).get(key));
-                                int oldDepth = oldDepthMap.get(currentPlayer).get(key);
-                                int newDepth = newDepthMap.get(key);
+                            if (visitMapAfterAction.containsKey(key)) {
+                                assertTrue(visitMapAfterAction.get(key) > oldVisitsMap.get(currentPlayer).get(key));
+                                int oldDepth = depthMapBeforeAction.get(currentPlayer).get(key);
+                                int newDepth = depthMapAfterAction.get(key);
                                 assertEquals(oldDepth - depthChange, newDepth);
                             }
                         }
