@@ -40,8 +40,7 @@ public class ToadForwardModel extends StandardForwardModel {
             state.playerHands.add(new PartialObservableDeck<>("Player " + i + " Hand", i, 2, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             state.playerDiscards.add(new Deck<>("Player " + i + " Discard", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             List<ToadCard> cards = params.getCardDeck();
-            Set<ToadConstants.ToadCardType> inPlay = cards.stream().map(c -> c.type).collect(Collectors.toSet());
-            state.cardTypesInPlay = inPlay;
+            state.cardTypesInPlay = cards.stream().map(c -> c.type).collect(Collectors.toSet());
             state.playerDecks.get(i).add(cards);
             state.playerDecks.get(i).shuffle(state.getRnd());
             for (int j = 0; j < params.handSize; j++) {

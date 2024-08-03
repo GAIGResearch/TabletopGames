@@ -29,32 +29,25 @@ public class ToadCard extends Card {
     public ToadCard(String name, int value, ToadCardType type, ToadAbility ability) {
         this(name, value, type, ability, ability);
     }
-//    public ToadCard(String name, int value, int ID) {
-//        this(name, value, null, null, ID);
-//    }
 
     @Override
     public ToadCard copy() {
         return this;  // currently immutable
     }
 
-    public ToadAbility getAbility() {
-        return ability;
-    }
-    public ToadAbility getTactics() {
-        return tactics;
-    }
-
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
         if (!(other instanceof ToadCard otherCard)) return false;
-        return super.equals(otherCard) && this.value == otherCard.value && this.ability.equals(otherCard.ability);
+        return super.equals(otherCard) && this.value == otherCard.value &&
+                this.ability.equals(otherCard.ability) &&
+                this.tactics.equals(otherCard.tactics) && this.type.equals(otherCard.type);
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode() + value + (ability != null ? ability.hashCode()  * 31 : 0);
+        return super.hashCode() + value + (ability != null ? ability.hashCode()  * 31 : 0) +
+                (tactics != null ? tactics.hashCode() * 31 : 0) + (type != null ? type.hashCode() * 31 : 0);
     }
 
 

@@ -16,7 +16,7 @@ public class AssaultCannon implements ToadAbility {
             if (!isAttacker)
                 return 0;
             // we also have a value of zero against a Saboteur
-            if (card.type == ToadConstants.ToadCardType.SABOTEUR || card.type == ToadConstants.ToadCardType.SABOTEURII)
+            if (card.type == ToadConstants.ToadCardType.SABOTEUR)
                 return 0; // we win
             // otherwise we are the attacker, and are not facing the Saboteur, so we win
             return 20;

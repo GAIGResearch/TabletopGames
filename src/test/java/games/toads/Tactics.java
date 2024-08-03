@@ -59,7 +59,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Five", 5, BERSERKER), // field
                 new ToadCard("Six", 6, ICON_BEARER),  // Flank
-                new ToadCard("Four", 4, SABOTEUR),  // Field
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Trickster", 3, TRICKSTER)// flank
         );
         // with no tactics this is 2 : 0
@@ -80,7 +80,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Six", 6, ICON_BEARER),
                 new ToadCard("Five", 5, BERSERKER),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Trickster", 3, TRICKSTER)
         );
 
@@ -121,9 +121,9 @@ public class Tactics {
     @Test
     public void tricksterSaboteurIconBearer() {
         playCards(
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, ICON_BEARER),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Trickster", 3, TRICKSTER)
         );
 
@@ -143,7 +143,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Five", 5, BERSERKER),
                 new ToadCard("Assassin", 1, ASSASSIN),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Trickster", 3, TRICKSTER)
         );
 
@@ -167,7 +167,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Five", 5, BERSERKER),
                 new ToadCard("Assassin", 1, ASSASSIN),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Trickster", 3, TRICKSTER)
         );
 
@@ -247,7 +247,7 @@ public class Tactics {
         playCards(
                 new ToadCard("Five", 5, BERSERKER),
                 new ToadCard("General", 7, GENERAL_ONE),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, null)
         );
 
@@ -317,9 +317,9 @@ public class Tactics {
         state.battlesTied[0] = 2;
 
         playCards(
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Assassin", 1, ASSASSIN),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Seven", 7, GENERAL_TWO)
         );
 
@@ -338,7 +338,7 @@ public class Tactics {
         playCards(
                 new ToadCard("One", 1, null),
                 new ToadCard("Berserker", 5, BERSERKER),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, ICON_BEARER)
         );
 
@@ -359,7 +359,7 @@ public class Tactics {
         playCards(
                 new ToadCard("One", 1, null),
                 new ToadCard("Berserker", 5, BERSERKER),
-                new ToadCard("Four", 4, SABOTEUR),
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Six", 6, ICON_BEARER)
         );
 
@@ -403,7 +403,7 @@ public class Tactics {
                 new ToadCard("Two", 2, SCOUT),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
                 new ToadCard("Two", 2, SCOUT),
-                new ToadCard("Saboteur", 4, SABOTEUR)
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur())
         );
         // without Tactics this is 1 : 0
 
@@ -436,10 +436,10 @@ public class Tactics {
     public void saboteurIIBreaksTies() {
         state.battlesWon[0][0] = 1;
         playCards(
-                new ToadCard("Four", 4, SABOTEURII),
+                new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII()),
                 new ToadCard("Three", 3, TRICKSTER),
                 new ToadCard("IconBearer", 6, null),
-                new ToadCard("Five", 4, SABOTEURII)
+                new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII())
         );
         // Trickster swaps with Saboteur II (which is not activated)
         // Trickster is now value 5, not enough to beat 6
@@ -451,7 +451,7 @@ public class Tactics {
     @Test
     public void saboteurIIHasNoEffectInField() {
         playCards(
-                new ToadCard("Four", 4, SABOTEURII),
+                new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII()),
                 new ToadCard("Three", 2, SCOUT),
                 new ToadCard("Five", 5, BERSERKER),
                 new ToadCard("IconBearer", 6, null)
@@ -464,7 +464,7 @@ public class Tactics {
     @Test
     public void saboteurIIWithIconBearerOppositeBerserker() {
         playCards(
-                new ToadCard("Sab", 4, SABOTEURII),
+                new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII()),
                 new ToadCard("IconBearer", 6, ICON_BEARER),
                 new ToadCard("Berserker", 5, BERSERKER),
                 new ToadCard("Gen", 7, GENERAL_ONE)
@@ -485,7 +485,7 @@ public class Tactics {
                 new ToadCard("Two", 2, null),
                 new ToadCard("IconBearer", 6, null),
                 new ToadCard("Two", 2, SCOUT),
-                new ToadCard("Five", 4, SABOTEURII)
+                new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII())
         );
         // Saboteur loses, but the Scout in Field will win
         assertEquals(1, state.battlesWon[0][0]);
@@ -513,7 +513,7 @@ public class Tactics {
                 new ToadCard("Three", 3, TRICKSTER),
                 new ToadCard("Two", 2, SCOUT),
                 new ToadCard("Scout", 2, SCOUT),
-                new ToadCard("Four", 4, SABOTEUR)
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur())
         );
 
         // without tactics this is 1 : 1

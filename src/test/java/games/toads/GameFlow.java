@@ -2,6 +2,8 @@ package games.toads;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import games.toads.abilities.Saboteur;
+import games.toads.abilities.SaboteurII;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import games.toads.components.ToadCard;
@@ -254,7 +256,7 @@ public class GameFlow {
     public void bombAgainstFourAttack() {
         playCards(
                 new ToadCard("Five", 5), // field
-                new ToadCard("Four", 4, SABOTEUR), // flank
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Bomb", 0, BOMB)
         );
@@ -268,7 +270,7 @@ public class GameFlow {
                 new ToadCard("Five", 5), // field
                 new ToadCard("Bomb", 0, BOMB),  // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Four", 4, SABOTEURII)  // flank
+                new ToadCard("Four", 4, SABOTEUR, new SaboteurII())  // flank
         );
 
         assertEquals(0, state.battlesWon[0][0]);
@@ -317,7 +319,7 @@ public class GameFlow {
         assertEquals(1, state.getCurrentPlayer());
         playCards(
                 new ToadCard("G2", 7, GENERAL_TWO), // field
-                new ToadCard("Saboteur", 4, SABOTEUR), // Flank
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur()),
                 new ToadCard("AC", 0, ASSAULT_CANNON),  // Field
                 new ToadCard("IconBearer", 6, ICON_BEARER) // flank
         );
@@ -331,7 +333,7 @@ public class GameFlow {
                 new ToadCard("Five", 5), // field
                 new ToadCard("AC", 0, ASSAULT_CANNON),  // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Saboteur", 4, SABOTEUR)  // flank
+                new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur())
         );
 
         assertEquals(0, state.battlesWon[0][0]);
@@ -344,7 +346,7 @@ public class GameFlow {
                 new ToadCard("Five", 5), // field
                 new ToadCard("AC", 0, ASSAULT_CANNON),  // Flank
                 new ToadCard("Five", 5),  // Field
-                new ToadCard("Saboteur", 4, SABOTEURII)  // flank
+                new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII())  // flank
         );
 
         assertEquals(0, state.battlesWon[0][0]);

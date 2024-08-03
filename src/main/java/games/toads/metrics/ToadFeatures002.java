@@ -84,9 +84,9 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
             ToadCard card = state.getPlayerHand(playerID).get(i);
             if (card.value < 7) {
                 features[13 + i] = 1;
-            } else if (card.getTactics() instanceof GeneralOne) {
+            } else if (card.tactics instanceof GeneralOne) {
                 features[20] = 1;
-            } else if (card.getTactics() instanceof GeneralTwo) {
+            } else if (card.tactics instanceof GeneralTwo) {
                 features[21] = 1;
             }
         }
@@ -95,9 +95,9 @@ public class ToadFeatures002 implements IStateFeatureVector, IStateKey {
             ToadCard card = state.getDiscards(playerID).get(i);
             if (card.value < 7) {
                 features[22 + i] = 1;
-            } else if (card.getTactics() instanceof GeneralOne) {
+            } else if (card.tactics instanceof GeneralOne) {
                 features[29] = 1;
-            } else if (card.getTactics() instanceof GeneralTwo) {
+            } else if (card.tactics instanceof GeneralTwo) {
                 features[30] = 1;
             }
         }
