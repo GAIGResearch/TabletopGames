@@ -40,8 +40,9 @@ public abstract class TunableStateFeatures extends TunableParameters implements 
     @Override
     public final double[] featureVector(AbstractGameState state, int playerID) {
         double[] data = fullFeatureVector(state, playerID);
-        double[] retValue = new double[namesUsed.length];
-        int count = 0;
+        double[] retValue = new double[namesUsed.length + 1];
+        int count = 1;
+        retValue[0] = state.getCurrentPlayer();
         for (int i = 0; i < allNames.length; i++) {
             if (active[i]) {
                 retValue[count] = data[i];

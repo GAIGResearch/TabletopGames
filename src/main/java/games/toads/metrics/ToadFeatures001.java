@@ -15,7 +15,8 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
     @Override
     public String[] names() {
         return new String[]{
-                "TICK", "TURN", "ROUND",
+                "TICK",
+                "HAND_1", "HAND_2", "HAND_3", "HAND_4",
                 "SCORE_US", "SCORE_THEM",
                 "FIELD_CARD", "FLANK_CARD",
                 "THEIR_FIELD",
