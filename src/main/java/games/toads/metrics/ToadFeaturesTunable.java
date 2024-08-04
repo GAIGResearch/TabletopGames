@@ -38,39 +38,51 @@ public class ToadFeaturesTunable extends TunableStateFeatures {
         int round = state.getRoundCounter();
         features[1] = state.getTurnCounter();
         features[2] = round;
-        features[3] = state.getFieldCard(playerID) == null ? 0 : state.getFieldCard(playerID).hashCode();
-        features[4] = state.getHiddenFlankCard(playerID) == null ? 0 : state.getHiddenFlankCard(playerID).hashCode();
-        features[5] = state.getFieldCard(1 - playerID) == null ? 0 : state.getFieldCard(1 - playerID).hashCode();
+        if (active[3]) // Field card (hashcode)
+            features[3] = state.getFieldCard(playerID) == null ? 0 : state.getFieldCard(playerID).hashCode();
+        if (active[4]) // Flank card (hashcode)
+            features[4] = state.getHiddenFlankCard(playerID) == null ? 0 : state.getHiddenFlankCard(playerID).hashCode();
+        if (active[5]) // Their field card (hashcode)
+            features[5] = state.getFieldCard(1 - playerID) == null ? 0 : state.getFieldCard(1 - playerID).hashCode();
 
-        List<Integer> handValuesInOrder = state.getPlayerHand(playerID).stream().map(c -> c.value).sorted().toList();
-        for (int i = 0; i < handValuesInOrder.size(); i++) {
-            features[6] += handValuesInOrder.get(i) * Math.pow(31, i);
+        if (active[6]) { // Hand contents
+            List<Integer> handValuesInOrder = state.getPlayerHand(playerID).stream().map(c -> c.value).sorted().toList();
+            for (int i = 0; i < handValuesInOrder.size(); i++) {
+                features[6] += handValuesInOrder.get(i) * Math.pow(31, i);
+            }
         }
         if (state.getRoundCounter() > 0) {
             int scoreDiff = state.getBattlesWon(0, playerID) - state.getBattlesWon(0, 1 - playerID);
             features[7] = scoreDiff > 0 ? 1 : scoreDiff < 0 ? 2 : 3;
         }
         List<ToadCard> oppHand = new ArrayList<>();
-        for (int i = 0; i < state.getPlayerHand(1 - playerID).getSize(); i++) {
-            if (state.getPlayerHand(1 - playerID).getVisibilityForPlayer(i, playerID)) {
-                oppHand.add(state.getPlayerHand(1 - playerID).get(i));
+        if (active[8]) {
+            for (int i = 0; i < state.getPlayerHand(1 - playerID).getSize(); i++) {
+                if (state.getPlayerHand(1 - playerID).getVisibilityForPlayer(i, playerID)) {
+                    oppHand.add(state.getPlayerHand(1 - playerID).get(i));
+                }
             }
-        }
-        if (!oppHand.isEmpty()) {
-            oppHand.sort(Comparator.comparingInt(c -> c.value));
-            features[8] = oppHand.get(0).hashCode();
+            if (!oppHand.isEmpty()) {
+                oppHand.sort(Comparator.comparingInt(c -> c.value));
+                features[8] = oppHand.get(0).hashCode();
+            }
         }
         features[9] = state.getBattlesTied(round);
         features[10] = state.getBattlesWon(round, playerID);
         features[11] = state.getBattlesWon(round, 1 - playerID);
         features[12] = state.getTieBreaker(playerID) == null ? -1 : state.getTieBreaker(playerID).value;
-        List<ToadCard> discards = state.getDiscards(playerID).stream().toList();
-        for (int i = 0; i < discards.size(); i++) {
-            features[13] += discards.get(i).hashCode() * Math.pow(31, i);
+        List<ToadCard> discards;
+        if (active[13]) {
+            discards = state.getDiscards(playerID).stream().toList();
+            for (int i = 0; i < discards.size(); i++) {
+                features[13] += discards.get(i).hashCode() * Math.pow(31, i);
+            }
         }
-        discards = state.getDiscards(1 - playerID).stream().toList();
-        for (int i = 0; i < discards.size(); i++) {
-            features[14] += discards.get(i).hashCode() * Math.pow(31, i);
+        if (active[14]) {
+            discards = state.getDiscards(1 - playerID).stream().toList();
+            for (int i = 0; i < discards.size(); i++) {
+                features[14] += discards.get(i).hashCode() * Math.pow(31, i);
+            }
         }
         return features;
     }
