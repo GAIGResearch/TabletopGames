@@ -35,9 +35,4 @@ public class Connect4StateVector implements IStateFeatureVector, IStateKey {
         return names;
     }
 
-    @Override
-    public String getKey(AbstractGameState state, int playerId) {
-        double[] retValue = featureVector(state, playerId);
-        return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(retValue));
-    }
 }

@@ -15,8 +15,7 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
     @Override
     public String[] names() {
         return new String[]{
-                "TICK",
-                "HAND_1", "HAND_2", "HAND_3", "HAND_4",
+                "TICK", "TURN", "ROUND",
                 "SCORE_US", "SCORE_THEM",
                 "FIELD_CARD", "FLANK_CARD",
                 "THEIR_FIELD",
@@ -70,13 +69,4 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
         return features;
     }
 
-    @Override
-    public Integer getKey(AbstractGameState state, int playerID) {
-        int retValue = state.getCurrentPlayer();
-        double[] features = featureVector(state, playerID);
-        for (int i = 0; i < features.length; i++) {
-            retValue += (int) (features[i] * Math.pow(31, i+1));
-        }
-        return retValue;
-    }
 }

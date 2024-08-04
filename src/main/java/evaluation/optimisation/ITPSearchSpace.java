@@ -100,9 +100,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
                         }
 
-                    } else if (data instanceof JSONArray) {
+                    } else if (data instanceof JSONArray arr) {
                         // we have a set of options for this parameter
-                        JSONArray arr = (JSONArray) data;
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
                         if (debug)
