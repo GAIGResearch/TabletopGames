@@ -105,9 +105,11 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 System.out.println("\tBacktracking for player " + mtRoot.roots[p].decisionPlayer);
             mtRoot.roots[p] = backtrack(mtRoot.roots[p], state);
             if (mtRoot.roots[p] != null) {
-                //         if (p == mtRoot.decisionPlayer)
-                //            mtRoot.roots[p].instantiate(null, null, state);
-                mtRoot.roots[p].rootify(oldRoot);
+                // here we do not do a full rootification as that would set the turnOwner and currentPlayer
+                // to the decision player, which we want to avoid
+                // TODO: Make this more elegant
+                mtRoot.roots[p].rootify(oldRoot, null);
+                mtRoot.roots[p].resetDepth(mtRoot.roots[p]);
                 mtRoot.roots[p].state = state.copy();
             }
         }
@@ -146,11 +148,10 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
                 oldGraphKeys = new HashMap<>();
                 return null;
             }
-            int oldDepth = retValue.depth;
-            retValue.instantiate(null, null, gameState);
-            retValue.depth = oldDepth;
+        //    int oldDepth = retValue.depth;
             retValue.setTranspositionMap(mcgsRoot.getTranspositionMap());
-            retValue.rootify(root);
+            retValue.rootify(root, gameState);
+      //      retValue.depth = oldDepth;
             return retValue;
         }
 
@@ -184,8 +185,8 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
             }
             // We need to make the new root the root of the tree
             // We need to remove the parent link from the new root
-            newRoot.instantiate(null, null, gameState);
-            newRoot.rootify(root);
+            //   newRoot.instantiate(null, null, gameState);
+            newRoot.rootify(root, gameState);
         }
         return newRoot;
     }

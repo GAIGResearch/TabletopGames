@@ -125,8 +125,8 @@ public class SingleTreeNode {
             depth = parent.depth + 1;
             factory = parent.factory;
             decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
-        } else {
-            depth = 0;
+        } else { // this is the root node (possibly reused from previous tree)
+            resetDepth(this);
             decisionPlayer = state.getCurrentPlayer();
         }
 
@@ -145,11 +145,12 @@ public class SingleTreeNode {
 
     }
 
-    public void rootify(SingleTreeNode template) {
+    public void rootify(SingleTreeNode template, AbstractGameState newState) {
         // now we need to reset the depth on all the children (recursively)
+        if (newState != null)
+            instantiate(null, null, newState);
         parent = null;
         actionToReach = null;
-        resetDepth(this);
         highReward = template.highReward;
         lowReward = template.lowReward;
         inheritedVisits = nVisits;

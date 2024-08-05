@@ -67,7 +67,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             } else {
                 // find the node that the flankAction leads to, and set this as the root
                 SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];
-                childNode.rootify(root);
+                childNode.rootify(root, state);
                 root = childNode;
             }
         }

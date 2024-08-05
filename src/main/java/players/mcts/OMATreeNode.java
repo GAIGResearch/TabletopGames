@@ -42,8 +42,8 @@ public class OMATreeNode extends SingleTreeNode {
 
 
     @Override
-    public void rootify(SingleTreeNode template) {
-        super.rootify(template);
+    public void rootify(SingleTreeNode template, AbstractGameState state) {
+        super.rootify(template, state);
         this.OMAParent = Optional.empty();
     }
     /**

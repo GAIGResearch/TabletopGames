@@ -126,7 +126,7 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-         //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+            //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
@@ -358,15 +358,18 @@ public class JSONUtils {
                     sb.append("\t".repeat(Math.max(0, tabDepth)));
                     if (v instanceof JSONObject subJSON) {
                         sb.append(prettyPrint(subJSON, tabDepth + 1));
-                    } else {
+                    } else if (v instanceof String) {
+                        sb.append("\"").append(v).append("\"");
+                    } else if (v instanceof Long || v instanceof Integer ||
+                            v instanceof Double || v instanceof Boolean) {
                         sb.append(v);
                     }
                     if (index < array.size() - 1)
-                        sb.append(",");
-                    sb.append("\n");
+                        sb.append(",").append("\n");
                 }
+                sb.append("\t".repeat(Math.max(0, tabDepth - 1))).append("]");
                 tabDepth--;
-            } else if (value instanceof String){
+            } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
                     value instanceof Double || value instanceof Boolean) {
@@ -378,7 +381,7 @@ public class JSONUtils {
                 sb.append(",");
             sb.append("\n");
         }
-        sb.append("\t".repeat(Math.max(0, tabDepth-1)));
+        sb.append("\t".repeat(Math.max(0, tabDepth - 1)));
         sb.append("}");
         return sb.toString();
     }

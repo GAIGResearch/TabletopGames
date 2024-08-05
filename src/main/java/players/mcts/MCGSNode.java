@@ -91,7 +91,7 @@ public class MCGSNode extends SingleTreeNode {
     }
 
     @Override
-    protected void resetDepth(SingleTreeNode newRoot) {
+    protected void resetDepth(SingleTreeNode unusedArgument) {
         int depthDelta = depth;
         root = this;
         for (MCGSNode node : transpositionMap.values()) {
