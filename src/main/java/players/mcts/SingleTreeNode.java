@@ -107,13 +107,25 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    protected void instantiate(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state) {
+    protected void instantiate(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState rootState) {
         this.fmCallsCount = 0;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
         this.params = root.params;
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
+
+        if (params.information != Closed_Loop && (params.maintainMasterState || depth == 0)) {
+            // if we're using open loop, then we need to make sure the reference state is never changed
+            // however this is only used at the root - and we can switch the copy off for other nodes for performance
+            // these master copies *are* required if we want to do something funky with the final tree, and gather
+            // features from the nodes - if we are gathering Expert Iteration data or Learning an Advantage function
+            root.copyCount++;
+            this.state = rootState.copy();
+        } else {
+            this.state = rootState;
+        }
+
         this.round = state.getRoundCounter();
         this.turn = state.getTurnCounter();
         this.turnOwner = state.getCurrentPlayer();
@@ -130,18 +142,8 @@ public class SingleTreeNode {
             decisionPlayer = state.getCurrentPlayer();
         }
 
-        if (params.information != Closed_Loop && (params.maintainMasterState || depth == 0)) {
-            // if we're using open loop, then we need to make sure the reference state is never changed
-            // however this is only used at the root - and we can switch the copy off for other nodes for performance
-            // these master copies *are* required if we want to do something funky with the final tree, and gather
-            // features from the nodes - if we are gathering Expert Iteration data or Learning an Advantage function
-            root.copyCount++;
-            this.state = state.copy();
-        } else {
-            this.state = state;
-        }
-        // then set up available actions, and set openLoopState = state
-        setActionsFromOpenLoopState(state);
+        // then set up available actions, and set openLoopState
+        setActionsFromOpenLoopState(rootState);
 
     }
 
@@ -1100,7 +1102,7 @@ public class SingleTreeNode {
 
     }
 
-    private AbstractAction bestAction(List<AbstractAction> actionsToConsider) {
+    public AbstractAction bestAction(List<AbstractAction> actionsToConsider) {
         AbstractAction bestAction = null;
         double maxValue = -Double.MAX_VALUE;
         for (AbstractAction action : actionsToConsider) {

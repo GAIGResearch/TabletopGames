@@ -110,7 +110,6 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // and we don't actually need to apply the flank action as this cannot affect our information state
         // (except for the currentPlayer...)
         // So we can apply *any* valid flank action
-        ToadGameState stateCopy = (ToadGameState) state.copy();
         getForwardModel().next(state, validActionsForOpponent.get(0));
 
         AbstractAction actualAction;
@@ -128,7 +127,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         } else {
             // we have OMA or OneTree or something...we navigate manually down the tree and take the best action from the node we reach
             SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];
-            actualAction = childNode.bestAction();
+            actualAction = childNode.bestAction(getForwardModel().computeAvailableActions(state));
         }
         this.lastAction = new Pair<>(playerID, actualAction);
         return actualAction;

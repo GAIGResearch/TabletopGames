@@ -20,11 +20,13 @@ public abstract class TunableStateFeatures extends TunableParameters implements 
      *  When extending this, the first thing to do is provide a list of the possible feature names in allNames
       */
     public TunableStateFeatures(String[] allNames) {
+        // we default to false. This means that automatic generation of the JSON
+        // file after tuning shows the ones that are switched on (it only includes non-default values)
         this.allNames = allNames;
         active = new boolean[allNames.length];
-        Arrays.fill(active, true);
+        Arrays.fill(active, false);
         for (String name : allNames) {
-            addTunableParameter(name, true);
+            addTunableParameter(name, false);
         }
         _reset();
     }
