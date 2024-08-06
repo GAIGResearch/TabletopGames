@@ -123,11 +123,11 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             if (node == null) {
                 throw new AssertionError("No node found for state key " + stateKey);
             }
-            actualAction = node.bestAction();
+            actualAction = node.bestAction(actions);
         } else {
             // we have OMA or OneTree or something...we navigate manually down the tree and take the best action from the node we reach
             SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];
-            actualAction = childNode.bestAction(getForwardModel().computeAvailableActions(state));
+            actualAction = childNode.bestAction(actions);
         }
         this.lastAction = new Pair<>(playerID, actualAction);
         return actualAction;
