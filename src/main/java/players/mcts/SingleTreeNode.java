@@ -1114,6 +1114,8 @@ public class SingleTreeNode {
                 bestAction = action;
             }
         }
+        if (bestAction == null)
+            return actionsToConsider.get(rnd.nextInt(actionsToConsider.size()));
         return bestAction;
     }
 

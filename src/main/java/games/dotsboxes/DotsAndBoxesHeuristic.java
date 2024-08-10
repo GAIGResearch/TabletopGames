@@ -88,8 +88,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
      */
     @Override
     protected boolean _equals(Object o) {
-        if (o instanceof DotsAndBoxesHeuristic) {
-            DotsAndBoxesHeuristic other = (DotsAndBoxesHeuristic) o;
+        if (o instanceof DotsAndBoxesHeuristic other) {
             return other.POINT_ADVANTAGE == POINT_ADVANTAGE &&
                     other.ORDINAL == ORDINAL &&
                     other.TWO_BOXES == TWO_BOXES && other.THREE_BOXES == THREE_BOXES &&

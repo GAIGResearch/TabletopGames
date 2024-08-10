@@ -13,7 +13,7 @@ public interface IStateFeatureVector extends IStateKey {
         int retValue = state.getCurrentPlayer();
         double[] features = featureVector(state, p);
         for (int i = 0; i < features.length; i++) {
-            retValue += (int) (features[i] * Math.pow(31, i+1));
+            retValue += (int) (features[i] * (Math.pow(31, i+1) - 1));
         }
         return retValue;
     }

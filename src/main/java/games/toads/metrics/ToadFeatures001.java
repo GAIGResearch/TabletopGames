@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
+public class ToadFeatures001 implements IStateFeatureVector {
 
     @Override
     public String[] names() {
@@ -58,10 +58,10 @@ public class ToadFeatures001 implements IStateFeatureVector, IStateKey {
         }
         features[12] = state.getTieBreaker(playerID) == null ? 0 : state.getTieBreaker(playerID).value;
         for (int i = 0; i < state.getDiscards(playerID).getSize(); i++) {
-            features[13] += state.getDiscards(playerID).get(i).value * (i + 11);
+            features[13] += state.getDiscards(playerID).get(i).value * Math.pow(31, i);
         }
         for (int i = 0; i < state.getDiscards(1 - playerID).getSize(); i++) {
-            features[14] += state.getDiscards(1 - playerID).get(i).value * (i + 11);
+            features[14] += state.getDiscards(1 - playerID).get(i).value * Math.pow(31, i);
         }
         features[15] = state.getRoundCounter() == 1 ? 1 : 0;
         features[16] = state.getBattlesWon(0, playerID) > state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
