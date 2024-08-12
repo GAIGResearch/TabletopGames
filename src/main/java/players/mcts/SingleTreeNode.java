@@ -184,7 +184,7 @@ public class SingleTreeNode {
     }
 
     /**
-     * This is a pretty key method. It is called when the tree search 'moves' to this node.
+     * This is a key method. It is called when the tree search 'moves' to this node.
      * Because we are using Open Loop search, we need to make sure that the state is updated to reflect the
      * state in the current trajectory; each visit to the node may have a different underlying state, and it's
      * perfectly possible for different actions to be available on different visits.
@@ -290,6 +290,7 @@ public class SingleTreeNode {
             }
         } else if (!params.opponentTreePolicy.selfOnlyTree) {
             throw new AssertionError("Expected?");
+            // How have we got to a state in which the decision player is not the active player?
         }
     }
 
