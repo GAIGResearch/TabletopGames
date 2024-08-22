@@ -16,6 +16,5 @@ public class Trickster implements ToadAbility {
                     ToadCard ally = br.getAlly(isAttacker, isFlank);
                     br.addValue(isAttacker, isFlank, ally.value / 2);
                 }));
-
     }
 }
