@@ -32,7 +32,7 @@ public class SearchPlayer extends AbstractPlayer {
         // - MACRO_ACTION: only when the currentPlayer() has changed as a result of applying the action
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
-        return expand(gs, actions, getParameters().searchDepth).a;
+        return expand(gs, actions, getParameters().searchDepth).action;
     }
 
     /**
