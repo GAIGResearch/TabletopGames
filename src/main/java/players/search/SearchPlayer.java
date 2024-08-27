@@ -19,7 +19,6 @@ public class SearchPlayer extends AbstractPlayer {
 
 
     private long startTime;
-    private boolean outOfTime = false;
     public SearchPlayer(SearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
@@ -36,7 +35,6 @@ public class SearchPlayer extends AbstractPlayer {
         // - ACTION: always
         // - MACRO_ACTION: only when the currentPlayer() has changed as a result of applying the action
         // - TURN: only when turn number has changed as a result of applying the action
-        outOfTime = false;
         startTime = System.currentTimeMillis();
         return expand(gs, actions, getParameters().searchDepth).a;
     }
@@ -95,9 +93,6 @@ public class SearchPlayer extends AbstractPlayer {
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
             // We are not interested in the best action from stateCopy
             Pair<AbstractAction, Double[]> option = expand(stateCopy, nextActions, newDepth);
-            if (outOfTime) {
-                return new Pair<>(null, bestValues);
-            }
 
             // we make the decision based on the actor at state, not the actor at stateCopy
             if (option.b[state.getCurrentPlayer()] > bestValue) {
