@@ -8,6 +8,7 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
+import players.search.SearchParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
@@ -87,7 +88,8 @@ public enum PlayerType {
                 player = new RandomPlayer(r);
                 break;
             case OSLA:
-                player = new OSLAPlayer(r);
+                player = new OSLAPlayer();
+                player.getParameters().setParameterValue("seed", seed);
                 break;
             case MCTS:
                 if (params == null) {
