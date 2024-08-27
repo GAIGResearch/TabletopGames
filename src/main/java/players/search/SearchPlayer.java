@@ -8,6 +8,7 @@ import players.PlayerParameters;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +17,9 @@ import static utilities.Utils.noise;
 
 public class SearchPlayer extends AbstractPlayer {
 
+
+    private long startTime;
+    private boolean outOfTime = false;
     public SearchPlayer(SearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
@@ -32,7 +36,8 @@ public class SearchPlayer extends AbstractPlayer {
         // - ACTION: always
         // - MACRO_ACTION: only when the currentPlayer() has changed as a result of applying the action
         // - TURN: only when turn number has changed as a result of applying the action
-
+        outOfTime = false;
+        startTime = System.currentTimeMillis();
         return expand(gs, actions, getParameters().searchDepth).a;
     }
 
@@ -43,6 +48,12 @@ public class SearchPlayer extends AbstractPlayer {
      */
     protected Pair<AbstractAction, Double[]> expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth) {
         SearchParameters params = getParameters();
+        if (System.currentTimeMillis() - startTime > params.budget) {
+            // out of time - return null action and a vector of zeros
+            Double[] allZeros = new Double[state.getNPlayers()];
+            Arrays.fill(allZeros, 0.0);
+            return new Pair<>(null, allZeros);
+        }
         // if we have reached the end of the search, or the state is terminal, we evaluate the state
         if (searchDepth == 0 || !state.isNotTerminal()) {
             // when valuing a state, we need to record the full vector of values for each player
@@ -84,6 +95,9 @@ public class SearchPlayer extends AbstractPlayer {
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
             // We are not interested in the best action from stateCopy
             Pair<AbstractAction, Double[]> option = expand(stateCopy, nextActions, newDepth);
+            if (outOfTime) {
+                return new Pair<>(null, bestValues);
+            }
 
             // we make the decision based on the actor at state, not the actor at stateCopy
             if (option.b[state.getCurrentPlayer()] > bestValue) {

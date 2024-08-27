@@ -1,6 +1,7 @@
 package players.search;
 
 import core.interfaces.IStateHeuristic;
+import players.PlayerConstants;
 import players.PlayerParameters;
 import players.heuristics.GameDefaultHeuristic;
 
@@ -31,6 +32,10 @@ public class SearchParameters extends PlayerParameters {
         paranoid = (boolean) getParameterValue("paranoid");
         if (heuristic == null) {
             heuristic = new GameDefaultHeuristic();
+        }
+        if (budgetType != PlayerConstants.BUDGET_TIME) {
+            System.out.println("Warning: SearchPlayer only supports time-based budget limits. Setting to BUDGET_TIME.");
+            budgetType = PlayerConstants.BUDGET_TIME;
         }
     }
 

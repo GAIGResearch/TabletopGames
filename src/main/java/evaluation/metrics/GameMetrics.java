@@ -199,6 +199,7 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
+            // ACTION_CHOSEN would be fine except for the recording of the time for 'next'
             return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
