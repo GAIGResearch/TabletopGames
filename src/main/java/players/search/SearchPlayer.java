@@ -2,10 +2,6 @@ package players.search;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
-import core.turnorders.StandardTurnOrder;
-import players.PlayerParameters;
-import players.simple.RandomPlayer;
 import utilities.Pair;
 
 import java.util.Arrays;
@@ -44,20 +40,18 @@ public class SearchPlayer extends AbstractPlayer {
      * The first element is the best action to take, based on the recursive search.
      * The second element is the value of the state on the assumption this best action is taken.
      */
-    protected Pair<AbstractAction, Double[]> expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth) {
+    protected SearchResult expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth) {
         SearchParameters params = getParameters();
         if (System.currentTimeMillis() - startTime > params.budget) {
             // out of time - return null action and a vector of zeros
-            Double[] allZeros = new Double[state.getNPlayers()];
-            Arrays.fill(allZeros, 0.0);
-            return new Pair<>(null, allZeros);
+            return new SearchResult(null, new double[state.getNPlayers()]);
         }
         // if we have reached the end of the search, or the state is terminal, we evaluate the state
         if (searchDepth == 0 || !state.isNotTerminal()) {
             // when valuing a state, we need to record the full vector of values for each player
             // as all of these need to be back-propagated up so that the relevant one can be used for decision-making
             // if paranoid and this action belongs to another player, we assume they try to minimise our score
-            Double[] values = new Double[state.getNPlayers()];
+            double[] values = new double[state.getNPlayers()];
             if (params.paranoid) {
                 double value = params.heuristic.evaluateState(state, getPlayerID());
                 for (int i = 0; i < state.getNPlayers(); i++) {
@@ -68,12 +62,12 @@ public class SearchPlayer extends AbstractPlayer {
                     values[i] = params.heuristic.evaluateState(state, i);
                 }
             }
-            return new Pair<>(null, values);
+            return new SearchResult(null, values);
         }
 
         // otherwise we recurse to find the best action and value
         double bestValue = Double.NEGATIVE_INFINITY;
-        Double[] bestValues = new Double[state.getNPlayers()];
+        double[] bestValues = new double[state.getNPlayers()];
         AbstractAction bestAction = null;
         // we shuffle the actions so that ties are broken at random
         Collections.shuffle(actions, getRnd());
@@ -92,19 +86,19 @@ public class SearchPlayer extends AbstractPlayer {
 
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
             // We are not interested in the best action from stateCopy
-            Pair<AbstractAction, Double[]> option = expand(stateCopy, nextActions, newDepth);
+            SearchResult result = expand(stateCopy, nextActions, newDepth);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
-            if (option.b[state.getCurrentPlayer()] > bestValue) {
+            if (result.value[state.getCurrentPlayer()]  > bestValue) {
                 bestAction = action;
-                bestValues = option.b;
+                bestValues = result.value;
                 bestValue = bestValues[state.getCurrentPlayer()];
             }
         }
         if (bestAction == null) {
             throw new AssertionError("No best action found");
         }
-        return new Pair<>(bestAction, bestValues);
+        return new SearchResult(bestAction, bestValues);
     }
 
     @Override
@@ -112,6 +106,9 @@ public class SearchPlayer extends AbstractPlayer {
         SearchPlayer retValue = new SearchPlayer((SearchParameters) getParameters().shallowCopy());
         retValue.setForwardModel(getForwardModel().copy());
         return retValue;
+    }
+
+    protected record SearchResult(AbstractAction action, double[] value) {
     }
 
 }
