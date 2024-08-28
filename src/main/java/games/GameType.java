@@ -33,6 +33,8 @@ import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;
@@ -51,7 +53,6 @@ import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
-import games.toads.*;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
@@ -200,8 +201,12 @@ public enum GameType {
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
-            Collections.singletonList(GridMovement),
+            Arrays.asList(GridMovement),
             CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
