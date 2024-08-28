@@ -53,7 +53,7 @@ public class TestVisibility {
         );
 
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(5, state.getPlayerHand(0).getSize());
+        assertEquals(3, state.getPlayerHand(0).getSize());
         for (int i = 0; i < state.getPlayerHand(0).getSize(); i++) {
             assertFalse(state.getPlayerHand(0).getVisibilityForPlayer(i, 1));
         }
@@ -72,9 +72,9 @@ public class TestVisibility {
         );
 
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(5, state.getPlayerHand(0).getSize());
+        assertEquals(3, state.getPlayerHand(0).getSize());
         for (int i = 0; i < state.getPlayerHand(0).getSize(); i++) {
-            if (i == 2)
+            if (i == 0)
                 assertTrue(state.getPlayerHand(0).getVisibilityForPlayer(i, 1));
             else
                 assertFalse(state.getPlayerHand(0).getVisibilityForPlayer(i, 1));

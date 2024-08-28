@@ -57,19 +57,19 @@ public class TestUndoOpponentFlank {
     public void basicInstantiation() {
         moveStateForwardToFirstDefenderMove();
         ToadCard flankCard = state.getHiddenFlankCard(0);
-        assertEquals(5, state.getPlayerHand(0).getSize());
+        assertEquals(3, state.getPlayerHand(0).getSize());
         Deck<ToadCard> p0Hand = state.getPlayerHand(0).copy();
 
         assertEquals(1, state.getCurrentPlayer());
         UndoOpponentFlank undo = new UndoOpponentFlank(state);
         assertEquals(undo, state.getActionsInProgress().get(0));
         assertNull(state.getHiddenFlankCard(0));
-        assertEquals(5, state.getPlayerHand(0).getSize());
+        assertEquals(3, state.getPlayerHand(0).getSize());
         assertTrue(state.getPlayerHand(0).contains(flankCard));
         assertEquals(0, state.getCurrentPlayer());
 
         List<AbstractAction> actions = fm._computeAvailableActions(state);
-        assertEquals(5, actions.size());
+        assertEquals(3, actions.size());
         p0Hand.add(flankCard);
         for (AbstractAction action : actions) {
             assertTrue(action instanceof PlayFlankCard);

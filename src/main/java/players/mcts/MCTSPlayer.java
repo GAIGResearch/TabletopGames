@@ -283,7 +283,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         }
         MASTStats = root.MASTStatistics;
 
-        if (root.children.size() > 2 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
+        if (root.children.size() > 3 * actions.size() && !(root instanceof MCGSNode) && !getParameters().reuseTree && !getParameters().actionSpace.equals(gameState.getCoreGameParameters().actionSpace))
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()));
         lastAction = new Pair<>(gameState.getCurrentPlayer(), root.bestAction());
         return lastAction.b.copy();

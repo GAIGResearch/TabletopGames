@@ -62,9 +62,10 @@ public class GameFlow {
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(1, state.getCurrentPlayer());
 
-        assertEquals(5, state.playerHands.get(0).getSize());
+        // at this point no cards have been drawn
+        assertEquals(3, state.playerHands.get(0).getSize());
         assertEquals(4, state.playerHands.get(1).getSize());
-        assertEquals(3, state.playerDecks.get(0).getSize());
+        assertEquals(5, state.playerDecks.get(0).getSize());
         assertEquals(5, state.playerDecks.get(1).getSize());
         // then they play two cards
         fm.next(state, fm.computeAvailableActions(state).get(0));

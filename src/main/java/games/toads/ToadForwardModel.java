@@ -123,7 +123,7 @@ public class ToadForwardModel extends StandardForwardModel {
             // continue with the same player
         } else if (state.fieldCards[1 - currentPlayer] == null) {
             // next player
-            endTurn(gameState, 1 - currentPlayer);
+            endPlayerTurn(gameState, 1 - currentPlayer);
         } else {
             // we reveal cards
             state.revealFlankCards();
@@ -164,6 +164,15 @@ public class ToadForwardModel extends StandardForwardModel {
             state.hiddenFlankCards = new ToadCard[state.getNPlayers()];
 
             // we then process any actions that need to be done after the battle
+            // but first we draw up cards (as these are important for some of the post-battle actions)
+            // Draw 2 cards for each player
+            for (int player = 0; player < state.getNPlayers(); player++) {
+                int cardsToDraw = Math.min(2, state.playerDecks.get(player).getSize());
+                for (int i = 0; i < cardsToDraw; i++) {
+                    state.playerHands.get(player).add(state.playerDecks.get(player).draw());
+                }
+            }
+
             if (battle.getPostBattleActions().isEmpty()) {
                 afterBattle(state);
             } else {
@@ -222,18 +231,7 @@ public class ToadForwardModel extends StandardForwardModel {
             }
         } else {
             // the defender in this battle always starts the next one as Attacker
-            endTurn(state, state.getCurrentPlayer());
+            endPlayerTurn(state, state.getCurrentPlayer());
         }
-    }
-
-    protected void endTurn(AbstractGameState gs, int nextPlayer) {
-        ToadGameState state = (ToadGameState) gs;
-        int player = state.getCurrentPlayer();
-        // Draw 2 cards
-        int cardsToDraw = Math.min(2, state.playerDecks.get(player).getSize());
-        for (int i = 0; i < cardsToDraw; i++) {
-            state.playerHands.get(player).add(state.playerDecks.get(player).draw());
-        }
-        endPlayerTurn(state, nextPlayer);
     }
 }
