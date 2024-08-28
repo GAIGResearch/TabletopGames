@@ -53,6 +53,10 @@ import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
+import games.toads.ToadForwardModel;
+import games.toads.ToadGUIManager;
+import games.toads.ToadGameState;
+import games.toads.ToadParameters;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
@@ -210,7 +214,7 @@ public enum GameType {
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
-            ToadGameState .class, ToadForwardModel .class, ToadParameters .class, ToadGUIManager.class);
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -442,7 +446,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient;
+        Wargame, Civilization, Ancient, CodeBreaking;
 
         /**
          * @return a list of all games within this category.
