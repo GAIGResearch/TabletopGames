@@ -131,9 +131,11 @@ public class ToadGameState extends AbstractGameState {
         return playerDecks.get(playerId);
     }
 
-    public void seeOpponentsHand(int player) {
+    public void seeOpponentsHand(int player, ToadConstants.ToadCardType exception) {
         PartialObservableDeck<ToadCard> handToSee = playerHands.get(1 - player);
         for (int i = 0; i < handToSee.getSize(); i++) {
+            if (exception != null && handToSee.peek(i).type == exception)
+                continue;
             handToSee.setVisibilityOfComponent(i, player, true);
         }
     }
