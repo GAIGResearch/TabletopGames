@@ -608,8 +608,32 @@ public class Tactics {
 
         assertEquals(0, state.getCurrentPlayer());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(9, actions.size());
+        assertEquals(10, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
+        fm.next(state, actions.get(0));
+        assertEquals(1, state.getCurrentPlayer());
+        actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlayFieldCard));
+    }
+
+    @Test
+    public void assaultCannonExcludesDiscardsAndTiebreaker() {
+        state.tieBreakers[0] = new ToadCard("Five", 5, BERSERKER);
+        state.getDiscards(1).add(new ToadCard("Five", 5, GENERAL_ONE));
+        playCards(
+                new ToadCard("Five", 5, null), // field
+                new ToadCard("AC", 0, ASSAULT_CANNON), // Flank
+                new ToadCard("Five", 5, null),  // Field
+                new ToadCard("Six", 6, null) // flank
+        );
+
+        assertEquals(0, state.getCurrentPlayer());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(8, actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
+        assertFalse(actions.contains(new ForceOpponentDiscard(BERSERKER)));
+        assertFalse(actions.contains(new ForceOpponentDiscard(GENERAL_ONE)));
+        assertTrue(actions.contains(new ForceOpponentDiscard(ToadConstants.ToadCardType.NONE_OF_THESE)));
         fm.next(state, actions.get(0));
         assertEquals(1, state.getCurrentPlayer());
         actions = fm.computeAvailableActions(state);

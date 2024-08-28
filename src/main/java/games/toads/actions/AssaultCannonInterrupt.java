@@ -8,6 +8,7 @@ import games.toads.ToadGameState;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AssaultCannonInterrupt implements IExtendedSequence {
 
@@ -21,9 +22,13 @@ public class AssaultCannonInterrupt implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         ToadGameState toadState = (ToadGameState) state;
+        // we filter out the known card that is our tiebreaker, plus the known cards in the opponent's discard pile
         List<ForceOpponentDiscard> retValue = toadState.getCardTypesInPlay().stream()
+                .filter(a -> toadState.getTieBreaker(player) == null || toadState.getTieBreaker(player).type != a)
+                .filter(a -> toadState.getDiscards(1 - player).stream().noneMatch(b -> b.type == a))
                 .map(ForceOpponentDiscard::new)
-                .toList();
+                .collect(Collectors.toList());
+        retValue.add(new ForceOpponentDiscard(ToadConstants.ToadCardType.NONE_OF_THESE));
         return retValue.stream().map(a -> (AbstractAction) a).toList();
     }
 

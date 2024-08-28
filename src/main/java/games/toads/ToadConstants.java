@@ -21,7 +21,8 @@ public class ToadConstants {
         BERSERKER (new Berserker()),
         ICON_BEARER (new IconBearer()),
         GENERAL_ONE (new GeneralOne()),
-        GENERAL_TWO (new GeneralTwo());
+        GENERAL_TWO (new GeneralTwo()),
+        NONE_OF_THESE (new NoAbility());
 
         public final ToadAbility defaultAbility;
 
