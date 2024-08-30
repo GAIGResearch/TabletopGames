@@ -25,7 +25,7 @@ public class ScoutCards  implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // we have to show three cards
         ToadGameState toadState = (ToadGameState) state;
-        List<ToadConstants.ToadCardType> inHand = toadState.getPlayerHand(player).stream().map(a -> a.type).toList();
+        List<ToadConstants.ToadCardType> inHand = toadState.getPlayerHand(1 - player).stream().map(a -> a.type).toList();
         if (inHand.size() <= CARDS_TO_SHOW) {
             // no decision to make
             return Collections.singletonList(new ShowCards());
@@ -38,7 +38,7 @@ public class ScoutCards  implements IExtendedSequence {
 
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return player;
+        return 1 - player;  // the other player has to decide what cards to show
     }
 
     @Override

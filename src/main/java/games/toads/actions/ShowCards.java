@@ -8,7 +8,7 @@ import games.toads.ToadGameState;
 
 public class ShowCards extends AbstractAction {
 
-    protected final ToadConstants.ToadCardType cardNotRevealed;
+    public final ToadConstants.ToadCardType cardNotRevealed;
 
     public ShowCards() {
         // this will show all cards in hand
@@ -22,7 +22,7 @@ public class ShowCards extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         ToadGameState state = (ToadGameState) gs;
-        state.seeOpponentsHand(state.getCurrentPlayer(), cardNotRevealed);
+        state.seeOpponentsHand(1 - state.getCurrentPlayer(), cardNotRevealed);
         return true;
     }
 

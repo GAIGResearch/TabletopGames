@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import static games.toads.ToadConstants.ToadCardType.*;
+import static games.toads.ToadConstants.ToadGamePhase.PLAY;
 import static games.toads.ToadConstants.ToadGamePhase.POST_BATTLE;
 import static org.junit.Assert.*;
 
@@ -505,6 +506,17 @@ public class Tactics {
             assertEquals(p1, state.playerHands.get(1).isComponentVisible(i, 0));
     }
 
+    private void checkVisibilityOfNumberOfCards(int n, int player) {
+        // player should be able to see exactly n cards in their opponent's hand
+        int visibleCount = 0;
+        for (int cardIndex = 0; cardIndex < state.playerHands.get(1 - player).getSize(); cardIndex++) {
+            if (state.playerHands.get(1 - player).isComponentVisible(cardIndex, player)) {
+                visibleCount++;
+            }
+        }
+        assertEquals(n, visibleCount);
+    }
+
     @Test
     public void scoutI() {
         checkVisibilityOfHands(0, false, false);
@@ -526,7 +538,13 @@ public class Tactics {
 
     @Test
     public void iconBearerActivatesScout() {
-        checkVisibilityOfHands(0, false, false);
+
+        // firstly remove cards from the hands fo they are within expected ranges
+        // as playCards adds the cards it plays
+        for (int i = 0; i < 2; i++) {
+            state.playerHands.get(i).remove(0);
+            state.playerHands.get(i).remove(0);
+        }
 
         playCards(
                 new ToadCard("Three", 3, TRICKSTER),
@@ -538,15 +556,36 @@ public class Tactics {
         // without tactics this is 1 : 1
         // Field is now 4 : 2 (p0 wins) Iconbearer cannot help; but it does activate the Scout ability
         // Flank is now 2 : 7 (p1 wins)
-
-        checkVisibilityOfHands(2, true, true);
-
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(1, state.battlesWon[0][1]);
+
+        // we then have the follow-on action for a scout
+        assertTrue(state.isActionInProgress());
+        assertEquals(2, state.getActionsInProgress().size());  // one for each Scout
+        assertEquals(0, state.getCurrentPlayer());
+        assertTrue(fm.computeAvailableActions(state).stream().allMatch(a -> a instanceof ShowCards));
+
+        checkVisibilityOfNumberOfCards(0, 1);
+        checkVisibilityOfNumberOfCards(0, 0);
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        checkVisibilityOfNumberOfCards(3, 1);
+        checkVisibilityOfNumberOfCards(0, 0);
+
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(1, state.getActionsInProgress().size());
     }
 
     @Test
     public void scoutIII() {
+        // firstly remove cards from the hands fo they are within expected ranges
+        // as playCards adds the cards it plays
+        for (int i = 0; i < 2; i++) {
+            state.playerHands.get(i).remove(0);
+            state.playerHands.get(i).remove(0);
+        }
+
         checkVisibilityOfHands(0, false, false);
 
         playCards(
@@ -559,11 +598,82 @@ public class Tactics {
         // without tactics this is 1 : 1
         // Field is now 4 : 3 (p0 wins)
         // Flank is now 2 : 1 (p0 wins)
-
-        checkVisibilityOfHands(2, false, true);
-
         assertEquals(1, state.battlesWon[0][0]);
         assertEquals(0, state.battlesWon[0][1]);
+
+        // we then have the follow-on action for a scout
+        assertTrue(state.isActionInProgress());
+        assertEquals(POST_BATTLE, state.getGamePhase());
+
+        assertEquals(1, state.getActionsInProgress().size());  // one for each Scout
+        assertEquals(1, state.getCurrentPlayer());  // p1 has to choose what cards to show to p0
+        assertTrue(fm.computeAvailableActions(state).stream().allMatch(a -> a instanceof ShowCards));
+        assertEquals(state.getPlayerHand(1).getSize(), fm.computeAvailableActions(state).size());
+        for (ToadCard card : state.playerHands.get(1).getComponents()) {
+            assertTrue(fm.computeAvailableActions(state).contains(new ShowCards(card.type)));
+        }
+
+        checkVisibilityOfNumberOfCards(0, 0);
+        checkVisibilityOfNumberOfCards(0, 1);
+
+        ShowCards action = (ShowCards) fm.computeAvailableActions(state).get(2);
+        fm.next(state, action);
+
+        checkVisibilityOfNumberOfCards(3, 0);
+        checkVisibilityOfNumberOfCards(0, 1);
+        for (int i = 0; i < state.playerHands.get(1).getSize(); i++) {
+            ToadCard card = state.playerHands.get(1).getComponents().get(i);
+            if (card.type == action.cardNotRevealed) {
+                assertFalse(state.playerHands.get(1).isComponentVisible(i, 0));
+            } else {
+                assertTrue(state.playerHands.get(1).isComponentVisible(i, 0));
+            }
+        }
+        assertEquals(1, state.getCurrentPlayer());
+        assertFalse(state.isActionInProgress());
+        assertEquals(PLAY, state.getGamePhase());
+
+    }
+
+    @Test
+    public void scoutNoOptionIfFewerThanFourCardsInHand() {
+        // firstly remove all cards from the hands
+        do {
+            state.playerHands.get(0).remove(0);
+            state.playerHands.get(1).remove(0);
+        } while (state.getPlayerHand(0).getSize() > 0);
+
+        checkVisibilityOfHands(0, false, false);
+
+        playCards(
+                new ToadCard("Three", 3, TRICKSTER),
+                new ToadCard("Scout", 2, SCOUT),
+                new ToadCard("One", 1, null),
+                new ToadCard("Trickster", 3, TRICKSTER)
+        );
+
+        // we then have the follow-on action for a scout
+        assertTrue(state.isActionInProgress());
+        assertEquals(POST_BATTLE, state.getGamePhase());
+
+        assertEquals(1, state.getActionsInProgress().size());  // one for each Scout
+        assertEquals(1, state.getCurrentPlayer());  // p1 has to choose what cards to show to p0
+        assertEquals(1, fm.computeAvailableActions(state).size()); // but only one option
+        assertEquals(new ShowCards(null), fm.computeAvailableActions(state).get(0));
+
+        assertEquals(2, state.getPlayerHand(0).getSize());
+        assertEquals(2, state.getPlayerHand(1).getSize());
+        checkVisibilityOfNumberOfCards(0, 0);
+        checkVisibilityOfNumberOfCards(0, 1);
+
+        fm.next(state, new ShowCards(null));
+
+        checkVisibilityOfNumberOfCards(2, 0);
+        checkVisibilityOfNumberOfCards(0, 1);
+
+        assertEquals(1, state.getCurrentPlayer());
+        assertFalse(state.isActionInProgress());
+        assertEquals(PLAY, state.getGamePhase());
     }
 
     @Test
@@ -575,7 +685,7 @@ public class Tactics {
                 new ToadCard("Trickster", 3, TRICKSTER)
         );
 
-        checkVisibilityOfHands(2, false, true);
+        assertEquals(1, state.getActionsInProgress().size());
     }
 
     @Test
@@ -644,7 +754,7 @@ public class Tactics {
     public void assaultCannonActivatedByIconBearer() {
         playCards(
                 new ToadCard("Five", 5, null), // field
-                new ToadCard("Scout", 2, SCOUT), // Flank
+                new ToadCard("Scout", 2, null), // Flank, no ability to avoid clashing
                 new ToadCard("AC", 0, ASSAULT_CANNON),  // Field
                 new ToadCard("Six", 6, ICON_BEARER) // flank
         );
@@ -652,7 +762,7 @@ public class Tactics {
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(POST_BATTLE, state.getGamePhase());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(9, actions.size());
+        assertEquals(10, actions.size());  // all possible cards, and NONE_OF_THESE
         assertTrue(actions.stream().allMatch(a -> a instanceof ForceOpponentDiscard));
         fm.next(state, actions.get(0));
         assertEquals(1, state.getCurrentPlayer());
