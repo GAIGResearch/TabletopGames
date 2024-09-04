@@ -36,7 +36,4 @@ public enum CardSuite {
         return duoBonus;
     }
 
-    // Action Factory
-    private BiFunction<SeaSaltPaperGameState, PlayDuo, List<AbstractAction>> generateDuoActions;
-
 }

@@ -63,6 +63,7 @@ public class HandManager {
             }
         }
         if (shellDuo[0] != -1 && shellDuo[1] != -1) {
+            // TODO check at least one discard pile is not empty
             duoActions.add(new ShellDuo(playerId, shellDuo));
         }
         if (boatDuo[0] != -1 && boatDuo[1] != -1) {

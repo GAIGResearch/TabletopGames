@@ -73,7 +73,6 @@ public class ShellDuo extends PlayDuo implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (currentStep == Step.CHOOSE_PILE) {
-            ChoosePile chooseAction = (ChoosePile) action;
             discardPileId = ((ChoosePile) action).pileId;
             currentStep = Step.CHOOSE_CARD;
         }

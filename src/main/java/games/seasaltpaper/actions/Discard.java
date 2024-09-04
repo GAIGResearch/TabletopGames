@@ -10,9 +10,9 @@ import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 public class Discard extends AbstractAction implements IPrintable {
 
-    int playerID;
-    int discardCardId;
-    int discardPileId;
+    final int playerID;
+    final int discardCardId;
+    final int discardPileId;
 
     public Discard(int discardCardId, int discardPileId, int playerID) {
         this.discardCardId = discardCardId;
@@ -50,8 +50,8 @@ public class Discard extends AbstractAction implements IPrintable {
     // TODO CANT DO "gameState.getComponentById(discardCardId).toString()" for some reason???
     @Override
     public String getString(AbstractGameState gameState) {
-//        return "Discard card " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();
-        return "Discard card " + discardCardId + " to pile " + gameState.getComponentById(discardPileId).getComponentName();
+        return "Discard card " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();
+//        return "Discard card " + discardCardId + " to pile " + gameState.getComponentById(discardPileId).getComponentName();
     }
 
     @Override
