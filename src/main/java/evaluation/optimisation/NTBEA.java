@@ -213,8 +213,12 @@ public class NTBEA {
                 // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
                 if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
                     // The elite agent is always the last one (and if the elite won fair and square, then we skip this
-                    double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
-                    double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                    double eliteWinRate = params.evalMethod.equals("Ordinal") ?
+                            tournament.getOrdinalRank(winnersPerRun.size() - 1) :
+                            tournament.getWinRate(winnersPerRun.size() - 1);
+                    double eliteStdErr = params.evalMethod.equals("Ordinal") ?
+                            tournament.getOrdinalStdErr(winnersPerRun.size() - 1) :
+                            tournament.getWinStdErr(winnersPerRun.size() - 1);
                     if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
                         if (params.verbose)
                             System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
