@@ -302,10 +302,9 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.printf("Evaluate %s at %tT%n", agentIDsInThisGame.toString(), System.currentTimeMillis());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
 
-        // If we are in self-play mode, we need to create a copy of the player to avoid them sharing the same state
-        // If not in self-play mode then this is unnecessary, as the same agent will never be in the same game twice
+        // create a copy of the player to avoid them sharing the same state
         for (int agentID : agentIDsInThisGame)
-            matchUpPlayers.add(tournamentMode == EXHAUSTIVE_SELF_PLAY ? this.agents.get(agentID).copy() : this.agents.get(agentID));
+            matchUpPlayers.add(this.agents.get(agentID).copy());
 
         if (verbose) {
             StringBuffer sb = new StringBuffer();

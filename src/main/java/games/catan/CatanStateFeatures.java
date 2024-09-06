@@ -2,6 +2,7 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.components.BoardNodeWithEdges;
+import core.components.Component;
 import core.interfaces.IStateFeatureVector;
 import games.catan.actions.build.BuyAction;
 import games.catan.components.Building;
@@ -10,8 +11,12 @@ import games.catan.components.CatanTile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import static games.catan.CatanParameters.Resource.*;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 public class CatanStateFeatures implements IStateFeatureVector {
 
@@ -48,7 +53,18 @@ public class CatanStateFeatures implements IStateFeatureVector {
             "LARGEST_ARMY_OTHER",
             "DEV_CARDS",
             "KNIGHTS",
-            "KNIGHTS_DIFF"
+            "KNIGHTS_DIFF",
+            "OTHER_INCOME_MAX",
+            "OTHER_INCOME_TOTAL",
+            "OPENING_GAME",
+            "EARLY_GAME",
+            "LATE_GAME",
+            "EXCHANGE_GRAIN",
+            "GRAIN_EXCHANGE",
+            "WOOL_EXCHANGE",
+            "BRICK_EXCHANGE",
+            "ORE_EXCHANGE",
+            "WOOD_EXCHANGE"
     };
 
 
@@ -82,6 +98,7 @@ public class CatanStateFeatures implements IStateFeatureVector {
         for (int i = 0; i < catanState.getBoard().length; i++) {
             allTiles.addAll(Arrays.asList(catanState.getBoard()[i]));
         }
+        double[] resourceIncome = new double[]{0.0, 0.0, 0.0, 0.0};
         for (CatanTile tile : allTiles) {
             if (tile.getNumber() == 0) continue; // DESERT, SEA
             double income = switch (tile.getNumber()) {
@@ -104,8 +121,8 @@ public class CatanStateFeatures implements IStateFeatureVector {
 
             int count = 0;
             for (Building b : catanState.getBuildings(tile)) {
-                if (b.getOwnerId() == -1 ) continue; // unowned
-                if (b.getOwnerId() != playerID && !tile.hasRobber()) continue; // other player's building (and robber is not there)
+                if (b.getOwnerId() == -1) continue; // unowned
+
                 switch (b.getBuildingType()) {
                     case Settlement -> income *= 1.0;
                     case City -> income *= 2.0;
@@ -128,19 +145,25 @@ public class CatanStateFeatures implements IStateFeatureVector {
                         retValue[19] += income;
                     }
                 } else {
-                    // the usual case, our income
-                    retValue[10 + incomeIndex] += income;
+                    if (b.getOwnerId() == playerID) {
+                        //  our income
+                        retValue[10 + incomeIndex] += income;
+                    } else {
+                        // other player's income
+                        resourceIncome[playerID] += income;
+                        retValue[34] += income;
+                    }
                 }
             }
-
-            retValue[15] = 10.0; // min income
-            retValue[16] = -10.0; // max income
-            for (int i = 0; i < 5; i++) {
-                retValue[15] = Math.min(retValue[15], retValue[10 + i]);
-                retValue[16] = Math.max(retValue[16], retValue[10 + i]);
-                retValue[17] += retValue[10 + i];  // total income
-            }
         }
+        retValue[15] = 10.0; // min income
+        retValue[16] = -10.0; // max income
+        for (int i = 0; i < 5; i++) {
+            retValue[15] = Math.min(retValue[15], retValue[10 + i]);
+            retValue[16] = Math.max(retValue[16], retValue[10 + i]);
+            retValue[17] += retValue[10 + i];  // total income
+        }
+        retValue[33] = Arrays.stream(resourceIncome).max().getAsDouble();  // highest income of another player
 
         retValue[20] = catanState.getPlayerResources(playerID).get(GRAIN).getValue();
         retValue[21] = catanState.getPlayerResources(playerID).get(WOOL).getValue();
@@ -164,8 +187,32 @@ public class CatanStateFeatures implements IStateFeatureVector {
             }
         }
         retValue[32] = retValue[31] - otherKnights;
-        return retValue;
 
+        Map<Integer, Long> settlementsPerPlayer = catanState.getSettlements().stream()
+                .filter(node -> node.getOwnerId() > -1)
+                .filter(node -> node instanceof Building b && b.getBuildingType() == Building.Type.Settlement)
+                .collect(groupingBy(Component::getOwnerId, counting()));
+        int maxSettlements = settlementsPerPlayer.values().stream().max(Long::compareTo).orElse(0L).intValue();
+
+        double maxScore = IntStream.range(0, state.getNPlayers())
+                .mapToDouble(catanState::getGameScore)
+                .max().orElse(0);
+
+        // define opening game as no-one has yet built another settlement
+        retValue[35] = maxSettlements == 2 ? 1.0 : 0.0;
+        // define early game as max points < 5
+        retValue[36] = maxScore < 5 ? 1.0 : 0.0;
+        // define late game as max points > 7
+        retValue[37] = maxScore > 7 ? 1.0 : 0.0;
+
+        // exchange rates (improvement over the default value)
+        retValue[38] = 4 - catanState.getExchangeRates(playerID).get(GRAIN).getValue();
+        retValue[39] = 4 - catanState.getExchangeRates(playerID).get(WOOL).getValue();
+        retValue[40] = 4 - catanState.getExchangeRates(playerID).get(BRICK).getValue();
+        retValue[41] = 4 - catanState.getExchangeRates(playerID).get(ORE).getValue();
+        retValue[42] = 4 - catanState.getExchangeRates(playerID).get(LUMBER).getValue();
+
+        return retValue;
     }
 
     @Override
