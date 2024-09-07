@@ -200,7 +200,7 @@ public class CatanStateFeatures implements IStateFeatureVector {
         // define opening game as no-one has yet built another settlement
         retValue[35] = maxSettlements == 2 ? 1.0 : 0.0;
         // define early game as max points < 5
-        retValue[36] = maxScore < 5 ? 1.0 : 0.0;
+        retValue[36] = (maxSettlements != 2 && maxScore < 5) ? 1.0 : 0.0;
         // define late game as max points > 7
         retValue[37] = maxScore > 7 ? 1.0 : 0.0;
 
