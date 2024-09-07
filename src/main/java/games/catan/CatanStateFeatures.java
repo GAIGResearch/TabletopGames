@@ -59,7 +59,6 @@ public class CatanStateFeatures implements IStateFeatureVector {
             "OPENING_GAME",
             "EARLY_GAME",
             "LATE_GAME",
-            "EXCHANGE_GRAIN",
             "GRAIN_EXCHANGE",
             "WOOL_EXCHANGE",
             "BRICK_EXCHANGE",
