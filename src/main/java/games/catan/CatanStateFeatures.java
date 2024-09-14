@@ -8,10 +8,7 @@ import games.catan.actions.build.BuyAction;
 import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static games.catan.CatanParameters.Resource.*;
@@ -21,7 +18,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class CatanStateFeatures implements IStateFeatureVector {
 
     String[] localNames = new String[]{
-            "TURN",
+            "INCOME_DELTA_MAX",
             "ROUND",
             "SCORE",
             "OTHER_SCORE",
@@ -63,7 +60,11 @@ public class CatanStateFeatures implements IStateFeatureVector {
             "WOOL_EXCHANGE",
             "BRICK_EXCHANGE",
             "ORE_EXCHANGE",
-            "WOOD_EXCHANGE"
+            "WOOD_EXCHANGE",
+            "WILD_EXCHANGE",
+            "BEST_EXCHANGE",
+            "EXCHANGE_MEASURE",
+            "INCOME_DELTA_MEAN"
     };
 
 
@@ -163,6 +164,8 @@ public class CatanStateFeatures implements IStateFeatureVector {
             retValue[17] += retValue[10 + i];  // total income
         }
         retValue[33] = Arrays.stream(resourceIncome).max().getAsDouble();  // highest income of another player
+        retValue[0] = retValue[17] - retValue[33]; // income delta
+        retValue[46] = retValue[17] - Arrays.stream(resourceIncome).average().orElse(0.0);  // highest income of another player
 
         retValue[20] = catanState.getPlayerResources(playerID).get(GRAIN).getValue();
         retValue[21] = catanState.getPlayerResources(playerID).get(WOOL).getValue();
@@ -197,8 +200,8 @@ public class CatanStateFeatures implements IStateFeatureVector {
                 .mapToDouble(catanState::getGameScore)
                 .max().orElse(0);
 
-        // define opening game as no-one has yet built another settlement
-        retValue[35] = maxSettlements == 2 ? 1.0 : 0.0;
+        // define opening game as no-one has yet built another settlement (maxScore check for end game issues with 2 settlements)
+        retValue[35] = maxScore < 5 && maxSettlements == 2 ? 1.0 : 0.0;
         // define early game as max points < 5
         retValue[36] = maxScore < 5 ? 1.0 : 0.0;
         // define late game as max points > 7
@@ -210,7 +213,14 @@ public class CatanStateFeatures implements IStateFeatureVector {
         retValue[40] = 4 - catanState.getExchangeRates(playerID).get(BRICK).getValue();
         retValue[41] = 4 - catanState.getExchangeRates(playerID).get(ORE).getValue();
         retValue[42] = 4 - catanState.getExchangeRates(playerID).get(LUMBER).getValue();
-
+        retValue[43] = 4 - catanState.getExchangeRates(playerID).get(WILD).getValue();
+        retValue[44] = Math.max(retValue[38], Math.max(retValue[39], Math.max(retValue[40], Math.max(retValue[41], retValue[42]))));
+        for (int i = 0; i < 5; i++) {
+            // exchange measure as indication of how well income correlates with exchange rates
+            double exchange = retValue[38 + i];
+            double income = retValue[10 + i];
+            retValue[45] += exchange * income;
+        }
         return retValue;
     }
 
