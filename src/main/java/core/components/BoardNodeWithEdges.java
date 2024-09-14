@@ -49,8 +49,14 @@ public class BoardNodeWithEdges extends Component {
         return neighbourEdgeMapping;
     }
 
+
+    /**
+     * This returns the set of edges. Do NOT modify this set, as it will modify the internal state of the node.
+     * @return
+     */
     public Set<Edge> getEdges() {
-        return new HashSet<>(neighbourEdgeMapping.keySet());
+        // this does not create a new HashSet from the edges, as that is a surprisingly large drain on performance
+        return neighbourEdgeMapping.keySet();
     }
 
     /**

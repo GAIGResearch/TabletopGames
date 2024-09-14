@@ -9,28 +9,30 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     // List of nodes in the board graph, mapping component ID to object reference
     protected Map<Integer, BoardNodeWithEdges> boardNodes;
 
+    private static final int initialCapacity = 256;
+
     public GraphBoardWithEdges(String name)
     {
         super(CoreConstants.ComponentType.BOARD, name);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     public GraphBoardWithEdges()
     {
         super(CoreConstants.ComponentType.BOARD);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     protected GraphBoardWithEdges(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     GraphBoardWithEdges(int ID)
     {
         super(CoreConstants.ComponentType.BOARD, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     /**
@@ -41,8 +43,8 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public GraphBoardWithEdges copy()
     {
         GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
-        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>();
-        HashMap<Integer, Edge> edgeCopies = new HashMap<>();
+        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
+        HashMap<Integer, Edge> edgeCopies = new HashMap<>(initialCapacity);
         // Copy board nodes
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = bn.copy();

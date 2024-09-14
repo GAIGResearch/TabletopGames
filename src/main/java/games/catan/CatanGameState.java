@@ -609,11 +609,14 @@ public class CatanGameState extends AbstractGameState {
             return true;
         }
 
-        // check if there is a road on a neighbouring edge
-        Set<Edge> roads = origin.getEdges();
-        roads.addAll(end.getEdges());
-        for (Edge rd : roads) {
-            if (!rd.equals(edge) && rd.getOwnerId() == player) {
+        // check if there is a road of ours on a neighbouring edge
+        for (Edge rd : origin.getEdges()) {
+            if (rd.getOwnerId() == player) {
+                return true;
+            }
+        }
+        for (Edge rd : end.getEdges()) {
+            if (rd.getOwnerId() == player) {
                 return true;
             }
         }

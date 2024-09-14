@@ -315,6 +315,8 @@ public class CatanActionFactory {
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
+                    // Skip sea and desert tiles; we will look at their edges via their neighbours
+                    if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT)) continue;
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
                         // Roads
@@ -322,8 +324,7 @@ public class CatanActionFactory {
                         if (edge == null || roadsAdded.contains(edge.getComponentID())) continue;
                         roadsAdded.add(edge.getComponentID());
 
-                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                                && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
+                        if (gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
                             actions.add(new BuildRoad(x, y, i, player, free));
                         }
                     }
