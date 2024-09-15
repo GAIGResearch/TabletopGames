@@ -76,10 +76,17 @@ public class BoardNodeWithEdges extends Component {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BoardNodeWithEdges)) return false;
-        if (!super.equals(o)) return false;
-        BoardNodeWithEdges that = (BoardNodeWithEdges) o;
-        return Objects.equals(neighbourEdgeMapping, that.neighbourEdgeMapping);
+        if (o instanceof BoardNodeWithEdges bn) {
+            for (Edge e: neighbourEdgeMapping.keySet()) {
+                if (!bn.neighbourEdgeMapping.containsKey(e)) return false;
+            }
+            // then the other way
+            for (Edge e: bn.neighbourEdgeMapping.keySet()) {
+                if (!neighbourEdgeMapping.containsKey(e)) return false;
+            }
+            return super.equals(bn);
+        }
+        return false;
     }
 
     @Override

@@ -43,12 +43,14 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public GraphBoardWithEdges copy()
     {
         // A temporary map to store the copied edges
-        HashMap<Integer, Edge> edgeCopies = new HashMap<>(initialCapacity);
+        // this slightly odd Edge -> Edge structure avoids the overhead of Integer Boxing/Unboxing compared
+        // to using a Map<Integer, Edge> for the edge IDs
+        HashMap<Edge, Edge> edgeCopies = new HashMap<>(initialCapacity);
         // copy edges
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             // copy edges (then used in the next loop)
-            for (Edge e: bn.neighbourEdgeMapping.keySet()) {
-                edgeCopies.put(e.componentID, e.copy());
+            for (Edge e: bn.getEdges()) {
+                edgeCopies.put(e, e.copy());
             }
         }
 
@@ -57,13 +59,13 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
         HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = bn.copy();
-            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.getComponentID());
+            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);
             bn.copyComponentTo(bnCopy);
-            nodeCopies.put(bn.getComponentID(), bnCopy);
-
             for (Map.Entry<Edge, BoardNodeWithEdges> e: bn.neighbourEdgeMapping.entrySet()) {
-                bnCopy.addNeighbour(boardNodes.get(e.getValue().getComponentID()), edgeCopies.get(e.getKey().componentID));
+                Integer nodeKey = e.getValue().componentID;
+                bnCopy.addNeighbour(boardNodes.get(nodeKey), edgeCopies.get(e.getKey()));
             }
+            nodeCopies.put(bn.getComponentID(), bnCopy);
         }
 
         // Assign new neighbours

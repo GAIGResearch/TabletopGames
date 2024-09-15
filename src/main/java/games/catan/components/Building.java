@@ -58,10 +58,10 @@ public class Building extends BoardNodeWithEdges {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Building)) return false;
-        if (!super.equals(o)) return false;
-        Building that = (Building) o;
-        return type == that.type && harbour == that.harbour;
+        if (o instanceof Building building) {
+            return super.equals(building) && type == building.type && harbour == building.harbour;
+        }
+        return false;
     }
 
     @Override
