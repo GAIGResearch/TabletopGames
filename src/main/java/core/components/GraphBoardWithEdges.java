@@ -48,7 +48,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
         // Copy board nodes
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = bn.copy();
-            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.getComponentID());
+            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);
             bn.copyComponentTo(bnCopy);
             nodeCopies.put(bn.getComponentID(), bnCopy);
             // Copy edges
@@ -81,11 +81,11 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
     /**
      * Returns the node in the list which matches the given ID
-     * @param id - ID of node to search for.
+     * @param key - ID of node to search for.
      * @return - node matching ID.
      */
-    public BoardNodeWithEdges getNodeByID(int id) {
-        return boardNodes.get(id);
+    public BoardNodeWithEdges getNodeByID(Integer key) {
+        return boardNodes.get(key);
     }
 
     /**

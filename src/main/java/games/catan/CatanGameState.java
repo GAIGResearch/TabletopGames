@@ -85,7 +85,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(catanGraph);
             for (int i = 0; i < nPlayers; i++) {
                 addAll(exchangeRates.get(i).values());
@@ -587,17 +587,15 @@ public class CatanGameState extends AbstractGameState {
 
     /**
      * Check if can place road on edge of tile
-     * @param edgeIdx- index of the edge on tile
+     * @param edge - Edge
      * @param tile- tile on which we would like to build a road
      * @param player- playerID
      * @return true if can place road on given edge, false otherwise
      */
-    public boolean checkRoadPlacement(int edgeIdx, CatanTile tile, int player) {
+    public boolean checkRoadPlacement(CatanTile tile, int v1, int v2, Edge edge, int player) {
         GraphBoardWithEdges graph = getGraph();
-        BoardNodeWithEdges origin = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[edgeIdx]);  // this is one node connected with this edge
-        Edge edge = origin.getEdgeByID(tile.getEdgeIDs()[edgeIdx]);
-        BoardNodeWithEdges end = origin.getNeighbour(edge);  // this is one node connected with this edge
-
+        BoardNodeWithEdges origin = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[v1]);
+        BoardNodeWithEdges end = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[v2]);
 
         // check if road is already taken
         if (edge == null || edge.getOwnerId() != -1) {

@@ -65,8 +65,7 @@ public class BoardNodeWithEdges extends Component {
      */
     @Override
     public BoardNodeWithEdges copy() {
-        // WARNING: DO not copy this directly, the GraphBoard copies it to correctly assign neighbour references!
-        return null;
+        throw new UnsupportedOperationException("Copy method not implemented for BoardNodeWithEdges - implement in subclass");
     }
 
     @Override

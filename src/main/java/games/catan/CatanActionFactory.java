@@ -17,12 +17,14 @@ import games.catan.actions.trade.*;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
+import org.antlr.v4.runtime.misc.IntSet;
 import utilities.Utils;
 
 import java.util.*;
 
 import static games.catan.CatanConstants.HEX_SIDES;
 import static games.catan.components.Building.Type.Settlement;
+import static java.util.stream.Collectors.toList;
 
 public class CatanActionFactory {
     /**
@@ -310,22 +312,23 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
-            Set<Integer> roadsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
+            HashSet<Edge> edgesChecked = new HashSet<>(256);
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
                     // Skip sea and desert tiles; we will look at their edges via their neighbours
                     if (tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT)) continue;
                     for (int i = 0; i < HEX_SIDES; i++) {
-                        Building settlement = gs.getBuilding(tile, i);
-                        // Roads
-                        Edge edge = gs.getRoad(settlement, tile, i);
-                        if (edge == null || roadsAdded.contains(edge.getComponentID())) continue;
-                        roadsAdded.add(edge.getComponentID());
+                        // we build from a vertex (settlement) to an adjacent vertex, but do not need to
+                        // actually retrieve the settlement object
+                        Edge edge = gs.getRoad(tile, i, i);
+                        if (edge == null) continue;
+                        if (edgesChecked.contains(edge)) continue;
+                        edgesChecked.add(edge);
 
-                        if (gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
-                            actions.add(new BuildRoad(x, y, i, player, free));
+                        if (gs.checkRoadPlacement(tile, i, (i + 1) % HEX_SIDES, edge, gs.getCurrentPlayer())) {
+                            actions.add(new BuildRoad(x, y, i, player, free, edge.getComponentID()));
                         }
                     }
                 }
@@ -346,8 +349,9 @@ public class CatanActionFactory {
                     CatanTile tile = board[x][y];
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
-                        if (settlementsAdded.contains(settlement.getComponentID())) continue;
-                        settlementsAdded.add(settlement.getComponentID());
+                        Integer componentID = settlement.getComponentID();  // to reduce auto-unboxing overhead
+                        if (settlementsAdded.contains(componentID)) continue;
+                        settlementsAdded.add(componentID);
 
                         // legal to place?
                         if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
@@ -373,8 +377,9 @@ public class CatanActionFactory {
                     CatanTile tile = board[x][y];
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
-                        if (settlementsAdded.contains(settlement.getComponentID())) continue;
-                        settlementsAdded.add(settlement.getComponentID());
+                        Integer componentID = settlement.getComponentID();  // to reduce auto-unboxing overhead
+                        if (settlementsAdded.contains(componentID)) continue;
+                        settlementsAdded.add(componentID);
                         if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
                             actions.add(new BuildCity(x, y, i, player));
                         }

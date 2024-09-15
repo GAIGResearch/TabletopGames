@@ -25,6 +25,6 @@ public class Edge extends Component {
 
     @Override
     public int hashCode() {
-        return componentID + ownerId;
+        return componentID * 31 + ownerId;
     }
 }

@@ -416,7 +416,7 @@ public class CatanForwardModel extends StandardForwardModel {
             for (int j = 0; j < board.length / 2; j++) {
                 int[] tileLocation = tile.getNeighbourOnEdge(i);
                 tile = board[tileLocation[0]][tileLocation[1]];
-                if (counter % 2 == 0 && harbors.size() > 0) {
+                if (counter % 2 == 0 && !harbors.isEmpty()) {
                     CatanParameters.Resource harbour = harbors.remove(0);
                     ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 2) % HEX_SIDES])).setHarbour(harbour);
                     ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 3) % HEX_SIDES])).setHarbour(harbour);
