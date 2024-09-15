@@ -17,6 +17,7 @@ import games.catan.actions.trade.*;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
+import games.puertorico.roles.Settler;
 import org.antlr.v4.runtime.misc.IntSet;
 import utilities.Utils;
 
@@ -342,16 +343,15 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Settlement), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Settlement).isMaximum()) {
-            Set<Integer> settlementsAdded = new HashSet<>();
+            Set<Building> settlementsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
-                        Integer componentID = settlement.getComponentID();  // to reduce auto-unboxing overhead
-                        if (settlementsAdded.contains(componentID)) continue;
-                        settlementsAdded.add(componentID);
+                        if (settlementsAdded.contains(settlement)) continue;
+                        settlementsAdded.add(settlement);
 
                         // legal to place?
                         if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
@@ -370,16 +370,15 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.City), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum()) {
-            Set<Integer> settlementsAdded = new HashSet<>();
+            Set<Building> settlementsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
-                        Integer componentID = settlement.getComponentID();  // to reduce auto-unboxing overhead
-                        if (settlementsAdded.contains(componentID)) continue;
-                        settlementsAdded.add(componentID);
+                        if (settlementsAdded.contains(settlement)) continue;
+                        settlementsAdded.add(settlement);
                         if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
                             actions.add(new BuildCity(x, y, i, player));
                         }

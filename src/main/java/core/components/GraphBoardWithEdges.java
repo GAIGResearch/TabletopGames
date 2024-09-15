@@ -60,7 +60,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = bn.copy();
             if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);
-            Integer key = bnCopy.getComponentID();
+            Integer key = bn.getComponentID();
             bn.copyComponentTo(bnCopy);
             nodeCopies.put(key, bnCopy);
             if (bn.neighbourEdgeMapping.size() > 3) {
@@ -70,14 +70,13 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
         // then update the neighbours
         for (BoardNodeWithEdges bn: boardNodes.values()) {
-            if (bn.neighbourEdgeMapping.size() > 3) {
-                throw new AssertionError("Too many neighbours in a node");
-            }
-            for (Edge e: bn.getEdges()) {
+            for (Map.Entry entry : bn.neighbourEdgeMapping.entrySet()) {
+                Edge e = (Edge) entry.getKey();
+                BoardNodeWithEdges otherEnd = (BoardNodeWithEdges) entry.getValue();
                 Edge eCopy = edgeCopies.get(e);
                 Integer keyOne = bn.getComponentID();
                 BoardNodeWithEdges vertexOne = nodeCopies.get(keyOne);
-                Integer keyTwo = bn.getNeighbour(e).getComponentID();
+                Integer keyTwo = otherEnd.getComponentID();
                 BoardNodeWithEdges vertexTwo = nodeCopies.get(keyTwo);
                 vertexOne.addNeighbour(vertexTwo, eCopy);
             }

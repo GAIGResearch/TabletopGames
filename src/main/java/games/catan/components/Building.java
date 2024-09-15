@@ -66,7 +66,7 @@ public class Building extends BoardNodeWithEdges {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, harbour, ownerId);
+        return super.hashCode() + 31 * type.ordinal() + (harbour == null ? 0 : 31 * 31 * harbour.ordinal());
     }
 
     @Override
