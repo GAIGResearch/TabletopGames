@@ -77,6 +77,7 @@ public class BoardNodeWithEdges extends Component {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof BoardNodeWithEdges bn) {
+            if (componentID != bn.componentID || ownerId != bn.ownerId) return false;
             for (Edge e: neighbourEdgeMapping.keySet()) {
                 if (!bn.neighbourEdgeMapping.containsKey(e)) return false;
             }
@@ -84,7 +85,7 @@ public class BoardNodeWithEdges extends Component {
             for (Edge e: bn.neighbourEdgeMapping.keySet()) {
                 if (!neighbourEdgeMapping.containsKey(e)) return false;
             }
-            return super.equals(bn);
+            return true;
         }
         return false;
     }

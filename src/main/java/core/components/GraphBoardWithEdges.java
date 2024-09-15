@@ -54,18 +54,33 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
             }
         }
 
-        // Copy board nodes
+        // Copy board nodes; we can't use the same trick as with Edges, because the Node change as we wire them up
         GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
         HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = bn.copy();
             if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);
+            Integer key = bnCopy.getComponentID();
             bn.copyComponentTo(bnCopy);
-            for (Map.Entry<Edge, BoardNodeWithEdges> e: bn.neighbourEdgeMapping.entrySet()) {
-                Integer nodeKey = e.getValue().componentID;
-                bnCopy.addNeighbour(boardNodes.get(nodeKey), edgeCopies.get(e.getKey()));
+            nodeCopies.put(key, bnCopy);
+            if (bn.neighbourEdgeMapping.size() > 3) {
+                throw new AssertionError("Too many neighbours in a node");
             }
-            nodeCopies.put(bn.getComponentID(), bnCopy);
+        }
+
+        // then update the neighbours
+        for (BoardNodeWithEdges bn: boardNodes.values()) {
+            if (bn.neighbourEdgeMapping.size() > 3) {
+                throw new AssertionError("Too many neighbours in a node");
+            }
+            for (Edge e: bn.getEdges()) {
+                Edge eCopy = edgeCopies.get(e);
+                Integer keyOne = bn.getComponentID();
+                BoardNodeWithEdges vertexOne = nodeCopies.get(keyOne);
+                Integer keyTwo = bn.getNeighbour(e).getComponentID();
+                BoardNodeWithEdges vertexTwo = nodeCopies.get(keyTwo);
+                vertexOne.addNeighbour(vertexTwo, eCopy);
+            }
         }
 
         // Assign new neighbours
@@ -146,6 +161,8 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public Edge addConnection(int bn1id, int bn2id) {
         BoardNodeWithEdges bn1 = boardNodes.get(bn1id);
         BoardNodeWithEdges bn2 = boardNodes.get(bn2id);
+        // check to see if already a connection
+        if (bn1.getNeighbours().contains(bn2)) return bn1.getEdge(bn2);
         Edge edge = new Edge();
         addConnection(bn1, bn2, edge);
         return edge;

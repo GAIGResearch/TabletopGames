@@ -27,4 +27,13 @@ public class Edge extends Component {
     public int hashCode() {
         return componentID * 31 + ownerId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof Edge edge) {
+            return ownerId == edge.ownerId && componentID == edge.componentID;
+        }
+        return false;
+    }
 }

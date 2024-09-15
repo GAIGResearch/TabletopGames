@@ -59,14 +59,14 @@ public class Building extends BoardNodeWithEdges {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o instanceof Building building) {
-            return super.equals(building) && type == building.type && harbour == building.harbour;
+            return super.equals(building) && type == building.type && harbour == building.harbour && ownerId == building.ownerId;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, harbour);
+        return Objects.hash(super.hashCode(), type, harbour, ownerId);
     }
 
     @Override
