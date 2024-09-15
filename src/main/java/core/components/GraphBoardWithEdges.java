@@ -42,25 +42,27 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     @Override
     public GraphBoardWithEdges copy()
     {
-        GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
-        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
+        // A temporary map to store the copied edges
         HashMap<Integer, Edge> edgeCopies = new HashMap<>(initialCapacity);
-        // Copy board nodes
+        // copy edges
         for (BoardNodeWithEdges bn: boardNodes.values()) {
-            BoardNodeWithEdges bnCopy = bn.copy();
-            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);
-            bn.copyComponentTo(bnCopy);
-            nodeCopies.put(bn.getComponentID(), bnCopy);
-            // Copy edges
+            // copy edges (then used in the next loop)
             for (Edge e: bn.neighbourEdgeMapping.keySet()) {
                 edgeCopies.put(e.componentID, e.copy());
             }
         }
-        // Assign neighbours and edges
+
+        // Copy board nodes
+        GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
+        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
         for (BoardNodeWithEdges bn: boardNodes.values()) {
-            BoardNodeWithEdges bnCopy = nodeCopies.get(bn.getComponentID());
+            BoardNodeWithEdges bnCopy = bn.copy();
+            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.getComponentID());
+            bn.copyComponentTo(bnCopy);
+            nodeCopies.put(bn.getComponentID(), bnCopy);
+
             for (Map.Entry<Edge, BoardNodeWithEdges> e: bn.neighbourEdgeMapping.entrySet()) {
-                bnCopy.addNeighbour(nodeCopies.get(e.getValue().getComponentID()), edgeCopies.get(e.getKey().componentID));
+                bnCopy.addNeighbour(boardNodes.get(e.getValue().getComponentID()), edgeCopies.get(e.getKey().componentID));
             }
         }
 
