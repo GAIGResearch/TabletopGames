@@ -184,6 +184,14 @@ public class MCTSParams extends PlayerParameters {
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
         useMAST = MAST != None;
+        // If we are using MAST for rollout or action heuristic, then we need to collect the data
+        if (!useMAST && (rolloutType == MCTSEnums.Strategies.MAST ||
+                oppModelType == MCTSEnums.Strategies.MAST ||
+                useMASTAsActionHeuristic)) {
+            System.out.println("Setting MAST to Both instead of None given use of MAST in rollout or action heuristic");
+            useMAST = true;
+            MAST = Both;
+        }
     }
 
     @Override
