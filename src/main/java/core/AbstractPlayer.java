@@ -9,8 +9,8 @@ import java.util.*;
 
 public abstract class AbstractPlayer {
 
-    // ID of this player, assigned by the game
-    protected int playerID;
+    // ID of this player, assigned by the game - this is intentionally package-private. Do not change it!
+    int playerID;
     String name;
     protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game

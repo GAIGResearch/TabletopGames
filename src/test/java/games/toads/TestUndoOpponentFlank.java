@@ -1,7 +1,9 @@
 package games.toads;
 
+import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.GameType;
 import games.toads.actions.*;
 import games.toads.components.ToadCard;
 import games.toads.metrics.ToadFeatures001;
@@ -10,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
 import players.mcts.*;
+import players.simple.RandomPlayer;
 
 import java.util.List;
 import java.util.Random;
@@ -20,9 +23,9 @@ import static org.junit.Assert.*;
 public class TestUndoOpponentFlank {
 
     ToadGameState state;
+    Game game;
     ToadForwardModel fm;
     ToadParameters params;
-    Random rnd = new Random(931);
     MCTSParams mctsParams = new MCTSParams();
 
     @Before
@@ -34,7 +37,7 @@ public class TestUndoOpponentFlank {
         state = new ToadGameState(params, 2);
         fm = new ToadForwardModel();
         fm.setup(state);
-        rnd = new Random(933);
+        game = new Game(GameType.WarOfTheToads, fm, state);
     }
 
     private void playCards(ToadCard... cardsInOrder) {
@@ -88,7 +91,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budget = 1000;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
@@ -108,7 +111,7 @@ public class TestUndoOpponentFlank {
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         mctsParams.reuseTree = true;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         List<AbstractAction> actions = fm._computeAvailableActions(state);
         AbstractAction actionChosen = player.getAction(state, actions);
@@ -149,7 +152,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budget = 1000;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state.copy(), fm._computeAvailableActions(state));
@@ -169,7 +172,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budget = 4;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
@@ -187,7 +190,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budget = 1000;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
@@ -206,7 +209,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budget = 1000;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
@@ -261,7 +264,7 @@ public class TestUndoOpponentFlank {
         mctsParams.budget = 1000;
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA_All;
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
@@ -280,7 +283,7 @@ public class TestUndoOpponentFlank {
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
         mctsParams.MCGSStateKey = new ToadFeatures001();
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
@@ -299,7 +302,7 @@ public class TestUndoOpponentFlank {
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
         mctsParams.MCGSStateKey = new ToadFeatures001();
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         player.getAction(state, fm._computeAvailableActions(state));
         MCGSNode root = (MCGSNode) player.getRoot();
@@ -314,7 +317,7 @@ public class TestUndoOpponentFlank {
         mctsParams.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
         mctsParams.MCGSStateKey = new ToadFeatures002();
         ToadMCTSPlayer player = new ToadMCTSPlayer(mctsParams);
-        player.setForwardModel(fm);
+        game.reset(List.of(new RandomPlayer(), player), 933);
         moveStateForwardToFirstDefenderMove();
         assertEquals(1, state.getCurrentPlayer());
         AbstractAction actionChosen = player.getAction(state, fm._computeAvailableActions(state));
