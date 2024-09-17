@@ -44,6 +44,20 @@ public class ToadGameState extends AbstractGameState {
         components.addAll(playerDecks.get(1).stream().toList());
         components.addAll(playerHands.get(0).stream().toList());
         components.addAll(playerHands.get(1).stream().toList());
+        components.addAll(playerDiscards.get(0).stream().toList());
+        components.addAll(playerDiscards.get(1).stream().toList());
+        if (hiddenFlankCards[0] != null)
+            components.add(hiddenFlankCards[0]);
+        if (hiddenFlankCards[1] != null)
+            components.add(hiddenFlankCards[1]);
+        if (fieldCards[0] != null)
+            components.add(fieldCards[0]);
+        if (fieldCards[1] != null)
+            components.add(fieldCards[1]);
+        if (tieBreakers[0] != null)
+            components.add(tieBreakers[0]);
+        if (tieBreakers[1] != null)
+            components.add(tieBreakers[1]);
         return components;
     }
 
