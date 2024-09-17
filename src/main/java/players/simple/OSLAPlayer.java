@@ -2,11 +2,11 @@ package players.simple;
 
 import core.interfaces.IStateHeuristic;
 import players.heuristics.GameDefaultHeuristic;
-import players.search.SearchParameters;
-import players.search.SearchPlayer;
+import players.search.MaxNSearchParameters;
+import players.search.MaxNSearchPlayer;
 
 
-public class OSLAPlayer extends SearchPlayer {
+public class OSLAPlayer extends MaxNSearchPlayer {
 
 
     public OSLAPlayer() {
@@ -18,8 +18,8 @@ public class OSLAPlayer extends SearchPlayer {
         setName("OSLA");
     }
 
-    private static SearchParameters constructParameters(IStateHeuristic heuristic) {
-        SearchParameters params = new SearchParameters();
+    private static MaxNSearchParameters constructParameters(IStateHeuristic heuristic) {
+        MaxNSearchParameters params = new MaxNSearchParameters();
         params.setParameterValue("BUDGET_TYPE", "BUDGET_TIME");
         params.setParameterValue("BUDGET", 100); // 100ms as timeout
         params.setParameterValue("searchDepth", 1);

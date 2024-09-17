@@ -2,26 +2,44 @@ package players.search;
 
 import core.*;
 import core.actions.AbstractAction;
-import utilities.Pair;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
-import static utilities.Utils.noise;
-
-public class SearchPlayer extends AbstractPlayer {
+public class MaxNSearchPlayer extends AbstractPlayer {
+    /**
+     * This class is a simple implementation of a MaxN search player.
+     * (This is the same as Minimax in the case of 2 players if the heuristic is symmetric)
+     * <p></p>
+     * This conducts a depth-first search of the game tree to a maximum depth of D.
+     * A vector of heuristic values is back-propagated up the tree, with one entry for each player.
+     * The assumption is that at each decision node, the acting player takes the action that
+     * maximises their own result.
+     * <p></p>
+     * The key parameters the algorithm takes are:
+     * - searchDepth: the maximum depth of the search (D)
+     * - heuristic: the heuristic function to evaluate the state of the game
+     * - paranoid: if true, the algorithm assumes that all players are trying to minimise its score
+     * - searchUnit: the unit of search (ACTION, MACRO_ACTION, TURN)
+     * <p></p>
+     * The searchUnit determines how we measure D, or searchDepth.
+     * - ACTION: D is decremented at each decision node
+     * - MACRO_ACTION: D is decremented at each decision node where the acting player changes
+     * - TURN: D is decremented at each decision node where the turn number changes
+     *
+     * Additionally, the BUDGET can be specified as a cutoff for the search. If this much time passes
+     * without the search finishing, the best action found so far is returned (likely to be pretty random).
+     */
 
 
     private long startTime;
-    public SearchPlayer(SearchParameters parameters) {
+    public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
 
     @Override
-    public SearchParameters getParameters() {
-        return (SearchParameters) this.parameters;
+    public MaxNSearchParameters getParameters() {
+        return (MaxNSearchParameters) this.parameters;
     }
 
     @Override
@@ -41,7 +59,7 @@ public class SearchPlayer extends AbstractPlayer {
      * The second element is the value of the state on the assumption this best action is taken.
      */
     protected SearchResult expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth) {
-        SearchParameters params = getParameters();
+        MaxNSearchParameters params = getParameters();
         if (System.currentTimeMillis() - startTime > params.budget) {
             // out of time - return null action and a vector of zeros
             return new SearchResult(null, new double[state.getNPlayers()]);
@@ -102,8 +120,8 @@ public class SearchPlayer extends AbstractPlayer {
     }
 
     @Override
-    public SearchPlayer copy() {
-        SearchPlayer retValue = new SearchPlayer((SearchParameters) getParameters().shallowCopy());
+    public MaxNSearchPlayer copy() {
+        MaxNSearchPlayer retValue = new MaxNSearchPlayer((MaxNSearchParameters) getParameters().shallowCopy());
         retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }

@@ -5,7 +5,7 @@ import players.PlayerConstants;
 import players.PlayerParameters;
 import players.heuristics.GameDefaultHeuristic;
 
-public class SearchParameters extends PlayerParameters {
+public class MaxNSearchParameters extends PlayerParameters {
 
     enum SearchUnit {
         ACTION, MACRO_ACTION, TURN
@@ -16,7 +16,7 @@ public class SearchParameters extends PlayerParameters {
     protected IStateHeuristic heuristic;
     protected boolean paranoid = false;
 
-    public SearchParameters() {
+    public MaxNSearchParameters() {
         this.addTunableParameter("searchDepth", 1);
         this.addTunableParameter("searchUnit", SearchUnit.ACTION);
         this.addTunableParameter("heuristic", IStateHeuristic.class);
@@ -40,18 +40,18 @@ public class SearchParameters extends PlayerParameters {
     }
 
     @Override
-    protected SearchParameters _copy() {
-        return new SearchParameters();
+    protected MaxNSearchParameters _copy() {
+        return new MaxNSearchParameters();
     }
 
     @Override
     protected boolean _equals(Object o) {
-        return o instanceof SearchParameters;
+        return o instanceof MaxNSearchParameters;
     }
 
     @Override
     public Object instantiate() {
-        return new SearchPlayer(this);
+        return new MaxNSearchPlayer(this);
     }
 
 }

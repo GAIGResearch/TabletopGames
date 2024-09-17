@@ -8,7 +8,6 @@ import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
-import players.search.SearchParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
