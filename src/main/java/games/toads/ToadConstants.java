@@ -5,6 +5,8 @@ import games.toads.abilities.*;
 
 public class ToadConstants {
 
+    public static int ASSASSIN_KILLS = 7;
+
     public enum ToadGamePhase implements IGamePhase {
         DISCARD,
         PLAY,
