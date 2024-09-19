@@ -7,9 +7,8 @@ import java.util.*;
 
 public class MCGSNode extends SingleTreeNode {
 
-    private Map<String, MCGSNode> transpositionMap = new HashMap<>();
-    public List<String> trajectory = new ArrayList<>();
-
+    private Map<Object, MCGSNode> transpositionMap = new HashMap<>();
+    public List<Object> trajectory = new ArrayList<>();
     protected MCGSNode() {
     }
 
@@ -22,13 +21,9 @@ public class MCGSNode extends SingleTreeNode {
     }
 
     private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
-        String key = params.MCGSStateKey.getKey(keyState);
+        Object key = params.MCGSStateKey.getKey(keyState);
         MCGSNode graphRoot = (MCGSNode) root;
-        if (graphRoot.transpositionMap.containsKey(key)) {
-            throw new AssertionError("Unexpected?");
-        }
         graphRoot.transpositionMap.put(key, node);
-        //   System.out.println("Adding to transposition table: " + key);
     }
 
     /**
@@ -43,7 +38,7 @@ public class MCGSNode extends SingleTreeNode {
         // we create the new node here; so that the backup does not create new nodes (which is in line with the main MCTS algorithm).
         // this enforces (for the moment) the rule that each iteration adds one new node.
         MCGSNode graphRoot = (MCGSNode) root;
-        String key = params.MCGSStateKey.getKey(nextState);
+        Object key = params.MCGSStateKey.getKey(nextState);
         if (graphRoot.transpositionMap.containsKey(key)) {
             if (params.MCGSExpandAfterClash) {
                 throw new AssertionError("Unexpected?");
@@ -59,7 +54,7 @@ public class MCGSNode extends SingleTreeNode {
     @Override
     protected SingleTreeNode nextNodeInTree(AbstractAction actionChosen) {
         // we look up the node in the transposition table using the feature vector for the openLoopState
-        String key = params.MCGSStateKey.getKey(openLoopState);
+        Object key = params.MCGSStateKey.getKey(openLoopState);
         MCGSNode nextNode = ((MCGSNode) root).transpositionMap.get(key);
 
         if (nextNode != null) {
@@ -83,7 +78,12 @@ public class MCGSNode extends SingleTreeNode {
             // We only track this while in the tree (we could do the rollout as well, but at the overhead
             // of featureVector calculations
             MCGSNode mcgsRoot = (MCGSNode) root;
-            String key = params.MCGSStateKey.getKey(gs);
+            Object key = params.MCGSStateKey.getKey(gs);
+            // special case at root when we *expect* the key to be different on several iterations through
+            // because we are redeterminising from a perspective other than the decisionPlayer
+            if (this == mcgsRoot && mcgsRoot.trajectory.isEmpty() && decisionPlayer != redeterminisationPlayer && redeterminisationPlayer != -1) {
+                key = params.MCGSStateKey.getKey(gs, redeterminisationPlayer);
+            }
             mcgsRoot.trajectory.add(key);
 //            System.out.println("Adding to trajectory: " + key);
         }
@@ -91,10 +91,9 @@ public class MCGSNode extends SingleTreeNode {
     }
 
     @Override
-    protected void resetDepth(SingleTreeNode newRoot) {
+    protected void resetDepth(SingleTreeNode unusedArgument) {
         int depthDelta = depth;
         root = this;
-        depth = 0;
         for (MCGSNode node : transpositionMap.values()) {
             node.depth -= depthDelta;
             node.root = this;
@@ -117,7 +116,7 @@ public class MCGSNode extends SingleTreeNode {
         }
 
         for (int i = nRoot.trajectory.size() - 1; i >= 0; i--) {
-            String key = nRoot.trajectory.get(i);
+            Object key = nRoot.trajectory.get(i);
             MCGSNode node = nRoot.transpositionMap.get(key);
             AbstractAction action = nRoot.actionsInTree.get(i).b;
             if (node == null) {
@@ -128,11 +127,11 @@ public class MCGSNode extends SingleTreeNode {
         nRoot.trajectory.clear();
     }
 
-    public Map<String, MCGSNode> getTranspositionMap() {
+    public Map<Object, MCGSNode> getTranspositionMap() {
         return transpositionMap;
     }
 
-    public void setTranspositionMap(Map<String, MCGSNode> transposition) {
+    public void setTranspositionMap(Map<Object, MCGSNode> transposition) {
         transpositionMap = transposition;
     }
 

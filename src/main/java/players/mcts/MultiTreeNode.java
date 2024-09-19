@@ -28,7 +28,7 @@ public class MultiTreeNode extends SingleTreeNode {
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        this.decisionPlayer = state.getCurrentPlayer();
+        this.decisionPlayer = player.getPlayerID();
         this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
         if (params.information == MCTSEnums.Information.Closed_Loop)
@@ -183,6 +183,10 @@ public class MultiTreeNode extends SingleTreeNode {
 
     public SingleTreeNode getRoot(int player) {
         return roots[player];
+    }
+
+    public void resetRoot(int player) {
+        roots[player] = null;
     }
 
 }

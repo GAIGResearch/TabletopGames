@@ -155,7 +155,10 @@ public class MetricsGameListener implements IGameListener {
         } else if (e == ROUND_OVER) {
             return "Round";
         } else if (e == TURN_OVER) {
-            return "Turn";
+            // Turn number is cyclic (i.e. in each Round, it restarts at 0)
+            // If we index on Turn number then this means we only record the data from the last TURN_OVER event for that number
+            // Hence, we counter-intuitively index on the TICK, which will be unique across Turns
+            return "Tick";
         } else if (e == ACTION_CHOSEN || e == ACTION_TAKEN || e == GAME_EVENT) {
             return "Tick";
         }

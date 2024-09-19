@@ -3,10 +3,16 @@ package evaluation.listeners;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
+import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
+import utilities.Utils;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static evaluation.metrics.IDataLogger.ReportDestination.ToBoth;
+import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
 
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
@@ -48,6 +54,14 @@ public abstract class FeatureListener implements IGameListener {
         }
     }
 
+    @Override
+    public boolean setOutputDirectory(String... nestedDirectories) {
+
+        if (logger instanceof FileStatsLogger fileLogger) {
+            fileLogger.setOutPutDirectory(nestedDirectories);
+        }
+        return true;
+    }
 
     protected void writeDataWithStandardHeaders(AbstractGameState state) {
         int totP = state.getNPlayers();

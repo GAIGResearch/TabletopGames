@@ -99,25 +99,23 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         if (finalData instanceof JSONObject subJson) {
             T retValue = JSONUtils.loadClassFromJSON(subJson);
             if (retValue instanceof TunableParameters subParams) {
-                TunableParameters.loadFromJSON(subParams, subJson);
+         //       TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
             }
             return retValue;
         }
-        if (defaultValue == null) {
-            throw new AssertionError("No default value provided for " + name + " to check JSON validity");
-        }
-        if (data.getClass() == defaultValue.getClass())
+        Class<?> requiredClass = params.getParameterTypes().get(name);
+        if (data.getClass() == requiredClass)
             return (T) data;
-        if (data.getClass() == Integer.class && defaultValue.getClass() == Double.class)
+        if (data.getClass() == Integer.class && requiredClass == Double.class)
             return (T) Double.valueOf((Integer) data);
-        if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
-            Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
+        if (data.getClass() == String.class && requiredClass.isEnum()) {
+            Optional<?> matchingValue = Arrays.stream(requiredClass.getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {
                 return (T) matchingValue.get();
             }
-            throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
+            throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(requiredClass.getEnumConstants()));
         }
         System.out.println("Warning: parsing param " + name + "; couldn't find correct type, assigning default value: " + defaultValue);
         return defaultValue;
@@ -221,7 +219,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         currentValues.put(name, defaultValue);
     }
 
-    public <T> void addTunableParameter(String name, Class<?> parameterClass, T defaultValue, List<T> allSettings) {
+    public <T> void addTunableParameter(String name, Class<? extends T> parameterClass, T defaultValue, List<T> allSettings) {
         if (!parameterNames.contains(name)) parameterNames.add(name);
         defaultValues.put(name, defaultValue);
         parameterTypes.put(name, parameterClass);

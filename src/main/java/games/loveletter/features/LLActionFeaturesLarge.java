@@ -24,11 +24,11 @@ public class LLActionFeaturesLarge implements IActionFeatureVector {
     public LLActionFeaturesLarge() {
         List<String> allNames = new ArrayList<>();
         // For each card type, is this the card played
-        allNames.addAll(enumNames(LoveLetterCard.CardType.class).stream().map(s -> s + "_PLAY").collect(toList()));
+        allNames.addAll(enumNames(LoveLetterCard.CardType.class).stream().map(s -> s + "_PLAY").toList());
         // For each card type, is this the card guessed (where that is relevant - for GUARD)
-        allNames.addAll(enumNames(LoveLetterCard.CardType.class).stream().map(s -> s + "_GUESS").collect(toList()));
+        allNames.addAll(enumNames(LoveLetterCard.CardType.class).stream().map(s -> s + "_GUESS").toList());
         // For each card type, does the target player have this card (to our knowledge)
-        allNames.addAll(enumNames(LoveLetterCard.CardType.class).stream().map(s -> s + "_HAS").collect(toList()));
+        allNames.addAll(enumNames(LoveLetterCard.CardType.class).stream().map(s -> s + "_HAS").toList());
         // current position of target player
         allNames.add("TARGET_ORDINAL");
         localNames = allNames.toArray(new String[0]);

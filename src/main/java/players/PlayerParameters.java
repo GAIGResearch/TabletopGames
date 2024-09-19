@@ -78,7 +78,7 @@ public class PlayerParameters extends TunableParameters {
 
     @Override
     public Object instantiate() {
-        return null;
+        throw new RuntimeException("PlayerParameters should not be instantiated directly.");
     }
 
 
