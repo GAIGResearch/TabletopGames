@@ -66,7 +66,7 @@ public class PlayerParameters extends TunableParameters {
     }
 
     @Override
-    public boolean _equals(Object o) {
+    protected boolean _equals(Object o) {
         if (this == o) return true;
         if (o instanceof PlayerParameters that) {
             if (gameHeuristic == null && that.gameHeuristic == null) return true;

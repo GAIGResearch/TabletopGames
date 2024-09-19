@@ -1,12 +1,9 @@
 package players.simple;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import core.turnorders.StandardTurnOrder;
 
 import java.util.List;
 import java.util.Random;
@@ -15,11 +12,11 @@ import static utilities.Utils.noise;
 
 public class OSLAPlayer extends AbstractPlayer {
 
-    // Heuristics used for the agent
+    // Heuristic used for the agent
     IStateHeuristic heuristic;
 
     public OSLAPlayer(Random random) {
-        super(null, "OSLA");
+        super(null, "SuperOSLA");
         this.rnd = random;
     }
 
@@ -49,10 +46,6 @@ public class OSLAPlayer extends AbstractPlayer {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);
 
-            if (gs instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gsCopy).getTurnOrder() instanceof StandardTurnOrder) {
-                advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
-            }
-
             if (heuristic != null) {
                 valState[actionIndex] = heuristic.evaluateState(gsCopy, playerID);
             } else {
@@ -60,7 +53,6 @@ public class OSLAPlayer extends AbstractPlayer {
             }
 
             double Q = noise(valState[actionIndex], getParameters().noiseEpsilon, rnd.nextDouble());
-            //     System.out.println(Arrays.stream(valState).mapToObj(v -> String.format("%1.3f", v)).collect(Collectors.joining("\t")));
 
             if (Q > maxQ) {
                 maxQ = Q;
@@ -78,29 +70,4 @@ public class OSLAPlayer extends AbstractPlayer {
         return retValue;
     }
 
-    private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy, int startingPlayer) {
-        // we assume that every other player now has to make a decision
-        RandomPlayer rnd = new RandomPlayer(this.rnd);
-        AbstractForwardModel fm = getForwardModel();
-        if (gsCopy.getCurrentPlayer() == startingPlayer) {
-            // first get to the end of our actions
-            while (gsCopy.getCurrentPlayer() == startingPlayer && gsCopy.isNotTerminal()) {
-                AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy, rnd.parameters.actionSpace));
-                fm.next(gsCopy, action);
-            }
-        }
-        // then each other player gets their round
-        if (gsCopy.isNotTerminal()) {
-            for (int p = 0; p < gsCopy.getNPlayers() - 1; p++) {
-                int currentPlayer = gsCopy.getCurrentPlayer();
-                if (currentPlayer == startingPlayer) {
-                    throw new AssertionError("Not expecting to return to player " + getPlayerID());
-                }
-                while (gsCopy.getCurrentPlayer() == currentPlayer && gsCopy.isNotTerminal()) {
-                    AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy, rnd.parameters.actionSpace));
-                    fm.next(gsCopy, action);
-                }
-            }
-        }
-    }
 }
