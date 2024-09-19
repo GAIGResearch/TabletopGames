@@ -38,6 +38,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     TurnPhase currentPhase = TurnPhase.DRAW;
 
+    //TODO: Make playerHands separate from played cards
     List<PartialObservableDeck<SeaSaltPaperCard>> playerHands;
 
     // TODO make this partially observable (only top card visible) and for whoever playing ShellDuo

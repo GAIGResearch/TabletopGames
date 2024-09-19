@@ -44,6 +44,7 @@ import games.resistance.gui.ResGUIManager;
 import games.seasaltpaper.SeaSaltPaperForwardModel;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.SeaSaltPaperParameters;
+import games.seasaltpaper.gui.SSPGuiManager;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -121,7 +122,7 @@ public enum GameType {
     SeaSaltPaper(2, 4,
             Arrays.asList(Cards, Deduction),
             Arrays.asList(HandManagement, SetCollection),
-            SeaSaltPaperGameState.class, SeaSaltPaperForwardModel.class, SeaSaltPaperParameters.class, null),
+            SeaSaltPaperGameState.class, SeaSaltPaperForwardModel.class, SeaSaltPaperParameters.class, SSPGuiManager.class),
     Uno(2, 10,
             Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
             Arrays.asList(HandManagement, LoseATurn, TakeThat),
