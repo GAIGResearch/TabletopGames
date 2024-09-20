@@ -64,7 +64,11 @@ public class CatanStateFeatures implements IStateFeatureVector {
             "WILD_EXCHANGE",
             "BEST_EXCHANGE",
             "EXCHANGE_MEASURE",
-            "INCOME_DELTA_MEAN"
+            "INCOME_DELTA_MEAN",
+            "ROAD_RESOURCES",
+            "SETTLEMENTS_RESOURCES",
+            "CITIES_RESOURCES",
+            "DEV_CARD_RESOURCES"
     };
 
 
@@ -221,6 +225,23 @@ public class CatanStateFeatures implements IStateFeatureVector {
             double income = retValue[10 + i];
             retValue[45] += exchange * income;
         }
+
+        // resources required for each type of building
+        // for a Road we need 1 Wood and 1 Brick
+        retValue[47] = Math.min(catanState.getPlayerResources(playerID).get(LUMBER).getValue(),
+                catanState.getPlayerResources(playerID).get(BRICK).getValue());
+        // for a Settlement we need 1 Wood, 1 Brick, 1 Grain, 1 Wool
+        retValue[48] = Math.min(catanState.getPlayerResources(playerID).get(LUMBER).getValue(),
+                Math.min(catanState.getPlayerResources(playerID).get(BRICK).getValue(),
+                        Math.min(catanState.getPlayerResources(playerID).get(GRAIN).getValue(),
+                                catanState.getPlayerResources(playerID).get(WOOL).getValue())));
+        // for a City we need 3 Ore, 2 Grain
+        retValue[49] = Math.min(catanState.getPlayerResources(playerID).get(ORE).getValue() / 3,
+                catanState.getPlayerResources(playerID).get(GRAIN).getValue() / 2);
+        // for a Dev Card we need 1 Grain, 1 Wool, 1 Ore
+        retValue[50] = Math.min(catanState.getPlayerResources(playerID).get(GRAIN).getValue(),
+                Math.min(catanState.getPlayerResources(playerID).get(WOOL).getValue(),
+                        catanState.getPlayerResources(playerID).get(ORE).getValue()));
         return retValue;
     }
 
