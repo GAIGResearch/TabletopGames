@@ -13,32 +13,30 @@ import java.util.*;
 
 public class SaboteurGameState extends AbstractGameState
 {
-    public List<Deck<SaboteurCard>> playerDecks;
-    public List<Deck<SaboteurCard>> brokenToolDecks;
-    public Deck<SaboteurCard> drawDeck;
-    PartialObservableDeck<SaboteurCard> discardDeck;
-    Deck<SaboteurCard> goalDeck;
+    List<Deck<SaboteurCard>> playerDecks;
+    List<Map<ActionCard.ToolCardType, Boolean>> toolDeck;  // for each player, if that tool is functional (true) or broken (false)
     PartialObservableDeck<SaboteurCard> roleDeck; // add list for roles as well due to visibility when copying
-    public PartialObservableGridBoard<PathCard> gridBoard;
-    public List<PartialObservableDeck<SaboteurCard>> playerNuggetDecks;
-    public Deck<SaboteurCard> nuggetDeck;
-    public List<Vector2D> pathCardOptions;
+    List<Deck<SaboteurCard>> playerNuggetDecks;
+
+    Deck<SaboteurCard> drawDeck;
+    Deck<SaboteurCard> discardDeck;
+    Deck<SaboteurCard> goalDeck;
+    PartialObservableGridBoard<PathCard> gridBoard;
+    Deck<SaboteurCard> nuggetDeck;
+
+    List<Vector2D> pathCardOptions;
     int centerOfGrid;
-    int[] playerScore;
 
-    public int nOfMiners;
-    public int nOfSaboteurs;
-
+    int nOfMiners;
+    int nOfSaboteurs;
 
     public SaboteurGameState(AbstractParameters parameters, int nPlayers)
     {
         super(parameters, nPlayers);
-        playerScore = new int[nPlayers];
         playerDecks = new ArrayList<>();
-        brokenToolDecks = new ArrayList<>();
+        toolDeck = new ArrayList<>();
         pathCardOptions = new ArrayList<>();
         playerNuggetDecks = new ArrayList<>();
-        //to finish
     }
 
     @Override
@@ -49,10 +47,9 @@ public class SaboteurGameState extends AbstractGameState
     @Override
     protected List<Component> _getAllComponents()
     {
-        return new ArrayList<Component>()
+        return new ArrayList<>()
         {{
             addAll(playerDecks);
-            addAll(brokenToolDecks);
             add(drawDeck);
             add(discardDeck);
             add(goalDeck);
@@ -77,10 +74,10 @@ public class SaboteurGameState extends AbstractGameState
         }
 
         //copying brokenToolsDeck
-        copy.brokenToolDecks = new ArrayList<>();
-        for(Deck<SaboteurCard> currentDeck : brokenToolDecks)
+        copy.toolDeck = new ArrayList<>();
+        for(Map<ActionCard.ToolCardType, Boolean> brokenToolDeck : toolDeck)
         {
-            copy.brokenToolDecks.add(currentDeck.copy());
+            copy.toolDeck.add(new HashMap<>(brokenToolDeck));
         }
 
         copy.drawDeck = drawDeck.copy();
@@ -91,7 +88,7 @@ public class SaboteurGameState extends AbstractGameState
         copy.nuggetDeck = nuggetDeck.copy();
 
         copy.playerNuggetDecks = new ArrayList<>();
-        for (PartialObservableDeck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
+        for (Deck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
         {
             copy.playerNuggetDecks.add(playerNuggetDeck.copy());
         }
@@ -103,11 +100,78 @@ public class SaboteurGameState extends AbstractGameState
         }
 
         copy.playerNuggetDecks = new ArrayList<>();
-        for(PartialObservableDeck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
+        for(Deck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
         {
             copy.playerNuggetDecks.add(playerNuggetDeck.copy());
         }
         return copy;
+    }
+
+    public Deck<SaboteurCard> getDiscardDeck() {
+        return discardDeck;
+    }
+
+    public Deck<SaboteurCard> getDrawDeck() {
+        return drawDeck;
+    }
+
+    public Deck<SaboteurCard> getGoalDeck() {
+        return goalDeck;
+    }
+
+    public Deck<SaboteurCard> getNuggetDeck() {
+        return nuggetDeck;
+    }
+
+    public List<Deck<SaboteurCard>> getPlayerDecks() {
+        return playerDecks;
+    }
+
+    public List<Deck<SaboteurCard>> getPlayerNuggetDecks() {
+        return playerNuggetDecks;
+    }
+
+    public List<Vector2D> getPathCardOptions() {
+        return pathCardOptions;
+    }
+
+    public PartialObservableDeck<SaboteurCard> getRoleDeck() {
+        return roleDeck;
+    }
+
+    public RoleCard.RoleCardType getRole(int playerId)
+    {
+        return ((RoleCard) roleDeck.peek(playerId)).type;
+    }
+
+    public List<Map<ActionCard.ToolCardType, Boolean>> getToolDeck() {
+        return toolDeck;
+    }
+
+    public boolean isToolFunctional(int playerId, ActionCard.ToolCardType toolType)
+    {
+        return toolDeck.get(playerId).get(toolType);
+    }
+
+    public void setToolFunctional(int playerId, ActionCard.ToolCardType toolType, boolean isFunctional)
+    {
+        toolDeck.get(playerId).put(toolType, isFunctional);
+    }
+
+    public boolean isAnyToolBroken (int playerId)
+    {
+        for (Map.Entry<ActionCard.ToolCardType, Boolean> entry : toolDeck.get(playerId).entrySet())
+        {
+            if (!entry.getValue())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PartialObservableGridBoard<PathCard> getGridBoard() {
+        return gridBoard;
     }
 
     @Override
@@ -121,22 +185,15 @@ public class SaboteurGameState extends AbstractGameState
     }
 
     @Override
-    protected boolean _equals(Object o)
-    {
+    public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SaboteurGameState)) return false;
+        if (!(o instanceof SaboteurGameState that)) return false;
         if (!super.equals(o)) return false;
-        SaboteurGameState that = (SaboteurGameState) o;
-        return
-                Objects.equals(playerDecks, that.playerDecks) &&
-                Objects.equals(brokenToolDecks, that.brokenToolDecks) &&
-                Objects.equals(drawDeck,that.drawDeck) &&
-                Objects.equals(discardDeck,that.discardDeck) &&
-                Objects.equals(goalDeck,that.goalDeck) &&
-                Objects.equals(roleDeck,that.roleDeck) &&
-                Objects.equals(gridBoard,that.gridBoard) &&
-                Objects.equals(nuggetDeck,that.nuggetDeck) &&
-                Objects.equals(playerNuggetDecks,that.playerNuggetDecks) &&
-                Objects.equals(pathCardOptions,that.pathCardOptions);
+        return centerOfGrid == that.centerOfGrid && nOfMiners == that.nOfMiners && nOfSaboteurs == that.nOfSaboteurs && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(toolDeck, that.toolDeck) && Objects.equals(roleDeck, that.roleDeck) && Objects.equals(playerNuggetDecks, that.playerNuggetDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(discardDeck, that.discardDeck) && Objects.equals(goalDeck, that.goalDeck) && Objects.equals(gridBoard, that.gridBoard) && Objects.equals(nuggetDeck, that.nuggetDeck) && Objects.equals(pathCardOptions, that.pathCardOptions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerDecks, toolDeck, roleDeck, playerNuggetDecks, drawDeck, discardDeck, goalDeck, gridBoard, nuggetDeck, pathCardOptions, centerOfGrid, nOfMiners, nOfSaboteurs);
     }
 }

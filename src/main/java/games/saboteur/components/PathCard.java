@@ -1,14 +1,15 @@
 package games.saboteur.components;
 
-import org.apache.poi.ss.formula.atp.Switch;
-
 import java.util.Arrays;
+import java.util.Objects;
+
 public class PathCard extends SaboteurCard
 {
+    static int nOfTreasures = 1;
+
     final private boolean[] directions;
     final public PathCardType type;
-    static int nOfTreasures = 1;
-    public final boolean hasTreasure;
+    final boolean hasTreasure;
 
     public enum PathCardType
     {
@@ -34,14 +35,6 @@ public class PathCard extends SaboteurCard
         }
     }
 
-    public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure, int componentID)
-    {
-        super(SaboteurCardType.Path, componentID);
-        this.type = type;
-        this.directions = direction;
-        this.hasTreasure = hasTreasure;
-    }
-
     public void Rotate()
     {
         //up down
@@ -60,39 +53,34 @@ public class PathCard extends SaboteurCard
     public boolean[] getDirections() {return directions;}
     public int getOppositeDirection(int direction)
     {
-        switch(direction)
-        {
-            case 0:
-                return 1;
-            case 1:
-                return 0;
-            case 2:
-                return 3;
-            case 3:
-                return 2;
-        }
-        return -1;
+        return switch (direction) {
+            case 0 -> 1;
+            case 1 -> 0;
+            case 2 -> 3;
+            case 3 -> 2;
+            default -> -1;
+        };
     }
+
+
+    public boolean hasTreasure() {
+        return hasTreasure;
+    }
+
     @Override
     public String toString()
     {
-        switch(type)
-        {
-            case Edge:
-            case Path:
-                return type + Arrays.toString(directions);
-            case Start:
-                return "S";
-            case Goal:
-                return "G" + hasTreasure;
-        }
-        return null;
+        return switch (type) {
+            case Edge, Path -> type + Arrays.toString(directions);
+            case Start -> "S";
+            case Goal -> "G" + hasTreasure;
+        };
     }
 
     @Override
     public PathCard copy()
     {
-        return new PathCard(type, directions, hasTreasure, componentID);
+        return this;
     }
 
     public String getString()
@@ -215,4 +203,18 @@ public class PathCard extends SaboteurCard
         return " ";
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PathCard pathCard)) return false;
+        if (!super.equals(o)) return false;
+        return hasTreasure == pathCard.hasTreasure && Arrays.equals(directions, pathCard.directions) && type == pathCard.type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), type, hasTreasure);
+        result = 31 * result + Arrays.hashCode(directions);
+        return result;
+    }
 }

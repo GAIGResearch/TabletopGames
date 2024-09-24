@@ -1,47 +1,48 @@
 package games.saboteur.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.Deck;
 import games.saboteur.SaboteurGameState;
 import games.saboteur.components.ActionCard;
+import games.saboteur.components.PathCard;
 import games.saboteur.components.SaboteurCard;
 
 
-public class PlayRockFallCard extends SetGridValueAction
+public class PlayRockFallCard extends SetGridValueAction<PathCard>
 {
-    private final ActionCard rockFallCard;
-    public PlayRockFallCard(int gridBoard, int x, int y, ActionCard rockFallCard) {
-        super(gridBoard, x, y, null);
-        this.rockFallCard = rockFallCard;
+    public PlayRockFallCard(int gridBoard, int x, int y) {
+        super(gridBoard, x, y, -1);
     }
-
 
     public boolean execute(AbstractGameState gs) {
         SaboteurGameState sgs = (SaboteurGameState) gs;
-        sgs.gridBoard.setElement(getX(), getY(), null);
+        sgs.getGridBoard().setElement(getX(), getY(), null);
 
-        Deck<SaboteurCard> currentDeck = sgs.playerDecks.get(sgs.getCurrentPlayer());
-        currentDeck.remove(rockFallCard);
-
-        System.out.println(this);
-        System.out.println(sgs.gridBoard.toString());
-        return false;
+        Deck<SaboteurCard> currentDeck = sgs.getPlayerDecks().get(sgs.getCurrentPlayer());
+        SaboteurCard cardToPlay = null;
+        for (SaboteurCard card : currentDeck.getComponents()) {
+            if (card instanceof ActionCard && ((ActionCard)card).actionType == ActionCard.ActionCardType.RockFall) {
+                cardToPlay = card;
+                break;
+            }
+        }
+        currentDeck.remove(cardToPlay);
+        return true;
     }
     @Override
-    public AbstractAction copy() {
-        return null;
+    public PlayRockFallCard copy() {
+        return this;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return false;
+        return obj instanceof PlayRockFallCard;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return 128942839;
     }
 
     @Override

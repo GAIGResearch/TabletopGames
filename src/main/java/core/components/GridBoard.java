@@ -406,7 +406,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return Objects.hash(componentID) + 5 * Arrays.hashCode(flattenGrid());
     }
 

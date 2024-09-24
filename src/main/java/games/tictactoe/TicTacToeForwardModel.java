@@ -42,7 +42,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
             for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
                 for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
                     if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
-                        actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                        actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player).getComponentID()));
                     }
                 }
             }
@@ -180,7 +180,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
                 ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
                 if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
                     xNode.setValue(1); // make sure that we set parent available
-                    yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                    yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player).getComponentID()));
                 }
             }
         }

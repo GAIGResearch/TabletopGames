@@ -29,9 +29,8 @@ public class SaboteurGameParameters extends TunableParameters
     public Map<SaboteurCard, Integer> goalCardDeck = new HashMap<>();
     public Map<SaboteurCard, Integer> goldNuggetDeck = new HashMap<>();
 
-    public SaboteurGameParameters (long seed)
+    public SaboteurGameParameters ()
     {
-        super(seed);
         addTunableParameter("nPlayers", 5,Arrays.asList(3,4,5,6,7));
         addTunableParameter("nNuggets", 44,Arrays.asList(44,88,132,176));
         addTunableParameter("nGoalCards", 3,Arrays.asList(3,6,9,12));
@@ -76,45 +75,44 @@ public class SaboteurGameParameters extends TunableParameters
         //10	7	3
         //11    7	4
         int nMiners;
-        int nSaboteurs;
-        switch(nPlayers)
-        {
-            case 3:
+        int nSaboteurs = switch (nPlayers) {
+            case 3 -> {
                 nMiners = 3;
-                nSaboteurs = 1;
-                break;
-            case 4:
+                yield 1;
+            }
+            case 4 -> {
                 nMiners = 4;
-                nSaboteurs = 1;
-                break;
-            case 5:
+                yield 1;
+            }
+            case 5 -> {
                 nMiners = 4;
-                nSaboteurs = 2;
-                break;
-            case 6:
+                yield 2;
+            }
+            case 6 -> {
                 nMiners = 5;
-                nSaboteurs = 2;
-                break;
-            case 7:
+                yield 2;
+            }
+            case 7 -> {
                 nMiners = 5;
-                nSaboteurs = 3;
-                break;
-            case 8:
+                yield 3;
+            }
+            case 8 -> {
                 nMiners = 6;
-                nSaboteurs = 3;
-                break;
-            case 9:
+                yield 3;
+            }
+            case 9 -> {
                 nMiners = 7;
-                nSaboteurs = 3;
-                break;
-            case 10:
+                yield 3;
+            }
+            case 10 -> {
                 nMiners = 7;
-                nSaboteurs = 4;
-                break;
-            default:
+                yield 4;
+            }
+            default -> {
                 nMiners = -1;
-                nSaboteurs = -1;
-        }
+                yield -1;
+            }
+        };
         roleCardDeck.put(new RoleCard(RoleCard.RoleCardType.GoldMiner), nMiners);
         roleCardDeck.put(new RoleCard(RoleCard.RoleCardType.Saboteur), nSaboteurs);
 
@@ -151,7 +149,7 @@ public class SaboteurGameParameters extends TunableParameters
     @Override
     protected AbstractParameters _copy()
     {
-        SaboteurGameParameters sgp = new SaboteurGameParameters(System.currentTimeMillis());
+        SaboteurGameParameters sgp = new SaboteurGameParameters();
         sgp.nPlayers = nPlayers;
         sgp.nNuggets = nNuggets;
         sgp.nGoalCards = nGoalCards;
@@ -162,20 +160,6 @@ public class SaboteurGameParameters extends TunableParameters
         return sgp;
     }
 
-    @Override
-    protected boolean _equals(Object o) {
-        if(this == o) return true;
-        if(!(o instanceof SaboteurGameParameters)) return false;
-        if (!super.equals(o)) return false;
-        SaboteurGameParameters that = (SaboteurGameParameters) o;
-        return nPlayers == that.nPlayers &&
-                nNuggets == that.nNuggets &&
-                nGoalCards == that.nGoalCards &&
-                nRounds == that.nRounds &&
-                GridSize == that.GridSize &&
-                GoalSpacingX == that.GoalSpacingX &&
-                GoalSpacingY == that.GoalSpacingY;
-    }
 
     @Override
     public Object instantiate()
@@ -197,14 +181,15 @@ public class SaboteurGameParameters extends TunableParameters
     }
 
     @Override
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SaboteurGameParameters that)) return false;
+        if (!super.equals(o)) return false;
+        return nPlayers == that.nPlayers && nNuggets == that.nNuggets && nGoalCards == that.nGoalCards && nRounds == that.nRounds && GridSize == that.GridSize && GoalSpacingX == that.GoalSpacingX && GoalSpacingY == that.GoalSpacingY && Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(roleCardDeck, that.roleCardDeck) && Objects.equals(actionCardDeck, that.actionCardDeck) && Objects.equals(goalCardDeck, that.goalCardDeck) && Objects.equals(goldNuggetDeck, that.goldNuggetDeck);
+    }
+
+    @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(),
-                nPlayers,
-                nNuggets,
-                nGoalCards,
-                nRounds,
-                GridSize,
-                GoalSpacingX,
-                GoalSpacingY);
+        return Objects.hash(super.hashCode(), nPlayers, nNuggets, nGoalCards, nRounds, GridSize, GoalSpacingX, GoalSpacingY, pathCardDeck, roleCardDeck, actionCardDeck, goalCardDeck, goldNuggetDeck);
     }
 }

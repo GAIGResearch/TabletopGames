@@ -6,6 +6,7 @@ import core.components.GridBoard;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class PartialObservableGridBoard<T extends Component> extends GridBoard<T>
 {
@@ -38,16 +39,16 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         Arrays.fill(gridBoardVisibility, defaultValue);
     }
 
-    public PartialObservableGridBoard(Component[][] grid)
+    private PartialObservableGridBoard(Component[][] grid, int componentID)
     {
-        super(grid);
+        super(grid, componentID);
     }
 //endregion
 //--------------------------------------------------------------------------------------------------//
 //region isVisible Functions
     public boolean isBoardVisible(int playerID)
     {
-        CheckBoardVisibilityArgument(playerID);
+        checkBoardVisibilityArgument(playerID);
 
         if(!gridBoardVisibility[playerID])
         {
@@ -59,7 +60,7 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
 
     public boolean isCellVisible(int x, int y, int playerID)
     {
-        CheckBoardVisibilityArgument(playerID);
+        checkBoardVisibilityArgument(playerID);
         CheckGridRangeArgument(x,y);
 
         return elementVisibility.get(playerID)[y][x];
@@ -69,20 +70,15 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
 //region setters
     public void setElementVisibility(int x, int y, int playerID, boolean value)
     {
-        CheckBoardVisibilityArgument(playerID);
+        checkBoardVisibilityArgument(playerID);
 
         elementVisibility.get(playerID)[y][x] = value;
     }
 
-    public void setGridBoardVisibility(int playerID, boolean value)
-    {
-        CheckBoardVisibilityArgument(playerID);
-        gridBoardVisibility[playerID] = value;
-    }
 //endregion
 //--------------------------------------------------------------------------------------------------//
 //region Argument Checks
-    public void CheckBoardVisibilityArgument(int playerID)
+    public void checkBoardVisibilityArgument(int playerID)
     {
         if (playerID < 0 || playerID >= gridBoardVisibility.length)
             throw new IllegalArgumentException("playerID " + playerID + " needs to be in range [0," + (gridBoardVisibility.length - 1) + "]");
@@ -100,7 +96,7 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
     @Override
     public PartialObservableGridBoard<T> copy()
     {
-        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(getGridValues());
+        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(getGridValues(), componentID);
 
         copy.gridBoardVisibility = gridBoardVisibility.clone();
         return copy;
@@ -164,4 +160,18 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PartialObservableGridBoard<?> that)) return false;
+        if (!super.equals(o)) return false;
+        return Arrays.equals(gridBoardVisibility, that.gridBoardVisibility) && Objects.equals(elementVisibility, that.elementVisibility);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), elementVisibility);
+        result = 31 * result + Arrays.hashCode(gridBoardVisibility);
+        return result;
+    }
 }

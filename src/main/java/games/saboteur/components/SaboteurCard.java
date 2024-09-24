@@ -2,10 +2,11 @@ package games.saboteur.components;
 
 import core.components.Card;
 
+import java.util.Objects;
+
 public class SaboteurCard extends Card
 {
-    public final SaboteurCardType type;
-    public final int nOfNuggets;
+
     public enum SaboteurCardType
     {
         Path,
@@ -14,35 +15,37 @@ public class SaboteurCard extends Card
         Action,
     }
 
+    public final SaboteurCardType type;
+    public final int nOfNuggets;
+
     public SaboteurCard (SaboteurCardType type)
     {
-        super(type.toString());
+        super(type.name());
         this.type = type;
         this.nOfNuggets = 0;
     }
 
-    public SaboteurCard(int nOfNuggets)
+    public SaboteurCard (int nOfNuggets)
     {
-        super(SaboteurCardType.GoldNugget.toString());
+        super(SaboteurCardType.GoldNugget.name());
         this.type = SaboteurCardType.GoldNugget;
         this.nOfNuggets = nOfNuggets;
     }
 
-    public SaboteurCard(SaboteurCardType type, int nOfNuggets, int componentID)
-    {
-        super(type.toString(), componentID);
-        this.type = type;
-        this.nOfNuggets = nOfNuggets;
-    }
-
-    public SaboteurCard(SaboteurCardType type, int componentID)
-    {
-        super(type.toString(), componentID);
-        this.type = type;
-        this.nOfNuggets = 0;
-    }
-
     @Override public SaboteurCard copy() {
-        return new SaboteurCard(type, this.nOfNuggets, componentID);
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SaboteurCard that)) return false;
+        if (!super.equals(o)) return false;
+        return nOfNuggets == that.nOfNuggets && type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), type, nOfNuggets);
     }
 }

@@ -1,6 +1,7 @@
 package games.saboteur.components;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ActionCard extends SaboteurCard
 {
@@ -26,19 +27,12 @@ public class ActionCard extends SaboteurCard
     {
         super(SaboteurCardType.Action);
         this.actionType = actionType;
-        toolTypes = null;
+        toolTypes = new ToolCardType[0];
     }
 
     public ActionCard(ActionCardType actionType, ToolCardType[] toolTypes)
     {
         super(SaboteurCardType.Action);
-        this.actionType = actionType;
-        this.toolTypes = toolTypes;
-    }
-
-    public ActionCard(ActionCardType actionType, ToolCardType[] toolTypes, int componentID)
-    {
-        super(SaboteurCardType.Action, componentID);
         this.actionType = actionType;
         this.toolTypes = toolTypes;
     }
@@ -53,22 +47,30 @@ public class ActionCard extends SaboteurCard
     @Override
     public String toString()
     {
-        switch(actionType)
-        {
-            case Map:
-            case RockFall:
-                return actionType.toString();
-
-            case BrokenTools:
-            case FixTools:
-                return actionType + Arrays.toString(toolTypes);
-        }
-        return null;
+        return switch (actionType) {
+            case Map, RockFall -> actionType.toString();
+            case BrokenTools, FixTools -> actionType + Arrays.toString(toolTypes);
+        };
     }
 
     @Override
     public ActionCard copy()
     {
-        return new ActionCard(actionType, toolTypes, componentID);
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ActionCard that)) return false;
+        if (!super.equals(o)) return false;
+        return actionType == that.actionType && Arrays.equals(toolTypes, that.toolTypes);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), actionType);
+        result = 31 * result + Arrays.hashCode(toolTypes);
+        return result;
     }
 }
