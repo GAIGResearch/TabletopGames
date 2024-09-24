@@ -28,7 +28,7 @@ public class PlayToolCard extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         SaboteurGameState sgs = (SaboteurGameState) gs;
         Deck<SaboteurCard> currentPlayerDeck = sgs.getPlayerDecks().get(sgs.getCurrentPlayer());
-        currentPlayerDeck.remove(cardIdx);
+        sgs.getDiscardDeck().add(currentPlayerDeck.pick(cardIdx));
         sgs.setToolFunctional(playerID, toolType, isFunctional);
         return true;
     }

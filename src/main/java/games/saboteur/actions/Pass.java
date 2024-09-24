@@ -18,7 +18,7 @@ public class Pass extends AbstractAction
     public boolean execute(AbstractGameState gs) {
         SaboteurGameState sgs = (SaboteurGameState) gs;
         Deck<SaboteurCard> currentDeck = sgs.getPlayerDecks().get(sgs.getCurrentPlayer());
-        currentDeck.remove(cardIdx);
+        sgs.getDiscardDeck().add(currentDeck.pick(cardIdx));
         return true;
     }
 

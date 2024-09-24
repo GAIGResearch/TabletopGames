@@ -20,14 +20,15 @@ public class PlayRockFallCard extends SetGridValueAction<PathCard>
         sgs.getGridBoard().setElement(getX(), getY(), null);
 
         Deck<SaboteurCard> currentDeck = sgs.getPlayerDecks().get(sgs.getCurrentPlayer());
-        SaboteurCard cardToPlay = null;
-        for (SaboteurCard card : currentDeck.getComponents()) {
+        int idx = -1;
+        for (int i = 0; i < currentDeck.getSize(); i++) {
+            SaboteurCard card = currentDeck.getComponents().get(i);
             if (card instanceof ActionCard && ((ActionCard)card).actionType == ActionCard.ActionCardType.RockFall) {
-                cardToPlay = card;
+                idx = i;
                 break;
             }
         }
-        currentDeck.remove(cardToPlay);
+        sgs.getDiscardDeck().add(currentDeck.pick(idx));
         return true;
     }
     @Override

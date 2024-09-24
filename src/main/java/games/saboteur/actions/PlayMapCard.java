@@ -24,14 +24,15 @@ public class PlayMapCard extends AbstractAction {
         int currentPlayer = sgs.getCurrentPlayer();
 
         Deck<SaboteurCard> currentPlayerDeck = sgs.getPlayerDecks().get(currentPlayer);
-        SaboteurCard cardToPlay = null;
-        for (SaboteurCard card : currentPlayerDeck.getComponents()) {
+        int idx = -1;
+        for (int i = 0; i < currentPlayerDeck.getSize(); i++) {
+            SaboteurCard card = currentPlayerDeck.getComponents().get(i);
             if (card instanceof ActionCard && ((ActionCard)card).actionType == ActionCard.ActionCardType.Map) {
-                cardToPlay = card;
+                idx = i;
                 break;
             }
         }
-        currentPlayerDeck.remove(cardToPlay);
+        sgs.getDiscardDeck().add(currentPlayerDeck.pick(idx));
         sgs.getGridBoard().setElementVisibility(position.getX(), position.getY(), currentPlayer, true);
         return true;
     }
