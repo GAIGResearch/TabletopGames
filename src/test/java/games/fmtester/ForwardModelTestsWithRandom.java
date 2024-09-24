@@ -5,6 +5,12 @@ import org.junit.Test;
 
 public class ForwardModelTestsWithRandom {
 
+
+    @Test
+    public void testRoot() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Root", "nGames=5", "nPlayers=2");
+    }
+
     @Test
     public void testBattleLore() {
         ForwardModelTester fmt = new ForwardModelTester("game=Battlelore", "nGames=5", "nPlayers=2");
