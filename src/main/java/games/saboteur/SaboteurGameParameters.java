@@ -1,68 +1,59 @@
 package games.saboteur;
 
 import core.AbstractParameters;
-import evaluation.optimisation.TunableParameters;
 import games.saboteur.components.ActionCard;
 import games.saboteur.components.PathCard;
 import games.saboteur.components.RoleCard;
-import games.saboteur.components.SaboteurCard;
+import utilities.Pair;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class SaboteurGameParameters extends TunableParameters
+public class SaboteurGameParameters extends AbstractParameters
 {
     public int nPlayers          = 10;
     public int nNuggets          = 27;
     public int nGoalCards        = 3;
     public int nRounds           = 3;
-    public int GridSize          = 500;
-    public int GoalSpacingX      = 8;
-    public int GoalSpacingY      = 1;
+    public int gridSize = 500;
+    public int goalSpacingX = 8;
+    public int goalSpacingY = 1;
 
     //map combination of specific cards to number of cards in that deck
-    public Map<SaboteurCard, Integer> pathCardDeck= new HashMap<>();
-    public Map<SaboteurCard, Integer> roleCardDeck = new HashMap<>();
-    public Map<SaboteurCard, Integer> actionCardDeck = new HashMap<>();
-    public Map<SaboteurCard, Integer> goalCardDeck = new HashMap<>();
-    public Map<SaboteurCard, Integer> goldNuggetDeck = new HashMap<>();
+    public Map<Pair<PathCard.PathCardType,boolean[]>, Integer> pathCardDeck= new HashMap<>();
+    public Map<RoleCard.RoleCardType, Integer> roleCardDeck = new HashMap<>();
+    public Map<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> toolCards = new HashMap<>();
+    public Map<ActionCard.ActionCardType, Integer> actionCards = new HashMap<>();
+    public Map<Pair<PathCard.PathCardType,boolean[]>, Integer> goalCardDeck = new HashMap<>();
+    public Map<Integer, Integer> goldNuggetDeck = new HashMap<>();
 
     public SaboteurGameParameters ()
     {
-        addTunableParameter("nPlayers", 5,Arrays.asList(3,4,5,6,7));
-        addTunableParameter("nNuggets", 44,Arrays.asList(44,88,132,176));
-        addTunableParameter("nGoalCards", 3,Arrays.asList(3,6,9,12));
-        addTunableParameter("nRounds", 3,Arrays.asList(3,6,9,12));
-        addTunableParameter("GridSize", 37,Arrays.asList(37,53,69,85));
-        addTunableParameter("GoalSpacingX", 7,Arrays.asList(7,14,21,28));
-        addTunableParameter("GoalSpacingY", 1,Arrays.asList(1,2,3,4));
-
         //All Path type cards in a deck excluding goal and start card
         PathCard.PathCardType edge = PathCard.PathCardType.Edge;
         PathCard.PathCardType path = PathCard.PathCardType.Path;
 
-        pathCardDeck.put(new PathCard(edge, new boolean[]{false, true , false, false}), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{false, false, true , false}), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{true , true , false, false}), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{false, false, true , true }), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{false, true , false, true }), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{false, true , true , false}), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{true , true , false, true }), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{true , false, true , true }), 1);
-        pathCardDeck.put(new PathCard(edge, new boolean[]{true , true , true , true }), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{false, true , false, false}), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{false, false, true , false}), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{true , true , false, false}), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{false, false, true , true }), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{false, true , false, true }), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{false, true , true , false}), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{true , true , false, true }), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{true , false, true , true }), 1);
+        pathCardDeck.put(new Pair<>(edge, new boolean[]{true , true , true , true }), 1);
 
-        pathCardDeck.put(new PathCard(path, new boolean[]{true , true , false, false}), 4);
-        pathCardDeck.put(new PathCard(path, new boolean[]{false, false, true , true }), 3);
-        pathCardDeck.put(new PathCard(path, new boolean[]{false, true , false, true }), 4);
-        pathCardDeck.put(new PathCard(path, new boolean[]{false, true , true , false}), 5);
-        pathCardDeck.put(new PathCard(path, new boolean[]{true , true , false, true }), 5);
-        pathCardDeck.put(new PathCard(path, new boolean[]{true , false, true , true }), 5);
-        pathCardDeck.put(new PathCard(path, new boolean[]{true , true , true , true }), 5);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{true , true , false, false}), 4);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{false, false, true , true }), 3);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{false, true , false, true }), 4);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{false, true , true , false}), 5);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{true , true , false, true }), 5);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{true , false, true , true }), 5);
+        pathCardDeck.put(new Pair<>(path, new boolean[]{true , true , true , true }), 5);
 
         //All goal cards
-        goalCardDeck.put(new PathCard(PathCard.PathCardType.Goal, new boolean[]{true, true, true, true}), 5);
+        goalCardDeck.put(new Pair<>(PathCard.PathCardType.Goal, new boolean[]{true, true, true, true}), 5);
 
         //All RolesCards in a deck depending on number of players
         //nPlayers, nMiners, nSaboteurs
@@ -113,8 +104,8 @@ public class SaboteurGameParameters extends TunableParameters
                 yield -1;
             }
         };
-        roleCardDeck.put(new RoleCard(RoleCard.RoleCardType.GoldMiner), nMiners);
-        roleCardDeck.put(new RoleCard(RoleCard.RoleCardType.Saboteur), nSaboteurs);
+        roleCardDeck.put(RoleCard.RoleCardType.GoldMiner, nMiners);
+        roleCardDeck.put(RoleCard.RoleCardType.Saboteur, nSaboteurs);
 
         //All Actions Cards
         ActionCard.ToolCardType mineCart = ActionCard.ToolCardType.MineCart;
@@ -126,24 +117,23 @@ public class SaboteurGameParameters extends TunableParameters
         ActionCard.ActionCardType map = ActionCard.ActionCardType.Map;
         ActionCard.ActionCardType rockFall = ActionCard.ActionCardType.RockFall;
 
-        actionCardDeck.put(new ActionCard(brokenTools, mineCart), 3);
-        actionCardDeck.put(new ActionCard(brokenTools, lantern), 3);
-        actionCardDeck.put(new ActionCard(brokenTools, pickaxe), 3);
+        toolCards.put(new Pair<>(brokenTools, new ActionCard.ToolCardType[]{mineCart}), 3);
+        toolCards.put(new Pair<>(brokenTools, new ActionCard.ToolCardType[]{lantern}), 3);
+        toolCards.put(new Pair<>(brokenTools, new ActionCard.ToolCardType[]{pickaxe}), 3);
+        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{mineCart}), 2);
+        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{lantern}), 2);
+        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{pickaxe}), 2);
+        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{mineCart,lantern}), 1);
+        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{lantern, pickaxe}), 1);
+        toolCards.put(new Pair<>(fixTools, new ActionCard.ToolCardType[]{pickaxe, mineCart}), 1);
 
-        actionCardDeck.put(new ActionCard(fixTools, mineCart), 2);
-        actionCardDeck.put(new ActionCard(fixTools, lantern), 2);
-        actionCardDeck.put(new ActionCard(fixTools, pickaxe), 2);
-        actionCardDeck.put(new ActionCard(fixTools, new ActionCard.ToolCardType[]{mineCart,lantern}), 1);
-        actionCardDeck.put(new ActionCard(fixTools, new ActionCard.ToolCardType[]{lantern, pickaxe}), 1);
-        actionCardDeck.put(new ActionCard(fixTools, new ActionCard.ToolCardType[]{pickaxe, mineCart}), 1);
-
-        actionCardDeck.put(new ActionCard(map), 3);
-        actionCardDeck.put(new ActionCard(rockFall), 6);
+        actionCards.put(map, 3);
+        actionCards.put(rockFall, 6);
 
         //Nugget cards
-        goldNuggetDeck.put(new SaboteurCard(3), 4);
-        goldNuggetDeck.put(new SaboteurCard(2), 8);
-        goldNuggetDeck.put(new SaboteurCard(1), 16);
+        goldNuggetDeck.put(3, 4);
+        goldNuggetDeck.put(2, 8);
+        goldNuggetDeck.put(1, 16);
     }
 
     @Override
@@ -154,30 +144,22 @@ public class SaboteurGameParameters extends TunableParameters
         sgp.nNuggets = nNuggets;
         sgp.nGoalCards = nGoalCards;
         sgp.nRounds = nRounds;
-        sgp.GridSize = GridSize;
-        sgp.GoalSpacingY = GoalSpacingY;
-        sgp.GoalSpacingX = GoalSpacingX;
+        sgp.gridSize = gridSize;
+        sgp.goalSpacingY = goalSpacingY;
+        sgp.goalSpacingX = goalSpacingX;
+        sgp.pathCardDeck = new HashMap<>();
+        for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : pathCardDeck.entrySet())
+            sgp.pathCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
+        sgp.roleCardDeck = new HashMap<>(roleCardDeck);
+        sgp.toolCards = new HashMap<>();
+        for (Map.Entry<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> entry : toolCards.entrySet())
+            sgp.toolCards.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
+        sgp.actionCards = new HashMap<>(actionCards);
+        sgp.goalCardDeck = new HashMap<>();
+        for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : goalCardDeck.entrySet())
+            sgp.goalCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
+        sgp.goldNuggetDeck = new HashMap<>(goldNuggetDeck);
         return sgp;
-    }
-
-
-    @Override
-    public Object instantiate()
-    {
-        //to be completed later
-        return null;
-    }
-
-    @Override
-    public void _reset()
-    {
-        nPlayers = (int) getParameterValue("nPlayers");
-        nNuggets = (int) getParameterValue("nNuggets");
-        nGoalCards = (int) getParameterValue("nGoalCards");
-        nRounds = (int) getParameterValue("nRounds");
-        GridSize = (int) getParameterValue("GridSize");
-        GoalSpacingX = (int) getParameterValue("GoalSpacingX");
-        GoalSpacingY = (int) getParameterValue("GoalSpacingY");
     }
 
     @Override
@@ -185,11 +167,11 @@ public class SaboteurGameParameters extends TunableParameters
         if (this == o) return true;
         if (!(o instanceof SaboteurGameParameters that)) return false;
         if (!super.equals(o)) return false;
-        return nPlayers == that.nPlayers && nNuggets == that.nNuggets && nGoalCards == that.nGoalCards && nRounds == that.nRounds && GridSize == that.GridSize && GoalSpacingX == that.GoalSpacingX && GoalSpacingY == that.GoalSpacingY && Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(roleCardDeck, that.roleCardDeck) && Objects.equals(actionCardDeck, that.actionCardDeck) && Objects.equals(goalCardDeck, that.goalCardDeck) && Objects.equals(goldNuggetDeck, that.goldNuggetDeck);
+        return nPlayers == that.nPlayers && nNuggets == that.nNuggets && nGoalCards == that.nGoalCards && nRounds == that.nRounds && gridSize == that.gridSize && goalSpacingX == that.goalSpacingX && goalSpacingY == that.goalSpacingY && Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(roleCardDeck, that.roleCardDeck) && Objects.equals(toolCards, that.toolCards) && Objects.equals(actionCards, that.actionCards) && Objects.equals(goalCardDeck, that.goalCardDeck) && Objects.equals(goldNuggetDeck, that.goldNuggetDeck);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), nPlayers, nNuggets, nGoalCards, nRounds, GridSize, GoalSpacingX, GoalSpacingY, pathCardDeck, roleCardDeck, actionCardDeck, goalCardDeck, goldNuggetDeck);
+        return Objects.hash(super.hashCode(), nPlayers, nNuggets, nGoalCards, nRounds, gridSize, goalSpacingX, goalSpacingY, pathCardDeck, roleCardDeck, toolCards, actionCards, goalCardDeck, goldNuggetDeck);
     }
 }

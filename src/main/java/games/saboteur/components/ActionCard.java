@@ -23,13 +23,6 @@ public class ActionCard extends SaboteurCard
         Map
     }
 
-    public ActionCard(ActionCardType actionType)
-    {
-        super(SaboteurCardType.Action);
-        this.actionType = actionType;
-        toolTypes = new ToolCardType[0];
-    }
-
     public ActionCard(ActionCardType actionType, ToolCardType[] toolTypes)
     {
         super(SaboteurCardType.Action);
@@ -37,11 +30,11 @@ public class ActionCard extends SaboteurCard
         this.toolTypes = toolTypes;
     }
 
-    public ActionCard(ActionCardType actionType, ToolCardType toolTypes)
+    private ActionCard(ActionCardType actionType, ToolCardType[] toolTypes, int componentID)
     {
-        super(SaboteurCardType.Action);
+        super(SaboteurCardType.Action, componentID);
         this.actionType = actionType;
-        this.toolTypes = new ToolCardType[] {toolTypes};
+        this.toolTypes = toolTypes;
     }
 
     @Override
@@ -56,7 +49,7 @@ public class ActionCard extends SaboteurCard
     @Override
     public ActionCard copy()
     {
-        return this;
+        return new ActionCard(actionType, toolTypes.clone(), componentID);
     }
 
     @Override

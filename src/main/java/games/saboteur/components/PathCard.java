@@ -3,36 +3,37 @@ package games.saboteur.components;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class PathCard extends SaboteurCard
-{
+public class PathCard extends SaboteurCard {
     static int nOfTreasures = 1;
 
     final private boolean[] directions;
     final public PathCardType type;
     final boolean hasTreasure;
 
-    public enum PathCardType
-    {
+    public enum PathCardType {
         Edge,
         Path,
         Goal,
         Start,
     }
 
-    public PathCard(PathCardType type, boolean[] direction)
-    {
+    public PathCard(PathCardType type, boolean[] direction) {
         super(SaboteurCardType.Path);
         this.type = type;
         this.directions = direction;
-        if(type == PathCardType.Goal && nOfTreasures > 0)
-        {
+        if (type == PathCardType.Goal && nOfTreasures > 0) {
             hasTreasure = true;
             nOfTreasures -= 1;
-        }
-        else
-        {
+        } else {
             hasTreasure = false;
         }
+    }
+
+    public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure, int componentID) {
+        super(SaboteurCardType.Path, componentID);
+        this.type = type;
+        this.directions = direction;
+        this.hasTreasure = hasTreasure;
     }
 
     public void rotate()
@@ -80,7 +81,7 @@ public class PathCard extends SaboteurCard
     @Override
     public PathCard copy()
     {
-        return this;
+        return new PathCard(type, directions.clone(), hasTreasure, componentID);
     }
 
     public String getString()

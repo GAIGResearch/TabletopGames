@@ -8,9 +8,11 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.saboteur.actions.*;
 import games.saboteur.components.*;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_OWNER;
@@ -25,35 +27,59 @@ public class SaboteurForwardModel extends StandardForwardModel {
         SaboteurGameParameters sgp = (SaboteurGameParameters) sgs.getGameParameters();
 
         sgs.roleDeck = new PartialObservableDeck<>("RoleDeck", sgs.getNPlayers(), new boolean[sgs.getNPlayers()]);
-        for(int i = 0; i < sgs.roleDeck.getSize(); i++)
+        for (Map.Entry<RoleCard.RoleCardType, Integer> entry: sgp.roleCardDeck.entrySet())
         {
-            sgs.roleDeck.setVisibilityOfComponent(i, i, true);
+            for (int i = 0; i < entry.getValue(); i++)
+            {
+                sgs.roleDeck.add(new RoleCard(entry.getKey()));
+            }
         }
-
         sgs.goalDeck = new Deck<>("GoalDeck", HIDDEN_TO_ALL);
-        for(int i = 0; i < 3; i++)
+        for(int i = 0; i < 3; i++)  // todo param
         {
             sgs.goalDeck.add(new PathCard(PathCard.PathCardType.Goal, new boolean[]{true, true, true, true}));
         }
 
         sgs.drawDeck = new Deck<>("DrawDeck", HIDDEN_TO_ALL);
+        for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : sgp.pathCardDeck.entrySet())
+        {
+            for (int i = 0; i < entry.getValue(); i++)
+            {
+                sgs.drawDeck.add(new PathCard(entry.getKey().a, entry.getKey().b));
+            }
+        }
+        for (Map.Entry<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> entry: sgp.toolCards.entrySet())
+        {
+            for (int i = 0; i < entry.getValue(); i++)
+            {
+                sgs.drawDeck.add(new ActionCard(entry.getKey().a, entry.getKey().b));
+            }
+        }
+
         sgs.discardDeck = new Deck<>("DiscardDeck", sgs.getNPlayers(), HIDDEN_TO_ALL);
-        sgs.gridBoard = new PartialObservableGridBoard<>(sgp.GridSize, sgp.GridSize, sgs.getNPlayers(), true);
+        sgs.gridBoard = new PartialObservableGridBoard<>(sgp.gridSize, sgp.gridSize, sgs.getNPlayers(), true);
         sgs.nuggetDeck = new Deck<>("NuggetDeck", HIDDEN_TO_ALL);
-
-
-        fillDeckViaMap(sgs.nuggetDeck, sgp.goldNuggetDeck);
+        for (Map.Entry<Integer, Integer> entry : sgp.goldNuggetDeck.entrySet())
+        {
+            for (int i = 0; i < entry.getValue(); i++)
+            {
+                sgs.nuggetDeck.add(new SaboteurCard(entry.getKey()));
+            }
+        }
         sgs.nuggetDeck.shuffle(new Random(sgs.getGameParameters().getRandomSeed()));
         setupPlayerDecks(sgs);
+
         setupRound(sgs, sgp);
     }
 
     private void setupRound(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
-        resetDecks(sgs, sgp);
         resetBoard(sgs, sgp);
+        resetDecks(sgs, sgp);
         resetPathCardOptions(sgs);
         setupStartingHand(sgs);
+
+        int a = 0;
     }
 
     private void setupPlayerDecks(SaboteurGameState sgs)
@@ -64,6 +90,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
             brokenTools.put(toolType, true);
         }
         //Initialise Player Decks
+        sgs.playerDecks.clear();
+        sgs.toolDeck.clear();
+        sgs.playerNuggetDecks.clear();
         for (int i = 0; i < sgs.getNPlayers(); i++)
         {
             sgs.playerDecks.add(new Deck<>("Player" + i + "Deck", VISIBLE_TO_OWNER));
@@ -76,7 +105,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
     {
         for (int i = 0; i < sgs.getNPlayers(); i++)
         {
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < 5; j++)  // todo param
             {
                 sgs.playerDecks.get(i).add(sgs.drawDeck.draw());
             }
@@ -88,68 +117,80 @@ public class SaboteurForwardModel extends StandardForwardModel {
     private void resetBoard(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
         //Initialise GridBoard with starting card
-        sgs.centerOfGrid = (int) Math.floor(sgp.GridSize / 2.0);
-        sgs.gridBoard = new PartialObservableGridBoard<>(sgp.GridSize, sgp.GridSize, sgs.getNPlayers(), true);
-        sgs.gridBoard.setElement(sgs.centerOfGrid, sgs.centerOfGrid, new PathCard(PathCard.PathCardType.Start, new boolean[]{true, true, true, true}));
-        resetGoals(sgs,sgp);
+        sgs.centerOfGrid = (int) Math.floor(sgp.gridSize / 2.0);
+        for (int x = 0; x < sgs.gridBoard.getWidth(); x++)
+        {
+            for (int y = 0; y < sgs.gridBoard.getHeight(); y++)
+            {
+                if (x == sgs.centerOfGrid && y == sgs.centerOfGrid)
+                {
+                    continue;
+                }
+                PathCard card = sgs.gridBoard.getElement(x, y);
+                if (card != null && card.type != PathCard.PathCardType.Goal) {
+                    sgs.drawDeck.add(card);
+                }
+                sgs.gridBoard.setElement(x, y, null);
+            }
         }
+        resetGoals(sgs,sgp);
+    }
 
     private void resetGoals(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
-        int totalLength = sgs.goalDeck.getSize() * (sgp.GoalSpacingY + 1);
+        int totalLength = sgs.goalDeck.getSize() * (sgp.goalSpacingY + 1);
         int startingY = (int) Math.floor(totalLength / 2.0) - 1;
 
-        assert sgp.GoalSpacingX <= Math.floor(sgs.gridBoard.getWidth() / 2.0): "Placing Goal card out of bounds for X";
+        assert sgp.goalSpacingX <= Math.floor(sgs.gridBoard.getWidth() / 2.0): "Placing Goal card out of bounds for X";
 
         for(SaboteurCard goalCard: sgs.goalDeck.getComponents())
         {
             assert startingY <= sgs.gridBoard.getHeight(): "Placing Goal card out of bounds for Y";
             PathCard currentCard = (PathCard) goalCard;
-            sgs.gridBoard.setElement(sgp.GoalSpacingX + 1 + sgs.centerOfGrid, startingY + sgs.centerOfGrid, currentCard);
-            startingY -= (sgp.GoalSpacingY + 1);
+            sgs.gridBoard.setElement(sgp.goalSpacingX + 1 + sgs.centerOfGrid, startingY + sgs.centerOfGrid, currentCard);
+            startingY -= (sgp.goalSpacingY + 1);
         }
     }
 
     private void resetDecks(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
-        //Clear player decks besides their gold nugget deck
-        sgs.drawDeck.clear();
+        sgs.drawDeck.add(sgs.discardDeck);
         sgs.discardDeck.clear();
-        sgs.roleDeck.clear();
         for (int i = 0; i < sgs.getNPlayers(); i++)
         {
             for (ActionCard.ToolCardType toolType : ActionCard.ToolCardType.values())
             {
                 sgs.toolDeck.get(i).put(toolType, true);
             }
+            sgs.drawDeck.add(sgs.playerDecks.get(i));
             sgs.playerDecks.get(i).clear();
         }
-
-        //Fill in decks
-        fillDeckViaMap(sgs.drawDeck, sgp.pathCardDeck);
-        fillDeckViaMap(sgs.drawDeck, sgp.actionCardDeck);
-        fillDeckViaMap(sgs.roleDeck, sgp.roleCardDeck);
 
         //Shuffle Necessary decks
         Random r = new Random(sgs.getGameParameters().getRandomSeed() + sgs.getRoundCounter());
         sgs.drawDeck.shuffle(r);
         sgs.goalDeck.shuffle(r);
+
+        // Assign roles
         sgs.roleDeck.shuffle(r);
-        sgs.nOfSaboteurs = 0;
-        sgs.nOfMiners = 0;
-        for(int i = 0; i < sgs.getNPlayers(); i++)
+        for(int i = 0; i < sgs.roleDeck.getSize(); i++)
         {
-            sgs.roleDeck.setVisibilityOfComponent(i, i, true);
-            RoleCard currentRole = (RoleCard) sgs.roleDeck.get(i);                                                       //does this remove the card?
-            if(currentRole.type == RoleCard.RoleCardType.Saboteur)
+            for (int j = 0; j < sgs.getNPlayers(); j++)
             {
-                sgs.nOfSaboteurs += 1;
-            }
-            else
-            {
-                sgs.nOfMiners += 1;
+                sgs.roleDeck.setVisibilityOfComponent(i, j, i == j);
             }
         }
+
+        sgs.nOfSaboteurs = 0;
+        sgs.nOfMiners = 0;
+        //does this remove the card?
+        IntStream.range(0, sgs.getNPlayers()).mapToObj(i -> (RoleCard) sgs.roleDeck.get(i)).forEach(currentRole -> {
+            if (currentRole.type == RoleCard.RoleCardType.Saboteur) {
+                sgs.nOfSaboteurs ++;
+            } else {
+                sgs.nOfMiners ++;
+            }
+        });
     }
 
     private void resetPathCardOptions(SaboteurGameState sgs)
@@ -200,10 +241,10 @@ public class SaboteurForwardModel extends StandardForwardModel {
         {
             actions.add(new Pass(i));
         }
-//        if(actions.isEmpty())
-//        {
-//            actions.add(new DoNothing());
-//        }
+        if(actions.isEmpty())
+        {
+            actions.add(new DoNothing());
+        }
         return actions;
     }
 
@@ -220,14 +261,14 @@ public class SaboteurForwardModel extends StandardForwardModel {
         {
             if(checkPathCardPlacement(card, sgs, location))
             {
-                actions.add(new PlacePathCard(0, location.getX(), location.getY(), card.getComponentID(), false));
+                actions.add(new PlacePathCard(sgs.gridBoard.getComponentID(), location.getX(), location.getY(), card.getComponentID(), false));
             }
 
             //check when its rotated
             card.rotate();
             if(checkPathCardPlacement(card, sgs, location))
             {
-                actions.add(new PlacePathCard(0, location.getX(), location.getY(), card.getComponentID(), true));
+                actions.add(new PlacePathCard(sgs.gridBoard.getComponentID(), location.getX(), location.getY(), card.getComponentID(), true));
             }
             card.rotate();
         }
@@ -238,8 +279,8 @@ public class SaboteurForwardModel extends StandardForwardModel {
     private boolean checkPathCardPlacement(PathCard card, SaboteurGameState sgs, Vector2D location)
     {
         if (location.getX() < 0 || location.getY() < 0
-                || location.getX() >= ((SaboteurGameParameters)sgs.getGameParameters()).GridSize
-                || location.getY() >= ((SaboteurGameParameters)sgs.getGameParameters()).GridSize) return false;
+                || location.getX() >= ((SaboteurGameParameters)sgs.getGameParameters()).gridSize
+                || location.getY() >= ((SaboteurGameParameters)sgs.getGameParameters()).gridSize) return false;
         boolean[] currentDirections = card.getDirections();
         for(int i = 0 ; i < 4; i++)
         {

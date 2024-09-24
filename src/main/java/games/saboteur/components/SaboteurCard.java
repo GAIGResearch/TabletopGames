@@ -25,6 +25,13 @@ public class SaboteurCard extends Card
         this.nOfNuggets = 0;
     }
 
+    protected SaboteurCard (SaboteurCardType type, int componentID)
+    {
+        super(type.name(), componentID);
+        this.type = type;
+        this.nOfNuggets = 0;
+    }
+
     public SaboteurCard (int nOfNuggets)
     {
         super(SaboteurCardType.GoldNugget.name());
