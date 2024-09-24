@@ -19,8 +19,6 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
 //region Constructor
     public PartialObservableGridBoard(int width, int height, int nPlayers, boolean defaultValue)
     {
-        //WHY IS THIS HEIGHT THEN WIDTH IN THE SUPER CALL?
-        //this.grid = new Component[height][width];
         super(width, height);
 
         //filling Visibility for each cell in grid
@@ -39,9 +37,15 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         Arrays.fill(gridBoardVisibility, defaultValue);
     }
 
-    private PartialObservableGridBoard(Component[][] grid, int componentID)
+    private PartialObservableGridBoard(Component[][] grid, boolean[] gridBoardVisibility, List<boolean[][]> elementVisibility, int componentID)
     {
         super(grid, componentID);
+        this.gridBoardVisibility = gridBoardVisibility.clone();
+        this.elementVisibility = new ArrayList<>();
+        for(boolean[][] visibility : elementVisibility)
+        {
+            this.elementVisibility.add(visibility.clone());
+        }
     }
 //endregion
 //--------------------------------------------------------------------------------------------------//
@@ -96,7 +100,7 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
     @Override
     public PartialObservableGridBoard<T> copy()
     {
-        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(getGridValues(), componentID);
+        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(getGridValues(), gridBoardVisibility, elementVisibility, componentID);
 
         copy.gridBoardVisibility = gridBoardVisibility.clone();
         return copy;

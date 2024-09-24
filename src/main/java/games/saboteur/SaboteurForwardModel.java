@@ -91,19 +91,19 @@ public class SaboteurForwardModel extends StandardForwardModel {
         sgs.centerOfGrid = (int) Math.floor(sgp.GridSize / 2.0);
         sgs.gridBoard = new PartialObservableGridBoard<>(sgp.GridSize, sgp.GridSize, sgs.getNPlayers(), true);
         sgs.gridBoard.setElement(sgs.centerOfGrid, sgs.centerOfGrid, new PathCard(PathCard.PathCardType.Start, new boolean[]{true, true, true, true}));
-        ResetGoals(sgs,sgp);
+        resetGoals(sgs,sgp);
         }
 
-    private void ResetGoals(SaboteurGameState sgs, SaboteurGameParameters sgp)
+    private void resetGoals(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
         int totalLength = sgs.goalDeck.getSize() * (sgp.GoalSpacingY + 1);
         int startingY = (int) Math.floor(totalLength / 2.0) - 1;
 
-        assert sgp.GoalSpacingX > Math.floor(sgs.gridBoard.getWidth() / 2.0): "Placing Goal card out of bounds for X";
+        assert sgp.GoalSpacingX <= Math.floor(sgs.gridBoard.getWidth() / 2.0): "Placing Goal card out of bounds for X";
 
         for(SaboteurCard goalCard: sgs.goalDeck.getComponents())
         {
-            assert startingY > sgs.gridBoard.getHeight(): "Placing Goal card out of bounds for Y";
+            assert startingY <= sgs.gridBoard.getHeight(): "Placing Goal card out of bounds for Y";
             PathCard currentCard = (PathCard) goalCard;
             sgs.gridBoard.setElement(sgp.GoalSpacingX + 1 + sgs.centerOfGrid, startingY + sgs.centerOfGrid, currentCard);
             startingY -= (sgp.GoalSpacingY + 1);
@@ -237,6 +237,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
     //Check if the path card can be placed at the location
     private boolean checkPathCardPlacement(PathCard card, SaboteurGameState sgs, Vector2D location)
     {
+        if (location.getX() < 0 || location.getY() < 0
+                || location.getX() >= ((SaboteurGameParameters)sgs.getGameParameters()).GridSize
+                || location.getY() >= ((SaboteurGameParameters)sgs.getGameParameters()).GridSize) return false;
         boolean[] currentDirections = card.getDirections();
         for(int i = 0 ; i < 4; i++)
         {

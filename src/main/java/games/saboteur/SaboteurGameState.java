@@ -61,8 +61,10 @@ public class SaboteurGameState extends AbstractGameState
         }};
     }
 
+
+
     @Override
-    protected AbstractGameState _copy(int playerId)
+    protected SaboteurGameState _copy(int playerId)
     {
         SaboteurGameState copy = new SaboteurGameState(gameParameters.copy(), getNPlayers());
 
@@ -104,6 +106,16 @@ public class SaboteurGameState extends AbstractGameState
         {
             copy.playerNuggetDecks.add(playerNuggetDeck.copy());
         }
+
+        copy.centerOfGrid = centerOfGrid;
+        copy.nOfMiners = nOfMiners;
+        copy.nOfSaboteurs = nOfSaboteurs;
+
+        // todo partial observability
+        if (playerId != -1 && getCoreGameParameters().partialObservable) {
+
+        }
+
         return copy;
     }
 

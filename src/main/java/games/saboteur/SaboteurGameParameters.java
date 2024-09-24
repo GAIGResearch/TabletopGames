@@ -18,7 +18,7 @@ public class SaboteurGameParameters extends TunableParameters
     public int nNuggets          = 27;
     public int nGoalCards        = 3;
     public int nRounds           = 3;
-    public int GridSize          = 37;
+    public int GridSize          = 500;
     public int GoalSpacingX      = 8;
     public int GoalSpacingY      = 1;
 
