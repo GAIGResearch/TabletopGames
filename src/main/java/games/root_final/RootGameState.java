@@ -194,10 +194,14 @@ public class RootGameState extends AbstractGameState {
         copy.setGamePhase(this.getGamePhase());
         copy.setPlayerSubGamePhase(playerSubGamePhase);
         copy.setActionsPlayed(actionsPlayed);
+        
         copy.craftableItems = new ArrayList<>();
         for (int i = 0; i < craftableItems.size(); i++) {
             copy.craftableItems.add(craftableItems.get(i).copy());
         }
+        copy.ruinItems = new ArrayList<>();
+        copy.startingItems = new ArrayList<>();
+
         copy.playerDecks = new ArrayList<>();
         copy.playerCraftedCards = new ArrayList<>();
         for (int e = 0; e < getNPlayers(); e++) {
@@ -245,11 +249,9 @@ public class RootGameState extends AbstractGameState {
         }
 
         if (getNPlayers() > 3) {
-            copy.ruinItems = new ArrayList<>();
             for (int i = 0; i < ruinItems.size(); i++) {
                 copy.ruinItems.add(ruinItems.get(i).copy());
             }
-            copy.startingItems = new ArrayList<>();
             for (int i = 0; i < startingItems.size(); i++) {
                 copy.startingItems.add(startingItems.get(i).copy());
             }
