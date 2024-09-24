@@ -25,7 +25,7 @@ public class PlacePathCard extends SetGridValueAction<PathCard>
         PathCard pathCard = (PathCard) sgs.getComponentById(getValueID());
         if(rotated)
         {
-            pathCard.Rotate();
+            pathCard.rotate();
         }
         sgs.getGridBoard().setElement(getX(), getY(), pathCard);
         sgs.getPathCardOptions().remove(new Vector2D(getX(), getY()));

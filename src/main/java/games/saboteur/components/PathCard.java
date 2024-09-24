@@ -35,15 +35,15 @@ public class PathCard extends SaboteurCard
         }
     }
 
-    public void Rotate()
+    public void rotate()
     {
         //up down
-        Swap(0,1);
+        swap(0,1);
         //left right
-        Swap(2,3);
+        swap(2,3);
     }
 
-    private void Swap(int indexA, int indexB)
+    private void swap(int indexA, int indexB)
     {
         boolean temp = directions[indexA];
         directions[indexA] = directions[indexB];

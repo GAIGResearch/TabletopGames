@@ -224,12 +224,12 @@ public class SaboteurForwardModel extends StandardForwardModel {
             }
 
             //check when its rotated
-            card.Rotate();
+            card.rotate();
             if(checkPathCardPlacement(card, sgs, location))
             {
                 actions.add(new PlacePathCard(0, location.getX(), location.getY(), card.getComponentID(), true));
             }
-            card.Rotate();
+            card.rotate();
         }
         return actions;
     }
