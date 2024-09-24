@@ -86,7 +86,7 @@ public class SaboteurGameState extends AbstractGameState
         copy.discardDeck = discardDeck.copy();
         copy.goalDeck = goalDeck.copy();
         copy.roleDeck = roleDeck.copy();
-        copy.gridBoard = gridBoard.copy();
+        copy.gridBoard = gridBoard.copy();  // todo deep copy not working
         copy.nuggetDeck = nuggetDeck.copy();
 
         copy.playerNuggetDecks = new ArrayList<>();
@@ -188,24 +188,24 @@ public class SaboteurGameState extends AbstractGameState
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return 0;
+        return getGameScore(playerId);
     }
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return 0;  // todo nuggets
     }
 
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SaboteurGameState that)) return false;
-        if (!super.equals(o)) return false;
         return centerOfGrid == that.centerOfGrid && nOfMiners == that.nOfMiners && nOfSaboteurs == that.nOfSaboteurs && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(toolDeck, that.toolDeck) && Objects.equals(roleDeck, that.roleDeck) && Objects.equals(playerNuggetDecks, that.playerNuggetDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(discardDeck, that.discardDeck) && Objects.equals(goalDeck, that.goalDeck) && Objects.equals(gridBoard, that.gridBoard) && Objects.equals(nuggetDeck, that.nuggetDeck) && Objects.equals(pathCardOptions, that.pathCardOptions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerDecks, toolDeck, roleDeck, playerNuggetDecks, drawDeck, discardDeck, goalDeck, gridBoard, nuggetDeck, pathCardOptions, centerOfGrid, nOfMiners, nOfSaboteurs);
+        return Objects.hash(playerDecks, toolDeck, roleDeck, playerNuggetDecks, drawDeck, discardDeck, goalDeck, gridBoard, nuggetDeck, pathCardOptions, centerOfGrid, nOfMiners, nOfSaboteurs);
     }
+
 }

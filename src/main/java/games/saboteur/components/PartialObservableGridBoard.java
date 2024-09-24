@@ -100,9 +100,18 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
     @Override
     public PartialObservableGridBoard<T> copy()
     {
-        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(getGridValues(), gridBoardVisibility, elementVisibility, componentID);
-
-        copy.gridBoardVisibility = gridBoardVisibility.clone();
+        Component[][] gridCopy = new Component[getHeight()][getWidth()];
+        for (int i = 0; i < getHeight(); i++) {
+            for (int j = 0; j < getWidth(); j++) {
+                if (getGridValues()[i][j] == null) {
+                    gridCopy[i][j] = null;
+                    continue;
+                }
+                gridCopy[i][j] = getGridValues()[i][j].copy();
+            }
+        }
+        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(gridCopy, gridBoardVisibility, elementVisibility, componentID);
+        copyComponentTo(copy);
         return copy;
     }
 
@@ -174,7 +183,10 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), elementVisibility);
+        int result = Objects.hash(super.hashCode());
+        result = 31 * result + elementVisibility.stream()
+                .mapToInt(Arrays::deepHashCode) // Apply deepHashCode for each boolean[][]
+                .reduce(31, (acc, hash) -> 31 * acc + hash);
         result = 31 * result + Arrays.hashCode(gridBoardVisibility);
         return result;
     }

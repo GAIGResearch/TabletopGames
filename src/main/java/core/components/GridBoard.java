@@ -233,7 +233,10 @@ public class GridBoard<T extends Component> extends Component implements ICompon
     public GridBoard<T> copy() {
         Component[][] gridCopy = new Component[getHeight()][getWidth()];
         for (int i = 0; i < height; i++) {
-            if (width >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
+            for (int j = 0; j < width; j++) {
+                if (grid[i][j] != null)
+                    gridCopy[i][j] = grid[i][j].copy();
+            }
         }
         GridBoard<T> g = new GridBoard<>(gridCopy, componentID);
         copyComponentTo(g);
