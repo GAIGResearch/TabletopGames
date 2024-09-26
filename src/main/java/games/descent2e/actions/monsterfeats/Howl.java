@@ -31,6 +31,11 @@ public class Howl extends TriggerAttributeTest {
     }
 
     @Override
+    public String toString() {
+        return "Howl";
+    }
+
+    @Override
     public boolean execute(DescentGameState state) {
         state.setActionInProgress(this);
         attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();

@@ -38,6 +38,11 @@ public class HowlTest extends AttributeTest {
     }
 
     @Override
+    public String toStringWithResult() {
+        return toString() + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; +1 Fatigue)");
+    }
+
+    @Override
     public void resolveTest(DescentGameState dgs, int figureID, boolean result)
     {
         Figure f = (Figure) dgs.getComponentById(figureID);

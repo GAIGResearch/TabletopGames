@@ -79,7 +79,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         phase = PRE_TEST_ROLL;
         interruptPlayer = testingPlayer;
         Figure tester = (Figure) state.getComponentById(testingFigure);
-        setTestingName(tester.getName());
+        setTestingName(tester.getName().replace("Hero: ", ""));
         attributeValue = tester.getAttributeValue(attribute);
 
         //announceTestDebug(state);
@@ -93,7 +93,13 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         // 4) Unlike attacks, tests can only be interrupted after the roll
         // 5) Lastly, we allow the results to be made public
 
-        tester.addActionTaken(toString());
+        if (sourceFigure != 0)
+        {
+            Figure source = (Figure) state.getComponentById(sourceFigure);
+            source.addActionTaken(toStringWithResult());
+        }
+        else
+            tester.addActionTaken(toStringWithResult());
 
         return true;
     }
@@ -341,6 +347,11 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     public String toString() {
         return attribute + " Attribute Test by " + testingName;
     }
+
+    public String toStringWithResult() {
+        return toString() + " - " + (result ? "Passed" : "Failed");
+    }
+
 
     @Override
     public String getString(AbstractGameState gameState) {
