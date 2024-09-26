@@ -17,6 +17,7 @@ import utilities.Vector2D;
 import java.util.*;
 
 import static evaluation.metrics.Event.GameEvent.*;
+import static games.descent2e.components.Figure.Attribute.Health;
 
 public class DescentMetrics implements IMetricsCollection {
 
@@ -724,6 +725,25 @@ public class DescentMetrics implements IMetricsCollection {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == ABOUT_TO_START)
+            {
+                records.put("Name", "Game Start");
+                records.put("ID", 0);
+                records.put("Position", "-");
+                String setup = getSetup((DescentGameState) e.state).toString();
+                records.put("Actions Taken", setup);
+                return true;
+            }
+
+            if (e.type == GAME_OVER) {
+                records.put("Name", "Game Over");
+                records.put("ID", 1);
+                records.put("Position", "-");
+                String setup = getSetup((DescentGameState) e.state).toString();
+                records.put("Actions Taken", setup);
+                return true;
+            }
+
             if (e.type == Event.GameEvent.GAME_EVENT) {
                 String[] text = ((LogEvent)e.action).text.split(":")[1].split(";");
                 String figure = text[0].trim();
@@ -736,11 +756,32 @@ public class DescentMetrics implements IMetricsCollection {
 
                 DescentGameState dgs = (DescentGameState) e.state;
                 Figure f = (Figure) dgs.getComponentById(componentID);
-                records.put("Actions Taken", getActionsTaken(dgs, f).toString());
+                records.put("Actions Taken", f.getActionsTaken().toString());
+                //records.put("Actions Taken", getActionsTaken(dgs, f).toString());
 
                 return true;
             }
             return false;
+        }
+
+        private List<String> getSetup(DescentGameState dgs)
+        {
+            List<String> setup = new ArrayList<>();
+            for (Hero hero : dgs.getHeroes())
+            {
+                String h = hero.getComponentName().replace("Hero: ", "") + " - " + hero.getProperty("archetype") + " (" + hero.getProperty("class") + ") - " +
+                        hero.getAttributeValue(Health) + " HP - " + hero.getHandEquipment().toString() + " - " + hero.getPosition().toString();
+                setup.add(h);
+            }
+            for (int i = 0; i < dgs.getMonsters().size(); i++)
+            {
+                for (Monster monster : dgs.getMonsters().get(i))
+                {
+                    String m = monster.getComponentName() + " - " + monster.getAttributeValue(Health) + " HP - " + monster.getPosition().toString();
+                    setup.add(m);
+                }
+            }
+            return setup;
         }
 
         private List<String> getActionsTaken(DescentGameState dgs, Figure f) {
@@ -810,9 +851,9 @@ public class DescentMetrics implements IMetricsCollection {
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<IGameEvent>() {{
+                add(ABOUT_TO_START);
                 add(Event.GameEvent.GAME_EVENT);
-                add(Event.GameEvent.TURN_OVER);
-                add(Event.GameEvent.ROUND_OVER);
+                add(GAME_OVER);
             }};
         }
 
