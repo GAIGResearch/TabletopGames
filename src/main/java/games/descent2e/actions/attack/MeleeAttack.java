@@ -618,6 +618,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     {
         return defendingFigure;
     }
+    public void setDefendingFigure(int d)
+    {
+        defendingFigure = d;
+    }
 
     public AttackPhase getPhase() {
         return phase;
