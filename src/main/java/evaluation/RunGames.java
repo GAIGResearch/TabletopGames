@@ -17,6 +17,7 @@ import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -140,6 +141,10 @@ public class RunGames implements IGameRunner {
 
                 // run tournament
                 tournament.run();
+            }
+            String shellScript = config.get(RunArg.shellScript).toString();
+            if (!shellScript.isEmpty()) {
+                Utils.runProcess(shellScript);
             }
         }
     }

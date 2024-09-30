@@ -1,5 +1,6 @@
 package utilities;
 
+import evaluation.RunArg;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -551,5 +552,17 @@ public abstract class Utils {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
 
+    public static Process runProcess(String commandLine) {
+        if (!commandLine.isEmpty()) {
+            String[] command = commandLine.split(" ");
+            try {
+                return Runtime.getRuntime().exec(command);
+            } catch (IOException e) {
+                System.out.println("Error executing shell script: " + commandLine);
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
 
 }
