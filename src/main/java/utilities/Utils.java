@@ -82,11 +82,12 @@ public abstract class Utils {
      * Given a total budget of games, and number of players and agents, calculates how many games should be played
      * For each possible permutation of players.
      * This is a helper function to avoid the need for users of Tournaments to (mis-)calculate this themselves.
-     * @param nPlayers - the number of players in each game
-     * @param nAgents - the number of agents we are comparing
+     *
+     * @param nPlayers        - the number of players in each game
+     * @param nAgents         - the number of agents we are comparing
      * @param totalGameBudget - the desired total number of games to play
-//     * @param allowBudgetBreach - if true then we will return the value closest to the totalGameBudget, even if it exceeds it
-//     *                         if false then we will return the value that is less than or equal to the totalGameBudget
+     *                        //     * @param allowBudgetBreach - if true then we will return the value closest to the totalGameBudget, even if it exceeds it
+     *                        //     *                         if false then we will return the value that is less than or equal to the totalGameBudget
      * @return the number of permutations possible
      */
     public static int gamesPerMatchup(int nPlayers, int nAgents, int totalGameBudget, boolean selfPlay) {
@@ -552,13 +553,15 @@ public abstract class Utils {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
 
-    public static Process runProcess(String commandLine) {
+    public static Process runProcess(String commandLine, String workingDirectory) {
         if (!commandLine.isEmpty()) {
-            String[] command = commandLine.split(" ");
             try {
-                return Runtime.getRuntime().exec(command);
+                if (!workingDirectory.isEmpty()) {
+                    return Runtime.getRuntime().exec(commandLine, null, new File(workingDirectory));
+                }
+                return Runtime.getRuntime().exec(commandLine);
             } catch (IOException e) {
-                System.out.println("Error executing shell script: " + commandLine);
+                System.out.println("Error executing shell script: " + commandLine + " in " + workingDirectory);
                 throw new RuntimeException(e);
             }
         }

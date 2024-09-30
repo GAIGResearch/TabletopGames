@@ -144,7 +144,7 @@ public class RunGames implements IGameRunner {
             }
             String shellScript = config.get(RunArg.shellScript).toString();
             if (!shellScript.isEmpty()) {
-                Utils.runProcess(shellScript);
+                Utils.runProcess(shellScript, config.get(shellScriptDir).toString());
             }
         }
     }

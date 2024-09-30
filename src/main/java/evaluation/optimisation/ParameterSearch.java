@@ -12,8 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static evaluation.RunArg.game;
-import static evaluation.RunArg.parseConfig;
+import static evaluation.RunArg.*;
 import static utilities.Utils.getArg;
 
 public class ParameterSearch {
@@ -81,7 +80,6 @@ public class ParameterSearch {
 
         String shellScript = config.get(RunArg.shellScript).toString();
         if (!shellScript.isEmpty()) {
-            Utils.runProcess(shellScript);
-        }
+            Utils.runProcess(shellScript, config.get(shellScriptDir).toString());        }
     }
 }
