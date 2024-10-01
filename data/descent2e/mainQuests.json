@@ -3,7 +3,7 @@
     "id": "Acolyte of Saradyn",
     "act": 1,
     "monsters": [
-      ["Goblin Archer:group", "9A"],
+      ["Goblin Archer:group", "5A"],
       ["Barghest:group", "4A", "all:Health:+2"]
     ],
     "tokens": [
