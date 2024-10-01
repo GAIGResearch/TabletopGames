@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.components.*;
 import core.components.Component;
 import core.properties.*;
+import evaluation.metrics.Event;
 import games.descent2e.DescentTypes.*;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.actions.*;
@@ -186,7 +187,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // Jain Fairwood's Hero Ability
             // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
-            if (hero.getAbility().equals(HeroAbilities.HeroAbility.DamageToFatigue))
+            /*if (hero.getAbility().equals(HeroAbilities.HeroAbility.DamageToFatigue))
             {
                 for (int i = 0; i < (hero.getAttribute(Figure.Attribute.Fatigue).getMaximum()); i++) {
                     JainTurnDamageIntoFatigue reduce = new JainTurnDamageIntoFatigue(hero.getComponentID(), (i + 1));
@@ -194,7 +195,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                         hero.addAbility(reduce);
                     }
                 }
-            }
+            }*/
 
             // Tomble Burrowell's Hero Ability
             // If we are targeted by an attack, and we are adjacent to an ally
@@ -340,6 +341,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         if (EndTurn.turnEnded && actions.isEmpty() && dgs.getActionsInProgress().isEmpty())
         {
+            dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getComponentID() + ";" + actingFigure.getPosition());
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
