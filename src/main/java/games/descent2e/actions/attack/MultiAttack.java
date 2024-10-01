@@ -105,7 +105,7 @@ public class MultiAttack extends RangedAttack {
                 {
                     index++;
                     setNewTarget(state, index);
-                    result += "; Result: ";
+                    result += " | Result: ";
                     // For MultiAttacks, we use the same Attack dice results
                     // But each defender is allowed to roll their own Defence dice
                     phase = PRE_DEFENCE_ROLL;
