@@ -780,6 +780,7 @@ public class DescentHelper {
     public static void figureDeath(DescentGameState dgs, Figure f) {
         // All conditions are removed when a figure is defeated
         f.removeAllConditions();
+        f.addActionTaken("Defeated");
 
         //System.out.println(defender.getComponentName() + " defeated!");
 
