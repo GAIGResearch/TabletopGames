@@ -553,19 +553,5 @@ public abstract class Utils {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
 
-    public static Process runProcess(String commandLine, String workingDirectory) {
-        if (!commandLine.isEmpty()) {
-            try {
-                if (!workingDirectory.isEmpty()) {
-                    return Runtime.getRuntime().exec(commandLine, null, new File(workingDirectory));
-                }
-                return Runtime.getRuntime().exec(commandLine);
-            } catch (IOException e) {
-                System.out.println("Error executing shell script: " + commandLine + " in " + workingDirectory);
-                throw new RuntimeException(e);
-            }
-        }
-        return null;
-    }
 
 }

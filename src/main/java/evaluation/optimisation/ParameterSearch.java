@@ -77,9 +77,5 @@ public class ParameterSearch {
                 multiNTBEA.run();
                 break;
         }
-
-        String shellScript = config.get(RunArg.shellScript).toString();
-        if (!shellScript.isEmpty()) {
-            Utils.runProcess(shellScript, config.get(shellScriptDir).toString());        }
     }
 }

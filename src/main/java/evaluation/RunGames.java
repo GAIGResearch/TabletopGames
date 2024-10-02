@@ -142,10 +142,6 @@ public class RunGames implements IGameRunner {
                 // run tournament
                 tournament.run();
             }
-            String shellScript = config.get(RunArg.shellScript).toString();
-            if (!shellScript.isEmpty()) {
-                Utils.runProcess(shellScript, config.get(shellScriptDir).toString());
-            }
         }
     }
 

@@ -161,13 +161,6 @@ public enum RunArg {
             "\t Each seed will be used in turn for a full tournament run, as defined by the other parameters.",
             "",
             new Usage[]{Usage.RunGames}),
-    shellScript("(Optional) If set then this is the name and location of a local OS batch script to run. \n" +
-            "\t This will be executed once the final tournament has been run.",
-            "",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
-    shellScriptDir("(Optional) The working directory to use for any shell script.",
-            "",
-            new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     startBudget("The starting budget for the SkillLadder process. \n",
             8,
             new Usage[]{Usage.SkillLadder}),
