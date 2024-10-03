@@ -134,7 +134,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 actualGames = this.gamesPerMatchup * Utils.playerPermutations(agentPositions, agents.size(), selfPlay);
                 break;
             case RANDOM:
-                this.gamesPerMatchup = 1; // not actually used, we just run the totalGameBudget number of games
+                this.gamesPerMatchup = totalGameBudget; // not actually used, we just run the totalGameBudget number of games
                 break;
             default:
                 throw new IllegalArgumentException("Unknown tournament mode " + config.get(RunArg.mode));
@@ -235,7 +235,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     List<Integer> matchup = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
                         matchup.add(idStream.getAsInt());
-                    evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
+                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(i)));
                 }
                 break;
             case ONE_VS_ALL:
@@ -550,7 +550,8 @@ public class RoundRobinTournament extends AbstractTournament {
                 writer.write("\n");
                 writer.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Unable to write results to " + resultsFile);
+                resultsFile = null;
             }
         }
     }
