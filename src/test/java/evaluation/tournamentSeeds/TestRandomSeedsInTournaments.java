@@ -4,6 +4,7 @@ import core.AbstractPlayer;
 import evaluation.RunArg;
 import evaluation.RunGames;
 import evaluation.tournaments.RoundRobinTournament;
+import evaluation.tournaments.SkillGrid;
 import games.GameType;
 import org.json.simple.JSONObject;
 import org.junit.Test;
@@ -175,7 +176,4 @@ public class TestRandomSeedsInTournaments {
         assertEquals(4, uniqueSeeds.size());
     }
 
-    //TODO: Random with distinct seeds
-
-    // TODO: SkillGrid (sequential)
 }
