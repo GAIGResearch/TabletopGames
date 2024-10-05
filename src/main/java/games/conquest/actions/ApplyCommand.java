@@ -66,6 +66,7 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
         List<AbstractAction> actions = new ArrayList<>();
+        actions.add(new SelectTroop(playerId));
         actions.add(new MoveTroop(playerId));
         actions.add(new AttackTroop(playerId));
         actions.add(new ApplyCommand(playerId));
