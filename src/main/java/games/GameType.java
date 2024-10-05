@@ -18,6 +18,8 @@ import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
 import games.connect4.gui.Connect4GUIManager;
+import games.conquest.*;
+import games.conquest.gui.CQGUIManager;
 import games.diamant.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
@@ -200,7 +202,11 @@ public enum GameType {
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Conquest(2, 2,
+            Arrays.asList(Strategy, Wargame, Abstract),
+            Arrays.asList(GridMovement, HandManagement),
+            CQGameState.class, CQForwardModel.class, CQParameters.class, CQGUIManager.class);
 
 
     // Core classes where the game is defined

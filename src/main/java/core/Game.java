@@ -828,7 +828,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Pandemic");
+        String gameType = Utils.getArg(args, "game", "Conquest");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -836,9 +836,10 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+        // players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new BasicMCTSPlayer());
+        players.add(new HumanGUIPlayer(ac));
+        // players.add(new BasicMCTSPlayer());
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;
