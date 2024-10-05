@@ -141,7 +141,9 @@ public class CQGameState extends AbstractGameState {
     public Troop getTroopByLocation(Vector2D vec) {
         Integer id = locationToTroopMap.get(vec);
         if (id == null) return null;
-        return (Troop) getComponentById(id);
+        Troop troop = (Troop) getComponentById(id);
+        if (troop.getHealth() <= 0) return null; // troop has died; is no longer relevant
+        return troop;
     }
     public Troop getTroopByLocation(Cell c) {
         return getTroopByLocation(c.position);
