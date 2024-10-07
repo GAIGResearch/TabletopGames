@@ -580,7 +580,7 @@ public class Game {
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
-                agentTime += (System.nanoTime() - s);
+                agentTime = (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {

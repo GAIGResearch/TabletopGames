@@ -92,4 +92,9 @@ public class ForwardModelTestsWithRandom {
     public void testHearts() {
         ForwardModelTester fmt = new ForwardModelTester("game=Hearts", "nGames=2", "nPlayers=4");
     }
+
+    @Test
+    public void testMastermind() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Mastermind", "nGames=10", "nPlayers=1");
+    }
 }

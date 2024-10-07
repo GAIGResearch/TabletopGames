@@ -218,6 +218,14 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     @Override
+    public boolean add(Collection<T> d, int index) {
+        for (int i = 0; i < d.size(); i++) {
+            this.elementVisibility.add(index, deckVisibility.clone());
+        }
+        return super.add(d, index);
+    }
+
+    @Override
     public boolean add(Deck<T> d) {
         return add(d, 0);
     }

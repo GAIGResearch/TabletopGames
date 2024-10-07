@@ -107,7 +107,7 @@ public class CatanParameters extends TunableParameters {
         public static ResourceAmount translate(int amount, CatanParameters cp) {
             double perc = amount*1.0 / cp.n_resource_cards;
             int idx = (int)(values().length * perc);
-            if (idx == 4) idx--;
+            if (idx >= 4) idx = 3;
             return values()[idx];
         }
     }

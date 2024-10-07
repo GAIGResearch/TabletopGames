@@ -46,6 +46,8 @@ public abstract class GLMHeuristic implements ICoefficients {
         Pair<double[], Map<int[], Double>> x = loadModel(coefficientsFile);
         this.coefficients = x.a;
         List<int[]> loadedInteractions = x.b.keySet().stream().toList();
+        if (loadedInteractions.isEmpty())
+            return;
         this.interactions = new int[loadedInteractions.size()][loadedInteractions.get(0).length];
         this.interactionCoefficients = new double[loadedInteractions.size()];
         for (int i = 0; i < interactions.length; i++) {

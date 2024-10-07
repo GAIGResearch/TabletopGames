@@ -1,7 +1,6 @@
 package games.poker;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.components.FrenchCard;
 import evaluation.features.TunableStateFeatures;
 

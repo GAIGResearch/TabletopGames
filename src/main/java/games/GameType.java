@@ -35,6 +35,8 @@ import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;
@@ -53,6 +55,10 @@ import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
+import games.toads.ToadForwardModel;
+import games.toads.ToadGUIManager;
+import games.toads.ToadGameState;
+import games.toads.ToadParameters;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
@@ -203,6 +209,14 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
             CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
+    WarOfTheToads(2, 2,
+            Arrays.asList(Strategy, Abstract, Cards),
+            Collections.singletonList(TrickTaking),
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
     Conquest(2, 2,
             Arrays.asList(Strategy, Wargame, Abstract),
             Arrays.asList(GridMovement, HandManagement),
@@ -438,7 +452,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient;
+        Wargame, Civilization, Ancient, CodeBreaking;
 
         /**
          * @return a list of all games within this category.
