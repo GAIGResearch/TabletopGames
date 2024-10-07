@@ -98,6 +98,13 @@ public class CQGameState extends AbstractGameState {
     public PartialObservableDeck getCommands(int uid) {
         return chosenCommands[uid];
     }
+    public boolean useCommand(int uid, Command cmd) {
+        cmd.use();
+        int idx = getCommands(uid).getComponents().indexOf(cmd);
+        if (idx == -1) return false;
+        getCommands(uid).setVisibilityOfComponent(idx, uid ^ 1, true);
+        return true;
+    }
     public Troop getSelectedTroop() {
         return (Troop) getComponentById(selectedTroop);
     }

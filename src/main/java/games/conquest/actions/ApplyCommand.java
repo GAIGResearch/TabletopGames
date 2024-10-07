@@ -58,7 +58,7 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
             Troop target = cqgs.getTroopByLocation(cqgs.highlight);
             target.applyCommand(cmd.getCommandType());
         }
-        cmd.use();
+        cqgs.useCommand(playerId, cmd);
         return gs.setActionInProgress(this);
     }
 

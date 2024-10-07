@@ -838,6 +838,7 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         // players.add(new RandomPlayer());
         players.add(new RandomPlayer());
+//        players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));
         // players.add(new BasicMCTSPlayer());
 

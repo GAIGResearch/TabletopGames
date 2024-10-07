@@ -65,7 +65,7 @@ public class CQGUIManager extends AbstractGUIManager {
 
         JPanel commandView = new JPanel(new BorderLayout());
         for (int i=0;i<2;i++) {
-            commandViews[i] = new CQCommandView(i, cqgs.getCommands(i), true, cqp.dataPath);
+            commandViews[i] = new CQCommandView(i, cqgs.getCommands(i), false, cqp.dataPath);
             commandViews[i].minCardOffset = commandWidth + 3;
         }
         commandView.add(commandViews[0], BorderLayout.NORTH);
@@ -260,6 +260,8 @@ public class CQGUIManager extends AbstractGUIManager {
             }
             cqgs.cmdHighlight = commandSelection;
             showCommandInfo(cqgs);
+//            System.out.println("Visible:");
+//            System.out.println(cqgs.getCommands(0).getVisibleComponents(1));
         }
     }
 }

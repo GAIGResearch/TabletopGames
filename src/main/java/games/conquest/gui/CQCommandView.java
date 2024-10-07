@@ -50,6 +50,10 @@ public class CQCommandView extends DeckView<Command> {
     @Override
     public void drawComponent(Graphics2D g, Rectangle rect, Command cmd, boolean front) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + cmd.getCommandType().name + ".png");
+//        System.out.println(((PartialObservableDeck<Command>) component).isComponentVisible(0, this.humanId ^ 1));
+//        System.out.println(this.humanId);
+//        System.out.println((PartialObservableDeck<Command>) component);
+//        System.out.println(((PartialObservableDeck<Command>) component).isComponentVisible(0, 0));
         if (cardHighlight >= 0 && rects[cardHighlight] == rect) {
             // current card is highlighted
             highlight = cmd;

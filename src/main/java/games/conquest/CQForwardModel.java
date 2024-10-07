@@ -96,9 +96,10 @@ public class CQForwardModel extends StandardForwardModel {
 
 
     private void setupCommands(HashSet<CommandType> commands, int uid, CQGameState cqgs) {
+        boolean[] visibility = new boolean[] {uid==0, uid==1};
         for (CommandType cmd : commands) {
             if (cqgs.chosenCommands[uid].getSize() < maxCommands) {
-                cqgs.chosenCommands[uid].add(new Command(cmd, uid));
+                cqgs.chosenCommands[uid].add(new Command(cmd, uid), visibility);
             }
         }
     }

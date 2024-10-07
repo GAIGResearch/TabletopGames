@@ -89,4 +89,8 @@ public class Command extends Card {
     public CommandType getCommandType() {
         return commandType;
     }
+
+    public String toString() {
+        return commandType.toString() + " command (" + cooldown + "/" + commandType.cooldown + ")";
+    }
 }
