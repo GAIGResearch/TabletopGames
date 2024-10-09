@@ -6,6 +6,7 @@ import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
 import games.conquest.components.Troop;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,9 +30,14 @@ import java.util.List;
 public class SelectTroop extends AbstractAction implements IExtendedSequence {
     public final int playerId;
     private boolean executed = false;
+    private Vector2D highlight;
 
     public SelectTroop(int pid) {
         playerId = pid;
+    }
+    public SelectTroop(int pid, Vector2D loc) {
+        this(pid);
+        highlight = loc;
     }
 
     /**
@@ -43,24 +49,19 @@ public class SelectTroop extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
-        Troop troop = cqgs.getTroopByLocation(cqgs.highlight);
+        if (highlight == null) highlight = cqgs.highlight;
+        Troop troop = cqgs.getTroopByLocation(highlight);
         if (troop == null) return false;
         if (troop.getOwnerId() != playerId) return false;
         if (troop.getMovement() == 0) return false; // Troop is chastised, can't be selected.
-        cqgs.setGamePhase(CQGameState.CQGamePhase.MovementPhase);
         cqgs.setSelectedTroop(troop.getComponentID());
+        cqgs.setGamePhase(CQGameState.CQGamePhase.MovementPhase);
         return gs.setActionInProgress(this);
     }
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        CQGameState cqgs = (CQGameState) gs;
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new MoveTroop(playerId));
-        actions.add(new AttackTroop(playerId));
-        actions.add(new ApplyCommand(playerId));
-        actions.add(new EndTurn());
-        return actions;
+        return ((CQGameState) gs).getAvailableActions();
     }
 
     @Override
@@ -106,8 +107,10 @@ public class SelectTroop extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "Select Troop";
+        if (highlight != null)
+            return "Select Troop " + highlight;
+        else
+            return "Select Troop";
     }
 
     /**

@@ -158,20 +158,7 @@ public class CQForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         CQGameState cqgs = (CQGameState) gameState;
-        List<AbstractAction> actions = new ArrayList<>();
-        CQGameState.CQGamePhase phase = (CQGameState.CQGamePhase) cqgs.getGamePhase();
-        if (phase.equals(CQGameState.CQGamePhase.SelectionPhase)) {
-            actions.add(new SelectTroop(cqgs.getCurrentPlayer()));
-        }
-        if (phase.equals(CQGameState.CQGamePhase.MovementPhase)) {
-            actions.add(new MoveTroop(cqgs.getCurrentPlayer()));
-        }
-        if (phase.equals(CQGameState.CQGamePhase.CombatPhase)) {
-            actions.add(new AttackTroop(cqgs.getCurrentPlayer()));
-        }
-        actions.add(new ApplyCommand(cqgs.getCurrentPlayer()));
-        actions.add(new EndTurn());
-        return actions;
+        return cqgs.getAvailableActions();
     }
 
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {

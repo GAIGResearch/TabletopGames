@@ -6,6 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
 import games.conquest.components.Cell;
 import games.conquest.components.Troop;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,14 @@ public class MoveTroop extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     public final int playerId;
     private boolean executed;
+    Vector2D target;
 
     public MoveTroop(int pid) {
         playerId = pid;
+    }
+    public MoveTroop(int pid, Vector2D to) {
+        this(pid);
+        target = to;
     }
 
     /**
@@ -40,12 +46,7 @@ public class MoveTroop extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        CQGameState cqgs = (CQGameState) gs;
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new AttackTroop(playerId));
-        actions.add(new ApplyCommand(playerId));
-        actions.add(new EndTurn());
-        return actions;
+        return ((CQGameState) gs).getAvailableActions();
     }
 
     /**
@@ -75,7 +76,7 @@ public class MoveTroop extends AbstractAction implements IExtendedSequence {
         CQGameState cqgs = (CQGameState) gs;
         Troop troop = cqgs.getSelectedTroop();
         if (troop == null) return false;
-        Cell target = cqgs.getCell(cqgs.highlight);
+        Cell target = cqgs.getCell(this.target != null ? this.target : cqgs.highlight);
         if (target == null || cqgs.getTroopByLocation(target) != null) return false;
         int distance = cqgs.getDistance(troop.getLocation(), target.position);
         if (distance > troop.getMovement()) return false; // too far to be allowed.
@@ -138,7 +139,10 @@ public class MoveTroop extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "Move Troop";
+        if (target != null)
+            return "Move Troop " + target;
+        else
+            return "Move Troop";
     }
 
     /**

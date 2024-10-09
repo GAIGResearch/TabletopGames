@@ -4,8 +4,10 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
+import games.conquest.components.Cell;
 import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +27,14 @@ public class AttackTroop extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerId;
     private boolean executed = false;
+    Vector2D target;
 
     public AttackTroop(int pid) {
         this.playerId = pid;
+    }
+    public AttackTroop(int pid, Vector2D to) {
+        this(pid);
+        target = to;
     }
 
     /**
@@ -40,10 +47,7 @@ public class AttackTroop extends AbstractAction implements IExtendedSequence {
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new ApplyCommand(playerId));
-        actions.add(new EndTurn());
-        return actions;
+        return ((CQGameState) gs).getAvailableActions();
     }
 
     /**
@@ -96,9 +100,8 @@ public class AttackTroop extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         gs.setActionInProgress(this);
-
         CQGameState cqgs = (CQGameState) gs;
-        Troop target = cqgs.getTroopByLocation(cqgs.highlight);
+        Troop target = cqgs.getTroopByLocation(this.target != null ? this.target : cqgs.highlight);
         Troop selected = cqgs.getSelectedTroop();
         int distance = cqgs.getCell(target.getLocation()).getCrowDistance(selected.getLocation());
         if (distance > selected.getRange()) return false;
@@ -154,7 +157,10 @@ public class AttackTroop extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "Attack Troop";
+        if (target != null)
+            return "Attack Troop " + target;
+        else
+            return "Attack Troop";
     }
 
     /**

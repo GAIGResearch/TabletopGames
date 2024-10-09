@@ -9,10 +9,8 @@ import games.conquest.components.Command;
 import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -33,9 +31,14 @@ import java.util.Random;
 public class ApplyCommand extends AbstractAction implements IExtendedSequence {
     public final int playerId;
     private boolean executed = false;
+    private Command cmd;
 
     public ApplyCommand(int pid) {
         playerId = pid;
+    }
+    public ApplyCommand(int pid, Command command) {
+        this(pid);
+        cmd = command;
     }
 
     /**
@@ -48,10 +51,10 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
         if (!cqgs.canPerformAction(this)) return false;
-        Command cmd = cqgs.cmdHighlight;
+        if (cmd == null) cmd = cqgs.cmdHighlight;
         if (!cqgs.spendCommandPoints(playerId, cmd.getCost())) return false;
         if (cmd.getCommandType() == CommandType.WindsOfFate) {
-            HashSet<Command> hs = cqgs.getInactiveCommands(playerId);
+            HashSet<Command> hs = cqgs.getCommands(playerId, false);
             Command[] cooldowns = hs.toArray(new Command[hs.size()]);
             cooldowns[cqgs.getRnd().nextInt(hs.size())].reset(); // reset selected command
         } else {
@@ -64,14 +67,7 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        CQGameState cqgs = (CQGameState) gs;
-        List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new SelectTroop(playerId));
-        actions.add(new MoveTroop(playerId));
-        actions.add(new AttackTroop(playerId));
-        actions.add(new ApplyCommand(playerId));
-        actions.add(new EndTurn());
-        return actions;
+        return ((CQGameState) gs).getAvailableActions();
     }
 
     @Override
@@ -114,7 +110,10 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "Apply Command";
+        if (cmd != null)
+            return "Apply Command: " + cmd.getCommandType();
+        else
+            return "Apply Command";
     }
 
     /**

@@ -17,12 +17,13 @@ public class CQCommandView extends DeckView<Command> {
     /**
      * Constructor initialising information and adding key/mouse listener for card highlight (left click or ALT + hover
      * allows showing the highlighted card on top of all others).
+     * @param human - the id of the human player, who is not supposed to see the other deck
      * @param d - deck to draw
      * @param visible - true if whole deck visible
      * @param rect - the location of the Deck
      */
-    public CQCommandView(int player, Deck<Command> d, boolean visible, String path, Rectangle rect) {
-        super(player, d, visible, rect.width, rect.height, rect);
+    public CQCommandView(int human, Deck<Command> d, boolean visible, String path, Rectangle rect) {
+        super(human, d, visible, rect.width, rect.height, rect);
         // increase dimensions to allow the highlighted command to get a full outline
         this.rect.x += 2;
         this.rect.y += 2;
@@ -31,8 +32,8 @@ public class CQCommandView extends DeckView<Command> {
         dataPath = path;
         unknownCommand = ImageIO.GetInstance().getImage(dataPath + "Stoicism.png");
     }
-    public CQCommandView(int player, Deck<Command> d, boolean visible, String path) {
-        this(player, d, visible, path, new Rectangle(0, 0, CQGUIManager.commandWidth, CQGUIManager.commandHeight));
+    public CQCommandView(int human, Deck<Command> d, boolean visible, String path) {
+        this(human, d, visible, path, new Rectangle(0, 0, CQGUIManager.commandWidth, CQGUIManager.commandHeight));
     }
 
     public Command getHighlight() {
@@ -50,10 +51,6 @@ public class CQCommandView extends DeckView<Command> {
     @Override
     public void drawComponent(Graphics2D g, Rectangle rect, Command cmd, boolean front) {
         Image cardFace = ImageIO.GetInstance().getImage(dataPath + cmd.getCommandType().name + ".png");
-//        System.out.println(((PartialObservableDeck<Command>) component).isComponentVisible(0, this.humanId ^ 1));
-//        System.out.println(this.humanId);
-//        System.out.println((PartialObservableDeck<Command>) component);
-//        System.out.println(((PartialObservableDeck<Command>) component).isComponentVisible(0, 0));
         if (cardHighlight >= 0 && rects[cardHighlight] == rect) {
             // current card is highlighted
             highlight = cmd;

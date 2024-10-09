@@ -1,12 +1,11 @@
 package games.conquest.gui;
 
+import cats.kernel.Hash;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.components.Deck;
-import core.interfaces.IGamePhase;
 import games.conquest.CQGameState;
 import games.conquest.CQParameters;
 import games.conquest.actions.*;
@@ -16,11 +15,9 @@ import games.tictactoe.gui.TicTacToeGUIManager;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
-import org.sparkproject.dmg.pmml.Apply;
 import players.human.ActionController;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +62,7 @@ public class CQGUIManager extends AbstractGUIManager {
 
         JPanel commandView = new JPanel(new BorderLayout());
         for (int i=0;i<2;i++) {
-            commandViews[i] = new CQCommandView(i, cqgs.getCommands(i), false, cqp.dataPath);
+            commandViews[i] = new CQCommandView(human.stream().findFirst().orElse(0), cqgs.getCommands(i), false, cqp.dataPath);
             commandViews[i].minCardOffset = commandWidth + 3;
         }
         commandView.add(commandViews[0], BorderLayout.NORTH);
@@ -104,7 +101,8 @@ public class CQGUIManager extends AbstractGUIManager {
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         CQGameState cqgs = (CQGameState) gameState;
         if (cqgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+//            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            List<AbstractAction> actions = cqgs.getGenericActions(); // TODO: better way to do this, without evading ForwardModel?
             ArrayList<Rectangle> highlight = boardView.getHighlight();
 
             int start = actions.size();

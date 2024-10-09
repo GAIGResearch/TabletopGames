@@ -18,6 +18,7 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 
@@ -38,7 +39,6 @@ public class CQGameState extends AbstractGameState {
     }
     Cell[][] cells;
     HashSet<Troop> troops;
-    HashSet<Command> commands;
     HashMap<Vector2D, Integer> locationToTroopMap;
     private int selectedTroop = -1; // The troop that is allowed to move and attack
     public Vector2D highlight = null; // the highlighted cell, whether or not it contains anything
@@ -95,9 +95,91 @@ public class CQGameState extends AbstractGameState {
         return getCell(pos.getX(), pos.getY());
     }
 
+    public HashSet<Troop> getTroops(int uid) {
+        return troops.stream().filter(t -> t.getOwnerId() == uid).collect(Collectors.toCollection(HashSet::new));
+    }
     public PartialObservableDeck getCommands(int uid) {
         return chosenCommands[uid];
     }
+    /**
+     * See your own commands on/off cooldown
+     * @param uid the user checking their own inactive commands
+     * @param active whether the list should show the inactive or active commands
+     * @return set of commands that are on cooldown
+     */
+    public HashSet<Command> getCommands(int uid, boolean active) {
+        HashSet<Command> commands = new HashSet<>();
+        if (chosenCommands == null) return commands;
+        List<Command> list = chosenCommands[uid].getVisibleComponents(uid);
+        for (Command cmd : list) {
+            if ((active && cmd.getCooldown() == 0) || (!active && cmd.getCooldown() > 0))
+                commands.add(cmd);
+        }
+        return commands;
+    }
+
+    /**
+     * List actions that are available in the current game phase.
+     * This will be called from the different extended action sequences, which would
+     * otherwise have to duplicate code computing these available actions.
+     * @return the full list of actions available at the current point in the game.
+     */
+    public List<AbstractAction> getAvailableActions() {
+        int uid = getCurrentPlayer();
+        CQGamePhase phase = (CQGamePhase) getGamePhase();
+        List<AbstractAction> actions = new ArrayList<>();
+        actions.add(new EndTurn());
+        if (!getCommands(uid, true).isEmpty()) {
+            for (Command c : getCommands(uid, true)) {
+                actions.add(new ApplyCommand(uid, c));
+            }
+        }
+        Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
+        if (phase.equals(CQGamePhase.SelectionPhase)) {
+            for (Troop t : getTroops(uid)) {
+                actions.add(new SelectTroop(uid, t.getLocation()));
+            }
+        } else if (phase.equals(CQGamePhase.MovementPhase)) {
+            assert currentTroop != null;
+            Vector2D pos = currentTroop.getLocation();
+            int range = currentTroop.getMovement();
+            for (int i = pos.getX() - range; i < pos.getX() + range; i++) {
+                for (int j = pos.getY() - range; j < pos.getY() + range; j++) {
+                    if (getTroopByLocation(pos) == null) continue; // can't move where another troop is located
+                    if (getDistance(pos, new Vector2D(i,j)) > range) continue; // path is longer than crow's flight due to obstacle
+                    actions.add(new MoveTroop(uid, new Vector2D(i,j)));
+                }
+            }
+        } else if (phase.equals(CQGamePhase.CombatPhase)) {
+            assert currentTroop != null;
+            Cell c = getCell(currentTroop.getLocation());
+            for (Troop t : getTroops(uid ^ 1)) {
+                if (c.getCrowDistance(t.getLocation()) <= currentTroop.getRange()) {
+                    actions.add(new AttackTroop(uid, c.position));
+                }
+            }
+        }
+        return actions;
+    }
+    public List<AbstractAction> getGenericActions() {
+        CQGamePhase phase = (CQGamePhase) getGamePhase();
+        List<AbstractAction> actions = new ArrayList<>();
+        int uid = getCurrentPlayer();
+        actions.add(new EndTurn());
+        if (!getCommands(uid, true).isEmpty()) {
+            actions.add(new ApplyCommand(uid));
+        }
+        if (phase.equals(CQGamePhase.SelectionPhase)) {
+            actions.add(new SelectTroop(uid));
+        } else if (!phase.equals(CQGamePhase.RallyPhase)) {
+            actions.add(new AttackTroop(uid));
+            if (phase.equals(CQGamePhase.MovementPhase)) {
+                actions.add(new MoveTroop(uid));
+            }
+        }
+        return actions;
+    }
+
     public boolean useCommand(int uid, Command cmd) {
         cmd.use();
         int idx = getCommands(uid).getComponents().indexOf(cmd);
@@ -188,27 +270,27 @@ public class CQGameState extends AbstractGameState {
             if (cmdHighlight.getCost() > getCommandPoints()) return false; // no activating expensive commands
             CommandType cmdType = cmdHighlight.getCommandType();
             if (cmdType == CommandType.WindsOfFate) {
-                return !getInactiveCommands(getCurrentPlayer()).isEmpty();
+                return !getCommands(getCurrentPlayer(), false).isEmpty();
             } else if (target == null) return false; // all other commands need to be applied to a target
             if ((target.getOwnerId() == getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
             if (cmdType == CommandType.Charge && (
-                    getGamePhase() == CQGameState.CQGamePhase.CombatPhase || getGamePhase() == CQGameState.CQGamePhase.RallyPhase
+                    getGamePhase() == CQGamePhase.CombatPhase || getGamePhase() == CQGamePhase.RallyPhase
             )) {
                 // no use in applying Charge on a troop after it has already moved; prevent this from happening to aid MCTS
                 return false;
             }
             return true;
         } else if (target == null && action instanceof MoveTroop) {
-            if (phase != CQGameState.CQGamePhase.MovementPhase || selected == null) return false; // Other phases don't ever allow movement
+            if (phase != CQGamePhase.MovementPhase || selected == null) return false; // Other phases don't ever allow movement
             // Check if movement is allowed: calculate distance
             int dist = getDistance(selected.getLocation(), highlight);
             return dist <= selected.getMovement(); // allowed if within movement range, otherwise not
         } else if (target != null) {
             if (action instanceof SelectTroop) {
-                if (phase != CQGameState.CQGamePhase.SelectionPhase) return false;
+                if (phase != CQGamePhase.SelectionPhase) return false;
                 return target.getOwnerId() == getCurrentPlayer(); // allow if the selected troop is owned by current player
             } else if (action instanceof AttackTroop) {
-                if (phase == CQGameState.CQGamePhase.RallyPhase || selected == null) return false; // you can attack in MovementPhase or CombatPhase
+                if (phase == CQGamePhase.RallyPhase || selected == null) return false; // you can attack in MovementPhase or CombatPhase
                 if (target.getOwnerId() == getCurrentPlayer()) return false; // don't attack your own troops
                 Cell targetCell = getCell(target.getLocation());
                 return targetCell.getCrowDistance(selected.getLocation()) <= selected.getRange(); // only allowed if within attack range
@@ -216,20 +298,6 @@ public class CQGameState extends AbstractGameState {
         }
         // no conditions found to allow this action => disallow
         return false;
-    }
-
-    /**
-     * See your own commands on cooldown
-     * @param uid the user checking their own inactive commands
-     * @return set of commands that are on cooldown
-     */
-    public HashSet<Command> getInactiveCommands(int uid) {
-        HashSet<Command> commands = new HashSet<>();
-        List<Command> list = chosenCommands[uid].getVisibleComponents(uid);
-        for (Command cmd : list) {
-            if (cmd.getCooldown() > 0) commands.add(cmd);
-        }
-        return commands;
     }
 
     public boolean moveTroop(int troop, Vector2D from, Vector2D to) {
@@ -240,7 +308,7 @@ public class CQGameState extends AbstractGameState {
     }
 
     public void endTurn() {
-        setGamePhase(CQGameState.CQGamePhase.SelectionPhase);
+        setGamePhase(CQGamePhase.SelectionPhase);
         selectedTroop = -1;
         for (Troop troop : troops) {
             troop.step(getCurrentPlayer());
@@ -271,12 +339,15 @@ public class CQGameState extends AbstractGameState {
     @Override
     protected CQGameState _copy(int playerId) {
         CQGameState copy = new CQGameState(getGameParameters(), getNPlayers());
-        // TODO: can't see commands for the enemy unless they have been cast already
         // TODO: make deep copies of troops and commands?
         copy.cells = cells;
-        copy.troops = troops;
+        copy.troops = (HashSet<Troop>) troops.clone();
         copy.locationToTroopMap = (HashMap<Vector2D, Integer>) locationToTroopMap.clone();
+        copy.selectedTroop = selectedTroop;
+        copy.highlight = highlight;
+        copy.cmdHighlight = cmdHighlight;
         copy.gridBoard = gridBoard.copy();
+        copy.chosenCommands = chosenCommands.clone();
         copy.commandPoints = commandPoints.clone();
         return copy;
     }
