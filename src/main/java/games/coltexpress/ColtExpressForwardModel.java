@@ -29,6 +29,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
         //       System.out.println("Game " + cegs.getGameID() + ", seed: " + cep.getRandomSeed() + ", rnd: " + cegs.getRnd().nextInt(10000));
+
         cegs.bulletsLeft = new int[cegs.getNPlayers()];
         cegs.playerCharacters = new HashMap<>();
         cegs.playerPlayingBelle = -1;

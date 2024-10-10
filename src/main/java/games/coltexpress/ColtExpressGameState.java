@@ -53,6 +53,11 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
         int playerSeed = ((ColtExpressParameters) gameParameters).playerHandShuffleSeed;
         playerHandRnd = playerSeed == -1 ? rnd : new Random(playerSeed);
     }

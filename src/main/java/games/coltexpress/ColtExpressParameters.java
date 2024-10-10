@@ -144,6 +144,7 @@ public class ColtExpressParameters extends TunableParameters {
         addTunableParameter("initialCharacterShuffleSeed", -1);
         addTunableParameter("roundDeckShuffleSeed", -1);
         addTunableParameter("trainShuffleSeed", -1);
+        addTunableParameter("playerHandShuffleSeed", -1);
     }
 
     @Override
@@ -161,6 +162,7 @@ public class ColtExpressParameters extends TunableParameters {
         initialCharacterShuffleSeed = (int) getParameterValue("initialCharacterShuffleSeed");
         roundDeckShuffleSeed = (int) getParameterValue("roundDeckShuffleSeed");
         trainShuffleSeed = (int) getParameterValue("trainShuffleSeed");
+        playerHandShuffleSeed = (int) getParameterValue("playerHandShuffleSeed");
     }
 
     @Override

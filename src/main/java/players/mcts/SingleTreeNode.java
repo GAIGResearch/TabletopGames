@@ -1149,9 +1149,10 @@ public class SingleTreeNode {
         if (params.treePolicy == EXP3) {
             // EXP3 uses the tree policy (without exploration)
             bestAction = treePolicyAction(false);
-        } else if (params.treePolicy == RegretMatching && !regretMatchingAverage.isEmpty()) {
+        } else if (params.treePolicy == RegretMatching) {
             // RM uses a special policy as the average of all previous root policies
-            updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
+            if (regretMatchingAverage.isEmpty())  // in case we have a very low number of visits
+                updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
             bestAction = regretMatchingAverage();
         } else {
             // We iterate through all actions valid in the original root state
