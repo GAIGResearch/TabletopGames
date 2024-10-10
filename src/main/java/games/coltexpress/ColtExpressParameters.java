@@ -33,6 +33,7 @@ public class ColtExpressParameters extends TunableParameters {
     public int initialCharacterShuffleSeed = -1;
     public int roundDeckShuffleSeed = -1;
     public int trainShuffleSeed = -1;
+    public int playerHandShuffleSeed = -1;
 
     // How many cards of each type are in a player's deck, total minimum nCardsInHand + nCardsInHandExtraDoc
     public HashMap<ColtExpressCard.CardType, Integer> cardCounts = new HashMap<ColtExpressCard.CardType, Integer>() {{

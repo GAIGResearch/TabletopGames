@@ -65,7 +65,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
             cegs.playerDecks.add(playerCards);
-            playerCards.shuffle(cegs.getRnd());
+            playerCards.shuffle(cegs.playerHandRnd);
 
             Deck<ColtExpressCard> playerHand = new Deck<>("playerHand" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
 
@@ -397,7 +397,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
-        if (actions.size() == 0)
+        if (actions.isEmpty())
             actions.add(new PunchAction(deckFromID, deckToID, cardIdx, -1, -1, -1,
                     null, -1, playerIsCheyenne));
     }
