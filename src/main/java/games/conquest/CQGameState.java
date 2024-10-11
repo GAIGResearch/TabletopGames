@@ -96,7 +96,10 @@ public class CQGameState extends AbstractGameState {
     }
 
     public HashSet<Troop> getTroops(int uid) {
-        return troops.stream().filter(t -> t.getOwnerId() == uid).collect(Collectors.toCollection(HashSet::new));
+        return troops
+                .stream()
+                .filter(t -> t.getOwnerId() == uid && t.getHealth() > 0)
+                .collect(Collectors.toCollection(HashSet::new));
     }
     public PartialObservableDeck getCommands(int uid) {
         return chosenCommands[uid];
@@ -129,12 +132,22 @@ public class CQGameState extends AbstractGameState {
         CQGamePhase phase = (CQGamePhase) getGamePhase();
         List<AbstractAction> actions = new ArrayList<>();
         actions.add(new EndTurn());
+        Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
         if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
-                actions.add(new ApplyCommand(uid, c));
+                if (c.getCommandType() == CommandType.WindsOfFate) {
+                    actions.add(new ApplyCommand(uid, c, null));
+                } else if (c.getCommandType().enemy) {
+                    for (Troop t : getTroops(uid ^ 1)) {
+                        actions.add(new ApplyCommand(uid, c, t));
+                    }
+                } else {
+                    for (Troop t : getTroops(uid)) {
+                        actions.add(new ApplyCommand(uid, c, t));
+                    }
+                }
             }
         }
-        Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
         if (phase.equals(CQGamePhase.SelectionPhase)) {
             for (Troop t : getTroops(uid)) {
                 actions.add(new SelectTroop(uid, t.getLocation()));
@@ -143,38 +156,21 @@ public class CQGameState extends AbstractGameState {
             assert currentTroop != null;
             Vector2D pos = currentTroop.getLocation();
             int range = currentTroop.getMovement();
-            for (int i = pos.getX() - range; i < pos.getX() + range; i++) {
-                for (int j = pos.getY() - range; j < pos.getY() + range; j++) {
+            for (int i = Math.max(0, pos.getX() - range); i <= Math.min(20, pos.getX() + range); i++) {
+                for (int j = Math.max(0, pos.getY() - range); j <= Math.min(20, pos.getY() + range); j++) {
                     if (getTroopByLocation(pos) == null) continue; // can't move where another troop is located
                     if (getDistance(pos, new Vector2D(i,j)) > range) continue; // path is longer than crow's flight due to obstacle
                     actions.add(new MoveTroop(uid, new Vector2D(i,j)));
                 }
             }
-        } else if (phase.equals(CQGamePhase.CombatPhase)) {
+        }
+        if (phase.equals(CQGamePhase.MovementPhase) || phase.equals(CQGamePhase.CombatPhase)) {
             assert currentTroop != null;
             Cell c = getCell(currentTroop.getLocation());
             for (Troop t : getTroops(uid ^ 1)) {
                 if (c.getCrowDistance(t.getLocation()) <= currentTroop.getRange()) {
-                    actions.add(new AttackTroop(uid, c.position));
+                    actions.add(new AttackTroop(uid, t.getLocation()));
                 }
-            }
-        }
-        return actions;
-    }
-    public List<AbstractAction> getGenericActions() {
-        CQGamePhase phase = (CQGamePhase) getGamePhase();
-        List<AbstractAction> actions = new ArrayList<>();
-        int uid = getCurrentPlayer();
-        actions.add(new EndTurn());
-        if (!getCommands(uid, true).isEmpty()) {
-            actions.add(new ApplyCommand(uid));
-        }
-        if (phase.equals(CQGamePhase.SelectionPhase)) {
-            actions.add(new SelectTroop(uid));
-        } else if (!phase.equals(CQGamePhase.RallyPhase)) {
-            actions.add(new AttackTroop(uid));
-            if (phase.equals(CQGamePhase.MovementPhase)) {
-                actions.add(new MoveTroop(uid));
             }
         }
         return actions;
@@ -256,48 +252,16 @@ public class CQGameState extends AbstractGameState {
     /**
      * Check if an action is allowed to be performed on the target. This verifies the different conditions for different actions.
      * @param action Which action to check
+     * @param requireHighlight whether or not to require the target cell to be taken from the highlight, or the action
      * @return can the action be performed or not
      */
-    public boolean canPerformAction(AbstractAction action) {
-        Troop target = getTroopByLocation(highlight);
-        Troop selected = getSelectedTroop();
-        IGamePhase phase = getGamePhase();
+    public boolean canPerformAction(AbstractAction action, boolean requireHighlight) {
+        if (requireHighlight && !CQUtility.compareHighlight(action, highlight, cmdHighlight)) return false;
         if (action instanceof EndTurn) {
             return true;
-        } else if (action instanceof ApplyCommand) {
-            if (cmdHighlight == null) return false;
-            if (cmdHighlight.getCooldown() > 0) return false; // no activating an inactive command
-            if (cmdHighlight.getCost() > getCommandPoints()) return false; // no activating expensive commands
-            CommandType cmdType = cmdHighlight.getCommandType();
-            if (cmdType == CommandType.WindsOfFate) {
-                return !getCommands(getCurrentPlayer(), false).isEmpty();
-            } else if (target == null) return false; // all other commands need to be applied to a target
-            if ((target.getOwnerId() == getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
-            if (cmdType == CommandType.Charge && (
-                    getGamePhase() == CQGamePhase.CombatPhase || getGamePhase() == CQGamePhase.RallyPhase
-            )) {
-                // no use in applying Charge on a troop after it has already moved; prevent this from happening to aid MCTS
-                return false;
-            }
-            return true;
-        } else if (target == null && action instanceof MoveTroop) {
-            if (phase != CQGamePhase.MovementPhase || selected == null) return false; // Other phases don't ever allow movement
-            // Check if movement is allowed: calculate distance
-            int dist = getDistance(selected.getLocation(), highlight);
-            return dist <= selected.getMovement(); // allowed if within movement range, otherwise not
-        } else if (target != null) {
-            if (action instanceof SelectTroop) {
-                if (phase != CQGamePhase.SelectionPhase) return false;
-                return target.getOwnerId() == getCurrentPlayer(); // allow if the selected troop is owned by current player
-            } else if (action instanceof AttackTroop) {
-                if (phase == CQGamePhase.RallyPhase || selected == null) return false; // you can attack in MovementPhase or CombatPhase
-                if (target.getOwnerId() == getCurrentPlayer()) return false; // don't attack your own troops
-                Cell targetCell = getCell(target.getLocation());
-                return targetCell.getCrowDistance(selected.getLocation()) <= selected.getRange(); // only allowed if within attack range
-            }
+        } else {
+            return ((CQAction) action).canExecute(this);
         }
-        // no conditions found to allow this action => disallow
-        return false;
     }
 
     public boolean moveTroop(int troop, Vector2D from, Vector2D to) {

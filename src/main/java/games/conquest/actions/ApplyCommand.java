@@ -8,6 +8,7 @@ import games.conquest.CQGameState;
 import games.conquest.components.Command;
 import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
+import utilities.Vector2D;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,17 +29,30 @@ import java.util.List;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class ApplyCommand extends AbstractAction implements IExtendedSequence {
-    public final int playerId;
-    private boolean executed = false;
-    private Command cmd;
-
-    public ApplyCommand(int pid) {
-        playerId = pid;
-    }
+public class ApplyCommand extends CQAction {
     public ApplyCommand(int pid, Command command) {
-        this(pid);
-        cmd = command;
+        super(pid, command, null);
+    }
+    public ApplyCommand(int pid, Command command, Troop target) {
+        super(pid, command, target == null ? null : target.getLocation());
+    }
+
+    @Override
+    public boolean canExecute(CQGameState cqgs) {
+        Command cmd = cmdHighlight != null ? cmdHighlight : cqgs.cmdHighlight;
+        if (cmd.getCooldown() > 0) return false;
+        if (cmd.getCost() > cqgs.getCommandPoints()) return false;
+        CommandType cmdType = cmd.getCommandType();
+        if (cmdType == CommandType.WindsOfFate) {
+            return !cqgs.getCommands(cqgs.getCurrentPlayer(), false).isEmpty();
+        } else {
+            Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
+            if (target == null) return false; // only Winds of Fate can be applied without target.
+            if ((target.getOwnerId() == cqgs.getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
+            if (cmdType != CommandType.Charge) return true; // All non-Charge commands can be applied any time.
+            else // no use in applying Charge on a troop after it has already moved; prevent this from happening to aid MCTS
+                return cqgs.getGamePhase() == CQGameState.CQGamePhase.SelectionPhase || cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase;
+        }
     }
 
     /**
@@ -50,39 +64,19 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
-        if (!cqgs.canPerformAction(this)) return false;
-        if (cmd == null) cmd = cqgs.cmdHighlight;
-        if (!cqgs.spendCommandPoints(playerId, cmd.getCost())) return false;
-        if (cmd.getCommandType() == CommandType.WindsOfFate) {
+        if (cmdHighlight == null) cmdHighlight = cqgs.cmdHighlight;
+        if (!cqgs.spendCommandPoints(playerId, cmdHighlight.getCost())) return false;
+        if (cmdHighlight.getCommandType() == CommandType.WindsOfFate) {
             HashSet<Command> hs = cqgs.getCommands(playerId, false);
             Command[] cooldowns = hs.toArray(new Command[hs.size()]);
             cooldowns[cqgs.getRnd().nextInt(hs.size())].reset(); // reset selected command
         } else {
-            Troop target = cqgs.getTroopByLocation(cqgs.highlight);
-            target.applyCommand(cmd.getCommandType());
+            if (highlight == null) highlight = cqgs.highlight;
+            Troop target = cqgs.getTroopByLocation(highlight);
+            target.applyCommand(cmdHighlight.getCommandType());
         }
-        cqgs.useCommand(playerId, cmd);
+        cqgs.useCommand(playerId, cmdHighlight);
         return gs.setActionInProgress(this);
-    }
-
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        return ((CQGameState) gs).getAvailableActions();
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState gs) {
-        return playerId;
-    }
-
-    @Override
-    public void _afterAction(AbstractGameState state, AbstractAction action) {
-        executed = true;
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return executed;
     }
 
     /**
@@ -109,38 +103,15 @@ public class ApplyCommand extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public String toString() {
-        if (cmd != null)
-            return "Apply Command: " + cmd.getCommandType();
-        else
-            return "Apply Command";
+    public String _toString() {
+        return "Apply Command";
     }
-
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
     @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
+    public String toString() {
+        String str = "Apply";
+        if (cmdHighlight != null) str += " " + cmdHighlight;
+        else str += " Command";
+        if (highlight != null) str += "->" + highlight;
+        return str;
     }
-
-
-    /**
-     * This next one is optional.
-     *
-     *  May optionally be implemented if Actions are not fully visible
-     *  The only impact this has is in the GUI, to avoid this giving too much information to the human player.
-     *
-     *  An example is in Resistance or Sushi Go, in which all cards are technically revealed simultaneously,
-     *  but the game engine asks for the moves sequentially. In this case, the action should be able to
-     *  output something like "Player N plays card", without saying what the card is.
-     * @param gameState - game state to be used to generate the string.
-     * @param playerId - player to whom the action should be represented.
-     * @return
-     */
-   // @Override
-   // public String getString(AbstractGameState gameState, int playerId);
 }

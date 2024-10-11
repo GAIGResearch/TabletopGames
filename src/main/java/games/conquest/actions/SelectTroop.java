@@ -3,13 +3,9 @@ package games.conquest.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
-import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
 import games.conquest.components.Troop;
 import utilities.Vector2D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -27,17 +23,17 @@ import java.util.List;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class SelectTroop extends AbstractAction implements IExtendedSequence {
-    public final int playerId;
-    private boolean executed = false;
-    private Vector2D highlight;
-
-    public SelectTroop(int pid) {
-        playerId = pid;
+public class SelectTroop extends CQAction {
+    public SelectTroop(int pid, Vector2D target) {
+        super(pid, target);
     }
-    public SelectTroop(int pid, Vector2D loc) {
-        this(pid);
-        highlight = loc;
+
+    @Override
+    public boolean canExecute(CQGameState cqgs) {
+        if (cqgs.getSelectedTroop() != null) return false; // a troop was already selected.
+        Troop troop = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
+        // true if a troop is selected, it's your troop, and it's not chastised.
+        return troop != null && troop.getOwnerId() == playerId && troop.getMovement() != 0;
     }
 
     /**
@@ -49,34 +45,12 @@ public class SelectTroop extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
+        if (!canExecute(cqgs)) return false;
         if (highlight == null) highlight = cqgs.highlight;
         Troop troop = cqgs.getTroopByLocation(highlight);
-        if (troop == null) return false;
-        if (troop.getOwnerId() != playerId) return false;
-        if (troop.getMovement() == 0) return false; // Troop is chastised, can't be selected.
         cqgs.setSelectedTroop(troop.getComponentID());
         cqgs.setGamePhase(CQGameState.CQGamePhase.MovementPhase);
         return gs.setActionInProgress(this);
-    }
-
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        return ((CQGameState) gs).getAvailableActions();
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState gs) {
-        return playerId;
-    }
-
-    @Override
-    public void _afterAction(AbstractGameState state, AbstractAction action) {
-        executed = true;
-    }
-
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return executed;
     }
 
     /**
@@ -106,37 +80,7 @@ public class SelectTroop extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public String toString() {
-        if (highlight != null)
-            return "Select Troop " + highlight;
-        else
-            return "Select Troop";
+    String _toString() {
+        return "Select Troop";
     }
-
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    /**
-     * This next one is optional.
-     *
-     *  May optionally be implemented if Actions are not fully visible
-     *  The only impact this has is in the GUI, to avoid this giving too much information to the human player.
-     *
-     *  An example is in Resistance or Sushi Go, in which all cards are technically revealed simultaneously,
-     *  but the game engine asks for the moves sequentially. In this case, the action should be able to
-     *  output something like "Player N plays card", without saying what the card is.
-     * @param gameState - game state to be used to generate the string.
-     * @param playerId - player to whom the action should be represented.
-     * @return
-     */
-   // @Override
-   // public String getString(AbstractGameState gameState, int playerId);
 }

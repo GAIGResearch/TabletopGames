@@ -2,6 +2,7 @@ package games.conquest.components;
 
 import core.CoreConstants;
 import core.components.Component;
+import games.conquest.CQGameState;
 import utilities.Vector2D;
 
 import java.util.HashMap;
@@ -34,6 +35,15 @@ public class Cell extends Component {
     }
     public int getCrowDistance(Vector2D to) {
         return Math.max(Math.abs(position.getX() - to.getX()), Math.abs(position.getY() - to.getY()));
+    }
+
+    /**
+     * Check if this cell is walkable; can be false if either an obstacle, or occupied.
+     * @param cqgs Game state, to check if there is a troop there
+     * @return true if walkable, false otherwise.
+     */
+    public boolean isWalkable(CQGameState cqgs) {
+        return cqgs.getTroopByLocation(this) != null;
     }
 
     /**

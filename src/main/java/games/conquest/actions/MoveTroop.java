@@ -21,44 +21,20 @@ import java.util.List;
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link EndTurn} apply here as well.</p>
  */
-public class MoveTroop extends AbstractAction implements IExtendedSequence {
-
-    // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
-    public final int playerId;
-    private boolean executed;
-    Vector2D target;
-
-    public MoveTroop(int pid) {
-        playerId = pid;
-    }
-    public MoveTroop(int pid, Vector2D to) {
-        this(pid);
-        target = to;
+public class MoveTroop extends CQAction {
+    public MoveTroop(int pid, Vector2D target) {
+        super(pid, target);
     }
 
-    /**
-     * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
-     * if this Extended Sequence is currently active.
-     *
-     * @param gs The current game state
-     * @return the list of possible actions for the {@link AbstractGameState#getCurrentPlayer()}.
-     * These may be instances of this same class, with more choices between different values for a not-yet filled in parameter.
-     */
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
-        return ((CQGameState) gs).getAvailableActions();
-    }
-
-    /**
-     * TurnOrder delegates to this from {@link core.turnorders.TurnOrder#getCurrentPlayer(AbstractGameState)}
-     * if this Extended Sequence is currently active.
-     *
-     * @param state The current game state
-     * @return The player ID whose move it is.
-     */
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return playerId;
+    public boolean canExecute(CQGameState cqgs) {
+        if (cqgs.getGamePhase() != CQGameState.CQGamePhase.MovementPhase) return false;
+        Troop troop = cqgs.getSelectedTroop();
+        if (troop == null) return false;
+        Cell target = cqgs.getCell(highlight != null ? highlight : cqgs.highlight);
+        if (target == null || target.isWalkable(cqgs)) return false;
+        int distance = cqgs.getDistance(troop.getLocation(), target.position);
+        return distance <= troop.getMovement(); // can only execute if within movement distance.
     }
 
     /**
@@ -74,43 +50,15 @@ public class MoveTroop extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
+        if (!canExecute(cqgs)) return false;
         Troop troop = cqgs.getSelectedTroop();
-        if (troop == null) return false;
-        Cell target = cqgs.getCell(this.target != null ? this.target : cqgs.highlight);
-        if (target == null || cqgs.getTroopByLocation(target) != null) return false;
-        int distance = cqgs.getDistance(troop.getLocation(), target.position);
-        if (distance > troop.getMovement()) return false; // too far to be allowed.
+        Cell target = cqgs.getCell(this.highlight != null ? this.highlight : cqgs.highlight);
         troop.move(target, cqgs); // actually move troop.
         if (troop.getMovement() == 0) {
             // If selected troop has exhausted movement, change to CombatPhase
             cqgs.setGamePhase(CQGameState.CQGamePhase.CombatPhase);
         }
         return gs.setActionInProgress(this);
-    }
-
-    /**
-     * <p>This is called by ForwardModel whenever an action is about to be taken. It enables the IExtendedSequence
-     * to maintain local state in whichever way is most suitable.</p>
-     *
-     * <p>After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
-     * In some cases, there is no need to implement anything in this method - if for example you can tell if all
-     * actions are complete from the state directly, then that can be implemented purely in {@link #executionComplete(AbstractGameState)}</p>
-     *
-     * @param state The current game state
-     * @param action The action about to be taken (so the game state has not yet been updated with it)
-     */
-    @Override
-    public void _afterAction(AbstractGameState state, AbstractAction action) {
-        executed = true;
-    }
-
-    /**
-     * @param state The current game state
-     * @return True if this extended sequence has now completed and there is nothing left to do.
-     */
-    @Override
-    public boolean executionComplete(AbstractGameState state) {
-        return executed;
     }
 
     /**
@@ -138,21 +86,7 @@ public class MoveTroop extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public String toString() {
-        if (target != null)
-            return "Move Troop " + target;
-        else
-            return "Move Troop";
-    }
-
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
+    public String _toString() {
+        return "Move Troop";
     }
 }

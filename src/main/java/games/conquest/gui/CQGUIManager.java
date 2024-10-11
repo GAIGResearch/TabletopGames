@@ -101,16 +101,13 @@ public class CQGUIManager extends AbstractGUIManager {
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         CQGameState cqgs = (CQGameState) gameState;
         if (cqgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-//            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
-            List<AbstractAction> actions = cqgs.getGenericActions(); // TODO: better way to do this, without evading ForwardModel?
             ArrayList<Rectangle> highlight = boardView.getHighlight();
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
 
-            int start = actions.size();
             if (!highlight.isEmpty()) {
-                Troop troop = cqgs.getTroopByRect(highlight.get(0));
                 int i = 0;
                 for (AbstractAction action : actions) {
-                    if (cqgs.canPerformAction(action)) {
+                    if (cqgs.canPerformAction(action, true)) {
                         actionButtons[i].setButtonAction(action, action.toString());
                         actionButtons[i].setVisible(true);
                         i++;
@@ -128,6 +125,7 @@ public class CQGUIManager extends AbstractGUIManager {
                 EndTurn end = new EndTurn();
                 actionButtons[0].setButtonAction(end, end.toString());
                 actionButtons[0].setVisible(true);
+                // TODO: Check for Winds of Fate
             }
         }
     }
@@ -258,8 +256,6 @@ public class CQGUIManager extends AbstractGUIManager {
             }
             cqgs.cmdHighlight = commandSelection;
             showCommandInfo(cqgs);
-//            System.out.println("Visible:");
-//            System.out.println(cqgs.getCommands(0).getVisibleComponents(1));
         }
     }
 }
