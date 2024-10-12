@@ -95,5 +95,23 @@ public class shuffleTests {
         }
     }
 
+    @Test
+    public void cardsPassedClockwise() {
+        SGGameState copy = (SGGameState) state.copy(-1);
+        do {
+            List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+            fm.next(state, availableActions.get(state.getRnd().nextInt(availableActions.size())));
+        } while (state.getTurnCounter() < 4);
+
+        // now check that player 0 has the old hand of player 1;
+        // and that player 3 has the old hand of player 0
+
+        int commonCount = copy.getPlayerHands().get(1).stream().filter(state.getPlayerHands().get(0)::contains).toArray().length;
+        assertEquals(7, commonCount);
+        commonCount = copy.getPlayerHands().get(0).stream().filter(state.getPlayerHands().get(3)::contains).toArray().length;
+        assertEquals(7, commonCount);
+
+    }
+
 }
 
