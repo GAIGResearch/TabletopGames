@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class shuffleTests {
 
@@ -127,7 +127,30 @@ public class shuffleTests {
 
     @Test
     public void testPreviousActionsAreRemovedOnRedeterminisation() {
-        // Test that the redeterminisation of the deck is the same as the original deck
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        Wonders7GameState copy = (Wonders7GameState) state.copy(2);
+        // the copy should have no actions...
+        for (int i = 0; i < 4; i++) {
+            assertNull(copy.turnActions[i]);
+            if (i < 2) {
+                assertNotNull(state.turnActions[i]);
+            } else {
+                assertNull(state.turnActions[i]);
+            }
+        }
+        do {
+            // we then process the game on the copy, and check that each player plays one card
+            List<AbstractAction> availableActionsCopy = fm.computeAvailableActions(copy);
+            fm.next(copy, availableActionsCopy.get(copy.getRnd().nextInt(availableActionsCopy.size())));
+        } while (copy.playerHands.get(2).getSize() == 7);
+        // The turn counter is not reset (as it really should be on the copy...but this doesn't leak any information)
+        assertEquals(6, copy.getTurnCounter());
+        for (int i = 0; i < 4; i++) {
+            assertNull(copy.turnActions[i]);
+            assertEquals(6, copy.getPlayerHands().get(i).getSize());
+        }
+
     }
 }
 

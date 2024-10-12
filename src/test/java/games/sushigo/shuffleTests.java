@@ -61,7 +61,7 @@ public class shuffleTests {
         for (int i = 0; i < 4; i++) {
             var hand = state.getPlayerHands().get(i);
             assertEquals(7, hand.getSize());
-            if (i == 2 || i == 3) {
+            if (i == 2 || i == 1) {
                 // iterate over all cards
                 for (int j = 0; j < hand.getSize(); j++) {
                     assertEquals(copy.getPlayerHands().get(i).get(j), state.getPlayerHands().get(i).get(j));
