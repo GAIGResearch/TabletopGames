@@ -27,7 +27,6 @@ public class JavaCoder {
      * dir: working dir
      * [2]: evaluator name
      *
-     * @param args
      */
     public static void main(String[] args) {
 
@@ -55,13 +54,28 @@ public class JavaCoder {
                 String fileName = fileStem + String.format("%03d.java", iteration);
                 String className = evaluatorName + String.format("%03d", iteration);
 
-                String llmPrompt = GamePromptGenerator.createLLMTaskPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, playerCount, className);
+                String llmPrompt = GamePromptGenerator.createLLMTaskPrompt(
+                        GamePromptGenerator.TaskType.Heuristic,
+                        GameType.TicTacToe,
+                        playerCount,
+                        className);
                 if (iteration > 0) {
-                    GamePromptGenerator.createLLMFeedbackPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className, generatedCode);
+                    GamePromptGenerator.createLLMFeedbackPrompt(
+                            GamePromptGenerator.TaskType.Heuristic,
+                            GameType.TicTacToe,
+                            2,
+                            className,
+                            generatedCode);
                 }
 
                 if (!error.isEmpty())
-                    llmPrompt = GamePromptGenerator.createLLMErrorPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className, generatedCode, error);
+                    llmPrompt = GamePromptGenerator.createLLMErrorPrompt(
+                            GamePromptGenerator.TaskType.Heuristic,
+                            GameType.TicTacToe,
+                            2,
+                            className,
+                            generatedCode,
+                            error);
 
                 //String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);
                 error = "";

@@ -36,22 +36,26 @@ public class GamePromptGenerator {
     }
 
     public static String createLLMTaskPrompt(TaskType taskType, GameType gameType, int nPlayers, String className) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
 
         // Task information
-        result += "This is your task: " + taskType.getTaskTest(gameType, nPlayers, className);
+        result.append("This is your task: ").append(taskType.getTaskTest(gameType, nPlayers, className));
 
         // Rulebook manual
         String rules = gameType.loadRulebook();
-        result += "This is the description of the board game " + gameType.name() + ": " + rules + "\n";
+        result.append("This is the description of the board game ").append(gameType.name()).append(": ").append(rules).append("\n");
 
         // API, game-type specific
-        result += "You can use the following API to complete the task:\n";
+        result.append("You can use the following API to complete the task:\n");
 
         File sourceFile = new File("src/main/java/games/" + gameType.name().toLowerCase() + "/" + gameType.getGameStateClass().getSimpleName() + ".java");  // todo check
 
         // Extract methods using reflection
         // TODO: Have a specific list for core methods and enums (i.e. GameResult) + extract from game package.
+
+        // TODO: Have a template heuristic function that uses PlayerResult,
+        // TODO: clarify that only the middle section needs to be completed.
+        // TODO: only include the top level GameState classes? (at least as an option)
         Map<String, List<Method>> methods = getAllMethods(gameType.getGameStateClass());
 
         // Extract Javadocs using JavaParser
@@ -68,22 +72,22 @@ public class GamePromptGenerator {
 
         // Map methods to Javadocs
         for (String cl : methods.keySet()) {
-            result += "From class " + fullClasses.get(cl) + ":\n";
+            result.append("From class ").append(fullClasses.get(cl)).append(":\n");
             for (Method method : methods.get(cl)) {
 
                 String signature = getMethodSignature(method);
                 if (javadocs != null && javadocs.containsKey(signature)) {
-                    result += " - " + signature + ": " + javadocs.get(signature) + "\n";
+                    result.append(" - ").append(signature).append(": ").append(javadocs.get(signature)).append("\n");
                 } else {
-                    result += " - " + signature + "\n";
+                    result.append(" - ").append(signature).append("\n");
                 }
 
             }
         }
 
-        result += "Assume all the other classes are implemented, and do not include a main function. Add all the import statements required.\n";
+        result.append("Assume all the other classes are implemented, and do not include a main function. Add all the import statements required.\n");
 
-        return result;
+        return result.toString();
     }
 
     public static String createLLMFeedbackPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code) {

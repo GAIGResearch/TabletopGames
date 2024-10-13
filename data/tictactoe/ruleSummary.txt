@@ -1,0 +1,9 @@
+Tic Tac Toe is a classic two-player game played on a 3x3 grid. The objective of the game is to be the first player to get three of their marks in a row, column, or diagonal. Here are the core rules of the game:
+
+1. Players take turns marking empty squares on the grid. One player uses X, and the other uses O.
+2. The first player to place three of their marks in a row (horizontally, vertically, or diagonally) wins the game.
+3. If all squares on the grid are filled without achieving three in a row, the game ends in a draw.
+4. The game is usually played on paper, but it can also be played online or in person with a physical board.
+5. To win, players must plan their moves carefully and try to anticipate their opponent's moves.
+
+In summary, Tic Tac Toe is a simple game with a few core rules: players take turns marking squares on a 3x3 grid, and the first player to get three in a row wins. If all squares are filled without achieving this, the game ends in a draw. The game is played for fun and is often used as a way to teach children basic strategy and logical thinking.
