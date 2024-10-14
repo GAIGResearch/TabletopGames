@@ -81,7 +81,7 @@ public class JavaCoder {
                             className,
                             generatedCode,
                             error);
-                    }
+                }
 
                 //String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);
                 error = "";
@@ -140,7 +140,7 @@ public class JavaCoder {
             // then override the ones we really want
             tournamentConfig.putAll(Map.of(
                     RunArg.game, gameType,
-                    RunArg.matchups, 100,
+                    RunArg.matchups, 1000,
                     RunArg.listener, Collections.emptyList(),
                     RunArg.mode, "exhaustive",
                     RunArg.output, String.format("%s_%03d_Results.txt", fileStem, iteration),
