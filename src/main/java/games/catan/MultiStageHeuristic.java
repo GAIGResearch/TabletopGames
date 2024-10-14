@@ -7,9 +7,7 @@ import evaluation.optimisation.TunableParameters;
 import players.heuristics.LinearStateHeuristic;
 import players.heuristics.ScoreHeuristic;
 
-import java.util.Arrays;
-
-public class CatanMultiStageHeuristic extends TunableParameters implements IStateHeuristic {
+public class MultiStageHeuristic extends TunableParameters implements IStateHeuristic {
 
     LinearStateHeuristic base, opening, early, late;
     CatanStateFeatures features = new CatanStateFeatures();
@@ -21,7 +19,7 @@ public class CatanMultiStageHeuristic extends TunableParameters implements IStat
     /**
      * This is a state value heuristic that uses a different function for each round
      */
-    public CatanMultiStageHeuristic() {
+    public MultiStageHeuristic() {
         // This is hardcoded for the moment to always use a linear state heuristic for a Score Plus based heuristic
         // the parameters then define the different coefficient files to use at different stages of the game
 
@@ -64,7 +62,7 @@ public class CatanMultiStageHeuristic extends TunableParameters implements IStat
 
     @Override
     protected AbstractParameters _copy() {
-        return new CatanMultiStageHeuristic();
+        return new MultiStageHeuristic();
     }
 
     @Override
@@ -73,7 +71,7 @@ public class CatanMultiStageHeuristic extends TunableParameters implements IStat
     }
 
     @Override
-    public CatanMultiStageHeuristic instantiate() {
+    public MultiStageHeuristic instantiate() {
         return this;
     }
 
