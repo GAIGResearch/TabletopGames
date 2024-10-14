@@ -50,6 +50,10 @@ public class GamePromptGenerator {
 
         // Extract methods using reflection
         // TODO: Have a specific list for core methods and enums (i.e. GameResult) + extract from game package.
+
+        // TODO: Have a template heuristic function that uses PlayerResult,
+        // TODO: clarify that only the middle section needs to be completed.
+        // TODO: only include the top level GameState classes? (at least as an option)
         Map<String, List<Method>> methods = getAllMethods(gameType.getGameStateClass());
 
         // Extract Javadocs using JavaParser

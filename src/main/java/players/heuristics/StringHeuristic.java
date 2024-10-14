@@ -97,7 +97,9 @@ public class StringHeuristic implements IStateHeuristic {
         // Compile the source code
         DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<JavaFileObject>();
 
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticsCollector, null, null, List.of(javaFileObject));
+        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager,
+                diagnosticsCollector, null, null,
+                List.of(javaFileObject));
 
         boolean success = task.call();
         if (!success) {
@@ -127,8 +129,9 @@ public class StringHeuristic implements IStateHeuristic {
             // Find and invoke the method using reflection
             heuristicFunction = dynamicClass.getMethod("evaluateState", AbstractGameState.class, int.class);
 
+            classLoader.close();
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                 NoSuchMethodException | MalformedURLException e) {
+                 NoSuchMethodException | IOException e) {
             throw new RuntimeException(e);
         }
     }
