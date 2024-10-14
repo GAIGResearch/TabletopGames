@@ -71,11 +71,23 @@ public class JavaCoder {
                 error = "";
                 // Use regex to extract code between ```java and ```
                 // and remove any comments
-                generatedCode = llm.getResponse(llmPrompt)
+                generatedCode = llm.getResponse(llmPrompt);
+                //.replaceAll("```java\\s*(.*?)", "$1");
+                //        .replaceAll("(.*?)```", "$1")
+                 //       .replaceAll("//.*\\n", "");
+
+                String commentPrompt = """
+                            After the *** is a Java class.
+                            Your task is to remove any comments or JavaDoc from this code.
+                            The output should be the same code, with any syntax corrections, but without any comments.
+                         
+                            ***
+                        """;
+                String commentFreeCode = llm.getResponse(commentPrompt + generatedCode)
                         .replaceAll("```java\\s*(.*?)", "$1")
-                        .replaceAll("(.*?)```", "$1")
-                        .replaceAll("//.*\\n", "");
-                writeGeneratedCodeToFile(generatedCode, fileName);
+                        .replaceAll("(.*?)```", "$1");
+                writeGeneratedCodeToFile(commentFreeCode, fileName);
+
 
                 System.out.printf("Iteration %d has generated code%n", iteration);
 

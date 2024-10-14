@@ -101,23 +101,23 @@ public class StringHeuristic implements IStateHeuristic {
 
         boolean success = task.call();
         if (!success) {
-                StringBuilder sb = new StringBuilder();
-                List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
-                for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
-                    if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
-                        // read error details from the diagnostic object
-                        sb.append(diagnostic.getMessage(null)).append("\n");
-                    }
+            StringBuilder sb = new StringBuilder();
+            List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+                if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
+                    // read error details from the diagnostic object
+                    sb.append(diagnostic.getMessage(null)).append("\n");
                 }
-                String error = String.format("Compilation error: %s", sb);
+            }
+            String error = String.format("Compilation error: %s", sb);
             throw new RuntimeException(error);
-        }else{
+        } else {
             System.out.println("Heuristic loaded: " + fileName);
         }
 
         // Load the compiled class
         try {
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { new File("").toURI().toURL() });
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File("").toURI().toURL()});
 
             Class<?> dynamicClass = classLoader.loadClass(className);
 
@@ -125,10 +125,7 @@ public class StringHeuristic implements IStateHeuristic {
             heuristicClass = dynamicClass.getDeclaredConstructor().newInstance();
 
             // Find and invoke the method using reflection
-            if(className.contains("TicTacToeEvaluator"))
-                heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
-            else if(className.contains("LoveLetterEvaluator"))
-                heuristicFunction = dynamicClass.getMethod("evaluateState", LoveLetterGameState.class, int.class);
+            heuristicFunction = dynamicClass.getMethod("evaluateState", AbstractGameState.class, int.class);
 
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
                  NoSuchMethodException | MalformedURLException e) {
