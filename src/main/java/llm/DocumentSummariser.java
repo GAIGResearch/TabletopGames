@@ -89,7 +89,7 @@ public class DocumentSummariser {
                 Summarise the information about %s below in no more than %d words.
                 """, areaOfInterest, wordLimit);
 
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.MISTRAL, "RulesSummary_LLM_Log.txt");
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, "RulesSummary_LLM_Log.txt");
 
         int charactersPerRequest = 2500;
         int characterOverlap = 500;
@@ -120,8 +120,8 @@ public class DocumentSummariser {
     }
 
     public static void main(String[] args) {
-//        DocumentSummariser summariser = new DocumentSummariser("data/loveletter/rulebook.pdf");
-//        System.out.println(summariser.processText());
+        DocumentSummariser summariser = new DocumentSummariser("data/loveletter/rulebook.pdf");
+        System.out.println(summariser.processText());
 
         System.out.println(GameType.LoveLetter.loadRulebook());
     }

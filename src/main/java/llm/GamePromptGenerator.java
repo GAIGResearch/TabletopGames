@@ -20,15 +20,13 @@ public class GamePromptGenerator {
             if (this == Heuristic) {
                 return "You are playing the board game " + gameType.name() + ". Your job is to write the evaluation logic to help an AI play this game. Don't leave parts unfinished or TODOs.\n" +
                         "Write it all in a Java class called " + className + ", with only a single function with this signature:\n" +
-                        " - public double evaluateState(AbstractGameState gameState, int playerId)\n" +
-                        "This is a heuristic function to play the game. The variable gameState is the current state of the game, and playerId" +
-                        "is the ID of the player we evaluate the state for. The first thing you'll do is cast the abstract game state variable" +
-                        "to the specific one we need: " + gameType.getGameStateClass().getSimpleName() + ".\n Write the contents of this heuristic function, so that we give a higher numeric " +
-                        "evaluation to those game states that are beneficial to the player with the received playerId as id. Return:\n" +
-                        "  - 0.0 if player playerId lost the game.\n" +
-                        "  - 1.0 if player playerId won the game.\n" +
-                        " If the game is not over, return a value between 0.0 and 1.0 so that the value is close to 0.0 if player playerId is close to losing," +
-                        " and closer to 1.0 if playerId is about to win the game.\n" +
+                        " - public double evaluateState(core.AbstractGameState gameState, int playerId)\n" +
+                        "The variable gameState is the current state of the game, and playerId is the ID of the player we evaluate the state for. " +
+                        "The return value is an estimate of the value of the state. This must be between 0.0 and 1.0. " +
+                        "0.0 means we have no chance of winning, 0.50 means we have a 50% chance of winning, and 1.0 means we have won the game.\n" +
+                        "The first thing you'll do is cast the abstract game state variable" +
+                        "to the specific one we need: " + gameType.getGameStateClass().getSimpleName() + ".\n Write the contents of this function, so that we give a higher numeric " +
+                        "evaluation to those game states that are beneficial to the player with the received playerId as id. " +
                         "Take into account the whole game state and possible opponent moves. There are " + (nPlayers-1) + " other players in the game.";
             }
             return "";
@@ -103,6 +101,7 @@ public class GamePromptGenerator {
 
     public static String createLLMErrorPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code, String error) {
         String text = """
+                A previous attempt at this task created the class below.
                 This class had failed to compile correctly.
                 ```java
                 %s
@@ -110,11 +109,11 @@ public class GamePromptGenerator {
                 The error message is:
                 %s
                 
-                Rewrite this code to compile correctly
+                Your immediate task is to rewrite this code to compile correctly.
                 """;
         String result = String.format(text, code, error);
         String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className);
-        return result+taskText;
+        return taskText + result;
     }
 
     public static Map<String, List<Method>> getAllMethods(Class<?> clazz) {
@@ -124,10 +123,19 @@ public class GamePromptGenerator {
         return methods;
     }
 
+    static List<String> packagesToIgnore = List.of("java.lang", "java.util", "core", "core.components", "core.actions");
+    static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck", "Dice");
+
     private static void extractMethods(Class<?> clazz, Map<String, List<Method>> methods, List<Class<?>> visitedClasses) {
         if (clazz == null || clazz == Object.class || clazz.isEnum() || visitedClasses.contains(clazz)) {
+            System.out.println("Skipping " + clazz);
             return;
         }
+        if (packagesToIgnore.contains(clazz.getPackageName()) && !classesToOverride.contains(clazz.getSimpleName())) {
+            System.out.println("Ignoring " + clazz);
+            return;
+        }
+        System.out.println("Extracting methods from " + clazz);
 
         visitedClasses.add(clazz);
         List<Method> methodList = new ArrayList<>();
@@ -144,13 +152,18 @@ public class GamePromptGenerator {
 
         if (!methodList.isEmpty()) {
             methods.put(clazz.getSimpleName(), methodList);
+            // We also need to extract classes from the argument lists of the methods
+
+            for (Method method : methodList) {
+                for (Class<?> parameterType : method.getParameterTypes()) {
+                    extractMethods(parameterType, methods, visitedClasses);
+                }
+            }
         }
 
         for (Field field : clazz.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers()) &&
-                    !field.getType().isPrimitive() &&
-                    !field.getType().getName().startsWith("java.lang") &&
-                    !field.getType().getName().startsWith("java.util")) {
+                    !field.getType().isPrimitive()) {
                 extractMethods(field.getType(), methods, visitedClasses);
             }
         }

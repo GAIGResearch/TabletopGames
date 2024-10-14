@@ -43,12 +43,15 @@ public class JavaCoder {
 
         int iteration = 0;
         int max_iters = 3;
+        int currentErrors = 0;
+        int maxErrorsPerIteration = 3;
 
         LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, llmLogFile);
         List<AbstractPlayer> playerList = new ArrayList<>();
 
         String generatedCode = "";
         String error = "";
+
 
         while (iteration < max_iters) {
             try {
@@ -60,9 +63,10 @@ public class JavaCoder {
                     GamePromptGenerator.createLLMFeedbackPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className, generatedCode);
                 }
 
-                if (!error.isEmpty())
+                if (!error.isEmpty()) {
+                    currentErrors++;
                     llmPrompt = GamePromptGenerator.createLLMErrorPrompt(GamePromptGenerator.TaskType.Heuristic, GameType.TicTacToe, 2, className, generatedCode, error);
-
+                }
                 //String.format("This class had failed to compile correctly.%n%n%s%n%nThe error message is %s%n.Rewrite this code to compile correctly%n", generatedCode, error);
                 error = "";
                 // Use regex to extract code between ```java and ```
@@ -93,7 +97,13 @@ public class JavaCoder {
 
             if (!error.isEmpty()) {
                 // in this case we failed to compile the code, so we don't run the tournament
-                System.out.println("Compilation error, re-asking LLM");
+                if (currentErrors >= maxErrorsPerIteration) {
+                    System.out.println("Too many errors, stopping this iteration");
+                    iteration++;
+                    currentErrors = 0;
+                    error = "";
+                } else
+                    System.out.println("Compilation error, re-asking LLM");
                 continue;
             }
             // set up defaults

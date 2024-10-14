@@ -1,6 +1,7 @@
 package players.heuristics;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import games.loveletter.LoveLetterGameState;
 import games.tictactoe.TicTacToeGameState;
@@ -137,6 +138,14 @@ public class StringHeuristic implements IStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
+            return 0;
+        if (playerResult == CoreConstants.GameResult.DRAW_GAME)
+            return 0.5;
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
+            return 1;
+
         try {
             return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
