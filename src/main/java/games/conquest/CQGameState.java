@@ -77,10 +77,13 @@ public class CQGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // TODO: board squares
         ArrayList<Component> components = new ArrayList<>();
-        // components.add(cells); // TODO: cells are not components.
+        for (Cell[] cell : cells) {
+            components.addAll(List.of(cell));
+        }
         components.addAll(troops);
+        components.addAll(chosenCommands[0].getComponents());
+        components.addAll(chosenCommands[1].getComponents());
         return components;
     }
 
@@ -133,10 +136,11 @@ public class CQGameState extends AbstractGameState {
         List<AbstractAction> actions = new ArrayList<>();
         actions.add(new EndTurn());
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
+        AbstractAction action;
         if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
                 if (c.getCommandType() == CommandType.WindsOfFate) {
-                    actions.add(new ApplyCommand(uid, c, null));
+                    actions.add(new ApplyCommand(uid, c, (Vector2D) null));
                 } else if (c.getCommandType().enemy) {
                     for (Troop t : getTroops(uid ^ 1)) {
                         actions.add(new ApplyCommand(uid, c, t));
@@ -150,7 +154,9 @@ public class CQGameState extends AbstractGameState {
         }
         if (phase.equals(CQGamePhase.SelectionPhase)) {
             for (Troop t : getTroops(uid)) {
-                actions.add(new SelectTroop(uid, t.getLocation()));
+                SelectTroop sel = new SelectTroop(uid, t.getLocation());
+                if (canPerformAction(sel, false))
+                    actions.add(sel);
             }
         } else if (phase.equals(CQGamePhase.MovementPhase)) {
             assert currentTroop != null;
@@ -158,9 +164,9 @@ public class CQGameState extends AbstractGameState {
             int range = currentTroop.getMovement();
             for (int i = Math.max(0, pos.getX() - range); i <= Math.min(20, pos.getX() + range); i++) {
                 for (int j = Math.max(0, pos.getY() - range); j <= Math.min(20, pos.getY() + range); j++) {
-                    if (getTroopByLocation(pos) == null) continue; // can't move where another troop is located
-                    if (getDistance(pos, new Vector2D(i,j)) > range) continue; // path is longer than crow's flight due to obstacle
-                    actions.add(new MoveTroop(uid, new Vector2D(i,j)));
+                    MoveTroop mov = new MoveTroop(uid, new Vector2D(i,j));
+                    if (canPerformAction(mov, false))
+                        actions.add(mov);
                 }
             }
         }
@@ -168,8 +174,9 @@ public class CQGameState extends AbstractGameState {
             assert currentTroop != null;
             Cell c = getCell(currentTroop.getLocation());
             for (Troop t : getTroops(uid ^ 1)) {
-                if (c.getCrowDistance(t.getLocation()) <= currentTroop.getRange()) {
-                    actions.add(new AttackTroop(uid, t.getLocation()));
+                AttackTroop atk = new AttackTroop(uid, t.getLocation());
+                if (canPerformAction(atk, false)) {
+                    actions.add(atk);
                 }
             }
         }
@@ -303,8 +310,7 @@ public class CQGameState extends AbstractGameState {
     @Override
     protected CQGameState _copy(int playerId) {
         CQGameState copy = new CQGameState(getGameParameters(), getNPlayers());
-        // TODO: make deep copies of troops and commands?
-        copy.cells = cells;
+        copy.cells = cells; // Cells only have final properties so can be copied like this.
         copy.troops = (HashSet<Troop>) troops.clone();
         copy.locationToTroopMap = (HashMap<Vector2D, Integer>) locationToTroopMap.clone();
         copy.selectedTroop = selectedTroop;
@@ -342,15 +348,37 @@ public class CQGameState extends AbstractGameState {
 
     @Override
     protected boolean _equals(Object o) {
-        // TODO: compare all variables in the state
-        return o instanceof CQGameState;
+        if (o == this) return true;
+        if (!(o instanceof CQGameState)) return false;
+        CQGameState cqgs = (CQGameState) o;
+        if (cqgs.getGamePhase() != getGamePhase()) return false;
+        // Compare simple integer values:
+        if (cqgs.commandPoints[0] != commandPoints[0] ||
+            cqgs.commandPoints[1] != commandPoints[1])
+            return false;
+        // Compare hashmaps and other subobjects:
+        if (!(
+                cqgs.highlight.equals(highlight) &&
+                cqgs.random.equals(random) &&
+                Arrays.deepEquals(cqgs.cells, cells) &&
+                cqgs.troops.equals(troops) &&
+                cqgs.locationToTroopMap.equals(locationToTroopMap) &&
+                cqgs.cmdHighlight.equals(cmdHighlight) &&
+                cqgs.gridBoard.equals(gridBoard) &&
+                Arrays.equals(cqgs.chosenCommands, chosenCommands)
+        ))
+            return false;
+        return true;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hash code of all variables
-        return super.hashCode();
+        return Objects.hash(
+                getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop,
+                highlight, cmdHighlight, gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints)
+        );
     }
+
     // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
     // TODO: So you do not (and generally should not) implement your own versions - take advantage of the framework!
     public Random getRnd() {

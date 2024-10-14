@@ -1,6 +1,5 @@
 package games.conquest.gui;
 
-import cats.kernel.Hash;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
@@ -125,7 +124,19 @@ public class CQGUIManager extends AbstractGUIManager {
                 EndTurn end = new EndTurn();
                 actionButtons[0].setButtonAction(end, end.toString());
                 actionButtons[0].setVisible(true);
-                // TODO: Check for Winds of Fate
+                if (commandSelection != null && commandSelection.getCommandType() == CommandType.WindsOfFate) {
+                    // Winds of Fate is highlighted; add that as well, if it can be executed.
+                    for (AbstractAction action : actions) {
+                        if (!(action instanceof ApplyCommand)) continue;
+                        ApplyCommand cmd = (ApplyCommand) action;
+                        if (cmd.isWindsOfFate()) {
+                            if (!cmd.canExecute(cqgs)) break; // can't execute it (not enough command points)
+                            actionButtons[1].setButtonAction(action, action.toString());
+                            actionButtons[1].setVisible(true);
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
@@ -224,8 +235,7 @@ public class CQGUIManager extends AbstractGUIManager {
      */
     @Override
     public int getMaxActionSpace() {
-        // TODO
-        return 10;
+        return 3; // EndTurn + ApplyCommand + one of: (SelectTroop, MoveTroop, AttackTroop)
     }
 
     /**

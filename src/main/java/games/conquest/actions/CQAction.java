@@ -7,7 +7,8 @@ import games.conquest.CQGameState;
 import games.conquest.components.Command;
 import games.conquest.components.CommandType;
 import utilities.Vector2D;
-import java.util.logging.Logger;
+
+import java.util.Objects;
 
 import java.util.List;
 
@@ -26,13 +27,19 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
         cmdHighlight = cmd;
     }
 
-    public boolean checkHighlight(Vector2D cmp) {
-        return cmp.equals(highlight);
-    }
+    /**
+     * Check if the highlighted cell corresponds with the highlight set for the given action
+     * @param cmp position to compare highlight with
+     * @param cmd (optional) command to compare highlight with
+     * @return `true` if the board's highlight `cmp` (and `cmd`) is equal to the action's `highlight` (and `cmdHighlight`); `false` otherwise.
+     */
     public boolean checkHighlight(Vector2D cmp, Command cmd) {
-        if (cmd == null) return false; // TODO: Is this correct for non-GUI players?
+        if (cmd == null) return false;
         if (cmd.getCommandType() == CommandType.WindsOfFate) return cmd.equals(cmdHighlight);
         else return cmp.equals(highlight) && cmd.equals(cmdHighlight);
+    }
+    public boolean checkHighlight(Vector2D cmp) {
+        return cmp.equals(highlight);
     }
 
     public abstract boolean canExecute(CQGameState cqgs);
@@ -84,7 +91,9 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
     public abstract boolean equals(Object obj);
 
     @Override
-    public abstract int hashCode();
+    public int hashCode() {
+        return Objects.hash(playerId, highlight, cmdHighlight, executed);
+    }
 
     /**
      * @param gameState - game state provided for context.

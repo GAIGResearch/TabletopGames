@@ -39,4 +39,9 @@ public enum CommandType {
         this.speed = speed;
         this.icon = new ImageIcon(ImageIO.GetInstance().getImage(CQParameters.dataPath + name + ".png"));
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -15,13 +15,13 @@ import evaluation.optimisation.TunableParameters;
  * automatic game parameter optimisation tools in the framework.</p>
  */
 public class CQParameters extends AbstractParameters {
-    int gridWidth = 20;
-    int gridHeight = 20;
-    int setupPoints = 1000;
-    int maxTroops = 10;
-    int maxCommands = 4;
-    int nSetupRows = 3; // setup allowed in first 3 rows only
-    int randomSeed = 0;
+    public final int gridWidth = 20;
+    public final int gridHeight = 20;
+    public final int setupPoints = 1000;
+    public final int maxTroops = 10;
+    public final int maxCommands = 4;
+    public final int nSetupRows = 3; // setup allowed in first 3 rows only
+    public final int randomSeed = 0;
     public static final String dataPath = "data/conquest/";
 
     public CQParameters() {
@@ -30,19 +30,16 @@ public class CQParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        // TODO: deep copy of all variables.
         return this;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        // TODO: compare all variables.
         return o instanceof CQParameters;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hashcode of all variables.
         return super.hashCode();
     }
 }

@@ -67,7 +67,7 @@ public class Cell extends Component {
         if (this == o) return true;
         if (!(o instanceof Cell)) return false;
         Cell cell = (Cell) o;
-        return Objects.equals(position, cell.position);
+        return position.equals(cell.position);
     }
 
     @Override

@@ -36,6 +36,9 @@ public class ApplyCommand extends CQAction {
     public ApplyCommand(int pid, Command command, Troop target) {
         super(pid, command, target == null ? null : target.getLocation());
     }
+    public ApplyCommand(int pid, Command command, Vector2D target) {
+        super(pid, command, target);
+    }
 
     @Override
     public boolean canExecute(CQGameState cqgs) {
@@ -79,6 +82,10 @@ public class ApplyCommand extends CQAction {
         return gs.setActionInProgress(this);
     }
 
+    public boolean isWindsOfFate() {
+        return cmdHighlight.getCommandType() == CommandType.WindsOfFate;
+    }
+
     /**
      * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
      * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
@@ -87,19 +94,17 @@ public class ApplyCommand extends CQAction {
      */
     @Override
     public ApplyCommand copy() {
-        return this;
+        return new ApplyCommand(playerId, cmdHighlight, highlight);
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: need to check pid?
-        return obj instanceof ApplyCommand;
-    }
-
-    @Override
-    public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        if (this == obj) return true;
+        if (!(obj instanceof  ApplyCommand)) return false;
+        ApplyCommand acObj = ((ApplyCommand) obj);
+        if (acObj.playerId != playerId || !acObj.cmdHighlight.equals(cmdHighlight)) return false;
+        if (highlight == null && acObj.highlight == null) return true;
+        return acObj.highlight.equals(highlight);
     }
 
     @Override

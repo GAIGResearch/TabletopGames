@@ -4,6 +4,8 @@ import core.CoreConstants;
 import core.components.Card;
 import core.components.Component;
 
+import java.util.Objects;
+
 /**
  * <p>Components represent a game piece, or encompass some unit of game information (e.g. cards, tokens, score counters, boards, dice etc.)</p>
  * <p>Components in the game can (and should, if applicable) extend one of the other components, in package {@link core.components}.
@@ -58,13 +60,13 @@ public class Command extends Card {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Command) || !super.equals(o)) return false;
-        return ((Command) o).cooldown == this.cooldown;
+        Command cmd = (Command) o;
+        return cmd.ownerId == ownerId && cmd.cooldown == this.cooldown && cmd.commandType.equals(commandType);
     }
 
     @Override
     public int hashCode() {
-        // TODO: include all class variables (if any).
-        return super.hashCode();
+        return Objects.hash(super.hashCode(), ownerId, commandType, cooldown);
     }
 
     public void step() {

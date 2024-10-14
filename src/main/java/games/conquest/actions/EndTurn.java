@@ -32,12 +32,6 @@ public class EndTurn extends AbstractAction {
         return true;
     }
 
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
-     * <p>If all variables in this class are final or effectively final (which they should be),
-     * then you can just return <code>`this`</code>.</p>
-     */
     @Override
     public EndTurn copy() {
         return this;
@@ -58,12 +52,6 @@ public class EndTurn extends AbstractAction {
         return "End turn";
     }
 
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

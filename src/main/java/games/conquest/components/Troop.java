@@ -9,6 +9,7 @@ import utilities.Vector2D;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * <p>Components represent a game piece, or encompass some unit of game information (e.g. cards, tokens, score counters, boards, dice etc.)</p>
@@ -72,7 +73,6 @@ public class Troop extends Component {
         copy.healthBoost = healthBoost;
         copy.distanceMoved = distanceMoved;
         copy.setLocation(location);
-//        copyComponentTo(copy); // TODO: ?
         return copy;
     }
 
@@ -107,14 +107,17 @@ public class Troop extends Component {
         if (!(o instanceof Troop)) return false;
         if (!super.equals(o)) return false; // this already checks for equality of all final values (through the componentID)
         Troop troop = (Troop) o;
-        return troop.getHealth() == this.getHealth() &&
-               troop.getMovement() == this.getMovement(); // TODO: check applied commands hash
+        return troop.ownerId == ownerId &&
+               troop.getHealth() == this.getHealth() &&
+               troop.getMovement() == this.getMovement() &&
+               troop.appliedCommands.equals(appliedCommands);
     }
 
     @Override
     public int hashCode() {
-        // TODO: include all class variables (if any).
-        return super.hashCode();
+        return Objects.hash(
+                super.hashCode(), ownerId, troopType, health, healthBoost, distanceMoved, location, appliedCommands
+        );
     }
 
     // step function; two different behaviours whether it will be my turn next, or the enemy's turn

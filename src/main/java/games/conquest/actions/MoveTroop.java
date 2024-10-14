@@ -69,20 +69,15 @@ public class MoveTroop extends CQAction {
      */
     @Override
     public MoveTroop copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        return new MoveTroop(playerId, highlight);
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof EndTurn;
-    }
-
-    @Override
-    public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        if (this == obj) return true;
+        if (!(obj instanceof MoveTroop)) return false;
+        MoveTroop mtObj = (MoveTroop) obj;
+        return mtObj.playerId == playerId && mtObj.highlight.equals(highlight);
     }
 
     @Override

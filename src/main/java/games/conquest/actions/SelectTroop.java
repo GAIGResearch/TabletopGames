@@ -61,8 +61,7 @@ public class SelectTroop extends CQAction {
      */
     @Override
     public SelectTroop copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        return new SelectTroop(playerId, highlight);
     }
 
     @Override
@@ -70,13 +69,7 @@ public class SelectTroop extends CQAction {
         if (this == obj) return true;
         if (!(obj instanceof SelectTroop)) return false;
         SelectTroop stObj = (SelectTroop) obj;
-        return stObj.playerId == playerId;
-    }
-
-    @Override
-    public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return stObj.playerId == playerId && stObj.highlight.equals(highlight);
     }
 
     @Override
