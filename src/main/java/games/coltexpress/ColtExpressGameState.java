@@ -45,12 +45,21 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     LinkedList<Compartment> trainCompartments;
     // The round cards
     PartialObservableDeck<RoundCard> rounds;
+    Random playerHandRnd;
+
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        int playerSeed = ((ColtExpressParameters) gameParameters).playerHandShuffleSeed;
+        playerHandRnd = playerSeed == -1 ? rnd : new Random(playerSeed);
     }
     @Override
     protected TurnOrder _createTurnOrder(int nPlayers) {
@@ -78,6 +87,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         ColtExpressGameState copy = new ColtExpressGameState(gameParameters.copy(), getNPlayers());
 
+        ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
         // These are always visible
         copy.bulletsLeft = bulletsLeft.clone();
         copy.playerCharacters = new HashMap<>(playerCharacters);
@@ -102,6 +112,8 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         for (Compartment d : trainCompartments) {
             copy.trainCompartments.add((Compartment) d.copy());
         }
+        // we always reset the player hand shuffle seed (the main rnd is covered in the parent copy)
+        copy.playerHandRnd = new Random(redeterminisationRnd.nextLong());
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
@@ -329,6 +341,10 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
             playerDeck.add(playerHand);
             playerHand.clear();
+            // This is the basic variant, in which all cards are reshuffled into the deck for each round
+            // The expert variant which maintains a separate discard pile that is only shuffled to
+            // become the draw deck when the latter is empty is not currently implemented
+            playerDeck.shuffle(playerHandRnd);
 
             for (int i = 0; i < ((ColtExpressParameters) getGameParameters()).nCardsInHand; i++) {
                 playerHand.add(playerDeck.draw());
