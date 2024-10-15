@@ -7,8 +7,9 @@ import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
-import players.heuristics.WinOnlyHeuristic;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +45,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return new WinOnlyHeuristic().evaluateState(this, playerId);
-//        return new TicTacToeHeuristic().evaluateState(this, playerId);
+        return new TicTacToeHeuristic().evaluateState(this, playerId);
     }
 
     /**
@@ -90,11 +90,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     @Override
     public void printToConsole() {
         System.out.println(gridBoard.toString());
-    }
-
-    public Token getPlayerToken(int playerId)
-    {
-        return TicTacToeConstants.playerMapping.get(playerId);
     }
 
 }

@@ -99,19 +99,24 @@ public class Wonders7GameState extends AbstractGameState {
         copy.wonderBoardDeck = wonderBoardDeck.copy();
         copy.cardRnd = new Random(redeterminisationRnd.nextInt());
 
-        // TODO: This does not keep the known information!!!
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // Player does not know the other players hands and discard pile (except for next players hand)
-            // All the cards of other players and discard pile are shuffled
+            // Seven Wonders does not use PartialObservableDecks
+            // However a player knows the cards in the hands of players now holding hands that the player used to have
+            // (there is one exception to this, in that any card used to build a wonder from the hand of cards is not known)
+            // (we ignore this exception for now; as this is a small effect compared to know cards other players mostly have)
+
+
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.ageDeck.add(copy.playerHands.get(i)); // Groups other players cards (except for next players hand) into the ageDeck (along with any cards that were not in the game at that age)
+                if (!hasSeenHand(playerId, i)) {
+                    copy.ageDeck.add(copy.playerHands.get(i));
+                    // Groups other players cards (except for next players hand) into the ageDeck
+                    // (along with any cards that were not in the game at that age)
                 }
             }
             copy.ageDeck.add(copy.discardPile); // Groups the discard pile into the ageDeck
             copy.ageDeck.shuffle(redeterminisationRnd); // Shuffle all the cards
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
+                if (!hasSeenHand(playerId, i)) {
                     Deck<Wonder7Card> hand = copy.playerHands.get(i);
                     int nCards = hand.getSize();
                     hand.clear();  // Empties the accurate player hands, except for the next players hand
@@ -132,6 +137,30 @@ public class Wonders7GameState extends AbstractGameState {
             // we know our action (if one has been chosen, but no one elses)
         }
         return copy;
+    }
+
+    /**
+     * we do know the contents of the hands of players up to T to our left or right, where T
+     * is the number of cards we have played.
+     *
+     * @param playerId   - id of player whose vision we're checking
+     * @param opponentId - id of opponent owning the hand of cards we're checking vision of
+     * @return - true if player has seen the opponent's hand of cards, false otherwise
+     */
+    public boolean hasSeenHand(int playerId, int opponentId) {
+        if (playerId == opponentId) return true;  // always know your own hand
+        Wonders7GameParameters params = (Wonders7GameParameters) gameParameters;
+        // a player knows a number of other hands equal to the number of cards they have played
+        int handsKnown = params.nWonderCardsPerPlayer - playerHands.get(playerId).getSize();
+
+        // 'Left' means we pass to lower numbered players, 'Right' means we pass to higher numbered players
+        int opponentSpacesToLeft = (playerId - opponentId + getNPlayers()) % getNPlayers();
+        int opponentSpacesToRight = (opponentId  - playerId + getNPlayers()) % getNPlayers();
+
+        if (direction == 1) {  // this passes to lower numbered players
+            return handsKnown >= opponentSpacesToLeft;
+        } else  // this passes to higher numbered players
+            return handsKnown >= opponentSpacesToRight;
     }
 
     @Override

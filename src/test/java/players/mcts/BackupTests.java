@@ -36,13 +36,13 @@ public class BackupTests {
         // This assumes we will be back-propagating a trajectory of Middle, Left, Right, Middle
 
         for (int i = 0; i < 50; i++) {
-            root.backUpSingleNode(new LMRAction("Middle"), new double[]{1.0});
+            root.backUpSingleNode(new LMRAction("Middle"), new double[]{1.0, -0.1});
         }
         for (int i = 0; i < 25; i++) {
-            root.backUpSingleNode(new LMRAction("Left"), new double[]{0.0});
+            root.backUpSingleNode(new LMRAction("Left"), new double[]{0.0, 0.0});
         }
         for (int i = 0; i < 25; i++) {
-            root.backUpSingleNode(new LMRAction("Right"), new double[]{0.5});
+            root.backUpSingleNode(new LMRAction("Right"), new double[]{0.5, -0.05});
         }
         // We now have a root node with 100 visits; with values of 1.0 for Middle, 0.0 for Left, 0.5 for Right
 
@@ -52,13 +52,13 @@ public class BackupTests {
         }
         SingleTreeNode levelOneMiddle = root.getChildren().get(baseActions.get(1))[0];
         for (int i = 0; i < 25; i++) {
-            levelOneMiddle.backUpSingleNode(new LMRAction("Left"), new double[]{0.9});
+            levelOneMiddle.backUpSingleNode(new LMRAction("Left"), new double[]{0.9, -0.09});
         }
         for (int i = 0; i < 15; i++) {
-            levelOneMiddle.backUpSingleNode(new LMRAction("Middle"), new double[]{0.0});
+            levelOneMiddle.backUpSingleNode(new LMRAction("Middle"), new double[]{0.0, 0.0});
         }
         for (int i = 0; i < 10; i++) {
-            levelOneMiddle.backUpSingleNode(new LMRAction("Right"), new double[]{1.0});
+            levelOneMiddle.backUpSingleNode(new LMRAction("Right"), new double[]{1.0, -0.1});
         }
         // We now have a level 1 node with 50 visits; with values of 0.9 for Left, 0.0 for Middle, 1.0 for Right
 
@@ -68,13 +68,13 @@ public class BackupTests {
         }
         SingleTreeNode levelTwoLeft = levelOneMiddle.getChildren().get(baseActions.get(0))[0];
         for (int i = 0; i < 10; i++) {
-            levelTwoLeft.backUpSingleNode(new LMRAction("Left"), new double[]{1.0});
+            levelTwoLeft.backUpSingleNode(new LMRAction("Left"), new double[]{1.0, -0.1});
         }
         for (int i = 0; i < 10; i++) {
-            levelTwoLeft.backUpSingleNode(new LMRAction("Middle"), new double[]{1.0});
+            levelTwoLeft.backUpSingleNode(new LMRAction("Middle"), new double[]{1.0, -0.1});
         }
         for (int i = 0; i < 5; i++) {
-            levelTwoLeft.backUpSingleNode(new LMRAction("Right"), new double[]{0.0});
+            levelTwoLeft.backUpSingleNode(new LMRAction("Right"), new double[]{0.0, 0.0});
         }
         // We now have a level 2 node with 25 visits; with values of 1.0 for Left, 1.0 for Middle, 0.0 for Right
 
@@ -84,13 +84,13 @@ public class BackupTests {
         }
         SingleTreeNode levelThreeRight = levelTwoLeft.getChildren().get(baseActions.get(2))[0];
         for (int i = 0; i < 2; i++) {
-            levelThreeRight.backUpSingleNode(new LMRAction("Left"), new double[]{0.8});
+            levelThreeRight.backUpSingleNode(new LMRAction("Left"), new double[]{0.8, -0.08});
         }
         for (int i = 0; i < 2; i++) {
-            levelThreeRight.backUpSingleNode(new LMRAction("Middle"), new double[]{0.7});
+            levelThreeRight.backUpSingleNode(new LMRAction("Middle"), new double[]{0.7, -0.07});
         }
         for (int i = 0; i < 1; i++) {
-            levelThreeRight.backUpSingleNode(new LMRAction("Right"), new double[]{0.2});
+            levelThreeRight.backUpSingleNode(new LMRAction("Right"), new double[]{0.2, -0.02});
         }
 
         for (int i = 0; i < 3; i++) {
@@ -118,7 +118,7 @@ public class BackupTests {
     @Test
     public void standardBackup() {
         setupPlayer();
-        lastNode.backUp(new double[]{0.5});
+        lastNode.backUp(new double[]{0.5, -0.05});
 
         assertEquals(101, root.getVisits());
         assertEquals(51, nodeTrajectory001.get(1).getVisits());
@@ -143,11 +143,12 @@ public class BackupTests {
     @Test
     public void maxBackup001() {
         setupPlayer();
+        params.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
         params.maxBackupThreshold = 30; // we set this now to avoid interfering with the tree construction
         // This will just affect the root and first level nodes
         // the best action is already taken at the root, but at level 1 we take a suboptimal action
         // This will not affect the update at level 1; but will affect the update at the root
-        lastNode.backUp(new double[]{0.5});
+        lastNode.backUp(new double[]{0.5, -0.05});
 
         assertEquals(101, root.getVisits());
         assertEquals(51, nodeTrajectory001.get(1).getVisits());
@@ -176,9 +177,10 @@ public class BackupTests {
     @Test
     public void maxBackup002() {
         setupPlayer();
+        params.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
         params.maxBackupThreshold = 2; // we set this now to avoid interfering with the tree construction
         // This will now affect all the updates
-        lastNode.backUp(new double[]{0.5});
+        lastNode.backUp(new double[]{0.5, -0.05});
 
         assertEquals(101, root.getVisits());
         assertEquals(51, nodeTrajectory001.get(1).getVisits());
@@ -204,6 +206,41 @@ public class BackupTests {
         update = 2.0/51.0 * update + 49.0 / 51.0 * 1.0;
         assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
         assertEquals(50 + update, root.getActionStats(new LMRAction("Middle")).totValue[0], 0.0001);
+    }
+
+
+    @Test
+    public void maxBackupOtherPlayer() {
+        setupPlayer();
+        params.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
+        params.maxBackupThreshold = 2; // we set this now to avoid interfering with the tree construction
+        // This will now affect all the updates
+        lastNode.backUp(new double[]{0.5, -0.05});
+
+        assertEquals(101, root.getVisits());
+        assertEquals(51, nodeTrajectory001.get(1).getVisits());
+        assertEquals(26, nodeTrajectory001.get(2).getVisits());
+        assertEquals(6, nodeTrajectory001.get(3).getVisits());
+        assertEquals(0, lastNode.getVisits());
+
+        // 6 visits, Left is best action at 0.8
+        assertEquals(3, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).nVisits);
+        assertEquals(-0.07 - 0.07 - 0.05, nodeTrajectory001.get(3).actionValues.get(new LMRAction("Middle")).totValue[1], 0.0001);
+
+        // 26 Visits, Left and Middle are both 1.0 (Right has been taken 5 times with mean 0 reward)
+        double update = -0.1  * (2.0/6.0 * 0.5 + 4.0 / 6.0 * 0.8);
+        assertEquals(6, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).nVisits);
+        assertEquals(update, nodeTrajectory001.get(2).actionValues.get(new LMRAction("Right")).totValue[1], 0.0001);
+
+        // 51 Visits, Right is best at 1.0 (Left has been taken 25 times with mean 0.9 reward)
+        update = 2.0/26.0 * update + 24.0 / 26.0 * -0.1;
+        assertEquals(26, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).nVisits);
+        assertEquals(-2.5 * 0.9 + update, nodeTrajectory001.get(1).actionValues.get(new LMRAction("Left")).totValue[1], 0.00001);
+
+        // Middle is best action
+        update = 2.0/51.0 * update + 49.0 / 51.0 * -0.1;
+        assertEquals(51, root.getActionStats(new LMRAction("Middle")).nVisits);
+        assertEquals(-5.0 + update, root.getActionStats(new LMRAction("Middle")).totValue[1], 0.0001);
 
     }
 
@@ -219,9 +256,10 @@ public class BackupTests {
                 new Pair<>(0, new LMRAction("Middle")));
         root.actionsInTree = actionTrajectory001;
 
+        params.backupPolicy = MCTSEnums.BackupPolicy.MaxMC;
         params.maxBackupThreshold = 2; // we set this now to avoid interfering with the tree construction
         // This will now affect all the updates
-        lastNode.backUp(new double[]{0.5});
+        lastNode.backUp(new double[]{0.5, -0.05});
 
         assertEquals(101, root.getVisits());
         assertEquals(51, nodeTrajectory001.get(1).getVisits());

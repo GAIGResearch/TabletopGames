@@ -1,16 +1,11 @@
 package games.loveletter.features;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.components.PartialObservableDeck;
-import core.interfaces.IStateFeatureVector;
 import evaluation.features.TunableStateFeatures;
-import evaluation.optimisation.TunableParameters;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
 import games.loveletter.cards.LoveLetterCard;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;

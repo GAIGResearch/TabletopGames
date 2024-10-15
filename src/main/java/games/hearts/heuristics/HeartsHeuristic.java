@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
 import games.hearts.HeartsGameState;
-import players.heuristics.StateHeuristicType;
 
 public class HeartsHeuristic extends TunableParameters implements IStateHeuristic {
 

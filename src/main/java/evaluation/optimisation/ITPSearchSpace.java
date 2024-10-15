@@ -91,7 +91,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             subJSON.get("class");
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
-                            Object child = registerChild(key, subJSON);
+                            Object child =  JSONUtils.loadClassFromJSON(subJSON);
                             itp.setParameterValue((String) baseKey, child);
                             if (child instanceof ITunableParameters)
                                 retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
@@ -100,9 +100,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
                         }
 
-                    } else if (data instanceof JSONArray) {
+                    } else if (data instanceof JSONArray arr) {
                         // we have a set of options for this parameter
-                        JSONArray arr = (JSONArray) data;
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
                         if (debug)
@@ -124,23 +123,6 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         }
         return retValue;
     }
-
-    public static Object registerChild(String nameSpace, JSONObject json) {
-        try {
-            if (debug)
-                System.out.println("Registering " + nameSpace);
-            Object child = JSONUtils.loadClassFromJSON(json);
-            if (child instanceof TunableParameters) {
-                TunableParameters tunableChild = (TunableParameters) child;
-                TunableParameters.loadFromJSON(tunableChild, json);
-            }
-            return child;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getMessage() + " when trying to a nested TunableParameters : " + json.get("class"));
-        }
-    }
-
 
     private static Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json, ITunableParameters itp) {
         return extractRecursiveParameters("", json, itp).stream()

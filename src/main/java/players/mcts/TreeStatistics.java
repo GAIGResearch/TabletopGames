@@ -27,7 +27,7 @@ public class TreeStatistics {
 
 
     public void mcgsStats(MCGSNode root) {
-        Map<String, MCGSNode> transpositionMap = root.getTranspositionMap();
+        Map<Object, MCGSNode> transpositionMap = root.getTranspositionMap();
         totalNodes = transpositionMap.size();
         Map<Integer, List<MCGSNode>> byDepth = transpositionMap.values().stream()
                 .collect(Collectors.groupingBy(MCGSNode::getDepth));

@@ -12,23 +12,29 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
-import players.heuristics.StateHeuristicType;
-import players.heuristics.StringHeuristic;
+import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCParams;
+import players.rmhc.RMHCPlayer;
+import players.simple.FirstActionPlayer;
 import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static games.GameType.*;
 
 
 public class Game {
@@ -574,7 +580,7 @@ public class Game {
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
-                agentTime += (System.nanoTime() - s);
+                agentTime = (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -822,7 +828,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "TicTacToe");
+        String gameType = Utils.getArg(args, "game", "Pandemic");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -830,12 +836,9 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new MCTSPlayer());
-        players.add(new OSLAPlayer());
-
-        MCTSParams params = new MCTSParams();
-   //     params.heuristic = StateHeuristicType.StringHeuristic;
-//        players.add(new MCTSPlayer(params));
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new BasicMCTSPlayer());
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;

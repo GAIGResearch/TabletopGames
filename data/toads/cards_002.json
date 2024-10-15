@@ -1,0 +1,46 @@
+{
+  "cards": [
+    {
+      "name": "Assassin",
+      "value": 1,
+      "special" : "Assassin",
+      "count": 1
+    },
+    {
+      "name": "Two",
+      "value": 2,
+      "count": 1
+    },
+    {
+      "name": "Three",
+      "value": 3,
+      "count": 1
+    },
+    {
+      "name": "Four",
+      "value": 4,
+      "count": 1
+    },
+    {
+      "name": "Five",
+      "value": 5,
+      "count": 1
+    },
+    {
+      "name": "Six",
+      "value": 6,
+      "count": 1
+    },
+    {
+      "name": "Seven",
+      "value": 7,
+      "count": 2
+    },
+    {
+      "name": "AssaultCannon",
+      "value": 0,
+      "special": "AssaultCannon",
+      "count": 1
+    }
+  ]
+}

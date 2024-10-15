@@ -38,6 +38,10 @@ public class TestMCTSPlayer extends MCTSPlayer {
         this.debug = debug;
     }
 
+    public SingleTreeNode getRoot() {
+        return root;
+    }
+
     public SingleTreeNode getRoot(int player) {
         if (root instanceof MultiTreeNode)
             return ((MultiTreeNode) root).getRoot(player);

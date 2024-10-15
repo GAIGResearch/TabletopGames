@@ -21,9 +21,4 @@ public class OrdinalPosition implements IStateHeuristic {
     public double maxValue() {
         return playerCount - 1;
     }
-
-    @Override
-    public StateHeuristicType getType() {
-        return StateHeuristicType.OrdinalPosition;
-    }
 }

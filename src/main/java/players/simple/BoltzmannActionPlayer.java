@@ -6,10 +6,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
 import utilities.Utils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * This implementation of AbstractPlayer uses a Boltzmann distribution to select actions.
@@ -67,7 +64,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     // for testing
     public double valueOf(AbstractAction action, AbstractGameState gameState) {
-        return actionHeuristic.evaluateAction(action, gameState);
+        return actionHeuristic.evaluateAction(action, gameState, new ArrayList<>());
     }
 
     // for testing
@@ -77,7 +74,7 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
         for (double value : actionValues) {
             sum += Math.exp(value / temperature);
         }
-        return Math.exp(actionHeuristic.evaluateAction(action, gameState) / temperature) / sum;
+        return Math.exp(actionHeuristic.evaluateAction(action, gameState, new ArrayList<>()) / temperature) / sum;
     }
 
     @Override

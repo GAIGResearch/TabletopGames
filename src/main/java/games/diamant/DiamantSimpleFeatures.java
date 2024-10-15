@@ -1,11 +1,7 @@
 package games.diamant;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
-import core.interfaces.IStateFeatureJSON;
-import core.interfaces.IStateFeatureVector;
 import evaluation.features.TunableStateFeatures;
-import org.json.simple.JSONObject;
 import players.heuristics.LeaderHeuristic;
 
 public class DiamantSimpleFeatures extends TunableStateFeatures {
@@ -60,5 +56,10 @@ public class DiamantSimpleFeatures extends TunableStateFeatures {
     @Override
     protected DiamantSimpleFeatures _copy() {
         return new DiamantSimpleFeatures();
+    }
+
+    @Override
+    public Object getKey(AbstractGameState state) {
+        return super.getKey(state);
     }
 }

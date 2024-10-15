@@ -11,7 +11,7 @@ import java.util.List;
 public class LMRGame extends AbstractGameState {
 
     public LMRGame(AbstractParameters gameParameters) {
-        super(gameParameters, 1);
+        super(gameParameters, 2);
     }
 
     // A Simple Game State for testing MCTS - this has no state at all, and 3 possible actions

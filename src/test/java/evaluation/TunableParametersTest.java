@@ -13,11 +13,8 @@ import players.simple.BoltzmannActionParams;
 import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.Assert.*;
 import static players.PlayerConstants.BUDGET_TIME;
@@ -125,7 +122,7 @@ public class TunableParametersTest {
         MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
         MCTSParams params = agent.getParameters();
         assertEquals(10.0, params.MASTBoltzmann, 0.001);
-        assertTrue(params.getStateHeuristic() instanceof  CoarseTunableHeuristic);
+        assertTrue(params.getHeuristic() instanceof  CoarseTunableHeuristic);
         assertEquals(SCORE_PLUS, ((CoarseTunableHeuristic) params.heuristic).getHeuristicType());
     }
 

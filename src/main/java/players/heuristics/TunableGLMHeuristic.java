@@ -13,33 +13,35 @@ import java.util.Map;
 
 public class TunableGLMHeuristic extends TunableParameters implements IActionHeuristic, IStateHeuristic {
 
-    public final GLMHeuristic heuristic;
+    public GLMHeuristic heuristic;
 
     public enum LinkFunction {
         Linear, Logistic
     }
 
-    public TunableGLMHeuristic(GLMHeuristic heuristic) {
-        this.heuristic = heuristic;
+    public TunableGLMHeuristic() {
+        addTunableParameter("heuristic", GLMHeuristic.class);
         // we initialise with a heuristic, which needs to define the feature spaces to be used
         addTunableParameter("coefficients", "None");
         addTunableParameter("linkFunction", LinkFunction.Linear);
     }
 
     public void _reset() {
+        heuristic = (GLMHeuristic) this.getParameterValue("heuristic");
         String coefficientsFile = (String) this.getParameterValue("coefficients");
-        if (!coefficientsFile.equals("None")) {
+        if (heuristic != null && !coefficientsFile.equals("None")) {
             heuristic.loadModel(coefficientsFile);
         }
         LinkFunction linkFunction = (LinkFunction) this.getParameterValue("linkFunction");
-        switch (linkFunction) {
-            case Linear:
-                heuristic.setInverseLinkFunction(x -> x);
-                break;
-            case Logistic:
-                heuristic.setInverseLinkFunction(x -> 1.0 / (1.0 + Math.exp(-x)));
-                break;
-        }
+        if (heuristic != null)
+            switch (linkFunction) {
+                case Linear:
+                    heuristic.setInverseLinkFunction(x -> x);
+                    break;
+                case Logistic:
+                    heuristic.setInverseLinkFunction(x -> 1.0 / (1.0 + Math.exp(-x)));
+                    break;
+            }
     }
 
     @Override
@@ -54,13 +56,13 @@ public class TunableGLMHeuristic extends TunableParameters implements IActionHeu
 
     @Override
     protected AbstractParameters _copy() {
-        return new TunableGLMHeuristic(heuristic);
+        return new TunableGLMHeuristic();
     }
 
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+    public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         if (heuristic instanceof IActionHeuristic actionHeuristic)
-            return actionHeuristic.evaluateAction(action, state);
+            return actionHeuristic.evaluateAction(action, state, contextActions);
         throw new AssertionError("Heuristic is not an IActionHeuristic");
     }
 

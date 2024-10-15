@@ -22,9 +22,4 @@ public class LeaderHeuristic implements IStateHeuristic {
             score *= 1.5;
         return score;
     }
-
-    @Override
-    public StateHeuristicType getType() {
-        return StateHeuristicType.LeaderHeuristic;
-    }
 }
