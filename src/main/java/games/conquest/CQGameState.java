@@ -143,9 +143,9 @@ public class CQGameState extends AbstractGameState {
         List<AbstractAction> actions = new ArrayList<>();
         actions.add(new EndTurn());
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
-        AbstractAction action;
         if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
+                if (c.getCost() > getCommandPoints(uid)) continue;
                 if (c.getCommandType() == CommandType.WindsOfFate) {
                     actions.add(new ApplyCommand(uid, c, (Vector2D) null));
                 } else if (c.getCommandType().enemy) {

@@ -260,6 +260,19 @@ public class CQGUIManager extends AbstractGUIManager {
                 }
                 showTroopInfo(cqgs, r); // show highlighted troop
                 cqgs.highlight = cqgs.getLocationByRect(r);
+                if (boardView.doubleClick != null) {
+                    // Something got double-clicked; activate the primary action in this phase
+                    for (ActionButton button : actionButtons) {
+                        if (!button.isVisible()) continue; // don't activate hidden buttons
+                        AbstractAction a = button.getButtonAction();
+                        if (a instanceof SelectTroop || a instanceof MoveTroop || a instanceof AttackTroop) {
+                            // this action can be performed with double click
+                            button.doClick();
+                            break;
+                        }
+                    }
+                    boardView.doubleClick = null; // only activate once.
+                }
             } else {
                 showTroopInfo(cqgs, null);
                 cqgs.highlight = null;

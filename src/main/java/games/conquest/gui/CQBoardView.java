@@ -21,6 +21,7 @@ import java.util.Map;
 public class CQBoardView extends ComponentView implements IScreenHighlight {
     Rectangle[] rects;
     ArrayList<Rectangle> highlight;
+    Rectangle doubleClick = null;
     HashMap<Vector2D, Troop> locationToTroopMap;
     private int movementRange = 0;
     private int attackRange = 0;
@@ -48,12 +49,15 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
                         if (r != null && r.contains(e.getPoint())) {
                             highlight.clear();
                             highlight.add(r);
+                            if (e.getClickCount() == 2)
+                                doubleClick = r;
                             break;
                         }
                     }
                 } else {
                     // Remove highlight
                     highlight.clear();
+                    doubleClick = null;
                 }
             }
         });
@@ -167,8 +171,8 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
         Troop selected = cqgs.getSelectedTroop();
         if (selected != null && selected.isAlive()) {
             selection = selected.getLocation();
-            movementRange = selected.getMovement();
-            attackRange = selected.getRange();
+            movementRange = cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase ? selected.getMovement() : 0;
+            attackRange = cqgs.getGamePhase() != CQGameState.CQGamePhase.RallyPhase ? selected.getRange() : 0;
             distancesFromSelection = CQUtility.floodFill(cqgs, cqgs.getCell(selection));
         } else {
             selection = null;

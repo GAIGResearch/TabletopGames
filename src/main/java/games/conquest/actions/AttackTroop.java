@@ -50,7 +50,7 @@ public class AttackTroop extends CQAction {
         CQGameState cqgs = (CQGameState) gs;
         Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
         Troop selected = cqgs.getSelectedTroop();
-        if (selected == null) return false;
+        if (target == null || selected == null) return false;
         int distance = cqgs.getCell(target.getLocation()).getChebyshev(selected.getLocation());
         if (distance > selected.getRange()) return false;
         boolean counterAttack = distance <= target.getRange();
@@ -66,7 +66,10 @@ public class AttackTroop extends CQAction {
             reward = target.damage(dmg);
         }
         cqgs.gainCommandPoints(vigilance ? playerId ^ 1 : playerId, reward);
-        if (reward > 0) return true; // no counterattack possible, end execution
+        if (reward > 0) {
+            cqgs.setGamePhase(CQGameState.CQGamePhase.RallyPhase);
+            return true; // no counterattack possible, end execution
+        }
         // Counterattack, as the troop survived
         if (vigilance) {
             // we applied vigilance before, so now my own troop gets to strike
