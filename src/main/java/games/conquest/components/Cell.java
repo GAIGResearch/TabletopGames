@@ -5,9 +5,9 @@ import core.components.Component;
 import games.conquest.CQGameState;
 import utilities.Vector2D;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Vector;
 
 /**
  * <p>Components represent a game piece, or encompass some unit of game information (e.g. cards, tokens, score counters, boards, dice etc.)</p>
@@ -30,11 +30,23 @@ public class Cell extends Component {
         this.position = position;
     }
 
-    public int getCrowDistance(Cell to) {
-        return getCrowDistance(to.position);
+    public int getChebyshev(Cell to) {
+        return getChebyshev(to.position);
     }
-    public int getCrowDistance(Vector2D to) {
+    public int getChebyshev(Vector2D to) {
         return Math.max(Math.abs(position.getX() - to.getX()), Math.abs(position.getY() - to.getY()));
+    }
+    public List<Cell> getNeighbors(Cell[][] board) {
+        List<Cell> neighbors = new ArrayList<>();
+        for (int i=0;i<9;i++) {
+            if (i == 4) continue; // in a 3x3 grid, index 4 is a null move
+            int x = i%3 + position.getX() - 1; // cycle through x 3 times
+            int y = i/3 + position.getY() - 1; // cycle through y once every 3 steps
+            if (x >= 0 && y >= 0 && x < board.length && y < board[0].length) {
+                neighbors.add(board[x][y]);
+            }
+        }
+        return neighbors;
     }
 
     /**
@@ -43,7 +55,7 @@ public class Cell extends Component {
      * @return true if walkable, false otherwise.
      */
     public boolean isWalkable(CQGameState cqgs) {
-        return cqgs.getTroopByLocation(this) != null;
+        return cqgs.getTroopByLocation(this) == null;
     }
 
     /**
@@ -77,6 +89,6 @@ public class Cell extends Component {
 
     @Override
     public String toString() {
-        return String.valueOf(position.getX());
+        return "Cell[" + position.getX() + "," + position.getY() + "]";
     }
 }

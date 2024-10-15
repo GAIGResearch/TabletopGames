@@ -220,14 +220,10 @@ public class CQGameState extends AbstractGameState {
     }
 
     public int getDistance(Cell from, Cell to) {
-        return getDistance(from.position, to.position);
+        return CQUtility.astar(this, from, to);
     }
     public int getDistance(Vector2D from, Vector2D to) {
-        // TODO: use locationToTroopMap with A*
-        return getDistance(from, to, locationToTroopMap);
-    }
-    public static int getDistance(Vector2D from, Vector2D to, HashMap<Vector2D, Integer> map) {
-        return Math.max(Math.abs(from.getX() - to.getX()), Math.abs(from.getY() - to.getY()));
+        return getDistance(getCell(from), getCell(to));
     }
 
     public Troop getTroopByLocation(Vector2D vec) {

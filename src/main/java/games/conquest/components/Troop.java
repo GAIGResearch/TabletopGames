@@ -93,7 +93,7 @@ public class Troop extends Component {
 
     public boolean move(Cell target, CQGameState cqgs) {
         HashMap<Vector2D, Integer> locationToTroopMap = cqgs.getLocationToTroopMap();
-        int distance = cqgs.getDistance(location, target.position);
+        int distance = cqgs.getDistance(cqgs.getCell(location), target);
         if (distance > getMovement()) return false; // do nothing, can't move there
         cqgs.moveTroop(this.getComponentID(), location, target.position);
         location = target.position;

@@ -2,14 +2,11 @@ package games.conquest.gui;
 
 import core.components.GridBoard;
 import games.conquest.CQGameState;
+import games.conquest.CQUtility;
 import games.conquest.components.Cell;
-import games.conquest.components.Command;
-import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
-import org.apache.hadoop.service.launcher.HadoopUncaughtExceptionHandler;
-import scala.collection.immutable.Vector2;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -17,6 +14,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,10 +22,10 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
     Rectangle[] rects;
     ArrayList<Rectangle> highlight;
     HashMap<Vector2D, Troop> locationToTroopMap;
-    HashMap<Vector2D, Integer> locationToIdMap;
     private int movementRange = 0;
     private int attackRange = 0;
     private Vector2D selection;
+    int[][] distancesFromSelection;
     int defaultCellSize = 35;
     private static final Color GREEN = new Color(58, 216, 66);
     private static final Color BROWN = new Color(165, 42, 42);
@@ -37,7 +35,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
         super(gridBoard, gridBoard.getWidth(), gridBoard.getHeight());
 
         locationToTroopMap = new HashMap<>();
-        locationToIdMap = new HashMap<>();
+        distancesFromSelection = new int[gridBoard.getWidth()][gridBoard.getHeight()];
         rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
         highlight = new ArrayList<>();
 
@@ -114,20 +112,15 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
         g.setColor(Color.black);
         g.drawRect(x, y, defaultCellSize, defaultCellSize);
         Troop troop;
-        String troopID;
+        String troopID = "";
 
-        if (cell != null) {
+        if (cell != null && locationToTroopMap != null) {
             Vector2D cellPos = cell.position;
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, defaultCellSize));
-            if (locationToTroopMap != null) {
-                troop = locationToTroopMap.get(cellPos);
-            } else {
-                troop = null;
-            }
+            troop = locationToTroopMap.get(cellPos);
             Troop selected = locationToTroopMap.get(selection);
-            if (selected != null &&
-                    CQGameState.getDistance(selected.getLocation(), cell.position, locationToIdMap) <= movementRange) {
+            if (selected != null && distancesFromSelection[cell.position.getX()][cell.position.getY()] <= movementRange) {
                 if (selected.getLocation().equals(cell.position)) {
                     g.setColor(GREEN);
                 } else {
@@ -141,7 +134,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
                 troopID = String.valueOf(troop.getTroopID());
                 if (selected != null &&
                     selected.getOwnerId() != troop.getOwnerId() &&
-                    cell.getCrowDistance(selected.getLocation()) <= attackRange
+                    cell.getChebyshev(selected.getLocation()) <= attackRange
                 ) {
                     // current cell contains an enemy troop that can be attacked from the current position
                     g.setColor(BROWN);
@@ -149,8 +142,6 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
                     g.setColor(Color.black);
                     g.drawRect(x, y, defaultCellSize, defaultCellSize);
                 }
-            } else {
-                troopID = " ";
             }
             // Center alignment:
             Rectangle2D stringBounds = g.getFontMetrics().getStringBounds(troopID, g);
@@ -166,7 +157,6 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
     public synchronized void update(CQGameState cqgs) {
         // Function based on approach used in CantStopBoardView::update.
         HashMap<Vector2D, Integer> map = cqgs.getLocationToTroopMap();
-        locationToIdMap = cqgs.getLocationToTroopMap();
         locationToTroopMap = new HashMap<>(); // reset list
         for (Map.Entry<Vector2D, Integer> entry : map.entrySet()) {
             Troop troop = (Troop) cqgs.getComponentById(entry.getValue());
@@ -179,6 +169,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
             selection = selected.getLocation();
             movementRange = selected.getMovement();
             attackRange = selected.getRange();
+            distancesFromSelection = CQUtility.floodFill(cqgs, cqgs.getCell(selection));
         } else {
             selection = null;
             movementRange = 0;

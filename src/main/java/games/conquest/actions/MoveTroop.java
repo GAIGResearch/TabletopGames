@@ -32,8 +32,8 @@ public class MoveTroop extends CQAction {
         Troop troop = cqgs.getSelectedTroop();
         if (troop == null) return false;
         Cell target = cqgs.getCell(highlight != null ? highlight : cqgs.highlight);
-        if (target == null || target.isWalkable(cqgs)) return false;
-        int distance = cqgs.getDistance(troop.getLocation(), target.position);
+        if (target == null || !target.isWalkable(cqgs)) return false;
+        int distance = cqgs.getDistance(cqgs.getCell(troop.getLocation()), target);
         return distance <= troop.getMovement(); // can only execute if within movement distance.
     }
 

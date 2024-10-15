@@ -4,13 +4,9 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
-import games.conquest.components.Cell;
 import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
 import utilities.Vector2D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -34,7 +30,7 @@ public class AttackTroop extends CQAction {
             return false; // can't attack before selecting a troop, or after a previous attack.
         Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
         if (target.getOwnerId() == selected.getOwnerId()) return false; // can't attack own troop
-        int distance = cqgs.getCell(target.getLocation()).getCrowDistance(selected.getLocation());
+        int distance = cqgs.getCell(target.getLocation()).getChebyshev(selected.getLocation());
         return distance <= selected.getRange();
     }
 
@@ -55,7 +51,7 @@ public class AttackTroop extends CQAction {
         Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
         Troop selected = cqgs.getSelectedTroop();
         if (selected == null) return false;
-        int distance = cqgs.getCell(target.getLocation()).getCrowDistance(selected.getLocation());
+        int distance = cqgs.getCell(target.getLocation()).getChebyshev(selected.getLocation());
         if (distance > selected.getRange()) return false;
         boolean counterAttack = distance <= target.getRange();
         int dmg = selected.getDamage(),
