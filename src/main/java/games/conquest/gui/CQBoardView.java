@@ -31,6 +31,8 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
     private static final Color GREEN = new Color(58, 216, 66);
     private static final Color BROWN = new Color(165, 42, 42);
     private static final Color BLUE = new Color(100, 149, 237);
+    private static final Color PLAYER0 = new Color(0, 128, 0);
+    private static final Color PLAYER1 = new Color(128, 0, 0);
 
     public CQBoardView(GridBoard<Cell> gridBoard) {
         super(gridBoard, gridBoard.getWidth(), gridBoard.getHeight());
@@ -151,9 +153,15 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
             Rectangle2D stringBounds = g.getFontMetrics().getStringBounds(troopID, g);
             int padLeft = (int) ((defaultCellSize - stringBounds.getWidth())/2 + 1);
             // add to board
+            if (troop != null && troop.getOwnerId() == 0) {
+                g.setColor(PLAYER0);
+            } else {
+                g.setColor(PLAYER1);
+            }
             g.drawString(troopID,
                     x + padLeft,
                     y + defaultCellSize - defaultCellSize / 10);
+            g.setColor(Color.black);
             g.setFont(f);
         }
     }
