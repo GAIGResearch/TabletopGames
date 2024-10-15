@@ -160,12 +160,12 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
         locationToTroopMap = new HashMap<>(); // reset list
         for (Map.Entry<Vector2D, Integer> entry : map.entrySet()) {
             Troop troop = (Troop) cqgs.getComponentById(entry.getValue());
-            if (troop.getHealth() > 0) {
+            if (troop.isAlive()) {
                 locationToTroopMap.put(entry.getKey(), troop);
             }
         }
         Troop selected = cqgs.getSelectedTroop();
-        if (selected != null && selected.getHealth() > 0) {
+        if (selected != null && selected.isAlive()) {
             selection = selected.getLocation();
             movementRange = selected.getMovement();
             attackRange = selected.getRange();

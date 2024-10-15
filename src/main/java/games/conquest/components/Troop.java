@@ -92,7 +92,6 @@ public class Troop extends Component {
     }
 
     public boolean move(Cell target, CQGameState cqgs) {
-        HashMap<Vector2D, Integer> locationToTroopMap = cqgs.getLocationToTroopMap();
         int distance = cqgs.getDistance(cqgs.getCell(location), target);
         if (distance > getMovement()) return false; // do nothing, can't move there
         cqgs.moveTroop(this.getComponentID(), location, target.position);
@@ -144,6 +143,9 @@ public class Troop extends Component {
         if (hasCommand(CommandType.Charge)) return movement * 2 - distanceMoved;
         return movement - distanceMoved;
     }
+    public int getUnboostedHealth() {
+        return health;
+    }
     public int getHealth() {
         return health + healthBoost;
     }
@@ -186,7 +188,7 @@ public class Troop extends Component {
      * @return 0 if this troop survives; the cost of the troop if it died.
      */
     public int damage(int dmg) {
-        if (getHealth() < dmg) {
+        if (getHealth() <= dmg) {
             // Troop dies, award points
             health = 0;
             healthBoost = 0;

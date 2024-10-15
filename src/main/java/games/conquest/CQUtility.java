@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import games.conquest.actions.*;
 import games.conquest.components.Cell;
 import games.conquest.components.Command;
+import games.conquest.components.Troop;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -21,6 +22,21 @@ public class CQUtility {
         assert action instanceof CQAction; // Only EndTurn is a basic AbstractAction; the rest extend CQAction
         if (action instanceof ApplyCommand) return ((CQAction) action).checkHighlight(highlight, cmdHighlight);
         else return ((CQAction) action).checkHighlight(highlight);
+    }
+
+    public static double getRelativeCost(HashSet<Troop> troops) {
+        double cost = 0;
+        for (Troop troop : troops) {
+            cost += troop.getTroopType().cost * troop.getUnboostedHealth() / (double) troop.getTroopType().health;
+        }
+        return cost;
+    }
+    public static int getTotalCost(HashSet<Troop> troops) {
+        int cost = 0;
+        for (Troop troop : troops) {
+            cost += troop.getTroopType().cost;
+        }
+        return cost;
     }
 
     /**

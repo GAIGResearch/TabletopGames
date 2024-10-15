@@ -2,6 +2,7 @@ package games.conquest;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.GridBoard;
@@ -98,10 +99,16 @@ public class CQGameState extends AbstractGameState {
         return getCell(pos.getX(), pos.getY());
     }
 
+    public HashSet<Troop> getAllTroops(int uid) {
+        return troops
+                .stream()
+                .filter(t -> t.getOwnerId() == uid)
+                .collect(Collectors.toCollection(HashSet::new));
+    }
     public HashSet<Troop> getTroops(int uid) {
         return troops
                 .stream()
-                .filter(t -> t.getOwnerId() == uid && t.getHealth() > 0)
+                .filter(t -> t.getOwnerId() == uid && t.isAlive())
                 .collect(Collectors.toCollection(HashSet::new));
     }
     public PartialObservableDeck getCommands(int uid) {
@@ -201,11 +208,14 @@ public class CQGameState extends AbstractGameState {
         return commandPoints[uid];
     }
     public void gainCommandPoints(int uid, int points) {
-        assert points > 0;
+        assert points >= 0;
         spendCommandPoints(uid, -points);
+        if (getTroops(uid ^ 1).isEmpty()) {
+            // Game is over.
+            setGameStatus(CoreConstants.GameResult.WIN_GAME);
+        }
     }
     public boolean spendCommandPoints(int uid, int points) {
-        assert points > 0;
         if (getCommandPoints(uid) >= points) {
             commandPoints[uid] -= points;
             return true;
@@ -230,7 +240,7 @@ public class CQGameState extends AbstractGameState {
         Integer id = locationToTroopMap.get(vec);
         if (id == null) return null;
         Troop troop = (Troop) getComponentById(id);
-        if (troop.getHealth() <= 0) return null; // troop has died; is no longer relevant
+        if (!troop.isAlive()) return null; // troop has died; is no longer relevant
         return troop;
     }
     public Troop getTroopByLocation(Cell c) {
@@ -319,6 +329,11 @@ public class CQGameState extends AbstractGameState {
     }
 
     /**
+     * Heuristic used: Consider total troop health (scaled by value), and scale this by Command Point imbalance, which in turn is scaled based on command cooldowns
+     * The troops all have a predetermined value. Their health determines the fraction of that value that's relevant.
+     * The sum of all troops' values is then compared to the original value of all troops, in order to determine how close to death a player is.
+     * If all but one of my troops is dead, I should get a score near 0. If all troops are alive, the other factors are much more relevant.
+     * So, the other factors should only apply a scaling factor on the heuristic.
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
      * the game); a value between 0 and 1 is preferred, where 0 means the game was lost, and 1 means the game was won.
@@ -326,11 +341,38 @@ public class CQGameState extends AbstractGameState {
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
-            // TODO: Calculate the amount of troops killed on each side
-            // TODO: Calculate amount of health lost on each side
-            // TODO: Calculate amount of command points on each side
-            // TODO: adjust score based on cooldown of commands
-            return 0;
+            // Scores based on troop health and value; between 0 and 1 for each player
+            double myScore = CQUtility.getRelativeCost(getTroops(playerId)) / CQUtility.getTotalCost(getAllTroops(playerId));
+            double theirScore = CQUtility.getRelativeCost(getTroops(playerId ^ 1)) / CQUtility.getTotalCost(getAllTroops(playerId));
+            // Cooldowns, based on command cooldowns. A percentage of cooldown for each command, summed; between 0 and 4 for each player
+            double myCooldowns = 0, theirCooldowns = 0;
+            // Command points remaining per player. Any positive integer.
+            int myPoints = getCommandPoints(playerId), theirPoints = getCommandPoints(playerId ^ 1);
+            List<Command> myCommands = chosenCommands[playerId].getVisibleComponents(playerId),
+                          theirCommands = chosenCommands[playerId ^ 1].getVisibleComponents(playerId);
+            for (Command cmd : myCommands) {
+                if (cmd.getCooldown() > 0)
+                    // Add uncompleted fraction of cooldown to counter
+                    myCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
+            }
+            for (Command cmd : theirCommands) {
+                if (cmd == null) continue; // their command hasn't been seen yet, so can't affect our heuristic score
+                if (cmd.getCooldown() > 0)
+                    // Add uncompleted fraction of cooldown to counter
+                    theirCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
+            }
+            // Scale scores based on command points and command depletion:
+            myScore *= myPoints * myCooldowns;
+            theirScore *= theirPoints * theirCooldowns;
+            // Normalize scores:
+            double maxScore = Math.max(myScore, theirScore);
+            myScore /= maxScore;
+            theirScore /= maxScore;
+            // Scale it so that 0.5 is a tie, 0 is a loss for `playerId`, and 1 is a win for `playerId`.
+            // Both scores are now normalized, so between 0 and 1. The higher of the two will be equal to 1.0.
+            // if myScore is 1/10th of theirScore, then this will result in (0.5 + (0.1 - 1) / 2.0) = 0.05.
+            // if I have a slight edge of 1.0 vs 0.9, then this will be (0.5 + (1 - 0.9) / 2.0) = 0.55.
+            return 0.5 + (myScore - theirScore) / 2.0;
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;
@@ -339,7 +381,7 @@ public class CQGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return CQUtility.getTotalCost(getTroops(playerId));
     }
 
     @Override
