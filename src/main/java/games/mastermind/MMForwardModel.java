@@ -29,7 +29,7 @@ public class MMForwardModel extends StandardForwardModel {
         MMGameState mmgs = (MMGameState) gameState;
         ArrayList<AbstractAction> availableActions = new ArrayList<>();
         for (Token colour : MMConstants.guessColours) {
-            availableActions.add(new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), mmgs.activeCol, mmgs.activeRow, colour));
+            availableActions.add(new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), mmgs.activeCol, mmgs.activeRow, colour.getComponentID()));
         }
         return availableActions;
     }

@@ -143,7 +143,7 @@ public class OMATests {
                 Token expected = node.getActor() == 0 ? x : o;
                 return parentActions.stream().flatMap(a -> OMAParent.getOMAChildrenActions(a).stream())
                         .filter(Objects::nonNull)
-                        .allMatch(c -> ((SetGridValueAction<Token>) c).getValue().equals(expected));
+                        .allMatch(c -> ((SetGridValueAction<Token>) c).getValue(state).equals(expected));
             } else return true;
         });
         assertEquals(0, problemNodes.size());

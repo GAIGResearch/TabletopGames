@@ -39,7 +39,7 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
                 {
                     boolean newCol = false;
                     if (c4gs.gridBoard.getElement(x, y).getTokenType().equals(Connect4Constants.emptyCell)) {
-                        actions.add(new SetGridValueAction<>(c4gs.gridBoard.getComponentID(), x, y, Connect4Constants.playerMapping.get(player)));
+                        actions.add(new SetGridValueAction<>(c4gs.gridBoard.getComponentID(), x, y, Connect4Constants.playerMapping.get(player).getComponentID()));
                         newCol = true;
                     }
 
