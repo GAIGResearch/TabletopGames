@@ -45,6 +45,17 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
     public abstract boolean canExecute(CQGameState cqgs);
 
     /**
+     * Compares highlighted cell and/or command with the expected highlights for a given action.
+     * @param highlight The highlighted cell
+     * @param cmdHighlight The highlighted command
+     * @return `true` if highlight(s) correspond to action's highlight(s); `false` otherwise
+     */
+    public boolean compareHighlight(Vector2D highlight, Command cmdHighlight) {
+        if (this instanceof ApplyCommand) return this.checkHighlight(highlight, cmdHighlight);
+        else return this.checkHighlight(highlight);
+    }
+
+    /**
      * Forward Model delegates to this from {@link core.StandardForwardModel#computeAvailableActions(AbstractGameState)}
      * if this Extended Sequence is currently active.
      *

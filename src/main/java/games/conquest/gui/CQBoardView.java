@@ -2,7 +2,6 @@ package games.conquest.gui;
 
 import core.components.GridBoard;
 import games.conquest.CQGameState;
-import games.conquest.CQUtility;
 import games.conquest.components.Cell;
 import games.conquest.components.Troop;
 import gui.IScreenHighlight;
@@ -14,7 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -181,7 +179,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
             selection = selected.getLocation();
             movementRange = cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase ? selected.getMovement() : 0;
             attackRange = cqgs.getGamePhase() != CQGameState.CQGamePhase.RallyPhase ? selected.getRange() : 0;
-            distancesFromSelection = CQUtility.floodFill(cqgs, cqgs.getCell(selection));
+            distancesFromSelection = cqgs.floodFill(cqgs.getCell(selection));
         } else {
             selection = null;
             movementRange = 0;
