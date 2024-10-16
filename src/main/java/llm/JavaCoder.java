@@ -3,9 +3,10 @@ package llm;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import evaluation.RunArg;
-import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
+import llm.LLMAccess.LLM_MODEL;
+import llm.LLMAccess.LLM_SIZE;
 import players.heuristics.StringHeuristic;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
@@ -34,6 +35,8 @@ public class JavaCoder {
         GameType gameType = GameType.valueOf(gameName);
         int playerCount = Utils.getArg(args, "players", 2);
         String workingDir = Utils.getArg(args, "dir", "llm");
+        String modelType = Utils.getArg(args, "model", "GEMINI");
+        String modelSize = Utils.getArg(args, "size", "SMALL");
         String evaluatorName = Utils.getArg(args, "evaluator", gameName + "Evaluator");
         String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
         String fileStem = workingDir + "/" + evaluatorName;
@@ -43,7 +46,10 @@ public class JavaCoder {
         int currentErrors = 0;
         int maxErrorsPerIteration = 3;
 
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, llmLogFile);
+        LLM_SIZE llmSize = LLM_SIZE.valueOf(modelSize);
+        LLM_MODEL llmModel = LLM_MODEL.valueOf(modelType);
+
+        LLMAccess llm = new LLMAccess(llmModel, llmSize, llmLogFile);
         List<AbstractPlayer> playerList = new ArrayList<>();
 
         String generatedCode = "";
@@ -94,9 +100,10 @@ public class JavaCoder {
                             Your task is to remove any comments or JavaDoc from this code.
                             The output should be the same code, with any syntax corrections, but without any comments.
                          
+                            The output mist include only the final java code.
                             ***
                         """;
-                String commentFreeCode = llm.getResponse(commentPrompt + generatedCode)
+                String commentFreeCode = llm.getResponse(commentPrompt + generatedCode, llmModel, LLM_SIZE.SMALL)
                         .replaceAll("```java\\s*(.*?)", "$1")
                         .replaceAll("(.*?)```", "$1");
                 writeGeneratedCodeToFile(commentFreeCode, fileName);
@@ -138,6 +145,7 @@ public class JavaCoder {
                     RunArg.matchups, 1000,
                     RunArg.listener, Collections.emptyList(),
                     RunArg.mode, "exhaustive",
+                    RunArg.destDir, workingDir,
                     RunArg.verbose, false
             ));
             AbstractParameters params = gameType.createParameters(System.currentTimeMillis());

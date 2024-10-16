@@ -12,9 +12,9 @@ import java.io.FileWriter;
 
 public class LLMAccess {
 
-    static ChatLanguageModel geminiModel;
-    static ChatLanguageModel mistralModel;
-    static ChatLanguageModel openaiModel;
+    static ChatLanguageModel[] geminiModel = new ChatLanguageModel[2];
+    static ChatLanguageModel[] mistralModel = new ChatLanguageModel[2];
+    static ChatLanguageModel[] openaiModel = new ChatLanguageModel[2];
 
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
@@ -26,6 +26,7 @@ public class LLMAccess {
     String geminiLocation = "europe-west2";
 
     LLM_MODEL modelType;
+    LLM_SIZE modelSize;
 
     public enum LLM_MODEL {
         GEMINI,
@@ -33,8 +34,20 @@ public class LLMAccess {
         OPENAI
     }
 
+    public enum LLM_SIZE {
+        SMALL,
+        LARGE
+    }
 
-    public LLMAccess(LLM_MODEL modelType, String logFileName) {
+
+    /**
+     * Constructor for LLMAccess
+     *
+     * @param modelType   - the model to use as the default (this can be overridden in the getResponse method)
+     * @param modelSize   - the size of the model to use (this can be overridden in the getResponse method)
+     * @param logFileName - the name of the log file to write to. this will include all the messages sent to any LLM
+     */
+    public LLMAccess(LLM_MODEL modelType, LLM_SIZE modelSize, String logFileName) {
         if (logFileName != null && !logFileName.isEmpty()) {
             logFile = new File(logFileName);
             try {
@@ -44,9 +57,10 @@ public class LLMAccess {
             }
         }
         this.modelType = modelType;
+        this.modelSize = modelSize;
         if (geminiProject != null && !geminiProject.isEmpty()) {
             try {
-                geminiModel = VertexAiGeminiChatModel.builder()
+                geminiModel[1] = VertexAiGeminiChatModel.builder()
                         .project(geminiProject)
                         .location(geminiLocation)
                         //      .temperature(1.0f)  // between 0 and 2; default 1.0 for pro-1.5
@@ -54,7 +68,12 @@ public class LLMAccess {
                         //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
                         //     .maxOutputTokens(1000)  // max replay size (max is 8192)
                         // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-                        .modelName("gemini-1.5-flash") // $0.075 per million characters output, $0.01875 per million characters input
+                        .modelName("gemini-1.5-pro") // $0.075 per million characters output, $0.01875 per million characters input
+                        .build();
+                geminiModel[0] = VertexAiGeminiChatModel.builder()
+                        .project(geminiProject)
+                        .location(geminiLocation)
+                        .modelName("gemini-1.5-flash")
                         .build();
             } catch (Error e) {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
@@ -62,7 +81,11 @@ public class LLMAccess {
         }
 
         if (mistralToken != null && !mistralToken.isEmpty()) {
-            mistralModel = MistralAiChatModel.builder()
+            mistralModel[0] = MistralAiChatModel.builder()
+                    .modelName(MistralAiChatModelName.MISTRAL_SMALL_LATEST)
+                    .apiKey(mistralToken)
+                    .build();
+            mistralModel[1] = MistralAiChatModel.builder()
                     .modelName(MistralAiChatModelName.MISTRAL_LARGE_LATEST)
                     .apiKey(mistralToken)
                     .build();
@@ -70,9 +93,12 @@ public class LLMAccess {
         }
 
         if (openaiToken != null && !openaiToken.isEmpty()) {
-            openaiModel = OpenAiChatModel.builder()
+            openaiModel[0] = OpenAiChatModel.builder()
+                    .modelName(OpenAiChatModelName.GPT_4_O_MINI) // $0.15 per million input tokens, $0.6 per million output tokens
+                    .apiKey(openaiToken)
+                    .build();
+            openaiModel[1] = OpenAiChatModel.builder()
                     .modelName(OpenAiChatModelName.GPT_4_O) // $5 per million input tokens, $15 per million output tokens
-            //        .modelName(OpenAiChatModelName.GPT_4_O_MINI) // $0.15 per million input tokens, $0.6 per million output tokens
                     .apiKey(openaiToken)
                     .build();
 
@@ -86,16 +112,22 @@ public class LLMAccess {
      * @param modelType the LLM model to use
      * @return The full text returned by the model; or an empty string if no valid model
      */
-    public String getResponse(String query, LLM_MODEL modelType) {
+    public String getResponse(String query, LLM_MODEL modelType, LLM_SIZE modelSize) {
         String response = "";
-        if (modelType == LLM_MODEL.MISTRAL && mistralModel != null) {
-            response = mistralModel.generate(query);
-        }
-        if (modelType == LLM_MODEL.GEMINI && geminiModel != null) {
-            response = geminiModel.generate(query);
-        }
-        if (modelType == LLM_MODEL.OPENAI && openaiModel != null) {
-            response = openaiModel.generate(query);
+        ChatLanguageModel modelToUse = switch(modelType) {
+            case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
+            case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
+            case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
+        };
+        if (modelToUse != null) {
+            try {
+                response = modelToUse.generate(query);
+            } catch (Exception e) {
+                System.out.println("Error getting response from model: " + e.getMessage());
+            }
+        } else {
+            System.out.println("No valid model available for " + modelType + " " + modelSize);
+            return "No reply available";
         }
         // Write to file (if log file is specified)
         if (logWriter != null) {
@@ -117,12 +149,12 @@ public class LLMAccess {
      * @return The full text returned by the model; or an empty string if no valid model
      */
     public String getResponse(String query) {
-        return getResponse(query, this.modelType);
+        return getResponse(query, this.modelType, this.modelSize);
     }
 
     public static void main(String[] args) {
-        LLMAccess llm = new LLMAccess(LLM_MODEL.OPENAI, "");
+        LLMAccess llm = new LLMAccess(LLM_MODEL.OPENAI, LLM_SIZE.LARGE, "llm_log.txt");
         llm.getResponse("What is the average lifespan of a Spanish Armadillo?");
-        llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.OPENAI);
+        llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.OPENAI, LLM_SIZE.SMALL);
     }
 }

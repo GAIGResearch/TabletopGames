@@ -20,11 +20,10 @@ public class TaskPrompter {
                  - public double evaluateState(%s gameState, int playerId)
                 This is a heuristic function to play %s. The variable gameState is the current state of the game, and playerId\s
                 is the ID of the player we evaluate the state for. Write the contents of this function, so that we give a higher numeric\s
-                evaluation to those game states that are beneficial to the player with the received playerId as id. Return:
-                  - 0.0 if player playerId lost the game.
-                  - 1.0 if player playerId won the game.
-                 If the game is not over, return a value between 0.0 and 1.0 so that the value is close to 0.0 if player playerId is close to losing,
-                 and closer to 1.0 if playerId is about to win the game.
+                evaluation to those game states that are beneficial to the player with the received playerId as id.
+                The return value must be between 0.0 and 1.0 so that the value is close to 0.0 if player playerId is close to losing,
+                and closer to 1.0 if playerId is about to win the game.
+                You should assume that the game is not over when this function is called.
                 Take into account all the elements of the game state and possible opponent moves.\s
                 """, gameName, className, gameStateClassName, gameName);
     }

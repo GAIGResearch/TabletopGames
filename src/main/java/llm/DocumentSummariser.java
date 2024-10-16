@@ -89,7 +89,7 @@ public class DocumentSummariser {
                 Summarise the information about %s below in no more than %d words.
                 """, areaOfInterest, wordLimit);
 
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, "RulesSummary_LLM_Log.txt");
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.MISTRAL, LLMAccess.LLM_SIZE.LARGE, "RulesSummary_LLM_Log.txt");
 
         int charactersPerRequest = 2500;
         int characterOverlap = 500;
