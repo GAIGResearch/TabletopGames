@@ -3,10 +3,8 @@ package core;
 import games.GameType;
 import players.basicMCTS.BasicMCTSParams;
 import players.basicMCTS.BasicMCTSPlayer;
-import players.heuristics.StateHeuristicType;
 import players.heuristics.StringHeuristic;
 import players.human.ActionController;
-import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import utilities.Utils;
 
@@ -24,9 +22,7 @@ public class LLMTest {
 
         public AbstractPlayer createPlayer(String evaluatorFileName, String className) {
             if (this == OSLA){
-                OSLAParameters params = new OSLAParameters();
-                params.heuristic = new StringHeuristic(evaluatorFileName, className);
-                return new OSLAPlayer(params);
+                return new OSLAPlayer(new StringHeuristic(evaluatorFileName, className));
             }
             else if (this == MCTS){
                 BasicMCTSParams params = new BasicMCTSParams();

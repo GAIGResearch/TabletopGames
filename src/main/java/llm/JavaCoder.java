@@ -2,14 +2,11 @@ package llm;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.Game;
 import evaluation.RunArg;
 import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import org.apache.spark.sql.catalyst.expressions.Abs;
 import players.heuristics.StringHeuristic;
-import players.simple.OSLAParameters;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Utils;
@@ -109,9 +106,7 @@ public class JavaCoder {
 
                 // We now create a StringHeuristic and OSLA player from the generated code
                 StringHeuristic heuristic = new StringHeuristic(fileName, className);
-                OSLAParameters params = new OSLAParameters();
-                params.heuristic = heuristic;
-                OSLAPlayer player = new OSLAPlayer(params);
+                OSLAPlayer player = new OSLAPlayer(heuristic);
                 player.setName(String.format("OSLA_%03d", iteration));
                 playerList.add(player);
 
@@ -143,7 +138,6 @@ public class JavaCoder {
                     RunArg.matchups, 1000,
                     RunArg.listener, Collections.emptyList(),
                     RunArg.mode, "exhaustive",
-                    RunArg.output, String.format("%s_%03d_Results.txt", fileStem, iteration),
                     RunArg.verbose, false
             ));
             AbstractParameters params = gameType.createParameters(System.currentTimeMillis());
@@ -156,10 +150,9 @@ public class JavaCoder {
                 playersForTournament.add(new RandomPlayer());
             }
 
-            // TODO: There is scope to refactor RoundRobinTournament constructor usage to simplify this
             RoundRobinTournament tournament = new RoundRobinTournament(
                     playersForTournament, gameType, playerCount, params,
-                    AbstractTournament.TournamentMode.NO_SELF_PLAY, tournamentConfig);
+                    tournamentConfig);
             tournament.run();
             for (int index = 0; index < playerList.size(); index++) {
                 System.out.printf("Player %s has score %.2f%n", playerList.get(index).toString(), tournament.getWinRate(index));

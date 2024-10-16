@@ -9,7 +9,7 @@ public enum StateHeuristicType {
     GameSpecificHeuristic(new GameDefaultHeuristic()),
     WinOnlyHeuristic(new WinOnlyHeuristic()),
     OrdinalPosition(new OrdinalPosition()),
-    WinPlusHeuristic(new WinPlusHeuristic()),
+    WinPlusHeuristic(new WinPlusHeuristic(1000.0)),
     LeaderHeuristic(new LeaderHeuristic()),
     PureScoreHeuristic(new PureScoreHeuristic()),
     ScoreHeuristic(new ScoreHeuristic()),
@@ -23,10 +23,6 @@ public enum StateHeuristicType {
 
     StateHeuristicType(IStateHeuristic heuristicFunc) {
         this.heuristicFunc = heuristicFunc;
-    }
-
-    public IStateHeuristic getExemplarHeuristic() {
-        return heuristicFunc;
     }
 
 }
