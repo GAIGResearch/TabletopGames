@@ -7,10 +7,12 @@ import games.puertorico.PuertoRicoConstants.Crop;
 import games.puertorico.actions.*;
 import games.puertorico.components.ProductionBuilding;
 
+import java.util.List;
+
 public class PuertoRicoActionHeuristic001 implements IActionHeuristic {
 
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState gameState) {
+    public double evaluateAction(AbstractAction action, AbstractGameState gameState, List<AbstractAction> contextActions) {
         // This just needs to return a value that is higher for better actions
         int player = gameState.getCurrentPlayer();
         PuertoRicoGameState state = (PuertoRicoGameState) gameState;

@@ -21,9 +21,4 @@ public class OrdinalPositionScaled implements IStateHeuristic {
     public double maxValue() {
         return 1.0;
     }
-
-    @Override
-    public StateHeuristicType getType() {
-        return StateHeuristicType.OrdinalPosition;
-    }
 }

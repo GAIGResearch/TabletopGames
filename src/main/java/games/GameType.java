@@ -1,50 +1,27 @@
 package games;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
-import core.AbstractParameters;
-import core.Game;
+import core.*;
 import core.rules.AbstractRuleBasedForwardModel;
-import games.battlelore.BattleloreForwardModel;
-import games.battlelore.BattleloreGameParameters;
-import games.battlelore.BattleloreGameState;
+import games.battlelore.*;
 import games.battlelore.gui.BattleloreGUI;
-import games.blackjack.BlackjackForwardModel;
-import games.blackjack.BlackjackGameState;
-import games.blackjack.BlackjackParameters;
+import games.blackjack.*;
 import games.blackjack.gui.BlackjackGUIManager;
-import games.cantstop.CantStopForwardModel;
-import games.cantstop.CantStopGameState;
-import games.cantstop.CantStopParameters;
+import games.cantstop.*;
 import games.cantstop.gui.CantStopGUIManager;
-import games.catan.CatanForwardModel;
-import games.catan.CatanGameState;
-import games.catan.CatanParameters;
+import games.catan.*;
 import games.catan.gui.CatanGUI;
 import games.chinesecheckers.CCForwardModel;
 import games.chinesecheckers.CCGameState;
 import games.chinesecheckers.CCParameters;
 import games.chinesecheckers.gui.CCGUIManager;
-import games.coltexpress.ColtExpressForwardModel;
-import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
-import games.connect4.Connect4ForwardModel;
-import games.connect4.Connect4GameParameters;
-import games.connect4.Connect4GameState;
+import games.connect4.*;
 import games.connect4.gui.Connect4GUIManager;
-import games.diamant.DiamantForwardModel;
-import games.diamant.DiamantGameState;
-import games.diamant.DiamantParameters;
-import games.dominion.*;
+import games.diamant.*;
 import games.dominion.gui.DominionGUIManager;
-import games.dotsboxes.DBForwardModel;
-import games.dotsboxes.DBGUIManager;
-import games.dotsboxes.DBGameState;
-import games.dotsboxes.DBParameters;
-import games.explodingkittens.ExplodingKittensForwardModel;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.ExplodingKittensParameters;
+import games.dotsboxes.*;
+import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.hanabi.HanabiForwardModel;
 import games.hanabi.HanabiGameState;
@@ -54,49 +31,36 @@ import games.hearts.HeartsForwardModel;
 import games.hearts.HeartsGameState;
 import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
-import games.loveletter.LoveLetterForwardModel;
-import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
+import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
-import games.pandemic.PandemicForwardModel;
-import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
+import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
-import games.poker.PokerForwardModel;
-import games.poker.PokerGameParameters;
-import games.poker.PokerGameState;
-import games.poker.gui.PokerGUIManager;
-import games.puertorico.PuertoRicoForwardModel;
-import games.puertorico.PuertoRicoGameState;
-import games.puertorico.PuertoRicoParameters;
+import games.puertorico.*;
 import games.puertorico.gui.PuertoRicoGUI;
 import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
-import games.stratego.StrategoForwardModel;
-import games.stratego.StrategoGameState;
-import games.stratego.StrategoParams;
-import games.stratego.gui.StrategoGUIManager;
-import games.sushigo.SGForwardModel;
-import games.sushigo.SGGameState;
-import games.sushigo.SGParameters;
-import games.sushigo.gui.SGGUIManager;
-import games.terraformingmars.TMForwardModel;
-import games.terraformingmars.TMGameParameters;
-import games.terraformingmars.TMGameState;
+import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
-import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
-import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.gui.TicTacToeGUIManager;
-import games.uno.UnoForwardModel;
-import games.uno.UnoGameParameters;
-import games.uno.UnoGameState;
-import games.uno.gui.UnoGUIManager;
-import games.virus.VirusForwardModel;
-import games.virus.VirusGameParameters;
-import games.virus.VirusGameState;
+import games.poker.*;
+import games.poker.gui.*;
+import games.stratego.*;
+import games.stratego.gui.StrategoGUIManager;
+import games.sushigo.*;
+import games.sushigo.gui.SGGUIManager;
+import games.tictactoe.*;
+import games.tictactoe.gui.*;
+import games.toads.ToadForwardModel;
+import games.toads.ToadGUIManager;
+import games.toads.ToadGameState;
+import games.toads.ToadParameters;
+import games.uno.*;
+import games.uno.gui.*;
+import games.virus.*;
+import games.dominion.*;
 import games.wonders7.Wonders7ForwardModel;
 import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
@@ -105,22 +69,19 @@ import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
-import gui.AbstractGUIManager;
-import gui.GamePanel;
+import gui.*;
+import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static core.CoreConstants.*;
+import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 
@@ -247,7 +208,15 @@ public enum GameType {
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
+    WarOfTheToads(2, 2,
+            Arrays.asList(Strategy, Abstract, Cards),
+            Collections.singletonList(TrickTaking),
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -289,55 +258,55 @@ public enum GameType {
 
     public String loadRulebook() {
         String pdfFilePath = "data/" + this.name().toLowerCase() + "/rulebook.pdf";
-        try {
-            // Load the PDF document
-            PDDocument document = PDDocument.load(new File(pdfFilePath));
+        String ruleSummaryPath = "data/" + this.name().toLowerCase() + "/ruleSummary.txt";
+        String strategySummaryPath = "data/" + this.name().toLowerCase() + "/strategySummary.txt";
+        // The first time we process the rulebook we create rule and strategy summaries for use
+        // with LLM-created heuristics (etc.)
+        // If these files exist then we skip the processing
 
-            // Instantiate PDFTextStripper to extract text
-            PDFTextStripper pdfStripper = new PDFTextStripper();
-
-            // Retrieve text from the PDF
-            String text = processText(pdfStripper.getText(document));
-            // todo summarise with LLMs?
-
-            // Close the document
-            document.close();
-
-            // Print the extracted text
-            return text;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    // Removes page numbers and replaces with new paragraphs instead. Removes line breaks otherwise
-    // to avoid artificial PDF line breaks. Caveat: also removes line breaks we might want...
-    public static String processText(String text) {
-        StringBuilder result = new StringBuilder();
-        String[] lines = text.split("\r?\n");
-        Pattern numberPattern = Pattern.compile("\\d+");
-
-        for (int i = 0; i < lines.length; i++) {
-            String line = lines[i].trim();
-            if (numberPattern.matcher(line).matches()) {
-                // If the line contains only a number, keep the line break only
-                result.append("\n");
-            } else {
-                // If the line does not contain only a number, remove the line break
-                result.append(line);
-                // Check if the next line exists and is not a number, if so, add a space
-                if (i + 1 < lines.length && !numberPattern.matcher(lines[i + 1].trim()).matches()) {
-                    result.append(" ");
+        File ruleSummaryFile = new File(ruleSummaryPath);
+        if (ruleSummaryFile.exists()) {
+            try {
+                Scanner scanner = new Scanner(ruleSummaryFile);
+                StringBuilder sb = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    sb.append(scanner.nextLine()).append("\n");
                 }
+                File strategySummaryFile = new File(strategySummaryPath);
+                if (strategySummaryFile.exists()) {
+                    scanner = new Scanner(strategySummaryFile);
+                    sb.append("\n\nStrategy Summary:\n");
+                    while (scanner.hasNextLine()) {
+                        sb.append(scanner.nextLine()).append("\n");
+                    }
+                }
+                return sb.toString();
+            } catch (FileNotFoundException e) {
+                throw new AssertionError("File exists but could not be read: " + ruleSummaryPath);
             }
         }
-        String ret = result.toString();
-        if (ret.startsWith("\n")) {
-            ret = ret.substring(1);
+
+        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+        String rulesText = summariser.processText("Core Game Rules (not including strategy)", 500);
+        // Then write this to file
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
+            writer.write(rulesText);
+            writer.close();
+        } catch (IOException e) {
+            throw new AssertionError("Error writing rule summary file: " + ruleSummaryPath);
         }
-        return ret;
+
+        String strategyText = summariser.processText("strategy to play the game well (not including core game rules)", 500);
+        // Then write this to file
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(strategySummaryPath));
+            writer.write(strategyText);
+            writer.close();
+        } catch (IOException e) {
+            throw new AssertionError("Error writing strategy summary file: " + strategySummaryPath);
+        }
+        return rulesText + "\n\nStrategy Summary:\n" + strategyText;
     }
 
     // Getters
@@ -548,7 +517,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient;
+        Wargame, Civilization, Ancient, CodeBreaking;
 
         /**
          * @return a list of all games within this category.

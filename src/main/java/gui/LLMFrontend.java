@@ -463,7 +463,7 @@ public class LLMFrontend extends GUI {
                     Map<RunArg, Object> config = new HashMap<>();
                     config.put(RunArg.matchups, nGames);
                     config.put(RunArg.budget, 100);  // todo param? or from agent?
-                    RoundRobinTournament tournament = new RoundRobinTournament(players, gameType, players.size(), params, AbstractTournament.TournamentMode.NO_SELF_PLAY, config);
+                    RoundRobinTournament tournament = new RoundRobinTournament(players, gameType, players.size(), params, config);
                     tournament.run();
                 } else {
                     gameRunning = gameType.createGameInstance(players.size(), params);

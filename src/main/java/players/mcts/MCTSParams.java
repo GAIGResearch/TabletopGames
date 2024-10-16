@@ -1,26 +1,23 @@
 package players.mcts;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
 import evaluation.optimisation.TunableParameters;
 import org.jetbrains.annotations.NotNull;
 import players.PlayerParameters;
-import players.heuristics.PureScoreHeuristic;
-import players.heuristics.StateHeuristicType;
 import players.simple.RandomPlayer;
 import utilities.JSONUtils;
 
 import java.util.Arrays;
 import java.util.Random;
 
-import static players.mcts.MCTSEnums.Information.Closed_Loop;
-import static players.mcts.MCTSEnums.Information.Information_Set;
-import static players.mcts.MCTSEnums.MASTType.None;
+import static players.mcts.MCTSEnums.Information.*;
+import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
-import static players.mcts.MCTSEnums.Strategies.PARAMS;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
+import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
@@ -36,7 +33,6 @@ public class MCTSParams extends PlayerParameters {
     public double MASTDefaultValue = 0.0;
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 0.1;
-    public double hedgeBoltzmann = 100;
     public boolean useMASTAsActionHeuristic = false;
     public MCTSEnums.SelectionPolicy selectionPolicy = SIMPLE;  // In general better than ROBUST
     public MCTSEnums.TreePolicy treePolicy = UCB;
@@ -50,14 +46,14 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
-    public int omaVisits = 0;
+    public int omaVisits = 30;
     public boolean normaliseRewards = true;  // This will automatically normalise rewards to be in the range [0,1]
     // so that K does not need to be tuned to the precise scale of reward in a game
     // It also means that at the end of the game (when rewards are possibly closer to each other, they are still scaled to [0, 1]
     public boolean maintainMasterState = false;
     public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
-    public IStateHeuristic heuristic = new PureScoreHeuristic();
+    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
@@ -72,13 +68,15 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveWideningExponent = 0.0;
     public double progressiveBias = 0.0;
     public boolean reuseTree = false;
+    public MCTSEnums.BackupPolicy backupPolicy = MCTSEnums.BackupPolicy.MonteCarlo;
+    public double backupLambda = 1.0;
     public int maxBackupThreshold = 1000000;
+    public Class<?> instantiationClass;
 
     public MCTSParams() {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 0.1);
-        addTunableParameter("hedgeBoltzmann", 100.0);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("rolloutLengthPerPlayer", false);
         addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100));
@@ -95,9 +93,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic",
-                StateHeuristicType.PureScoreHeuristic.getExemplarHeuristic(),
-                Arrays.stream(StateHeuristicType.values()).map(StateHeuristicType::getExemplarHeuristic).toList());        addTunableParameter("opponentHeuristic", StateHeuristicType.PureScoreHeuristic, Arrays.asList(StateHeuristicType.values()));
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
@@ -106,7 +102,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
-        addTunableParameter("omaVisits", 0);
+        addTunableParameter("omaVisits", 30);
         addTunableParameter("paranoid", false);
         addTunableParameter("MASTActionKey", IActionKey.class);
         addTunableParameter("MASTDefaultValue", 0.0);
@@ -120,7 +116,10 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("initialiseVisits", 0);
         addTunableParameter("actionHeuristicRecalculation", 20);
         addTunableParameter("reuseTree", false);
+        addTunableParameter("backupPolicy", MCTSEnums.BackupPolicy.MonteCarlo, Arrays.asList(MCTSEnums.BackupPolicy.values()));
+        addTunableParameter("backupLambda", 1.0);
         addTunableParameter("maxBackupThreshold", 1000000);
+        addTunableParameter("instantiationClass", "players.mcts.MCTSPlayer");
     }
 
     @Override
@@ -136,18 +135,12 @@ public class MCTSParams extends PlayerParameters {
         information = (MCTSEnums.Information) getParameterValue("information");
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
-        if (selectionPolicy == MCTSEnums.SelectionPolicy.TREE &&
-                (treePolicy == UCB || treePolicy == UCB_Tuned || treePolicy == AlphaGo)) {
-            // in this case TREE is equivalent to SIMPLE
-            selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        }
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
         MASTBoltzmann = (double) getParameterValue("MASTBoltzmann");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         MASTGamma = (double) getParameterValue("MASTGamma");
         exp3Boltzmann = (double) getParameterValue("exp3Boltzmann");
-        hedgeBoltzmann = (double) getParameterValue("hedgeBoltzmann");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
 
@@ -178,7 +171,14 @@ public class MCTSParams extends PlayerParameters {
         initialiseVisits = (int) getParameterValue("initialiseVisits");
         actionHeuristicRecalculationThreshold = (int) getParameterValue("actionHeuristicRecalculation");
         reuseTree = (boolean) getParameterValue("reuseTree");
+        backupPolicy = (MCTSEnums.BackupPolicy) getParameterValue("backupPolicy");
+        backupLambda = (double) getParameterValue("backupLambda");
         maxBackupThreshold = (int) getParameterValue("maxBackupThreshold");
+        try {
+            instantiationClass = Class.forName((String) getParameterValue("instantiationClass"));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         opponentModel = null;
         rolloutPolicy = null;
         useMASTAsActionHeuristic = (boolean) getParameterValue("useMASTAsActionHeuristic");
@@ -190,8 +190,7 @@ public class MCTSParams extends PlayerParameters {
         // All the copying is done in TunableParameters.copy()
         // Note that any *local* changes of parameters will not be copied
         // unless they have been 'registered' with setParameterValue("name", value)
-        MCTSParams p = new MCTSParams();
-        return p;
+        return new MCTSParams();
     }
 
     public AbstractPlayer getOpponentModel() {
@@ -219,19 +218,19 @@ public class MCTSParams extends PlayerParameters {
     }
 
     private AbstractPlayer constructStrategy(MCTSEnums.Strategies type, String details) {
-        switch (type) {
-            case RANDOM:
-                return new RandomPlayer(new Random(getRandomSeed()));
-            case MAST:
-                return new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
-            case CLASS:
+        return switch (type) {
+            case RANDOM -> new RandomPlayer(new Random(getRandomSeed()));
+            case MAST -> new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
+            case CLASS ->
                 // we have a bespoke Class to instantiate
-                return JSONUtils.loadClassFromString(details);
-            case PARAMS:
-                throw new AssertionError("PolicyParameters have not been set");
-            default:
-                throw new AssertionError("Unknown strategy type : " + type);
-        }
+                    JSONUtils.loadClassFromString(details);
+            case PARAMS -> throw new AssertionError("PolicyParameters have not been set");
+            default -> throw new AssertionError("Unknown strategy type : " + type);
+        };
+    }
+
+    public IStateHeuristic getHeuristic() {
+        return heuristic;
     }
 
     @Override
@@ -239,12 +238,17 @@ public class MCTSParams extends PlayerParameters {
         if (!useMAST && (useMASTAsActionHeuristic || rolloutType == MCTSEnums.Strategies.MAST)) {
             throw new AssertionError("MAST data not being collected, but MAST is being used as the rollout policy or as the action heuristic. Set MAST parameter.");
         }
-        return new MCTSPlayer((MCTSParams) this.copy());
-    }
-
-    @Override
-    public IStateHeuristic getStateHeuristic() {
-        return heuristic;
+        if (instantiationClass == null || instantiationClass == MCTSPlayer.class)
+            return new MCTSPlayer((MCTSParams) this.copy());
+        else {
+            // the instantiation Class should implement a constructor that takes a MCTSParams object
+            // which we find and then instantiate
+            try {
+                return (MCTSPlayer) instantiationClass.getConstructor(MCTSParams.class).newInstance(this);
+            } catch (Exception e) {
+                throw new AssertionError("Could not instantiate class : " + instantiationClass.getName());
+            }
+        }
     }
 
 }

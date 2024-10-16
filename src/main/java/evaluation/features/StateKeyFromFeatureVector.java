@@ -15,8 +15,8 @@ public class StateKeyFromFeatureVector  implements IStateKey {
     }
 
     @Override
-    public String getKey(AbstractGameState state) {
-        double[] retValue = featureVector.featureVector(state, state.getCurrentPlayer());
-        return String.format("%d-%s", state.getCurrentPlayer(), Arrays.toString(retValue));
+    public String getKey(AbstractGameState state, int playerId) {
+        double[] retValue = featureVector.featureVector(state, playerId);
+        return String.format("%d-%s", playerId, Arrays.toString(retValue));
     }
 }

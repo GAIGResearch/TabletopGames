@@ -140,22 +140,22 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j</artifactId>
-            <version>0.31.0</version>
+            <version>0.35.0</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-vertex-ai-gemini</artifactId>
-            <version>0.31.0</version>
+            <version>0.35.0</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-mistral-ai</artifactId>
-            <version>0.31.0</version>
+            <version>0.35.0</version>
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
-            <version>0.31.0</version>
+            <version>0.35.0</version>
         </dependency>
 
     </dependencies>
@@ -193,17 +193,89 @@
                 <version>3.3.0</version>
                 <executions>
                     <execution>
-                        <id>llm</id>
+                        <id>frontend</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>core.LLMTest</mainClass>
+                                    <mainClass>gui.Frontend</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>LLMTest</finalName>
+                            <finalName>FrontEnd</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>RunGames</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.RunGames</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>RunGames</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ParameterSearch</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>ParameterSearch</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ProgressiveLearner</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.ProgressiveLearner</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>ProgressiveLearner</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>SkillLadder</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>SkillLadder</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

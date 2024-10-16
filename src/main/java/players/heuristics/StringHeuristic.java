@@ -1,6 +1,7 @@
 package players.heuristics;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import games.loveletter.LoveLetterGameState;
 import games.tictactoe.TicTacToeGameState;
@@ -96,27 +97,29 @@ public class StringHeuristic implements IStateHeuristic {
         // Compile the source code
         DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<JavaFileObject>();
 
-        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticsCollector, null, null, List.of(javaFileObject));
+        JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager,
+                diagnosticsCollector, null, null,
+                List.of(javaFileObject));
 
         boolean success = task.call();
         if (!success) {
-                StringBuilder sb = new StringBuilder();
-                List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
-                for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
-                    if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
-                        // read error details from the diagnostic object
-                        sb.append(diagnostic.getMessage(null)).append("\n");
-                    }
+            StringBuilder sb = new StringBuilder();
+            List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+                if (diagnostic.getKind() != Diagnostic.Kind.NOTE) {
+                    // read error details from the diagnostic object
+                    sb.append(diagnostic.getMessage(null)).append("\n");
                 }
-                String error = String.format("Compilation error: %s", sb);
+            }
+            String error = String.format("Compilation error: %s", sb);
             throw new RuntimeException(error);
-        }else{
+        } else {
             System.out.println("Heuristic loaded: " + fileName);
         }
 
         // Load the compiled class
         try {
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { new File("").toURI().toURL() });
+            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File("").toURI().toURL()});
 
             Class<?> dynamicClass = classLoader.loadClass(className);
 
@@ -124,28 +127,29 @@ public class StringHeuristic implements IStateHeuristic {
             heuristicClass = dynamicClass.getDeclaredConstructor().newInstance();
 
             // Find and invoke the method using reflection
-            if(className.contains("TicTacToeEvaluator"))
-                heuristicFunction = dynamicClass.getMethod("evaluateState", TicTacToeGameState.class, int.class);
-            else if(className.contains("LoveLetterEvaluator"))
-                heuristicFunction = dynamicClass.getMethod("evaluateState", LoveLetterGameState.class, int.class);
+            heuristicFunction = dynamicClass.getMethod("evaluateState", AbstractGameState.class, int.class);
 
+            classLoader.close();
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                 NoSuchMethodException | MalformedURLException e) {
+                 NoSuchMethodException | IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
+            return 0;
+        if (playerResult == CoreConstants.GameResult.DRAW_GAME)
+            return 0.5;
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
+            return 1;
+
         try {
             return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public StateHeuristicType getType() {
-        return StateHeuristicType.StringHeuristic;
     }
 }

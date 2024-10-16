@@ -7,6 +7,7 @@ import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import games.wonders7.Wonders7GameParameters;
 import org.json.simple.JSONObject;
 import utilities.Pair;
 
@@ -109,7 +110,7 @@ public class SGGameState extends AbstractGameState {
 
             // Add player hands unseen back to the draw pile
             for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (hasNotSeenHand(playerId, p)) {
+                if (!hasSeenHand(playerId, p)) {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
@@ -117,7 +118,7 @@ public class SGGameState extends AbstractGameState {
 
             // Now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (hasNotSeenHand(playerId, p)) {
+                if (!hasSeenHand(playerId, p)) {
                     Deck<SGCard> hand = copy.playerHands.get(p);
                     int handSize = hand.getSize();
                     hand.clear();
@@ -150,12 +151,10 @@ public class SGGameState extends AbstractGameState {
      * @param opponentId - id of opponent owning the hand of cards we're checking vision of
      * @return - true if player has not seen the opponent's hand of cards, false otherwise
      */
-    public boolean hasNotSeenHand(int playerId, int opponentId) {
-        if (playerId == opponentId) return false;
-        int opponentSpacesToLeft = opponentId - playerId;
-        if (opponentSpacesToLeft < 0)
-            opponentSpacesToLeft = getNPlayers() + opponentSpacesToLeft;
-        return deckRotations < opponentSpacesToLeft;
+    public boolean hasSeenHand(int playerId, int opponentId) {
+        // Player 0 is one space to the 'Left' of player 1
+        int opponentSpacesToLeft = (playerId - opponentId + getNPlayers()) % getNPlayers();
+        return opponentSpacesToLeft <= deckRotations;
     }
 
     public Counter[] getPlayerScore() {

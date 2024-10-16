@@ -1,0 +1,66 @@
+Game: TicTacToe, Players: 2, GamesPerMatchup: 100, Mode: NO_SELF_PLAY
+Alpha calculations using Delta Ordinal
+Alpha: 30.0
+	0.109	OSLA_000-0
+	0.891	OSLA_001-1
+	0.000	Random-2
+
+Transition matrix for alpha = 30.0
+0.109	0.891	0.000	
+0.109	0.891	0.000	
+0.047	0.953	0.000	
+B matrix for alpha = 30.0
+0.832	1.045	0.854	
+1.045	3.300	0.854	
+0.854	0.854	0.910	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for OSLA_000-0
+		OSLA_000-0
+		Random-2
+
+Alpha calculations using Win Rate
+Alpha: 30.0
+	0.109	OSLA_000-0
+	0.891	OSLA_001-1
+	0.000	Random-2
+
+Transition matrix for alpha = 30.0
+0.109	0.891	0.000	
+0.109	0.891	0.000	
+0.047	0.953	0.000	
+B matrix for alpha = 30.0
+0.832	1.045	0.854	
+1.045	3.300	0.854	
+0.854	0.854	0.910	
+The following agents cluster together, and may be considered equivalent: 
+	Cluster for OSLA_000-0
+		OSLA_000-0
+		Random-2
+
+OSLA_000-0 got 218.00 points. OSLA_000-0 won 34.5% of the 600 games of the tournament. OSLA_000-0 won 51.8% of the 400 games it played during the tournament.
+OSLA_000-0 won 45.5% of the 200 games against OSLA_001-1.
+OSLA_000-0 won 58.0% of the 200 games against Random-2.
+
+OSLA_001-1 got 242.00 points. OSLA_001-1 won 38.3% of the 600 games of the tournament. OSLA_001-1 won 57.5% of the 400 games it played during the tournament.
+OSLA_001-1 won 52.5% of the 200 games against OSLA_000-0.
+OSLA_001-1 won 62.5% of the 200 games against Random-2.
+
+Random-2 got 140.00 points. Random-2 won 20.2% of the 600 games of the tournament. Random-2 won 30.3% of the 400 games it played during the tournament.
+Random-2 won 33.0% of the 200 games against OSLA_000-0.
+Random-2 won 27.5% of the 200 games against OSLA_001-1.
+
+---- Ranking ---- (+/- are standard errors on the mean calculated using a Normal approximation) 
+OSLA_001-1: Win rate 0.61 +/- 0.024	Mean Ordinal 1.37 +/- 0.02
+OSLA_000-0: Win rate 0.55 +/- 0.024	Mean Ordinal 1.43 +/- 0.02
+Random-2: Win rate 0.35 +/- 0.023	Mean Ordinal 1.60 +/- 0.02
+
+Alpha-rank by Win Rate
+	OSLA_001-1                    	0.89
+	OSLA_000-0                    	0.11
+	Random-2                      	0.00
+
+Alpha-rank by Ordinal Position
+	OSLA_001-1                    	0.89
+	OSLA_000-0                    	0.11
+	Random-2                      	0.00
+

@@ -1,9 +1,10 @@
 package players.rhea;
 
+import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
+import org.json.simple.JSONObject;
 import players.PlayerParameters;
-import players.heuristics.StateHeuristicType;
 
 import java.util.Arrays;
 
@@ -20,8 +21,9 @@ public class RHEAParams extends PlayerParameters
     public int tournamentSize = 4;
     public RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
     public boolean shiftLeft;
+    public IStateHeuristic heuristic = AbstractGameState::getGameScore;
     public boolean useMAST;
-    IStateHeuristic heuristic;
+
 
     public RHEAParams() {
         addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
@@ -34,9 +36,8 @@ public class RHEAParams extends PlayerParameters
         addTunableParameter("crossoverType", RHEAEnums.CrossoverType.UNIFORM, Arrays.asList(RHEAEnums.CrossoverType.values()));
         addTunableParameter("shiftLeft", false, Arrays.asList(false, true));
         addTunableParameter("mutationCount", 1, Arrays.asList(1, 3, 10));
-        addTunableParameter("heuristic",
-                StateHeuristicType.PureScoreHeuristic.getExemplarHeuristic(),
-                Arrays.stream(StateHeuristicType.values()).map(StateHeuristicType::getExemplarHeuristic).toList());        addTunableParameter("useMAST", false, Arrays.asList(false, true));
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getGameScore);
+        addTunableParameter("useMAST", false, Arrays.asList(false, true));
     }
 
     @Override
@@ -54,6 +55,12 @@ public class RHEAParams extends PlayerParameters
         mutationCount = (int) getParameterValue("mutationCount");
         useMAST = (boolean) getParameterValue("useMAST");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
+        if (heuristic instanceof TunableParameters) {
+            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+            for (String name : tunableHeuristic.getParameterNames()) {
+                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+            }
+        }
     }
 
     @Override
@@ -67,8 +74,7 @@ public class RHEAParams extends PlayerParameters
         return new RHEAPlayer(this);
     }
 
-    @Override
-    public IStateHeuristic getStateHeuristic() {
+    public IStateHeuristic getHeuristic() {
         return heuristic;
     }
 
