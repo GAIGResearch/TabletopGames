@@ -1,0 +1,64 @@
+package evaluation.listeners;
+
+import core.Game;
+import evaluation.metrics.Event;
+import utilities.JSONUtils;
+
+import java.io.File;
+import java.util.Set;
+
+public interface IGameListener {
+
+    /**
+     * Manages all events.
+     *
+     * @param event Event has information about its type and data fields for game, state, action and player.
+     *              It's not guaranteed that the data fields are different to null, so a check is necessary.
+     */
+    void onEvent(Event event);
+
+
+    /**
+     * This is called when all processing is finished, for example after running a sequence of games
+     * As such, no state is provided.
+     * <p>
+     * This is useful for Listeners that are just interested in aggregate data across many runs
+     */
+    void report();
+
+    default boolean setOutputDirectory(String... nestedDirectories) {
+        return true;
+    }
+
+    void setGame(Game game);
+
+    Game getGame();
+
+    /**
+     * Create listener based on given class, logger and metrics class. TODO: more than 1 metrics class
+     *
+     * @param listenerName - class of listener, full path (e.g. evaluation.metrics.MetricsGameListener)
+     * @return - GameListener instance to be attached to a game
+     */
+    static IGameListener createListener(String listenerName) {
+        // We must always have a listenerClas specified; a metrics class is optional
+        if (listenerName == null || listenerName.isEmpty())
+            throw new IllegalArgumentException("A listenerName must be specified");
+        // first we check to see if listenerName is a file or not
+        IGameListener listener;
+        File listenerDetails = new File(listenerName);
+        if (listenerDetails.exists()) {
+            // in this case we construct from file
+            listener = JSONUtils.loadClassFromFile(listenerName);
+        } else {
+           throw new IllegalArgumentException("Unable to find listener file: " + listenerName);
+        }
+        return listener;
+    }
+
+    default void reset() {
+    }
+
+    default void init(Game game, int nPlayersPerGame, Set<String> playerNames) {}
+
+}

@@ -7,7 +7,7 @@
 [![](https://img.shields.io/github/stars/GAIGResearch/TabletopGames.svg?label=Stars&style=social)](https://github.com/GAIGResearch/TabletopGames)
 
 The [Tabletop Games Framework (TAG)](http://tabletopgames.ai) is a Java-based benchmark for developing modern board games for AI research.  TAG provides a common skeleton for implementing tabletop games based on a common API for AI agents, a set of components and classes to easily add new games and an import module for defining data in JSON format. At present, this platform includes the implementation of seven different tabletop games that can also be used as an example for further developments. Additionally, TAG also incorporates logging functionality that allows the user to perform a detailed analysis of the game, in terms of action space, branching factor, hidden information, and other measures of interest for Game AI research.
-![Pandemic](data/imgs/Pandemic.png)
+![Pandemic](core/data/imgs/Pandemic.png)
 *Example GUI for Pandemic*
 
 ## Games

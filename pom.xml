@@ -200,7 +200,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>
+                                    <mainClass>optimisation.evaluation.ParameterSearch</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>ParameterSearch</finalName>
@@ -236,7 +236,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.tournaments.SkillLadder</mainClass>
+                                    <mainClass>tournaments.evaluation.SkillLadder</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>SkillLadder</finalName>
