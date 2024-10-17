@@ -305,7 +305,7 @@ public class CQGameState extends AbstractGameState {
     public boolean canPerformAction(AbstractAction action, boolean requireHighlight) {
         if (action instanceof EndTurn) return true;
         CQAction cqAction = (CQAction) action;
-        if (requireHighlight && !cqAction.compareHighlight(highlight, ((Command) getComponentById(cmdHighlight)).getCommandType())) return false;
+        if (requireHighlight && !cqAction.compareHighlight(highlight, (Command) getComponentById(cmdHighlight))) return false;
         return ((CQAction) action).canExecute(this);
     }
     public int getDistance(Cell from, Cell to) {

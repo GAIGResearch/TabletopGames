@@ -34,10 +34,10 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
      * @param cmd (optional) command to compare highlight with
      * @return `true` if the board's highlight `cmp` (and `cmd`) is equal to the action's `highlight` (and `cmdHighlight`); `false` otherwise.
      */
-    public boolean checkHighlight(Vector2D cmp, CommandType cmd) {
+    public boolean checkHighlight(Vector2D cmp, Command cmd) {
         if (cmd == null) return false;
-        if (cmd == CommandType.WindsOfFate) return cmd.equals(cmdType);
-        else return cmp.equals(highlight) && cmd.equals(cmdType);
+        if (cmd.getCommandType() == CommandType.WindsOfFate) return cmd.getCommandType().equals(cmdType);
+        else return cmp.equals(highlight) && cmd.getCommandType().equals(cmdType);
     }
     public boolean checkHighlight(Vector2D cmp) {
         return cmp.equals(highlight);
@@ -51,7 +51,7 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
      * @param cmdHighlight The highlighted command
      * @return `true` if highlight(s) correspond to action's highlight(s); `false` otherwise
      */
-    public boolean compareHighlight(Vector2D highlight, CommandType cmdHighlight) {
+    public boolean compareHighlight(Vector2D highlight, Command cmdHighlight) {
         if (this instanceof ApplyCommand) return this.checkHighlight(highlight, cmdHighlight);
         else return this.checkHighlight(highlight);
     }
