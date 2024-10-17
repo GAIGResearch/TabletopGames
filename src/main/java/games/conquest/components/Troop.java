@@ -72,7 +72,8 @@ public class Troop extends Component {
         copy.health = health;
         copy.healthBoost = healthBoost;
         copy.distanceMoved = distanceMoved;
-        copy.setLocation(location);
+        copy.setLocation(location.copy());
+        copy.appliedCommands = (HashSet<CommandType>) appliedCommands.clone();
         return copy;
     }
 
@@ -87,14 +88,12 @@ public class Troop extends Component {
     public void setLocation(Vector2D loc) {
         location = loc;
     }
-    public void setLocation(int x, int y) {
-        location = new Vector2D(x, y);
-    }
 
     public boolean move(Cell target, CQGameState cqgs) {
         int distance = cqgs.getDistance(cqgs.getCell(location), target);
         if (distance > getMovement()) return false; // do nothing, can't move there
-        cqgs.moveTroop(this.getComponentID(), location, target.position);
+        if (!cqgs.moveTroop(this, target.position))
+            throw new AssertionError("Could not move troop: troop not found.");
         location = target.position;
         distanceMoved += distance;
         return true;

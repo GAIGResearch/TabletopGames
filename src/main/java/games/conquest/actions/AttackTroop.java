@@ -29,7 +29,8 @@ public class AttackTroop extends CQAction {
         if (selected == null || cqgs.getGamePhase() == CQGameState.CQGamePhase.RallyPhase)
             return false; // can't attack before selecting a troop, or after a previous attack.
         Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
-        if (target.getOwnerId() == selected.getOwnerId()) return false; // can't attack own troop
+        if (target.getOwnerId() == selected.getOwnerId())
+            return false; // can't attack own troop
         int distance = cqgs.getCell(target.getLocation()).getChebyshev(selected.getLocation());
         return distance <= selected.getRange();
     }

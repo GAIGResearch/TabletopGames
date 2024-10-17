@@ -44,7 +44,7 @@ public class CQGameState extends AbstractGameState {
     HashMap<Vector2D, Integer> locationToTroopMap;
     private int selectedTroop = -1; // The troop that is allowed to move and attack
     public Vector2D highlight = null; // the highlighted cell, whether or not it contains anything
-    public Command cmdHighlight = null; // the highlighted command, for the current player.
+    public int cmdHighlight = -1; // the highlighted command, for the current player.
     GridBoard<Cell> gridBoard;
     PartialObservableDeck[] chosenCommands;
     int[] commandPoints = new int[] {0, 0};
@@ -137,7 +137,7 @@ public class CQGameState extends AbstractGameState {
     /**
      * See your own commands on/off cooldown
      * @param uid the user checking their own inactive commands
-     * @param active whether the list should show the inactive or active commands
+     * @param active whether the list should show the inactive or active commands.
      * @return set of commands that are on cooldown
      */
     public HashSet<Command> getCommands(int uid, boolean active) {
@@ -182,20 +182,21 @@ public class CQGameState extends AbstractGameState {
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
         if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
+                int commandId = c.getComponentID();
                 if (c.getCost() > getCommandPoints(uid)) continue;
                 if (c.getCommandType() == CommandType.WindsOfFate) {
-                    actions.add(new ApplyCommand(uid, c, (Vector2D) null));
+                    actions.add(new ApplyCommand(uid, commandId, (Vector2D) null, c.getCommandType()));
                 } else if (c.getCommandType().enemy) {
                     for (Troop t : getTroops(uid ^ 1)) {
                         if (!t.getAppliedCommands().contains(c.getCommandType()))
                             // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
-                            actions.add(new ApplyCommand(uid, c, t));
+                            actions.add(new ApplyCommand(uid, commandId, t, c.getCommandType()));
                     }
                 } else {
                     for (Troop t : getTroops(uid)) {
                         if (!t.getAppliedCommands().contains(c.getCommandType()))
                             // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
-                            actions.add(new ApplyCommand(uid, c, t));
+                            actions.add(new ApplyCommand(uid, commandId, t, c.getCommandType()));
                     }
                 }
             }
@@ -247,8 +248,8 @@ public class CQGameState extends AbstractGameState {
 
     /*======= METHODS THAT EXECUTE SOME ACTION =======*/
     public boolean useCommand(int uid, @NotNull Command cmd) {
-        cmd.use();
         int idx = getCommands(uid).getComponents().indexOf(cmd);
+        cmd.use();
         if (idx == -1) return false;
         getCommands(uid).setVisibilityOfComponent(idx, uid ^ 1, true);
         return true;
@@ -269,10 +270,11 @@ public class CQGameState extends AbstractGameState {
             return false;
         }
     }
-    public boolean moveTroop(int troop, Vector2D from, Vector2D to) {
-        if (locationToTroopMap.get(from) == null) return false;
-        locationToTroopMap.remove(from);
-        locationToTroopMap.put(to, troop);
+    public boolean moveTroop(@NotNull Troop troop, Vector2D to) {
+        if (locationToTroopMap.get(troop.getLocation()) == null)
+            return false;
+        locationToTroopMap.remove(troop.getLocation());
+        locationToTroopMap.put(to, troop.getComponentID());
         return true;
     }
     public void endTurn() {
@@ -288,6 +290,10 @@ public class CQGameState extends AbstractGameState {
             cmd.step();
         }
     }
+    public void addTroop(@NotNull Troop troop, Vector2D position) {
+        troop.setLocation(position);
+        locationToTroopMap.put(position, troop.getComponentID());
+    }
 
     /*======= CHECKING / COMPUTING FUNCTIONS =======*/
     /**
@@ -299,7 +305,7 @@ public class CQGameState extends AbstractGameState {
     public boolean canPerformAction(AbstractAction action, boolean requireHighlight) {
         if (action instanceof EndTurn) return true;
         CQAction cqAction = (CQAction) action;
-        if (requireHighlight && !cqAction.compareHighlight(highlight, cmdHighlight)) return false;
+        if (requireHighlight && !cqAction.compareHighlight(highlight, ((Command) getComponentById(cmdHighlight)).getCommandType())) return false;
         return ((CQAction) action).canExecute(this);
     }
     public int getDistance(Cell from, Cell to) {
@@ -416,13 +422,18 @@ public class CQGameState extends AbstractGameState {
     protected CQGameState _copy(int playerId) {
         CQGameState copy = new CQGameState(getGameParameters(), getNPlayers());
         copy.cells = cells; // Cells only have final properties so can be copied like this.
-        copy.troops = (HashSet<Troop>) troops.clone();
+        copy.troops = new HashSet<Troop>();
+        for (Troop t : troops) {
+            copy.troops.add(t.copy());
+        }
         copy.locationToTroopMap = (HashMap<Vector2D, Integer>) locationToTroopMap.clone();
         copy.selectedTroop = selectedTroop;
         copy.highlight = highlight;
         copy.cmdHighlight = cmdHighlight;
         copy.gridBoard = gridBoard.copy();
-        copy.chosenCommands = chosenCommands.clone();
+        copy.chosenCommands = new PartialObservableDeck[2];
+        copy.chosenCommands[0] = chosenCommands[0].copy();
+        copy.chosenCommands[1] = chosenCommands[1].copy();
         copy.commandPoints = commandPoints.clone();
         return copy;
     }
@@ -464,6 +475,7 @@ public class CQGameState extends AbstractGameState {
             theirScore *= theirPoints * theirCooldowns;
             // Normalize scores:
             double maxScore = Math.max(myScore, theirScore);
+            if (maxScore == 0.0) return 0.5; // neither player has a score yet, so it's a tie.
             myScore /= maxScore;
             theirScore /= maxScore;
             // Scale it so that 0.5 is a tie, 0 is a loss for `playerId`, and 1 is a win for `playerId`.
@@ -497,7 +509,7 @@ public class CQGameState extends AbstractGameState {
                 Arrays.deepEquals(cqgs.cells, cells) &&
                 cqgs.troops.equals(troops) &&
                 cqgs.locationToTroopMap.equals(locationToTroopMap) &&
-                cqgs.cmdHighlight.equals(cmdHighlight) &&
+                cqgs.cmdHighlight == cmdHighlight &&
                 cqgs.gridBoard.equals(gridBoard) &&
                 Arrays.equals(cqgs.chosenCommands, chosenCommands)
         ))

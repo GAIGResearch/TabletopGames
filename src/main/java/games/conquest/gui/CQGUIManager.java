@@ -213,7 +213,7 @@ public class CQGUIManager extends AbstractGUIManager {
 
     public void showCommandInfo(CQGameState cqgs) {
         commandInfo[0].setText("Command Points: " + cqgs.getCommandPoints(0));
-        int currentPlayer = cqgs.getCurrentPlayer();
+        int currentPlayer = cqgs.getCurrentPlayer(); // TODO: Toggle this to inspect the opponent's commands while debugging
         Command highlight = commandViews[currentPlayer].highlight;
         if (highlight == null) {
             for (int i=1; i<3; i++) {
@@ -277,7 +277,7 @@ public class CQGUIManager extends AbstractGUIManager {
                 showTroopInfo(cqgs, null);
                 cqgs.highlight = null;
             }
-            cqgs.cmdHighlight = commandSelection;
+            cqgs.cmdHighlight = commandSelection == null ? -1 : commandSelection.getComponentID();
             showCommandInfo(cqgs);
         }
     }

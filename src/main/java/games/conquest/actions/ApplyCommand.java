@@ -30,23 +30,23 @@ import java.util.List;
  * given your componentID.</p>
  */
 public class ApplyCommand extends CQAction {
-    public ApplyCommand(int pid, Command command) {
-        super(pid, command, null);
+    public ApplyCommand(int pid, int command, CommandType type) {
+        this(pid, command, (Vector2D) null, type);
     }
-    public ApplyCommand(int pid, Command command, Troop target) {
-        super(pid, command, target == null ? null : target.getLocation());
+    public ApplyCommand(int pid, int command, Troop target, CommandType type) {
+        this(pid, command, target == null ? null : target.getLocation(), type);
     }
-    public ApplyCommand(int pid, Command command, Vector2D target) {
+    public ApplyCommand(int pid, int command, Vector2D target, CommandType type) {
         super(pid, command, target);
+        cmdType = type;
     }
 
     @Override
     public boolean canExecute(CQGameState cqgs) {
-        Command cmd = cmdHighlight != null ? cmdHighlight : cqgs.cmdHighlight;
+        Command cmd = (Command) cqgs.getComponentById(cmdHighlight != -1 ? cmdHighlight : cqgs.cmdHighlight);
         if (cmd.getCooldown() > 0) return false;
         if (cmd.getCost() > cqgs.getCommandPoints()) return false;
-        CommandType cmdType = cmd.getCommandType();
-        if (cmdType == CommandType.WindsOfFate) {
+        if (isWindsOfFate()) {
             return !cqgs.getCommands(cqgs.getCurrentPlayer(), false).isEmpty();
         } else {
             Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
@@ -67,23 +67,24 @@ public class ApplyCommand extends CQAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
-        if (cmdHighlight == null) cmdHighlight = cqgs.cmdHighlight;
-        if (!cqgs.spendCommandPoints(playerId, cmdHighlight.getCost())) return false;
-        if (cmdHighlight.getCommandType() == CommandType.WindsOfFate) {
+        if (cmdHighlight == -1) cmdHighlight = cqgs.cmdHighlight;
+        Command cmd = (Command) cqgs.getComponentById(cmdHighlight);
+        if (!cqgs.spendCommandPoints(playerId, cmd.getCost())) return false;
+        if (isWindsOfFate()) {
             HashSet<Command> hs = cqgs.getCommands(playerId, false);
             Command[] cooldowns = hs.toArray(new Command[hs.size()]);
             cooldowns[cqgs.getRnd().nextInt(hs.size())].reset(); // reset selected command
         } else {
             if (highlight == null) highlight = cqgs.highlight;
             Troop target = cqgs.getTroopByLocation(highlight);
-            target.applyCommand(cmdHighlight.getCommandType());
+            target.applyCommand(cmdType);
         }
-        cqgs.useCommand(playerId, cmdHighlight);
+        cqgs.useCommand(playerId, cmd);
         return gs.setActionInProgress(this);
     }
 
     public boolean isWindsOfFate() {
-        return cmdHighlight.getCommandType() == CommandType.WindsOfFate;
+        return cmdType == CommandType.WindsOfFate;
     }
 
     /**
@@ -94,7 +95,7 @@ public class ApplyCommand extends CQAction {
      */
     @Override
     public ApplyCommand copy() {
-        return new ApplyCommand(playerId, cmdHighlight, highlight);
+        return new ApplyCommand(playerId, cmdHighlight, highlight, cmdType);
     }
 
     @Override
@@ -102,7 +103,7 @@ public class ApplyCommand extends CQAction {
         if (this == obj) return true;
         if (!(obj instanceof  ApplyCommand)) return false;
         ApplyCommand acObj = ((ApplyCommand) obj);
-        if (acObj.playerId != playerId || !acObj.cmdHighlight.equals(cmdHighlight)) return false;
+        if (acObj.playerId != playerId || acObj.cmdHighlight != cmdHighlight) return false;
         if (highlight == null && acObj.highlight == null) return true;
         return acObj.highlight.equals(highlight);
     }
@@ -114,7 +115,7 @@ public class ApplyCommand extends CQAction {
     @Override
     public String toString() {
         String str = "Apply";
-        if (cmdHighlight != null) str += " " + cmdHighlight;
+        if (cmdType != null) str += " " + cmdType;
         else str += " Command";
         if (highlight != null) str += "->" + highlight;
         return str;

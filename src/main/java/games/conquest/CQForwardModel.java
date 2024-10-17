@@ -137,8 +137,7 @@ public class CQForwardModel extends StandardForwardModel {
                     x = cqp.gridWidth-1 - i;
                     y = cqp.gridHeight-1 - j;
                 }
-                unit.setLocation(x, y);
-                cqgs.locationToTroopMap.put(new Vector2D(x, y), unit.getComponentID());
+                cqgs.addTroop(unit, new Vector2D(x, y));
                 if (nTroops >= maxTroops) return;
             }
         }

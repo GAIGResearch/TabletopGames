@@ -15,14 +15,15 @@ import java.util.List;
 public abstract class CQAction extends AbstractAction implements IExtendedSequence {
     public final int playerId;
     Vector2D highlight;
-    Command cmdHighlight;
+    int cmdHighlight = -1;
+    CommandType cmdType = null;
     private boolean executed = false;
 
     public CQAction(int pid, Vector2D target) {
         playerId = pid;
         highlight = target;
     }
-    public CQAction(int pid, Command cmd, Vector2D target) {
+    public CQAction(int pid, int cmd, Vector2D target) {
         this(pid, target);
         cmdHighlight = cmd;
     }
@@ -33,10 +34,10 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
      * @param cmd (optional) command to compare highlight with
      * @return `true` if the board's highlight `cmp` (and `cmd`) is equal to the action's `highlight` (and `cmdHighlight`); `false` otherwise.
      */
-    public boolean checkHighlight(Vector2D cmp, Command cmd) {
+    public boolean checkHighlight(Vector2D cmp, CommandType cmd) {
         if (cmd == null) return false;
-        if (cmd.getCommandType() == CommandType.WindsOfFate) return cmd.equals(cmdHighlight);
-        else return cmp.equals(highlight) && cmd.equals(cmdHighlight);
+        if (cmd == CommandType.WindsOfFate) return cmd.equals(cmdType);
+        else return cmp.equals(highlight) && cmd.equals(cmdType);
     }
     public boolean checkHighlight(Vector2D cmp) {
         return cmp.equals(highlight);
@@ -50,7 +51,7 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
      * @param cmdHighlight The highlighted command
      * @return `true` if highlight(s) correspond to action's highlight(s); `false` otherwise
      */
-    public boolean compareHighlight(Vector2D highlight, Command cmdHighlight) {
+    public boolean compareHighlight(Vector2D highlight, CommandType cmdHighlight) {
         if (this instanceof ApplyCommand) return this.checkHighlight(highlight, cmdHighlight);
         else return this.checkHighlight(highlight);
     }
