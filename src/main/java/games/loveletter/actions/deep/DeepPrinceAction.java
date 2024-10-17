@@ -3,7 +3,7 @@ package games.loveletter.actions.deep;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.cards.LoveLetterCard;
+import games.loveletter.cards.CardType;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 public class DeepPrinceAction extends PlayCardDeep {
 
     public DeepPrinceAction(int cardIdx, int playerId) {
-        super(LoveLetterCard.CardType.Prince, cardIdx, playerId);
+        super(CardType.Prince, cardIdx, playerId);
     }
 
     @Override

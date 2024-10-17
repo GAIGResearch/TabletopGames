@@ -1,5 +1,6 @@
 package players.heuristics;
 
+import com.fasterxml.jackson.databind.annotation.NoClass;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
@@ -131,7 +132,7 @@ public class StringHeuristic implements IStateHeuristic {
 
             classLoader.close();
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                 NoSuchMethodException | IOException e) {
+                 NoSuchMethodException | IOException | NoClassDefFoundError e) {
             throw new RuntimeException(e);
         }
     }
@@ -149,7 +150,8 @@ public class StringHeuristic implements IStateHeuristic {
         try {
             return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            System.out.println("Error invoking heuristic function: " + e.getMessage());
+            return 0;
         }
     }
 }

@@ -31,7 +31,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(gridBoard);
         }};
     }
@@ -49,9 +49,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
-     * of victory points, etc.
-     * If a game does not support this directly, then just return 0.0
+     * For TicTacToe this returns 0 unless the game is over. In which case 1 is a win, 0.5 is a draw and 0 is a loss.
      *
      * @param playerId
      * @return - double, score of current state
@@ -59,6 +57,13 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     @Override
     public double getGameScore(int playerId) {
         return playerResults[playerId].value;
+    }
+
+    /**
+     * This returns the symbol used for the token for the given player id. This will match with Token.getTokenType().
+     */
+    public String getPlayerToken(int playerId) {
+        return TicTacToeConstants.playerMapping.get(playerId).getTokenType();
     }
 
     @Override

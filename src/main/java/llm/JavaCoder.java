@@ -41,6 +41,8 @@ public class JavaCoder {
         String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
         String fileStem = workingDir + "/" + evaluatorName;
 
+        GamePromptGenerator promptGenerator = new GamePromptGenerator();
+
         int iteration = 0;
         int max_iters = 3;
         int currentErrors = 0;
@@ -61,26 +63,26 @@ public class JavaCoder {
                 String fileName = fileStem + String.format("%03d.java", iteration);
                 String className = evaluatorName + String.format("%03d", iteration);
 
-                String llmPrompt = GamePromptGenerator.createLLMTaskPrompt(
+                String llmPrompt = promptGenerator.createLLMTaskPrompt(
                         GamePromptGenerator.TaskType.Heuristic,
-                        GameType.TicTacToe,
+                        gameType,
                         playerCount,
                         className);
                 if (iteration > 0) {
-                    GamePromptGenerator.createLLMFeedbackPrompt(
+                    promptGenerator.createLLMFeedbackPrompt(
                             GamePromptGenerator.TaskType.Heuristic,
-                            GameType.TicTacToe,
-                            2,
+                            gameType,
+                            playerCount,
                             className,
                             generatedCode);
                 }
 
                 if (!error.isEmpty()) {
                     currentErrors++;
-                    llmPrompt = GamePromptGenerator.createLLMErrorPrompt(
+                    llmPrompt = promptGenerator.createLLMErrorPrompt(
                             GamePromptGenerator.TaskType.Heuristic,
-                            GameType.TicTacToe,
-                            2,
+                            gameType,
+                            playerCount,
                             className,
                             generatedCode,
                             error);
@@ -167,6 +169,7 @@ public class JavaCoder {
             }
 
             iteration++;
+            currentErrors = 0;
         }
     }
 
