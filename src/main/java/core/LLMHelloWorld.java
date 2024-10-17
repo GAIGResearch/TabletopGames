@@ -73,38 +73,37 @@ public class LLMHelloWorld {
         System.out.println(answer);
 
 
-//        dev.langchain4j.model.huggingface.HuggingFaceLanguageModel llm = dev.langchain4j.model.huggingface.HuggingFaceLanguageModel.builder()
-//                .accessToken(keyText)
-//                .modelId(modelID)
-//                .waitForModel(true)
-//                .timeout(ofSeconds(60))
-//                .maxNewTokens(1024)
-//                .temperature(0.1)
-//                .returnFullText(true)
-//                .build();
-//
-//
-//        String templateStr = "Answer the following question to the best of your ability:\n"
-//                + "\n"
-//                + "Question:\n"
-//                + "{{question}}\n";
-//
-//        StructuredPromptProcessor processor = new StructuredPromptProcessor();
-//
-//
-//
-//
-//        PromptTemplate promptTemplate = PromptTemplate.from(templateStr);
-//
-//        Map<String, Object> variables = new HashMap<>();
-//        variables.put("question", question);
-//        StructuredPrompt prompt =  promptTemplate.   /// promptTemplate.apply(variables);
-//
-//        String answer = llm.process(prompt.toUserMessage()); //llm.sendUserMessage(prompt.toUserMessage());
+        dev.langchain4j.model.huggingface.   HuggingFaceLanguageModel llm = dev.langchain4j.model.huggingface.HuggingFaceLanguageModel.builder()
+                .accessToken(keyText)
+                .modelId(modelID)
+                .waitForModel(true)
+                .timeout(ofSeconds(60))
+                .maxNewTokens(1024)
+                .temperature(0.1)
+                .returnFullText(true)
+                .build();
 
-//        AiMessage aiMessage = llm.sendUserMessage("What do you know about The Resistance, the board game?");
-//        String answer = aiMessage.text();
-//        System.out.println(answer);
+
+        String templateStr = "Answer the following question to the best of your ability:\n"
+                + "\n"
+                + "Question:\n"
+                + "{{question}}\n";
+
+        StructuredPromptProcessor processor = new StructuredPromptProcessor();
+
+
+
+
+        PromptTemplate promptTemplate = PromptTemplate.from(templateStr);
+
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("question", question);
+
+        answer = llm.process(prompt.toUserMessage()); //llm.sendUserMessage(prompt.toUserMessage());
+
+        AiMessage aiMessage = llm.sendUserMessage("What do you know about The Resistance, the board game?");
+        String answer = aiMessage.text();
+        System.out.println(answer);
 
         // FOR DOCUMENTS:
 //        EmbeddingModel embeddingModel = HuggingFaceEmbeddingModel.builder()
