@@ -2,15 +2,11 @@ package games.toads;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import games.toads.ToadForwardModel;
-import games.toads.ToadGameState;
-import games.toads.ToadParameters;
 import games.toads.abilities.Saboteur;
 import games.toads.abilities.SaboteurII;
 import games.toads.actions.PlayFieldCard;
 import games.toads.actions.PlayFlankCard;
 import games.toads.components.ToadCard;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,12 +36,12 @@ public class GameFlow {
 
     @Test
     public void gameInitialisation() {
-        assertEquals(5, state.getPlayerDeck(0).getSize());
-        assertEquals(5, state.getPlayerDeck(1).getSize());
-        assertEquals(4, state.getPlayerHand(0).getSize());
-        assertEquals(4, state.getPlayerHand(1).getSize());
-        assertEquals(0, state.getDiscards(0).getSize());
-        assertEquals(0, state.getDiscards(1).getSize());
+        assertEquals(5, state.playerDecks.get(0).getSize());
+        assertEquals(5, state.playerDecks.get(1).getSize());
+        assertEquals(4, state.playerHands.get(0).getSize());
+        assertEquals(4, state.playerHands.get(1).getSize());
+        assertEquals(0, state.playerDiscards.get(0).getSize());
+        assertEquals(0, state.playerDiscards.get(1).getSize());
     }
 
     @Test
@@ -55,22 +51,22 @@ public class GameFlow {
         assertEquals(0, state.getPlayerHand(0).stream().filter(c -> c.value == 7).count(), 1);
         assertEquals(4, fm.computeAvailableActions(state).size());
         for (ToadCard card : state.getPlayerHand(0)) {
-            Assert.assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> ((PlayFieldCard) a).card == card));
+            assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> ((PlayFieldCard) a).card == card));
         }
         fm.computeAvailableActions(state).get(0).execute(state);
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(3, fm.computeAvailableActions(state).size());
         for (ToadCard card : state.getPlayerHand(0)) {
-            Assert.assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> ((PlayFlankCard) a).card == card));
+            assertTrue(fm.computeAvailableActions(state).stream().anyMatch(a -> ((PlayFlankCard) a).card == card));
         }
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(1, state.getCurrentPlayer());
 
         // at this point no cards have been drawn
-        assertEquals(3, state.getPlayerHand(0).getSize());
-        assertEquals(4, state.getPlayerHand(1).getSize());
-        assertEquals(5, state.getPlayerDeck(0).getSize());
-        assertEquals(5, state.getPlayerDeck(1).getSize());
+        assertEquals(3, state.playerHands.get(0).getSize());
+        assertEquals(4, state.playerHands.get(1).getSize());
+        assertEquals(5, state.playerDecks.get(0).getSize());
+        assertEquals(5, state.playerDecks.get(1).getSize());
         // then they play two cards
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(0, state.getRoundCounter());
@@ -78,10 +74,10 @@ public class GameFlow {
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(0, state.getRoundCounter());
         assertEquals(2, state.getTurnCounter());
-        assertEquals(4, state.getPlayerHand(0).getSize());
-        assertEquals(4, state.getPlayerHand(1).getSize());
-        assertEquals(3, state.getPlayerDeck(0).getSize());
-        assertEquals(3, state.getPlayerDeck(1).getSize());
+        assertEquals(4, state.playerHands.get(0).getSize());
+        assertEquals(4, state.playerHands.get(1).getSize());
+        assertEquals(3, state.playerDecks.get(0).getSize());
+        assertEquals(3, state.playerDecks.get(1).getSize());
     }
 
     private void playCards(ToadCard... cardsInOrder) {
@@ -130,7 +126,7 @@ public class GameFlow {
                 // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
                 int expectedPlayer = ((i + 2) / 4) % 2;
                 if (i >= 16) {
-                    int startPlayer = state.getBattlesWon(0,0) < state.getBattlesWon(0,1) ? 0 : 1;
+                    int startPlayer = state.battlesWon[0][0] < state.battlesWon[0][1] ? 0 : 1;
                     expectedPlayer = (expectedPlayer + startPlayer) % 2;
                 }
                 System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
@@ -150,7 +146,7 @@ public class GameFlow {
                 // Each player effectively gets four consecutive actions, as after they have defended, they are the attacker in the next battle
                 int expectedPlayer = ((i + 2) / 4) % 2;
                 if (i >= 16) {
-                    int startPlayer = state.getBattlesWon(0,0) > state.getBattlesWon(0,1) ? 0 : 1;
+                    int startPlayer = state.battlesWon[0][0] > state.battlesWon[0][1] ? 0 : 1;
                     expectedPlayer = (expectedPlayer + startPlayer) % 2;
                 }
                 System.out.println("Round " + state.getRoundCounter() + " Turn " + state.getTurnCounter() + " Player " + state.getCurrentPlayer() + " Expected " + expectedPlayer);
@@ -171,16 +167,16 @@ public class GameFlow {
         assertEquals(1, state.getRoundCounter());
         assertEquals(0, state.getCurrentPlayer());
         // attacker is player zero
-        assertEquals(0, state.getBattlesWon(1,0));
-        assertEquals(0, state.getBattlesWon(1,1));
+        assertEquals(0, state.battlesWon[1][0]);
+        assertEquals(0, state.battlesWon[1][1]);
         playCards(
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6),  // Flank
                 new ToadCard("Three", 3), // field
                 new ToadCard("Six", 6) // flank
         );
-        assertEquals(1, state.getBattlesWon(1,0));
-        assertEquals(0, state.getBattlesWon(1,1));
+        assertEquals(1, state.battlesWon[1][0]);
+        assertEquals(0, state.battlesWon[1][1]);
 
         assertEquals(1, state.getCurrentPlayer());
         // attacker is player one
@@ -190,8 +186,8 @@ public class GameFlow {
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6)  // Flank
         );
-        assertEquals(2, state.getBattlesWon(1,0));
-        assertEquals(0, state.getBattlesWon(1,1));
+        assertEquals(2, state.battlesWon[1][0]);
+        assertEquals(0, state.battlesWon[1][1]);
     }
 
     @Test
@@ -216,8 +212,8 @@ public class GameFlow {
                 new ToadCard("Three", 3), // field
                 new ToadCard("Six", 6) // flank
         );
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(0, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
@@ -228,9 +224,9 @@ public class GameFlow {
                 new ToadCard("Five", 5), // field
                 new ToadCard("Six", 6) // flank
         );
-        assertEquals(0, state.getBattlesWon(0,0));
-        assertEquals(0, state.getBattlesWon(0,1));
-        assertEquals(2, state.getBattlesTied(0));
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
+        assertEquals(2, state.battlesTied[0]);
     }
 
     @Test
@@ -241,8 +237,8 @@ public class GameFlow {
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Seven", 7) // flank
         );
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -253,8 +249,8 @@ public class GameFlow {
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Six", 6) // flank
         );
-        assertEquals(0, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -265,8 +261,8 @@ public class GameFlow {
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Bomb", 0, BOMB)
         );
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(0, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
@@ -278,8 +274,8 @@ public class GameFlow {
                 new ToadCard("Four", 4, SABOTEUR, new SaboteurII())  // flank
         );
 
-        assertEquals(0, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
 
@@ -292,8 +288,8 @@ public class GameFlow {
                 new ToadCard("Bomb", 0, ASSAULT_CANNON) // Flank
         );
 
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(0, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
@@ -305,8 +301,8 @@ public class GameFlow {
                 new ToadCard("Six", 6) // flank
         );
 
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(0, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
 
@@ -318,8 +314,8 @@ public class GameFlow {
                 new ToadCard("Berserker", 5, BERSERKER),  // Field
                 new ToadCard("G1", 7, GENERAL_ONE) // flank
         );
-        assertEquals(0, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
 
         assertEquals(1, state.getCurrentPlayer());
         playCards(
@@ -328,8 +324,8 @@ public class GameFlow {
                 new ToadCard("AC", 0, ASSAULT_CANNON),  // Field
                 new ToadCard("IconBearer", 6, ICON_BEARER) // flank
         );
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(2, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(2, state.battlesWon[0][1]);
     }
 
     @Test
@@ -341,8 +337,8 @@ public class GameFlow {
                 new ToadCard("Saboteur", 4, SABOTEUR, new Saboteur())
         );
 
-        assertEquals(0, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -354,8 +350,8 @@ public class GameFlow {
                 new ToadCard("Saboteur", 4, SABOTEUR, new SaboteurII())  // flank
         );
 
-        assertEquals(0, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(0, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
 
@@ -368,13 +364,13 @@ public class GameFlow {
                 new ToadCard("Six", 6)  // Flank
         );
 
-        assertEquals(1, state.getBattlesWon(0,0));
-        assertEquals(0, state.getBattlesWon(0,1));
+        assertEquals(1, state.battlesWon[0][0]);
+        assertEquals(0, state.battlesWon[0][1]);
     }
 
     @Test
     public void pushback() {
-        state.setBattlesWon(0,1, 1);
+        state.battlesWon[0][1] = 1;
         playCards(
                 new ToadCard("Five", 5),  // Field
                 new ToadCard("Seven", 7), // flank
@@ -382,8 +378,8 @@ public class GameFlow {
                 new ToadCard("Six", 6)  // Flank
         );
 
-        assertEquals(2, state.getBattlesWon(0,0));
-        assertEquals(1, state.getBattlesWon(0,1));
+        assertEquals(2, state.battlesWon[0][0]);
+        assertEquals(1, state.battlesWon[0][1]);
     }
 
     @Test
@@ -393,12 +389,12 @@ public class GameFlow {
                 new ToadCard("Seven", 7), // flank
                 new ToadCard("Three", 3) // field
         );
-        state.setHiddenFlankCard(1, new ToadCard("Six", 6));
+        state.hiddenFlankCards[1] = new ToadCard("Six", 6);
         ToadGameState copy = (ToadGameState) state.copy(0);
-        assertEquals(state.getFieldCard(0), copy.getFieldCard(0));
-        assertEquals(state.getFieldCard(1), copy.getFieldCard(1));
-        assertEquals(state.getHiddenFlankCard(0), copy.getHiddenFlankCard(0));
-        assertNotSame(state.getHiddenFlankCard(1), copy.getHiddenFlankCard(1));
+        assertEquals(state.fieldCards[0], copy.fieldCards[0]);
+        assertEquals(state.fieldCards[1], copy.fieldCards[1]);
+        assertEquals(state.hiddenFlankCards[0], copy.hiddenFlankCards[0]);
+        assertNotSame(state.hiddenFlankCards[1], copy.hiddenFlankCards[1]);
     }
 
     @Test
@@ -417,20 +413,19 @@ public class GameFlow {
 
     @Test
     public void winFirstLoseSecondLosesGame() {
-        state.setBattlesWon(0,0, 10);
-        state.setBattlesWon(0,1, 0);
+        state.battlesWon[0][0] = 10;
+        state.battlesWon[0][1] = 0;
         assertEquals(10, state.getGameScore(0), 0.001);
         assertEquals(0, state.getGameScore(1), 0.001);
         fm.endRound(state, 1);
         assertEquals(0, state.getGameScore(0), 0.001);
         assertEquals(0, state.getGameScore(1), 0.001);
-        state.getPlayerDeck(0).clear();
-        state.getPlayerHand(0).clear();
-        state.getPlayerDeck(1).clear();
-        state.getPlayerHand(1).clear();
-
-        state.setTieBreaker(0, new ToadCard("Six", 6));
-        state.setTieBreaker(1, new ToadCard("Five", 5));
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[0] = new ToadCard("Six", 6);
+        state.tieBreakers[1] = new ToadCard("Five", 5);
 
         playCards(
                 new ToadCard("Five", 5),  // Field
@@ -447,27 +442,29 @@ public class GameFlow {
 
     @Test
     public void winningFirstAndTieOnSecondWins() {
-        state.setBattlesWon(0,0, 0);
-        state.setBattlesWon(0,1, 10);
+        state.battlesWon[0][0] = 0;
+        state.battlesWon[0][1] = 10;
         assertEquals(0, state.getGameScore(0), 0.001);
         assertEquals(10, state.getGameScore(1), 0.001);
         fm.endRound(state, 1);
         assertEquals(0, state.getGameScore(0), 0.001);
         assertEquals(0, state.getGameScore(1), 0.001);
-        state.getPlayerDeck(0).clear();
-        state.getPlayerHand(0).clear();
-        state.getPlayerDeck(1).clear();
-        state.getPlayerHand(1).clear();
-        state.setTieBreaker(0, new ToadCard("Five", 5));
-        state.setTieBreaker(1, new ToadCard("Six", 6));
-        state.setFieldCard(0, new ToadCard("Five", 5));
-        state.setFieldCard(1, new ToadCard("Three", 3));
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[1] = new ToadCard("Six", 6);
+        state.tieBreakers[0] = new ToadCard("Five", 5);
+
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Three", 3);
+
         ToadCard flank0 = new ToadCard("Six", 6);
         ToadCard flank1 = new ToadCard("Seven", 7);
-        state.setHiddenFlankCard(1, flank1);
-        state.setHiddenFlankCard(0, flank0);
-        state.getPlayerHand(0).add(flank0);
-        state.getPlayerHand(1).add(flank1);
+        state.hiddenFlankCards[1] = flank1;
+        state.hiddenFlankCards[0] = flank0;
+        state.playerHands.get(0).add(flank0);
+        state.playerHands.get(1).add(flank1);
 
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
@@ -479,28 +476,29 @@ public class GameFlow {
 
     @Test
     public void tieBreaker() {
-        state.setBattlesWon(0,0, 3);
-        state.setBattlesWon(0,1, 3);
-
+        state.battlesWon[0][0] = 3;
+        state.battlesWon[0][1] = 3;
         assertEquals(3, state.getGameScore(0), 0.001);
         assertEquals(3, state.getGameScore(1), 0.001);
         fm.endRound(state, 1);
         assertEquals(0, state.getGameScore(0), 0.001);
         assertEquals(0, state.getGameScore(1), 0.001);
-        state.getPlayerDeck(0).clear();
-        state.getPlayerHand(0).clear();
-        state.getPlayerDeck(1).clear();
-        state.getPlayerHand(1).clear();
-        state.setTieBreaker(0, new ToadCard("Five", 5));
-        state.setTieBreaker(1, new ToadCard("Six", 6));
-        state.setFieldCard(0, new ToadCard("Five", 5));
-        state.setFieldCard(1, new ToadCard("Three", 3));
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[1] = new ToadCard("Six", 6);
+        state.tieBreakers[0] = new ToadCard("Five", 5);
+
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Three", 3);
+
         ToadCard flank0 = new ToadCard("Six", 6);
         ToadCard flank1 = new ToadCard("Seven", 7);
-        state.setHiddenFlankCard(1, flank1);
-        state.setHiddenFlankCard(0, flank0);
-        state.getPlayerHand(0).add(flank0);
-        state.getPlayerHand(1).add(flank1);
+        state.hiddenFlankCards[1] = flank1;
+        state.hiddenFlankCards[0] = flank0;
+        state.playerHands.get(0).add(flank0);
+        state.playerHands.get(1).add(flank1);
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
         assertEquals(5.0, state.getGameScore(0), 0.001);
@@ -512,29 +510,29 @@ public class GameFlow {
 
     @Test
     public void absoluteTie() {
-        state.setBattlesWon(0,0, 3);
-        state.setBattlesWon(0,1, 3);
+        state.battlesWon[0][0] = 3;
+        state.battlesWon[0][1] = 3;
         assertEquals(3, state.getGameScore(0), 0.001);
         assertEquals(3, state.getGameScore(1), 0.001);
         fm.endRound(state, 1);
         assertEquals(0, state.getGameScore(0), 0.001);
         assertEquals(0, state.getGameScore(1), 0.001);
-        state.getPlayerDeck(0).clear();
-        state.getPlayerHand(0).clear();
-        state.getPlayerDeck(1).clear();
-        state.getPlayerHand(1).clear();
-        state.setTieBreaker(0, new ToadCard("Five", 5));
-        state.setTieBreaker(1, new ToadCard("Five", 5));
+        state.playerDecks.get(0).clear();
+        state.playerHands.get(0).clear();
+        state.playerDecks.get(1).clear();
+        state.playerHands.get(1).clear();
+        state.tieBreakers[1] = new ToadCard("Five", 5);
+        state.tieBreakers[0] = new ToadCard("Five", 5);
 
-        state.setFieldCard(0, new ToadCard("Five", 5));
-        state.setFieldCard(1, new ToadCard("Five", 5));
+        state.fieldCards[0] = new ToadCard("Five", 5);
+        state.fieldCards[1] = new ToadCard("Three", 3);
 
         ToadCard flank0 = new ToadCard("Six", 6);
         ToadCard flank1 = new ToadCard("Seven", 7);
-        state.setHiddenFlankCard(1, flank1);
-        state.setHiddenFlankCard(0, flank0);
-        state.getPlayerHand(0).add(flank0);
-        state.getPlayerHand(1).add(flank1);
+        state.hiddenFlankCards[1] = flank1;
+        state.hiddenFlankCards[0] = flank0;
+        state.playerHands.get(0).add(flank0);
+        state.playerHands.get(1).add(flank1);
 
         fm._afterAction(state, null);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());

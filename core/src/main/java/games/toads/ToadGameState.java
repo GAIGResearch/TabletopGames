@@ -1,11 +1,11 @@
 package games.toads;
 
-import games.GameType;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import games.GameType;
 import games.toads.components.ToadCard;
 import utilities.DeterminisationUtilities;
 
@@ -177,26 +177,6 @@ public class ToadGameState extends AbstractGameState {
     }
     public int getScoreInBattle(int battle, int playerId) {
         return roundWinners[battle][playerId];
-    }
-
-    public void setTieBreaker(int playerId, ToadCard tc)
-    {
-        tieBreakers[playerId] = tc;
-    }
-
-    public void setFieldCard(int playerId, ToadCard tc)
-    {
-        fieldCards[playerId] = tc;
-    }
-
-    public void setHiddenFlankCard(int playerId, ToadCard tc)
-    {
-        hiddenFlankCards[playerId] = tc;
-    }
-
-    public void setBattlesWon(int round, int playerId, int value)
-    {
-        battlesWon[round][playerId] = value;
     }
 
     public Deck<ToadCard> getDiscards(int playerId) {
