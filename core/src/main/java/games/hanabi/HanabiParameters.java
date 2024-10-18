@@ -21,7 +21,7 @@ public class HanabiParameters extends TunableParameters {
     int nCards4 = 2;
     int nCards5 = 1;
 
-    public String dataPath = "data/hanabi/";
+    public String dataPath = "core/data/hanabi/";
     public HanabiParameters(){
         addTunableParameter("nHandCards", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("hintCounter", 8, Arrays.asList(3,5,8,10));

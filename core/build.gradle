@@ -1,14 +1,26 @@
+
+plugins{
+    id 'application'
+}
+
+
+println name
+println project.name
+
+application {
+    mainClass = 'core.Game'
+}
+
 java {
     sourceCompatibility = 21
 }
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-sourceSets.main.java.srcDirs = [ "src/" ]
-
-eclipse.project.name = appName + "-core"
+sourceSets.main.java.srcDirs = [ "src/main/java/" ]
 
 dependencies {
     api "com.badlogicgames.gdx:gdx-freetype:1.9.10"
 }
+
 

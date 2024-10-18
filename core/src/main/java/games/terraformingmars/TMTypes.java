@@ -75,18 +75,18 @@ public class TMTypes {
     }
 
     public enum Tile {
-        Ocean ("data/terraformingmars/images/tiles/ocean.png"),
-        Greenery ("data/terraformingmars/images/tiles/greenery_no_O2.png"),
-        City ("data/terraformingmars/images/tiles/city.png"),
-        CommercialBuilding ("data/terraformingmars/images/tiles/CommercialBuilding.png"),
-        NuclearExplosion ("data/terraformingmars/images/tiles/NuclearExplosion.png"),
-        IndustrialBuilding ("data/terraformingmars/images/tiles/IndustrialBuilding.png"),
-        Mine ("data/terraformingmars/images/tiles/mine.png"),
-        Moonhole ("data/terraformingmars/images/tiles/Moonhole.png"),
-        Nature ("data/terraformingmars/images/tiles/Nature.png"),
-        Park ("data/terraformingmars/images/tiles/park.png"),
-        Restricted ("data/terraformingmars/images/tiles/Restricted.png"),
-        Volcano ("data/terraformingmars/images/tiles/Volcano.png");
+        Ocean ("core/data/terraformingmars/images/tiles/ocean.png"),
+        Greenery ("core/data/terraformingmars/images/tiles/greenery_no_O2.png"),
+        City ("core/data/terraformingmars/images/tiles/city.png"),
+        CommercialBuilding ("core/data/terraformingmars/images/tiles/CommercialBuilding.png"),
+        NuclearExplosion ("core/data/terraformingmars/images/tiles/NuclearExplosion.png"),
+        IndustrialBuilding ("core/data/terraformingmars/images/tiles/IndustrialBuilding.png"),
+        Mine ("core/data/terraformingmars/images/tiles/mine.png"),
+        Moonhole ("core/data/terraformingmars/images/tiles/Moonhole.png"),
+        Nature ("core/data/terraformingmars/images/tiles/Nature.png"),
+        Park ("core/data/terraformingmars/images/tiles/park.png"),
+        Restricted ("core/data/terraformingmars/images/tiles/Restricted.png"),
+        Volcano ("core/data/terraformingmars/images/tiles/Volcano.png");
 
         String imagePath;
 
@@ -115,19 +115,19 @@ public class TMTypes {
     }
 
     public enum Resource {
-        MegaCredit("data/terraformingmars/images/megacredits/megacredit.png", true, false),
-        Steel("data/terraformingmars/images/resources/steel.png", true, false),
-        Titanium("data/terraformingmars/images/resources/titanium.png", true, false),
-        Plant("data/terraformingmars/images/resources/plant.png", true, false),
-        Energy("data/terraformingmars/images/resources/power.png", true, false),
-        Heat("data/terraformingmars/images/resources/heat.png", true, false),
-        Card("data/terraformingmars/images/resources/card.png", false, false),
-        TR("data/terraformingmars/images/resources/TR.png", false, false),
-        Microbe("data/terraformingmars/images/resources/microbe.png", false, true),
-        Animal("data/terraformingmars/images/resources/animal.png", false, true),
-        Science("data/terraformingmars/images/resources/science.png", false, true),
-        Fighter("data/terraformingmars/images/resources/fighter.png", false, true),
-        Floater("data/terraformingmars/images/resources/floater.png", false, true);
+        MegaCredit("core/data/terraformingmars/images/megacredits/megacredit.png", true, false),
+        Steel("core/data/terraformingmars/images/resources/steel.png", true, false),
+        Titanium("core/data/terraformingmars/images/resources/titanium.png", true, false),
+        Plant("core/data/terraformingmars/images/resources/plant.png", true, false),
+        Energy("core/data/terraformingmars/images/resources/power.png", true, false),
+        Heat("core/data/terraformingmars/images/resources/heat.png", true, false),
+        Card("core/data/terraformingmars/images/resources/card.png", false, false),
+        TR("core/data/terraformingmars/images/resources/TR.png", false, false),
+        Microbe("core/data/terraformingmars/images/resources/microbe.png", false, true),
+        Animal("core/data/terraformingmars/images/resources/animal.png", false, true),
+        Science("core/data/terraformingmars/images/resources/science.png", false, true),
+        Fighter("core/data/terraformingmars/images/resources/fighter.png", false, true),
+        Floater("core/data/terraformingmars/images/resources/floater.png", false, true);
 
         String imagePath;
         boolean playerBoardRes;
@@ -171,19 +171,19 @@ public class TMTypes {
     }
 
     public enum Tag {
-        Plant("data/terraformingmars/images/tags/plant.png"),
-        Microbe("data/terraformingmars/images/tags/microbe.png"),
-        Animal("data/terraformingmars/images/tags/animal.png"),
-        Science("data/terraformingmars/images/tags/science.png"),
-        Earth("data/terraformingmars/images/tags/earth.png"),
-        Space("data/terraformingmars/images/tags/space.png"),
-        Event("data/terraformingmars/images/tags/event.png"),
-        Building("data/terraformingmars/images/tags/building.png"),
-        Power("data/terraformingmars/images/tags/power.png"),
-        Jovian("data/terraformingmars/images/tags/jovian.png"),
-        City("data/terraformingmars/images/tags/city.png"),
-        Venus("data/terraformingmars/images/tags/venus.png"),
-        Wild("data/terraformingmars/images/tags/wild.png");
+        Plant("core/data/terraformingmars/images/tags/plant.png"),
+        Microbe("core/data/terraformingmars/images/tags/microbe.png"),
+        Animal("core/data/terraformingmars/images/tags/animal.png"),
+        Science("core/data/terraformingmars/images/tags/science.png"),
+        Earth("core/data/terraformingmars/images/tags/earth.png"),
+        Space("core/data/terraformingmars/images/tags/space.png"),
+        Event("core/data/terraformingmars/images/tags/event.png"),
+        Building("core/data/terraformingmars/images/tags/building.png"),
+        Power("core/data/terraformingmars/images/tags/power.png"),
+        Jovian("core/data/terraformingmars/images/tags/jovian.png"),
+        City("core/data/terraformingmars/images/tags/city.png"),
+        Venus("core/data/terraformingmars/images/tags/venus.png"),
+        Wild("core/data/terraformingmars/images/tags/wild.png");
 
         String imagePath;
 
@@ -197,13 +197,13 @@ public class TMTypes {
     }
 
     public enum CardType {
-        Automated("data/terraformingmars/images/cards/card-automated.png", true, Color.green),
-        Active("data/terraformingmars/images/cards/card-active.png", true, Color.cyan),
-        Event("data/terraformingmars/images/cards/card-event.png", true, Color.orange),
-        Corporation("data/terraformingmars/images/cards/corp-card-bg.png", false, Color.gray),
-        Prelude("data/terraformingmars/images/cards/proj-card-bg.png", false, Color.pink),
-        Colony("data/terraformingmars/images/cards/proj-card-bg.png", false, Color.lightGray),
-        GlobalEvent("data/terraformingmars/images/cards/proj-card-bg.png", false, Color.blue);
+        Automated("core/data/terraformingmars/images/cards/card-automated.png", true, Color.green),
+        Active("core/data/terraformingmars/images/cards/card-active.png", true, Color.cyan),
+        Event("core/data/terraformingmars/images/cards/card-event.png", true, Color.orange),
+        Corporation("core/data/terraformingmars/images/cards/corp-card-bg.png", false, Color.gray),
+        Prelude("core/data/terraformingmars/images/cards/proj-card-bg.png", false, Color.pink),
+        Colony("core/data/terraformingmars/images/cards/proj-card-bg.png", false, Color.lightGray),
+        GlobalEvent("core/data/terraformingmars/images/cards/proj-card-bg.png", false, Color.blue);
 
         String imagePath;
         Color color;
@@ -229,10 +229,10 @@ public class TMTypes {
     }
 
     public enum GlobalParameter {
-        Oxygen ("data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true, "O2"),
-        Temperature ("data/terraformingmars/images/global-parameters/temperature.png", Color.white, true, "°C"),
-        OceanTiles ("data/terraformingmars/images/tiles/ocean.png", Color.yellow, true, "Ocean"),
-        Venus("data/terraformingmars/images/global-parameters/venus.png", Color.blue, false, "Venus");
+        Oxygen ("core/data/terraformingmars/images/global-parameters/oxygen.png", Color.lightGray, true, "O2"),
+        Temperature ("core/data/terraformingmars/images/global-parameters/temperature.png", Color.white, true, "°C"),
+        OceanTiles ("core/data/terraformingmars/images/tiles/ocean.png", Color.yellow, true, "Ocean"),
+        Venus("core/data/terraformingmars/images/global-parameters/venus.png", Color.blue, false, "Venus");
 
         String imagePath;
         String shortString;
@@ -286,16 +286,16 @@ public class TMTypes {
         Elysium;
 
         public String getBoardPath() {
-            return "data/terraformingmars/boards/" + this.name().toLowerCase() + ".json";
+            return "core/data/terraformingmars/boards/" + this.name().toLowerCase() + ".json";
         }
         public String getCorpCardsPath() {
-            return "data/terraformingmars/corporationCards/" + this.name().toLowerCase() + ".json";
+            return "core/data/terraformingmars/corporationCards/" + this.name().toLowerCase() + ".json";
         }
         public String getProjectCardsPath() {
-            return "data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
+            return "core/data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
         }
         public String getOtherCardsPath() {
-            return "data/terraformingmars/otherCards/" + this.name().toLowerCase() + ".json";
+            return "core/data/terraformingmars/otherCards/" + this.name().toLowerCase() + ".json";
         }
 
         /* custom loading info from json */

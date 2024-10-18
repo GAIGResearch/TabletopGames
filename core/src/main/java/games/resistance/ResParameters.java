@@ -4,7 +4,7 @@ import games.resistance.components.ResGameBoard;
 import core.AbstractParameters;
 
 public class ResParameters extends AbstractParameters {
-    public String dataPath = "data/resistance/";
+    public String dataPath = "core/data/resistance/";
 
     public int[][] playersPerMission = {
             {2, 3, 2, 3, 3},

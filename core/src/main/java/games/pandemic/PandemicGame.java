@@ -81,7 +81,7 @@ public class PandemicGame extends Game {
             players.add(new RandomPlayer());
         }
 
-        PandemicParameters params = new PandemicParameters("data/pandemic/");
+        PandemicParameters params = new PandemicParameters("core/data/pandemic/");
         runCompetition(config, players, -1, false, listeners, nRepetition, ac);
         pl.report();
     }
@@ -153,7 +153,7 @@ public class PandemicGame extends Game {
             List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
-            PandemicParameters params = new PandemicParameters("data/pandemic/");
+            PandemicParameters params = new PandemicParameters("core/data/pandemic/");
             List<AbstractPlayer> players = new ArrayList<>();
             for (int i = 0; i < nPlayers; i++) {
                 players.add(playerType.createPlayerInstance(params.getRandomSeed()));
@@ -183,7 +183,7 @@ public class PandemicGame extends Game {
          * Settings: configuration file, ac (visuals on if initialised, off if null), number of players,
          * number of repetitions per player, list of players to test.
          */
-        String config = "data/pandemic/train/param-config-v2.json";
+        String config = "core/data/pandemic/train/param-config-v2.json";
 //        String config = "data/pandemic/param-config-easy.json";
         int nPlayers = 4;
         PlayerType[] playersToTest = new PlayerType[] {

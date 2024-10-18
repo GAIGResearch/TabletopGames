@@ -58,12 +58,12 @@ public class TMCardView extends JComponent {
         this.width = width;
         this.height = height;
 
-        pointBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/card-point-bg.png");
-        projCardBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/proj-card-bg.png");
-        production = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/production.png");
-        actionArrow = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/arrow.png");
-        reqMin = ImageIO.GetInstance().getImage("data/terraformingmars/images/requisites/min_big.png");
-        reqMax = ImageIO.GetInstance().getImage("data/terraformingmars/images/requisites/max_big.png");
+        pointBg = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/cards/card-point-bg.png");
+        projCardBg = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/cards/proj-card-bg.png");
+        production = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/production.png");
+        actionArrow = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/arrow.png");
+        reqMin = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/requisites/min_big.png");
+        reqMax = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/requisites/max_big.png");
 
         aboveRibbon = new Rectangle(width/5, 0, width - width/5 - spacing/2, height/8);
 

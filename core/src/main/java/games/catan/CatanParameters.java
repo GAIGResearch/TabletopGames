@@ -15,7 +15,7 @@ import java.util.HashMap;
 import static games.catan.CatanParameters.Resource.*;
 
 public class CatanParameters extends TunableParameters {
-    private String dataPath = "data/catan/";
+    private String dataPath = "core/data/catan/";
 
     public int n_resource_cards = 19;
     public int n_tiles_per_row = 7;

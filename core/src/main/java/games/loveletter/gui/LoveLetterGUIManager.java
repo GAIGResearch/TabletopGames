@@ -89,7 +89,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                 this.height = (int) (playerAreaHeight * nVertAreas);
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                parent.setBackground(ImageIO.GetInstance().getImage("data/loveletter/bg.png"));
+                parent.setBackground(ImageIO.GetInstance().getImage("core/data/loveletter/bg.png"));
 
                 LoveLetterGameState llgs = (LoveLetterGameState) gameState;
                 LoveLetterParameters llp = (LoveLetterParameters) gameState.getGameParameters();

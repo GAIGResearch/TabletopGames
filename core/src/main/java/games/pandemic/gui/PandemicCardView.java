@@ -38,7 +38,7 @@ public class PandemicCardView extends CardView {
         this.component = c;
         String tooltip = "";
 
-        String dataPath = "data/pandemic/img/";
+        String dataPath = "core/data/pandemic/img/";
         if (c != null) {
             Property country = c.getProperty(countryHash);
             Property pop = c.getProperty(Hash.GetInstance().hash("population"));
@@ -70,7 +70,7 @@ public class PandemicCardView extends CardView {
     }
 
     private static Image findBackground(Card c) {
-        String dataPath = "data/pandemic/img/";
+        String dataPath = "core/data/pandemic/img/";
         Image background = null;
         if (c != null) {
             Property country = c.getProperty(countryHash);

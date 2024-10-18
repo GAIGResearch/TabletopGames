@@ -1,1 +1,3 @@
-include ':core'
+rootProject.name = "TAG Framework"
+
+include(':core')

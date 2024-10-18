@@ -55,7 +55,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         JScrollPane deckScroll = new JScrollPane(deckView);
         deckScroll.setPreferredSize(new Dimension(width, defaultCardHeight + 20));
         deckScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        JButton expandDeckButton = new JButton(new ImageIcon("data/javagraphics/toolbarButtonGraphics/General/ZoomIn16.gif"));
+        JButton expandDeckButton = new JButton(new ImageIcon("core/data/javagraphics/toolbarButtonGraphics/General/ZoomIn16.gif"));
         expandDeckButton.setOpaque(true);
         expandDeckButton.setBackground(Color.white);
         expandDeckButton.setToolTipText("Expand deck");

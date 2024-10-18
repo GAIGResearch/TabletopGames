@@ -53,12 +53,12 @@ public class TMBoardView extends ComponentView implements IScreenHighlight {
 
         rects = new HashMap<>();
         highlight = new ArrayList<>();
-        background = ImageIO.GetInstance().getImage("data/terraformingmars/images/mars.png");
-        counterTop = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/meter-scale-top.png");
-        counterMid = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/meter-scale-mid.png");
-        counterBot = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/meter-scale-bot.png");
-        production = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/production.png");
-        tr = ImageIO.GetInstance().getImage("data/terraformingmars/images/resources/TR.png");
+        background = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/mars.png");
+        counterTop = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/meter-scale-top.png");
+        counterMid = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/meter-scale-mid.png");
+        counterBot = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/meter-scale-bot.png");
+        production = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/production.png");
+        tr = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/resources/TR.png");
 
         addMouseListener(new MouseAdapter() {
             @Override

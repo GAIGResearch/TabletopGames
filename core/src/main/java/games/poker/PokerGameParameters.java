@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class PokerGameParameters extends TunableParameters {
-    public String dataPath = "data/FrenchCards/";
+    public String dataPath = "core/data/FrenchCards/";
 
     // Game over condition parameters
     public int maxRounds = 10;

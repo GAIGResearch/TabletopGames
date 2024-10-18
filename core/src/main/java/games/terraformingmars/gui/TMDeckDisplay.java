@@ -29,7 +29,7 @@ public class TMDeckDisplay extends JComponent implements IScreenHighlight {
         this.deck = deck;
         this.horizontal = horizontal;
 
-        Image projCardBg = ImageIO.GetInstance().getImage("data/terraformingmars/images/cards/proj-card-bg.png");
+        Image projCardBg = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/cards/proj-card-bg.png");
         Vector2D dim = Utils.scaleLargestDimImg(projCardBg, cardHeight);
         cardWidth = dim.getX();
         if (deck != null) {

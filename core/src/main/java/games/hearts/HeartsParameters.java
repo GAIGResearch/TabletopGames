@@ -18,7 +18,7 @@ import java.util.*;
  * automatic game parameter optimisation tools in the framework.</p>
  */
 public class HeartsParameters extends AbstractParameters {
-    public String dataPath = "data/FrenchCards/";
+    public String dataPath = "core/data/FrenchCards/";
     public final int shootTheMoon = 26;
     public final int heartCard = 1;
     // Could be expanded if needed to a whole sequence of 'special cards, with special scores'

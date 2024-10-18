@@ -89,7 +89,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 this.height = Math.max(playerAreaHeight * (nPlayers+1), trainView.height + ceCardHeight + 50 + roundView.height) + defaultInfoPanelHeight + defaultActionPanelHeight;
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                parent.setBackground(ImageIO.GetInstance().getImage("data/coltexpress/bg.jpg"));
+                parent.setBackground(ImageIO.GetInstance().getImage("core/data/coltexpress/bg.jpg"));
 
                 // Create main game area that will hold all game views
                 JPanel mainGameArea = new JPanel();

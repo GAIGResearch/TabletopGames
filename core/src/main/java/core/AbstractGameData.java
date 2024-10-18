@@ -17,6 +17,7 @@ public class AbstractGameData {
     private List<Token> tokens = new ArrayList<>();
 
     public void load(String dataPath) {
+        //dataPath = "core/" + dataPath;
         File dir = new File(dataPath);
         if (dir.isDirectory()) {
             List<String> files = Arrays.asList(Objects.requireNonNull(dir.list()));

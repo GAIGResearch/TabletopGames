@@ -19,7 +19,7 @@ public class FrontendSimple {
         int nPlayers = Utils.getArg(args, "nPlayers", 3);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         Random rnd = new Random(seed);
-        String agentDir = Utils.getArg(args, "agentDir", "data/" + gameType + "/agents/");
+        String agentDir = Utils.getArg(args, "agentDir", "core/data/" + gameType + "/agents/");
         ActionController ac = new ActionController();
 
         File dir = new File(agentDir);

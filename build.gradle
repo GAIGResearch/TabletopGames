@@ -15,11 +15,12 @@ buildscript {
 }
 
 allprojects {
-    apply plugin: "eclipse"
-
     version = '1.0'
+
+    apply plugin: "java-library"
+
     ext {
-        appName = "Tabletop Games"
+        appName = "TAG Framework"
         gdxVersion = '1.12.0'
         roboVMVersion = '2.3.19'
         box2DLightsVersion = '1.5'
@@ -38,13 +39,10 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
         maven { url "https://jitpack.io" }
     }
-}
-
-project(":core") {
-    apply plugin: "java-library"
 
     dependencies {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-freetype:1.9.10"
         implementation 'org.json4s:json4s-core_2.9.1-1:3.1.0'
         implementation 'com.googlecode.json-simple:json-simple:1.1.1'
         implementation 'tech.tablesaw:tablesaw-core:0.43.1'
@@ -71,3 +69,4 @@ project(":core") {
 
     }
 }
+

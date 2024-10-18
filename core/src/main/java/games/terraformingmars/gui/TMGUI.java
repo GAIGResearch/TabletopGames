@@ -106,7 +106,7 @@ public class TMGUI extends AbstractGUIManager {
         try {
             GraphicsEnvironment ge =
                     GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("data/terraformingmars/images/fonts/Prototype.ttf")));
+            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("core/data/terraformingmars/images/fonts/Prototype.ttf")));
         } catch (IOException |FontFormatException e) {
             //Handle exception
         }
@@ -296,7 +296,7 @@ public class TMGUI extends AbstractGUIManager {
         instructionsPanel.add(textPane);
 
         tabs.add("Help", instructionsPanel);
-        Image qmark = ImageIO.GetInstance().getImage("data/terraformingmars/images/resources/wild.png");
+        Image qmark = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/resources/wild.png");
         qmark = getScaledImage(qmark, 20, 20);
         tabs.setIconAt(1, new ImageIcon(qmark));
 //        menuBar.add(Box.createHorizontalGlue());

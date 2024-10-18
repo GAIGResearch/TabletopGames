@@ -39,7 +39,7 @@ public class TMPlayerView extends ComponentView {
         rects = new Rectangle[gs.getBoard().getWidth() * gs.getBoard().getHeight()];
         highlight = new ArrayList<>();
 
-        production = ImageIO.GetInstance().getImage("data/terraformingmars/images/misc/production.png");
+        production = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/misc/production.png");
 
         addMouseListener(new MouseAdapter() {
             @Override

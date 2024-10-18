@@ -13,7 +13,7 @@ import utilities.Pair;
 
 public class ColtExpressParameters extends TunableParameters {
 
-    String dataPath = "data/coltexpress/";
+    String dataPath = "core/data/coltexpress/";
 
     // Other parameters
     public int nCardsInHand = 6;

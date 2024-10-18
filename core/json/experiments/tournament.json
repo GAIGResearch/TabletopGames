@@ -1,8 +1,8 @@
 {
   "game": "LoveLetter",
   "selfPlay": false,
-  "playersDirectory": "data/experiments/actionspaces/all",
+  "playersDirectory": "core/data/experiments/actionspaces/all",
   "nPlayers": 2,
   "matchups": 1000,
-  "listener": "data/metrics/loveletter.json"
+  "listener": "core/data/metrics/loveletter.json"
 }

@@ -16,7 +16,7 @@ public class BattleloreBoardView extends ComponentView {
 
     public BattleloreBoardView(GridBoard<MapTile> hexBoard) {
         super(hexBoard, hexBoard.getWidth() * GUI.defaultItemSize, hexBoard.getHeight() * GUI.defaultItemSize);
-        background = ImageIO.GetInstance().getImage("data/battlelore/board.png");
+        background = ImageIO.GetInstance().getImage("core/data/battlelore/board.png");
     }
 
     public void drawGridBoard(Graphics2D g, GridBoard<MapTile> gridBoard, int x, int y) {

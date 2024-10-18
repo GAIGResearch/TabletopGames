@@ -12,7 +12,7 @@ import java.util.Objects;
 
 public class ExplodingKittensParameters extends TunableParameters {
 
-    String dataPath = "data/explodingkittens/";
+    String dataPath = "core/data/explodingkittens/";
 
     HashMap<ExplodingKittensCard.CardType, Integer> cardCounts = new HashMap<ExplodingKittensCard.CardType, Integer>() {{
         put(ExplodingKittensCard.CardType.ATTACK, 4);

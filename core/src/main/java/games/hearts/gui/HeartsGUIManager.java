@@ -73,7 +73,7 @@ public class HeartsGUIManager extends AbstractGUIManager {
                 HeartsGameState hgs = (HeartsGameState) gameState;
                 HeartsParameters bjgp = (HeartsParameters) gameState.getGameParameters();
 
-                parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
+                parent.setBackground(ImageIO.GetInstance().getImage("core/data/FrenchCards/table-background.jpg"));
 
                 playerHands = new HeartsPlayerView[nPlayers];
                 playerTricks = new HeartsPlayerTrickView[nPlayers];
