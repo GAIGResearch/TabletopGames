@@ -24,7 +24,7 @@
 hs_err_pid*
 
 .idea/
-./gradle/
+.gradle/
 target/
 *.iml
 *.kotlin_module
