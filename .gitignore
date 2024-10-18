@@ -24,7 +24,6 @@
 hs_err_pid*
 
 .idea/
-.gradle/
 target/
 *.iml
 *.kotlin_module
@@ -39,3 +38,17 @@ src/main/java/META-INF/MANIFEST.MF
 src/pytag/env/
 core/metrics/out/*
 treeRecorder*
+
+
+.gradle
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
