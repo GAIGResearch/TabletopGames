@@ -12,6 +12,6 @@ public class ForwardModelTest {
 
     @Test
     public void mctsTest() {
-        new ForwardModelTester("game=WarOfTheToads", "nGames=5", "nPlayers=2", "agentToPlay=json\\players\\gameSpecific\\Diamant.json");
+        new ForwardModelTester("game=WarOfTheToads", "nGames=5", "nPlayers=2", "agentToPlay=core\\json\\players\\gameSpecific\\Diamant.json");
     }
 }

@@ -94,7 +94,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
                 ruleText.setPreferredSize(new Dimension(width*2/3+60, height*2/3+100));
 
-                parent.setBackground(ImageIO.GetInstance().getImage("core/data/FrenchCards/table-background.jpg"));
+                parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
 
                 // Create main game area that will hold all game views
                 playerHands = new PokerPlayerView[nPlayers];

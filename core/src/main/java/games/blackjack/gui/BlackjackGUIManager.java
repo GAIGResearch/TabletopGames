@@ -66,7 +66,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
                 BlackjackGameState bjgs = (BlackjackGameState) gameState;
                 BlackjackParameters bjgp = (BlackjackParameters) gameState.getGameParameters();
 
-                parent.setBackground(ImageIO.GetInstance().getImage("core/data/FrenchCards/table-background.jpg"));
+                parent.setBackground(ImageIO.GetInstance().getImage("data/FrenchCards/table-background.jpg"));
 
                 playerHands = new BlackjackPlayerView[nPlayers];
                 playerViewBorders = new Border[nPlayers];

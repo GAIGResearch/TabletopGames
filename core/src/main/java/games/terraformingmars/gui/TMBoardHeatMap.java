@@ -37,7 +37,7 @@ public class TMBoardHeatMap extends ComponentView {
         height = 200;
         tileSize = Math.min(width/gs.getBoard().getWidth(), height/(gs.getBoard().getHeight()+2));
 
-        background = ImageIO.GetInstance().getImage("core/data/terraformingmars/images/mars.png");
+        background = ImageIO.GetInstance().getImage("data/terraformingmars/images/mars.png");
     }
 
     @Override

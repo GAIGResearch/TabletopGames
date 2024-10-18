@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 public class LoveLetterParameters extends TunableParameters {
 
-    String dataPath = "core/data/loveletter/";
+    String dataPath = "data/loveletter/";
 
     // Occurrence count for each card
     public HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{

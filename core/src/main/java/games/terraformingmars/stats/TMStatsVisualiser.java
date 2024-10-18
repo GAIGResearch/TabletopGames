@@ -31,14 +31,14 @@ public class TMStatsVisualiser extends StatsVisualiser {
         super(listeners);
 
         // Set background image
-        BufferedImage bg = (BufferedImage) ImageIO.GetInstance().getImage("core/data/terraformingmars/images/stars.jpg");
+        BufferedImage bg = (BufferedImage) ImageIO.GetInstance().getImage("data/terraformingmars/images/stars.jpg");
         setBackgroundImage(bg);
 
         // Register font type
         try {
             GraphicsEnvironment ge =
                     GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("core/data/terraformingmars/images/fonts/Prototype.ttf")));
+            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("data/terraformingmars/images/fonts/Prototype.ttf")));
         } catch (IOException | FontFormatException e) {
             //Handle exception
         }

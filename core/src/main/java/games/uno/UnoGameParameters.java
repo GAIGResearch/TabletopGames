@@ -10,7 +10,7 @@ import java.util.Objects;
 
 
 public class UnoGameParameters extends TunableParameters {
-    public String dataPath = "core/data/uno/";
+    public String dataPath = "data/uno/";
 
     // CLASSIC scoring only gives points to the winning player equal to the cards held by their opponents
     // INCREMENTAL scores the points held in ones own hand, and the winner is the lowest score at the end

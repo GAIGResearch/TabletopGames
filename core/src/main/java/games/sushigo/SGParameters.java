@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class SGParameters extends AbstractParameters {
-    public String dataPath = "core/data/sushigo/";
+    public String dataPath = "data/sushigo/";
 
     public int nRounds = 3;
 

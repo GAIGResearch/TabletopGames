@@ -10,7 +10,7 @@ import java.util.*;
 public class DominionParameters extends TunableParameters {
 
     List<CardType> cardsUsed = new ArrayList<>();
-    String dataPath = "core/data/dominion/";
+    String dataPath = "data/dominion/";
     public int initialShuffleSeed = -1;
 
     public int HAND_SIZE = 5;

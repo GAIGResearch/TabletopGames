@@ -35,7 +35,7 @@ public class DBGUIManager extends AbstractGUIManager {
 
         this.width = gapRight + displayWidth;
         this.height = displayHeight;
-        parent.setBackground(ImageIO.GetInstance().getImage("core/data/dotsboxes/bg.png"));
+        parent.setBackground(ImageIO.GetInstance().getImage("data/dotsboxes/bg.png"));
 
         JTabbedPane pane = new JTabbedPane();
         JPanel main = new JPanel();

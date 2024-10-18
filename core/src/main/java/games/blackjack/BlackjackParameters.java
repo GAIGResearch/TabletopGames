@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class BlackjackParameters extends TunableParameters {
-    public String dataPath = "core/data/FrenchCards/";
+    public String dataPath = "data/FrenchCards/";
 
     public int nCardsPerPlayer = 2;
     public int jackCard = 10;
