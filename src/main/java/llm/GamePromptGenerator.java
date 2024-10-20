@@ -43,16 +43,17 @@ public class GamePromptGenerator {
     // ... except for these classes in those otherwise ignored packages
     static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck", "Dice");
 
-    public String createLLMTaskPrompt(TaskType taskType, GameType gameType, int nPlayers, String className) {
+    public String createLLMTaskPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, boolean includeRules) {
         StringBuilder result = new StringBuilder();
 
         // Task information
         result.append("This is your task: \n").append(taskType.getTaskTest(gameType, nPlayers, className));
 
-        // Rulebook manual
-        String rules = gameType.loadRulebook();
-        result.append("This is the description of the board game ").append(gameType.name()).append(": \n").append(rules).append("\n");
-
+        if (includeRules) {
+            // Rulebook manual
+            String rules = gameType.loadRulebook();
+            result.append("This is the description of the board game ").append(gameType.name()).append(": \n").append(rules).append("\n");
+        }
         // API, game-type specific
         result.append("You can use the following API to complete the task:\n");
 
@@ -78,10 +79,10 @@ public class GamePromptGenerator {
                 result.append(">");
             }
 
-            result.append("\n");
             if (data.superClass != null && !data.superClass.equals("java.lang.Object")) {
-                result.append("Extends: ").append(data.superClass).append("\n");
+                result.append(" extends ").append(data.superClass);
             }
+            result.append("\n");
   //          if (!data.implementedInterfaces.isEmpty()) {
   //              result.append("Implements: ").append(data.implementedInterfaces).append("\n");
   //          }
@@ -117,24 +118,25 @@ public class GamePromptGenerator {
                                 
                 """;
         String result = String.format(text, code);
-        String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className);
+        String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className, true);
         return result + taskText;
     }
 
     public String createLLMErrorPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code, String error) {
         String text = """
+                
                 A previous attempt at this task created the class below.
                 This class had failed to compile correctly.
-                ```java
+                
                 %s
-                ```
-                The error message is:
+
+                The compilation error message is:
                 %s
                                 
                 Your immediate task is to rewrite this code to compile correctly.
                 """;
         String result = String.format(text, code, error);
-        String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className);
+        String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className, false);
         return taskText + result;
     }
 

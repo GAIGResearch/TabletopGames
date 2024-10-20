@@ -44,7 +44,7 @@ public class JavaCoder {
         GamePromptGenerator promptGenerator = new GamePromptGenerator();
 
         int iteration = 0;
-        int max_iters = 3;
+        int max_iters = 5;
         int currentErrors = 0;
         int maxErrorsPerIteration = 3;
 
@@ -67,7 +67,8 @@ public class JavaCoder {
                         GamePromptGenerator.TaskType.Heuristic,
                         gameType,
                         playerCount,
-                        className);
+                        className,
+                        true);
                 if (iteration > 0) {
                     promptGenerator.createLLMFeedbackPrompt(
                             GamePromptGenerator.TaskType.Heuristic,

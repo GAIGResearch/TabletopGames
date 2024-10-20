@@ -287,7 +287,7 @@ public enum GameType {
         }
 
         DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
-        String rulesText = summariser.processText("Core Game Rules (not including strategy)", 500);
+        String rulesText = summariser.processText("Core Game Rules (not including strategy of how to play the game well)", 500);
         // Then write this to file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
