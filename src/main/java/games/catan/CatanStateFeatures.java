@@ -68,7 +68,8 @@ public class CatanStateFeatures implements IStateFeatureVector {
             "ROAD_RESOURCES",
             "SETTLEMENTS_RESOURCES",
             "CITIES_RESOURCES",
-            "DEV_CARD_RESOURCES"
+            "DEV_CARD_RESOURCES",
+            "FOUR_PLAYERS"
     };
 
 
@@ -242,6 +243,10 @@ public class CatanStateFeatures implements IStateFeatureVector {
         retValue[50] = Math.min(catanState.getPlayerResources(playerID).get(GRAIN).getValue(),
                 Math.min(catanState.getPlayerResources(playerID).get(WOOL).getValue(),
                         catanState.getPlayerResources(playerID).get(ORE).getValue()));
+
+        // four players flag
+        retValue[51] = state.getNPlayers() == 4 ? 1.0 : 0.0;
+
         return retValue;
     }
 
