@@ -1,0 +1,21 @@
+{
+  "budgetType": "BUDGET_TIME",
+  "rolloutLength": 100,
+  "rolloutTermination": "END_TURN",
+  "rolloutType": "RANDOM",
+  "opponentTreePolicy": "OneTree",
+  "MASTGamma": 0.5,
+  "heuristic": {
+    "class": "players.heuristics.WinPlusHeuristic"
+  },
+  "K": 1,
+  "exploreEpsilon": 0.03,
+  "treePolicy": "RegretMatching",
+  "MAST": "Both",
+  "information": "Information_Set",
+  "class": "players.mcts.MCTSParams",
+  "backupPolicy": "MonteCarlo",
+  "budget": 10000,
+  "paranoid": true,
+  "reuseTree": true
+}

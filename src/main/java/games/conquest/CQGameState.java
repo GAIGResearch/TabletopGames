@@ -211,13 +211,14 @@ public class CQGameState extends AbstractGameState {
             assert currentTroop != null;
             Vector2D pos = currentTroop.getLocation();
             int range = currentTroop.getMovement();
-            for (int i = Math.max(0, pos.getX() - range); i <= Math.min(20, pos.getX() + range); i++) {
-                for (int j = Math.max(0, pos.getY() - range); j <= Math.min(20, pos.getY() + range); j++) {
-                    MoveTroop mov = new MoveTroop(uid, new Vector2D(i,j));
-                    if (canPerformAction(mov, false))
-                        actions.add(mov);
+            if (!currentTroop.hasMoved()) // TODO: If the player is the gui player, it's nice to let them move multiple times.
+                for (int i = Math.max(0, pos.getX() - range); i <= Math.min(gridBoard.getWidth(), pos.getX() + range); i++) {
+                    for (int j = Math.max(0, pos.getY() - range); j <= Math.min(gridBoard.getHeight(), pos.getY() + range); j++) {
+                        MoveTroop mov = new MoveTroop(uid, new Vector2D(i,j));
+                        if (canPerformAction(mov, false))
+                            actions.add(mov);
+                    }
                 }
-            }
         }
         if (phase.equals(CQGamePhase.MovementPhase) || phase.equals(CQGamePhase.CombatPhase)) {
             assert currentTroop != null;

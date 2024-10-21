@@ -121,7 +121,8 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
         if (cell != null && locationToTroopMap != null) {
             Vector2D cellPos = cell.position;
             Font f = g.getFont();
-            g.setFont(new Font(f.getName(), Font.BOLD, defaultCellSize));
+            Font troopFont = new Font(f.getName(), Font.BOLD, defaultCellSize);
+            g.setFont(troopFont);
             troop = locationToTroopMap.get(cellPos);
             Troop selected = locationToTroopMap.get(selection);
             if (selected != null && distancesFromSelection[cell.position.getX()][cell.position.getY()] <= movementRange) {
@@ -155,6 +156,9 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
                 g.setColor(PLAYER0);
             } else {
                 g.setColor(PLAYER1);
+            }
+            if (troop != null && !troop.getAppliedCommands().isEmpty()) {
+                g.setFont(troopFont.deriveFont(Font.ITALIC));
             }
             g.drawString(troopID,
                     x + padLeft,

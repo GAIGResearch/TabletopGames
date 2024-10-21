@@ -135,6 +135,9 @@ public class Troop extends Component {
     public boolean hasCommand(CommandType type) {
         return appliedCommands.contains(type);
     }
+    public boolean hasMoved() {
+        return distanceMoved > 0;
+    }
 
     // Get allowed movement remaining.
     public int getMovement() {
