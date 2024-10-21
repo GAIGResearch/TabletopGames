@@ -287,7 +287,8 @@ public enum GameType {
         }
 
         DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
-        String rulesText = summariser.processText("Core Game Rules (not including strategy of how to play the game well)", 500);
+        String rulesText = summariser.processText("game rules and strategy", 500);
+        //   String rulesText = summariser.processText("Core Game Rules (not including strategy of how to play the game well)", 500);
         // Then write this to file
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
@@ -299,14 +300,14 @@ public enum GameType {
 
         String strategyText = summariser.processText("strategy to play the game well (not including core game rules)", 500);
         // Then write this to file
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(strategySummaryPath));
-            writer.write(strategyText);
-            writer.close();
-        } catch (IOException e) {
-            throw new AssertionError("Error writing strategy summary file: " + strategySummaryPath);
-        }
-        return rulesText + "\n\nStrategy Summary:\n" + strategyText;
+//        try {
+//            BufferedWriter writer = new BufferedWriter(new FileWriter(strategySummaryPath));
+//            writer.write(strategyText);
+//            writer.close();
+//        } catch (IOException e) {
+//            throw new AssertionError("Error writing strategy summary file: " + strategySummaryPath);
+//        }
+        return rulesText; // + "\n\nStrategy Summary:\n" + strategyText;
     }
 
     // Getters

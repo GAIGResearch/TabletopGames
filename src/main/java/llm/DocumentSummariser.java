@@ -84,7 +84,6 @@ public class DocumentSummariser {
 
         String summaryPrompt = String.format("""
                 Summarise the information about %s in this text in 1-2 sentences.
-                This summary will be used by a developer to implement the game.
                 Be concise and clear.
                 """, areaOfInterest);
 

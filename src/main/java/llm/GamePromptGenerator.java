@@ -20,11 +20,11 @@ public class GamePromptGenerator {
                 return "You are playing the board game " + gameType.name() + ". Your job is to write the evaluation logic to help an AI play this game. " +
                         "Don't leave parts unfinished or TODOs. Do not include any package name.\n" +
                         "Write it all in a Java class called " + className + ", with only a single function with this signature:\n" +
-                        " - public double evaluateState(core.AbstractGameState gameState, int playerId)\n" +
+                        "\tpublic double evaluateState(core.AbstractGameState gameState, int playerId)\n" +
                         "The variable gameState is the current state of the game, and playerId is the ID of the player we evaluate the state for. " +
                         "The return value is an estimate of the value of the state. This must be between 0.0 and 1.0. " +
                         "0.0 means we have no chance of winning, 0.50 means we have a 50% chance of winning, and 1.0 means we have won the game.\n" +
-                        "You do not need to check for the end of the game, as the game engine will do that for you and will only call evaluateState() if the game is still in progress.\n" +
+                        "You do not need to check for the end of the game, as the game engine will do that and only call evaluateState() if the game is still in progress.\n" +
                         "The first thing you'll do is cast the abstract game state variable " +
                         "to the specific one we need: " + gameType.getGameStateClass().getSimpleName() + ".\n Write the contents of this function, so that we give a higher numeric " +
                         "evaluation to those game states that are beneficial to playerId. " +
@@ -53,7 +53,7 @@ public class GamePromptGenerator {
             result.append("This is the description of the board game ").append(gameType.name()).append(": \n").append(rules).append("\n");
         }
         // API, game-type specific
-        result.append("\nYou can use the following API to complete the task:\n");
+        result.append("\nAs well as standard java libraries you must use the following API to complete the task:\n");
 
         // Extract methods using reflection
         List<ClassData> classData = getAllMethods(gameType.getGameStateClass());
@@ -64,7 +64,7 @@ public class GamePromptGenerator {
             File sourceFile = new File("src/main/java/" + fullClassName.replaceAll("\\.", "/") + ".java");
             Map<String, String> javadocs = extractJavadocs(sourceFile);
 
-            result.append("Class: ").append(data.clazz.getPackageName()).append(".").append(data.clazz.getSimpleName());
+            result.append("New Class API starting\n").append(data.clazz.getTypeName());
             // then check for generics in definition
             if (data.clazz.getTypeParameters().length > 0) {
                 result.append("<");
@@ -81,18 +81,18 @@ public class GamePromptGenerator {
                 result.append(" extends ").append(data.superClass);
             }
             result.append("\n");
-  //          if (!data.implementedInterfaces.isEmpty()) {
-  //              result.append("Implements: ").append(data.implementedInterfaces).append("\n");
-  //          }
+            //          if (!data.implementedInterfaces.isEmpty()) {
+            //              result.append("Implements: ").append(data.implementedInterfaces).append("\n");
+            //          }
             if (javadocs != null && javadocs.containsKey(data.clazz.getSimpleName())) {
                 result.append("Javadoc: ").append(javadocs.get(data.clazz.getSimpleName())).append("\n");
             }
             if (data.classEnumsAsString != null) {
                 result.append("Enum Values: ").append(data.classEnumsAsString).append("\n");
             }
-            // Check for any public fields
+            // Check for any public fields (excluding any enums)
             for (Field field : data.clazz.getDeclaredFields()) {
-                if (Modifier.isPublic(field.getModifiers())) {
+                if (Modifier.isPublic(field.getModifiers()) && !field.getType().isEnum()) {
                     result.append("\tpublic  ").append(field.getType().getSimpleName()).append(" ").append(field.getName()).append("\n");
                 }
             }
@@ -101,15 +101,16 @@ public class GamePromptGenerator {
                 if (method.getModifiers() == Modifier.PUBLIC) {
                     String signature = getMethodSignature(method);
                     if (javadocs != null && javadocs.containsKey(signature)) {
-                        result.append(" - ").append(signature).append(": ").append(javadocs.get(signature)).append("\n");
+                        result.append("\tpublic ").append(signature).append(": ").append(javadocs.get(signature)).append("\n");
                     } else {
-                        result.append(" - ").append(signature).append("\n");
+                        result.append("\tpublic ").append(signature).append("\n");
                     }
                 }
             }
         }
 
-        result.append("\nAssume all the other classes are implemented, and do not include a main function. Add all the import statements required.\n");
+        result.append("\nDo not use any methods on the classes in the API unless they are explicitly defined above.\n")
+                .append("Do not include a main function in the class you write. Add all the import statements required.\n");
 
         return result.toString();
     }
@@ -131,10 +132,10 @@ public class GamePromptGenerator {
 
     public String createLLMErrorPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code, String error) {
         String text = """
-                
+                                
                 A previous attempt at this task created the class below.
                 This class had failed to compile correctly.
-                
+                                
                 %s
 
                 The compilation error message is:
@@ -313,13 +314,20 @@ public class GamePromptGenerator {
         return signature.toString();
     }
 
+    /**
+     * Get a description of the type, including generics if present
+     * However we only return the simple name + generics.
+     * We don't include the package name.
+     */
     private String getTypeDescription(Type type) {
         if (type instanceof Class<?> clazz) {
             return clazz.getSimpleName();
-        } else if (type instanceof ParameterizedType pType) {
-            return pType.getTypeName();
-        } else {
-            return type.getTypeName();
         }
+        String fullName = type.getTypeName();
+        int index = fullName.lastIndexOf(".");
+        if (index >= 0) {
+            return fullName.substring(index + 1);
+        }
+        return fullName; // no "."
     }
 }

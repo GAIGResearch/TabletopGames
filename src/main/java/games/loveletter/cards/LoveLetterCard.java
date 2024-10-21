@@ -20,10 +20,6 @@ public class LoveLetterCard extends Card {
         return cardType.toString();
     }
 
-    public CardType getCardType() {
-        return cardType;
-    }
-
     @Override
     public LoveLetterCard copy() {
         return new LoveLetterCard(cardType, componentID);
