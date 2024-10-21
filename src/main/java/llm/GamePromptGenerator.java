@@ -29,9 +29,7 @@ public class GamePromptGenerator {
                         "to the specific one we need: " + gameType.getGameStateClass().getSimpleName() + ".\n Write the contents of this function, so that we give a higher numeric " +
                         "evaluation to those game states that are beneficial to playerId. " +
                         "Ths first player has a playerId of 0, the second player has a playerId of 1, and so on. " +
-                        "There are a total of " + nPlayers + " players in the game.\n" +
-                        "The core.components.Component class has a getOwnerId() method that returns the player ID of the owner of the component, or -1 if " +
-                        "no player owns it. ";
+                        "There are a total of " + nPlayers + " players in the game.\n";
             }
             return "";
         }
@@ -55,7 +53,7 @@ public class GamePromptGenerator {
             result.append("This is the description of the board game ").append(gameType.name()).append(": \n").append(rules).append("\n");
         }
         // API, game-type specific
-        result.append("You can use the following API to complete the task:\n");
+        result.append("\nYou can use the following API to complete the task:\n");
 
         // Extract methods using reflection
         List<ClassData> classData = getAllMethods(gameType.getGameStateClass());
@@ -92,17 +90,26 @@ public class GamePromptGenerator {
             if (data.classEnumsAsString != null) {
                 result.append("Enum Values: ").append(data.classEnumsAsString).append("\n");
             }
+            // Check for any public fields
+            for (Field field : data.clazz.getDeclaredFields()) {
+                if (Modifier.isPublic(field.getModifiers())) {
+                    result.append("\tpublic  ").append(field.getType().getSimpleName()).append(" ").append(field.getName()).append("\n");
+                }
+            }
+            // then add public methods
             for (Method method : data.classMethods) {
-                String signature = getMethodSignature(method);
-                if (javadocs != null && javadocs.containsKey(signature)) {
-                    result.append(" - ").append(signature).append(": ").append(javadocs.get(signature)).append("\n");
-                } else {
-                    result.append(" - ").append(signature).append("\n");
+                if (method.getModifiers() == Modifier.PUBLIC) {
+                    String signature = getMethodSignature(method);
+                    if (javadocs != null && javadocs.containsKey(signature)) {
+                        result.append(" - ").append(signature).append(": ").append(javadocs.get(signature)).append("\n");
+                    } else {
+                        result.append(" - ").append(signature).append("\n");
+                    }
                 }
             }
         }
 
-        result.append("Assume all the other classes are implemented, and do not include a main function. Add all the import statements required.\n");
+        result.append("\nAssume all the other classes are implemented, and do not include a main function. Add all the import statements required.\n");
 
         return result.toString();
     }
