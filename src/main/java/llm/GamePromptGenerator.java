@@ -92,7 +92,7 @@ public class GamePromptGenerator {
             }
             // Check for any public fields (excluding any enums)
             for (Field field : data.clazz.getDeclaredFields()) {
-                if (Modifier.isPublic(field.getModifiers()) && !field.getType().isEnum()) {
+                if (Modifier.isPublic(field.getModifiers()) && !field.isEnumConstant()) {
                     result.append("\tpublic  ").append(field.getType().getSimpleName()).append(" ").append(field.getName()).append("\n");
                 }
             }
@@ -324,10 +324,45 @@ public class GamePromptGenerator {
             return clazz.getSimpleName();
         }
         String fullName = type.getTypeName();
-        int index = fullName.lastIndexOf(".");
-        if (index >= 0) {
-            return fullName.substring(index + 1);
+        return simpleClassVersionOfType(fullName);
+    }
+
+    private String simpleClassVersionOfType(String type) {
+        // we want to pull out the last part of any name (i.e. after the last . character)
+        // within each <> parameterised version
+        // for example java.util.List<java.lang.String> would return List<String>
+
+        // we can do this recursively by:
+        // 1. finding the first < character
+        // 2. finding the matching > character
+        // 3. calling this method on the substring between the < and > characters
+        // 4. replacing the substring between the < and > characters with the result of the recursive call
+        // 5. repeating until there are no more < characters
+
+        int start = type.indexOf('<');
+        // we can then truncate the class up to start
+        if (start == -1) {
+            return type.substring(type.lastIndexOf('.') + 1);
         }
-        return fullName; // no "."
+        String simpleClass = type.substring(0, start);
+        simpleClass = simpleClass.substring(simpleClass.lastIndexOf('.') + 1);
+        // we now need to find the matching ">" character
+        // we can do this by counting the number of < and > characters
+        int count = 1;
+        int end = start + 1;
+        while (count > 0) {
+            if (type.charAt(end) == '<') {
+                count++;
+            } else if (type.charAt(end) == '>') {
+                count--;
+            }
+            end++;
+        }
+
+        String innerType = type.substring(start + 1, end);
+        String simpleInnerType = simpleClassVersionOfType(innerType);
+        return simpleClass + "<" + simpleInnerType + simpleClassVersionOfType(type.substring(end));
+
+
     }
 }

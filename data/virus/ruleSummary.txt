@@ -1,0 +1,27 @@
+**"Virus" is a strategic card game for 2-6 players, aiming to collect four different colored organ cards to form a healthy body. Here are the key rules and strategies:**
+
+**Game Rules:**
+- Players draw three cards per turn.
+- To win, a player must collect four unique organ cards.
+- Card types: Healthy Organs, Viruses, Medicines, and Treatments/Actions.
+- Viruses can destroy or infect organs; Medicines protect or immunize organs.
+- Treatment/Action cards offer special effects, like Virus transfer ("Contagion") or organ swapping ("Organ Thief", "Organ Transplantation").
+- Multicolor cards can represent any color.
+- The game ends when a player has four healthy organs.
+- When the deck is empty, draw from the discard pile.
+
+**Strategy:**
+- Protect your organs with Medicine cards.
+- Use Virus cards strategically to target opponents' organs.
+- Leverage Treatment/Action cards for disruption or advantage.
+- Key strategies include:
+  - Spreading viruses to hinder opponents.
+  - Using "Medical Error" to swap bodies when an opponent is close to winning.
+  - Immunizing organs as soon as possible.
+
+**Implementation Notes:**
+- Ensure each player has three cards in their hand at the start.
+- Include virus, medicine, treatment/action, and multicolor cards in the deck.
+- Implement special effects for Treatment/Action cards.
+- Allow drawing from the discard pile when the deck is empty.
+- End the game when a player collects four unique healthy organ cards.
