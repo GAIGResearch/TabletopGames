@@ -377,7 +377,6 @@ public class CQGameState extends AbstractGameState {
         int[][] board = new int[w][h];
         for (int[] row : board) // fill all with 'unreachable' initially
             Arrays.fill(row, 9999);
-        board[source.position.getX()][source.position.getY()] = 0;
         int distance = 0;
         while (!openSet.isEmpty()) {
             distance++; // first iteration is distance 1, etc
@@ -399,6 +398,7 @@ public class CQGameState extends AbstractGameState {
             openSet.addAll(newSet); // copy new set of all neighbours to open set
             openSet.removeAll(closedSet); // remove cells that have been visited before
         }
+        board[source.position.getX()][source.position.getY()] = 0;
         return board;
     }
 
@@ -450,44 +450,39 @@ public class CQGameState extends AbstractGameState {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (isNotTerminal()) {
-            // Scores based on troop health and value; between 0 and 1 for each player
-            double myScore = getRelativeTroopCost(getTroops(playerId)) / getTotalTroopCost(getAllTroops(playerId));
-            double theirScore = getRelativeTroopCost(getTroops(playerId ^ 1)) / getTotalTroopCost(getAllTroops(playerId));
-            // Cooldowns, based on command cooldowns. A percentage of cooldown for each command, summed; between 0 and 4 for each player
-            double myCooldowns = 0, theirCooldowns = 0;
-            // Command points remaining per player. Any positive integer.
-            int myPoints = getCommandPoints(playerId), theirPoints = getCommandPoints(playerId ^ 1);
-            List<Command> myCommands = chosenCommands[playerId].getVisibleComponents(playerId),
-                          theirCommands = chosenCommands[playerId ^ 1].getVisibleComponents(playerId);
-            for (Command cmd : myCommands) {
-                if (cmd.getCooldown() > 0)
-                    // Add uncompleted fraction of cooldown to counter
-                    myCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
-            }
-            for (Command cmd : theirCommands) {
-                if (cmd == null) continue; // their command hasn't been seen yet, so can't affect our heuristic score
-                if (cmd.getCooldown() > 0)
-                    // Add uncompleted fraction of cooldown to counter
-                    theirCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
-            }
-            // Scale scores based on command points and command depletion:
-            myScore *= myPoints * myCooldowns;
-            theirScore *= theirPoints * theirCooldowns;
-            // Normalize scores:
-            double maxScore = Math.max(myScore, theirScore);
-            if (maxScore == 0.0) return 0.5; // neither player has a score yet, so it's a tie.
-            myScore /= maxScore;
-            theirScore /= maxScore;
-            // Scale it so that 0.5 is a tie, 0 is a loss for `playerId`, and 1 is a win for `playerId`.
-            // Both scores are now normalized, so between 0 and 1. The higher of the two will be equal to 1.0.
-            // if myScore is 1/10th of theirScore, then this will result in (0.5 + (0.1 - 1) / 2.0) = 0.05.
-            // if I have a slight edge of 1.0 vs 0.9, then this will be (0.5 + (1 - 0.9) / 2.0) = 0.55.
-            return 0.5 + (myScore - theirScore) / 2.0;
-        } else {
-            // The game finished, we can instead return the actual result of the game for the given player.
-            return getPlayerResults()[playerId].value;
+        // Scores based on troop health and value; between 0 and 1 for each player
+        double myScore = getRelativeTroopCost(getTroops(playerId)) / getTotalTroopCost(getAllTroops(playerId));
+        double theirScore = getRelativeTroopCost(getTroops(playerId ^ 1)) / getTotalTroopCost(getAllTroops(playerId));
+        // Cooldowns, based on command cooldowns. A percentage of cooldown for each command, summed; between 0 and 4 for each player
+        double myCooldowns = 0, theirCooldowns = 0;
+        // Command points remaining per player. Any positive integer.
+        int myPoints = getCommandPoints(playerId), theirPoints = getCommandPoints(playerId ^ 1);
+        List<Command> myCommands = chosenCommands[playerId].getVisibleComponents(playerId),
+                      theirCommands = chosenCommands[playerId ^ 1].getVisibleComponents(playerId);
+        for (Command cmd : myCommands) {
+            if (cmd.getCooldown() > 0)
+                // Add uncompleted fraction of cooldown to counter
+                myCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
         }
+        for (Command cmd : theirCommands) {
+            if (cmd == null) continue; // their command hasn't been seen yet, so can't affect our heuristic score
+            if (cmd.getCooldown() > 0)
+                // Add uncompleted fraction of cooldown to counter
+                theirCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
+        }
+        // Scale scores based on command points and command depletion:
+        myScore *= myPoints * myCooldowns;
+        theirScore *= theirPoints * theirCooldowns;
+        // Normalize scores:
+        double maxScore = Math.max(myScore, theirScore);
+        if (maxScore == 0.0) return 0.5; // neither player has a score yet, so it's a tie.
+        myScore /= maxScore;
+        theirScore /= maxScore;
+        // Scale it so that 0.5 is a tie, 0 is a loss for `playerId`, and 1 is a win for `playerId`.
+        // Both scores are now normalized, so between 0 and 1. The higher of the two will be equal to 1.0.
+        // if myScore is 1/10th of theirScore, then this will result in (0.5 + (0.1 - 1) / 2.0) = 0.05.
+        // if I have a slight edge of 1.0 vs 0.9, then this will be (0.5 + (1 - 0.9) / 2.0) = 0.55.
+        return 0.5 + (myScore - theirScore) / 2.0;
     }
     @Override
     public double getGameScore(int playerId) {
