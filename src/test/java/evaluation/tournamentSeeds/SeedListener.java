@@ -10,6 +10,8 @@ import java.util.List;
 
 public class SeedListener implements IGameListener {
     public List<Long> seeds =  new ArrayList<>();
+    public List<String> firstPlayerNames = new ArrayList<>();
+    private Game game;
 
     @Override
     public void onEvent(Event event) {
@@ -17,6 +19,7 @@ public class SeedListener implements IGameListener {
             long seed = event.state.getGameParameters().getRandomSeed();
       //      System.out.println("Seed = " + seed);
             seeds.add(seed);
+            firstPlayerNames.add(game.getPlayers().get(0).toString());
         }
     }
 
@@ -26,10 +29,11 @@ public class SeedListener implements IGameListener {
 
     @Override
     public void setGame(Game game) {
+        this.game = game;
     }
 
     @Override
     public Game getGame() {
-        return null;
+        return game;
     }
 }

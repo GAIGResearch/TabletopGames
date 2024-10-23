@@ -79,6 +79,31 @@ public class TestRandomSeedsInTournaments {
     }
 
     @Test
+    public void testFixedSingleSeed() {
+        // i.e. in Fixed mode
+        List<AbstractPlayer> players = new ArrayList<>();
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.get(0).setName("p1");
+        players.get(1).setName("p2");
+        String[] args = new String[] {
+                "mode=fixed", "matchups=10", "distinctRandomSeeds=1", "seed=35830953", "listener=\"\""
+        };
+        Map<RunArg, Object> config = RunArg.parseConfig(args, Collections.singletonList(RunArg.Usage.RunGames));
+        RoundRobinTournament tournament = new RoundRobinTournament(players, GameType.DotsAndBoxes, 2, null, config);
+        // we now check that each game used the same random seed
+        tournament.addListener(seedListener);
+        tournament.run();
+        assertEquals(10, seedListener.seeds.size());
+        Set<Long> uniqueSeeds = new HashSet<>(seedListener.seeds);
+        assertEquals(1, uniqueSeeds.size());
+
+        // then check that all games had p1 as the first player
+        int p1Count = seedListener.firstPlayerNames.stream().mapToInt(s -> s.equals("p1") ? 1 : 0).sum();
+        assertEquals(10, p1Count);
+    }
+
+    @Test
     public void testExhaustiveManySeeds() {
         List<AbstractPlayer> randomPlayer = List.of(new RandomPlayer(), new RandomPlayer(), new RandomPlayer(), new RandomPlayer());
         String[] args = new String[] {

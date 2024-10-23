@@ -71,11 +71,15 @@ public class RoundRobinTournament extends AbstractTournament {
             case "EXHAUSTIVE" -> EXHAUSTIVE;
             case "EXHAUSTIVESP" -> EXHAUSTIVE_SELF_PLAY;
             case "ONEVSALL" -> ONE_VS_ALL;
+            case "FIXED" -> FIXED;
             default -> RANDOM;
         };
         if (tournamentMode == EXHAUSTIVE && nTeams > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or switch to RANDOM mode.");
+        }
+        if (tournamentMode == FIXED && this.agents.size() != playersPerGame) {
+            throw new IllegalArgumentException("In FIXED mode, the number of agents must match the number of players per game.");
         }
 
         this.allAgentIds = new LinkedList<>();
@@ -133,6 +137,8 @@ public class RoundRobinTournament extends AbstractTournament {
                 }
                 actualGames = this.gamesPerMatchup * Utils.playerPermutations(agentPositions, agents.size(), selfPlay);
                 break;
+            case FIXED:
+                // we run the totalGameBudget number of games with no change to agent order
             case RANDOM:
                 this.gamesPerMatchup = totalGameBudget; // not actually used, we just run the totalGameBudget number of games
                 break;
@@ -228,6 +234,13 @@ public class RoundRobinTournament extends AbstractTournament {
 
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
         switch (tournamentMode) {
+            case FIXED:
+                // we add the agents to the matchUp in the order they are in the list
+                for (int i = 0; i < agents.size(); i++) {
+                    matchUp.add(i);
+                }
+                evaluateMatchUp(matchUp, gamesPerMatchup, gameSeeds);
+                break;
             case RANDOM:
                 // In the RANDOM case we use a new seed for each game
                 PermutationCycler idStream = new PermutationCycler(agents.size(), seedRnd, nTeams);
