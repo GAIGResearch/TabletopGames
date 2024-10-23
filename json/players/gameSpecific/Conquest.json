@@ -14,12 +14,12 @@
   "rolloutLength" : [5, 10, 20],
   "maxTreeDepth" : [3, 10, 30],
   "exploreEpsilon": 0.03,
-  "treePolicy": "RegretMatching",
+  "treePolicy": ["UCB", "UCB_Tuned", "AlphaGo"],
   "MAST": "Both",
   "information": "Information_Set",
   "class": "players.mcts.MCTSParams",
   "backupPolicy": "MonteCarlo",
-  "budget": [100, 1000],
+  "budget": 40,
   "paranoid": [true, false],
   "reuseTree": true
 }
