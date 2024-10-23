@@ -48,7 +48,6 @@ public class CQGameState extends AbstractGameState {
     GridBoard<Cell> gridBoard;
     PartialObservableDeck[] chosenCommands;
     int[] commandPoints = new int[] {0, 0};
-    Random random;
 
     /**
      * @param gameParameters - game parameters.
@@ -56,7 +55,6 @@ public class CQGameState extends AbstractGameState {
      */
     public CQGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        random = new Random(gameParameters.getRandomSeed());
     }
 
     /*======= SIMPLE GETTERS AND SETTERS =======*/
@@ -501,7 +499,6 @@ public class CQGameState extends AbstractGameState {
         // Compare hashmaps and other subobjects:
         if (!(
                 cqgs.highlight.equals(highlight) &&
-                cqgs.random.equals(random) &&
                 Arrays.deepEquals(cqgs.cells, cells) &&
                 cqgs.troops.equals(troops) &&
                 cqgs.locationToTroopMap.equals(locationToTroopMap) &&
@@ -518,10 +515,5 @@ public class CQGameState extends AbstractGameState {
                 getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop,
                 highlight, cmdHighlight, gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints)
         );
-    }
-    // TODO: Review the methods below...these are all supported by the default implementation in AbstractGameState
-    // TODO: So you do not (and generally should not) implement your own versions - take advantage of the framework!
-    public Random getRnd() {
-        return random;
     }
 }
