@@ -32,7 +32,7 @@ public class CatanGameState extends AbstractGameState {
     List<Map<CatanParameters.Resource, Counter>> playerResources;
     List<Map<BuyAction.BuyType, Counter>> playerTokens;
     List<Deck<CatanCard>> playerDevCards;
-    HashMap<CatanParameters.Resource, Counter> resourcePool;
+    Map<CatanParameters.Resource, Counter> resourcePool;
     Deck<CatanCard> devCards;
     boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
 
@@ -557,7 +557,7 @@ public class CatanGameState extends AbstractGameState {
         }
     }
 
-    public HashMap<CatanParameters.Resource, Counter> getResourcePool() {
+    public Map<CatanParameters.Resource, Counter> getResourcePool() {
         return resourcePool;
     }
 

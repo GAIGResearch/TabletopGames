@@ -300,8 +300,9 @@ public class CatanForwardModel extends StandardForwardModel {
             }
         }
         // shuffle collections, so we get randomized tiles and tokens on them
-        Collections.shuffle(tileList, rnd);
-        Collections.shuffle(numberList, rnd);
+        Random toUse = params.hexShuffleSeed > -1 ? new Random(params.hexShuffleSeed) : rnd;
+        Collections.shuffle(tileList, toUse);
+        Collections.shuffle(numberList, toUse);
 
         CatanTile[][] board = new CatanTile[params.n_tiles_per_row][params.n_tiles_per_row];
         int midX = board.length / 2;
@@ -397,7 +398,8 @@ public class CatanForwardModel extends StandardForwardModel {
             for (int i = 0; i < entry.getValue(); i++)
                 harbors.add(entry.getKey());
         }
-        Collections.shuffle(harbors, rnd);
+        Random toUse = cp.hexShuffleSeed > -1 ? new Random(cp.hexShuffleSeed * 2L) : rnd;
+        Collections.shuffle(harbors, toUse);
 
         int radius = board.length / 2;
         // todo edge 4 can work, but random would be better, the math changes with different directions.
