@@ -108,7 +108,6 @@ public class CatanMetrics implements IMetricsCollection {
                 Set<CatanParameters.Resource> uniqueResources = new HashSet<>(initResources.get(i));
                 records.put(playerName + "_varietyResources", uniqueResources.size());
             }
-
             return true;
         }
 
@@ -429,4 +428,29 @@ public class CatanMetrics implements IMetricsCollection {
             return columns;
         }
     }
+
+    public static class RandomSeeds extends AbstractMetric {
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            CatanGameState gs = (CatanGameState) e.state;
+            CatanParameters cp = (CatanParameters) gs.getGameParameters();
+            records.put("HexSeed", cp.hexShuffleSeed);
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("HexSeed", Integer.class);
+            return columns;
+        }
+    }
+
+
+
 }
