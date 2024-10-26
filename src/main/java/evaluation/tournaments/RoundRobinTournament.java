@@ -236,6 +236,8 @@ public class RoundRobinTournament extends AbstractTournament {
         switch (tournamentMode) {
             case FIXED:
                 // we add the agents to the matchUp in the order they are in the list
+                // we always run the same fixed set of agents, so ignore the input matchup
+                matchUp.clear();
                 for (int i = 0; i < agents.size(); i++) {
                     matchUp.add(i);
                 }
