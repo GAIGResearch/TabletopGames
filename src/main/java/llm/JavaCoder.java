@@ -44,7 +44,7 @@ public class JavaCoder {
         GamePromptGenerator promptGenerator = new GamePromptGenerator();
 
         int iteration = 0;
-        int max_iters = 5;
+        int max_iters = 10;
         int currentErrors = 0;
         int maxErrorsPerIteration = 3;
 
@@ -57,6 +57,8 @@ public class JavaCoder {
         String generatedCode = "";
         String error = "";
 
+        double[] scores = new double[max_iters];
+        String[] code = new String[max_iters];
 
         while (iteration < max_iters) {
             try {
@@ -70,12 +72,23 @@ public class JavaCoder {
                         className,
                         true);
                 if (iteration > 0) {
+                    // TODO: Any code that failed to compile should be excluded from this
+                    // find the best score so far, and extract the code for that
+                    String bestCode = "";
+                    double bestScore = 0.0;
+                    for (int index = 0; index < iteration; index++) {
+                        if (scores[index] > bestScore) {
+                            bestScore = scores[index];
+                            bestCode = code[index];
+                        }
+                    }
+
                     promptGenerator.createLLMFeedbackPrompt(
                             GamePromptGenerator.TaskType.Heuristic,
                             gameType,
                             playerCount,
                             className,
-                            generatedCode);
+                            bestCode);
                 }
 
                 if (!error.isEmpty()) {
@@ -103,14 +116,18 @@ public class JavaCoder {
                             Your task is to remove any comments or JavaDoc from this code.
                             The output should be the same code, with any syntax corrections, but without any comments.
                          
-                            The output mist include only the final java code.
+                            The output must include only the final java code.
                             ***
                         """;
                 String commentFreeCode = llm.getResponse(commentPrompt + generatedCode, llmModel, LLM_SIZE.SMALL)
                         .replaceAll("```java\\s*(.*?)", "$1")
                         .replaceAll("(.*?)```", "$1");
                 writeGeneratedCodeToFile(commentFreeCode, fileName);
+                code[iteration] = generatedCode;  // we store for future prompts (with comments, as these could be useful)
 
+                // TODO: Add an extra call to summarise the functionality of the code (using the version with comments)
+                // "useful to someone who wanted to write the function anew from a functional specification"
+                // that might be a good thing to pass to future iterations
 
                 System.out.printf("Iteration %d has generated code%n", iteration);
 
@@ -167,6 +184,12 @@ public class JavaCoder {
             tournament.run();
             for (int index = 0; index < playerList.size(); index++) {
                 System.out.printf("Player %s has score %.2f%n", playerList.get(index).toString(), tournament.getWinRate(index));
+            }
+
+            // we now extract the scores of the agents, and record these
+            // the players are added in iteration order, so we can use that
+            for (int index = 0; index <= iteration; index++) {
+                scores[index] = tournament.getWinRate(index);
             }
 
             iteration++;

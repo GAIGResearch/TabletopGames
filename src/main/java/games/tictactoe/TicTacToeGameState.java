@@ -60,10 +60,11 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     /**
-     * This returns the symbol used for the token for the given player id. This will match with Token.getTokenType().
+     * This returns the player id of the token at the given position. Or -1 if this is empty.
      */
-    public String getPlayerToken(int playerId) {
-        return TicTacToeConstants.playerMapping.get(playerId).getTokenType();
+    public int getPlayerAt(int x, int y) {
+        Token token = gridBoard.getElement(x, y);
+        return token == null ? -1 : token.getOwnerId();
     }
 
     @Override

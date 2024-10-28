@@ -66,6 +66,8 @@ public class GamePromptGenerator {
 
             result.append("New Class API starting\n").append(data.clazz.getTypeName());
             // then check for generics in definition
+            // TODO: I should simplify to the final simple class name at this stage; not try and hack the string afterwards
+            // TODO: I only want the full class name for initial name of the Class for which the API is being documented (and what it extends)
             if (data.clazz.getTypeParameters().length > 0) {
                 result.append("<");
                 for (int i = 0; i < data.clazz.getTypeParameters().length; i++) {
@@ -123,6 +125,7 @@ public class GamePromptGenerator {
                 ```
                 Your task is to generate a new heuristic function that is better than the current one.
                 A better heuristic will have a higher win rate and/or have shorter and less complex code.
+                You should aim to improve the heuristic function by modifying the existing code, changing relative weights, or adding (or removing) new features.
                                 
                 """;
         String result = String.format(text, code);
