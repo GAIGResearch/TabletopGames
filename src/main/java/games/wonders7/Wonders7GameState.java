@@ -97,7 +97,7 @@ public class Wonders7GameState extends AbstractGameState {
         copy.currentAge = currentAge;
         copy.direction = direction;
         copy.wonderBoardDeck = wonderBoardDeck.copy();
-        copy.cardRnd = new Random(redeterminisationRnd.nextInt());
+        copy.cardRnd = new Random(redeterminisationRnd.nextLong());
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Seven Wonders does not use PartialObservableDecks

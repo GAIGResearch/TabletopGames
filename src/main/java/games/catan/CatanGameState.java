@@ -28,6 +28,7 @@ public class CatanGameState extends AbstractGameState {
     protected int longestRoadOwner; // playerID of the player currently holding the longest road
     protected int longestRoadLength, largestArmySize;
     int rollValue;
+    Random diceRnd;
 
     List<Map<CatanParameters.Resource, Counter>> playerResources;
     List<Map<BuyAction.BuyType, Counter>> playerTokens;
@@ -408,6 +409,8 @@ public class CatanGameState extends AbstractGameState {
 
         copy.tradeOffer = tradeOffer != null? tradeOffer.copy() : null;
         copy.negotiationStepsCount = negotiationStepsCount;
+
+        copy.diceRnd = new Random(redeterminisationRnd.nextLong());
 
         copy.devCards = devCards.copy();
 

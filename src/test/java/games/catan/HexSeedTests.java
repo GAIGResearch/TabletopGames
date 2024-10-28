@@ -82,4 +82,68 @@ public class HexSeedTests {
             }
         }
     }
+
+    @Test
+    public void diceAreNotPredictable() {
+        CatanParameters params = new CatanParameters();
+        params.setParameterValue("diceSeed", -1);
+        params.setRandomSeed(39392);
+        CatanGameState state = new CatanGameState(params, 4);
+        fm.setup(state);
+
+        int[] diceRolls = new int[20];
+        for (int loop = -0; loop < 20; loop++) {
+            fm.rollDiceAndAllocateResources(state, params);
+            diceRolls[loop] = state.getRollValue();
+        }
+
+        // Now we repeat this with a different seed
+        params.setRandomSeed(392);
+        fm.setup(state);
+        int matches = 0;
+        for (int loop = 0; loop < 20; loop++) {
+            fm.rollDiceAndAllocateResources(state, params);
+          //  System.out.println("Checking " + diceRolls[loop] + " vs " + state.getRollValue());
+            if (diceRolls[loop] == state.getRollValue()) {
+                matches++;
+            }
+        }
+        assertEquals(0, matches, 2);
+    }
+
+    @Test
+    public void fixingDiceSeedFixesDice() {
+        CatanParameters params = new CatanParameters();
+        params.setParameterValue("diceSeed", 39392);
+        params.setRandomSeed(39392);
+        CatanGameState state = new CatanGameState(params, 4);
+        fm.setup(state);
+
+        int[] diceRolls = new int[20];
+        for (int loop = -0; loop < 20; loop++) {
+            fm.rollDiceAndAllocateResources(state, params);
+            diceRolls[loop] = state.getRollValue();
+        }
+
+        // Now we repeat this with the same dice seed, but different random seed
+        params.setRandomSeed(392);
+        fm.setup(state);
+        for (int loop = 0; loop < 20; loop++) {
+            fm.rollDiceAndAllocateResources(state, params);
+            assertEquals(diceRolls[loop], state.getRollValue());
+        }
+
+        // Now we repeat this with a different seed
+        params.setRandomSeed(392);
+        params.setParameterValue("diceSeed", 427858);
+        fm.setup(state);
+        int matches = 0;
+        for (int loop = 0; loop < 20; loop++) {
+            fm.rollDiceAndAllocateResources(state, params);
+            if (diceRolls[loop] == state.getRollValue()) {
+                matches++;
+            }
+            assertEquals(0, matches, 2);
+        }
+    }
 }
