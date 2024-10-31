@@ -8,7 +8,7 @@
   },
   "K": 1,
   "exploreEpsilon": 0.03,
-  "treePolicy": "RegretMatching",
+  "treePolicy": "UCB-Tuned",
   "MAST": "Both",
   "rolloutType": "RANDOM",
   "information": "Information_Set",
