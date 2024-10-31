@@ -435,6 +435,7 @@ public class CatanMetrics implements IMetricsCollection {
             CatanGameState gs = (CatanGameState) e.state;
             CatanParameters cp = (CatanParameters) gs.getGameParameters();
             records.put("HexSeed", cp.hexShuffleSeed);
+            records.put("DiceSeed", cp.diceSeed);
             return true;
         }
 
@@ -447,6 +448,7 @@ public class CatanMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("HexSeed", Integer.class);
+            columns.put("DiceSeed", Integer.class);
             return columns;
         }
     }
