@@ -1,5 +1,7 @@
 package llm;
 
+import dev.langchain4j.model.anthropic.AnthropicChatModel;
+import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiChatModel;
@@ -15,10 +17,12 @@ public class LLMAccess {
     static ChatLanguageModel[] geminiModel = new ChatLanguageModel[2];
     static ChatLanguageModel[] mistralModel = new ChatLanguageModel[2];
     static ChatLanguageModel[] openaiModel = new ChatLanguageModel[2];
+    static ChatLanguageModel[] anthropicModel = new ChatLanguageModel[2];
 
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
     String openaiToken = System.getenv("OPENAI_TOKEN");
+    String anthropicToken = System.getenv("ANTHROPIC_TOKEN");
 
     File logFile;
     FileWriter logWriter;
@@ -31,7 +35,8 @@ public class LLMAccess {
     public enum LLM_MODEL {
         GEMINI,
         MISTRAL,
-        OPENAI
+        OPENAI,
+        ANTHROPIC
     }
 
     public enum LLM_SIZE {
@@ -103,6 +108,17 @@ public class LLMAccess {
                     .build();
 
         }
+
+        if (anthropicToken != null && !anthropicToken.isEmpty()) {
+            anthropicModel[0] = AnthropicChatModel.builder()
+                    .modelName(AnthropicChatModelName.CLAUDE_3_HAIKU_20240307) // $0.25 per million input tokens, $1.25 per million output tokens
+                    .apiKey(anthropicToken)
+                    .build();
+            anthropicModel[1] = AnthropicChatModel.builder()
+                    .modelName(AnthropicChatModelName.CLAUDE_3_5_SONNET_20240620) // $3 per million input tokens, $15 per million output tokens
+                    .apiKey(anthropicToken)
+                    .build();
+        }
     }
 
     /**
@@ -118,6 +134,7 @@ public class LLMAccess {
             case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
             case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
             case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
+            case ANTHROPIC -> modelSize == LLM_SIZE.SMALL ? anthropicModel[0] : anthropicModel[1];
         };
         if (modelToUse != null) {
             try {

@@ -13,6 +13,7 @@ import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -41,6 +42,10 @@ public class JavaCoder {
         String llmLogFile = workingDir + "/" + gameName + "_llm_log.txt";
         String fileStem = workingDir + "/" + evaluatorName;
 
+        File dir = new File(workingDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
         GamePromptGenerator promptGenerator = new GamePromptGenerator();
 
         int iteration = 0;
