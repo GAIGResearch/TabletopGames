@@ -62,25 +62,10 @@ public class CQForwardModel extends StandardForwardModel {
             }
         }
 
-        this.setupCommands(new HashSet<CommandType>(Set.of(
-                CommandType.Charge,
-                CommandType.BattleCry,
-                CommandType.Chastise,
-                CommandType.Vigilance
-            )), 0, cqgs);
-        this.setupTroopsFromString("\n"+
-                "      S   C   S\n"+
-                "       KA M AK", 0, cqgs, cqp);
-        this.setupCommands(new HashSet<CommandType>(Set.of(
-                CommandType.Charge,
-                CommandType.BattleCry,
-                CommandType.Chastise,
-                CommandType.Vigilance
-        )), 1, cqgs);
-        this.setupTroopsFromString("\n"+
-                "      S   C   S\n"+
-                "       KA M AK", 1, cqgs, cqp);
-        // TODO: implement custom setup for board
+        this.setupCommands(cqp.p0TroopSetup.commands, 0, cqgs);
+        this.setupTroopsFromString(cqp.p0TroopSetup.troops, 0, cqgs, cqp);
+        this.setupCommands(cqp.p1TroopSetup.commands, 1, cqgs);
+        this.setupTroopsFromString(cqp.p1TroopSetup.troops, 1, cqgs, cqp);
         for (int i = 0; i < cqp.gridHeight; i++) {
             for (int j = 0; j < cqp.gridWidth; j++) {
                 cqgs.cells[i][j] = new Cell(i, j);
@@ -108,7 +93,7 @@ public class CQForwardModel extends StandardForwardModel {
     protected void setupTroopsFromString(String str, int uid, CQGameState cqgs, CQParameters cqp) {
         String[] lines = str.split("\n", -1);
         assert(lines.length <= cqp.nSetupRows);
-        assert(Math.max(lines[0].length(), Math.max(lines[1].length(), lines[2].length())) <= cqp.gridWidth);
+        assert(Arrays.stream(lines).mapToInt(String::length).max().orElse(0) <= cqp.gridWidth); // lines[i].length() <= cqp.gridWidth for all i
         Troop unit;
         int nTroops = 0; // keep track of troops for this owner
         for (int j = 0; j < lines.length; j++) {
@@ -132,10 +117,12 @@ public class CQForwardModel extends StandardForwardModel {
                 int x,y;
                 if (uid == 0) {
                     x = i;
-                    y = j;
+                    // move troops forward as much as possible, when fewer than 3 lines are provided.
+                    y = cqp.nSetupRows - lines.length + j;
                 } else {
                     x = cqp.gridWidth-1 - i;
-                    y = cqp.gridHeight-1 - j;
+                    // move troops forward as much as possible, when fewer than 3 lines are provided.
+                    y = cqp.gridHeight-1 - (cqp.nSetupRows - lines.length + j);
                 }
                 cqgs.addTroop(unit, new Vector2D(x, y));
                 if (nTroops >= maxTroops) return;

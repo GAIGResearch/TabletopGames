@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 
+// TODO: implement actionHeuristic?
+
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
  * in the Forward Model or actions modifying the state of the game.</p>
@@ -183,18 +185,29 @@ public class CQGameState extends AbstractGameState {
                 int commandId = c.getComponentID();
                 if (c.getCost() > getCommandPoints(uid)) continue;
                 if (c.getCommandType() == CommandType.WindsOfFate) {
-                    actions.add(new ApplyCommand(uid, commandId, (Vector2D) null, c.getCommandType()));
+                    ApplyCommand cmd = new ApplyCommand(uid, commandId, (Vector2D) null, c.getCommandType());
+                    if (cmd.canExecute(this)) {
+                        actions.add(cmd); // only add it if it can execute
+                    }
                 } else if (c.getCommandType().enemy) {
                     for (Troop t : getTroops(uid ^ 1)) {
-                        if (!t.getAppliedCommands().contains(c.getCommandType()))
-                            // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
-                            actions.add(new ApplyCommand(uid, commandId, t, c.getCommandType()));
+                        // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
+                        if (!t.getAppliedCommands().contains(c.getCommandType())) {
+                            ApplyCommand cmd = new ApplyCommand(uid, commandId, t, c.getCommandType());
+                            if (cmd.canExecute(this)) {
+                                actions.add(cmd);
+                            }
+                        }
                     }
                 } else {
                     for (Troop t : getTroops(uid)) {
-                        if (!t.getAppliedCommands().contains(c.getCommandType()))
-                            // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
-                            actions.add(new ApplyCommand(uid, commandId, t, c.getCommandType()));
+                        // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
+                        if (!t.getAppliedCommands().contains(c.getCommandType())) {
+                            ApplyCommand cmd = new ApplyCommand(uid, commandId, t, c.getCommandType());
+                            if (cmd.canExecute(this)) {
+                                actions.add(cmd);
+                            }
+                        }
                     }
                 }
             }

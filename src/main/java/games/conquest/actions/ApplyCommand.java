@@ -73,6 +73,10 @@ public class ApplyCommand extends CQAction {
         if (isWindsOfFate()) {
             HashSet<Command> hs = cqgs.getCommands(playerId, false);
             Command[] cooldowns = hs.toArray(new Command[hs.size()]);
+            if (hs.size() == 0) {
+                System.out.println(hs);
+                System.out.println(canExecute(cqgs));
+            }
             cooldowns[cqgs.getRnd().nextInt(hs.size())].reset(); // reset selected command
         } else {
             if (highlight == null) highlight = cqgs.highlight;

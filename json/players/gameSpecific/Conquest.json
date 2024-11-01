@@ -1,25 +1,12 @@
 {
-  "budgetType": "BUDGET_TIME",
-  "rolloutTermination": "END_TURN",
-  "rolloutType": "RANDOM",
-  "opponentTreePolicy": "OneTree",
-  "MASTGamma": 0.5,
-  "heuristic": {
-    "args": [
-      1000.0
-    ],
-    "class": "players.heuristics.WinPlusHeuristic"
-  },
-  "K" : [0.1, 1.0, 10.0],
-  "rolloutLength" : [5, 10, 20],
-  "maxTreeDepth" : [3, 10, 30],
-  "exploreEpsilon": 0.03,
-  "treePolicy": ["UCB", "UCB_Tuned", "AlphaGo"],
-  "MAST": "Both",
-  "information": "Information_Set",
-  "class": "players.mcts.MCTSParams",
-  "backupPolicy": "MonteCarlo",
-  "budget": 40,
-  "paranoid": [true, false],
-  "reuseTree": true
+  "budgetType" : "BUDGET_FM_CALLS",
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 70,
+  "maxTreeDepth" : 30,
+  "MAST" : "Both",
+  "MASTGamma" : 0.5,
+  "K" : 1.4,
+  "class" : "players.mcts.MCTSParams",
+  "budget" : 10000,
+  "treePolicy" : "UCB_Tuned"
 }

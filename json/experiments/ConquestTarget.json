@@ -1,0 +1,4 @@
+{
+  "class" : "evaluation.heuristics.TargetGameLength",
+  "args" : ["TURNS", 50]
+}

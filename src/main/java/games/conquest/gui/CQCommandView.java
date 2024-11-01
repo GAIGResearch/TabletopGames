@@ -30,7 +30,7 @@ public class CQCommandView extends DeckView<Command> {
         this.rect.width += 4;
         this.rect.height += 4;
         dataPath = path;
-        unknownCommand = ImageIO.GetInstance().getImage(dataPath + "Stoicism.png");
+        unknownCommand = ImageIO.GetInstance().getImage(dataPath + "unknown.png");
     }
     public CQCommandView(int human, Deck<Command> d, boolean visible, String path) {
         this(human, d, visible, path, new Rectangle(0, 0, CQGUIManager.commandWidth, CQGUIManager.commandHeight));
