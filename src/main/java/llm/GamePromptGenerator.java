@@ -64,17 +64,15 @@ public class GamePromptGenerator {
             File sourceFile = new File("src/main/java/" + fullClassName.replaceAll("\\.", "/") + ".java");
             Map<String, String> javadocs = extractJavadocs(sourceFile);
 
-            result.append("New Class API starting\n").append(data.clazz.getTypeName());
+            result.append("\nClass API for ").append(data.clazz.getTypeName());
             // then check for generics in definition
-            // TODO: I should simplify to the final simple class name at this stage; not try and hack the string afterwards
-            // TODO: I only want the full class name for initial name of the Class for which the API is being documented (and what it extends)
             if (data.clazz.getTypeParameters().length > 0) {
                 result.append("<");
                 for (int i = 0; i < data.clazz.getTypeParameters().length; i++) {
                     if (i > 0) {
                         result.append(", ");
                     }
-                    result.append(data.clazz.getTypeParameters()[i].getName());
+                    result.append(data.clazz.getTypeParameters()[i].getGenericDeclaration().getSimpleName());
                 }
                 result.append(">");
             }
@@ -137,7 +135,7 @@ public class GamePromptGenerator {
         String text = """
                                 
                 A previous attempt at this task created the class below.
-                This class had failed to compile correctly.
+                This class failed to compile correctly.
                                 
                 %s
 
@@ -300,18 +298,19 @@ public class GamePromptGenerator {
                 if (i > 0) {
                     signature.append(", ");
                 }
-                signature.append(method.getTypeParameters()[i].getName());
+                signature.append(method.getTypeParameters()[i].getClass().getSimpleName());
             }
             signature.append(">");
         }
 
         signature.append("(");
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        for (int i = 0; i < parameterTypes.length; i++) {
+        Parameter[] params = method.getParameters();
+        for (int i = 0; i < params.length; i++) {
             if (i > 0) {
                 signature.append(", ");
             }
-            signature.append(parameterTypes[i].getSimpleName());
+            signature.append(getTypeDescription(params[i].getParameterizedType()));
+            signature.append(" ").append(params[i].getName());
         }
         signature.append(")");
         return signature.toString();
@@ -326,46 +325,29 @@ public class GamePromptGenerator {
         if (type instanceof Class<?> clazz) {
             return clazz.getSimpleName();
         }
-        String fullName = type.getTypeName();
-        return simpleClassVersionOfType(fullName);
+        if (type instanceof ParameterizedType pType) {
+            Type rawType = pType.getRawType();
+            StringBuilder result = new StringBuilder();
+            if (rawType instanceof Class<?> rawClass) {
+                result.append(rawClass.getSimpleName());
+            } else {
+                result.append(rawType.getTypeName());
+            }
+            result.append("<");
+            for (int i = 0; i < pType.getActualTypeArguments().length; i++) {
+                if (i > 0) {
+                    result.append(", ");
+                }
+                result.append(getTypeDescription(pType.getActualTypeArguments()[i]));
+            }
+            result.append(">");
+            return result.toString();
+        }
+        return type.getTypeName();
     }
 
-    private String simpleClassVersionOfType(String type) {
-        // we want to pull out the last part of any name (i.e. after the last . character)
-        // within each <> parameterised version
-        // for example java.util.List<java.lang.String> would return List<String>
-
-        // we can do this recursively by:
-        // 1. finding the first < character
-        // 2. finding the matching > character
-        // 3. calling this method on the substring between the < and > characters
-        // 4. replacing the substring between the < and > characters with the result of the recursive call
-        // 5. repeating until there are no more < characters
-
-        int start = type.indexOf('<');
-        // we can then truncate the class up to start
-        if (start == -1) {
-            return type.substring(type.lastIndexOf('.') + 1);
-        }
-        String simpleClass = type.substring(0, start);
-        simpleClass = simpleClass.substring(simpleClass.lastIndexOf('.') + 1);
-        // we now need to find the matching ">" character
-        // we can do this by counting the number of < and > characters
-        int count = 1;
-        int end = start + 1;
-        while (count > 0) {
-            if (type.charAt(end) == '<') {
-                count++;
-            } else if (type.charAt(end) == '>') {
-                count--;
-            }
-            end++;
-        }
-
-        String innerType = type.substring(start + 1, end);
-        String simpleInnerType = simpleClassVersionOfType(innerType);
-        return simpleClass + "<" + simpleInnerType + simpleClassVersionOfType(type.substring(end));
-
-
+    public static void main(String[] args) {
+        GamePromptGenerator generator = new GamePromptGenerator();
+        System.out.println(generator.createLLMTaskPrompt(TaskType.Heuristic, GameType.Dominion, 2, "TicTacToeHeuristic", false));
     }
 }
