@@ -64,6 +64,7 @@ public class JavaCoder {
 
         double[] scores = new double[max_iters];
         String[] code = new String[max_iters];
+        boolean[] safeIterations = new boolean[max_iters];
 
         while (iteration < max_iters) {
             try {
@@ -76,12 +77,22 @@ public class JavaCoder {
                         playerCount,
                         className,
                         true);
-                if (iteration > 0) {
-                    // TODO: Any code that failed to compile should be excluded from this
+
+                boolean atLeastOneSafePreviousIteration = false;
+                for (int index = 0; index < iteration; index++) {
+                    if (safeIterations[index]) {
+                        atLeastOneSafePreviousIteration = true;
+                        break;
+                    }
+                }
+                if (atLeastOneSafePreviousIteration) {
                     // find the best score so far, and extract the code for that
                     String bestCode = "";
                     double bestScore = 0.0;
                     for (int index = 0; index < iteration; index++) {
+                        if (!safeIterations[index]) {
+                            continue; // exclude iterations that failed to compile or threw exceptions
+                        }
                         if (scores[index] > bestScore) {
                             bestScore = scores[index];
                             bestCode = code[index];
@@ -114,7 +125,7 @@ public class JavaCoder {
                 generatedCode = llm.getResponse(llmPrompt);
                 //.replaceAll("```java\\s*(.*?)", "$1");
                 //        .replaceAll("(.*?)```", "$1")
-                 //       .replaceAll("//.*\\n", "");
+                //       .replaceAll("//.*\\n", "");
 
                 String commentPrompt = """
                             After the *** is a Java class.
@@ -135,6 +146,7 @@ public class JavaCoder {
                 // that might be a good thing to pass to future iterations
 
                 System.out.printf("Iteration %d has generated code%n", iteration);
+                safeIterations[iteration] = true;
 
                 // We now create a StringHeuristic and OSLA player from the generated code
                 StringHeuristic heuristic = new StringHeuristic(fileName, className);
@@ -186,15 +198,26 @@ public class JavaCoder {
             RoundRobinTournament tournament = new RoundRobinTournament(
                     playersForTournament, gameType, playerCount, params,
                     tournamentConfig);
-            tournament.run();
-            for (int index = 0; index < playerList.size(); index++) {
-                System.out.printf("Player %s has score %.2f%n", playerList.get(index).toString(), tournament.getWinRate(index));
+            try {
+                tournament.run();
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Error running up tournament: " + e.getMessage());
+                error = e.getMessage();
+                safeIterations[iteration] = false;  // exclude the latest heuristic from future consideration
+                playerList.remove(playerList.size() - 1);  // remove the last player from the list
             }
+            if (safeIterations[iteration]) {
+                // record results if we ran safely
+                for (int index = 0; index < playerList.size(); index++) {
+                    System.out.printf("Player %s has score %.2f%n", playerList.get(index).toString(), tournament.getWinRate(index));
+                }
 
-            // we now extract the scores of the agents, and record these
-            // the players are added in iteration order, so we can use that
-            for (int index = 0; index <= iteration; index++) {
-                scores[index] = tournament.getWinRate(index);
+                // we now extract the scores of the agents, and record these
+                // the players are added in iteration order, so we can use that
+                for (int index = 0; index <= iteration; index++) {
+                    scores[index] = tournament.getWinRate(index);
+                }
             }
 
             iteration++;

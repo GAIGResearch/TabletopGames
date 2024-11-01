@@ -722,11 +722,11 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public double getWinRate(int agentID) {
-        return finalWinRanking.get(agentID).a;
+        return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
 
     public double getWinStdErr(int agentID) {
-        return finalWinRanking.get(agentID).b;
+        return finalWinRanking.get(agentID) == null ? 0.0 :  finalWinRanking.get(agentID).b;
     }
 
     public double getOrdinalRank(int agentID) {

@@ -150,8 +150,7 @@ public class StringHeuristic implements IStateHeuristic {
         try {
             return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            System.out.println("Error invoking heuristic function: " + e.getMessage());
-            return 0;
+            throw new RuntimeException("Error invoking heuristic function as it returns a null value : ", e);
         }
     }
 }
