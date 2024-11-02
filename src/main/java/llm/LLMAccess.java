@@ -18,6 +18,7 @@ public class LLMAccess {
     static ChatLanguageModel[] mistralModel = new ChatLanguageModel[2];
     static ChatLanguageModel[] openaiModel = new ChatLanguageModel[2];
     static ChatLanguageModel[] anthropicModel = new ChatLanguageModel[2];
+    static ChatLanguageModel[] llamaModel = new ChatLanguageModel[2];
 
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
@@ -28,6 +29,7 @@ public class LLMAccess {
     FileWriter logWriter;
 
     String geminiLocation = "europe-west2";
+    String llamaLocation = "us-central1";
 
     LLM_MODEL modelType;
     LLM_SIZE modelSize;
@@ -36,7 +38,8 @@ public class LLMAccess {
         GEMINI,
         MISTRAL,
         OPENAI,
-        ANTHROPIC
+        ANTHROPIC,
+        LLAMA
     }
 
     public enum LLM_SIZE {
@@ -83,6 +86,27 @@ public class LLMAccess {
             } catch (Error e) {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
             }
+
+
+            try {
+                llamaModel[1] = VertexAiGeminiChatModel.builder()
+                        .project(geminiProject)
+                        .location(llamaLocation)
+                        //      .temperature(1.0f)  // between 0 and 2; default 1.0 for pro-1.5
+                        //       .topK(40) // some models have a three-stage sampling process. topK; then topP; then temperature
+                        //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
+                        //     .maxOutputTokens(1000)  // max replay size (max is 8192)
+                        // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
+                        .modelName("llama3.1-405b-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
+                        .build();
+                llamaModel[0] = VertexAiGeminiChatModel.builder()
+                        .project(geminiProject)
+                        .location(llamaLocation)
+                        .modelName("llama3.1-70b-instruct-maas")
+                        .build();
+            } catch (Error e) {
+                System.out.println("Error creating Llama model: " + e.getMessage());
+            }
         }
 
         if (mistralToken != null && !mistralToken.isEmpty()) {
@@ -119,6 +143,7 @@ public class LLMAccess {
                     .apiKey(anthropicToken)
                     .build();
         }
+
     }
 
     /**
@@ -135,6 +160,7 @@ public class LLMAccess {
             case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
             case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
             case ANTHROPIC -> modelSize == LLM_SIZE.SMALL ? anthropicModel[0] : anthropicModel[1];
+            case LLAMA -> modelSize == LLM_SIZE.SMALL ? llamaModel[0] : llamaModel[1];
         };
         if (modelToUse != null) {
             try {
