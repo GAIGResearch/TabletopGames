@@ -1,11 +1,13 @@
 package llm;
 
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
+import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 
@@ -20,6 +22,8 @@ public class LLMAccess {
     static ChatLanguageModel[] anthropicModel = new ChatLanguageModel[2];
     static ChatLanguageModel[] llamaModel = new ChatLanguageModel[2];
 
+    static OpenAiTokenizer tokenizer = new OpenAiTokenizer();
+
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
     String openaiToken = System.getenv("OPENAI_TOKEN");
@@ -33,6 +37,9 @@ public class LLMAccess {
 
     LLM_MODEL modelType;
     LLM_SIZE modelSize;
+
+    long inputTokens = 0;
+    long outputTokens = 0;
 
     public enum LLM_MODEL {
         GEMINI,
@@ -130,17 +137,18 @@ public class LLMAccess {
                     .modelName(OpenAiChatModelName.GPT_4_O) // $5 per million input tokens, $15 per million output tokens
                     .apiKey(openaiToken)
                     .build();
-
         }
 
         if (anthropicToken != null && !anthropicToken.isEmpty()) {
             anthropicModel[0] = AnthropicChatModel.builder()
                     .modelName(AnthropicChatModelName.CLAUDE_3_HAIKU_20240307) // $0.25 per million input tokens, $1.25 per million output tokens
                     .apiKey(anthropicToken)
+                    .maxTokens(4096)
                     .build();
             anthropicModel[1] = AnthropicChatModel.builder()
                     .modelName(AnthropicChatModelName.CLAUDE_3_5_SONNET_20240620) // $3 per million input tokens, $15 per million output tokens
                     .apiKey(anthropicToken)
+                    .maxTokens(8192)
                     .build();
         }
 
@@ -164,7 +172,9 @@ public class LLMAccess {
         };
         if (modelToUse != null) {
             try {
+                inputTokens += tokenizer.estimateTokenCountInText(query);
                 response = modelToUse.generate(query);
+                outputTokens += tokenizer.estimateTokenCountInText(response);
             } catch (Exception e) {
                 System.out.println("Error getting response from model: " + e.getMessage());
             }
