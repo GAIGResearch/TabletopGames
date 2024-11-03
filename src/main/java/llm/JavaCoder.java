@@ -226,7 +226,7 @@ public class JavaCoder {
                     tournamentConfig);
             try {
                 tournament.run();
-            } catch (Exception e) {
+            } catch (Exception | Error e) {
                 e.printStackTrace();
                 System.out.println("Error running up tournament: " + e.getMessage());
                 runtimeErrors++;

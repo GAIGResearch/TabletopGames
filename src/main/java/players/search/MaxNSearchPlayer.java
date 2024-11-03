@@ -28,13 +28,14 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
      * - ACTION: D is decremented at each decision node
      * - MACRO_ACTION: D is decremented at each decision node where the acting player changes
      * - TURN: D is decremented at each decision node where the turn number changes
-     *
+     * <p>
      * Additionally, the BUDGET can be specified as a cutoff for the search. If this much time passes
      * without the search finishing, the best action found so far is returned (likely to be pretty random).
      */
 
 
     private long startTime;
+
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
@@ -119,7 +120,7 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
             SearchResult result = expand(stateCopy, nextActions, newDepth);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
-            if (result.value[state.getCurrentPlayer()]  > bestValue) {
+            if (result.value[state.getCurrentPlayer()] > bestValue) {
                 bestAction = action;
                 bestValues = result.value;
                 bestValue = bestValues[state.getCurrentPlayer()];
@@ -134,7 +135,8 @@ public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeurist
     @Override
     public MaxNSearchPlayer copy() {
         MaxNSearchPlayer retValue = new MaxNSearchPlayer((MaxNSearchParameters) getParameters().shallowCopy());
-        retValue.setForwardModel(getForwardModel().copy());
+        if (getForwardModel() != null)
+            retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }
 
