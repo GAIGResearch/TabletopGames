@@ -8,6 +8,7 @@ import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import llm.LLMAccess.LLM_MODEL;
 import llm.LLMAccess.LLM_SIZE;
+import players.PlayerFactory;
 import players.heuristics.StringHeuristic;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
@@ -36,6 +37,9 @@ public class JavaCoder {
         String gameName = Utils.getArg(args, "game", "TicTacToe");
         GameType gameType = GameType.valueOf(gameName);
         int playerCount = Utils.getArg(args, "players", 2);
+        String opponent = Utils.getArg(args, "opponent", "random");
+        AbstractPlayer opponentPlayer = PlayerFactory.createPlayer(opponent);
+        String baseAgentLocation = Utils.getArg(args, "baseAgent", opponent);
         String workingDir = Utils.getArg(args, "dir", "llm");
         String modelType = Utils.getArg(args, "model", "GEMINI");
         String modelSize = Utils.getArg(args, "size", "SMALL");
@@ -162,9 +166,14 @@ public class JavaCoder {
                 System.out.printf("Iteration %d has generated code%n", iteration);
                 safeIterations[iteration] = true;
 
+                AbstractPlayer player = PlayerFactory.createPlayer(baseAgentLocation);
+                if (player instanceof IHasStateHeuristic hPlayer) {
+                    hPlayer.setStateHeuristic(new StringHeuristic(fileName, className));
+                } else {
+                    throw new IllegalArgumentException("Agent " + baseAgentLocation + " does not implement IHasStateHeuristic");
+                }
+
                 // We now create a StringHeuristic and OSLA player from the generated code
-                StringHeuristic heuristic = new StringHeuristic(fileName, className);
-                OSLAPlayer player = new OSLAPlayer(heuristic);
                 player.setName(String.format("OSLA_%03d", iteration));
                 playerList.add(player);
 
@@ -205,11 +214,11 @@ public class JavaCoder {
             AbstractParameters params = gameType.createParameters(System.currentTimeMillis());
 
             List<AbstractPlayer> playersForTournament = new ArrayList<>(playerList);
-            // we have at least one Random player for comparison
+            // we have at least one opponent player for comparison
             // and then pad out extra players to the required number for the player count (if needed)
-            playersForTournament.add(new RandomPlayer());
+            playersForTournament.add(opponentPlayer.copy());
             while (playersForTournament.size() < playerCount) {
-                playersForTournament.add(new RandomPlayer());
+                playersForTournament.add(opponentPlayer.copy());
             }
 
             RoundRobinTournament tournament = new RoundRobinTournament(
@@ -274,9 +283,7 @@ public class JavaCoder {
                     llm.inputTokens, llm.outputTokens,
                     playerList.size(), bestScoreIndex));
         }
-
     }
-
 
     // Write the prompt response to file
     public static void writeGeneratedCodeToFile(String generatedCode, String filePath) throws IOException {

@@ -104,12 +104,12 @@ public class LLMAccess {
                         //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
                         //     .maxOutputTokens(1000)  // max replay size (max is 8192)
                         // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-                        .modelName("llama3.1-405b-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
+                        .modelName("llama3-405b-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
                         .build();
                 llamaModel[0] = VertexAiGeminiChatModel.builder()
                         .project(geminiProject)
                         .location(llamaLocation)
-                        .modelName("llama3.1-70b-instruct-maas")
+                        .modelName("llama3-70b-instruct-maas")
                         .build();
             } catch (Error e) {
                 System.out.println("Error creating Llama model: " + e.getMessage());

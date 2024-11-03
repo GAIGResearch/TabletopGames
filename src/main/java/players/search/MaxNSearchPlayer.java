@@ -2,11 +2,13 @@ package players.search;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
+import llm.IHasStateHeuristic;
 
 import java.util.Collections;
 import java.util.List;
 
-public class MaxNSearchPlayer extends AbstractPlayer {
+public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeuristic {
     /**
      * This class is a simple implementation of a MaxN search player.
      * (This is the same as Minimax in the case of 2 players if the heuristic is symmetric)
@@ -51,6 +53,16 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
         return expand(gs, actions, getParameters().searchDepth).action;
+    }
+
+    @Override
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        getParameters().setParameterValue("heuristic", heuristic);
+    }
+
+    @Override
+    public IStateHeuristic getStateHeuristic() {
+        return getParameters().heuristic;
     }
 
     /**
