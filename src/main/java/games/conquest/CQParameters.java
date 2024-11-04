@@ -39,9 +39,9 @@ public class CQParameters extends TunableParameters {
     // The names used are those used in said strategy guide: https://runescape.wiki/w/Conquest/Strategies?oldid=35427217
     // The placement of each of the troops, unless provided in the strategy guide, is done based on the strategy description
     public enum Setup {
-        Default("      S H C H S\n" +
-                   "      F M K A F",
-                   BattleCry, Charge, Stoicism, Chastise),
+        Default("    S A F  F M S\n" +
+                   "     H K    C H",
+                   BattleCry, Charge, Chastise),
         Rush("       S K   H S\n"+
                 "      C S S S S C",
                 BattleCry, Charge, ShieldWall, Stoicism),
@@ -63,12 +63,12 @@ public class CQParameters extends TunableParameters {
         BombardSetup("   S S C C S S\n"+
                         "     S S S S",
                         Charge, BattleCry, Chastise, Bombard),
-        DefaultVariantArcher("      S H C H S\n" +
-                                "       A M K A",
-                                Charge, BattleCry, Chastise, Vigilance),
-        DefaultVariant1("      S H C H S\n" +
-                           "       A MSM A",
-                           Charge, BattleCry, Chastise, Vigilance),
+        DefaultVariantArcher("    S A    A M S\n" +
+                                "     H K    C H",
+                                Charge, BattleCry, Chastise),
+        DefaultVariant1("      S A H  H A S\n" +
+                           "       M C    S M",
+                           BattleCry, Chastise, Vigilance),
         DefaultVariant2("      S   C   S\n" +
                            "       KA M AK",
                            Charge, BattleCry, Chastise, Vigilance),

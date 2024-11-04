@@ -1,7 +1,7 @@
 {
   "budgetType" : "BUDGET_FM_CALLS",
   "rolloutTermination" : "END_TURN",
-  "rolloutLength" : 70,
+  "rolloutLength" : 50,
   "maxTreeDepth" : 30,
   "MAST" : "Both",
   "MASTGamma" : 0.5,
