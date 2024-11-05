@@ -247,7 +247,6 @@ public class RoundRobinTournament extends AbstractTournament {
                         executor.submit(() -> {
                             evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
                         });
-                        System.out.println(executor);
                     } else {
                         evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
                     }
@@ -323,11 +322,9 @@ public class RoundRobinTournament extends AbstractTournament {
             try {
                 // Wait for all tasks to complete; no timeout (infty hours) because this normally also has no timeout
                 if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS)) {
-                    System.out.println("Some tasks did not finish in time!");
                     executor.shutdownNow(); // Force shutdown if tasks are hanging
                 }
             } catch (InterruptedException e) {
-                System.out.println("Waiting interrupted!");
                 executor.shutdownNow(); // Restore interrupted status and shutdown
                 Thread.currentThread().interrupt();
             }
@@ -335,57 +332,43 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     /**
-     * Evaluates one combination of players.
+     * Evaluates one combination of players. May be run in parallel.
      *
      * @param agentIDsInThisGame - IDs of agents participating in this run.
      */
     protected void evaluateMatchUp(List<Integer> agentIDsInThisGame, int nGames, List<Integer> seeds) {
+        // Note: This function is able to run in multiple parallel threads at the same time. In order to avoid
+        //       concurrency problems, operations on `this` need to be either atomic, or synchronized(this).
         if (seeds.size() < nGames)
             throw new AssertionError("Not enough seeds for the number of games requested");
         if (debug)
             System.out.printf("Evaluate %s at %tT%n", agentIDsInThisGame.toString(), System.currentTimeMillis());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
 
-        // If we are in self-play mode, we need to create a copy of the player to avoid them sharing the same state
+        // If we are in self-play mode or multithreading, we need to create a copy of the player to avoid them sharing the same state
         // If not in self-play mode then this is unnecessary, as the same agent will never be in the same game twice
         for (int agentID : agentIDsInThisGame)
-            matchUpPlayers.add(tournamentMode == EXHAUSTIVE_SELF_PLAY ? this.agents.get(agentID).copy() : this.agents.get(agentID));
-
-        if (verbose) {
-            StringBuffer sb = new StringBuffer();
-            sb.append("[");
-            for (int agentID : agentIDsInThisGame)
-                sb.append(this.agents.get(agentID).toString()).append(",");
-            sb.setCharAt(sb.length() - 1, ']');
-            System.out.println(sb);
-        }
+            matchUpPlayers.add(tournamentMode == EXHAUSTIVE_SELF_PLAY || nThreads > 1 ? this.agents.get(agentID).copy() : this.agents.get(agentID));
 
         // TODO : Not sure this is the ideal place for this...ask Raluca
         Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());
-        for (IGameListener listener : listeners) {
-            if (listener instanceof TournamentMetricsGameListener) {
-                ((TournamentMetricsGameListener) listener).tournamentInit(game, nPlayers, agentNames, new HashSet<>(matchUpPlayers));
+        synchronized (this) {
+            for (IGameListener listener : listeners) {
+                if (listener instanceof TournamentMetricsGameListener) {
+                    ((TournamentMetricsGameListener) listener).tournamentInit(game, nPlayers, agentNames, new HashSet<>(matchUpPlayers));
+                }
             }
         }
 
         // Run the game N = gamesPerMatchUp times with these players
         for (int i = 0; i < nGames; i++) {
-            // if tournamentSeeds > 0, then we are running this many tournaments, each with a different random seed fixed for the whole tournament
-            // so we override the standard random seeds
-            game.reset(matchUpPlayers, seeds.get(i));
-
-            // Randomize parameters
-            if (randomGameParams) {
-                game.getGameState().getGameParameters().randomize();
-                System.out.println("Game parameters: " + game.getGameState().getGameParameters());
-            }
             AbstractGameState gs;
             GameResult[] results;
-            synchronized (this) {
-                game.run();  // Always running tournaments without visuals
-                gs = game.getGameState().copy(); // copy gamestate as extra precaution against race conditions
-                results = gs.getPlayerResults();
-            }
+
+            // run an instance of the game, allowing parallelizing, and save the final game state.
+            // This function will also reset the state and apply random parameters if necessary.
+            gs = game.runInstance(matchUpPlayers, seeds.get(i), randomGameParams);
+            results = gs.getPlayerResults();
 
             int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++) {
@@ -421,6 +404,10 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("[");
+                for (int agentID : agentIDsInThisGame)
+                    sb.append(this.agents.get(agentID).toString()).append(",");
+                sb.setCharAt(sb.length() - 1, ']');
+                sb.append(": [");
                 for (int j = 0; j < matchUpPlayers.size(); j++) {
                     for (int player = 0; player < gs.getNPlayers(); player++) {
                         if (gs.getTeam(player) == j) {
@@ -434,10 +421,11 @@ public class RoundRobinTournament extends AbstractTournament {
             }
 
         }
-        totalGamesRun += nGames;
+        totalGamesRun += nGames; // atomic
     }
 
     private int updatePoints(AbstractGameState gs, GameResult[] results, List<Integer> matchUpPlayers, int j, int player) {
+        // Note: This function may be called in parallelized games; ensure either atomic operations on this, or synchronized(this)
         // j is the index of the agent in the matchup; player is the corresponding player number in the game
         int ordinalPos = gs.getOrdinalPosition(player);
         rankPerPlayer[j] += ordinalPos;
