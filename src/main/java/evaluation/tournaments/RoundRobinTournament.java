@@ -1,5 +1,6 @@
 package evaluation.tournaments;
 
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import evaluation.RunArg;
@@ -15,6 +16,9 @@ import utilities.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,6 +52,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected boolean randomGameParams;
     public String name;
     public boolean byTeam;
+    public int nThreads = 1;
 
     protected long randomSeed;
     List<Integer> gameSeeds = new ArrayList<>();
@@ -66,6 +71,7 @@ public class RoundRobinTournament extends AbstractTournament {
                                 AbstractParameters gameParams, Map<RunArg, Object> config) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         int nTeams = game.getGameState().getNTeams();
+        this.nThreads = (int) config.getOrDefault(RunArg.nThreads, 1);
         this.verbose = (boolean) config.getOrDefault(RunArg.verbose, false);
         this.tournamentMode = switch (config.get(RunArg.mode).toString().toUpperCase()) {
             case "EXHAUSTIVE" -> EXHAUSTIVE;
@@ -225,6 +231,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param matchUp - current combination of players, updated recursively.
      */
     public void createAndRunMatchUp(List<Integer> matchUp) {
+        ExecutorService executor = nThreads > 1 ? Executors.newFixedThreadPool(nThreads) : null;
 
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
         switch (tournamentMode) {
@@ -235,7 +242,15 @@ public class RoundRobinTournament extends AbstractTournament {
                     List<Integer> matchup = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
                         matchup.add(idStream.getAsInt());
-                    evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
+                    if (executor != null) {
+                        // run in parallel if allowed
+                        executor.submit(() -> {
+                            evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
+                        });
+                        System.out.println(executor);
+                    } else {
+                        evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
+                    }
                 }
                 break;
             case ONE_VS_ALL:
@@ -256,7 +271,14 @@ public class RoundRobinTournament extends AbstractTournament {
                         }
                         // We split the total budget equally across the possible positions the focus player can be in
                         // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
-                        evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds);
+                        if (executor != null) {
+                            // run in parallel if allowed
+                            executor.submit(() -> {
+                                evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds);
+                            });
+                        } else {
+                            evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds);
+                        }
                     } else {
                         for (int m = 0; m < this.totalGameBudget / nTeams; m++) {
                             Collections.shuffle(agentOrder, seedRnd);
@@ -268,7 +290,15 @@ public class RoundRobinTournament extends AbstractTournament {
                                     matchup.add(agentOrder.get(j % agentOrder.size()));
                                 }
                             }
-                            evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(m)));
+                            if (executor != null) {
+                                // run in parallel if allowed
+                                final int seed = m; // final seed for using in lambda function
+                                executor.submit(() -> {
+                                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(seed)));
+                                });
+                            } else {
+                                evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(m)));
+                            }
                         }
                     }
                 }
@@ -287,6 +317,20 @@ public class RoundRobinTournament extends AbstractTournament {
                         }
                     }
                 }
+        }
+        if (executor != null) {
+            executor.shutdown();
+            try {
+                // Wait for all tasks to complete; no timeout (infty hours) because this normally also has no timeout
+                if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS)) {
+                    System.out.println("Some tasks did not finish in time!");
+                    executor.shutdownNow(); // Force shutdown if tasks are hanging
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Waiting interrupted!");
+                executor.shutdownNow(); // Restore interrupted status and shutdown
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -335,29 +379,33 @@ public class RoundRobinTournament extends AbstractTournament {
                 game.getGameState().getGameParameters().randomize();
                 System.out.println("Game parameters: " + game.getGameState().getGameParameters());
             }
-
-            game.run();  // Always running tournaments without visuals
-            GameResult[] results = game.getGameState().getPlayerResults();
+            AbstractGameState gs;
+            GameResult[] results;
+            synchronized (this) {
+                game.run();  // Always running tournaments without visuals
+                gs = game.getGameState().copy(); // copy gamestate as extra precaution against race conditions
+                results = gs.getPlayerResults();
+            }
 
             int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++) {
-                nGamesPlayed[agentIDsInThisGame.get(j)] += 1;
+                nGamesPlayed[agentIDsInThisGame.get(j)]++;
                 for (int k = 0; k < matchUpPlayers.size(); k++) {
                     if (k != j) {
-                        nGamesPlayedPerOpponent[agentIDsInThisGame.get(j)][agentIDsInThisGame.get(k)] += 1;
+                        nGamesPlayedPerOpponent[agentIDsInThisGame.get(j)][agentIDsInThisGame.get(k)]++;
                     }
                 }
 
                 // now we need to be careful if we have a team game, as the agents are indexed by Team, not player
                 if (byTeam) {
-                    for (int player = 0; player < game.getGameState().getNPlayers(); player++) {
-                        if (game.getGameState().getTeam(player) == j) {
-                            numDraws += updatePoints(results, agentIDsInThisGame, agentIDsInThisGame.get(j), player);
+                    for (int player = 0; player < gs.getNPlayers(); player++) {
+                        if (gs.getTeam(player) == j) {
+                            numDraws += updatePoints(gs, results, agentIDsInThisGame, agentIDsInThisGame.get(j), player);
                             break; // we stop after one player on the team to avoid double counting
                         }
                     }
                 } else {
-                    numDraws += updatePoints(results, agentIDsInThisGame, agentIDsInThisGame.get(j), j);
+                    numDraws += updatePoints(gs, results, agentIDsInThisGame, agentIDsInThisGame.get(j), j);
                 }
             }
 
@@ -374,8 +422,8 @@ public class RoundRobinTournament extends AbstractTournament {
                 StringBuffer sb = new StringBuffer();
                 sb.append("[");
                 for (int j = 0; j < matchUpPlayers.size(); j++) {
-                    for (int player = 0; player < game.getGameState().getNPlayers(); player++) {
-                        if (game.getGameState().getTeam(player) == j) {
+                    for (int player = 0; player < gs.getNPlayers(); player++) {
+                        if (gs.getTeam(player) == j) {
                             sb.append(results[player]).append(",");
                             break; // we stop after one player on the team to avoid double counting
                         }
@@ -389,15 +437,15 @@ public class RoundRobinTournament extends AbstractTournament {
         totalGamesRun += nGames;
     }
 
-    private int updatePoints(GameResult[] results, List<Integer> matchUpPlayers, int j, int player) {
+    private int updatePoints(AbstractGameState gs, GameResult[] results, List<Integer> matchUpPlayers, int j, int player) {
         // j is the index of the agent in the matchup; player is the corresponding player number in the game
-        int ordinalPos = game.getGameState().getOrdinalPosition(player);
+        int ordinalPos = gs.getOrdinalPosition(player);
         rankPerPlayer[j] += ordinalPos;
         rankPerPlayerSquared[j] += ordinalPos * ordinalPos;
 
-        for (int playerPos = 0; playerPos < game.getGameState().getNPlayers(); playerPos++) {
+        for (int playerPos = 0; playerPos < gs.getNPlayers(); playerPos++) {
             if (playerPos != player) {
-                int ordinalOther = game.getGameState().getOrdinalPosition(playerPos);
+                int ordinalOther = gs.getOrdinalPosition(playerPos);
                 ordinalDeltaPerOpponent[j][matchUpPlayers.get(playerPos)] += ordinalOther - ordinalPos;
             }
         }
