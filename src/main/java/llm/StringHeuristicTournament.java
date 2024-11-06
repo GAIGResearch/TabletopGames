@@ -12,6 +12,7 @@ import utilities.Utils;
 import java.io.*;
 import java.util.*;
 
+import static evaluation.RunArg.game;
 import static evaluation.RunArg.parseConfig;
 
 public class StringHeuristicTournament {
@@ -35,6 +36,10 @@ public class StringHeuristicTournament {
         }
         String agentConfig = Utils.getArg(args, "playerDirectory", "osla");
 
+        GameType gameType = GameType.valueOf(Utils.getArg(args, "game", "TicTacToe"));
+        int nPlayers = Integer.parseInt(Utils.getArg(args, "nPlayers", "2"));
+
+
         List<AbstractPlayer> players = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
@@ -45,8 +50,9 @@ public class StringHeuristicTournament {
                     continue;
                 }
                 String agentName = parts[0].trim();
+                String className = agentName + "_" + gameType.name();
                 String fileName = parts[1].trim();
-                String className = fileName.replaceAll(".*(/|\\\\)(.*?)\\.java", "$2");
+         //       String className = fileName.replaceAll(".*(/|\\\\)(.*?)\\.java", "$2");
                 StringHeuristic heuristic = new StringHeuristic(fileName, className);
 
                 // To get the player from the StringHeuristic we rely on implementation of IHasStateHeuristic
@@ -59,9 +65,6 @@ public class StringHeuristicTournament {
                 player.setName(agentName);
                 players.add(player);
             }
-
-            GameType gameType = GameType.valueOf(Utils.getArg(args, "game", "TicTacToe"));
-            int nPlayers = Integer.parseInt(Utils.getArg(args, "nPlayers", "2"));
 
             Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(RunArg.Usage.RunGames));
 

@@ -248,10 +248,12 @@ public enum RunArg {
                 JSONObject json = (JSONObject) parser.parse(reader);
                 Map<RunArg, Object> configFileArgs = parseConfig(json, usages);
                 for (RunArg key : configFileArgs.keySet()) {
-                    if (!commandLineArgs.containsKey(key)) {
+                    // we check if the key is already in the command line arguments (we check args directly as
+                    // parseConfig populates all the Map with the default value if not present in the array)
+                    if (Arrays.stream(args).noneMatch(s -> s.startsWith(key.name()))) {
                         commandLineArgs.put(key, configFileArgs.get(key));
                     } else {
-                        System.out.println("Overriding config file value for " + key + " with command line value of " + commandLineArgs.get(key));
+                        System.out.println("Using command line value for " + key + " of " + commandLineArgs.get(key));
                     }
                 }
             } catch (FileNotFoundException ignored) {

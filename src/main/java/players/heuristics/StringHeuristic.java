@@ -52,7 +52,6 @@ public class StringHeuristic implements IStateHeuristic {
     }
 
     private void loadFile() {
-
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -71,7 +70,8 @@ public class StringHeuristic implements IStateHeuristic {
     private void compile() {
         // Method string
         //String className = fileName.replaceAll(".*/(.*?)\\.java", "$1");
-        String sourceCode = str;
+        // Replace class name in the source code
+        String sourceCode = str.replaceAll("public class .*? \\{", "public class " + className + " {");
 
         // Compile source code
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

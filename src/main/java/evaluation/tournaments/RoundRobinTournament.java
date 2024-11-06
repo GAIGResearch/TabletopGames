@@ -545,6 +545,11 @@ public class RoundRobinTournament extends AbstractTournament {
         // To file
         if (toFile) {
             try {
+                File resultsFile = new File(this.resultsFile);
+                if (!resultsFile.exists()) {
+                    File dir = resultsFile.getParentFile();
+                    dir.mkdirs();
+                }
                 FileWriter writer = new FileWriter(resultsFile, true);
                 for (String line : dataDump)
                     writer.write(line);
