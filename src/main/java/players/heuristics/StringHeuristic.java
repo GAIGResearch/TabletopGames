@@ -22,8 +22,8 @@ import java.util.List;
 
 public class StringHeuristic implements IStateHeuristic {
 
-    private String className = "TicTacToeEvaluator";
-    private String fileName = "llm/" + className + ".java";
+    private final String className;
+    private final String fileName;
 
     private String str;
 
@@ -33,10 +33,6 @@ public class StringHeuristic implements IStateHeuristic {
 
     public String getFileName() {
         return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public String getHeuristicCode() {
@@ -51,11 +47,6 @@ public class StringHeuristic implements IStateHeuristic {
     public StringHeuristic(String fileName, String className) {
         this.fileName = fileName;
         this.className = className;
-        loadFile();
-        compile();
-    }
-
-    public StringHeuristic() {
         loadFile();
         compile();
     }
