@@ -44,9 +44,9 @@ public class StringHeuristicTournament {
                     System.out.println("Invalid line: " + line);
                     continue;
                 }
-                String agentName = parts[0];
-                String fileName = parts[1];
-                String className = fileName.replaceAll(".*[/|\\](.*?)\\.java", "$1");
+                String agentName = parts[0].trim();
+                String fileName = parts[1].trim();
+                String className = fileName.replaceAll(".*(/|\\\\)(.*?)\\.java", "$2");
                 StringHeuristic heuristic = new StringHeuristic(fileName, className);
 
                 // To get the player from the StringHeuristic we rely on implementation of IHasStateHeuristic

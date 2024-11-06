@@ -2,8 +2,13 @@ package evaluation;
 
 import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -230,9 +235,33 @@ public enum RunArg {
     public static Map<RunArg, Object> parseConfig(String[] args, List<Usage> usages, boolean checkUnknownArgs) {
         if (checkUnknownArgs)
             checkUnknownArgs(args, usages);
-        return Arrays.stream(RunArg.values())
+        Map<RunArg, Object> commandLineArgs = Arrays.stream(RunArg.values())
                 .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(args)));
+        // then as a second stage we unpack any arguments specified in the config file
+        String setupFile = commandLineArgs.getOrDefault(RunArg.config, "").toString();
+        if (!setupFile.isEmpty()) {
+            // Read from file in addition (any values on the command line override the file contents)
+            try {
+                FileReader reader = new FileReader(setupFile);
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(reader);
+                Map<RunArg, Object> configFileArgs = parseConfig(json, usages);
+                for (RunArg key : configFileArgs.keySet()) {
+                    if (!commandLineArgs.containsKey(key)) {
+                        commandLineArgs.put(key, configFileArgs.get(key));
+                    } else {
+                        System.out.println("Overriding config file value for " + key + " with command line value of " + commandLineArgs.get(key));
+                    }
+                }
+            } catch (FileNotFoundException ignored) {
+                throw new AssertionError("Config file not found : " + setupFile);
+                //    parseConfig(runGames, args);
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return commandLineArgs;
     }
 
     public static void checkUnknownArgs(String[] args, List<Usage> usages) {
