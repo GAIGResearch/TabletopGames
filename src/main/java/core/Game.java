@@ -571,7 +571,6 @@ public class Game {
             }
             if (debug) System.out.println("Exiting synchronized block in Game");
         }
-        System.out.println("Done playing: " + players);
         if (firstEnd) {
             if (gameState.coreGameParameters.verbose) {
                 System.out.println("Ended");

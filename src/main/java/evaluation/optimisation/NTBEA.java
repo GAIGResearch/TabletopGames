@@ -1,20 +1,16 @@
 package evaluation.optimisation;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
-import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
-import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
-import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -28,6 +24,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.IntToDoubleFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -136,15 +135,53 @@ public class NTBEA {
      * @return
      */
     public Pair<Object, int[]> run() {
-
-        for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
-            runIteration();
-            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
-                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
+        ExecutorService executor = params.nThreads > 1 ? Executors.newFixedThreadPool(params.nThreads) : null;
+        // if we're multithreading, we don't want to have different threads interfering with eachother
+        List<NTBEA> clones = new ArrayList<>();
+        if (executor == null) {
+            // no multithreading, so list of clones consists only of the current object
+            clones.add(this);
         }
 
-        // After all runs are complete, if tournamentGames are specified, then we allow all the
-        // winners from each iteration to play in a tournament and pick the winner of this tournament
+        // Only this loop is parallelized, since the rest is just analysis, or initializing a tournament (which is
+        // on its own already parallelized)
+        for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
+            NTBEA clone = executor == null ? this : this.copy();
+            if (executor != null) {
+                clone.currentIteration = currentIteration; // for correct reporting
+                // run in parallel if allowed
+                executor.submit(clone::runIteration);
+                clones.add(clone);
+            } else {
+                clone.runIteration();
+            }
+        }
+
+        if (executor != null) {
+            executor.shutdown();
+            try {
+                // Wait for all tasks to complete; no timeout (infty hours) because this normally also has no timeout
+                if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS)) {
+                    executor.shutdownNow(); // Force shutdown if tasks are hanging
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow(); // Restore interrupted status and shutdown
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        // After all runs are complete, do some cleaning up and logging
+        for (NTBEA clone : clones) {
+            writeAgentJSON(clone.winnerSettings.get(clone.winnerSettings.size() - 1),
+                    params.destDir + File.separator + "Recommended_" + clone.currentIteration + ".json");
+        }
+        if (clones.size() > 1 || clones.get(0) != this) {
+            // aggregate all data from all clones
+            collectCloneResults(clones);
+        }
+
+        // If tournamentGames are specified, then we allow all the winners from each iteration
+        // to play in a tournament and pick the winner of this tournament
         if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
             activateTournament();
         }
@@ -156,6 +193,22 @@ public class NTBEA {
         writeAgentJSON(bestResult.b,
                 params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
+    }
+
+    /**
+     * Gathers all data from all parallel threads, which have their data stored in a clone of this object
+     * This ensures all metrics from these clones are incorporated into this object's data
+     * @param clones the list of clones that have run in separate threads
+     */
+    protected void collectCloneResults(List<NTBEA> clones) {
+        for (NTBEA clone : clones) {
+            this.elites.addAll(clone.elites);
+            this.winnersPerRun.addAll(clone.winnersPerRun);
+            this.winnerSettings.addAll(clone.winnerSettings);
+            if (clone.bestResult.a.a > this.bestResult.a.a) {
+                bestResult = clone.bestResult;
+            }
+        }
     }
 
     protected void activateTournament() {
@@ -195,6 +248,7 @@ public class NTBEA {
             config.put(RunArg.budget, params.budget);
             config.put(RunArg.verbose, false);
             config.put(RunArg.destDir, params.destDir);
+            config.put(RunArg.nThreads, params.nThreads);
             RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
             createListeners().forEach(tournament::addListener);
             tournament.run();
@@ -384,6 +438,10 @@ public class NTBEA {
         }
     }
 
+    public NTBEA copy() {
+        return new NTBEA(params, game, nPlayers);
+    }
+
     private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace ss) {
         Object value = ss.value(paramIndex, valueIndex);
         String valueString = value.toString();
@@ -394,5 +452,4 @@ public class NTBEA {
         }
         return valueString;
     }
-
 }

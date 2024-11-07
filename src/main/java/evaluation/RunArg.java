@@ -123,7 +123,7 @@ public enum RunArg {
             new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
     nThreads("The number of threads that can be spawned in order to evaluate games.",
             1,
-            new Usage[]{Usage.RunGames}),
+            new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
     neighbourhood("The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) ",
             50,
             new Usage[]{Usage.ParameterSearch}),

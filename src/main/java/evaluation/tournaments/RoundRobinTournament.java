@@ -232,7 +232,6 @@ public class RoundRobinTournament extends AbstractTournament {
      */
     public void createAndRunMatchUp(List<Integer> matchUp) {
         ExecutorService executor = nThreads > 1 ? Executors.newFixedThreadPool(nThreads) : null;
-
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
         switch (tournamentMode) {
             case RANDOM:
@@ -304,6 +303,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 break;
             case EXHAUSTIVE:
             case EXHAUSTIVE_SELF_PLAY:
+                // TODO: Make iterative instead of recursive, to parallelize
                 // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
                 if (matchUp.size() == nTeams) {
                     evaluateMatchUp(matchUp, gamesPerMatchup, gameSeeds);
