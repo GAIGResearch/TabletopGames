@@ -146,82 +146,7 @@ public class NTBEA {
         // After all runs are complete, if tournamentGames are specified, then we allow all the
         // winners from each iteration to play in a tournament and pick the winner of this tournament
         if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
-            if (!elites.isEmpty()) {
-                // first of all we add the elites into winnerSettings, and winnersPerRun
-                // i.e. we effectively add an extra 'run' for each elite
-                for (int[] elite : elites) {
-                    winnerSettings.add(elite);
-                    winnersPerRun.add(params.searchSpace.getAgent(elite));
-                }
-            }
-
-            List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
-            for (int i = 0; i < players.size(); i++) {
-                players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
-            }
-            // Given we have N players in each game, and a total of M agents (the number of NTBEA iterations), we
-            // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
-            // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
-            // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
-            //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
-            int nTeams = params.byTeam ? game.createGameInstance(nPlayers, params.gameParams).getGameState().getNTeams() : nPlayers;
-            if (players.size() < nTeams) {
-                System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
-                        "check the repeats options is at least equal to the number of players.");
-            } else {
-                Map<RunArg, Object> config = new HashMap<>();
-                config.put(matchups, params.tournamentGames);
-                if (players.size() < nPlayers) {
-                    // if we don't have enough players to fill the game, then we will need to use self-play
-                    config.put(RunArg.mode, "exhaustiveSP");
-                } else {
-                    config.put(RunArg.mode, "exhaustive");
-                }
-                config.put(byTeam, true);
-                config.put(RunArg.distinctRandomSeeds, 0);
-                config.put(RunArg.budget, params.budget);
-                config.put(RunArg.verbose, false);
-                config.put(RunArg.destDir, params.destDir);
-                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
-                createListeners().forEach(tournament::addListener);
-                tournament.run();
-                // create a new list of results in descending order of score
-                IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
-                List<Integer> agentsInOrder = IntStream.range(0, players.size())
-                        .boxed()
-                        .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
-                        .collect(Collectors.toList());
-                Collections.reverse(agentsInOrder);
-                params.logFile = "RRT_" + params.logFile;
-                for (int index : agentsInOrder) {
-                    if (params.verbose)
-                        System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
-                                tournament.getWinRate(index), tournament.getWinStdErr(index),
-                                tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
-                    Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
-                    if (params.evalMethod.equals("Ordinal"))
-                        resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
-
-                    logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
-                }
-                params.logFile = params.logFile.substring(4);
-                bestResult = params.evalMethod.equals("Ordinal") ?
-                        new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
-                        new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
-
-                // We then want to check the win rate against the elite agent (if one was provided)
-                // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
-                if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
-                    // The elite agent is always the last one (and if the elite won fair and square, then we skip this
-                    double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
-                    double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                    if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
-                        if (params.verbose)
-                            System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
-                        bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
-                    }
-                }
-            }
+            activateTournament();
         }
         if (params.verbose) {
             System.out.println("\nFinal Recommendation: ");
@@ -231,6 +156,85 @@ public class NTBEA {
         writeAgentJSON(bestResult.b,
                 params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
+    }
+
+    protected void activateTournament() {
+        if (!elites.isEmpty()) {
+            // first of all we add the elites into winnerSettings, and winnersPerRun
+            // i.e. we effectively add an extra 'run' for each elite
+            for (int[] elite : elites) {
+                winnerSettings.add(elite);
+                winnersPerRun.add(params.searchSpace.getAgent(elite));
+            }
+        }
+
+        List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
+        }
+        // Given we have N players in each game, and a total of M agents (the number of NTBEA iterations), we
+        // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
+        // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
+        // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
+        //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
+        int nTeams = params.byTeam ? game.createGameInstance(nPlayers, params.gameParams).getGameState().getNTeams() : nPlayers;
+        if (players.size() < nTeams) {
+            System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
+                               "check the repeats options is at least equal to the number of players.");
+        } else {
+            Map<RunArg, Object> config = new HashMap<>();
+            config.put(matchups, params.tournamentGames);
+            if (players.size() < nPlayers) {
+                // if we don't have enough players to fill the game, then we will need to use self-play
+                config.put(RunArg.mode, "exhaustiveSP");
+            } else {
+                config.put(RunArg.mode, "exhaustive");
+            }
+            config.put(byTeam, true);
+            config.put(RunArg.distinctRandomSeeds, 0);
+            config.put(RunArg.budget, params.budget);
+            config.put(RunArg.verbose, false);
+            config.put(RunArg.destDir, params.destDir);
+            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
+            createListeners().forEach(tournament::addListener);
+            tournament.run();
+            // create a new list of results in descending order of score
+            IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
+            List<Integer> agentsInOrder = IntStream.range(0, players.size())
+                    .boxed()
+                    .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
+                    .collect(Collectors.toList());
+            Collections.reverse(agentsInOrder);
+            params.logFile = "RRT_" + params.logFile;
+            for (int index : agentsInOrder) {
+                if (params.verbose)
+                    System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
+                            tournament.getWinRate(index), tournament.getWinStdErr(index),
+                            tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
+                if (params.evalMethod.equals("Ordinal"))
+                    resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+
+                logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
+            }
+            params.logFile = params.logFile.substring(4);
+            bestResult = params.evalMethod.equals("Ordinal") ?
+                    new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
+                    new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
+
+            // We then want to check the win rate against the elite agent (if one was provided)
+            // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
+            if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
+                // The elite agent is always the last one (and if the elite won fair and square, then we skip this
+                double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
+                double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
+                    if (params.verbose)
+                        System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
+                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
+                }
+            }
+        }
     }
 
     protected void runTrials() {
