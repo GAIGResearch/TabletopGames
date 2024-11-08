@@ -135,7 +135,7 @@ public class NTBEA {
      * @return
      */
     public Pair<Object, int[]> run() {
-        ExecutorService executor = params.nThreads > 1 ? Executors.newFixedThreadPool(params.nThreads) : null;
+        ExecutorService executor = params.nThreads > 1 ? Executors.newFixedThreadPool(Math.min(params.nThreads, params.repeats)) : null;
         // if we're multithreading, we don't want to have different threads interfering with eachother
         List<NTBEA> clones = new ArrayList<>();
         if (executor == null) {
