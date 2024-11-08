@@ -174,7 +174,6 @@ public class RoundRobinTournament extends AbstractTournament {
             game.addListener(gameTracker);
         }
 
-        LinkedList<Integer> matchUp = new LinkedList<>();
         // add outer loop if we have tournamentSeeds enabled; if not this will just run once
         List<Integer> allSeeds = new ArrayList<>(gameSeeds);
         for (int iter = 0; iter < Math.max(1, tournamentSeeds); iter++) {
@@ -187,7 +186,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 // use a seed per matchup
                 gameSeeds = IntStream.range(0, gamesPerMatchup).mapToObj(i -> seedRnd.nextInt()).collect(toList());
             }
-            createAndRunMatchUp(matchUp);
+            createAndRunMatchUps();
         }
         reportResults();
 
@@ -226,11 +225,9 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     /**
-     * Recursively creates one combination of players and evaluates it.
-     *
-     * @param matchUp - current combination of players, updated recursively.
+     * Create and run all match ups given the selected tournament mode.
      */
-    public void createAndRunMatchUp(List<Integer> matchUp) {
+    public void createAndRunMatchUps() {
         ExecutorService executor = nThreads > 1 ? Executors.newFixedThreadPool(nThreads) : null;
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
         switch (tournamentMode) {
@@ -303,17 +300,18 @@ public class RoundRobinTournament extends AbstractTournament {
                 break;
             case EXHAUSTIVE:
             case EXHAUSTIVE_SELF_PLAY:
-                // TODO: Make iterative instead of recursive, to parallelize
-                // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
-                if (matchUp.size() == nTeams) {
-                    evaluateMatchUp(matchUp, gamesPerMatchup, gameSeeds);
-                } else {
-                    for (Integer agentID : this.allAgentIds) {
-                        if (tournamentMode == EXHAUSTIVE_SELF_PLAY || !matchUp.contains(agentID)) {
-                            matchUp.add(agentID);
-                            createAndRunMatchUp(matchUp);
-                            matchUp.remove(agentID);
-                        }
+                ArrayList<ArrayList<Integer>> matchups = new ArrayList<>();
+
+                generateMatchUps(matchups, new ArrayList<>(), nTeams);
+
+                for (List<Integer> matchup : matchups) {
+                    if (executor != null) {
+                        // run in parallel if allowed
+                        executor.submit(() -> {
+                            evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds);
+                        });
+                    } else {
+                        evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds);
                     }
                 }
         }
@@ -327,6 +325,28 @@ public class RoundRobinTournament extends AbstractTournament {
             } catch (InterruptedException e) {
                 executor.shutdownNow(); // Restore interrupted status and shutdown
                 Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    /**
+     * Recursively generate an exhaustive list of possible size-`nTeams` match ups between agents,
+     * and then add these to a list of results
+     * @param result the list to store the match ups in
+     * @param current the current state of the list to be added to the results
+     * @param nTeams the size of each match up to be generated
+     */
+    private void generateMatchUps(ArrayList<ArrayList<Integer>> result, ArrayList<Integer> current, int nTeams) {
+        if (current.size() == nTeams) {
+            result.add(new ArrayList<>(current));
+        } else {
+            for (Integer agentID : this.allAgentIds) {
+                if (tournamentMode == EXHAUSTIVE_SELF_PLAY || !current.contains(agentID)) {
+                    // only add duplicates when self play is enabled
+                    current.add(agentID);
+                    generateMatchUps(result, current, nTeams);
+                    current.remove(current.size() - 1);
+                }
             }
         }
     }
@@ -460,10 +480,10 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.agents.size(); i++) {
             // We calculate the standard deviation, and hence the standard error on the mean value
             // (using a normal approximation, which is valid for large N)
-            double stdDev = Math.sqrt(pointsPerPlayerSquared[i] / nGamesPlayed[i] - (pointsPerPlayer[i] / nGamesPlayed[i])
+            double stdDev = sqrt(pointsPerPlayerSquared[i] / nGamesPlayed[i] - (pointsPerPlayer[i] / nGamesPlayed[i])
                     * (pointsPerPlayer[i] / nGamesPlayed[i]));
             finalWinRanking.put(i, new Pair<>(pointsPerPlayer[i] / nGamesPlayed[i], stdDev / sqrt(nGamesPlayed[i])));
-            stdDev = Math.sqrt(rankPerPlayerSquared[i] / nGamesPlayed[i] - (rankPerPlayer[i] / nGamesPlayed[i]) * (rankPerPlayer[i] / nGamesPlayed[i]));
+            stdDev = sqrt(rankPerPlayerSquared[i] / nGamesPlayed[i] - (rankPerPlayer[i] / nGamesPlayed[i]) * (rankPerPlayer[i] / nGamesPlayed[i]));
             finalOrdinalRanking.put(i, new Pair<>(rankPerPlayer[i] / nGamesPlayed[i], stdDev / sqrt(nGamesPlayed[i])));
         }
         // Sort by points.
