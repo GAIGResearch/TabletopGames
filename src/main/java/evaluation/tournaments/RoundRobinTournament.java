@@ -238,14 +238,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     List<Integer> matchup = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
                         matchup.add(idStream.getAsInt());
-                    if (executor != null) {
-                        // run in parallel if allowed
-                        executor.submit(() -> {
-                            evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
-                        });
-                    } else {
-                        evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()));
-                    }
+                    evaluateMatchUp(matchup, 1, Collections.singletonList(seedRnd.nextInt()), executor);
                 }
                 break;
             case ONE_VS_ALL:
@@ -266,14 +259,7 @@ public class RoundRobinTournament extends AbstractTournament {
                         }
                         // We split the total budget equally across the possible positions the focus player can be in
                         // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
-                        if (executor != null) {
-                            // run in parallel if allowed
-                            executor.submit(() -> {
-                                evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds);
-                            });
-                        } else {
-                            evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds);
-                        }
+                        evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds, executor);
                     } else {
                         for (int m = 0; m < this.totalGameBudget / nTeams; m++) {
                             Collections.shuffle(agentOrder, seedRnd);
@@ -285,15 +271,7 @@ public class RoundRobinTournament extends AbstractTournament {
                                     matchup.add(agentOrder.get(j % agentOrder.size()));
                                 }
                             }
-                            if (executor != null) {
-                                // run in parallel if allowed
-                                final int seed = m; // final seed for using in lambda function
-                                executor.submit(() -> {
-                                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(seed)));
-                                });
-                            } else {
-                                evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(m)));
-                            }
+                            evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(m)), executor);
                         }
                     }
                 }
@@ -305,14 +283,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 generateMatchUps(matchups, new ArrayList<>(), nTeams);
 
                 for (List<Integer> matchup : matchups) {
-                    if (executor != null) {
-                        // run in parallel if allowed
-                        executor.submit(() -> {
-                            evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds);
-                        });
-                    } else {
-                        evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds);
-                    }
+                    evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds, executor);
                 }
         }
         if (executor != null) {
@@ -351,6 +322,22 @@ public class RoundRobinTournament extends AbstractTournament {
         }
     }
 
+    /**
+     * Wrapper for evaluateMatchUp, which checks if the function should be called in parallel or not.
+     * Evaluates one combination of players.
+     * @param agentIDsInThisGame - IDs of agents participating in this run.
+     * @param executor - The ExecutorService which holds the pool of threads allocated, or `null` if not ran on parallel threads.
+     */
+    protected void evaluateMatchUp(List<Integer> agentIDsInThisGame, int nGames, List<Integer> seeds, ExecutorService executor) {
+        if (executor != null) {
+            // run in parallel if allowed
+            executor.submit(() -> {
+                evaluateMatchUp(agentIDsInThisGame, nGames, seeds);
+            });
+        } else {
+            evaluateMatchUp(agentIDsInThisGame, nGames, seeds);
+        }
+    }
     /**
      * Evaluates one combination of players. May be run in parallel.
      *
