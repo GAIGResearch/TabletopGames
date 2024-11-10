@@ -43,10 +43,12 @@ public class JavaCoder {
         String workingDir = Utils.getArg(args, "dir", "llm");
         String modelType = Utils.getArg(args, "model", "GEMINI");
         String modelSize = Utils.getArg(args, "size", "SMALL");
+        int matchups = Utils.getArg(args, "matchups", 1000);
+        String matchMode = Utils.getArg(args, "mode", "exhaustive");
         String resultsFile = Utils.getArg(args, "results", workingDir + "/HeuristicSearch_Results.txt");
         String evaluatorName = Utils.getArg(args, "evaluator", gameName + "Evaluator");
         workingDir = workingDir + "/" + modelType + "_" + modelSize + "/" + gameName;
-        String llmLogFile = workingDir  + "/LLM.log";
+        String llmLogFile = workingDir + "/LLM.log";
         String fileStem = workingDir + "/" + evaluatorName;
         File results = new File(resultsFile);
         boolean headersNeeded = !results.exists();
@@ -149,7 +151,7 @@ public class JavaCoder {
                             After the *** is a Java class.
                             Your task is to remove any comments or JavaDoc from this code.
                             The output should be the same code, with any syntax corrections, but without any comments.
-                         
+                        
                             The output must include only the final java code.
                             ***
                         """;
@@ -173,8 +175,8 @@ public class JavaCoder {
                     throw new IllegalArgumentException("Agent " + baseAgentLocation + " does not implement IHasStateHeuristic");
                 }
 
-                // We now create a StringHeuristic and OSLA player from the generated code
-                player.setName(String.format("OSLA_%03d", iteration));
+                // We now create a StringHeuristic and associated player from the generated code
+                player.setName(String.format("%s_%03d", player.toString(), iteration));
                 playerList.add(player);
 
             } catch (RuntimeException e) {
@@ -205,9 +207,9 @@ public class JavaCoder {
             // then override the ones we really want
             tournamentConfig.putAll(Map.of(
                     RunArg.game, gameType,
-                    RunArg.matchups, 1000,
+                    RunArg.matchups, matchups,
+                    RunArg.mode, matchMode,
                     RunArg.listener, Collections.emptyList(),
-                    RunArg.mode, "exhaustive",
                     RunArg.destDir, workingDir,
                     RunArg.verbose, false
             ));

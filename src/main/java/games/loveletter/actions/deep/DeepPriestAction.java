@@ -25,7 +25,7 @@ public class DeepPriestAction extends PlayCardDeep {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         assert cardType != null;
-        return cardType.getFlatActions((LoveLetterGameState) state, cardIdx, playerID, false);
+        return cardType.flatActions((LoveLetterGameState) state, cardIdx, playerID, false);
     }
 
     @Override

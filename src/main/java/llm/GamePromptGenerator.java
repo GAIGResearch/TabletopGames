@@ -39,7 +39,7 @@ public class GamePromptGenerator {
     static List<String> packagesToIgnore = List.of("java.lang", "java.util", "core", "core.actions", "core.components", "evaluation.optimisation",
             "java.util.function", "java.util.stream");
     // ... except for these classes in those otherwise ignored packages
-    static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck", "Dice");
+    static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck", "Dice", "FrenchCard");
 
     public String createLLMTaskPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, boolean includeRules) {
         StringBuilder result = new StringBuilder();
@@ -124,7 +124,7 @@ public class GamePromptGenerator {
                 Your task is to generate a new heuristic function that is better than the current one.
                 A better heuristic will have a higher win rate and/or have shorter and less complex code.
                 You should aim to improve the heuristic function by modifying the existing code, changing relative weights, or adding (or removing) new features.
-                                
+                
                 """;
         String result = String.format(text, code);
         String taskText = createLLMTaskPrompt(taskType, gameType, nPlayers, className, true);
@@ -133,15 +133,15 @@ public class GamePromptGenerator {
 
     public String createLLMErrorPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, String code, String error) {
         String text = """
-                                
+                
                 A previous attempt at this task created the class below.
                 This class failed to compile correctly.
-                                
+                
                 %s
-
+                
                 The compilation error message is:
                 %s
-                                
+                
                 Your immediate task is to rewrite this code to compile correctly.
                 """;
         String result = String.format(text, code, error);
@@ -193,7 +193,7 @@ public class GamePromptGenerator {
 
         for (Method method : clazz.getDeclaredMethods()) {
             if (!Modifier.isPrivate(method.getModifiers()) && !objectMethodNames.contains(method.getName()) &&
-                    method.getName().startsWith("get") &&
+                    (method.getName().startsWith("get") || method.getName().startsWith("is")) &&
                     !method.getName().equals("get") &&
                     !method.getName().contains("String")) {
                 methodList.add(method);
@@ -277,7 +277,7 @@ public class GamePromptGenerator {
             cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cls -> {
                 cls.getJavadoc().ifPresent(javadoc -> javadocs.put(cls.getNameAsString(), javadoc.getDescription().toText()));
                 cls.findAll(MethodDeclaration.class).forEach(method -> {
-                    String signature = method.getDeclarationAsString(false, false, false);
+                    String signature = method.getDeclarationAsString(false, false, true);
                     method.getJavadoc().ifPresent(javadoc -> javadocs.put(signature, javadoc.getDescription().toText()));
                 });
             });

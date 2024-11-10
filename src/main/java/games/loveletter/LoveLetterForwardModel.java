@@ -337,9 +337,9 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
             if (actionSpace.context == ActionSpace.Context.Dependent) cardIdx = card;
             else cardIdx = -1;  // Independent and default
             if (actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default) {
-                actions.addAll(cardType.getFlatActions(llgs, cardIdx, playerID, true));
+                actions.addAll(cardType.flatActions(llgs, cardIdx, playerID, true));
             } else if (actionSpace.structure == ActionSpace.Structure.Deep) {
-                actions.addAll(cardType.getDeepActions(llgs, cardIdx, playerID, true));
+                actions.addAll(cardType.deepActions(llgs, cardIdx, playerID, true));
             }
 
         }

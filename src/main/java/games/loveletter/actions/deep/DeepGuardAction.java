@@ -61,7 +61,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
             if (cardActions.size() == 0) cardActions.add(new ChoosePlayer(-1));
         } else {
             // Complete actions
-            cardActions.addAll(CardType.Guard.getFlatActions(gs, new PlayCard(cardIdx, playerID, false, targetPlayer)));
+            cardActions.addAll(CardType.Guard.flatActions(gs, new PlayCard(cardIdx, playerID, false, targetPlayer)));
         }
         return cardActions;
     }

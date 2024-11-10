@@ -29,6 +29,7 @@ public enum CardType {
         this.cardText = text;
     }
 
+    /** Numeric value of card from 1 to 8 */
     public int getValue() {
         return value;
     }
@@ -134,20 +135,20 @@ public enum CardType {
         Guard.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepGuardAction(play.getCardIdx(), play.getPlayerID()));
     }
 
-    public List<AbstractAction> getFlatActions(LoveLetterGameState gs, PlayCard play) {
+    public List<AbstractAction> flatActions(LoveLetterGameState gs, PlayCard play) {
         if (generateFlatActions != null) return generateFlatActions.apply(gs, play);
         return new ArrayList<>();
     }
 
-    public List<AbstractAction> getFlatActions(LoveLetterGameState gs, int cardIdx, int playerId, boolean discard) {
+    public List<AbstractAction> flatActions(LoveLetterGameState gs, int cardIdx, int playerId, boolean discard) {
         if (generateFlatActions != null) return generateFlatActions.apply(gs, new PlayCard(cardIdx, playerId, discard));
         return new ArrayList<>();
     }
 
-    public List<AbstractAction> getDeepActions(LoveLetterGameState gs, int cardIdx, int playerId, boolean discard) {
+    public List<AbstractAction> deepActions(LoveLetterGameState gs, int cardIdx, int playerId, boolean discard) {
         PlayCard play = new PlayCard(cardIdx, playerId, discard);
         if (generateDeepActions != null) return generateDeepActions.apply(gs, play);
-        return getFlatActions(gs, play);
+        return flatActions(gs, play);
     }
 
     // To string

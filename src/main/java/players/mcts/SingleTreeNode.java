@@ -915,7 +915,7 @@ public class SingleTreeNode {
 
         for (int i = 0; i < retValue.length; i++) {
             retValue[i] = params.heuristic.evaluateState(rolloutState, i);
-            if (Double.isNaN(retValue[i]))
+            if (Double.isNaN(retValue[i]) || Double.isInfinite(retValue[i]))
                 throw new AssertionError("Illegal heuristic value - should be a number");
         }
         return retValue;
@@ -973,6 +973,8 @@ public class SingleTreeNode {
             if (root.highReward < stats.getMax())
                 root.highReward = stats.getMax();
         }
+        if (root.lowReward == Double.NEGATIVE_INFINITY || root.highReward == Double.POSITIVE_INFINITY)
+            throw new AssertionError("We have somehow failed to update the min or max rewards");
     }
 
     protected double[] processResultsForParanoidOrSelfOnly(double[] result) {

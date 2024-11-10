@@ -117,6 +117,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     @Override
+    /** Returns the score of the player (the number of affection tokens) */
     public double getGameScore(int playerId) {
         return affectionTokens[playerId];
     }
@@ -202,6 +203,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         return reserveCards;
     }
 
+    /** Player is protected by the Handmaid */
     public boolean isProtected(int playerID) {
         return effectProtection[playerID];
     }
@@ -210,6 +212,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         effectProtection[playerID] = protection;
     }
 
+    /** Number of cards left in the draw deck */
     public int getRemainingCards() {
         return drawPile.getSize();
     }
@@ -226,6 +229,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         return drawPile;
     }
 
+    /**
+     * Returns the affection tokens for each player in an array.
+     * The index of the array corresponds to the player ID.
+     */
     public int[] getAffectionTokens() {
         return affectionTokens;
     }
