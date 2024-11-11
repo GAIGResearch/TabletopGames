@@ -246,7 +246,7 @@ public class NTBEA {
             config.put(byTeam, true);
             config.put(RunArg.distinctRandomSeeds, 0);
             config.put(RunArg.budget, params.budget);
-            config.put(RunArg.verbose, false);
+            config.put(RunArg.verbose, params.verbose);
             config.put(RunArg.destDir, params.destDir);
             config.put(RunArg.nThreads, params.nThreads);
             RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
