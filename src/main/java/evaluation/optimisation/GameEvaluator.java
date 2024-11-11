@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
@@ -95,9 +94,17 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     @Override
     public double evaluate(int[] settings) {
-        if (debug)
-            System.out.printf("Starting evaluation %d of %s at %tT%n", nEvals,
-                    Arrays.toString(settings), System.currentTimeMillis());
+        if (debug) {
+            HashMap<String, Object> chosenConfigs = new HashMap<>();
+            for (int i = 0; i < searchSpace.nDims(); i++) {
+                int finalI = i;
+                chosenConfigs.put(searchSpace.name(i), IntStream.range(0, searchSpace.nValues(i))
+                        .mapToObj(j -> searchSpace.value(finalI, j))
+                        .toList().get(settings[i]));
+            }
+            System.out.printf("%d Starting evaluation %d of %s at %tT%n", this.hashCode(), nEvals,
+                    chosenConfigs, System.currentTimeMillis());
+        }
         Object configuredThing = searchSpace.getAgent(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;
