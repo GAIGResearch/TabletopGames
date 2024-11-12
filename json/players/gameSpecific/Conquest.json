@@ -7,6 +7,8 @@
   "MASTGamma" : 0.5,
   "K" : 1.4,
   "class" : "players.mcts.MCTSParams",
-  "budget" : 10000,
-  "treePolicy" : "UCB_Tuned"
+  "budget" : 5000,
+  "treePolicy": "UCB_Tuned",
+  "actionHeuristic" : "players.heuristics.GameDefaultHeuristic",
+  "visitInitialisation": 10
 }

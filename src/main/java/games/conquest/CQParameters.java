@@ -187,10 +187,10 @@ public class CQParameters extends TunableParameters {
             Setup.IAmWarrior,
             Setup.HalberderPure
         );
-        p0TroopSetup = Setup.WindsOfFateSetup;
-        p1TroopSetup = Setup.WindsOfFateSetup;
-        addTunableParameter("p0TroopSetup", Setup.WindsOfFateSetup, setups);
-        addTunableParameter("p1TroopSetup", Setup.WindsOfFateSetup, setups);
+        p0TroopSetup = Setup.Default;
+        p1TroopSetup = Setup.Default;
+        addTunableParameter("p0TroopSetup", Setup.Default, setups);
+        addTunableParameter("p1TroopSetup", Setup.Default, setups);
     }
 
     @Override

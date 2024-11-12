@@ -449,6 +449,17 @@ public class CQGameState extends AbstractGameState {
         copy.commandPoints = commandPoints.clone();
         return copy;
     }
+
+    protected double getRelativePoints(int playerId) {
+        double cooldowns = 0;
+        List<Command> commands = chosenCommands[playerId].getVisibleComponents(playerId);
+        for (Command cmd : commands) {
+            // Add uncompleted fraction of cooldown to counter
+            cooldowns += 1 - (cmd.getCooldown() / (double) cmd.getCommandType().cooldown);
+        }
+        cooldowns /= commands.size();
+        return getCommandPoints(playerId) * cooldowns;
+    }
     /**
      * Heuristic used: Consider total troop health (scaled by value), and scale this by Command Point imbalance, which in turn is scaled based on command cooldowns
      * The troops all have a predetermined value. Their health determines the fraction of that value that's relevant.
@@ -457,43 +468,27 @@ public class CQGameState extends AbstractGameState {
      * So, the other factors should only apply a scaling factor on the heuristic.
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
-     * the game); a value between 0 and 1 is preferred, where 0 means the game was lost, and 1 means the game was won.
+     * the game); a value between -1 and 1 is preferred, where -1 means the game was lost, and 1 means the game was won.
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
         // Scores based on troop health and value; between 0 and 1 for each player
-        double myScore = getRelativeTroopCost(getTroops(playerId)) / getTotalTroopCost(getAllTroops(playerId));
-        double theirScore = getRelativeTroopCost(getTroops(playerId ^ 1)) / getTotalTroopCost(getAllTroops(playerId));
-        // Cooldowns, based on command cooldowns. A percentage of cooldown for each command, summed; between 0 and 4 for each player
-        double myCooldowns = 0, theirCooldowns = 0;
-        // Command points remaining per player. Any positive integer.
-        int myPoints = getCommandPoints(playerId), theirPoints = getCommandPoints(playerId ^ 1);
-        List<Command> myCommands = chosenCommands[playerId].getVisibleComponents(playerId),
-                      theirCommands = chosenCommands[playerId ^ 1].getVisibleComponents(playerId);
-        for (Command cmd : myCommands) {
-            if (cmd.getCooldown() > 0)
-                // Add uncompleted fraction of cooldown to counter
-                myCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
+        double myTroopCost = getRelativeTroopCost(getTroops(playerId)) / getTotalTroopCost(getAllTroops(playerId));
+        double theirTroopCost = getRelativeTroopCost(getTroops(playerId ^ 1)) / getTotalTroopCost(getAllTroops(playerId ^ 1));
+        // Relative command points, scaled to how many commands are inactive (and for how long)
+        double myPoints = getRelativePoints(playerId);
+        double theirPoints = getRelativePoints(playerId ^ 1);
+//        if (myPoints < theirPoints - 25) return -1;
+        if (Math.max(myPoints, theirPoints) == 0.0) {
+            // neither player has command points, so don't take those into account
+            return (myTroopCost - theirTroopCost) / Math.max(myTroopCost, theirTroopCost);
         }
-        for (Command cmd : theirCommands) {
-            if (cmd == null) continue; // their command hasn't been seen yet, so can't affect our heuristic score
-            if (cmd.getCooldown() > 0)
-                // Add uncompleted fraction of cooldown to counter
-                theirCooldowns += cmd.getCooldown() / (double) cmd.getCommandType().cooldown;
-        }
-        // Scale scores based on command points and command depletion:
-        myScore *= myPoints * myCooldowns;
-        theirScore *= theirPoints * theirCooldowns;
-        // Normalize scores:
-        double maxScore = Math.max(myScore, theirScore);
-        if (maxScore == 0.0) return 0.5; // neither player has a score yet, so it's a tie.
-        myScore /= maxScore;
-        theirScore /= maxScore;
-        // Scale it so that 0.5 is a tie, 0 is a loss for `playerId`, and 1 is a win for `playerId`.
-        // Both scores are now normalized, so between 0 and 1. The higher of the two will be equal to 1.0.
-        // if myScore is 1/10th of theirScore, then this will result in (0.5 + (0.1 - 1) / 2.0) = 0.05.
-        // if I have a slight edge of 1.0 vs 0.9, then this will be (0.5 + (1 - 0.9) / 2.0) = 0.55.
-        return 0.5 + (myScore - theirScore) / 2.0;
+        // Combine troop cost and points with equal weighting, by normalizing both
+        double myScore = myTroopCost / Math.max(myTroopCost, theirTroopCost) + myPoints / Math.max(myPoints, theirPoints);
+        double theirScore  = theirTroopCost / Math.max(myTroopCost, theirTroopCost) + theirPoints / Math.max(myPoints, theirPoints);
+        // Scale scores from -1.0 (win for them) to 1.0 (win for me).
+        // To do this, we need to normalize the above result once more
+        return (myScore - theirScore) / Math.max(myScore, theirScore);
     }
     @Override
     public double getGameScore(int playerId) {
