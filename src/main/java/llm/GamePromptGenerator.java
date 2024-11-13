@@ -39,7 +39,9 @@ public class GamePromptGenerator {
     static List<String> packagesToIgnore = List.of("java.lang", "java.util", "core", "core.actions", "core.components", "evaluation.optimisation",
             "java.util.function", "java.util.stream");
     // ... except for these classes in those otherwise ignored packages
-    static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck", "Dice", "FrenchCard");
+    static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck",
+            "GraphBoardWithEdges", "BoardNodeWithEdges",
+            "Dice", "FrenchCard");
 
     public String createLLMTaskPrompt(TaskType taskType, GameType gameType, int nPlayers, String className, boolean includeRules) {
         StringBuilder result = new StringBuilder();

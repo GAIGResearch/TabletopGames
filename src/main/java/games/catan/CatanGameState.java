@@ -40,6 +40,7 @@ public class CatanGameState extends AbstractGameState {
     public int negotiationStepsCount;
     public int nTradesThisTurn;
 
+    // Details of the current trade offer (if any, may be null)
     public AbstractAction getTradeOffer() {
         return tradeOffer;
     }
@@ -141,6 +142,7 @@ public class CatanGameState extends AbstractGameState {
         this.rollValue = rollValue;
     }
 
+    // value of the currently rolled dice
     public int getRollValue() {
         return rollValue;
     }
@@ -178,6 +180,7 @@ public class CatanGameState extends AbstractGameState {
         }
     }
 
+    // The number of knights that each player has
     public int[] getKnights() {
         return Arrays.copyOf(knights, knights.length);
     }
@@ -236,6 +239,7 @@ public class CatanGameState extends AbstractGameState {
         return exchangeRates.get(playerID);
     }
 
+    // The road distance between two adjacent settlements, one at x, y, the other along the specified edgeIdx
     public int getRoadDistance(int x, int y, int edgeIdx) {
         // As the settlements are the nodes, we expand them to find roads
         // calculates the distance length of the road
@@ -304,6 +308,7 @@ public class CatanGameState extends AbstractGameState {
         return expandRoad(roadSet, unexpanded, expanded);
     }
 
+    // The number of resource cards in a player's hand
     public int getNResourcesInHand(int player) {
         int deckSize = 0;
         for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(player).entrySet()) {
