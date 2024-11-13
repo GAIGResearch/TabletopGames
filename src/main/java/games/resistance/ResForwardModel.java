@@ -270,7 +270,6 @@ public class ResForwardModel extends StandardForwardModel {
         resgs.leaderID = (resgs.leaderID + 1) % resgs.getNPlayers();
     }
 
-
     public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID, Random rnd) {
         // We want to randomly assign the number of spies across the total number of players
         // and return a boolean[] with length of total, and spies number of true values
