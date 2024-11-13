@@ -256,9 +256,7 @@ public class ResForwardModel extends StandardForwardModel {
             resgs.historicTeams.add(new ArrayList<>(resgs.finalTeamChoice));
             resgs.noVotesPerMission.add(occurrenceCount);
         }
-
     }
-
 
     @Override
     protected void endGame(AbstractGameState gs) {
