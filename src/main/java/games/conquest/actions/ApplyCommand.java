@@ -30,14 +30,14 @@ import java.util.List;
  * given your componentID.</p>
  */
 public class ApplyCommand extends CQAction {
-    public ApplyCommand(int pid, int command, CommandType type) {
-        this(pid, command, (Vector2D) null, type);
+    public ApplyCommand(int pid, int command, CommandType type, int stateHash) {
+        this(pid, command, (Vector2D) null, type, stateHash);
     }
-    public ApplyCommand(int pid, int command, Troop target, CommandType type) {
-        this(pid, command, target == null ? null : target.getLocation(), type);
+    public ApplyCommand(int pid, int command, Troop target, CommandType type, int stateHash) {
+        this(pid, command, target == null ? null : target.getLocation(), type, stateHash);
     }
-    public ApplyCommand(int pid, int command, Vector2D target, CommandType type) {
-        super(pid, command, target);
+    public ApplyCommand(int pid, int command, Vector2D target, CommandType type, int stateHash) {
+        super(pid, command, target, stateHash);
         cmdType = type;
     }
 
@@ -114,14 +114,15 @@ public class ApplyCommand extends CQAction {
      */
     @Override
     public ApplyCommand copy() {
-        return new ApplyCommand(playerId, cmdHighlight, highlight, cmdType);
+        return new ApplyCommand(playerId, cmdHighlight, highlight, cmdType, stateHash);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof  ApplyCommand)) return false;
+        if (!(obj instanceof ApplyCommand)) return false;
         ApplyCommand acObj = ((ApplyCommand) obj);
+        if (acObj.stateHash != stateHash) return false;
         if (acObj.playerId != playerId || acObj.cmdHighlight != cmdHighlight) return false;
         if (highlight == null && acObj.highlight == null) return true;
         return acObj.highlight.equals(highlight);

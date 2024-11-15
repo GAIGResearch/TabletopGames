@@ -24,8 +24,8 @@ import utilities.Vector2D;
  * given your componentID.</p>
  */
 public class SelectTroop extends CQAction {
-    public SelectTroop(int pid, Vector2D target) {
-        super(pid, target);
+    public SelectTroop(int pid, Vector2D target, int stateHash) {
+        super(pid, target, stateHash);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SelectTroop extends CQAction {
      */
     @Override
     public SelectTroop copy() {
-        return new SelectTroop(playerId, highlight);
+        return new SelectTroop(playerId, highlight, stateHash);
     }
 
     @Override
@@ -69,6 +69,7 @@ public class SelectTroop extends CQAction {
         if (this == obj) return true;
         if (!(obj instanceof SelectTroop)) return false;
         SelectTroop stObj = (SelectTroop) obj;
+        if (stObj.stateHash != stateHash) return false;
         return stObj.playerId == playerId && stObj.highlight.equals(highlight);
     }
 

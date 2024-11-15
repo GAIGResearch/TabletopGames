@@ -19,8 +19,8 @@ import utilities.Vector2D;
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link EndTurn} apply here as well.</p>
  */
 public class AttackTroop extends CQAction {
-    public AttackTroop(int pid, Vector2D target) {
-        super(pid, target);
+    public AttackTroop(int pid, Vector2D target, int stateHash) {
+        super(pid, target, stateHash);
     }
 
     @Override
@@ -92,15 +92,16 @@ public class AttackTroop extends CQAction {
      */
     @Override
     public AttackTroop copy() {
-        return new AttackTroop(playerId, highlight);
+        return new AttackTroop(playerId, highlight, stateHash);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof AttackTroop)) return false;
-        AttackTroop mtObj = (AttackTroop) obj;
-        return mtObj.playerId == playerId && mtObj.highlight.equals(highlight);
+        AttackTroop atObj = (AttackTroop) obj;
+        if (atObj.stateHash != stateHash) return false;
+        return atObj.playerId == playerId && atObj.highlight.equals(highlight);
     }
 
     @Override

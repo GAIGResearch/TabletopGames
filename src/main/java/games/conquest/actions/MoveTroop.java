@@ -23,8 +23,8 @@ import java.util.List;
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link EndTurn} apply here as well.</p>
  */
 public class MoveTroop extends CQAction {
-    public MoveTroop(int pid, Vector2D target) {
-        super(pid, target);
+    public MoveTroop(int pid, Vector2D target, int stateHash) {
+        super(pid, target, stateHash);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class MoveTroop extends CQAction {
      */
     @Override
     public MoveTroop copy() {
-        return new MoveTroop(playerId, highlight);
+        return new MoveTroop(playerId, highlight, stateHash);
     }
 
     @Override
@@ -82,6 +82,7 @@ public class MoveTroop extends CQAction {
         if (this == obj) return true;
         if (!(obj instanceof MoveTroop)) return false;
         MoveTroop mtObj = (MoveTroop) obj;
+        if (mtObj.stateHash != stateHash) return false;
         return mtObj.playerId == playerId && mtObj.highlight.equals(highlight);
     }
 

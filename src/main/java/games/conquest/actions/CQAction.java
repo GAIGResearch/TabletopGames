@@ -18,13 +18,17 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
     int cmdHighlight = -1;
     CommandType cmdType = null;
     private boolean executed = false;
+    // Keeps track of the state hash, in order to guarantee .equals() and .hashCode() are unique
+    // Otherwise two of the same action type targeting the same square are flagged as equal
+    int stateHash = 0;
 
-    public CQAction(int pid, Vector2D target) {
+    public CQAction(int pid, Vector2D target, int currentStateHash) {
         playerId = pid;
         highlight = target;
+        stateHash = currentStateHash;
     }
-    public CQAction(int pid, int cmd, Vector2D target) {
-        this(pid, target);
+    public CQAction(int pid, int cmd, Vector2D target, int stateHash) {
+        this(pid, target, stateHash);
         cmdHighlight = cmd;
     }
 
@@ -104,7 +108,7 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, highlight, cmdHighlight, executed);
+        return Objects.hash(playerId, highlight, cmdHighlight, executed, stateHash);
     }
 
     /**
