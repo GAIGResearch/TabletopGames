@@ -155,7 +155,7 @@ public class Troop extends Component {
         return health > 0;
     }
     public int getDamage() {
-        if (hasCommand(CommandType.BattleCry)) return damage * 2;
+        if (hasCommand(CommandType.BattleCry)) return damage + 200;
         return damage;
     }
     public int getRange() {

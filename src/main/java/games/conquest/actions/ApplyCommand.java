@@ -52,9 +52,24 @@ public class ApplyCommand extends CQAction {
             Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
             if (target == null) return false; // only Winds of Fate can be applied without target.
             if ((target.getOwnerId() == cqgs.getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
-            if (cmdType != CommandType.Charge) return true; // All non-Charge commands can be applied any time.
-            else // no use in applying Charge on a troop after it has already moved; prevent this from happening to aid MCTS
-                return cqgs.getGamePhase() == CQGameState.CQGamePhase.SelectionPhase || cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase;
+            return switch (cmdType) {
+                // Game rules state that chastise can't be used on the last remaining troop:
+                case Chastise -> cqgs.getTroops(target.getOwnerId()).size() > 1;
+
+                // no use in applying Charge on a troop after it has already moved; prevent this from happening to aid MCTS:
+                case Charge -> cqgs.getGamePhase() == CQGameState.CQGamePhase.SelectionPhase || (
+                        cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase && cqgs.getSelectedTroop() == target
+                );
+
+                // only allow healing damaged targets:
+                case Regenerate -> target.getUnboostedHealth() < target.getTroopType().health;
+
+                // It makes no sense to apply shield wall if you have 100 hp to begin with; either way, any hit is a 1-hit KO:
+                // (Note: applying BattleCry or Stoicism will then allow you to use this command _after_ applying that command)
+                case ShieldWall -> target.getHealth() > 100;
+
+                default -> true;
+            };
         }
     }
 

@@ -73,12 +73,22 @@ public class CQGameState extends AbstractGameState {
     public Cell getCell(Vector2D pos) {
         return getCell(pos.getX(), pos.getY());
     }
+    /**
+     * Gets all troops, including dead troops, for a given owner
+     * @param uid Player to list troops for
+     * @return A set of troops for the given owner
+     */
     public HashSet<Troop> getAllTroops(int uid) {
         return troops
                 .stream()
                 .filter(t -> t.getOwnerId() == uid)
                 .collect(Collectors.toCollection(HashSet::new));
     }
+    /**
+     * Gets troops owned by `uid` that are alive
+     * @param uid Player to list troops for
+     * @return A set of troops for the given owner
+     */
     public HashSet<Troop> getTroops(int uid) {
         return troops
                 .stream()
@@ -178,9 +188,10 @@ public class CQGameState extends AbstractGameState {
         int uid = getCurrentPlayer();
         CQGamePhase phase = (CQGamePhase) getGamePhase();
         List<AbstractAction> actions = new ArrayList<>();
-        actions.add(new EndTurn());
+        if (!phase.equals(CQGamePhase.SelectionPhase))
+            actions.add(new EndTurn());
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
-        if (!getCommands(uid, true).isEmpty()) {
+        if (!phase.equals(CQGamePhase.SelectionPhase) && !getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
                 int commandId = c.getComponentID();
                 if (c.getCost() > getCommandPoints(uid)) continue;
@@ -258,6 +269,26 @@ public class CQGameState extends AbstractGameState {
         return cost;
     }
 
+    /**
+     * Calculate a figure describing how many of a player's troops are alive, and if so, with how much health.
+     * If a troop is dead, it counts as negative points scaled to their cost; if a troop is alive, it's positive points,
+     * scaled to their cost and their current relative health.
+     * @param playerId The player to check troop health for
+     * @return the metric for alive-ness of troops
+     */
+    public double getTroopHealthMetric(int playerId) {
+        HashSet<Troop> allTroops = getAllTroops(playerId);
+        HashSet<Troop> livingTroops = getTroops(playerId);
+        int totalTroopCost = getTotalTroopCost(allTroops);
+        int livingTroopCost = getTotalTroopCost(livingTroops);
+        // dead troops is always worse than living troops; also, 2 champ at 100hp is better than 1 champ at 200hp.
+        double relativeTroopCost = getRelativeTroopCost(livingTroops) / totalTroopCost;
+        double deadTroopCost = (totalTroopCost - livingTroopCost) / (double) totalTroopCost;
+        // dead troops count as negative score; alive troop count as positive score, based on their health.
+        // all troops being dead counts as -1; all troops being full health counts as 1.
+        return -deadTroopCost + relativeTroopCost;
+    }
+
     /*======= METHODS THAT EXECUTE SOME ACTION =======*/
     public boolean useCommand(int uid, @NotNull Command cmd) {
         int idx = getCommands(uid).getComponents().indexOf(cmd);
@@ -315,7 +346,7 @@ public class CQGameState extends AbstractGameState {
      * @return can the action be performed or not
      */
     public boolean canPerformAction(AbstractAction action, boolean requireHighlight) {
-        if (action instanceof EndTurn) return true;
+        if (action instanceof EndTurn) return gamePhase != CQGamePhase.SelectionPhase;
         CQAction cqAction = (CQAction) action;
         if (requireHighlight && !cqAction.compareHighlight(highlight, (Command) getComponentById(cmdHighlight))) return false;
         return ((CQAction) action).canExecute(this);
@@ -379,9 +410,10 @@ public class CQGameState extends AbstractGameState {
      * Flood fill to generate distances to the whole board. (currently only used in GUI)
      * Used in case where all distances need to be known, due to being cheaper than performing A* on all cells.
      * @param source Source cell from which to calculate distances
+     * @param maxDistance maximum distance to perform floodFill on, or 0 if no maximum is set.
      * @return 2d integer array containing distances to the target square, or 9999 if unreachable.
      */
-    public int[][] floodFill (@NotNull Cell source) {
+    public int[][] floodFill (@NotNull Cell source, int maxDistance) {
         int w = cells.length, h = cells[0].length;
         List<Cell> openSet = source.getNeighbors(cells); // initial set of neighbors
         Set<Cell> closedSet = new HashSet<>();
@@ -389,7 +421,7 @@ public class CQGameState extends AbstractGameState {
         for (int[] row : board) // fill all with 'unreachable' initially
             Arrays.fill(row, 9999);
         int distance = 0;
-        while (!openSet.isEmpty()) {
+        while (!openSet.isEmpty() && (maxDistance == 0 || distance <= maxDistance)) {
             distance++; // first iteration is distance 1, etc
             for (Cell c : openSet) {
                 // First go through all cells currently listed and add their distance
@@ -450,49 +482,40 @@ public class CQGameState extends AbstractGameState {
         return copy;
     }
 
-    protected double getRelativePoints(int playerId) {
-        double cooldowns = 0;
-        List<Command> commands = chosenCommands[playerId].getVisibleComponents(playerId);
-        for (Command cmd : commands) {
-            // Add uncompleted fraction of cooldown to counter
-            cooldowns += 1 - (cmd.getCooldown() / (double) cmd.getCommandType().cooldown);
-        }
-        cooldowns /= commands.size();
-        return getCommandPoints(playerId) * cooldowns;
-    }
     /**
-     * Heuristic used: Consider total troop health (scaled by value), and scale this by Command Point imbalance, which in turn is scaled based on command cooldowns
-     * The troops all have a predetermined value. Their health determines the fraction of that value that's relevant.
-     * The sum of all troops' values is then compared to the original value of all troops, in order to determine how close to death a player is.
-     * If all but one of my troops is dead, I should get a score near 0. If all troops are alive, the other factors are much more relevant.
-     * So, the other factors should only apply a scaling factor on the heuristic.
+     * Heuristic used: Compute a metric that compares living troops to dead troops, and scales living troops to their hp
+     * Then take the difference between these two metrics, and add a metric for command points and command cooldowns.
+     * A player with a lot of command points and available commands, and lots of troops living, with an enemy with few troops living,
+     * will receive a score of 1. The opposite will result in a negative score. Since the command point metric can't be negative,
+     * the score will be divided by 3 for positive scores, or by 2 for negative scores;
      * @param playerId - player observing the state.
-     * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
-     * the game); a value between -1 and 1 is preferred, where -1 means the game was lost, and 1 means the game was won.
+     * @return a score for the given player approximating how well they are doing, between -1 and 1
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        // Scores based on troop health and value; between 0 and 1 for each player
-        double myTroopCost = getRelativeTroopCost(getTroops(playerId)) / getTotalTroopCost(getAllTroops(playerId));
-        double theirTroopCost = getRelativeTroopCost(getTroops(playerId ^ 1)) / getTotalTroopCost(getAllTroops(playerId ^ 1));
-        // Relative command points, scaled to how many commands are inactive (and for how long)
-        double myPoints = getRelativePoints(playerId);
-        double theirPoints = getRelativePoints(playerId ^ 1);
-//        if (myPoints < theirPoints - 25) return -1;
-        if (Math.max(myPoints, theirPoints) == 0.0) {
-            // neither player has command points, so don't take those into account
-            return (myTroopCost - theirTroopCost) / Math.max(myTroopCost, theirTroopCost);
+        // compare living troop scores for both players;
+        double runningScore = getTroopHealthMetric(playerId) - getTroopHealthMetric(playerId ^ 1);
+        // Commands are useful when not on cooldown; punish having commands on cooldown, but by less than the reward of a dead troop.
+        List<Command> allCommands = getCommands(playerId).getVisibleComponents(playerId);
+        int totalCooldown = 0;
+        int currentCooldown = 0;
+        for (Command cmd : allCommands) {
+            currentCooldown += cmd.getCooldown();
+            totalCooldown += cmd.getCommandType().cooldown;
         }
-        // Combine troop cost and points with equal weighting, by normalizing both
-        double myScore = myTroopCost / Math.max(myTroopCost, theirTroopCost) + myPoints / Math.max(myPoints, theirPoints);
-        double theirScore  = theirTroopCost / Math.max(myTroopCost, theirTroopCost) + theirPoints / Math.max(myPoints, theirPoints);
-        // Scale scores from -1.0 (win for them) to 1.0 (win for me).
-        // To do this, we need to normalize the above result once more
-        return (myScore - theirScore) / Math.max(myScore, theirScore);
+        double cooldownFraction = currentCooldown / (double) totalCooldown;
+        // Low points is bad, some points is good, more points is slightly better
+        int points = getCommandPoints(playerId);
+        double expPoints = 1 - Math.exp(-points / 25.0);
+        // to the final score, add points, subtract cooldowns
+        runningScore += (expPoints - cooldownFraction);
+        return runningScore > 0 ? runningScore / 3 : runningScore / 2;
     }
+
     @Override
     public double getGameScore(int playerId) {
-        return getTotalTroopCost(getTroops(playerId));
+        return _getHeuristicScore(playerId) * 1000;
+//        return getTotalTroopCost(getTroops(playerId));
     }
     @Override
     protected boolean _equals(Object o) {

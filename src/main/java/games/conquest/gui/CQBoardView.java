@@ -3,6 +3,7 @@ package games.conquest.gui;
 import core.components.GridBoard;
 import games.conquest.CQGameState;
 import games.conquest.components.Cell;
+import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
@@ -128,6 +129,12 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
             if (selected != null && distancesFromSelection[cell.position.getX()][cell.position.getY()] <= movementRange) {
                 if (selected.getLocation().equals(cell.position)) {
                     g.setColor(GREEN);
+                } else if (
+                        selected.getAppliedCommands().contains(CommandType.Charge) &&
+                        distancesFromSelection[cell.position.getX()][cell.position.getY()] <= selected.getTroopType().movement
+                ) {
+                    // if charge is applied, you can't walk short distances anymore (pruning the action tree). So charge && short distance gets default color
+                    g.setColor(Color.lightGray);
                 } else {
                     g.setColor(BLUE);
                 }
@@ -183,7 +190,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
             selection = selected.getLocation();
             movementRange = cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase ? selected.getMovement() : 0;
             attackRange = cqgs.getGamePhase() != CQGameState.CQGamePhase.RallyPhase ? selected.getRange() : 0;
-            distancesFromSelection = cqgs.floodFill(cqgs.getCell(selection));
+            distancesFromSelection = cqgs.floodFill(cqgs.getCell(selection), movementRange);
         } else {
             selection = null;
             movementRange = 0;

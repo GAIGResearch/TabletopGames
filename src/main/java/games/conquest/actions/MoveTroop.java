@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
 import games.conquest.components.Cell;
+import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
 import utilities.Vector2D;
 
@@ -34,6 +35,10 @@ public class MoveTroop extends CQAction {
         Cell target = cqgs.getCell(highlight != null ? highlight : cqgs.highlight);
         if (target == null || !target.isWalkable(cqgs)) return false;
         int distance = cqgs.getDistance(cqgs.getCell(troop.getLocation()), target);
+        if (troop.getAppliedCommands().contains(CommandType.Charge) && distance <= troop.getTroopType().movement) {
+            // Prune nonsensical actions to prune action tree; if charge has been used, a troop can only move outside its normal range.
+            return false;
+        }
         return distance <= troop.getMovement(); // can only execute if within movement distance.
     }
 

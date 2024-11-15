@@ -121,13 +121,13 @@ public class CQGUIManager extends AbstractGUIManager {
                     a.setVisible(false);
                     a.setButtonAction(null, "");
                 }
-                EndTurn end = new EndTurn();
-                actionButtons[0].setButtonAction(end, end.toString());
-                actionButtons[0].setVisible(true);
+//                EndTurn end = new EndTurn();
+//                actionButtons[0].setButtonAction(end, end.toString());
+//                actionButtons[0].setVisible(true);
                 if (commandSelection != null && commandSelection.getCommandType() == CommandType.WindsOfFate) {
                     // Winds of Fate is highlighted; add that as well, if it can be executed.
                     for (AbstractAction action : actions) {
-                        if (!(action instanceof ApplyCommand)) continue;
+                        if (!(action instanceof ApplyCommand || action instanceof EndTurn)) continue;
                         ApplyCommand cmd = (ApplyCommand) action;
                         if (cmd.isWindsOfFate()) {
                             if (!cmd.canExecute(cqgs)) break; // can't execute it (not enough command points)
@@ -135,6 +135,13 @@ public class CQGUIManager extends AbstractGUIManager {
                             actionButtons[1].setVisible(true);
                             break;
                         }
+                    }
+                } else {
+                    for (AbstractAction action : actions) {
+                        if (!(action instanceof EndTurn)) continue;
+                        actionButtons[0].setButtonAction(action, action.toString());
+                        actionButtons[0].setVisible(true);
+                        break;
                     }
                 }
             }
