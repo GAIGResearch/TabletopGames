@@ -50,7 +50,16 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         // - MACRO_ACTION: only when the currentPlayer() has changed as a result of applying the action
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
-        return expand(gs, actions, getParameters().searchDepth).action;
+        if (getParameters().iterativeDeepening) {
+            // we do a depth D = 1 search, then D = 2 and so on until we reach maxDepth or exhaust budget
+            SearchResult bestResult = null;
+            for (int depth = 1; depth <= getParameters().searchDepth; depth++) {
+                bestResult = expand(gs, actions, depth);
+            }
+            return bestResult == null ? null : bestResult.action;
+        } else {
+            return expand(gs, actions, getParameters().searchDepth).action;
+        }
     }
 
     /**
@@ -107,7 +116,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             SearchResult result = expand(stateCopy, nextActions, newDepth);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
-            if (result.value[state.getCurrentPlayer()]  > bestValue) {
+            if (result.value[state.getCurrentPlayer()] > bestValue) {
                 bestAction = action;
                 bestValues = result.value;
                 bestValue = bestValues[state.getCurrentPlayer()];

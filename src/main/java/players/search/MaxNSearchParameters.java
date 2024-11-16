@@ -7,7 +7,7 @@ import players.heuristics.GameDefaultHeuristic;
 
 public class MaxNSearchParameters extends PlayerParameters {
 
-    enum SearchUnit {
+    public enum SearchUnit {
         ACTION, MACRO_ACTION, TURN
     }
 
@@ -15,12 +15,14 @@ public class MaxNSearchParameters extends PlayerParameters {
     protected SearchUnit searchUnit = SearchUnit.ACTION;
     protected IStateHeuristic heuristic;
     protected boolean paranoid = false;
+    protected boolean iterativeDeepening = false;
 
     public MaxNSearchParameters() {
         this.addTunableParameter("searchDepth", 1);
         this.addTunableParameter("searchUnit", SearchUnit.ACTION);
         this.addTunableParameter("heuristic", IStateHeuristic.class);
         this.addTunableParameter("paranoid", false);
+        this.addTunableParameter("iterativeDeepening", false);
     }
 
     @Override
@@ -30,6 +32,7 @@ public class MaxNSearchParameters extends PlayerParameters {
         searchUnit = (SearchUnit) getParameterValue("searchUnit");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         paranoid = (boolean) getParameterValue("paranoid");
+        iterativeDeepening = (boolean) getParameterValue("iterativeDeepening");
         if (heuristic == null) {
             heuristic = new GameDefaultHeuristic();
         }
