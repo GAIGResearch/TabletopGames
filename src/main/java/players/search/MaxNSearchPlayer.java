@@ -42,6 +42,10 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         return (MaxNSearchParameters) this.parameters;
     }
 
+    // TODO: alpha-beta pruning if paranoid
+    // TODO: Use information from iterative deepening to improve the expansion order
+    // TODO: Store the best action so far, in case we run out of budget
+
     @Override
     public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         // For each action we copy the state and recursively call the expand method
@@ -69,10 +73,6 @@ public class MaxNSearchPlayer extends AbstractPlayer {
      */
     protected SearchResult expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth) {
         MaxNSearchParameters params = getParameters();
-        if (System.currentTimeMillis() - startTime > params.budget) {
-            // out of time - return null action and a vector of zeros
-            return new SearchResult(null, new double[state.getNPlayers()]);
-        }
         // if we have reached the end of the search, or the state is terminal, we evaluate the state
         if (searchDepth == 0 || !state.isNotTerminal()) {
             // when valuing a state, we need to record the full vector of values for each player
@@ -120,6 +120,11 @@ public class MaxNSearchPlayer extends AbstractPlayer {
                 bestAction = action;
                 bestValues = result.value;
                 bestValue = bestValues[state.getCurrentPlayer()];
+            }
+
+            if (System.currentTimeMillis() - startTime > params.budget) {
+                // out of time - return best action so far
+                return new SearchResult(bestAction, bestValues);
             }
         }
         if (bestAction == null) {
