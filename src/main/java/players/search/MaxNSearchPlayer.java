@@ -44,7 +44,6 @@ public class MaxNSearchPlayer extends AbstractPlayer {
 
     // TODO: alpha-beta pruning if paranoid
     // TODO: Use information from iterative deepening to improve the expansion order
-    // TODO: Store the best action so far, in case we run out of budget
 
     @Override
     public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
@@ -58,11 +57,12 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             // we do a depth D = 1 search, then D = 2 and so on until we reach maxDepth or exhaust budget
             SearchResult bestResult = null;
             for (int depth = 1; depth <= getParameters().searchDepth; depth++) {
-                bestResult = expand(gs, actions, depth);
+                bestResult = expand(gs, actions, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             }
             return bestResult == null ? null : bestResult.action;
         } else {
-            return expand(gs, actions, getParameters().searchDepth).action;
+            return expand(gs, actions, getParameters().searchDepth,
+                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY).action;
         }
     }
 
@@ -71,7 +71,8 @@ public class MaxNSearchPlayer extends AbstractPlayer {
      * The first element is the best action to take, based on the recursive search.
      * The second element is the value of the state on the assumption this best action is taken.
      */
-    protected SearchResult expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth) {
+    protected SearchResult expand(AbstractGameState state, List<AbstractAction> actions, int searchDepth,
+                                  double alpha, double beta) {
         MaxNSearchParameters params = getParameters();
         // if we have reached the end of the search, or the state is terminal, we evaluate the state
         if (searchDepth == 0 || !state.isNotTerminal()) {
@@ -89,7 +90,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
                     values[i] = params.heuristic.evaluateState(state, i);
                 }
             }
-            return new SearchResult(null, values);
+            return new SearchResult(null, values, alpha, beta);
         }
 
         // otherwise we recurse to find the best action and value
@@ -113,7 +114,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
 
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
             // We are not interested in the best action from stateCopy
-            SearchResult result = expand(stateCopy, nextActions, newDepth);
+            SearchResult result = expand(stateCopy, nextActions, newDepth, alpha, beta);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
             if (result.value[state.getCurrentPlayer()] > bestValue) {
@@ -121,16 +122,31 @@ public class MaxNSearchPlayer extends AbstractPlayer {
                 bestValues = result.value;
                 bestValue = bestValues[state.getCurrentPlayer()];
             }
+            if (params.paranoid) {
+                // alpha-beta pruning
+                // bestValue is already from the perspective of the current player (i.e. negated for opponents)
+                if (getPlayerID() == state.getCurrentPlayer()) {
+                    if (bestValue >= beta) {
+                        return new SearchResult(bestAction, bestValues, alpha, beta);
+                    }
+                    alpha = Math.max(alpha, bestValue);
+                } else {
+                    if (bestValue <= alpha) {
+                        return new SearchResult(bestAction, bestValues, alpha, beta);
+                    }
+                    beta = Math.min(beta, bestValue);
+                }
+            }
 
             if (System.currentTimeMillis() - startTime > params.budget) {
                 // out of time - return best action so far
-                return new SearchResult(bestAction, bestValues);
+                return new SearchResult(bestAction, bestValues, alpha, beta);
             }
         }
         if (bestAction == null) {
             throw new AssertionError("No best action found");
         }
-        return new SearchResult(bestAction, bestValues);
+        return new SearchResult(bestAction, bestValues, alpha, beta);
     }
 
     @Override
@@ -140,7 +156,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         return retValue;
     }
 
-    protected record SearchResult(AbstractAction action, double[] value) {
+    protected record SearchResult(AbstractAction action, double[] value, double alpha, double beta) {
     }
 
 }
