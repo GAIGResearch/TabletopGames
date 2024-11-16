@@ -9,6 +9,8 @@ public class MCGSNode extends SingleTreeNode {
 
     private Map<Object, MCGSNode> transpositionMap = new HashMap<>();
     public List<Object> trajectory = new ArrayList<>();
+    protected List<Object> keysTorRemove = new ArrayList<>();
+
     protected MCGSNode() {
     }
 
@@ -23,7 +25,13 @@ public class MCGSNode extends SingleTreeNode {
     private void addToTranspositionTable(MCGSNode node, AbstractGameState keyState) {
         Object key = params.MCGSStateKey.getKey(keyState);
         MCGSNode graphRoot = (MCGSNode) root;
-        graphRoot.transpositionMap.put(key, node);
+        if (graphRoot.transpositionMap.containsKey(key)) {
+            if (graphRoot.transpositionMap.get(key) != node) {
+                throw new AssertionError("Unexpected?");
+            }
+        } else {
+            graphRoot.transpositionMap.put(key, node);
+        }
     }
 
     /**
@@ -94,10 +102,16 @@ public class MCGSNode extends SingleTreeNode {
     protected void resetDepth(SingleTreeNode unusedArgument) {
         int depthDelta = depth;
         root = this;
-        for (MCGSNode node : transpositionMap.values()) {
+        keysTorRemove = new ArrayList<>();
+        for (Object key : transpositionMap.keySet()) {
+            MCGSNode node = transpositionMap.get(key);
             node.depth -= depthDelta;
+            if (node.depth < 0) {
+                keysTorRemove.add(key);
+            }
             node.root = this;
         }
+        keysTorRemove.forEach(transpositionMap::remove);
     }
 
     /**
