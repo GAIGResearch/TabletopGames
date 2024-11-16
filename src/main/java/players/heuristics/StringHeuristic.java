@@ -144,4 +144,9 @@ public class StringHeuristic implements IStateHeuristic {
             throw new RuntimeException("Error invoking heuristic function as it returns a null value : ", e);
         }
     }
+
+    @Override
+    public String toString() {
+        return "StringHeuristic: " + fileName;
+    }
 }

@@ -2,6 +2,7 @@ package llm;
 
 import core.AbstractPlayer;
 import evaluation.RunArg;
+import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.PlayerFactory;
@@ -11,9 +12,9 @@ import utilities.Utils;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
-import static evaluation.RunArg.game;
-import static evaluation.RunArg.parseConfig;
+import static evaluation.RunArg.*;
 
 public class StringHeuristicTournament {
 
@@ -69,6 +70,14 @@ public class StringHeuristicTournament {
             Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(RunArg.Usage.RunGames));
 
             RoundRobinTournament tournament = new RoundRobinTournament(players, gameType, nPlayers, null, config);
+            //noinspection unchecked
+             for (String listenerClass : ((List<String>) config.get(listener))) {
+                IGameListener gameTracker = IGameListener.createListener(listenerClass);
+                tournament.addListener(gameTracker);
+                String outputDir = (String) config.get(destDir);
+                gameTracker.setOutputDirectory(outputDir);
+            }
+
             tournament.run();
         } catch (IOException e) {
             throw new RuntimeException(e);

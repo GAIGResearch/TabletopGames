@@ -916,7 +916,7 @@ public class SingleTreeNode {
         for (int i = 0; i < retValue.length; i++) {
             retValue[i] = params.heuristic.evaluateState(rolloutState, i);
             if (Double.isNaN(retValue[i]) || Double.isInfinite(retValue[i]))
-                throw new AssertionError("Illegal heuristic value - should be a number");
+                throw new AssertionError("Illegal heuristic value - should be a number - " + params.heuristic.toString());
         }
         return retValue;
     }
