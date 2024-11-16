@@ -1,6 +1,6 @@
 package games.toads.abilities;
 
-import games.toads.ToadConstants;
+import static games.toads.ToadConstants.*;
 import games.toads.components.ToadCard;
 import utilities.Pair;
 
@@ -13,7 +13,7 @@ public class Assassin implements ToadAbility {
         return List.of((isAttacker, isFlank, br) -> {
             // If the opponent card is a General, then we set its value to 0.
             ToadCard card = br.getOpponent(isAttacker, isFlank);
-            if (card.value == 7)
+            if (card.value == ASSASSIN_KILLS)
                 return 20; // we win
             return 0;
         });

@@ -94,7 +94,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);

@@ -18,13 +18,11 @@ public class ToadMCTSPlayer extends MCTSPlayer {
 
     public ToadMCTSPlayer(MCTSParams params) {
         super(params);
-        playerID = -1; // not initialised
         if (params.opponentTreePolicy == MultiTree && params.reuseTree) {
             System.out.println("Warning: MultiTree with reuseTree is not supported in ToadMCTSPlayer");
             params.setParameterValue("reuseTree", false);
         }
     }
-
     @Override
     public void initializePlayer(AbstractGameState state) {
         super.initializePlayer(state);
@@ -38,7 +36,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             return false;
         }
         ToadGameState state = (ToadGameState) gameState;
-        return state.getHiddenFlankCard(1 - playerID) != null;
+        return state.getHiddenFlankCard(1 - getPlayerID()) != null;
     }
 
     @Override
@@ -49,9 +47,8 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         MCTSParams params = getParameters();
 
         int currentPlayer = state.getCurrentPlayer();
-        if (playerID == -1) // first time through (we don't know our playerID yet
-            playerID = currentPlayer;
-        else if (playerID != currentPlayer)
+
+        if (getPlayerID() != currentPlayer)
             throw new AssertionError("Player ID mismatch in ToadMCTSPlayer");
 
         if (flankAction != null && params.reuseTree) { // from the last action; we may have some clean up to do
@@ -61,7 +58,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             if (params.opponentTreePolicy == MultiTree) {
                 // null out the root node for the opponent as it has dummy data in
                 MultiTreeNode multiTreeNode = (MultiTreeNode) root;
-                multiTreeNode.resetRoot(1 - playerID);
+                multiTreeNode.resetRoot(1 - getPlayerID());
             } else if (params.opponentTreePolicy == MCGS) {
                 // nothing to do in this case
             } else {
@@ -78,8 +75,8 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             if (params.opponentTreePolicy == MultiTree) {
                 // hack. the MultiTree root node has the wrong decisionPlayer on it; so we have to override
                 super._getAction(state, actions);
-                AbstractAction actualAction =  ((MultiTreeNode) root).getRoot(playerID).bestAction();
-                this.lastAction = new Pair<>(playerID, actualAction);
+                AbstractAction actualAction =  ((MultiTreeNode) root).getRoot(getPlayerID()).bestAction();
+                this.lastAction = new Pair<>(getPlayerID(), actualAction);
                 return actualAction;
             } else {
                 return super._getAction(state, actions);
@@ -129,7 +126,7 @@ public class ToadMCTSPlayer extends MCTSPlayer {
             SingleTreeNode childNode = root.getChildren().get(flankAction)[currentPlayer];
             actualAction = childNode.bestAction(actions);
         }
-        this.lastAction = new Pair<>(playerID, actualAction);
+        this.lastAction = new Pair<>(getPlayerID(), actualAction);
         return actualAction;
     }
 
@@ -139,11 +136,11 @@ public class ToadMCTSPlayer extends MCTSPlayer {
         // we then just override the root so that redeterminisations occur from perspective of the correct player
         // otherwise we redeterminise from the root player (i.e. our opponent), which is very bad
         if (functionalityApplies) {  // this is from last time
-            root.setRedeterminisationPlayer(playerID);
+            root.setRedeterminisationPlayer(getPlayerID());
             // then we need to correct the transposition table
             if (root instanceof MCGSNode mcgsRoot) {
                 mcgsRoot.getTranspositionMap().clear();
-                mcgsRoot.getTranspositionMap().put(getParameters().MCGSStateKey.getKey(gameState, playerID), mcgsRoot);
+                mcgsRoot.getTranspositionMap().put(getParameters().MCGSStateKey.getKey(gameState, getPlayerID()), mcgsRoot);
                 this.oldGraphKeys.clear();
             }
         }
