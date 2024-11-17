@@ -3,6 +3,7 @@ package players.search;
 import core.*;
 import core.actions.AbstractAction;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -94,8 +95,8 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         }
 
         // otherwise we recurse to find the best action and value
-        double bestValue = Double.NEGATIVE_INFINITY;
         double[] bestValues = new double[state.getNPlayers()];
+        Arrays.fill(bestValues, Double.NEGATIVE_INFINITY);
         AbstractAction bestAction = null;
         // we shuffle the actions so that ties are broken at random
         Collections.shuffle(actions, getRnd());
@@ -117,24 +118,23 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             SearchResult result = expand(stateCopy, nextActions, newDepth, alpha, beta);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
-            if (result.value[state.getCurrentPlayer()] > bestValue) {
+            if (result.value[state.getCurrentPlayer()] > bestValues[state.getCurrentPlayer()]) {
                 bestAction = action;
                 bestValues = result.value;
-                bestValue = bestValues[state.getCurrentPlayer()];
             }
-            if (params.paranoid) {
+            if (params.paranoid && params.alphaBetaPruning) {
                 // alpha-beta pruning
                 // bestValue is already from the perspective of the current player (i.e. negated for opponents)
                 if (getPlayerID() == state.getCurrentPlayer()) {
-                    if (bestValue >= beta) {
+                    if (bestValues[state.getCurrentPlayer()] > beta) {
                         return new SearchResult(bestAction, bestValues, alpha, beta);
                     }
-                    alpha = Math.max(alpha, bestValue);
+                    alpha = Math.max(alpha, bestValues[state.getCurrentPlayer()]);
                 } else {
-                    if (bestValue <= alpha) {
+                    if (-bestValues[state.getCurrentPlayer()] < alpha) {
                         return new SearchResult(bestAction, bestValues, alpha, beta);
                     }
-                    beta = Math.min(beta, bestValue);
+                    beta = Math.min(beta, -bestValues[state.getCurrentPlayer()]);
                 }
             }
 

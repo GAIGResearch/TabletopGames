@@ -13,8 +13,9 @@ public class MaxNSearchParameters extends PlayerParameters {
 
     protected int searchDepth = 1;
     protected SearchUnit searchUnit = SearchUnit.ACTION;
-    protected IStateHeuristic heuristic;
+    protected IStateHeuristic heuristic = new GameDefaultHeuristic();
     protected boolean paranoid = false;
+    protected boolean alphaBetaPruning = true;
     protected boolean iterativeDeepening = false;
 
     public MaxNSearchParameters() {
@@ -23,6 +24,7 @@ public class MaxNSearchParameters extends PlayerParameters {
         this.addTunableParameter("heuristic", IStateHeuristic.class);
         this.addTunableParameter("paranoid", false);
         this.addTunableParameter("iterativeDeepening", false);
+        this.addTunableParameter("alphaBetaPruning", true);
     }
 
     @Override
@@ -33,6 +35,7 @@ public class MaxNSearchParameters extends PlayerParameters {
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         paranoid = (boolean) getParameterValue("paranoid");
         iterativeDeepening = (boolean) getParameterValue("iterativeDeepening");
+        alphaBetaPruning = (boolean) getParameterValue("alphaBetaPruning");
         if (heuristic == null) {
             heuristic = new GameDefaultHeuristic();
         }
