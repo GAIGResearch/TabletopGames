@@ -29,6 +29,7 @@ public class AlphaBetaPruningTests {
         paramsOne.alphaBetaPruning = false;
         paramsOne.paranoid = true;
         paramsOne.searchDepth = 4;
+        paramsOne.setRandomSeed(89);
         AbstractPlayer player1 = new MaxNSearchPlayer(paramsOne);
         player1.setForwardModel(forwardModel);
 
@@ -37,6 +38,7 @@ public class AlphaBetaPruningTests {
         paramsTwo.alphaBetaPruning = true;
         paramsTwo.paranoid = true;
         paramsTwo.searchDepth = 4;
+        paramsTwo.setRandomSeed(89);
         AbstractPlayer player2 = new MaxNSearchPlayer(paramsTwo);
         player2.setForwardModel(forwardModel);
 
