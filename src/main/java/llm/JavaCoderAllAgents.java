@@ -8,8 +8,9 @@ public class JavaCoderAllAgents {
         // we run JavaCoder for the specified args with each model type and size
 
         for (LLMAccess.LLM_SIZE size : LLMAccess.LLM_SIZE.values()) {
-          //  LLMAccess.LLM_SIZE size = LLMAccess.LLM_SIZE.LARGE;
+            //   LLMAccess.LLM_SIZE size = LLMAccess.LLM_SIZE.LARGE;
             for (LLMAccess.LLM_MODEL model : LLMAccess.LLM_MODEL.values()) {
+                //     LLMAccess.LLM_MODEL model = LLMAccess.LLM_MODEL.ANTHROPIC;
                 if (model == LLMAccess.LLM_MODEL.LLAMA) {
                     continue;
                 }

@@ -37,7 +37,7 @@ public class GamePromptGenerator {
 
     // Packages to ignore when extracting methods and javadoc to pass to the LLM
     static List<String> packagesToIgnore = List.of("java.lang", "java.util", "core", "core.actions", "core.components", "evaluation.optimisation",
-            "java.util.function", "java.util.stream");
+            "java.util.function", "java.util.stream", "java.awt");
     // ... except for these classes in those otherwise ignored packages
     static List<String> classesToOverride = List.of("GridBoard", "Deck", "PartialObservableDeck",
             "GraphBoardWithEdges", "BoardNodeWithEdges",
