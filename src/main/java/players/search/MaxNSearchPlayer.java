@@ -27,13 +27,14 @@ public class MaxNSearchPlayer extends AbstractPlayer {
      * - ACTION: D is decremented at each decision node
      * - MACRO_ACTION: D is decremented at each decision node where the acting player changes
      * - TURN: D is decremented at each decision node where the turn number changes
-     *
+     * <p>
      * Additionally, the BUDGET can be specified as a cutoff for the search. If this much time passes
      * without the search finishing, the best action found so far is returned (likely to be pretty random).
      */
 
 
     private long startTime;
+
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
@@ -96,7 +97,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
 
         // otherwise we recurse to find the best action and value
         double[] bestValues = new double[state.getNPlayers()];
-        Arrays.fill(bestValues, Double.NEGATIVE_INFINITY);
+        double bestValue = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
         // we shuffle the actions so that ties are broken at random
         Collections.shuffle(actions, getRnd());
@@ -118,23 +119,25 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             SearchResult result = expand(stateCopy, nextActions, newDepth, alpha, beta);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
-            if (result.value[state.getCurrentPlayer()] > bestValues[state.getCurrentPlayer()]) {
+            if (result.value[state.getCurrentPlayer()] > bestValue) {
                 bestAction = action;
+                bestValue = result.value[state.getCurrentPlayer()];
                 bestValues = result.value;
-            }
-            if (params.paranoid && params.alphaBetaPruning) {
-                // alpha-beta pruning
-                // bestValue is already from the perspective of the current player (i.e. negated for opponents)
-                if (getPlayerID() == state.getCurrentPlayer()) {
-                    if (bestValues[state.getCurrentPlayer()] > beta) {
-                        return new SearchResult(bestAction, bestValues, alpha, beta);
+
+                if (params.paranoid && params.alphaBetaPruning) {
+                    // alpha-beta pruning
+                    // bestValue is already from the perspective of the current player (i.e. negated for opponents)
+                    if (getPlayerID() == state.getCurrentPlayer()) {
+                        if (bestValue > beta) {
+                            return new SearchResult(bestAction, bestValues, alpha, beta);
+                        }
+                        alpha = Math.max(alpha, bestValue);
+                    } else {
+                        if (-bestValue < alpha) {
+                            return new SearchResult(bestAction, bestValues, alpha, beta);
+                        }
+                        beta = Math.min(beta, -bestValue);
                     }
-                    alpha = Math.max(alpha, bestValues[state.getCurrentPlayer()]);
-                } else {
-                    if (-bestValues[state.getCurrentPlayer()] < alpha) {
-                        return new SearchResult(bestAction, bestValues, alpha, beta);
-                    }
-                    beta = Math.min(beta, -bestValues[state.getCurrentPlayer()]);
                 }
             }
 
