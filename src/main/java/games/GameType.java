@@ -51,6 +51,10 @@ import games.stratego.*;
 import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
+import games.tickettoride.TicketToRideForwardModel;
+import games.tickettoride.gui.TicketToRideGUIManager;
+import games.tickettoride.TicketToRideGameState;
+import games.tickettoride.TicketToRideParameters;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
 import games.toads.ToadForwardModel;
@@ -215,6 +219,12 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
             ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
+//    TicketToRide(2, 5,
+//            Arrays.asList(Strategy, Cards),
+//            Arrays.asList(),
+//            TicketToRideGameState.class, TicketToRideForwardModel.class, TicketToRideParameters.class, TicketToRideGUIManager.class,
+//            "data/tickettoride/");
+
 
 
     // Core classes where the game is defined

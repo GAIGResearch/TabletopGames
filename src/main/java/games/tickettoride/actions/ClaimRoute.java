@@ -20,8 +20,21 @@ import core.components.Component;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class GTAction extends AbstractAction {
+public class ClaimRoute extends AbstractAction {
 
+    public final int x;
+    public final int y;
+    public final int edge;
+    public final int playerID;
+    public final boolean free;
+
+    public ClaimRoute(int x, int y, int edge, int playerID, boolean free) {
+        this.x = x;
+        this.y = y;
+        this.edge = edge;
+        this.playerID = playerID;
+        this.free = free;
+    }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
      * through the {@link AbstractGameState#getComponentById(int)} method.
@@ -41,7 +54,7 @@ public class GTAction extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public GTAction copy() {
+    public ClaimRoute copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -49,7 +62,7 @@ public class GTAction extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof GTAction;
+        return obj instanceof ClaimRoute;
     }
 
     @Override

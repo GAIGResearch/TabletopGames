@@ -1,0 +1,24 @@
+[
+  {
+    "name": [
+      "String",
+      "TrainCars"
+    ],
+    "visibility": "VISIBLE_TO_ALL",
+    "cards": [
+      {
+        "name": ["String","Red"],
+        "color": ["Color", "red"]
+      },
+      {
+        "name": ["String","Green"],
+        "color": ["Color", "green"]
+      },
+      {
+        "name": ["String","Blue"],
+        "color": ["Color", "blue"]
+      }
+    ]
+  }
+
+]

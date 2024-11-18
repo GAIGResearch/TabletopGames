@@ -2,10 +2,12 @@ package games.tickettoride;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.Component;
+import core.components.*;
 import games.GameType;
 
+import core.turnorders.TurnOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -16,12 +18,24 @@ import java.util.List;
  * <p>Computation may be included in functions here for ease of access, but only if this is querying the game state information.
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
-public class TicketToRIdeGameState extends AbstractGameState {
+public class  TicketToRideGameState extends AbstractGameState {
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
      */
-    public TicketToRIdeGameState(AbstractParameters gameParameters, int nPlayers) {
+
+    HashMap<Integer, Area> areas;
+    Deck<Card> tempDeck;
+    GraphBoard world;
+
+
+
+    public GraphBoard getWorld() {
+        return world;
+    }
+
+
+    public TicketToRideGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
 
@@ -64,8 +78,8 @@ public class TicketToRIdeGameState extends AbstractGameState {
      * @param playerId - player observing this game state.
      */
     @Override
-    protected TicketToRIdeGameState _copy(int playerId) {
-        TicketToRIdeGameState copy = new TicketToRIdeGameState(gameParameters, getNPlayers());
+    protected TicketToRideGameState _copy(int playerId) {
+        TicketToRideGameState copy = new TicketToRideGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
         return copy;
     }
@@ -99,13 +113,36 @@ public class TicketToRIdeGameState extends AbstractGameState {
     @Override
     protected boolean _equals(Object o) {
         // TODO: compare all variables in the state
-        return o instanceof TicketToRIdeGameState;
+        return o instanceof TicketToRideGameState;
     }
 
     @Override
     public int hashCode() {
         // TODO: include the hash code of all variables
         return super.hashCode();
+    }
+    public Component getComponent(int componentId, int playerId) {
+        return areas.get(playerId).getComponent(componentId);
+    }
+
+    public Component getComponent(int componentId) {
+        return getComponent(componentId, -1);
+    }
+    Area getArea(int playerId) {
+        return areas.get(playerId);
+    }
+
+    protected void _reset() {
+        areas = null;
+//        tempDeck = null;
+//        world = null;
+//        quietNight = false;
+//        epidemic = false;
+//        nCardsDrawn = 0;
+//        researchStationLocations = new ArrayList<>();
+    }
+    void addComponents() {
+        super.addAllComponents();
     }
 
     // TODO: Consider the methods below for possible implementation
@@ -148,3 +185,5 @@ public class TicketToRIdeGameState extends AbstractGameState {
     // This method can be used to log a game event (e.g. for something game-specific that you want to include in the metrics)
     // public void logEvent(IGameEvent...)
 }
+
+

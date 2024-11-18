@@ -15,7 +15,7 @@ import java.util.List;
  *     <li>A sequence of actions triggered by specific decisions (e.g. play a card which forces another player to discard a card - other player: which card to discard?)</li>
  * </ol></p>
  * <p>Extended actions should implement the {@link IExtendedSequence} interface and appropriate methods, as detailed below.</p>
- * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link GTAction} apply here as well.</p>
+ * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link ClaimRoute} apply here as well.</p>
  */
 public class GTExtendedSequenceAction extends AbstractAction implements IExtendedSequence {
 
@@ -110,7 +110,7 @@ public class GTExtendedSequenceAction extends AbstractAction implements IExtende
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof GTAction;
+        return obj instanceof ClaimRoute;
     }
 
     @Override

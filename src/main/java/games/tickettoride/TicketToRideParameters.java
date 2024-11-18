@@ -14,7 +14,31 @@ import evaluation.optimisation.TunableParameters;
  * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
-public class TicketToRIdeParameters extends AbstractParameters {
+public class TicketToRideParameters extends AbstractParameters {
+
+    int nLocomotiveCards = 14;
+    int nCardsPerColor = 12;
+    int nTrainCardsDraw = 2;
+    int nDestinationCardsDraw = 3;
+
+
+    int nMaxPlayers = 5;
+
+    String dataPath;
+
+    int nInitialTrainCards = 5;
+
+    int totalDestinationTickets = 30;
+
+    int nTotalTrainCards = 240;
+    int nTotalDestinationCards = 5;
+
+    public String getDataPath(){return dataPath;}
+
+    public enum cardColors {
+        Red, Green, Blue, Black, White, Purple, Yellow, Orange, Locomotive
+    }
+
 
     @Override
     protected AbstractParameters _copy() {
@@ -25,7 +49,7 @@ public class TicketToRIdeParameters extends AbstractParameters {
     @Override
     protected boolean _equals(Object o) {
         // TODO: compare all variables.
-        return o instanceof TicketToRIdeParameters;
+        return o instanceof TicketToRideParameters;
     }
 
     @Override

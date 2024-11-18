@@ -1,12 +1,16 @@
-package games.tickettoride;
+package games.tickettoride.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import games.tickettoride.TicketToRideGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
 
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -23,9 +27,29 @@ import java.util.Set;
  *
  * <p>A simple implementation example can be found in {@link games.tictactoe.gui.TicTacToeGUIManager}.</p>
  */
-public class TicketToRIdeGUIManager extends AbstractGUIManager {
+public class TicketToRideGUIManager extends AbstractGUIManager {
 
-    public TicketToRIdeGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
+    TicketToRideCardView[] playerCards;
+    JLabel[][] playerHandCardCounts;
+    ArrayList<TicketToRideCardView>[] playerHands;
+    ArrayList<TicketToRideCardView> bufferDeck;
+    TicketToRideBoardView boardView;
+
+
+    TicketToRideGameState gameState;
+    int nPlayers;
+    int maxCards;
+    int maxBufferCards = 50;
+    int panelWidth;
+
+    ArrayList<Integer>[] handCardHighlights;
+    HashSet<Integer> playerHighlights;
+    ArrayList<Integer> bufferHighlights;
+
+
+    JLabel gameTurnStep;
+
+    public TicketToRideGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null) return;
 
