@@ -11,10 +11,11 @@ import utilities.Hash;
 import utilities.ImageIO;
 import utilities.Utils;
 
-import java.awt.*;
 
-import static games.pandemic.PandemicConstants.countryHash;
-import static games.pandemic.PandemicConstants.effectHash;
+import java.awt.*;
+import static games.tickettoride.TicketToRideConstants.destinationHash;
+
+
 import static core.CoreConstants.colorHash;
 import static core.CoreConstants.nameHash;
 
@@ -37,44 +38,23 @@ public class TicketToRideCardView extends CardView {
         this.component = c;
         String tooltip = "";
 
-        String dataPath = "data/ticketToRide/img/";
+        String dataPath = "data/tickettoride/img/";
         if (c != null) {
-            Property country = c.getProperty(countryHash);
-            Property pop = c.getProperty(Hash.GetInstance().hash("population"));
-            Property act = c.getProperty(Hash.GetInstance().hash("action"));
-            Property effect = c.getProperty(effectHash);
-            if (country != null) {
-                if (pop != null) {
-                    // City card
-                    this.background = ImageIO.GetInstance().getImage(dataPath + "citycardbg.png");
-                    tooltip = "<html>Population: " + ((PropertyLong)pop).value +
-                            "<br/>Country: " + ((PropertyString)country).value + "</html>";
-                } else {
-                    // Infection card
-                    this.background = ImageIO.GetInstance().getImage(dataPath + "infectioncardbg.png");
-                }
-            } else if (act != null) {
-                // Player role card
-//                this.background = ImageIO.GetInstance().getImage(dataPath + "playercardbg.png");
-//                this.secondaryBG = ImageIO.GetInstance().getImage(dataPath + "playeractivebg.png");
-                tooltip = "Action: " + ((PropertyString)act).value;
-            } else {
-                // Event card
-                this.background = ImageIO.GetInstance().getImage(dataPath + "eventcardbg.png");
-                tooltip = "Effect: " + ((PropertyString)effect).value;
+            Property colorOfCard = c.getProperty(Hash.GetInstance().hash("cardColor"));
+            if (colorOfCard != null) { //train car card
+                background = ImageIO.GetInstance().getImage(dataPath + "trainCard" + colorOfCard + "Bg.png");
+            } else { // destination card
+                background = ImageIO.GetInstance().getImage(dataPath + "destinationcardbg.png");
             }
         }
 
-        if (!tooltip.equals("")) setToolTipText(tooltip);
     }
 
     private static Image findBackground(Card c) {
-        String dataPath = "data/pandemic/img/";
+        String dataPath = "data/tickettoride/img/";
         Image background = null;
         if (c != null) {
             Property colorOfCard = c.getProperty(Hash.GetInstance().hash("cardColor"));
-
-
             if (colorOfCard != null) { //train car card
                 background = ImageIO.GetInstance().getImage(dataPath + "trainCard" + colorOfCard + "Bg.png");
             }
@@ -119,10 +99,10 @@ public class TicketToRideCardView extends CardView {
 
         if (card != null) {
             Property name = card.getProperty(nameHash);
-            boolean event = false;
-            if (card.getProperty(effectHash) != null) {
+            boolean destination = false;
+            if (card.getProperty(destinationHash) != null) {
                 // Event card
-                event = true;
+                destination = true;
             }
             PropertyColor col = (PropertyColor)card.getProperty(colorHash);
             if (col != null) {
@@ -156,10 +136,10 @@ public class TicketToRideCardView extends CardView {
             int size = g.getFont().getSize();
 
             int i = 0;
-            if (event) {
+            if (destination) {
                 Font f = g.getFont();
                 g.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
-                g.drawString("~ EVENT ~", x + 10, y + 17);
+                g.drawString("~ Destination ~", x + 10, y + 17);
                 g.setFont(f);
                 i = 1;
             }

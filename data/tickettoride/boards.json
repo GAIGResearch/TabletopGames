@@ -1,0 +1,49 @@
+[
+  {
+    "type": "graph",
+    "verticesKey": "name",
+    "neighboursKey": "neighbours",
+    "maxNeighbours": -1,
+    "id": "cities",
+    "img": "ticketToRideBg.jpg",
+    "size": ["Vector2D", [1200, 849]],
+    "nodes" :
+    [
+      {
+        "name": ["String","LOS ANGELES"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["SAN FRANCISCO", "SALT LATE CITY"]],
+        "coordinates": ["Vector2D",[117, 379]]
+      },
+      {
+        "name": ["String","SAN FRANCISCO"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["LOS ANGELES", "SALT LATE CITY"]],
+        "coordinates": ["Vector2D",[100, 295]]
+      },
+      {
+        "name": ["String","SALT LATE CITY"],
+        "color": ["Color","blue"],
+        "neighbours": ["String[]",["LOS ANGELES", "SAN FRANCISCO"]],
+        "coordinates": ["Vector2D",[100, 295]]
+      }
+    ],
+    "routes": [
+      {
+        "cities": ["String[]", ["LOS ANGELES", "SAN FRANCISCO"]],
+        "color": ["String", "red"],
+        "trainCardsRequired": ["Number", 3]
+      },
+      {
+        "cities": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
+        "color": ["String", "green"],
+        "trainCardsRequired": ["Number", 4]
+      },
+      {
+        "cities": ["String[]", ["SAN FRANCISCO", "SALT LAKE CITY"]],
+        "color": ["String", "blue"],
+        "trainCardsRequired": ["Number", 5]
+      }
+    ]
+  }
+]

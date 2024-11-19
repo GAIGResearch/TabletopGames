@@ -6,9 +6,14 @@ import core.components.*;
 import games.GameType;
 
 import core.turnorders.TurnOrder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import games.catan.CatanParameters;
+import games.pandemic.PandemicParameters;
+
+import java.util.*;
+
+import static games.pandemic.PandemicConstants.infectionHash;
+import static games.pandemic.PandemicConstants.playerDeckHash;
+import static games.pandemic.PandemicGameState.PandemicGamePhase.Forecast;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -28,6 +33,11 @@ public class  TicketToRideGameState extends AbstractGameState {
     Deck<Card> tempDeck;
     GraphBoard world;
 
+    protected int[] scores;
+
+    List<Map<TicketToRideParameters.TrainCar, Counter>> playerTrainCars;
+    HashMap<TicketToRideParameters.TrainCar, Counter> trainCarPool;
+
 
 
     public GraphBoard getWorld() {
@@ -45,7 +55,7 @@ public class  TicketToRideGameState extends AbstractGameState {
     @Override
     protected GameType _getGameType() {
         // TODO: replace with game-specific enum value declared in GameType
-        return GameType.GameTemplate;
+        return GameType.TicketToRide ;
     }
 
     /**
@@ -56,8 +66,14 @@ public class  TicketToRideGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // TODO: add all components to the list
-        return new ArrayList<>();
+        List<Component> components = new ArrayList<>(areas.values());
+        components.add(tempDeck);
+        components.add(world);
+        return components;
+    }
+
+    public Map<TicketToRideParameters.TrainCar, Counter> getPlayerTrainCars(int playerID) {
+        return playerTrainCars.get(playerID);
     }
 
     /**
@@ -80,7 +96,15 @@ public class  TicketToRideGameState extends AbstractGameState {
     @Override
     protected TicketToRideGameState _copy(int playerId) {
         TicketToRideGameState copy = new TicketToRideGameState(gameParameters, getNPlayers());
-        // TODO: deep copy all variables to the new game state.
+        copy.areas = new HashMap<>();
+        for(int key : areas.keySet())
+        {
+            Area a = areas.get(key);
+            copy.areas.put(key, a.copy());
+        }
+        copy.tempDeck = tempDeck.copy();
+        copy.world = world.copy();
+        copy.scores = scores;
         return copy;
     }
 
@@ -106,8 +130,16 @@ public class  TicketToRideGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
-        // TODO: What is this player's score (if any)?
-        return 0;
+        return scores[playerId];
+    }
+    public int[] getScores() {
+        return scores;
+    }
+
+    public void addScore(int playerID, int score) {
+        if (playerID < scores.length) {
+            scores[playerID] += score;
+        }
     }
 
     @Override
@@ -118,8 +150,7 @@ public class  TicketToRideGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        // TODO: include the hash code of all variables
-        return super.hashCode();
+        return Objects.hash(super.hashCode(), areas, tempDeck, world);
     }
     public Component getComponent(int componentId, int playerId) {
         return areas.get(playerId).getComponent(componentId);
@@ -135,15 +166,32 @@ public class  TicketToRideGameState extends AbstractGameState {
     protected void _reset() {
         areas = null;
 //        tempDeck = null;
-//        world = null;
+        world = null;
 //        quietNight = false;
-//        epidemic = false;
 //        nCardsDrawn = 0;
 //        researchStationLocations = new ArrayList<>();
     }
     void addComponents() {
         super.addAllComponents();
     }
+
+//    public boolean checkCost(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
+//        for (Map.Entry<TicketToRideParameters.Resource, Integer> e: cost.entrySet()) {
+//            if (playerResources.get(playerId).get(e.getKey()).getValue() < cost.get(e.getKey())) return false;
+//        }
+//        return true;
+//    }
+//    public boolean checkCost(CatanParameters.Resource resource, int nRequired, int playerId) {
+//        return playerResources.get(playerId).get(resource).getValue() >= nRequired;
+//    }
+//
+//    public boolean spendResourcesIfPossible(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
+//        if (!checkCost(cost, playerId)) return false;
+//        for (Map.Entry<CatanParameters.Resource, Integer> e: cost.entrySet()) {
+//            playerResources.get(playerId).get(e.getKey()).decrement(e.getValue());
+//        }
+//        return true;
+//    }
 
     // TODO: Consider the methods below for possible implementation
     // TODO: These all have default implementations in AbstractGameState, so are not required to be implemented here.

@@ -64,8 +64,8 @@ public class TicketToRideBoardView extends JComponent {
 
         // Background and card backs
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);
-        cardBackInf = ImageIO.GetInstance().getImage(dataPath + "CardBackInfections.png");
-        cardBackPD = ImageIO.GetInstance().getImage(dataPath + "CardBackPD.png");
+        cardBackInf = ImageIO.GetInstance().getImage(dataPath + "trainCardBlueBg.png");
+        cardBackPD = ImageIO.GetInstance().getImage(dataPath + "trainCardRedBg.png");
 
 
         width = (int)(background.getWidth(null) * scale);

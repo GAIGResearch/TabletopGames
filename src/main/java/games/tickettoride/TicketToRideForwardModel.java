@@ -19,6 +19,7 @@ import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static core.CoreConstants.playerHandHash;
 import static games.tickettoride.TicketToRideConstants.*;
 
+import games.tickettoride.actions.DrawTrainCards;
 import utilities.Hash;
 import core.components.Counter;
 
@@ -48,13 +49,14 @@ public class TicketToRideForwardModel extends StandardForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
+
         TicketToRideGameState state = (TicketToRideGameState) firstState;
         state._reset();
         TicketToRideParameters tp = (TicketToRideParameters) state.getGameParameters();
 
         state.tempDeck = new Deck<>("Temp Deck", VISIBLE_TO_ALL);
         state.areas = new HashMap<>();
-
+        state.scores = new int[state.getNPlayers()];
         AbstractGameData _data = new AbstractGameData();
         _data.load(tp.getDataPath());
 
@@ -69,18 +71,11 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             state.areas.put(i, playerArea);
         }
 
-        state.world = _data.findGraphBoard("cities");
-
         Area gameArea = new Area(-1, "Game Area");
-        gameArea.putComponent(ticketToRideBoardHash, state.world);
+        state.areas.put(-1, gameArea);
 
-        // Player score setup
-        for (int i = 0; i < state.getNPlayers(); i++) {
-            Counter playerScoreCounter = _data.findCounter("Player " + i + " Score");
-            playerScoreCounter.setMaximum(258);
-            playerScoreCounter.setValue(0);
-            gameArea.putComponent(Hash.GetInstance().hash("Player " + i + " Score"), playerScoreCounter);
-        }
+        state.world = _data.findGraphBoard("cities");
+        gameArea.putComponent(ticketToRideBoardHash, state.world);
 
 
         // setup train car card deck
@@ -101,6 +96,8 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         }
 
 
+        state.setFirstPlayer(1);
+
        //state.getTurnOrder().setStartingPlayer(1);
 
 
@@ -112,9 +109,13 @@ public class TicketToRideForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        TicketToRideGameState tg = (TicketToRideGameState) gameState;
+
         List<AbstractAction> actions = new ArrayList<>();
-        // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-        actions.add(new ClaimRoute());
+        int playerId = tg.getCurrentPlayer();
+        System.out.println(playerId + " in compute action");
+        actions.add(new DrawTrainCards(playerId));
+        endPlayerTurn(tg);
         return actions;
     }
 }

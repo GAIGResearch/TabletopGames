@@ -3,6 +3,7 @@ package games.tickettoride;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
+import games.pandemic.PandemicParameters;
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -33,9 +34,12 @@ public class TicketToRideParameters extends AbstractParameters {
     int nTotalTrainCards = 240;
     int nTotalDestinationCards = 5;
 
-    public String getDataPath(){return dataPath;}
+    public String getDataPath() {
+        return dataPath;
+    }
 
-    public enum cardColors {
+
+    public enum TrainCar {
         Red, Green, Blue, Black, White, Purple, Yellow, Orange, Locomotive
     }
 
@@ -56,5 +60,14 @@ public class TicketToRideParameters extends AbstractParameters {
     public int hashCode() {
         // TODO: include the hashcode of all variables.
         return super.hashCode();
+    }
+
+    public TicketToRideParameters(String dataPath) {
+        this.dataPath = dataPath;
+
+    }
+
+    public TicketToRideParameters(TicketToRideParameters ticketToRideParameters) {
+        this(ticketToRideParameters.dataPath);
     }
 }

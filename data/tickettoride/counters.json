@@ -1,0 +1,27 @@
+[
+  {
+    "id": "Player 1 Score",
+    "min": ["Integer", 0],
+    "max": ["Integer", 256]
+  },
+  {
+    "id": "Player 2 Score",
+    "min": ["Integer", 0],
+    "max": ["Integer", 256]
+  },
+  {
+    "id": "Player 3 Score",
+    "min": ["Integer", 0],
+    "max": ["Integer", 256]
+  },
+  {
+    "id": "Player 4 Score",
+    "min": ["Integer", 0],
+    "max": ["Integer", 256]
+  },
+  {
+    "id": "Player 5 Score",
+    "min": ["Integer", 0],
+    "max": ["Integer", 256]
+  }
+]

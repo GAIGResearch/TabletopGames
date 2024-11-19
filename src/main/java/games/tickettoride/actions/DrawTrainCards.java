@@ -2,15 +2,9 @@ package games.tickettoride.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Component;
-import core.properties.PropertyColor;
-import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.tickettoride.TicketToRideGameState;
 import games.tickettoride.TicketToRideParameters;
-
-import static core.CoreConstants.colorHash;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -28,20 +22,14 @@ import static core.CoreConstants.colorHash;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class ClaimRoute extends AbstractAction {
+public class DrawTrainCards extends AbstractAction {
 
-    public final int x;
-    public final int y;
-    public final int edge;
+
     public final int playerID;
-    public final boolean free;
 
-    public ClaimRoute(int x, int y, int edge, int playerID, boolean free) {
-        this.x = x;
-        this.y = y;
-        this.edge = edge;
+
+    public DrawTrainCards(int playerID) {
         this.playerID = playerID;
-        this.free = free;
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -54,6 +42,7 @@ public class ClaimRoute extends AbstractAction {
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
 
+        System.out.println("TEST DRAW TRAIN CARD ACTION" + playerID);
 
         return true;
     }
@@ -65,7 +54,7 @@ public class ClaimRoute extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ClaimRoute copy() {
+    public DrawTrainCards copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -73,7 +62,7 @@ public class ClaimRoute extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof ClaimRoute;
+        return obj instanceof DrawTrainCards;
     }
 
     @Override

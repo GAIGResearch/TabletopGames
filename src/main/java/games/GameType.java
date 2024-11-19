@@ -218,12 +218,12 @@ public enum GameType {
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
-            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
-//    TicketToRide(2, 5,
-//            Arrays.asList(Strategy, Cards),
-//            Arrays.asList(),
-//            TicketToRideGameState.class, TicketToRideForwardModel.class, TicketToRideParameters.class, TicketToRideGUIManager.class,
-//            "data/tickettoride/");
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
+    TicketToRide(2, 5,
+            Arrays.asList(),
+            Arrays.asList(),
+            TicketToRideGameState.class, TicketToRideForwardModel.class, TicketToRideParameters.class, TicketToRideGUIManager.class,
+            "data/tickettoride/");
 
 
 
