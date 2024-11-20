@@ -192,7 +192,7 @@ public class CQGameState extends AbstractGameState {
             actions.add(new EndTurn());
         int hash = this.hashCode();
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
-        if (!phase.equals(CQGamePhase.SelectionPhase) && !getCommands(uid, true).isEmpty()) {
+        if (getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
                 int commandId = c.getComponentID();
                 if (c.getCost() > getCommandPoints(uid)) continue;
@@ -201,18 +201,8 @@ public class CQGameState extends AbstractGameState {
                     if (cmd.canExecute(this)) {
                         actions.add(cmd); // only add it if it can execute
                     }
-                } else if (c.getCommandType().enemy) {
-                    for (Troop t : getTroops(uid ^ 1)) {
-                        // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
-                        if (!t.getAppliedCommands().contains(c.getCommandType())) {
-                            ApplyCommand cmd = new ApplyCommand(uid, commandId, t, c.getCommandType(), hash);
-                            if (cmd.canExecute(this)) {
-                                actions.add(cmd);
-                            }
-                        }
-                    }
                 } else {
-                    for (Troop t : getTroops(uid)) {
+                    for (Troop t : getTroops(c.getCommandType().enemy ? uid ^ 1 : uid)) {
                         // if Winds of Fate caused immediate cooldown of a command, you still can't apply it twice to the same troop
                         if (!t.getAppliedCommands().contains(c.getCommandType())) {
                             ApplyCommand cmd = new ApplyCommand(uid, commandId, t, c.getCommandType(), hash);
@@ -545,7 +535,7 @@ public class CQGameState extends AbstractGameState {
     public int hashCode() {
         return Objects.hash(
                 getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop, getCurrentPlayer(),
-                highlight, cmdHighlight, gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints)
+                gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints)
         );
     }
 }

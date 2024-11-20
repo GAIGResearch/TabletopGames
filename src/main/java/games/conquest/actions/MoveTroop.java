@@ -59,10 +59,11 @@ public class MoveTroop extends CQAction {
         Troop troop = cqgs.getSelectedTroop();
         Cell target = cqgs.getCell(this.highlight != null ? this.highlight : cqgs.highlight);
         troop.move(target, cqgs); // actually move troop.
-        if (troop.getMovement() == 0) {
+//        if (troop.getMovement() == 0) {
             // If selected troop has exhausted movement, change to CombatPhase
-            cqgs.setGamePhase(CQGameState.CQGamePhase.CombatPhase);
-        }
+        // Only allow one movement to reduce search space
+        cqgs.setGamePhase(CQGameState.CQGamePhase.CombatPhase);
+//        }
         return gs.setActionInProgress(this);
     }
 

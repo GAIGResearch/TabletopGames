@@ -49,6 +49,7 @@ public class ApplyCommand extends CQAction {
         if (isWindsOfFate()) {
             return !cqgs.getCommands(cqgs.getCurrentPlayer(), false).isEmpty();
         } else {
+            if (!cmd.getCommandType().phases.contains((CQGameState.CQGamePhase) cqgs.getGamePhase())) return false;
             Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
             if (target == null) return false; // only Winds of Fate can be applied without target.
             if ((target.getOwnerId() == cqgs.getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
@@ -56,10 +57,8 @@ public class ApplyCommand extends CQAction {
                 // Game rules state that chastise can't be used on the last remaining troop:
                 case Chastise -> cqgs.getTroops(target.getOwnerId()).size() > 1;
 
-                // no use in applying Charge on a troop after it has already moved; prevent this from happening to aid MCTS:
-                case Charge -> cqgs.getGamePhase() == CQGameState.CQGamePhase.SelectionPhase || (
-                        cqgs.getGamePhase() == CQGameState.CQGamePhase.MovementPhase && cqgs.getSelectedTroop() == target
-                );
+                // Only allow charging on the selected troop; others won't be able to move anyway
+                case Charge -> cqgs.getSelectedTroop() == target;
 
                 // only allow healing damaged targets:
                 case Regenerate -> target.getUnboostedHealth() < target.getTroopType().health;
