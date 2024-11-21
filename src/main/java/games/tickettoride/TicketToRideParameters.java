@@ -3,7 +3,7 @@ package games.tickettoride;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
-import games.pandemic.PandemicParameters;
+
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -33,6 +33,7 @@ public class TicketToRideParameters extends AbstractParameters {
 
     int nTotalTrainCards = 240;
     int nTotalDestinationCards = 5;
+
 
     public String getDataPath() {
         return dataPath;

@@ -18,9 +18,9 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 
 import static core.CoreConstants.*;
-import static games.pandemic.PandemicConstants.*;
-import static games.pandemic.gui.PandemicCardView.drawCard;
 import static gui.views.DeckView.drawDeck;
+import static games.tickettoride.TicketToRideConstants.*;
+import static games.tickettoride.gui.TicketToRideCardView.drawCard;
 
 public class TicketToRideBoardView extends JComponent {
     private final Image background;
@@ -253,8 +253,8 @@ public class TicketToRideBoardView extends JComponent {
 
             g.drawString("Player Discard Deck", (int) playerDiscardDeckLocation.getX() + panX, (int) playerDiscardDeckLocation.getY() - fontSize + panY);
 
-            drawDeck(g, (Deck<Card>) gameState.getComponent(playerDeckHash), null, cardBackPD, new Rectangle(playerDeckLocation.x + panX, playerDeckLocation.y + panY, playerDeckLocation.width, playerDeckLocation.height), false);
-            g.drawString("Player Deck", (int)playerDeckLocation.getX() + panX, panY + (int)playerDeckLocation.getY() - fontSize);
+            drawDeck(g, (Deck<Card>) gameState.getComponent(trainCardDeckHash), null, cardBackPD, new Rectangle(playerDeckLocation.x + panX, playerDeckLocation.y + panY, playerDeckLocation.width, playerDeckLocation.height), false);
+            g.drawString("Player Train Card Deck", (int)playerDeckLocation.getX() + panX, panY + (int)playerDeckLocation.getY() - fontSize);
 
 
         }

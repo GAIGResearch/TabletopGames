@@ -5,9 +5,11 @@ import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
-import core.components.Area;
-import core.components.Card;
-import core.components.Deck;
+import core.components.*;
+import core.properties.PropertyString;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
+import games.pandemic.PandemicConstants;
 import games.tickettoride.actions.ClaimRoute;
 
 import java.util.ArrayList;
@@ -16,12 +18,13 @@ import java.util.List;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 import static games.tickettoride.TicketToRideConstants.*;
 
 import games.tickettoride.actions.DrawTrainCards;
+import org.apache.hadoop.yarn.state.Graph;
 import utilities.Hash;
-import core.components.Counter;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
@@ -67,6 +70,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             playerTrainCardHand.setOwnerId(i);
             playerArea.putComponent(playerHandHash, playerTrainCardHand);
 
+            System.out.println("Setup: made deck for player " + i + " has " + playerTrainCardHand);
 
             state.areas.put(i, playerArea);
         }
@@ -80,25 +84,35 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         // setup train car card deck
         Deck<Card> trainCardDeck = new Deck<>("Train Card Deck", HIDDEN_TO_ALL);
-        trainCardDeck.add(_data.findDeck("TrainCars"));
+        Deck<Card> trainCardTypes = _data.findDeck("TrainCars");
+        for (Card c: trainCardTypes) { //Add x number of each train card type
+            for (int i = 0; i < 25; i++) {
+                trainCardDeck.add(c);
+            }
+
+        }
+
+
         trainCardDeck.shuffle(firstState.getRnd());
         gameArea.putComponent(TicketToRideConstants.trainCardDeckHash, trainCardDeck);
 
         state.addComponents();
 
+
         //draw initial cards
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = state.getArea(i);
-            Deck<Card> playerTrainCardHand = (Deck<Card>) playerArea.getComponent(playerHandHash);
+            Deck<Card> playerTrainCardHandDeck = (Deck<Card>) playerArea.getComponent(playerHandHash);
             for (int j = 0; j < tp.nInitialTrainCards; j++) {
-                new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHand.getComponentID()).execute(state);
+                new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(state);
             }
+
+            System.out.println("Setup: player " + i + " has " + playerTrainCardHandDeck);
         }
 
 
-        state.setFirstPlayer(1);
+        state.setFirstPlayer(0);
 
-       //state.getTurnOrder().setStartingPlayer(1);
 
 
     }
@@ -115,7 +129,25 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         int playerId = tg.getCurrentPlayer();
         System.out.println(playerId + " in compute action");
         actions.add(new DrawTrainCards(playerId));
-        endPlayerTurn(tg);
+
         return actions;
+    }
+
+    @Override
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+        if (currentState.isActionInProgress()) return;
+        TicketToRideGameState gs = (TicketToRideGameState) currentState;
+        TicketToRideParameters params = (TicketToRideParameters) gs.getGameParameters();
+
+        endPlayerTurn(gs);
+
+    }
+
+    void checkRoutesAvailable(AbstractGameState gameState) {
+        TicketToRideGameState tg = (TicketToRideGameState) gameState;
+
+        Area gameArea = tg.getArea(-1);
+
+        GraphBoard world = (GraphBoard) gameArea.getComponent(ticketToRideBoardHash);
     }
 }

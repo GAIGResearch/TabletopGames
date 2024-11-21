@@ -15,4 +15,6 @@ public class TicketToRideConstants {
 
     public final static int destinationHash = Hash.GetInstance().hash("destination");
 
+    public final static int edgeHash = Hash.GetInstance().hash("edge");
+
 }

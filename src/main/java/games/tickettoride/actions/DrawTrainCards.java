@@ -2,9 +2,17 @@ package games.tickettoride.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DrawCard;
+import core.components.Area;
+import core.components.Card;
 import core.components.Component;
+import core.components.Deck;
+import games.pandemic.PandemicConstants;
+import games.tickettoride.TicketToRideConstants;
 import games.tickettoride.TicketToRideGameState;
 import games.tickettoride.TicketToRideParameters;
+
+import static core.CoreConstants.playerHandHash;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -42,8 +50,14 @@ public class DrawTrainCards extends AbstractAction {
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
 
-        System.out.println("TEST DRAW TRAIN CARD ACTION" + playerID);
+        Area gameArea = tgs.getArea(-1);
+        Deck<Card> trainCardDeck = (Deck<Card>) gameArea.getComponent(TicketToRideConstants.trainCardDeckHash);
 
+        Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
+        new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
+
+
+        System.out.println( playerID + " now has after drawing" + playerTrainCardHandDeck);
         return true;
     }
 

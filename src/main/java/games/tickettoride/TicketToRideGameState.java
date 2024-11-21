@@ -4,16 +4,13 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
 import games.GameType;
+import games.pandemic.PandemicGameState;
 
-import core.turnorders.TurnOrder;
-import games.catan.CatanParameters;
-import games.pandemic.PandemicParameters;
 
 import java.util.*;
 
-import static games.pandemic.PandemicConstants.infectionHash;
-import static games.pandemic.PandemicConstants.playerDeckHash;
-import static games.pandemic.PandemicGameState.PandemicGamePhase.Forecast;
+import static core.CoreConstants.playerHandHash;
+
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -76,6 +73,10 @@ public class  TicketToRideGameState extends AbstractGameState {
         return playerTrainCars.get(playerID);
     }
 
+    public Component getComponentActingPlayer(int playerId, int componentId) {
+        return areas.get(playerId).getComponent(componentId);
+    }
+
     /**
      * <p>Create a deep copy of the game state containing only those components the given player can observe.</p>
      * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
@@ -96,12 +97,7 @@ public class  TicketToRideGameState extends AbstractGameState {
     @Override
     protected TicketToRideGameState _copy(int playerId) {
         TicketToRideGameState copy = new TicketToRideGameState(gameParameters, getNPlayers());
-        copy.areas = new HashMap<>();
-        for(int key : areas.keySet())
-        {
-            Area a = areas.get(key);
-            copy.areas.put(key, a.copy());
-        }
+        copy.areas = areas;
         copy.tempDeck = tempDeck.copy();
         copy.world = world.copy();
         copy.scores = scores;
@@ -144,6 +140,9 @@ public class  TicketToRideGameState extends AbstractGameState {
 
     @Override
     protected boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PandemicGameState)) return false;
+        if (!super.equals(o)) return false;
         // TODO: compare all variables in the state
         return o instanceof TicketToRideGameState;
     }
@@ -159,12 +158,13 @@ public class  TicketToRideGameState extends AbstractGameState {
     public Component getComponent(int componentId) {
         return getComponent(componentId, -1);
     }
-    Area getArea(int playerId) {
+    public Area getArea(int playerId) {
         return areas.get(playerId);
     }
 
     protected void _reset() {
         areas = null;
+        scores = null;
 //        tempDeck = null;
         world = null;
 //        quietNight = false;
@@ -173,6 +173,21 @@ public class  TicketToRideGameState extends AbstractGameState {
     }
     void addComponents() {
         super.addAllComponents();
+    }
+
+    public int getNumberOfSpecificTrainCard(int playerId, String cardColor){
+        Area gameArea = this.getArea(-1);
+        Deck<Card> playerTrainCardHandDeck = (Deck<Card>) this.getComponentActingPlayer(playerId, playerHandHash);
+        int count = 0;
+
+        for (Card card : playerTrainCardHandDeck) {
+            if (card.toString().equalsIgnoreCase(cardColor)) {
+                count++;
+            }
+        }
+
+        return count;
+
     }
 
 //    public boolean checkCost(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
@@ -192,6 +207,8 @@ public class  TicketToRideGameState extends AbstractGameState {
 //        }
 //        return true;
 //    }
+
+
 
     // TODO: Consider the methods below for possible implementation
     // TODO: These all have default implementations in AbstractGameState, so are not required to be implemented here.
