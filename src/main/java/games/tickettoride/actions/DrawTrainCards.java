@@ -47,6 +47,8 @@ public class DrawTrainCards extends AbstractAction {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
+        System.out.println("PLAYER " + playerID + " DRAWING CARDS" );
+
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
 
@@ -57,7 +59,7 @@ public class DrawTrainCards extends AbstractAction {
         new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
 
 
-      //  System.out.println( playerID + " now has after drawing" + playerTrainCardHandDeck);
+        System.out.println( playerID + " now has after drawing" + playerTrainCardHandDeck);
         return true;
     }
 

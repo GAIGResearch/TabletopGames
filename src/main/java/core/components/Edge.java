@@ -19,8 +19,10 @@ public class Edge extends Component {
         return "Edge (" + ownerId + ")";
     }
 
-    public Edge copy(){
-        return new Edge(ownerId, componentID);
+    public Edge copy() {
+        Edge copy = new Edge(ownerId, componentID);
+        copy.setProperties(this.getProperties());
+        return copy;
     }
 
     @Override

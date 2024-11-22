@@ -4,6 +4,9 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -29,11 +32,21 @@ public class TicketToRideParameters extends AbstractParameters {
 
     int nInitialTrainCards = 5;
 
+
+
     int totalDestinationTickets = 30;
 
     int nTotalTrainCards = 240;
     int nTotalDestinationCards = 5;
 
+    static Map<Integer, Integer> pointsPerRoute = new HashMap<>() {{
+        put(1, 1);
+        put(2, 2);
+        put(3, 4);
+        put(4, 7);
+        put(5, 10);
+        put(6, 15);
+    }};
 
     public String getDataPath() {
         return dataPath;
@@ -44,6 +57,10 @@ public class TicketToRideParameters extends AbstractParameters {
         Red, Green, Blue, Black, White, Purple, Yellow, Orange, Locomotive
     }
 
+
+    public HashMap<Integer, Integer> getPointsPerRoute() {
+        return (HashMap<Integer, Integer>) pointsPerRoute;
+    }
 
     @Override
     protected AbstractParameters _copy() {
@@ -70,5 +87,10 @@ public class TicketToRideParameters extends AbstractParameters {
 
     public TicketToRideParameters(TicketToRideParameters ticketToRideParameters) {
         this(ticketToRideParameters.dataPath);
+        this.pointsPerRoute = new HashMap<>();
+        for(int key : TicketToRideParameters.pointsPerRoute.keySet())
+            this.pointsPerRoute.put(key, TicketToRideParameters.pointsPerRoute.get(key));
+
+
     }
 }

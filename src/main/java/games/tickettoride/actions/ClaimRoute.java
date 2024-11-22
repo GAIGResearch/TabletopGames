@@ -4,13 +4,19 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Component;
+import core.components.Deck;
+import core.components.Edge;
+import core.properties.Property;
+import core.properties.PropertyBoolean;
 import core.properties.PropertyColor;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.tickettoride.TicketToRideGameState;
 import games.tickettoride.TicketToRideParameters;
+import utilities.Hash;
 
 import static core.CoreConstants.colorHash;
+import static core.CoreConstants.playerHandHash;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -30,18 +36,20 @@ import static core.CoreConstants.colorHash;
  */
 public class ClaimRoute extends AbstractAction {
 
-    public final int x;
-    public final int y;
-    public final int edge;
-    public final int playerID;
-    public final boolean free;
 
-    public ClaimRoute(int x, int y, int edge, int playerID, boolean free) {
-        this.x = x;
-        this.y = y;
+    public final Edge edge;
+    public final int playerID;
+    public final String colorOfRoute;
+    public final int costOfRoute;
+
+
+
+    public ClaimRoute(Edge edge, int playerID, String colorOfRoute, int costOfRoute) {
         this.edge = edge;
         this.playerID = playerID;
-        this.free = free;
+        this.colorOfRoute = colorOfRoute;
+        this.costOfRoute = costOfRoute;
+
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -53,7 +61,29 @@ public class ClaimRoute extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
+        int amountToRemove = costOfRoute;
 
+        System.out.println("PLAYER " + playerID + " CLAIMING ROUTE" );
+
+        Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
+
+        System.out.println("player hand before " + playerTrainCardHandDeck);
+
+        for(int i = 0; i < playerTrainCardHandDeck.getSize() && amountToRemove > 0; i ++){
+            Card currentCard = playerTrainCardHandDeck.get(i);
+            if (currentCard.toString().equals(colorOfRoute)){
+                playerTrainCardHandDeck.remove(i);
+                i--;
+                amountToRemove--;
+            }
+        }
+
+
+        Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
+        edge.setProperty(routeClaimedProp );
+        System.out.println("Claim route" + colorOfRoute);
+
+        System.out.println("player hand after " + playerTrainCardHandDeck);
 
         return true;
     }

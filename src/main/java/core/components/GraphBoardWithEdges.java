@@ -295,6 +295,9 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
                 }
             }
         }
+
+
+
         return newEdge;
     }
     public BoardNodeWithEdges getNodeByStringProperty(int prop_id, String value)

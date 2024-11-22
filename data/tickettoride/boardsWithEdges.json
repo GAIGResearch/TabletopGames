@@ -18,13 +18,13 @@
       },
       {
         "name": ["String","SAN FRANCISCO"],
-        "color": ["Color","blue"],
+        "color": ["Color","Blue"],
         "neighbours": ["String[]",["LOS ANGELES", "SALT LAKE CITY"]],
         "coordinates": ["Vector2D",[100, 295]]
       },
       {
         "name": ["String","SALT LAKE CITY"],
-        "color": ["Color","blue"],
+        "color": ["Color","Blue"],
         "neighbours": ["String[]",["LOS ANGELES", "SAN FRANCISCO"]],
         "coordinates": ["Vector2D",[100, 295]]
       }
@@ -32,21 +32,21 @@
     "edges": [
       {
         "nodes": ["String[]", ["LOS ANGELES", "SAN FRANCISCO"]],
-        "color": ["String", "red"],
-        "trainCardsRequired": ["Number", 3],
+        "color": ["String", "Red"],
+        "trainCardsRequired": ["Integer", 3],
         "routeClaimed": ["Boolean", false]
 
       },
       {
         "nodes": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
-        "color": ["String", "green"],
-        "trainCardsRequired": ["Number", 4],
+        "color": ["String", "Green"],
+        "trainCardsRequired": ["Integer", 4],
         "routeClaimed": ["Boolean", false]
       },
       {
         "nodes": ["String[]", ["SAN FRANCISCO", "SALT LAKE CITY"]],
-        "color": ["String", "blue"],
-        "trainCardsRequired": ["Number", 5],
+        "color": ["String", "Blue"],
+        "trainCardsRequired": ["Integer", 5],
         "routeClaimed": ["Boolean", false]
       }
     ]

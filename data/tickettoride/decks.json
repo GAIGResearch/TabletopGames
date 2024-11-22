@@ -8,15 +8,15 @@
     "cards": [
       {
         "name": ["String","Red"],
-        "color": ["Color", "red"]
+        "color": ["Color", "Red"]
       },
       {
         "name": ["String","Green"],
-        "color": ["Color", "green"]
+        "color": ["Color", "Green"]
       },
       {
         "name": ["String","Blue"],
-        "color": ["Color", "blue"]
+        "color": ["Color", "Blue"]
       }
     ]
   }
