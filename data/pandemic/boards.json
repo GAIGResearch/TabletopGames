@@ -49,6 +49,7 @@
     "type": "graph",
     "verticesKey": "name",
     "neighboursKey": "neighbours",
+    "edgesKey": "edges",
     "maxNeighbours": -1,
     "id": "cities",
     "img": "pandemicBG.jpg",

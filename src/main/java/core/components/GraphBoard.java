@@ -60,16 +60,16 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
             bn.copyComponentTo(bnCopy);
             nodeCopies.put(bn.getComponentID(), bnCopy);
         }
-        // Assign neighbours
-        for (BoardNode bn: boardNodes.values()) {
-            BoardNode bnCopy = nodeCopies.get(bn.getComponentID());
-            for (BoardNode neighbour: bn.getNeighbours()) {
-                bnCopy.addNeighbour(nodeCopies.get(neighbour.getComponentID()));
+            // Assign neighbours
+            for (BoardNode bn: boardNodes.values()) {
+                BoardNode bnCopy = nodeCopies.get(bn.getComponentID());
+                for (BoardNode neighbour: bn.getNeighbours()) {
+                    bnCopy.addNeighbour(nodeCopies.get(neighbour.getComponentID()));
+                }
+                for (Map.Entry<BoardNode, Integer> e: bn.getNeighbourSideMapping().entrySet()) {
+                    bnCopy.addNeighbour(nodeCopies.get(e.getKey().componentID), e.getValue());
+                }
             }
-            for (Map.Entry<BoardNode, Integer> e: bn.getNeighbourSideMapping().entrySet()) {
-                bnCopy.addNeighbour(nodeCopies.get(e.getKey().componentID), e.getValue());
-            }
-        }
         // Assign new neighbours
         b.setBoardNodes(new ArrayList<>(nodeCopies.values()));
         // Copy properties

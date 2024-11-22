@@ -57,7 +57,7 @@ public class DrawTrainCards extends AbstractAction {
         new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
 
 
-        System.out.println( playerID + " now has after drawing" + playerTrainCardHandDeck);
+      //  System.out.println( playerID + " now has after drawing" + playerTrainCardHandDeck);
         return true;
     }
 

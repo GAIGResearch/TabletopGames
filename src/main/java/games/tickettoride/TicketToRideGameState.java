@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.*;
 import games.GameType;
 import games.pandemic.PandemicGameState;
+import org.apache.hadoop.yarn.state.Graph;
 
 
 import java.util.*;
@@ -28,7 +29,7 @@ public class  TicketToRideGameState extends AbstractGameState {
 
     HashMap<Integer, Area> areas;
     Deck<Card> tempDeck;
-    GraphBoard world;
+    GraphBoardWithEdges world;
 
     protected int[] scores;
 
@@ -37,7 +38,7 @@ public class  TicketToRideGameState extends AbstractGameState {
 
 
 
-    public GraphBoard getWorld() {
+    public GraphBoardWithEdges getWorld() {
         return world;
     }
 

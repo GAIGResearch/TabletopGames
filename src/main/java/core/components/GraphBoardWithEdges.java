@@ -2,7 +2,19 @@ package core.components;
 
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
+import core.properties.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import utilities.Hash;
+
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
+
+import static core.CoreConstants.imgHash;
+import static core.CoreConstants.nameHash;
 
 public class GraphBoardWithEdges extends Component implements IComponentContainer<BoardNodeWithEdges> {
 
@@ -148,6 +160,146 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public void addConnection(BoardNodeWithEdges bn1, BoardNodeWithEdges bn2, Edge edge) {
         bn1.addNeighbour(bn2, edge);
         bn2.addNeighbour(bn1, edge);
+    }
+
+    public static List<GraphBoardWithEdges> loadBoards(String filename)
+    {
+        JSONParser jsonParser = new JSONParser();
+        ArrayList<GraphBoardWithEdges> graphBoards = new ArrayList<>();
+
+        try (FileReader reader = new FileReader(filename)) {
+
+            JSONArray data = (JSONArray) jsonParser.parse(reader);
+            for(Object o : data) {
+                GraphBoardWithEdges newGraphBoard = new GraphBoardWithEdges();
+                newGraphBoard.loadBoard((JSONObject) o);
+                graphBoards.add(newGraphBoard);
+            }
+
+        }catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        return graphBoards;
+    }
+
+    /**
+     * Loads board nodes from a JSON file.
+     * @param board - board to load in JSON format
+     */
+    public void loadBoard(JSONObject board) {
+        System.out.println("load board called");
+        componentName = (String) board.get("id");
+        String boardType = (String) board.get("type");
+        String verticesKey = (String) board.get("verticesKey");
+        String edgesKey = (String) board.get("edgesKey");
+        String neighboursKey = (String) board.get("neighboursKey");
+        int maxNeighbours = (int) (long) board.get("maxNeighbours");
+
+        properties.put(Hash.GetInstance().hash("boardType"), new PropertyString("boardType", boardType));
+        if (board.get("img") != null) {
+            properties.put(imgHash, new PropertyString("img", (String) board.get("img")));
+        }
+
+        JSONArray nodeList = (JSONArray) board.get("nodes");
+        for(Object o : nodeList) //nodes into boardNode
+        {
+            JSONObject node = (JSONObject) o;
+            BoardNodeWithEdges newBN = new BoardNodeWithEdges();
+            newBN.loadBoardNodeWithEdge(node);
+            newBN.setComponentName(((PropertyString)newBN.getProperty(nameHash)).value);
+            newBN.setMaxNeighbours(maxNeighbours);
+            boardNodes.put(newBN.componentID, newBN);
+        }
+
+
+        int _hash_vertices_ = Hash.GetInstance().hash(verticesKey);
+
+
+
+        JSONArray edgeList = (JSONArray) board.get("edges");
+
+        System.out.println("Edge list: " + edgeList);
+        System.out.println("Edge list size: " + edgeList.size());
+
+        // Step 2: Load edges
+        for (Object edgeObj : edgeList) {
+            JSONObject currentEdge = (JSONObject) edgeObj;
+
+
+
+            JSONArray edgeConnections = (JSONArray) currentEdge.get("nodes");
+            JSONArray nodesArray = (JSONArray) edgeConnections.get(1);
+
+
+            //Get the two nodes that form an edge
+            String edge1Name = (String) nodesArray.get(0);
+            String edge2Name = (String) nodesArray.get(1);
+
+            BoardNodeWithEdges node1 = (BoardNodeWithEdges) this.getNodeByProperty(_hash_vertices_, new PropertyString("name", edge1Name));
+            BoardNodeWithEdges node2 = (BoardNodeWithEdges) this.getNodeByProperty(_hash_vertices_, new PropertyString("name", edge2Name));
+
+            Edge edge;
+            edge = CreateEdgeWithProperties(currentEdge); //make edge
+
+            if (node1 != null && node2 != null) {
+                node1.addNeighbour(node2, edge); //add to neighbourEdgeMapping
+
+            }
+
+        }
+    }
+
+    public BoardNodeWithEdges getNodeByProperty(int prop_id, Property p) {
+        for (BoardNodeWithEdges n : boardNodes.values()) {
+            Property prop = n.getProperty(prop_id);
+            if(prop != null)
+            {
+                if(prop.equals(p))
+                    return n;
+            }
+        }
+        return null;
+    }
+
+    public Edge CreateEdgeWithProperties(JSONObject edge) {
+
+        //Create new edge and give it properties from jsonobject edge
+        Edge newEdge = new Edge();
+
+        for (Object currentKeyObj : edge.keySet()) {
+            String key = (String) currentKeyObj;
+            Object valueObj = edge.get(key);
+
+            if (valueObj instanceof JSONArray) {
+                JSONArray valueArray = (JSONArray) valueObj;
+                String type = (String) valueArray.get(0);
+                Object value = valueArray.get(1);
+
+                Property property = null;
+
+                if (type.equals("String[]")) {
+                    property = new PropertyStringArray(key, (JSONArray) value);
+                }
+                else if (type.equals("String")) {
+                    property = new PropertyString(key, (String) value);
+                }
+                else if (type.equals("Integer")) {
+                    property = new PropertyInt(key, ((Long) value).intValue());
+                }
+                else if (type.equals("Boolean")) {
+                    property = new PropertyBoolean(key, (Boolean) value);
+                }
+                if (property != null) {
+                    newEdge.setProperty(property);
+                }
+            }
+        }
+        return newEdge;
+    }
+    public BoardNodeWithEdges getNodeByStringProperty(int prop_id, String value)
+    {
+        return getNodeByProperty(prop_id, new PropertyString(value));
     }
 
     @Override

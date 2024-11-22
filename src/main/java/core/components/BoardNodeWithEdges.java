@@ -1,16 +1,20 @@
 package core.components;
 
 import core.CoreConstants;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.*;
 
 public class BoardNodeWithEdges extends Component {
 
     protected final Map<Edge, BoardNodeWithEdges> neighbourEdgeMapping;  // Neighbours mapping to edge object encapsulating edge information, connecting this node to the one in the map key
+    protected int maxNeighbours;  // Maximum number of neighbours for this board node
 
     public BoardNodeWithEdges() {
         super(CoreConstants.ComponentType.BOARD_NODE, "");
         neighbourEdgeMapping = new HashMap<>();
+        maxNeighbours = -1;
     }
 
     protected BoardNodeWithEdges(int owner, int ID) {
@@ -51,6 +55,14 @@ public class BoardNodeWithEdges extends Component {
 
     public Set<Edge> getEdges() {
         return new HashSet<>(neighbourEdgeMapping.keySet());
+    }
+
+    public void loadBoardNodeWithEdge(JSONObject node) {
+        this.componentName = (String) ( (JSONArray) node.get("name")).get(1);
+        parseComponent(this, node);
+    }
+    public void setMaxNeighbours(int maxNeighbours) {
+        this.maxNeighbours = maxNeighbours;
     }
 
     /**

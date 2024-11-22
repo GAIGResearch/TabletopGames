@@ -70,7 +70,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             playerTrainCardHand.setOwnerId(i);
             playerArea.putComponent(playerHandHash, playerTrainCardHand);
 
-            System.out.println("Setup: made deck for player " + i + " has " + playerTrainCardHand);
+            //System.out.println("Setup: made deck for player " + i + " has " + playerTrainCardHand);
 
             state.areas.put(i, playerArea);
         }
@@ -78,8 +78,9 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         Area gameArea = new Area(-1, "Game Area");
         state.areas.put(-1, gameArea);
 
-        state.world = _data.findGraphBoard("cities");
+        state.world = _data.findGraphBoardWithEdges("locations");
         gameArea.putComponent(ticketToRideBoardHash, state.world);
+
 
 
         // setup train car card deck
@@ -107,7 +108,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(state);
             }
 
-            System.out.println("Setup: player " + i + " has " + playerTrainCardHandDeck);
+            //System.out.println("Setup: player " + i + " has " + playerTrainCardHandDeck);
         }
 
 
@@ -127,7 +128,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         List<AbstractAction> actions = new ArrayList<>();
         int playerId = tg.getCurrentPlayer();
-        System.out.println(playerId + " in compute action");
+        //System.out.println(playerId + " in compute action");
         actions.add(new DrawTrainCards(playerId));
 
         return actions;
@@ -135,11 +136,14 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.isActionInProgress()) return;
-        TicketToRideGameState gs = (TicketToRideGameState) currentState;
-        TicketToRideParameters params = (TicketToRideParameters) gs.getGameParameters();
+        checkRoutesAvailable(currentState);
 
-        endPlayerTurn(gs);
+        if (currentState.isActionInProgress()) return;
+
+//        TicketToRideGameState gs = (TicketToRideGameState) currentState;
+//        TicketToRideParameters params = (TicketToRideParameters) gs.getGameParameters();
+//
+//        endPlayerTurn(gs);
 
     }
 
@@ -147,7 +151,8 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
 
         Area gameArea = tg.getArea(-1);
+        GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
 
-        GraphBoard world = (GraphBoard) gameArea.getComponent(ticketToRideBoardHash);
+        System.out.println(world.getNodeByStringProperty(nameHash, "SALT LAKE CITY"));
     }
 }

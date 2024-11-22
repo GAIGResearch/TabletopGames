@@ -26,7 +26,7 @@ public class TicketToRideBoardView extends JComponent {
     private final Image background;
     private final Image cardBackPD;
     private final Image cardBackInf;
-    private final GraphBoard graphBoard;
+    private final GraphBoardWithEdges graphBoard;
     private int width;
     private int height;
 
@@ -75,8 +75,8 @@ public class TicketToRideBoardView extends JComponent {
         playerLocations = new Rectangle[gs.getNPlayers()];
         highlights = new HashMap<>();
 
-        Collection<BoardNode> bList = graphBoard.getBoardNodes();
-        for (BoardNode b : bList) {
+        Collection<BoardNodeWithEdges> bList = graphBoard.getBoardNodes();
+        for (BoardNodeWithEdges b : bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
             boardNodeLocations.put(((PropertyString) b.getProperty(nameHash)).value,
@@ -161,8 +161,8 @@ public class TicketToRideBoardView extends JComponent {
         height = (int)(background.getHeight(null) * scale);
 
         boardNodeLocations = new HashMap<>();
-        Collection<BoardNode> bList = graphBoard.getBoardNodes();
-        for (BoardNode b : bList) {
+        Collection<BoardNodeWithEdges> bList = graphBoard.getBoardNodes();
+        for (BoardNodeWithEdges b : bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale), (int)(poss.getY()*scale));
             boardNodeLocations.put(((PropertyString) b.getProperty(nameHash)).value,
@@ -201,14 +201,14 @@ public class TicketToRideBoardView extends JComponent {
         drawImage(g, background, panX, panY);
 
         // Draw nodes
-        Collection<BoardNode> bList = graphBoard.getBoardNodes();
-        for (BoardNode b : bList) {
+        Collection<BoardNodeWithEdges> bList = graphBoard.getBoardNodes();
+        for (BoardNodeWithEdges b : bList) {
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int) (poss.getX() * scale) + panX, (int) (poss.getY() * scale) + panY);
             PropertyBoolean edge = ((PropertyBoolean) b.getProperty(edgeHash));
 
-            HashSet<BoardNode> neighbours = b.getNeighbours();
-            for (BoardNode b2 : neighbours) {
+            HashSet<BoardNodeWithEdges> neighbours = (HashSet<BoardNodeWithEdges>) b.getNeighbours();
+            for (BoardNodeWithEdges b2 : neighbours) {
                 Vector2D poss2 = ((PropertyVector2D) b2.getProperty(coordinateHash)).values;
                 Vector2D pos2 = new Vector2D((int) (poss2.getX() * scale) + panX, (int) (poss2.getY() * scale) + panY);
                 PropertyBoolean edge2 = ((PropertyBoolean) b2.getProperty(edgeHash));
@@ -228,7 +228,7 @@ public class TicketToRideBoardView extends JComponent {
 
         }
 
-        for (BoardNode b : bList) {
+        for (BoardNodeWithEdges b : bList) {
             String name = ((PropertyString) b.getProperty(nameHash)).value;
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int) (poss.getX() * scale) + panX, (int) (poss.getY() * scale) + panY);

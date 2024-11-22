@@ -2,9 +2,10 @@
   {
     "type": "graph",
     "verticesKey": "name",
+    "edgesKey": "nodes",
     "neighboursKey": "neighbours",
     "maxNeighbours": -1,
-    "id": "cities",
+    "id": "locations",
     "img": "ticketToRideBg.jpg",
     "size": ["Vector2D", [1200, 849]],
     "nodes" :
@@ -12,37 +13,41 @@
       {
         "name": ["String","LOS ANGELES"],
         "color": ["Color","blue"],
-        "neighbours": ["String[]",["SAN FRANCISCO", "SALT LATE CITY"]],
+        "neighbours": ["String[]",["SAN FRANCISCO", "SALT LAKE CITY"]],
         "coordinates": ["Vector2D",[117, 379]]
       },
       {
         "name": ["String","SAN FRANCISCO"],
         "color": ["Color","blue"],
-        "neighbours": ["String[]",["LOS ANGELES", "SALT LATE CITY"]],
+        "neighbours": ["String[]",["LOS ANGELES", "SALT LAKE CITY"]],
         "coordinates": ["Vector2D",[100, 295]]
       },
       {
-        "name": ["String","SALT LATE CITY"],
+        "name": ["String","SALT LAKE CITY"],
         "color": ["Color","blue"],
         "neighbours": ["String[]",["LOS ANGELES", "SAN FRANCISCO"]],
         "coordinates": ["Vector2D",[100, 295]]
       }
     ],
-    "routes": [
+    "edges": [
       {
-        "cities": ["String[]", ["LOS ANGELES", "SAN FRANCISCO"]],
+        "nodes": ["String[]", ["LOS ANGELES", "SAN FRANCISCO"]],
         "color": ["String", "red"],
-        "trainCardsRequired": ["Number", 3]
+        "trainCardsRequired": ["Number", 3],
+        "routeClaimed": ["Boolean", false]
+
       },
       {
-        "cities": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
+        "nodes": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
         "color": ["String", "green"],
-        "trainCardsRequired": ["Number", 4]
+        "trainCardsRequired": ["Number", 4],
+        "routeClaimed": ["Boolean", false]
       },
       {
-        "cities": ["String[]", ["SAN FRANCISCO", "SALT LAKE CITY"]],
+        "nodes": ["String[]", ["SAN FRANCISCO", "SALT LAKE CITY"]],
         "color": ["String", "blue"],
-        "trainCardsRequired": ["Number", 5]
+        "trainCardsRequired": ["Number", 5],
+        "routeClaimed": ["Boolean", false]
       }
     ]
   }

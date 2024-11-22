@@ -12,6 +12,7 @@ import java.util.Objects;
 public class AbstractGameData {
 
     private List<GraphBoard> graphBoards = new ArrayList<>();
+    private List<GraphBoardWithEdges> graphBoardsWithEdges = new ArrayList<>();
     private List<GridBoard> gridBoards = new ArrayList<>();
     private List<Deck<Card>> decks = new ArrayList<>();
     private List<Counter> counters = new ArrayList<>();
@@ -23,6 +24,8 @@ public class AbstractGameData {
             List<String> files = Arrays.asList(Objects.requireNonNull(dir.list()));
             if (files.contains("boards.json"))
                 graphBoards = GraphBoard.loadBoards(dataPath + "/boards.json");
+            if (files.contains("boardsWithEdges.json"))
+                graphBoardsWithEdges = GraphBoardWithEdges.loadBoards(dataPath + "/boardsWithEdges.json");
             if (files.contains("gridboards.json"))
                 gridBoards = GridBoard.loadBoards(dataPath + "/gridboards.json");
             if (files.contains("decks.json"))
@@ -47,6 +50,15 @@ public class AbstractGameData {
 
     public GraphBoard findGraphBoard(String name) {
         for (GraphBoard c : graphBoards) {
+            if (name.equalsIgnoreCase(c.getComponentName())) {
+                return c.copy();
+            }
+        }
+        return null;
+    }
+
+    public GraphBoardWithEdges findGraphBoardWithEdges(String name) {
+        for (GraphBoardWithEdges c : graphBoardsWithEdges) {
             if (name.equalsIgnoreCase(c.getComponentName())) {
                 return c.copy();
             }
