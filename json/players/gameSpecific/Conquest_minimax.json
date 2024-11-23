@@ -1,17 +1,9 @@
 {
-  "budgetType" : "BUDGET_FM_CALLS",
-  "rolloutTermination" : "END_TURN",
-  "rolloutLength" : 0,
-  "maxTreeDepth" : 10,
-  "MAST" : "Both",
-  "MASTGamma" : 0.5,
-  "K" : 10000000000,
-  "class" : "players.mcts.MCTSParams",
-  "budget" : 5000,
-  "treePolicy": "UCB",
-  "backupPolicy": "MaxMC",
-  "exploreEpsilon": 0.9,
-  "heuristic" : {"class" : "players.heuristics.GameDefaultHeuristic"},
-  "visitInitialisation": 10,
-  "reuseTree": true
+  "class" : "games.conquest.players.FullTurnMCTSPlayer",
+  "budgetType": "BUDGET_TIME",
+  "budget": 100000,
+  "searchDepth": 1,
+  "searchUnit": "TURN",
+  "heuristic": {"class" : "players.heuristics.GameDefaultHeuristic"},
+  "paranoid": true
 }

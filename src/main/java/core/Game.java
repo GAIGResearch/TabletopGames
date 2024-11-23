@@ -12,6 +12,7 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import players.PlayerFactory;
 import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
@@ -838,7 +839,7 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-        players.add(new MCTSPlayer());
+        players.add(PlayerFactory.createPlayers("json/players/gameSpecific/Conquest.json").get(0));
 //        players.add(new MCTSPlayer());
         players.add(new HumanGUIPlayer(ac));
 

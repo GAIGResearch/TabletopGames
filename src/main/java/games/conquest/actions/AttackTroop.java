@@ -81,7 +81,7 @@ public class AttackTroop extends CQAction {
         }
         cqgs.gainCommandPoints(vigilance ? playerId : playerId ^ 1, reward);
         cqgs.setGamePhase(CQGameState.CQGamePhase.RallyPhase);
-        return true;
+        return gs.setActionInProgress(this);
     }
 
     /**

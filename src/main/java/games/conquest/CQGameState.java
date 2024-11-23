@@ -192,7 +192,7 @@ public class CQGameState extends AbstractGameState {
             actions.add(new EndTurn());
         int hash = this.hashCode();
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
-        if (getCommands(uid, true).isEmpty()) {
+        if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
                 int commandId = c.getComponentID();
                 if (c.getCost() > getCommandPoints(uid)) continue;

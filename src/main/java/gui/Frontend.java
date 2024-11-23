@@ -145,6 +145,10 @@ public class Frontend extends GUI {
             );
 
             fileButton.addActionListener(e -> {
+                        fileChooser.setCurrentDirectory(new java.io.File(
+                                System.getProperty("user.dir") +
+                                "/json/players/gameSpecific"
+                        ));
                         int retVal = fileChooser.showOpenDialog(this);
                         if (retVal == JFileChooser.APPROVE_OPTION) {
                             try {
