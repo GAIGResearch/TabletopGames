@@ -41,6 +41,7 @@ public class CQGameState extends AbstractGameState {
         CombatPhase,
         RallyPhase
     }
+
     Cell[][] cells;
     HashSet<Troop> troops;
     HashMap<Vector2D, Integer> locationToTroopMap;
@@ -49,7 +50,7 @@ public class CQGameState extends AbstractGameState {
     public int cmdHighlight = -1; // the highlighted command, for the current player.
     GridBoard<Cell> gridBoard;
     PartialObservableDeck[] chosenCommands;
-    int[] commandPoints = new int[] {0, 0};
+    int[] commandPoints = new int[]{0, 0};
 
     /**
      * @param gameParameters - game parameters.
@@ -63,6 +64,7 @@ public class CQGameState extends AbstractGameState {
     public GridBoard<Cell> getGridBoard() {
         return gridBoard;
     }
+
     public Cell getCell(int x, int y) {
         CQParameters cqp = (CQParameters) getGameParameters();
         if (x < 0 || y < 0 || x >= cqp.gridWidth || y >= cqp.gridHeight) {
@@ -70,11 +72,14 @@ public class CQGameState extends AbstractGameState {
         }
         return cells[x][y];
     }
+
     public Cell getCell(Vector2D pos) {
         return getCell(pos.getX(), pos.getY());
     }
+
     /**
      * Gets all troops, including dead troops, for a given owner
+     *
      * @param uid Player to list troops for
      * @return A set of troops for the given owner
      */
@@ -84,8 +89,10 @@ public class CQGameState extends AbstractGameState {
                 .filter(t -> t.getOwnerId() == uid)
                 .collect(Collectors.toCollection(HashSet::new));
     }
+
     /**
      * Gets troops owned by `uid` that are alive
+     *
      * @param uid Player to list troops for
      * @return A set of troops for the given owner
      */
@@ -95,25 +102,32 @@ public class CQGameState extends AbstractGameState {
                 .filter(t -> t.getOwnerId() == uid && t.isAlive())
                 .collect(Collectors.toCollection(HashSet::new));
     }
+
     public PartialObservableDeck getCommands(int uid) {
         return chosenCommands[uid];
     }
+
     public Troop getSelectedTroop() {
         return (Troop) getComponentById(selectedTroop);
     }
+
     public int getCommandPoints() {
         return getCommandPoints(getCurrentPlayer());
     }
+
     public int getCommandPoints(int uid) {
         return commandPoints[uid];
     }
+
     public void setSelectedTroop(int selectedTroop) {
         assert gamePhase == CQGamePhase.SelectionPhase;
         this.selectedTroop = selectedTroop;
     }
+
     public HashMap<Vector2D, Integer> getLocationToTroopMap() {
         return locationToTroopMap;
     }
+
     /**
      * @return the enum value corresponding to this game, declared in {@link GameType}.
      */
@@ -130,23 +144,29 @@ public class CQGameState extends AbstractGameState {
         if (!troop.isAlive()) return null; // troop has died; is no longer relevant
         return troop;
     }
+
     public Troop getTroopByLocation(@NotNull Cell c) {
         return getTroopByLocation(c.position);
     }
+
     public Troop getTroopByLocation(int x, int y) {
         return getTroopByLocation(new Vector2D(x, y));
     }
+
     public Troop getTroopByRect(Rectangle r) {
         return getTroopByLocation(getLocationByRect(r));
     }
+
     public Vector2D getLocationByRect(@NotNull Rectangle r) {
         int x = (int) (r.getX() / defaultItemSize);
         int y = (int) (r.getY() / defaultItemSize);
         return new Vector2D(x, y);
     }
+
     /**
      * See your own commands on/off cooldown
-     * @param uid the user checking their own inactive commands
+     *
+     * @param uid    the user checking their own inactive commands
      * @param active whether the list should show the inactive or active commands.
      * @return set of commands that are on cooldown
      */
@@ -160,11 +180,13 @@ public class CQGameState extends AbstractGameState {
         }
         return commands;
     }
+
     /**
      * Returns all Components used in the game
      * and referred to by componentId from actions or rules.
      * This method is called after initialising the game state,
      * so all components will be initialised already.
+     *
      * @return - List of Components in the game.
      */
     @Override
@@ -178,10 +200,12 @@ public class CQGameState extends AbstractGameState {
         components.addAll(chosenCommands[1].getComponents());
         return components;
     }
+
     /**
      * List actions that are available in the current game phase.
      * This will be called from the different extended action sequences, which would
      * otherwise have to duplicate code computing these available actions.
+     *
      * @return the full list of actions available at the current point in the game.
      */
     public List<AbstractAction> getAvailableActions() {
@@ -227,7 +251,7 @@ public class CQGameState extends AbstractGameState {
             if (!currentTroop.hasMoved()) // TODO: If the player is the gui player, it's nice to let them move multiple times.
                 for (int i = Math.max(0, pos.getX() - range); i <= Math.min(gridBoard.getWidth(), pos.getX() + range); i++) {
                     for (int j = Math.max(0, pos.getY() - range); j <= Math.min(gridBoard.getHeight(), pos.getY() + range); j++) {
-                        MoveTroop mov = new MoveTroop(uid, new Vector2D(i,j), hash);
+                        MoveTroop mov = new MoveTroop(uid, new Vector2D(i, j), hash);
                         if (canPerformAction(mov, false))
                             actions.add(mov);
                     }
@@ -245,6 +269,7 @@ public class CQGameState extends AbstractGameState {
         }
         return actions;
     }
+
     public static double getRelativeTroopCost(@NotNull HashSet<Troop> troops) {
         double cost = 0;
         for (Troop troop : troops) {
@@ -252,6 +277,7 @@ public class CQGameState extends AbstractGameState {
         }
         return cost;
     }
+
     public static int getTotalTroopCost(@NotNull HashSet<Troop> troops) {
         int cost = 0;
         for (Troop troop : troops) {
@@ -264,6 +290,7 @@ public class CQGameState extends AbstractGameState {
      * Calculate a figure describing how many of a player's troops are alive, and if so, with how much health.
      * If a troop is dead, it counts as negative points scaled to their cost; if a troop is alive, it's positive points,
      * scaled to their cost and their current relative health.
+     *
      * @param playerId The player to check troop health for
      * @return the metric for alive-ness of troops
      */
@@ -288,6 +315,7 @@ public class CQGameState extends AbstractGameState {
         getCommands(uid).setVisibilityOfComponent(idx, uid ^ 1, true);
         return true;
     }
+
     public void gainCommandPoints(int uid, int points) {
         assert points >= 0;
         spendCommandPoints(uid, -points);
@@ -296,6 +324,7 @@ public class CQGameState extends AbstractGameState {
             setGameStatus(CoreConstants.GameResult.WIN_GAME);
         }
     }
+
     public boolean spendCommandPoints(int uid, int points) {
         if (getCommandPoints(uid) >= points) {
             commandPoints[uid] -= points;
@@ -304,6 +333,7 @@ public class CQGameState extends AbstractGameState {
             return false;
         }
     }
+
     public boolean moveTroop(@NotNull Troop troop, Vector2D to) {
         if (locationToTroopMap.get(troop.getLocation()) == null)
             return false;
@@ -311,6 +341,7 @@ public class CQGameState extends AbstractGameState {
         locationToTroopMap.put(to, troop.getComponentID());
         return true;
     }
+
     public void endTurn() {
         setGamePhase(CQGamePhase.SelectionPhase);
         selectedTroop = -1;
@@ -324,34 +355,42 @@ public class CQGameState extends AbstractGameState {
             cmd.step();
         }
     }
+
     public void addTroop(@NotNull Troop troop, Vector2D position) {
         troop.setLocation(position);
         locationToTroopMap.put(position, troop.getComponentID());
     }
 
     /*======= CHECKING / COMPUTING FUNCTIONS =======*/
+
     /**
      * Check if an action is allowed to be performed on the target. This verifies the different conditions for different actions.
-     * @param action Which action to check
+     *
+     * @param action           Which action to check
      * @param requireHighlight whether or not to require the target cell to be taken from the highlight, or the action
      * @return can the action be performed or not
      */
     public boolean canPerformAction(AbstractAction action, boolean requireHighlight) {
         if (action instanceof EndTurn) return gamePhase != CQGamePhase.SelectionPhase;
         CQAction cqAction = (CQAction) action;
-        if (requireHighlight && !cqAction.compareHighlight(highlight, (Command) getComponentById(cmdHighlight))) return false;
+        if (requireHighlight && !cqAction.compareHighlight(highlight, (Command) getComponentById(cmdHighlight)))
+            return false;
         return ((CQAction) action).canExecute(this);
     }
+
     public int getDistance(Cell from, Cell to) {
         return aStar(from, to);
     }
+
     public int getDistance(Vector2D from, Vector2D to) {
         return getDistance(getCell(from), getCell(to));
     }
+
     /**
      * Calculate the distance between two points, given some game state.
+     *
      * @param from The cell from which to calculate
-     * @param to The cell to which to calculate
+     * @param to   The cell to which to calculate
      * @return Distance between the two cells; returns 9999 (~inf) when unreachable
      */
     public int aStar(@NotNull Cell from, Cell to) {
@@ -387,24 +426,28 @@ public class CQGameState extends AbstractGameState {
         // If no path was found
         return 9999;
     }
+
     private static class Node {
         Cell cell;
         int g;
         int f;
+
         Node(Cell cell, int g, int f) {
             this.cell = cell;
             this.g = g;
             this.f = f;
         }
     }
+
     /**
      * Flood fill to generate distances to the whole board. (currently only used in GUI)
      * Used in case where all distances need to be known, due to being cheaper than performing A* on all cells.
-     * @param source Source cell from which to calculate distances
+     *
+     * @param source      Source cell from which to calculate distances
      * @param maxDistance maximum distance to perform floodFill on, or 0 if no maximum is set.
      * @return 2d integer array containing distances to the target square, or 9999 if unreachable.
      */
-    public int[][] floodFill (@NotNull Cell source, int maxDistance) {
+    public int[][] floodFill(@NotNull Cell source, int maxDistance) {
         int w = cells.length, h = cells[0].length;
         List<Cell> openSet = source.getNeighbors(cells); // initial set of neighbors
         Set<Cell> closedSet = new HashSet<>();
@@ -437,6 +480,7 @@ public class CQGameState extends AbstractGameState {
     }
 
     /*======= BOILERPLATE METHODS =======*/
+
     /**
      * <p>Create a deep copy of the game state containing only those components the given player can observe.</p>
      * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
@@ -446,7 +490,7 @@ public class CQGameState extends AbstractGameState {
      * <p>There are some utilities to assist with this in utilities.DeterminisationUtilities. One firm is guideline is
      * that the standard random number generator from getRnd() should not be used in this method. A separate Random is provided
      * for this purpose - redeterminisationRnd.
-     *  This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)</p>
+     * This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)</p>
      * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
      *
      * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
@@ -479,6 +523,7 @@ public class CQGameState extends AbstractGameState {
      * A player with a lot of command points and available commands, and lots of troops living, with an enemy with few troops living,
      * will receive a score of 1. The opposite will result in a negative score. Since the command point metric can't be negative,
      * the score will be divided by 3 for positive scores, or by 2 for negative scores;
+     *
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing, between -1 and 1
      */
@@ -508,6 +553,7 @@ public class CQGameState extends AbstractGameState {
         return _getHeuristicScore(playerId) * 1000;
 //        return getTotalTroopCost(getTroops(playerId));
     }
+
     @Override
     protected boolean _equals(Object o) {
         if (o == this) return true;
@@ -531,11 +577,24 @@ public class CQGameState extends AbstractGameState {
             return false;
         return true;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(
                 getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop, getCurrentPlayer(),
                 gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints)
         );
+    }
+
+    /**
+     * Deterministic randomness; given a certain game state, this will always result in the exact same random number
+     * due to being initialised on the hashcode of the current gamestate every time it gets called. Since this game only
+     * has exactly 1 place that involves randomness, this won't affect very much at all, except that it makes the game
+     * essentially deterministic. Taking action A in game state S will always result in the exact same game state S'.
+     * @return re-initialised rnd with seed of the current hashCode of the game state
+     */
+    @Override
+    public Random getRnd() {
+        return rnd = new Random(hashCode());
     }
 }
