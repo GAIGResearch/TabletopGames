@@ -12,6 +12,7 @@ import games.seasaltpaper.actions.PlayDuo;
 import games.seasaltpaper.actions.Stop;
 import games.seasaltpaper.cards.*;
 import games.seasaltpaper.SeaSaltPaperGameState.TurnPhase;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -48,10 +49,11 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
         //TODO ADD ACTUAL CARDs
         // Placeholder
-        for (int i = 0; i < 10; i++) {
-            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, CardSuite.SHELL, CardType.DUO));
-        }
-        sspgs.drawPile.shuffle(sspgs.getRnd());
+//        for (int i = 0; i < 10; i++) {
+//            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, CardSuite.SHELL, CardType.DUO));
+//        }
+//        sspgs.drawPile.shuffle(sspgs.getRnd());
+        setupDrawPile(sspgs);
 
         // Set up player hands and discards
         if (sspgs.playerHands.isEmpty()) {
@@ -79,6 +81,27 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
         // Update components in the game state
         sspgs.updateComponents();
+    }
+
+    private void setupDrawPile(SeaSaltPaperGameState gs) {
+        SeaSaltPaperParameters parameters = (SeaSaltPaperParameters) gs.getGameParameters();
+
+        // Card Color randomly generated
+        // TODO check if there is a rule for color distribution
+        CardColor[] colors = {CardColor.YELLOW, CardColor.RED, CardColor.BLUE, CardColor.ORANGE, CardColor.GREEN, CardColor.PURPLE};
+
+        for (Pair<CardSuite, CardType> p: parameters.nCardsPerType.keySet()) {
+            int count = parameters.nCardsPerType.get(p);
+            for (int i = 0; i < count; i++) {
+                if (p.b == CardType.MULTIPLIER) {
+                    gs.drawPile.add(new SeaSaltPaperCard(CardColor.GREY, p.a, p.b));
+                    continue;
+                }
+                CardColor c = colors[gs.getRnd().nextInt(6)]; // Randomly assign a color
+                gs.drawPile.add(new SeaSaltPaperCard(c, p.a, p.b));
+            }
+        }
+        gs.drawPile.shuffle(gs.getRnd());
     }
 
     /**

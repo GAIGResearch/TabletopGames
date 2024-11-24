@@ -1,11 +1,14 @@
 package games.seasaltpaper.cards;
 
+import com.sun.xml.bind.v2.TODO;
 import core.components.Card;
 
 import java.util.Objects;
 
 
 public class SeaSaltPaperCard extends Card {
+
+    // TODO add collectorBonus/duoBonus/Multiplier here directly
 
     protected final CardColor color;
     protected final CardSuite cardSuite;
