@@ -7,13 +7,18 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import players.human.ActionController;
+import utilities.ImageIO;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Set;
 
-public class SSPGuiManager extends AbstractGUIManager {
-    public SSPGuiManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
+public class SSPGUIManager extends AbstractGUIManager {
+
+    final static int cardWidth = 120;
+    final static int cardHeight = 150;
+    public SSPGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
 
         this.width = 1000;
@@ -55,10 +60,29 @@ public class SSPGuiManager extends AbstractGUIManager {
         drawDiscardPanel.add(drawPile);
         drawDiscardPanel.add(discardPile1);
         drawDiscardPanel.add(discardPile2);
-        mainGameArea.add(drawDiscardPanel, BorderLayout.CENTER);
+//        mainGameArea.add(drawDiscardPanel, BorderLayout.CENTER);
+
+        JLabel testCard = new JLabel();
+        String dataPath = "data/seasaltpaper/";
+        Image iconSuite = ImageIO.GetInstance().getImage(dataPath + "boat.png");
+
+        BufferedImage cardFront = new BufferedImage(120, 150, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = cardFront.createGraphics();
+        g.setColor(new Color(231, 82, 82));
+        g.fillRect(0, 0, cardFront.getWidth(), cardFront.getHeight());
+        g.drawImage(iconSuite.getScaledInstance(60, 75, Image.SCALE_DEFAULT), 30, 30, null);
+//        ImageIcon icon = new ImageIcon(iconSuite.getScaledInstance(60, 75, Image.SCALE_DEFAULT));
+        g.setColor(Color.BLACK);
+        g.setFont(new Font( "SansSerif", Font.BOLD, 12 ));
+        g.drawString("[1, 3, 5, 7]", 5, 15);
+        g.dispose();
+        ImageIcon icon = new ImageIcon(cardFront);
+        testCard.setIcon(icon);
+        mainGameArea.add(testCard, BorderLayout.CENTER);
 
         JPanel infoPanel = createGameStateInfoPanel("Sea Salt and Paper", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+
 
         parent.setLayout(new BorderLayout());
         parent.add(mainGameArea, BorderLayout.CENTER);

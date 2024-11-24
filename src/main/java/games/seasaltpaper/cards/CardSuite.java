@@ -11,29 +11,37 @@ import java.util.function.BiFunction;
 public enum CardSuite {
 
     //TODO move the collectorbonus and duoBonus to parameters
-    BOAT(new SeaSaltPaperParameters().boatCollectorBonus, 1),
-    FISH(new int[]{1, 2, 3}, 1),
-    SHELL(new int[]{1, 2, 3}, 1),
-    OCTOPUS(new int[]{1, 2, 3}, 1),
-    PENGUIN(new int[]{1, 2, 3}, 1),
-    SAILOR(new int[]{1, 2, 3}, 1),
-    SHARK(new int[]{1, 2, 3}, 1);
+    BOAT(new SeaSaltPaperParameters().boatCollectorBonus, 1, 1),
+    FISH(new int[]{}, 1, 1),
+    SHELL(new int[]{0, 2, 4, 6, 8, 10}, 1, 0),
+    OCTOPUS(new int[]{0, 3, 6, 9, 12}, 1, 0),
+    PENGUIN(new int[]{1, 3, 5}, 1, 2),
+    SAILOR(new int[]{0, 5}, 1, 3),
+    SHARK(new int[]{}, 1, 0);
 
     private final int[] collectorBonus;
 
     private final int duoBonus;
 
-    CardSuite(int[] collectorBonus, int duoBonus) {
+    private final int multiplier;
+
+    CardSuite(int[] collectorBonus, int duoBonus, int multiplier) {
         this.collectorBonus = collectorBonus;
         this.duoBonus = duoBonus;
+        this.multiplier = multiplier;
     }
 
-    public int[] GetCollectorBonus() {
+    public int[] getCollectorBonus() {
         return collectorBonus;
     }
 
-    public int GetDuoBonus() {
+    public int getDuoBonus() {
         return duoBonus;
+    }
+
+    public int getMultiplier()
+    {
+        return multiplier;
     }
 
 }

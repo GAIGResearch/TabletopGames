@@ -26,6 +26,12 @@ public class SeaSaltPaperCard extends Card {
         return "{" + color + ", " + cardSuite + ", " + cardType + "}";
     }
 
+    public CardSuite getCardSuite() { return cardSuite;}
+
+    public CardColor getCardColor() { return color;}
+
+    public CardType getCardType() { return cardType;}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
