@@ -11,15 +11,31 @@ import utilities.ImageIO;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 
 public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
 
     final String dataPath = "data/seasaltpaper/";
-    Image backOfCard;
+    BufferedImage backOfCard;
 
     public SSPDeckView(int player, Deck<SeaSaltPaperCard> d, boolean visible, String dataPath, Rectangle rect) {
         super(player, d, visible, SSPGUIManager.cardWidth, SSPGUIManager.cardHeight, rect);
+
+        //TODO make a proper card back image
+        // Generate card back
+        backOfCard = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = backOfCard.createGraphics();
+        // Set background color
+        g.setColor(new Color(94, 92, 92));
+        g.fillRect(0, 0, backOfCard.getWidth(), backOfCard.getHeight());
+
+        // Draw outline
+        g.setStroke(new BasicStroke(5));
+        g.setColor(Color.WHITE);
+        g.drawRect(0, 0, backOfCard.getWidth(), backOfCard.getHeight());
+
+        g.dispose();
 
 //        backOfCard = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
     }
@@ -29,9 +45,9 @@ public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
         Image cardFace = getCardImage(card);
         int fontSize = g.getFont().getSize();
         CardView.drawCard(g, new Rectangle(rect.x, rect.y, rect.width, rect.height-fontSize), card, cardFace, backOfCard, front);
-        if (front) {
-            g.drawString(card.toString(), rect.x + 2, (int) (rect.y + rect.height - fontSize * 1.5));
-        }
+//        if (front) {
+//            g.drawString(card.toString(), rect.x + 2, (int) (rect.y + rect.height - fontSize * 1.5));
+//        }
     }
 
     private Image getCardImage(SeaSaltPaperCard card)
@@ -54,7 +70,7 @@ public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
         g.setFont(new Font( "SansSerif", Font.BOLD, 12 ));
 
         if (card.getCardType() == CardType.COLLECTOR) {
-            String collectorBonus = card.getCardSuite().getCollectorBonus().toString();
+            String collectorBonus = Arrays.toString(card.getCardSuite().getCollectorBonus());
             g.drawString(collectorBonus, 5, 15);
         }
         if (card.getCardType() == CardType.DUO) {
@@ -66,6 +82,11 @@ public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
             g.drawString("X " + multiplier, 5, 15);
         }
         //TODO Mermaid cards
+
+        // Draw outline
+        g.setStroke(new BasicStroke(5));
+        g.setColor(Color.BLACK);
+        g.drawRect(0, 0, cardFront.getWidth(), cardFront.getHeight());
 
         g.dispose();
 
