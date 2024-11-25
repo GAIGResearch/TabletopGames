@@ -40,6 +40,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     //TODO: Make playerHands separate from played cards
     List<PartialObservableDeck<SeaSaltPaperCard>> playerHands;
+    List<Deck<SeaSaltPaperCard>> playerDiscards;
 
     // TODO make this partially observable (only top card visible) and for whoever playing ShellDuo
     Deck<SeaSaltPaperCard> discardPile1, discardPile2;  // TODO make this a list to generalize different number of discard piles
@@ -62,6 +63,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     protected List<Component> _getAllComponents() {
         List<Component> components = new ArrayList<>();
         components.addAll(playerHands);
+        components.addAll(playerDiscards);
         components.add(drawPile);
         components.add(discardPile1);
         components.add(discardPile2);
@@ -79,6 +81,10 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         sspgs.playerHands = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
             sspgs.playerHands.add(playerHands.get(i).copy());
+        }
+        sspgs.playerDiscards = new ArrayList<>();
+        for (int i = 0; i < getNPlayers(); i++) {
+            sspgs.playerDiscards.add(playerDiscards.get(i).copy());
         }
         sspgs.playerPoints = playerPoints.clone();
         sspgs.currentPhase = currentPhase;
@@ -133,6 +139,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     }
 
     public List<PartialObservableDeck<SeaSaltPaperCard>> getPlayerHands() { return playerHands; }
+
+    public List<Deck<SeaSaltPaperCard>> getPlayerDiscards() { return playerDiscards; }
 
     public Deck<SeaSaltPaperCard> getDrawPile() { return drawPile; }
 

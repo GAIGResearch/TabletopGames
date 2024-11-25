@@ -36,6 +36,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         sspgs.discardPile2 = new Deck<>("discardPile2", VisibilityMode.VISIBLE_TO_ALL);
 
         sspgs.playerHands = new ArrayList<>(sspgs.getNPlayers());
+        sspgs.playerDiscards = new ArrayList<>(sspgs.getNPlayers());
         sspgs.playerPoints = new int[sspgs.getNPlayers()];
         // Set up first round
         setupRound(sspgs);
@@ -66,6 +67,9 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 }
                 PartialObservableDeck<SeaSaltPaperCard> playerHand = new PartialObservableDeck<SeaSaltPaperCard>("playerHand"+i, i, visible);
                 sspgs.playerHands.add(playerHand);
+
+                Deck<SeaSaltPaperCard> playerDiscard = new Deck<>("PlayerHandDiscard"+i, i, VisibilityMode.VISIBLE_TO_ALL);
+                sspgs.playerDiscards.add(playerDiscard);
             }
         }
 
@@ -77,6 +81,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         for (int i = 0; i < sspgs.getNPlayers(); i++) {
             sspgs.setPlayerResult(GameResult.GAME_ONGOING, i);
             sspgs.playerHands.get(i).clear();
+            sspgs.playerDiscards.get(i).clear();
         }
 
         // Update components in the game state
