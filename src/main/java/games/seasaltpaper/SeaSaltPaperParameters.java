@@ -42,6 +42,10 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         put(new Pair<>(CardSuite.FISH, CardType.MULTIPLIER), 1); //Grey
         put(new Pair<>(CardSuite.PENGUIN, CardType.MULTIPLIER), 1); //Green
         put(new Pair<>(CardSuite.SAILOR, CardType.MULTIPLIER), 1); //LightOrange
+
+        // You are missing the mermaids
+        //put(new Pair<>(CardSuite.MERMAID, CardType.MERMAID), 4);// LightGrey
+
     }};
 
     public SeaSaltPaperParameters()
