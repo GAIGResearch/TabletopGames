@@ -25,20 +25,23 @@ public class SeaSaltPaperParameters extends AbstractParameters {
 
 
     public HashMap<Pair<CardSuite, CardType>, Integer> nCardsPerType = new HashMap<>() {{
-        put(new Pair<>(CardSuite.SHELL, CardType.DUO), 9);
-        put(new Pair<>(CardSuite.BOAT, CardType.DUO), 8);
-        put(new Pair<>(CardSuite.FISH, CardType.DUO), 7);
-        put(new Pair<>(CardSuite.SHARK, CardType.DUO), 10);
+        put(new Pair<>(CardSuite.SHELL, CardType.DUO), 9); // LightBlue (x2), Blue (x2), Yellow (x2), Green, Grey, Black - This is CRAB.
+        put(new Pair<>(CardSuite.BOAT, CardType.DUO), 8); // LightBlue (x2), Blue (x2), Yellow (x2), Black (x2)
+        put(new Pair<>(CardSuite.FISH, CardType.DUO), 7); // Blue (x2), Black (x2), Yellow, LightBlue, Green
+        put(new Pair<>(CardSuite.SHARK, CardType.DUO), 10);// Light Blue, Blue, Black, Green, Purple
 
-        put(new Pair<>(CardSuite.SHELL, CardType.COLLECTOR), 6);
-        put(new Pair<>(CardSuite.OCTOPUS, CardType.COLLECTOR), 5);
-        put(new Pair<>(CardSuite.PENGUIN, CardType.COLLECTOR), 3);
-        put(new Pair<>(CardSuite.SAILOR, CardType.COLLECTOR), 2);
+        // You actually need Swimmers, I think
+        //put(new Pair<>(CardSuite.SWIMMER, CardType.DUO), 5);// Light Blue, Blue, Yellow, LightOrange - 5 total.
 
-        put(new Pair<>(CardSuite.BOAT, CardType.MULTIPLIER), 1);
-        put(new Pair<>(CardSuite.FISH, CardType.MULTIPLIER), 1);
-        put(new Pair<>(CardSuite.PENGUIN, CardType.MULTIPLIER), 1);
-        put(new Pair<>(CardSuite.SAILOR, CardType.MULTIPLIER), 1);
+        put(new Pair<>(CardSuite.SHELL, CardType.COLLECTOR), 6); // Green, Grey, LightBlue, Blue, Black, Yellow
+        put(new Pair<>(CardSuite.OCTOPUS, CardType.COLLECTOR), 5); //Light Blue, Green, Grey, Purple, Yellow
+        put(new Pair<>(CardSuite.PENGUIN, CardType.COLLECTOR), 3); //Pink, LightOrange, Purple
+        put(new Pair<>(CardSuite.SAILOR, CardType.COLLECTOR), 2); // Orange, Pink
+
+        put(new Pair<>(CardSuite.BOAT, CardType.MULTIPLIER), 1); //Purple
+        put(new Pair<>(CardSuite.FISH, CardType.MULTIPLIER), 1); //Grey
+        put(new Pair<>(CardSuite.PENGUIN, CardType.MULTIPLIER), 1); //Green
+        put(new Pair<>(CardSuite.SAILOR, CardType.MULTIPLIER), 1); //LightOrange
     }};
 
     public SeaSaltPaperParameters()
