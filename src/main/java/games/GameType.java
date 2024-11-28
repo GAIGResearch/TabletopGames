@@ -4,6 +4,8 @@ import core.*;
 import core.rules.AbstractRuleBasedForwardModel;
 import games.battlelore.*;
 import games.battlelore.gui.BattleloreGUI;
+import games.battleship.*;
+import games.battleship.gui.BattleshipGUIManager;
 import games.blackjack.*;
 import games.blackjack.gui.BlackjackGUIManager;
 import games.cantstop.*;
@@ -214,7 +216,11 @@ public enum GameType {
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
-            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
+    Battleship(2, 2,
+            Arrays.asList(Simple, Abstract, Strategy),
+            Collections.singletonList(PatternBuilding),
+            BattleshipGameState.class, BattleshipForwardModel.class, BattleshipGameParameters.class, BattleshipGUIManager.class),;
 
 
     // Core classes where the game is defined
