@@ -1,5 +1,31 @@
-Love Letter is a card game where players hold a secret card representing their current suitor trying to deliver a love letter to the princess. The game includes 16 unique cards with different ranks and effects. Players draw and discard cards to manipulate the order of suitors closest to the princess. The round ends when the deck is empty or all players but one are eliminated. The player closest to the princess wins a token of affection, and the first player to collect a certain number of tokens based on the number of players wins the game.
+**"Love Letter" Game Summary for Developer Implementation:**
 
-Each card has a unique effect when discarded, such as forcing a player to discard their hand, trading cards with another player, or comparing hands and knocking out the lower rank. Some cards also have ongoing effects while in a player's hand, such as immunity to other cards' effects. Additionally, discarding Princess Annette will eliminate a player if they have a letter in their hand, while having Countess Wilhelmina in hand with either the King or Prince forces the player to discard the Countess.
+**Objective:**
+- Be the last player standing or have the highest-value card when the deck runs out.
 
-Players can look at one other player's hand without revealing it to everyone, and the Guard card allows a player to name a card and knock out another player if they have that card, unless all remaining players are protected by the Handmaid. Overall, Love Letter is a game of strategy and luck, where players must use their cards' effects to their advantage and anticipate their opponents' moves to win the princess's favor.
+**Player Count:**
+- 2-6 players (Classic version: 2-4 players)
+
+**Gameplay:**
+- Players draw and play one card per turn, each with unique effects.
+- Effects can eliminate players, trade hands, peek at cards, or grant temporary immunity.
+- The round ends when the deck is empty or one player remains.
+
+**Special Cards:**
+- **Princess & Guard:** Immediately eliminate players.
+- **Handmaid:** Provides temporary immunity.
+- **Countess:** Must be played if King or Prince is in hand.
+- **Spy:** Grants a favor token at round's end if played or discarded.
+
+**Strategy:**
+- Pay attention to played/discarded cards and other players' hands.
+- Manage your hand carefully, considering forced play conditions (Countess, Princess).
+- Use cards like Chancellor to draw and optimize your hand.
+- Protect yourself with Handmaid, eliminate low-card opponents with Baron, and bluff with Spy.
+
+**Winning:**
+- Win a set number of rounds to claim victory.
+
+**Classic Version:**
+- Excludes certain cards from the setup.
+- Supports 2-4 players.

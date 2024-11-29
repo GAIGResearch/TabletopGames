@@ -1,0 +1,44 @@
+**Game Summary for Implementation**
+
+**Game Rules:**
+- Players build a deck (Dominion) using Treasure, Action, and Victory cards to gain victory points.
+- Players start with 7 Copper and 3 Estate cards.
+- Game ends when 3 supply piles or the Province pile is empty. Player with most victory points wins (fewest turns in case of a tie).
+- Turn structure: Draw 5 cards → Action phase (play Action cards) → Buy phase (acquire new cards) → Clean-up phase (discard down to 7 cards).
+- Players have 1 Action and 1 Buy per turn, but Action cards can modify these values.
+- Deck is shuffled when empty.
+
+**Card Types:**
+- Treasure: Copper, Silver, Gold
+- Victory: Estate, Duchy, Province
+- Curse
+- Kingdom: Action, Action-Attack, Action-Reaction, Victory
+
+**Strategy:**
+- Focus on acquiring powerful Action and Victory point cards.
+- Manage Treasure effectively to outpace opponents.
+- Efficiently use Action cards to draw more cards and perform additional actions.
+- Plan ahead for Action card restrictions (e.g., cannot play Action cards for first two turns).
+- Combine Treasure cards and Action-provided coins to buy multiple cards.
+- Use Action cards to alter game rules (e.g., drawing more cards, playing more Action cards, buying additional cards).
+- Understand specific card effects and timing (e.g., Throne Room, Village, Witch, Thief).
+- Manage hand size and card discarding/trashing strategically.
+- Recognize various strategic setups (e.g., "Big Money" with Market and Mine).
+
+**Notable Cards & Effects:**
+- Throne Room: Play an Action card twice without using extra Actions.
+- Village: Requires careful tracking of remaining Actions.
+- Witch: Discards cards, manage hand size carefully.
+- Thief: Reveal last card, discard one Treasure chosen by the attacker.
+- Moat: Protects against Attack cards.
+- Market, Laboratory: Allow additional card draws and plays.
+- Mine: Enables Treasure upgrades.
+- Gardens: Victory card with end-game scoring.
+- Militia: Forces players to discard down to three cards.
+
+**Special Actions & Rules:**
+- Trash Treasures to gain other Treasures or cheaper ones.
+- Use Moat to avoid Attack effects.
+- Specific conditions for Moneylender, Remodel, Smithy, Spy, and Thief.
+- Resolve 'Chancellor' before other turn actions.
+- Place gained cards directly into the Discard pile.

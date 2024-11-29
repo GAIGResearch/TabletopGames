@@ -4,9 +4,8 @@ import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
-
-import java.util.Objects;
 
 /**
  * The targeted player discards its current and draws a new one.
@@ -15,7 +14,7 @@ import java.util.Objects;
 public class PrinceAction extends PlayCard implements IPrintable {
 
     public PrinceAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.Prince, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
+        super(CardType.Prince, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -29,7 +28,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
         // if the discarded card is a princess, the targeted player loses the game
         targetCardType = card.cardType;
-        if (targetCardType == LoveLetterCard.CardType.Princess) {
+        if (targetCardType == CardType.Princess) {
             llgs.killPlayer(playerID, targetPlayer, cardType);
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Player " + targetPlayer + " discards Princess and loses!");

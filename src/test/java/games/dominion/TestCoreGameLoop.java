@@ -53,9 +53,9 @@ public class TestCoreGameLoop {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.setGamePhase(DominionGamePhase.Buy);
         for (int i = 0; i < 10; i++) {
-            state.spend(state.availableSpend(0));
+            state.spend(state.getAvailableSpend(0));
             state.spend(-i);
-            assertEquals(i, state.availableSpend(0));
+            assertEquals(i, state.getAvailableSpend(0));
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             Set<CardType> availableCards = actions.stream()
                     .filter(a -> a instanceof BuyCard)
@@ -157,7 +157,7 @@ public class TestCoreGameLoop {
         assertEquals(0, state.cardsOfType(CardType.SILVER, 0, DeckType.HAND));
         assertEquals(0, state.cardsOfType(CardType.SILVER, 0, DeckType.DRAW));
         assertEquals(silverAvailable - 1, state.cardsOfType(CardType.SILVER, 0, DeckType.SUPPLY));
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getBuysLeft());
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
     }
 
@@ -168,7 +168,7 @@ public class TestCoreGameLoop {
         BuyCard newBuy = new BuyCard(CardType.COPPER, 0);
         state.changeBuys(3);
         for (int i = 0; i < 4; i++) {
-            assertEquals(4 - i, state.buysLeft());
+            assertEquals(4 - i, state.getBuysLeft());
             assertEquals(i, state.cardsOfType(CardType.COPPER, 0, DeckType.DISCARD));
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             assertTrue(actions.contains(new EndPhase(DominionGamePhase.Buy)));
@@ -176,7 +176,7 @@ public class TestCoreGameLoop {
             fm.computeAvailableActions(state);
             fm.next(state, newBuy);
         }
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getBuysLeft());
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(11, state.cardsOfType(CardType.COPPER, 0, DeckType.ALL));
@@ -240,7 +240,7 @@ public class TestCoreGameLoop {
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         (new SimpleAction(CardType.SMITHY, 0)).execute(state);
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
         assertTrue(actions.contains(new EndPhase(DominionGamePhase.Play)));

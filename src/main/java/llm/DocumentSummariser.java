@@ -11,11 +11,11 @@ import java.util.regex.Pattern;
 
 public class DocumentSummariser {
 
-    private String documentFullText;
     private String documentProcessedText;
 
     public DocumentSummariser(String filePath) {
 
+        String documentFullText;
         if (filePath.endsWith("pdf")) {
             try {
                 // Load the PDF document
@@ -79,17 +79,21 @@ public class DocumentSummariser {
                 Does this section of the document contain information about %s?
                 Rate this section from 1 to 5, where 1 is not at all and 5 is very much.
                 Just return a single number between 1 and 5.
+                Do not include any explanation.
                 """, areaOfInterest);
 
         String summaryPrompt = String.format("""
                 Summarise the information about %s in this text in 1-2 sentences.
+                Be concise and clear.
                 """, areaOfInterest);
 
         String finalSummary = String.format("""
                 Summarise the information about %s below in no more than %d words.
+                This summary will be used by a developer to implement the game.
+                Be concise and clear.
                 """, areaOfInterest, wordLimit);
 
-        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.GEMINI, "RulesSummary_LLM_Log.txt");
+        LLMAccess llm = new LLMAccess(LLMAccess.LLM_MODEL.MISTRAL, LLMAccess.LLM_SIZE.SMALL, "RulesSummary_LLM_Log.txt");
 
         int charactersPerRequest = 2500;
         int characterOverlap = 500;

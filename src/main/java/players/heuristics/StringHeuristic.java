@@ -1,5 +1,6 @@
 package players.heuristics;
 
+import com.fasterxml.jackson.databind.annotation.NoClass;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
@@ -21,8 +22,8 @@ import java.util.List;
 
 public class StringHeuristic implements IStateHeuristic {
 
-    private String className = "TicTacToeEvaluator";
-    private String fileName = "llm/" + className + ".java";
+    private final String className;
+    private final String fileName;
 
     private String str;
 
@@ -32,10 +33,6 @@ public class StringHeuristic implements IStateHeuristic {
 
     public String getFileName() {
         return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
     }
 
     public String getHeuristicCode() {
@@ -54,13 +51,7 @@ public class StringHeuristic implements IStateHeuristic {
         compile();
     }
 
-    public StringHeuristic() {
-        loadFile();
-        compile();
-    }
-
     private void loadFile() {
-
         // Read 'str' as whole text in fileName file:
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -79,7 +70,8 @@ public class StringHeuristic implements IStateHeuristic {
     private void compile() {
         // Method string
         //String className = fileName.replaceAll(".*/(.*?)\\.java", "$1");
-        String sourceCode = str;
+        // Replace class name in the source code
+        String sourceCode = str.replaceAll("public class .*? \\{", "public class " + className + " {");
 
         // Compile source code
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -131,7 +123,7 @@ public class StringHeuristic implements IStateHeuristic {
 
             classLoader.close();
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                 NoSuchMethodException | IOException e) {
+                 NoSuchMethodException | IOException | NoClassDefFoundError e) {
             throw new RuntimeException(e);
         }
     }
@@ -149,7 +141,12 @@ public class StringHeuristic implements IStateHeuristic {
         try {
             return (double) heuristicFunction.invoke(heuristicClass, gs, playerId);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error invoking heuristic function as it returns a null value : ", e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "StringHeuristic: " + fileName;
     }
 }

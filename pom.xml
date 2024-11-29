@@ -149,6 +149,11 @@
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-vertex-ai</artifactId>
+            <version>0.35.0</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-mistral-ai</artifactId>
             <version>0.35.0</version>
         </dependency>
@@ -157,7 +162,11 @@
             <artifactId>langchain4j-open-ai</artifactId>
             <version>0.35.0</version>
         </dependency>
-
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-anthropic</artifactId>
+            <version>0.35.0</version>
+        </dependency>
     </dependencies>
 
     <build>

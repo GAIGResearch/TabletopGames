@@ -56,27 +56,11 @@ public class RunGames implements IGameRunner {
         RunGames runGames = new RunGames();
         runGames.config = parseConfig(args, Collections.singletonList(Usage.RunGames));
 
-        String setupFile = runGames.config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.isEmpty()) {
-            // Read from file instead
-            try {
-                FileReader reader = new FileReader(setupFile);
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(reader);
-                runGames.config = parseConfig(json, Usage.RunGames);
-            } catch (FileNotFoundException ignored) {
-                throw new AssertionError("Config file not found : " + setupFile);
-                //    parseConfig(runGames, args);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
         runGames.initialiseGamesAndPlayerCount();
         if (!runGames.config.get(RunArg.gameParams).equals("") && runGames.gamesAndPlayerCounts.keySet().size() > 1)
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
         // 2. Setup
-
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!runGames.config.get(playerDirectory).equals("")) {
             agents.addAll(PlayerFactory.createPlayers((String) runGames.config.get(playerDirectory)));
