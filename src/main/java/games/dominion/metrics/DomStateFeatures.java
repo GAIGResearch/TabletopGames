@@ -58,11 +58,11 @@ public class DomStateFeatures extends AbstractStateFeature {
 
         // actionsLeft / 5.
         if (state.getCurrentPlayer() == playerId)
-            retValue[4] = state.actionsLeft() / 5.0;
+            retValue[4] = state.getActionsLeft() / 5.0;
 
         // buysLeft / 5
         if (state.getCurrentPlayer() == playerId)
-            retValue[5] = state.buysLeft() / 5.0;
+            retValue[5] = state.getBuysLeft() / 5.0;
 
         // Total cards / 40
         retValue[6] = state.getTotalCards(playerId) / 40.0;

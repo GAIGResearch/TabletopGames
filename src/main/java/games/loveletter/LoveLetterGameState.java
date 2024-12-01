@@ -9,6 +9,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import evaluation.metrics.Event;
 import games.GameType;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
@@ -116,6 +117,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     @Override
+    /** Returns the score of the player (the number of affection tokens) */
     public double getGameScore(int playerId) {
         return affectionTokens[playerId];
     }
@@ -156,10 +158,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * @param playerDeck - deck of player to check
      * @return - card type of the card that forces the countess to be played, null if countess not forced
      */
-    public LoveLetterCard.CardType needToForceCountess(Deck<LoveLetterCard> playerDeck) {
+    public CardType needToForceCountess(Deck<LoveLetterCard> playerDeck) {
         boolean ownsCountess = false;
         for (LoveLetterCard card : playerDeck.getComponents()) {
-            if (card.cardType == LoveLetterCard.CardType.Countess) {
+            if (card.cardType == CardType.Countess) {
                 ownsCountess = true;
                 break;
             }
@@ -167,7 +169,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
         if (ownsCountess) {
             for (LoveLetterCard card : playerDeck.getComponents()) {
-                if (card.cardType == LoveLetterCard.CardType.Prince || card.cardType == LoveLetterCard.CardType.King) {
+                if (card.cardType == CardType.Prince || card.cardType == CardType.King) {
                     return card.cardType;
                 }
             }
@@ -182,7 +184,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * @param targetPlayer - ID of player killed
      * @param cardType     - card used to kill
      */
-    public void killPlayer(int whoKill, int targetPlayer, LoveLetterCard.CardType cardType) {
+    public void killPlayer(int whoKill, int targetPlayer, CardType cardType) {
         setPlayerResult(CoreConstants.GameResult.LOSE_ROUND, targetPlayer);
 
         // a losing player needs to discard all cards
@@ -201,6 +203,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         return reserveCards;
     }
 
+    /** Player is protected by the Handmaid */
     public boolean isProtected(int playerID) {
         return effectProtection[playerID];
     }
@@ -209,6 +212,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         effectProtection[playerID] = protection;
     }
 
+    /** Number of cards left in the draw deck */
     public int getRemainingCards() {
         return drawPile.getSize();
     }
@@ -225,6 +229,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         return drawPile;
     }
 
+    /**
+     * Returns the affection tokens for each player in an array.
+     * The index of the array corresponds to the player ID.
+     */
     public int[] getAffectionTokens() {
         return affectionTokens;
     }

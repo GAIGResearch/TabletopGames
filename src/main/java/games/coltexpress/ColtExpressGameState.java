@@ -208,7 +208,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
             for (int i = 0; i < rounds.getSize(); i++) {
                 if (!rounds.isComponentVisible(i, playerId)) {
                     if (i == rounds.getSize() - 1) { // last card, so use an End Round Card
-                        copy.rounds.setComponent(i, getRandomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
+                        copy.rounds.setComponent(i, randomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
                     } else {
                         copy.rounds.setComponent(i, getRandomRoundCard((ColtExpressParameters) getGameParameters(), i, exclusionList));
                         exclusionList.add(copy.rounds.get(i));
@@ -225,6 +225,10 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return new ColtExpressHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * The score that playerID would have if the game ended immediately.
+     * This includes the value of all loot, and the possible bonus shooter reward.
+     */
     @Override
     public double getGameScore(int playerId) {
         double retValue = getLoot(playerId).sumInt(Loot::getValue);
@@ -357,7 +361,6 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         }
     }
 
-    // Getters, setters
     public LinkedList<Compartment> getTrainCompartments() {
         return trainCompartments;
     }
@@ -366,10 +369,17 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return playerLoot.get(playerID);
     }
 
+    /**
+     * The Deck of played cards that will be executed in order in the execution phase
+     * Only some of these are visible.
+     */
     public PartialObservableDeck<ColtExpressCard> getPlannedActions() {
         return plannedActions;
     }
 
+    /**
+     * The draw decks of each player (a List in playerID order)
+     */
     public List<Deck<ColtExpressCard>> getPlayerDecks() {
         return playerDecks;
     }
@@ -378,14 +388,24 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return rounds;
     }
 
+    /**
+     * A mapping of playerID to the character they are playing
+     */
     public HashMap<Integer, CharacterType> getPlayerCharacters() {
         return playerCharacters;
     }
 
+    /**
+     * The hands of each player (a List in playerID order)
+     * Only a player's own hand is visible
+     */
     public List<Deck<ColtExpressCard>> getPlayerHandCards() {
         return playerHandCards;
     }
 
+    /**
+     * An array of the number of bullets each player has remaining
+     */
     public int[] getBulletsLeft() {
         return bulletsLeft;
     }
@@ -451,13 +471,13 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
      * Helper getter methods for round card composition.
      */
 
-    RoundCard getRandomEndRoundCard(ColtExpressParameters cep, Random overrideRnd) {
+    RoundCard randomEndRoundCard(ColtExpressParameters cep, Random overrideRnd) {
         int nEndCards = cep.endRoundCards.length;
         int choice = overrideRnd == null ? rnd.nextInt(nEndCards) : overrideRnd.nextInt(nEndCards);
         return getEndRoundCard(cep, choice);
     }
 
-    RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
+    private RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
         if (idx >= 0 && idx < cep.endRoundCards.length) {
             RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
             RoundEvent event = cep.endRoundCards[idx].getEndCardEvent();
@@ -466,7 +486,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return null;
     }
 
-    RoundCard getRandomRoundCard(ColtExpressParameters cep, int i, List<RoundCard> exclusionList) {
+    private RoundCard getRandomRoundCard(ColtExpressParameters cep, int i, List<RoundCard> exclusionList) {
         List<String> namesToExclude = exclusionList.stream().map(RoundCard::getComponentName).collect(toList());
         List<ColtExpressTypes.RegularRoundCard> availableTypes = Arrays.stream(cep.roundCards)
                 .filter(rc -> !namesToExclude.contains(rc.name())).collect(toList());

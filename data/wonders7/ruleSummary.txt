@@ -1,0 +1,41 @@
+**Game Rules & Strategy Summary**
+
+**Game Rules:**
+- Players lead cities through three ages, each with 6 turns.
+- Players draft cards (structures, Wonders) and compare military strength with neighbors.
+- Victory points (VP) are awarded at the end of each age (1, 3, 5 VP respectively).
+- Cards have costs (coins, resources) and provide resources, points, coins, or military strength.
+- Players buy resources from neighbors for 2 coins each.
+- Players take turns playing cards, gaining coins, or advancing Wonders.
+- Military conflicts resolve at the end of each age.
+- Final score includes VP tokens, coins (3 coins = 1 VP), Wonder points, and structure points.
+- Scientific structures earn points for sets of symbols.
+- Two-player variant includes a shared "Free City."
+- Each Wonder has unique abilities and VP values.
+
+**Strategy:**
+- Focus on resource production, commerce, and military strength.
+- Prioritize structures that provide resources, points, and free builds.
+- Plan resource purchases and constructions carefully.
+- Use commercial structures to reduce resource costs.
+- Balance resource production, military strength, and coin management.
+- Optimize Free City resource purchases and constructions in the two-player variant.
+- Utilize each Wonder's unique abilities for resources, coins, or VP.
+- Optimize resource use, timing of Wonder stages, and Guild selection.
+- Build structures that provide market discounts or defensive bonuses.
+- Balance immediate gains with long-term VP from card colors and Guilds.
+- Build and manage your city to maximize VP and scientific symbols.
+
+**Key Points:**
+- Efficient resource production and management are crucial.
+- Balance immediate gains with long-term VP strategies.
+- Utilize each Wonder's unique abilities effectively.
+- Plan ahead for Free Constructions and coin income.
+- Optimize resource purchases and mandated constructions in the Free City (two-player variant).
+
+**Development Notes:**
+- Implement unique abilities for each Wonder.
+- Ensure each card's cost, benefits, and effects are clearly defined.
+- Incorporate military conflict resolution and VP awarding at the end of each age.
+- Implement the two-player variant with the Free City mechanics.
+- Ensure final scoring accurately reflects all VP sources (tokens, coins, Wonder points, structure points, scientific symbols).

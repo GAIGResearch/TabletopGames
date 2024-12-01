@@ -8,6 +8,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.ITreeActionSpace;
 import games.GameType;
 import games.loveletter.actions.PlayCard;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.ActionTreeNode;
 
@@ -58,7 +59,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         // Add all cards to the draw pile
         llgs.drawPile.clear();
-        for (HashMap.Entry<LoveLetterCard.CardType, Integer> entry : llp.cardCounts.entrySet()) {
+        for (HashMap.Entry<CardType, Integer> entry : llp.cardCounts.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++) {
                 LoveLetterCard card = new LoveLetterCard(entry.getKey());
                 llgs.drawPile.add(card);
@@ -326,19 +327,19 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
 
         // in case a player holds the countess and either the king or the prince, the countess needs to be played
-        LoveLetterCard.CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
+        CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
 
         // We create the respective actions for each card on the player's hand
         for (int card = 0; card < playerDeck.getSize(); card++) {
-            LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
-            if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
+            CardType cardType = playerDeck.getComponents().get(card).cardType;
+            if (cardType != CardType.Countess && cardTypeForceCountess != null) continue;
             int cardIdx;
             if (actionSpace.context == ActionSpace.Context.Dependent) cardIdx = card;
             else cardIdx = -1;  // Independent and default
             if (actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default) {
-                actions.addAll(cardType.getFlatActions(llgs, cardIdx, playerID, true));
+                actions.addAll(cardType.flatActions(llgs, cardIdx, playerID, true));
             } else if (actionSpace.structure == ActionSpace.Structure.Deep) {
-                actions.addAll(cardType.getDeepActions(llgs, cardIdx, playerID, true));
+                actions.addAll(cardType.deepActions(llgs, cardIdx, playerID, true));
             }
 
         }
@@ -355,10 +356,10 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
             PlayCard llAction = (PlayCard) action;
 
             // TODO - Probaly a better way to get the card names
-            LoveLetterCard.CardType[] soloCards = new LoveLetterCard.CardType[]{
-                    LoveLetterCard.CardType.Handmaid,
-                    LoveLetterCard.CardType.Countess,
-                    LoveLetterCard.CardType.Princess
+            CardType[] soloCards = new CardType[]{
+                    CardType.Handmaid,
+                    CardType.Countess,
+                    CardType.Princess
             };
 
             // Actions stored in the card type layer (Layer 1)
@@ -370,7 +371,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
             else {
                 ActionTreeNode cardNode = root.findChildrenByName(llAction.getCardType().toString().toLowerCase());
                 ActionTreeNode playerNode = cardNode.findChildrenByName("player" + llAction.getTargetPlayer());
-                if (llAction.getCardType() == LoveLetterCard.CardType.Guard) {
+                if (llAction.getCardType() == CardType.Guard) {
                     if (llAction.getTargetCardType() == null) {
                         playerNode.getChildren().get(0).setAction(action);
                     } else {

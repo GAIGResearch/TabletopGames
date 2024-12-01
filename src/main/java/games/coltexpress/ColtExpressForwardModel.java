@@ -112,7 +112,7 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         }
         cegs.rounds.shuffle(rndForRoundCards);
 
-        RoundCard endCard = cegs.getRandomEndRoundCard(cep, rndForRoundCards);
+        RoundCard endCard = cegs.randomEndRoundCard(cep, rndForRoundCards);
         cegs.rounds.addToBottom(endCard);
     }
 

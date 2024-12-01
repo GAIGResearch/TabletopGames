@@ -1,0 +1,23 @@
+**"Connect Four" Game Rules and Strategy Summary:**
+
+- **Objective:** Align four checkers of your color vertically, horizontally, or diagonally on a 7x6 grid.
+- **Players:** Two players, taking turns.
+- **Gameplay:**
+  - Players take turns dropping checkers into the top of the grid.
+  - Checkers fall to the lowest available row.
+  - The game ends when a player achieves a winning combination or the grid is full.
+- **Winning Condition:** First player to align four checkers in a row (vertical, horizontal, or diagonal) wins.
+- **Post-Game:** Winning player slides a lever to clear the grid, preparing for the next game.
+
+**Strategy:**
+- **Center Control:** Aim to control the center columns (3 and 4) to have the most line options.
+- **Block Opponent:** Prevent the opponent from getting three in a row, especially in the center.
+- **Forks:** Create opportunities where you can win in multiple lines in your next turn.
+- **Force Opponent:** Force the opponent into positions where they must block you, limiting their own opportunities.
+- **Corner Play:** Use corners strategically, especially for diagonals.
+
+**Development Notes:**
+- Implement a 7x6 grid.
+- Check for winning combinations after each turn.
+- Handle full grid (no more moves) scenario.
+- Include lever mechanism to clear the grid after a win.

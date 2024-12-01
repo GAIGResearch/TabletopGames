@@ -4,14 +4,14 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.loveletter.actions.PlayCard;
-import games.loveletter.cards.LoveLetterCard;
+import games.loveletter.cards.CardType;
 
 import java.util.Objects;
 
 public abstract class PlayCardDeep extends PlayCard implements IExtendedSequence {
     private boolean executed;
 
-    public PlayCardDeep(LoveLetterCard.CardType cardType, int cardIdx, int playerID) {
+    public PlayCardDeep(CardType cardType, int cardIdx, int playerID) {
         super(cardType, cardIdx, playerID, -1, null, null, false, true);
     }
 
