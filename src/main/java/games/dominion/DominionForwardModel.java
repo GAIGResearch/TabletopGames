@@ -152,7 +152,7 @@ public class DominionForwardModel extends StandardForwardModel {
 
         switch (state.getGamePhase().toString()) {
             case "Play":
-                if (state.actionsLeft() > 0) {
+                if (state.getActionsLeft() > 0) {
                     List<DominionCard> actionCards = state.getDeck(DeckType.HAND, playerID).stream()
                             .filter(DominionCard::isActionCard).collect(toList());
                     List<AbstractAction> availableActions = actionCards.stream()
@@ -166,8 +166,8 @@ public class DominionForwardModel extends StandardForwardModel {
                 return Collections.singletonList(new EndPhase(DominionGameState.DominionGamePhase.Play));
             case "Buy":
                 // we return every available card for purchase within our price range
-                int budget = state.availableSpend(playerID);
-                List<AbstractAction> options = state.cardsToBuy().stream()
+                int budget = state.getAvailableSpend(playerID);
+                List<AbstractAction> options = state.getCardsToBuy().stream()
                         .filter(ct -> ct.cost <= budget)
                         .sorted(Comparator.comparingInt(c -> -c.cost))
                         .map(ct -> new BuyCard(ct, playerID))

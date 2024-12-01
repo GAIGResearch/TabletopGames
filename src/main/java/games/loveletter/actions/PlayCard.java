@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Objects;
@@ -12,15 +13,15 @@ import java.util.Objects;
 public class PlayCard extends AbstractAction {
     protected final int playerID;
     final int targetPlayer;
-    protected final LoveLetterCard.CardType cardType;
-    final LoveLetterCard.CardType forcedCountessCardType;
+    protected final CardType cardType;
+    final CardType forcedCountessCardType;
     final boolean canExecuteEffect;
     final boolean discard;
     protected final int cardIdx;
 
-    LoveLetterCard.CardType targetCardType, otherCardInHand;
+    CardType targetCardType, otherCardInHand;
 
-    public PlayCard(LoveLetterCard.CardType cardType, int cardIdx, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
+    public PlayCard(CardType cardType, int cardIdx, int playerID, int targetPlayer, CardType targetCardType, CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
         this.cardType = cardType;
         this.playerID = playerID;
         this.targetPlayer = targetPlayer;
@@ -30,7 +31,7 @@ public class PlayCard extends AbstractAction {
         this.discard = discard;
         this.cardIdx = cardIdx;
     }
-    public PlayCard(int cardIdx, int playerID, boolean discard, LoveLetterCard.CardType targetCardType) {
+    public PlayCard(int cardIdx, int playerID, boolean discard, CardType targetCardType) {
         this.cardType = null;
         this.playerID = playerID;
         this.targetPlayer = -1;
@@ -137,15 +138,15 @@ public class PlayCard extends AbstractAction {
         return targetPlayer;
     }
 
-    public LoveLetterCard.CardType getCardType() {
+    public CardType getCardType() {
         return cardType;
     }
 
-    public LoveLetterCard.CardType getForcedCountessCardType() {
+    public CardType getForcedCountessCardType() {
         return forcedCountessCardType;
     }
 
-    public LoveLetterCard.CardType getTargetCardType() {
+    public CardType getTargetCardType() {
         return targetCardType;
     }
 
@@ -157,7 +158,7 @@ public class PlayCard extends AbstractAction {
         return discard;
     }
 
-    public LoveLetterCard.CardType getOtherCardInHand() {
+    public CardType getOtherCardInHand() {
         return otherCardInHand;
     }
 
