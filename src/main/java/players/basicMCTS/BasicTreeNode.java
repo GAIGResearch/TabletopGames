@@ -313,4 +313,7 @@ class BasicTreeNode {
         return bestAction;
     }
 
+    public String toString() {
+        return String.format("BasicTreeNode, visits: %d, totValue: %f", nVisits, totValue);
+    }
 }

@@ -582,7 +582,7 @@ public class CQGameState extends AbstractGameState {
     public int hashCode() {
         return Objects.hash(
                 getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop, getCurrentPlayer(),
-                gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints)
+                gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints), getGameTick()
         );
     }
 

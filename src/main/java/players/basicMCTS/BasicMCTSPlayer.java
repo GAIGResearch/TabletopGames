@@ -47,6 +47,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
         // mctsSearch does all of the hard work
         root.mctsSearch();
+        System.out.println(root);
 
         // Return best action
         return root.bestAction();
