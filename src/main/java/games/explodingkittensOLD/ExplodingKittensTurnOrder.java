@@ -1,16 +1,16 @@
-package games.explodingkittens;
+package games.explodingkittensOLD;
 
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Objects;
 
-import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
+import static games.explodingkittensOLD.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {

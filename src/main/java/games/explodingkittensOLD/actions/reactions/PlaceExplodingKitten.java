@@ -1,12 +1,12 @@
-package games.explodingkittens.actions.reactions;
+package games.explodingkittensOLD.actions.reactions;
 
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.ExplodingKittensTurnOrder;
+import games.explodingkittensOLD.ExplodingKittensGameState;
+import games.explodingkittensOLD.ExplodingKittensTurnOrder;
 
 public class PlaceExplodingKitten extends DrawCard implements IPrintable {
 

@@ -1,15 +1,14 @@
-package games.explodingkittens.actions;
+package games.explodingkittensOLD.actions;
 
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.ExplodingKittensGameState;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 import java.util.Arrays;
-import java.util.Random;
 
 public class ShuffleAction extends DrawCard implements IsNopeable, IPrintable {
 

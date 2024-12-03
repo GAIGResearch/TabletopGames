@@ -1,9 +1,9 @@
-package games.explodingkittens;
+package games.explodingkittensOLD;
 
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateFeatureVector;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package games.explodingkittens.cards;
+package games.explodingkittensOLD.cards;
 
 import core.components.Card;
 
@@ -16,7 +16,7 @@ public class ExplodingKittensCard extends Card {
         MELONCAT,
         FURRYCAT,
         BEARDCAT,
-        RAINBOWCAT
+        RAINBOWCAT,
     }
 
     public CardType cardType;
@@ -33,7 +33,7 @@ public class ExplodingKittensCard extends Card {
 
     @Override
     public Card copy() {
-        return this; // immutable
+        return new ExplodingKittensCard(cardType, componentID);
     }
 
     @Override

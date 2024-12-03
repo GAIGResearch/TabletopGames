@@ -1,13 +1,14 @@
-package games.explodingkittens.gui;
+package games.explodingkittensOLD.gui;
 
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import gui.AbstractGUIManager;
-import gui.GamePanel;
+import games.explodingkittensOLD.ExplodingKittensParameters;
+import games.explodingkittensOLD.ExplodingKittensGameState;
 import gui.IScreenHighlight;
 import players.human.ActionController;
-import games.explodingkittens.*;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -67,7 +68,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(i, ekgs.getPlayerHand(i), false, ekgp.getDataPath());
+                    ExplodingKittensDeckView playerHand = new ExplodingKittensDeckView(i, ekgs.getPlayerHandCards().get(i), false, ekgp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -91,7 +92,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                discardPile = new ExplodingKittensDiscardView(ekgs.getDiscardPile(), ekgs.getActionsInProgress(), true, ekgp.getDataPath());
+                discardPile = new ExplodingKittensDiscardView(ekgs.getDiscardPile(), ekgs.getActionStack(), true, ekgp.getDataPath());
                 drawPile = new ExplodingKittensDeckView(-1, ekgs.getDrawPile(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, ekgp.getDataPath());
                 centerArea.add(drawPile);
                 centerArea.add(discardPile);
@@ -135,7 +136,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             // Update decks and visibility
             ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].updateComponent(ekgs.getPlayerHand(i));
+                playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
                         || humanPlayerId.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {

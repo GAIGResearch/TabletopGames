@@ -1,14 +1,14 @@
-package games.explodingkittens.gui;
+package games.explodingkittensOLD.gui;
 
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
-import core.interfaces.IExtendedSequence;
-import games.explodingkittens.actions.PlayInterruptibleCard;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.actions.*;
+import games.explodingkittensOLD.actions.reactions.ChooseSeeTheFutureOrder;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Stack;
+import java.util.*;
 
 public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
 
@@ -16,7 +16,7 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
     ArrayList<String> catImagesBkup;
 
     // This view adds action stack as cards in the discard pile for display
-    Stack<IExtendedSequence> actionStack;
+    Stack<AbstractAction> actionStack;
 
     /**
      * Constructor initialising information and adding key/mouse listener for card highlight (left click or ALT + hover
@@ -25,7 +25,7 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
      * @param visible - true if whole deck visible
      * @param dataPath - path to assets
      */
-    public ExplodingKittensDiscardView(Deck<ExplodingKittensCard> d, Stack<IExtendedSequence> actionStack, boolean visible, String dataPath) {
+    public ExplodingKittensDiscardView(Deck<ExplodingKittensCard> d, Stack<AbstractAction> actionStack, boolean visible, String dataPath) {
         super(-1, d, visible, dataPath);
         this.actionStack = actionStack;
         catImagesBkup = new ArrayList<>();
@@ -41,7 +41,7 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
         @SuppressWarnings("unchecked") Deck<ExplodingKittensCard> deckCopy = ((Deck<ExplodingKittensCard>) component).copy();
 
         // Add cards played from action stack into the copy of the deck
-        for (IExtendedSequence aa: actionStack) {
+        for (AbstractAction aa: actionStack) {
             ExplodingKittensCard card = getStackCard(aa);
             if (card != null) {
                 deckCopy.add(card);
@@ -60,9 +60,17 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
      * @param aa - action to turn to card
      * @return - Exploding kittens card
      */
-    private ExplodingKittensCard getStackCard(IExtendedSequence aa) {
-        if (aa instanceof PlayInterruptibleCard pic) {
-            return new ExplodingKittensCard(pic.cardType);
+    private ExplodingKittensCard getStackCard(AbstractAction aa) {
+        if (aa instanceof AttackAction) {
+            return new ExplodingKittensCard(ExplodingKittensCard.CardType.ATTACK, 0);
+        } else if (aa instanceof ChooseSeeTheFutureOrder) {
+            return new ExplodingKittensCard(ExplodingKittensCard.CardType.FAVOR, 1);
+        } else if (aa instanceof NopeAction) {
+            return new ExplodingKittensCard(ExplodingKittensCard.CardType.SEETHEFUTURE, 3);
+        } else if (aa instanceof ShuffleAction) {
+            return new ExplodingKittensCard(ExplodingKittensCard.CardType.SHUFFLE, 4);
+        } else if (aa instanceof SkipAction) {
+            return new ExplodingKittensCard(ExplodingKittensCard.CardType.SKIP, 5);
         }
         return null;
     }

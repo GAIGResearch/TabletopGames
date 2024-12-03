@@ -1,4 +1,4 @@
-package games.explodingkittens.actions.reactions;
+package games.explodingkittensOLD.actions.reactions;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
@@ -7,9 +7,9 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittensTurnOrder;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.ExplodingKittensTurnOrder;
+import games.explodingkittensOLD.ExplodingKittensGameState;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 public class GiveCard extends DrawCard implements IPrintable {
 

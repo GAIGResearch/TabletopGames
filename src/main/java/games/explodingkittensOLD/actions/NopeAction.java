@@ -1,4 +1,4 @@
-package games.explodingkittens.actions;
+package games.explodingkittensOLD.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
