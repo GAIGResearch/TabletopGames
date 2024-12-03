@@ -9,11 +9,11 @@ import games.seasaltpaper.SeaSaltPaperGameState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SailorSharkDuo extends PlayDuo implements IExtendedSequence {
+public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
 
     boolean executed = false;
 
-    public SailorSharkDuo(int playerId, int[] cardsIdx) {
+    public SwimmerSharkDuo(int playerId, int[] cardsIdx) {
         super(playerId, cardsIdx);
     }
 
@@ -57,7 +57,7 @@ public class SailorSharkDuo extends PlayDuo implements IExtendedSequence {
     }
 
     @Override
-    public SailorSharkDuo copy() { return this; }
+    public SwimmerSharkDuo copy() { return this; }
 
     @Override
     public String getString(AbstractGameState gameState) {

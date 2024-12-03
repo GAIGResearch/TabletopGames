@@ -1,13 +1,12 @@
 package games.seasaltpaper.cards;
 
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.PartialObservableDeck;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.actions.BoatDuo;
 import games.seasaltpaper.actions.FishDuo;
-import games.seasaltpaper.actions.SailorSharkDuo;
-import games.seasaltpaper.actions.ShellDuo;
+import games.seasaltpaper.actions.SwimmerSharkDuo;
+import games.seasaltpaper.actions.CrabDuo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +18,11 @@ public class HandManager {
     public static  List<AbstractAction> generateDuoActions(SeaSaltPaperGameState gs, int playerId) {
         ArrayList<AbstractAction> duoActions = new ArrayList<>();
         // TODO make this more general? Does ENUM correspond to number? can manually make them correspond to numbers
-        int[] shellDuo, boatDuo, fishDuo, sailorSharkDuo; // = new int[]{-1, -1};    // array contain card number of the duo
-        shellDuo = new int[]{-1, -1};
+        int[] crabDuo, boatDuo, fishDuo, swimmerSharkDuo; // = new int[]{-1, -1};    // array contain card number of the duo
+        crabDuo = new int[]{-1, -1};
         boatDuo = new int[]{-1, -1};
         fishDuo = new int[]{-1, -1};
-        sailorSharkDuo = new int[]{-1, -1};
+        swimmerSharkDuo = new int[]{-1, -1};
         PartialObservableDeck<SeaSaltPaperCard> playerHand =  gs.getPlayerHands().get(playerId);
         // get duo cards
         for (int i = 0; i < playerHand.getSize(); i++) {
@@ -34,8 +33,8 @@ public class HandManager {
             CardSuite suite = card.cardSuite;
             int[] duoCards = null;
             switch(suite) {
-                case SHELL:
-                    duoCards = shellDuo;
+                case CRAB:
+                    duoCards = crabDuo;
                     break;
                 case BOAT:
                     duoCards = boatDuo;
@@ -43,17 +42,17 @@ public class HandManager {
                 case FISH:
                     duoCards = fishDuo;
                     break;
-                case SAILOR:
-                    if (sailorSharkDuo[0] == -1) {
-                        sailorSharkDuo[0] = i;
+                case SWIMMER:
+                    if (swimmerSharkDuo[0] == -1) {
+                        swimmerSharkDuo[0] = i;
                     }
                     break;
                 case SHARK:
-                    if (sailorSharkDuo[1] == -1) {
-                        sailorSharkDuo[1] = i;
+                    if (swimmerSharkDuo[1] == -1) {
+                        swimmerSharkDuo[1] = i;
                     }
             }
-            if (suite == CardSuite.SAILOR || suite == CardSuite.SHARK) { continue; }
+            if (suite == CardSuite.SWIMMER || suite == CardSuite.SHARK) { continue; }
             if (duoCards[0] == -1) {
                 duoCards[0] = i;
             }
@@ -62,9 +61,9 @@ public class HandManager {
                 duoCards[1] = i;
             }
         }
-        if (shellDuo[0] != -1 && shellDuo[1] != -1) {
+        if (crabDuo[0] != -1 && crabDuo[1] != -1) {
             // TODO check at least one discard pile is not empty
-            duoActions.add(new ShellDuo(playerId, shellDuo));
+            duoActions.add(new CrabDuo(playerId, crabDuo));
         }
         if (boatDuo[0] != -1 && boatDuo[1] != -1) {
             duoActions.add(new BoatDuo(playerId, boatDuo));
@@ -72,8 +71,8 @@ public class HandManager {
         if (fishDuo[0] != -1 && fishDuo[1] != -1) {
             duoActions.add(new FishDuo(playerId, fishDuo));
         }
-        if (sailorSharkDuo[0] != -1 && sailorSharkDuo[1] != -1) {
-            duoActions.add(new SailorSharkDuo(playerId, sailorSharkDuo));
+        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1) {
+            duoActions.add(new SwimmerSharkDuo(playerId, swimmerSharkDuo));
         }
         return duoActions;
     }

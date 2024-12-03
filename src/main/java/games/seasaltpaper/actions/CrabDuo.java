@@ -2,10 +2,8 @@ package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.ActionSpace;
 import core.actions.DrawCard;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
@@ -13,7 +11,7 @@ import games.seasaltpaper.cards.SeaSaltPaperCard;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShellDuo extends PlayDuo implements IExtendedSequence {
+public class CrabDuo extends PlayDuo implements IExtendedSequence {
 
     enum Step {
         CHOOSE_PILE,
@@ -25,7 +23,7 @@ public class ShellDuo extends PlayDuo implements IExtendedSequence {
 
     private int discardPileId;
 
-    public ShellDuo(int playerId, int[] cardsIdx) {
+    public CrabDuo(int playerId, int[] cardsIdx) {
         super(playerId, cardsIdx);
     }
 
@@ -90,10 +88,10 @@ public class ShellDuo extends PlayDuo implements IExtendedSequence {
     }
 
     @Override
-    public ShellDuo copy() { return this; }
+    public CrabDuo copy() { return this; }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Shell Duo Action: Choose a discard pile to look at then draw a card from that pile";
+        return "Crab Duo Action: Choose a discard pile to look at then draw a card from that pile";
     }
 }
