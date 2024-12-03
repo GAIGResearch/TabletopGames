@@ -27,7 +27,6 @@ public class BasicGameTurn {
         // this removes any cards which have extra action decisions to make
         params.cardCounts.put(ATTACK, 0);
         params.cardCounts.put(SKIP, 0);
-        params.cardCounts.put(TACOCAT, 10);
         params.cardCounts.put(FAVOR, 0);
         params.cardCounts.put(NOPE, 0);
         state = new ExplodingKittensGameState(params, 4);
@@ -67,6 +66,7 @@ public class BasicGameTurn {
 
     @Test
     public void passActionDrawsCard() {
+        state.drawPile.add(new ExplodingKittensCard(TACOCAT));
         fm.next(state, new Pass());
         assertEquals(9, state.playerHandCards.get(0).getSize());
         assertEquals(0, state.discardPile.getSize());
@@ -74,6 +74,7 @@ public class BasicGameTurn {
 
     @Test
     public void playActionDrawsCard() {
+        state.drawPile.add(new ExplodingKittensCard(TACOCAT));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(new Pass(), actions.get(0));
         assertTrue(actions.get(1) instanceof PlayInterruptibleCard);
@@ -84,13 +85,23 @@ public class BasicGameTurn {
 
     @Test
     public void defuseStopsExplodingKitten() {
-        fail("Not implemented");
-
+        state.drawPile.add(new ExplodingKittensCard(EXPLODING_KITTEN));
+        assertTrue(state.getPlayerHand(0).stream().anyMatch(c -> c.cardType == DEFUSE));
+        fm.next(state, new Pass());
+        assertTrue(state.isNotTerminalForPlayer(0));
+        assertEquals(1, state.discardPile.getSize());
+        assertEquals(4, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
     }
 
     @Test
     public void explodingKittenKillsPlayer() {
-        fail("Not implemented");
-
+        state.drawPile.add(new ExplodingKittensCard(EXPLODING_KITTEN));
+        List<ExplodingKittensCard> defuseCards = state.playerHandCards.get(0).stream().filter(c -> c.cardType == DEFUSE).toList();
+        state.playerHandCards.get(0).removeAll(defuseCards);
+        assertTrue(state.getPlayerHand(0).stream().noneMatch(c -> c.cardType == DEFUSE));
+        fm.next(state, new Pass());
+        assertFalse(state.isNotTerminalForPlayer(0));
+        assertEquals(1, state.discardPile.getSize());
+        assertEquals(3, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
     }
 }
