@@ -22,6 +22,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     PartialObservableDeck<ExplodingKittensCard> drawPile;
     // Cards in the discard pile
     Deck<ExplodingKittensCard> discardPile;
+    Deck<ExplodingKittensCard> inPlay;
 
     int[] orderOfPlayerDeath;
 
@@ -43,10 +44,19 @@ public class ExplodingKittensGameState extends AbstractGameState {
         return ret;
     }
 
+    // when a card is played to the table, but before
+    public void setInPlay(ExplodingKittensCard card, int playerID) {
+        inPlay.add(card);
+        if (!playerHandCards.get(playerID).remove(card)) {
+            throw new AssertionError("Player " + playerID + " does not have card " + card + " to play");
+        }
+    }
+
     @Override
     protected ExplodingKittensGameState _copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.discardPile = discardPile.copy();
+        ekgs.inPlay = inPlay.copy();
         ekgs.orderOfPlayerDeath = orderOfPlayerDeath.clone();
         ekgs.playerHandCards = new ArrayList<>();
         for (PartialObservableDeck<ExplodingKittensCard> d : playerHandCards) {
@@ -130,6 +140,9 @@ public class ExplodingKittensGameState extends AbstractGameState {
     public Deck<ExplodingKittensCard> getDiscardPile() {
         return discardPile;
     }
+    public Deck<ExplodingKittensCard> getInPlay() {
+        return inPlay;
+    }
 
     @Override
     protected boolean _equals(Object o) {
@@ -137,6 +150,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
             return discardPile.equals(other.discardPile) &&
                     Arrays.equals(orderOfPlayerDeath, other.orderOfPlayerDeath) &&
                     playerHandCards.equals(other.playerHandCards) &&
+                    inPlay.equals(other.inPlay) &&
                     drawPile.equals(other.drawPile);
         };
         return false;
@@ -144,7 +158,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(discardPile, playerHandCards, drawPile) + 31 * Arrays.hashCode(orderOfPlayerDeath);
+        return Objects.hash(discardPile, playerHandCards, drawPile, inPlay) + 31 * Arrays.hashCode(orderOfPlayerDeath);
     }
 
 }

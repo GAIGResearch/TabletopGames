@@ -4,19 +4,25 @@ import core.components.Card;
 
 public class ExplodingKittensCard extends Card {
     public enum CardType {
-        EXPLODING_KITTEN,
-        DEFUSE,
-        NOPE,
-        ATTACK,
-        SKIP,
-        FAVOR,
-        SHUFFLE,
-        SEETHEFUTURE,
-        TACOCAT,
-        MELONCAT,
-        FURRYCAT,
-        BEARDCAT,
-        RAINBOWCAT
+        EXPLODING_KITTEN(false),
+        DEFUSE (false),
+        NOPE (true),
+        ATTACK (true),
+        SKIP (true),
+        FAVOR (true),
+        SHUFFLE (true),
+        SEETHEFUTURE (true),
+        TACOCAT (false),
+        MELONCAT (false),
+        FURRYCAT (false),
+        BEARDCAT (false),
+        RAINBOWCAT (false);
+
+        public boolean nopeable;
+
+        CardType(boolean nope) {
+            this.nopeable = nope;
+        }
     }
 
     public CardType cardType;

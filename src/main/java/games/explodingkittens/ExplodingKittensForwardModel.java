@@ -6,10 +6,10 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import games.explodingkittens.actions.Favor;
 import games.explodingkittens.actions.Pass;
 import games.explodingkittens.actions.PlayInterruptibleCard;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import org.apache.spark.sql.catalyst.expressions.Abs;
 
 import java.util.*;
 
@@ -26,6 +26,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
         // Set up draw pile deck
         PartialObservableDeck<ExplodingKittensCard> drawPile = new PartialObservableDeck<>("Draw Pile", -1, firstState.getNPlayers(), CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         ekgs.drawPile = drawPile;
+        ekgs.inPlay = new Deck<>("In Play", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         // Add all cards but defuse and exploding kittens
         for (HashMap.Entry<ExplodingKittensCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
@@ -151,7 +152,17 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
         playableTypes.remove(EXPLODING_KITTEN);
 
         for (ExplodingKittensCard.CardType type : playableTypes) {
-            actions.add(new PlayInterruptibleCard(type, playerID));
+            switch(type) {
+                case FAVOR:
+                    for (int i = 0; i < ekgs.getNPlayers(); i++) {
+                        if (i != playerID) {
+                            actions.add(new Favor(playerID, i));
+                        }
+                    }
+                    break;
+                default :
+                    actions.add(new PlayInterruptibleCard(type, playerID));
+            }
         }
         // TODO: Special case for a pair of identical Cat cards (not implemented in OLD version)
         return actions;
