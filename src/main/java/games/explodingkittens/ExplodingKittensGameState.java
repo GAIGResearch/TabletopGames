@@ -23,6 +23,9 @@ public class ExplodingKittensGameState extends AbstractGameState {
     // Cards in the discard pile
     Deck<ExplodingKittensCard> discardPile;
     Deck<ExplodingKittensCard> inPlay;
+    int currentAttackLevel = 0;
+    int nextAttackLevel = 0;
+    boolean skip = false;
 
     int[] orderOfPlayerDeath;
 
@@ -116,6 +119,16 @@ public class ExplodingKittensGameState extends AbstractGameState {
         return ekgs;
     }
 
+    public void incrementAttackLevel() {
+        nextAttackLevel++;
+    }
+
+    public boolean skipNext() {
+        return skip;
+    }
+    public void setSkip(boolean skip) {
+        this.skip = skip;
+    }
     @Override
     protected double _getHeuristicScore(int playerId) {
         return new ExplodingKittensHeuristic().evaluateState(this, playerId);

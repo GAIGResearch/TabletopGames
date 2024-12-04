@@ -7,4 +7,9 @@ public class Pass extends DoNothing {
     public String toString() {
         return "Player passes";
     }
+
+    @Override
+    public Pass copy() {
+        return this;
+    }
 }

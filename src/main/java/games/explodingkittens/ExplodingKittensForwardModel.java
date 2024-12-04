@@ -6,14 +6,12 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.explodingkittens.actions.Favor;
-import games.explodingkittens.actions.Pass;
-import games.explodingkittens.actions.PlayInterruptibleCard;
+import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.util.*;
 
-import static games.explodingkittens.cards.ExplodingKittensCard.CardType.EXPLODING_KITTEN;
+import static games.explodingkittens.cards.ExplodingKittensCard.CardType.*;
 
 public class ExplodingKittensForwardModel extends StandardForwardModel {
 
@@ -30,7 +28,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
 
         // Add all cards but defuse and exploding kittens
         for (HashMap.Entry<ExplodingKittensCard.CardType, Integer> entry : ekp.cardCounts.entrySet()) {
-            if (entry.getKey() == ExplodingKittensCard.CardType.DEFUSE || entry.getKey() == EXPLODING_KITTEN)
+            if (entry.getKey() == DEFUSE || entry.getKey() == EXPLODING_KITTEN)
                 continue;
             for (int i = 0; i < entry.getValue(); i++) {
                 ExplodingKittensCard card = new ExplodingKittensCard(entry.getKey());
@@ -48,7 +46,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
             playerHandCards.add(playerCards);
 
             // Add defuse card
-            ExplodingKittensCard defuse = new ExplodingKittensCard(ExplodingKittensCard.CardType.DEFUSE);
+            ExplodingKittensCard defuse = new ExplodingKittensCard(DEFUSE);
             defuse.setOwnerId(i);
             playerCards.add(defuse);
 
@@ -64,7 +62,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
 
         // Add remaining defuse cards and exploding kitten cards to the deck and shuffle again
         for (int i = ekgs.getNPlayers(); i < ekp.nDefuseCards; i++) {
-            ExplodingKittensCard defuse = new ExplodingKittensCard(ExplodingKittensCard.CardType.DEFUSE);
+            ExplodingKittensCard defuse = new ExplodingKittensCard(DEFUSE);
             drawPile.add(defuse);
         }
         for (int i = 0; i < ekgs.getNPlayers() + ekp.cardCounts.get(EXPLODING_KITTEN); i++) {
@@ -83,31 +81,48 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
         if (ekgs.isActionInProgress())
             return;
 
+        // We may have some special statuses to be aware of:
+        // - If a player has skipped, they skip the draw card
+
+        // - If a player has been attacked, they will have to take two turns
+        // - This is stored in the currentAttackLevel, which has to decrement down to zero before play passes on
+        // - the nextAttackLevel indicates the attack level that will then be applied to the next player
+
         if (ekgs.isNotTerminal()) {
-            // Draw a card for the current player
-            int currentPlayer = ekgs.getCurrentPlayer();
-            ExplodingKittensCard card = ekgs.drawPile.draw();
-            if (card.cardType == EXPLODING_KITTEN) {
-                if (ekgs.playerHandCards.get(currentPlayer).stream().anyMatch(c -> c.cardType == ExplodingKittensCard.CardType.DEFUSE)) {
-                    // Exploding kitten drawn, player has defuse
-                    ExplodingKittensCard defuseCard = ekgs.playerHandCards.get(currentPlayer).stream().filter(c -> c.cardType == ExplodingKittensCard.CardType.DEFUSE).findFirst().get();
-                    ekgs.playerHandCards.get(currentPlayer).remove(defuseCard);
-                    // Add to a random location in the draw pile (that we then know)
-                    // TODO: This should formally be a player decision
-                    int position = ekgs.getRnd().nextInt(ekgs.drawPile.getSize()+1);
-                    ekgs.drawPile.add(card, position);
-                    ekgs.drawPile.setVisibilityOfComponent(position, currentPlayer, true);
-                    ekgs.discardPile.add(defuseCard);
-                } else {
-                    // Exploding kitten drawn, player is dead
-                    ekgs.discardPile.add(card);
-                    killPlayer(ekgs, currentPlayer);
-                }
+            if (ekgs.skip) {
+                ekgs.setSkip(false);
             } else {
-                card.setOwnerId(currentPlayer);
-                ekgs.playerHandCards.get(currentPlayer).add(card);
+                // Draw a card for the current player
+                int currentPlayer = ekgs.getCurrentPlayer();
+                ExplodingKittensCard card = ekgs.drawPile.draw();
+                if (card.cardType == EXPLODING_KITTEN) {
+                    if (ekgs.playerHandCards.get(currentPlayer).stream().anyMatch(c -> c.cardType == DEFUSE)) {
+                        // Exploding kitten drawn, player has defuse
+                        ExplodingKittensCard defuseCard = ekgs.playerHandCards.get(currentPlayer).stream().filter(c -> c.cardType == DEFUSE).findFirst().get();
+                        ekgs.playerHandCards.get(currentPlayer).remove(defuseCard);
+                        // Add to a random location in the draw pile (that we then know)
+                        // TODO: This should be a player decision
+                        int position = ekgs.getRnd().nextInt(ekgs.drawPile.getSize() + 1);
+                        ekgs.drawPile.add(card, position);
+                        ekgs.drawPile.setVisibilityOfComponent(position, currentPlayer, true);
+                        ekgs.discardPile.add(defuseCard);
+                    } else {
+                        // Exploding kitten drawn, player is dead
+                        ekgs.discardPile.add(card);
+                        killPlayer(ekgs, currentPlayer);
+                    }
+                } else {
+                    card.setOwnerId(currentPlayer);
+                    ekgs.playerHandCards.get(currentPlayer).add(card);
+                }
             }
-            endPlayerTurn(ekgs);
+            if (ekgs.currentAttackLevel > 0) {
+                ekgs.currentAttackLevel--;
+            } else {
+                endPlayerTurn(ekgs);
+                ekgs.currentAttackLevel = ekgs.nextAttackLevel;
+                ekgs.nextAttackLevel = 0;
+            }
         }
     }
 
@@ -148,11 +163,12 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
             playableTypes.add(playerDeck.get(i).cardType);
         }
         // remove defuse and exploding kittens from playable types
-        playableTypes.remove(ExplodingKittensCard.CardType.DEFUSE);
+        playableTypes.remove(DEFUSE);
         playableTypes.remove(EXPLODING_KITTEN);
+        playableTypes.remove(NOPE);
 
         for (ExplodingKittensCard.CardType type : playableTypes) {
-            switch(type) {
+            switch (type) {
                 case FAVOR:
                     for (int i = 0; i < ekgs.getNPlayers(); i++) {
                         if (i != playerID) {
@@ -160,7 +176,16 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                         }
                     }
                     break;
-                default :
+                case SHUFFLE:
+                    actions.add(new Shuffle(playerID));
+                    break;
+                case SKIP:
+                    actions.add(new Skip(playerID));
+                    break;
+                case ATTACK:
+                    actions.add(new Attack(playerID));
+                    break;
+                default:
                     actions.add(new PlayInterruptibleCard(type, playerID));
             }
         }

@@ -1,8 +1,10 @@
 package games.explodingkittens;
 
 import core.actions.AbstractAction;
+import core.components.Deck;
 import games.explodingkittens.actions.Favor;
 import games.explodingkittens.actions.Pass;
+import games.explodingkittens.actions.Shuffle;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +12,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static games.explodingkittens.cards.ExplodingKittensCard.CardType.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class SpecialCards {
 
@@ -55,5 +57,37 @@ public class SpecialCards {
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(10, state.getPlayerHand(0).getSize());
         assertEquals(7, state.getPlayerHand(1).getSize());
+    }
+
+    @Test
+    public void shuffle() {
+        state.getPlayerHand(0).clear();
+        ExplodingKittensCard shuffleCard = new ExplodingKittensCard(SHUFFLE);
+        state.getPlayerHand(0).add(shuffleCard);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+        assertEquals(new Shuffle(0), actions.get(1));
+
+        Deck<ExplodingKittensCard> oldDrawPile = state.drawPile.copy();
+        fm.next(state, new Shuffle(0));
+        assertEquals(oldDrawPile.getSize()-1, state.drawPile.getSize());
+        boolean allSame = true;
+        for (int i = 1; i < oldDrawPile.getSize(); i++) {
+            if (oldDrawPile.get(i) != state.drawPile.get(i)) {
+                allSame = false;
+                break;
+            }
+        }
+        assertFalse(allSame);
+        boolean containsAll = true;
+        for (ExplodingKittensCard c : state.drawPile) {
+            if (!oldDrawPile.contains(c)) {
+                containsAll = false;
+                break;
+            }
+            oldDrawPile.remove(c);
+        }
+        assertTrue(containsAll);
     }
 }

@@ -38,6 +38,15 @@ public class NopeInteractions {
     }
 
     @Test
+    public void nopeNotPlayableByItself() {
+        state.getPlayerHand(0).clear();
+        state.getPlayerHand(0).add(new ExplodingKittensCard(NOPE));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+    }
+
+    @Test
     public void doNotInterruptSingleCatCard() {
         state.getPlayerHand(2).add(new ExplodingKittensCard(NOPE));
         state.getPlayerHand(0).add(new ExplodingKittensCard(RAINBOWCAT));
