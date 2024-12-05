@@ -15,13 +15,9 @@ public class Favor extends PlayInterruptibleCard {
 
     @Override
     public void _execute(ExplodingKittensGameState state) {
-        // TODO: This needs to be turned into a player decision
         int cards = state.getPlayerHand(targetPlayer).getSize();
         if (cards > 0) { // edge cases make this possible
-            int cardIndex = state.getRnd().nextInt(cards);
-            ExplodingKittensCard card = state.getPlayerHand(targetPlayer).get(cardIndex);
-            state.getPlayerHand(targetPlayer).remove(card);
-            state.getPlayerHand(state.getCurrentPlayer()).add(card);
+            state.setActionInProgress(new ChoiceOfCardToGive(targetPlayer, cardPlayer));
         }
     }
 

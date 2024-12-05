@@ -105,12 +105,10 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                         // Exploding kitten drawn, player has defuse
                         ExplodingKittensCard defuseCard = ekgs.playerHandCards.get(currentPlayer).stream().filter(c -> c.cardType == DEFUSE).findFirst().get();
                         ekgs.playerHandCards.get(currentPlayer).remove(defuseCard);
-                        // Add to a random location in the draw pile (that we then know)
-                        // TODO: This should be a player decision
-                        int position = ekgs.getRnd().nextInt(ekgs.drawPile.getSize() + 1);
-                        ekgs.drawPile.add(card, position);
-                        ekgs.drawPile.setVisibilityOfComponent(position, currentPlayer, true);
+                        ekgs.playerHandCards.get(currentPlayer).add(card);  // add Exploding Kitten (to be removed)
                         ekgs.discardPile.add(defuseCard);
+                        ekgs.setActionInProgress(new DefuseKitten(currentPlayer));
+                        return;
                     } else {
                         // Exploding kitten drawn, player is dead
                         if (ekgs.getPlayerResults()[currentPlayer] == CoreConstants.GameResult.LOSE_GAME) {
@@ -191,7 +189,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                 case FAVOR:
                     for (int i = 0; i < ekgs.getNPlayers(); i++) {
                         if (i != playerID) {
-                            if (ekgs.getPlayerHand(i).getSize() > 0)
+                            if (ekgs.isNotTerminalForPlayer(i) && ekgs.getPlayerHand(i).getSize() > 0)
                                 actions.add(new Favor(playerID, i));
                         }
                     }

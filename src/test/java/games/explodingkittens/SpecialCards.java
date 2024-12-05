@@ -54,8 +54,26 @@ public class SpecialCards {
         assertEquals(8, state.getPlayerHand(1).getSize());
         fm.next(state, new Favor(0, 1));
         assertEquals(1, state.getCurrentPlayer());
+        assertTrue(state.isActionInProgress());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(state.getPlayerHand(1).stream().map(c -> c.cardType).distinct().count(), actions.size());
+        fm.next(state, new GiveCard(1, 0, state.getPlayerHand(1).get(0).cardType));
+        assertFalse(state.isActionInProgress());
+
         assertEquals(10, state.getPlayerHand(0).getSize());
         assertEquals(7, state.getPlayerHand(1).getSize());
+    }
+
+    @Test
+    public void cannotAskFavourOfTheDead() {
+        state.getPlayerHand(0).add(new ExplodingKittensCard(FAVOR));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        int actionsBefore = actions.size();
+        assertTrue(actions.contains(new Favor(0, 1)));
+        fm.killPlayer(state, 1);
+        actions = fm.computeAvailableActions(state);
+        assertFalse(actions.contains(new Favor(0, 1)));
+        assertEquals(actionsBefore - 1, actions.size());
     }
 
     @Test

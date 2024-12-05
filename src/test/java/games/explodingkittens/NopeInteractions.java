@@ -1,6 +1,7 @@
 package games.explodingkittens;
 
 import core.actions.AbstractAction;
+import games.explodingkittens.actions.ChoiceOfCardToGive;
 import games.explodingkittens.actions.Favor;
 import games.explodingkittens.actions.Pass;
 import games.explodingkittens.actions.PlayInterruptibleCard;
@@ -71,10 +72,9 @@ public class NopeInteractions {
         assertEquals(new PlayInterruptibleCard(NOPE, 2), actions.get(1));
 
         fm.next(state, new Pass());
-        assertFalse(state.isActionInProgress());
+        assertTrue(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(1, state.discardPile.getSize());
-        assertEquals(7, state.getPlayerHand(1).getSize());
+        assertTrue(state.currentActionInProgress() instanceof ChoiceOfCardToGive);
 
     }
 
@@ -118,11 +118,9 @@ public class NopeInteractions {
         assertEquals(1, state.getCurrentPlayer());
         fm.next(state, new Pass());  // player 1 passes again
 
-        assertFalse(state.isActionInProgress()); // because no other NOPE cards
-
-        assertEquals(3, state.discardPile.getSize());  // FAVOR and 2 NOPE
+        assertTrue(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
-        assertEquals(8, state.getPlayerHand(1).getSize());
+        assertTrue(state.currentActionInProgress() instanceof ChoiceOfCardToGive);
     }
 
     @Test

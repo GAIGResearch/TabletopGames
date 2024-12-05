@@ -2,7 +2,9 @@ package games.explodingkittens;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import games.explodingkittens.actions.DefuseKitten;
 import games.explodingkittens.actions.Pass;
+import games.explodingkittens.actions.PlaceKitten;
 import games.explodingkittens.actions.PlayInterruptibleCard;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import org.junit.Before;
@@ -54,13 +56,14 @@ public class BasicGameTurn {
         // Each player should play or pass until the game ends
         int expectedPlayer = 0;
         do {
-       //     System.out.println("Player " + expectedPlayer + " playing");
+                System.out.println("Player " + expectedPlayer + " playing");
             assertEquals(expectedPlayer, state.getCurrentPlayer());
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             fm.next(state, actions.get(rnd.nextInt(actions.size())));
-            do {
-                expectedPlayer = (expectedPlayer + 1) % state.getNPlayers();
-            } while (state.getPlayerResults()[expectedPlayer] == CoreConstants.GameResult.LOSE_GAME);
+            if (!state.isActionInProgress())
+                do {
+                    expectedPlayer = (expectedPlayer + 1) % state.getNPlayers();
+                } while (state.getPlayerResults()[expectedPlayer] == CoreConstants.GameResult.LOSE_GAME);
         } while (state.isNotTerminal());
     }
 
@@ -91,6 +94,48 @@ public class BasicGameTurn {
         assertTrue(state.getPlayerHand(0).stream().anyMatch(c -> c.cardType == DEFUSE));
         fm.next(state, new Pass());
         assertTrue(state.isNotTerminalForPlayer(0));
+        assertTrue(state.isActionInProgress());
+        assertEquals(1, state.discardPile.getSize());
+        assertEquals(3, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
+    }
+
+    @Test
+    public void defuseGivesChoiceOfPlacementToPlayer() {
+        state.drawPile.add(new ExplodingKittensCard(EXPLODING_KITTEN));
+        assertTrue(state.getPlayerHand(0).stream().anyMatch(c -> c.cardType == DEFUSE));
+        fm.next(state, new Pass());
+        assertTrue(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertTrue(state.currentActionInProgress() instanceof DefuseKitten);
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(state.drawPile.getSize(), actions.size());
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlaceKitten));
+
+        assertEquals(1, state.discardPile.getSize());
+        int index = ((PlaceKitten) actions.get(3)).index;
+        fm.next(state, actions.get(3));
+
+        assertEquals(1, state.discardPile.getSize());
+        assertEquals(4, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
+        assertEquals(EXPLODING_KITTEN, state.drawPile.get(index).cardType);
+        assertTrue(state.drawPile.getVisibilityForPlayer(index, 0));
+        assertFalse(state.drawPile.getVisibilityForPlayer(index, 1));
+        assertFalse(state.drawPile.getVisibilityForPlayer(index, 2));
+        assertFalse(state.drawPile.getVisibilityForPlayer(index, 3));
+
+        assertEquals(0, state.getActionsInProgress().size());
+        assertEquals(1, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void defusingDoesNotDrawExtraCard() {
+        state.drawPile.add(new ExplodingKittensCard(EXPLODING_KITTEN));
+        fm.next(state, new Pass());
+        assertTrue(state.isActionInProgress());
+        assertEquals(1, state.discardPile.getSize());
+        assertEquals(8, state.playerHandCards.get(0).getSize()); // +KITTEN -DEFUSE
+        fm.next(state, new PlaceKitten(3));
         assertEquals(1, state.discardPile.getSize());
         assertEquals(4, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
     }
