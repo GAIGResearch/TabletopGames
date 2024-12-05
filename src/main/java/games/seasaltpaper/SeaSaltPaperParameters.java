@@ -2,12 +2,16 @@ package games.seasaltpaper;
 
 import core.AbstractParameters;
 import games.loveletter.LoveLetterParameters;
+import games.seasaltpaper.cards.CardColor;
 import games.seasaltpaper.cards.CardSuite;
 import games.seasaltpaper.cards.CardType;
+import org.apache.logging.log4j.core.pattern.AbstractStyleNameConverter;
 import utilities.Pair;
 
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static games.seasaltpaper.cards.CardColor.*;
 
 public class SeaSaltPaperParameters extends AbstractParameters {
 
@@ -24,27 +28,41 @@ public class SeaSaltPaperParameters extends AbstractParameters {
     public int[] sharkCollectorBonus = new int[]{};
 
 
-    public HashMap<Pair<CardSuite, CardType>, Integer> nCardsPerType = new HashMap<>() {{
-        put(new Pair<>(CardSuite.SHELL, CardType.DUO), 9); // LightBlue (x2), Blue (x2), Yellow (x2), Green, Grey, Black - This is CRAB.
-        put(new Pair<>(CardSuite.BOAT, CardType.DUO), 8); // LightBlue (x2), Blue (x2), Yellow (x2), Black (x2)
-        put(new Pair<>(CardSuite.FISH, CardType.DUO), 7); // Blue (x2), Black (x2), Yellow, LightBlue, Green
-        put(new Pair<>(CardSuite.SHARK, CardType.DUO), 10);// Light Blue, Blue, Black, Green, Purple
+    public HashMap<Pair<CardSuite, CardType>, Pair<Integer, CardColor[]>> cardsInit = new HashMap<>() {{
+        put(new Pair<>(CardSuite.CRAB, CardType.DUO),
+            new Pair<>(9, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, BLUE, YELLOW, YELLOW, GREEN, GREY, BLACK})); // LightBlue (x2), Blue (x2), Yellow (x2), Green, Grey, Black
+        put(new Pair<>(CardSuite.BOAT, CardType.DUO),
+            new Pair<>(8, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, BLUE, YELLOW, YELLOW, BLACK, BLACK})); // LightBlue (x2), Blue (x2), Yellow (x2), Black (x2)
+        put(new Pair<>(CardSuite.FISH, CardType.DUO),
+            new Pair<>(7, new CardColor[]{BLUE, BLUE, BLACK, BLACK, YELLOW, LIGHT_BLUE, GREEN})); // Blue (x2), Black (x2), Yellow, LightBlue, Green
+        put(new Pair<>(CardSuite.SHARK, CardType.DUO),
+            new Pair<>(5, new CardColor[]{LIGHT_BLUE, BLUE, BLACK, GREEN, PURPLE}));// Light Blue, Blue, Black, Green, Purple
+        put(new Pair<>(CardSuite.SWIMMER, CardType.DUO),
+            new Pair<>(5, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, YELLOW, ORANGE}));// Light Blue, Blue, Yellow, LightOrange - 5 total.
+        //TODO last swimmer color? only say 4
 
-        // You actually need Swimmers, I think
-        //put(new Pair<>(CardSuite.SWIMMER, CardType.DUO), 5);// Light Blue, Blue, Yellow, LightOrange - 5 total.
+        put(new Pair<>(CardSuite.SHELL, CardType.COLLECTOR),
+            new Pair<>(6, new CardColor[]{GREEN, GREY, LIGHT_BLUE, BLUE, BLACK, YELLOW})); // Green, Grey, LightBlue, Blue, Black, Yellow
+        put(new Pair<>(CardSuite.OCTOPUS, CardType.COLLECTOR),
+            new Pair<>(5, new CardColor[]{LIGHT_BLUE, GREEN, GREY, PURPLE, YELLOW})); //Light Blue, Green, Grey, Purple, Yellow
+        put(new Pair<>(CardSuite.PENGUIN, CardType.COLLECTOR),
+            new Pair<>(3, new CardColor[]{PINK, ORANGE, PURPLE})); //Pink, LightOrange, Purple
+        // TODO PINK VS PURPLE???
+        put(new Pair<>(CardSuite.SAILOR, CardType.COLLECTOR),
+            new Pair<>(2, new CardColor[]{ORANGE, PINK})); // Orange, Pink
+        //TODO Orange vs. LightOrange????
 
-        put(new Pair<>(CardSuite.SHELL, CardType.COLLECTOR), 6); // Green, Grey, LightBlue, Blue, Black, Yellow
-        put(new Pair<>(CardSuite.OCTOPUS, CardType.COLLECTOR), 5); //Light Blue, Green, Grey, Purple, Yellow
-        put(new Pair<>(CardSuite.PENGUIN, CardType.COLLECTOR), 3); //Pink, LightOrange, Purple
-        put(new Pair<>(CardSuite.SAILOR, CardType.COLLECTOR), 2); // Orange, Pink
+        put(new Pair<>(CardSuite.BOAT, CardType.MULTIPLIER),
+            new Pair<>(1, new CardColor[]{PURPLE})); //Purple
+        put(new Pair<>(CardSuite.FISH, CardType.MULTIPLIER),
+            new Pair<>(1, new CardColor[]{GREY})); //Grey
+        put(new Pair<>(CardSuite.PENGUIN, CardType.MULTIPLIER),
+            new Pair<>(1, new CardColor[]{GREEN})); //Green
+        put(new Pair<>(CardSuite.SAILOR, CardType.MULTIPLIER),
+            new Pair<>(1, new CardColor[]{ORANGE})); //LightOrange
 
-        put(new Pair<>(CardSuite.BOAT, CardType.MULTIPLIER), 1); //Purple
-        put(new Pair<>(CardSuite.FISH, CardType.MULTIPLIER), 1); //Grey
-        put(new Pair<>(CardSuite.PENGUIN, CardType.MULTIPLIER), 1); //Green
-        put(new Pair<>(CardSuite.SAILOR, CardType.MULTIPLIER), 1); //LightOrange
-
-        // You are missing the mermaids
-        //put(new Pair<>(CardSuite.MERMAID, CardType.MERMAID), 4);// LightGrey
+        put(new Pair<>(CardSuite.MERMAID, CardType.MERMAID),
+            new Pair<>(4, new CardColor[]{WHITE, WHITE, WHITE, WHITE,}));// LightGrey
 
     }};
 

@@ -19,10 +19,10 @@ import java.awt.image.BufferedImage;
 import java.util.Set;
 
 public class SSPGUIManager extends AbstractGUIManager {
-    final static int cardWidth = 120;
-    final static int cardHeight = 150;
+    final static int cardWidth = 100;
+    final static int cardHeight = 100;
     final static int playerAreaWidth = 350;
-    final static int playerAreaHeight = 150;
+    final static int playerAreaHeight = cardHeight + 5;
 
     SSPPlayerView[] playerViews;
     SSPDeckView discardPile1, discardPile2; //TODO make this generic for any number of discard piles?
@@ -94,7 +94,7 @@ public class SSPGUIManager extends AbstractGUIManager {
         drawDiscardPanel.add(discardPile2);
 //        JPanel jp = new JPanel(new GridBagLayout());
 //        jp.add(drawDiscardPanel);
-        drawDiscardPanel.setPreferredSize(new Dimension(cardWidth*3, cardHeight*3));
+//        drawDiscardPanel.setPreferredSize(new Dimension(cardWidth*3, cardHeight*3));
         mainGameArea.add(drawDiscardPanel, BorderLayout.CENTER);
 //        mainGameArea.add(jp, BorderLayout.CENTER);
 

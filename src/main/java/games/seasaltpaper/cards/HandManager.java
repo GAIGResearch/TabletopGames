@@ -51,6 +51,9 @@ public class HandManager {
                     if (swimmerSharkDuo[1] == -1) {
                         swimmerSharkDuo[1] = i;
                     }
+                    break;
+                default:
+                    throw(new RuntimeException(suite.name() + " is not a valid Duo Card, but exist anyway"));
             }
             if (suite == CardSuite.SWIMMER || suite == CardSuite.SHARK) { continue; }
             if (duoCards[0] == -1) {

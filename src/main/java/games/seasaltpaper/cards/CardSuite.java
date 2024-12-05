@@ -20,7 +20,8 @@ public enum CardSuite {
     PENGUIN(new int[]{1, 3, 5}, 1, 2),
     SAILOR(new int[]{0, 5}, 1, 3),
     SHARK(new int[]{}, 1, 0),
-    SWIMMER(new int[]{}, 1, 0);
+    SWIMMER(new int[]{}, 1, 0),
+    MERMAID(new int[]{}, 0, 0);
 
     private final int[] collectorBonus;
 

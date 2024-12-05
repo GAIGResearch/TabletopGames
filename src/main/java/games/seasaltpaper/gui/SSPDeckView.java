@@ -60,6 +60,7 @@ public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
         g.setColor(cardColor);
         g.fillRect(0, 0, cardFront.getWidth(), cardFront.getHeight());
 
+        // TODO Change suiteIcon and text color to white if cardColor==BLACK
         // Draw suite icon
         String suiteName = card.getCardSuite().name().toLowerCase();
         Image iconSuite = ImageIO.GetInstance().getImage(dataPath + suiteName + ".png");

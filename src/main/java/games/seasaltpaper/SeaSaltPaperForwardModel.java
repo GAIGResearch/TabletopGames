@@ -91,18 +91,10 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
     private void setupDrawPile(SeaSaltPaperGameState gs) {
         SeaSaltPaperParameters parameters = (SeaSaltPaperParameters) gs.getGameParameters();
 
-        // Card Color randomly generated
-        // TODO check if there is a rule for color distribution
-        CardColor[] colors = {CardColor.YELLOW, CardColor.RED, CardColor.BLUE, CardColor.ORANGE, CardColor.GREEN, CardColor.PURPLE};
-
-        for (Pair<CardSuite, CardType> p: parameters.nCardsPerType.keySet()) {
-            int count = parameters.nCardsPerType.get(p);
+        for (Pair<CardSuite, CardType> p: parameters.cardsInit.keySet()) {
+            int count = parameters.cardsInit.get(p).a;
             for (int i = 0; i < count; i++) {
-                if (p.b == CardType.MULTIPLIER) {
-                    gs.drawPile.add(new SeaSaltPaperCard(CardColor.GREY, p.a, p.b));
-                    continue;
-                }
-                CardColor c = colors[gs.getRnd().nextInt(6)]; // Randomly assign a color
+                CardColor c = parameters.cardsInit.get(p).b[i];
                 gs.drawPile.add(new SeaSaltPaperCard(c, p.a, p.b));
             }
         }
