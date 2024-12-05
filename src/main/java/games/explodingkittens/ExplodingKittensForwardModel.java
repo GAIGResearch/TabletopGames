@@ -205,6 +205,9 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                 case ATTACK:
                     actions.add(new Attack(playerID));
                     break;
+                case SEETHEFUTURE:
+                    actions.add(new SeeTheFuture(playerID));
+                    break;
                 default:
                     actions.add(new PlayInterruptibleCard(type, playerID));
             }

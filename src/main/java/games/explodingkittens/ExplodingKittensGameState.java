@@ -153,10 +153,10 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
 
-    public Deck<ExplodingKittensCard> getPlayerHand(int playerId) {
+    public PartialObservableDeck<ExplodingKittensCard> getPlayerHand(int playerId) {
         return playerHandCards.get(playerId);
     }
-    public Deck<ExplodingKittensCard> getDrawPile() {
+    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
         return drawPile;
     }
     public Deck<ExplodingKittensCard> getDiscardPile() {

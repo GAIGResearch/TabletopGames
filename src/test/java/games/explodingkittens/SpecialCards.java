@@ -70,7 +70,7 @@ public class SpecialCards {
 
         Deck<ExplodingKittensCard> oldDrawPile = state.drawPile.copy();
         fm.next(state, new Shuffle(0));
-        assertEquals(oldDrawPile.getSize()-1, state.drawPile.getSize());
+        assertEquals(oldDrawPile.getSize() - 1, state.drawPile.getSize());
         boolean allSame = true;
         for (int i = 1; i < oldDrawPile.getSize(); i++) {
             if (oldDrawPile.get(i) != state.drawPile.get(i)) {
@@ -188,6 +188,36 @@ public class SpecialCards {
         assertEquals(drawDeck - 1, state.drawPile.getSize());
 
         assertEquals(1, state.currentPlayerTurnsLeft);
+    }
+
+    @Test
+    public void seeTheFuture() {
+        state.getPlayerHand(0).clear();
+        ExplodingKittensCard seeTheFutureCard = new ExplodingKittensCard(SEETHEFUTURE);
+        state.getPlayerHand(0).add(seeTheFutureCard);
+        int drawDeck = state.drawPile.getSize();
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+        assertEquals(new SeeTheFuture(0), actions.get(1));
+
+        fm.next(state, new SeeTheFuture(0));
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(1, state.getTurnOwner());
+        assertEquals(drawDeck - 1, state.drawPile.getSize());
+
+        // and check drawpile visibility
+        for (int i = 0; i < state.drawPile.getSize(); i++) {
+            if (i < 2)  // only the top 2 cards should be visible, as we drew the top one
+                assertTrue(state.drawPile.getVisibilityForPlayer(i, 0));
+            else
+                assertFalse(state.drawPile.getVisibilityForPlayer(i, 0));
+
+            assertFalse(state.drawPile.getVisibilityForPlayer(i, 1));
+            assertFalse(state.drawPile.getVisibilityForPlayer(i, 2));
+            assertFalse(state.drawPile.getVisibilityForPlayer(i, 3));
+        }
     }
 
 }
