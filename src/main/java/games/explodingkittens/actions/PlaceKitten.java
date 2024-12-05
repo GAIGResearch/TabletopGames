@@ -16,10 +16,11 @@ public class PlaceKitten extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
-        ExplodingKittensCard card = state.getPlayerHand(state.getCurrentPlayer()).stream()
+        int player = state.getCurrentPlayer();
+        ExplodingKittensCard card = state.getPlayerHand(player).stream()
                 .filter(c -> c.cardType == ExplodingKittensCard.CardType.EXPLODING_KITTEN).findFirst()
                 .orElseThrow(() -> new AssertionError("No Exploding Kitten found"));
-        state.getPlayerHand(index).remove(card);
+        state.getPlayerHand(player).remove(card);
         boolean[] visibility = new boolean[state.getNPlayers()];
         visibility[state.getCurrentPlayer()] = true;
         state.getDrawPile().add(card, index, visibility);

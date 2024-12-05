@@ -23,7 +23,7 @@ public class DefuseKitten implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) state;
-        return IntStream.range(0, ekgs.getDrawPile().getSize()).mapToObj(i -> new PlaceKitten(i)).collect(toList());
+        return IntStream.rangeClosed(0, ekgs.getDrawPile().getSize()).mapToObj(PlaceKitten::new).collect(toList());
     }
 
     @Override

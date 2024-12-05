@@ -109,7 +109,7 @@ public class BasicGameTurn {
         assertTrue(state.currentActionInProgress() instanceof DefuseKitten);
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(state.drawPile.getSize(), actions.size());
+        assertEquals(state.drawPile.getSize()+1, actions.size());
         assertTrue(actions.stream().allMatch(a -> a instanceof PlaceKitten));
 
         assertEquals(1, state.discardPile.getSize());
