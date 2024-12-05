@@ -23,7 +23,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
     // Cards in the discard pile
     Deck<ExplodingKittensCard> discardPile;
     Deck<ExplodingKittensCard> inPlay;
-    int currentAttackLevel = 0;
+    int currentPlayerTurnsLeft = 0;
     int nextAttackLevel = 0;
     boolean skip = false;
 
@@ -59,6 +59,8 @@ public class ExplodingKittensGameState extends AbstractGameState {
     protected ExplodingKittensGameState _copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.discardPile = discardPile.copy();
+        ekgs.currentPlayerTurnsLeft = currentPlayerTurnsLeft;
+        ekgs.nextAttackLevel = nextAttackLevel;
         ekgs.inPlay = inPlay.copy();
         ekgs.orderOfPlayerDeath = orderOfPlayerDeath.clone();
         ekgs.playerHandCards = new ArrayList<>();
@@ -119,8 +121,15 @@ public class ExplodingKittensGameState extends AbstractGameState {
         return ekgs;
     }
 
-    public void incrementAttackLevel() {
-        nextAttackLevel++;
+    public void setNextAttackLevel(int value) {
+        nextAttackLevel = value;
+    }
+
+    public int getCurrentPlayerTurnsLeft() {
+        return currentPlayerTurnsLeft;
+    }
+    public void setCurrentPlayerTurnsLeft(int value) {
+        currentPlayerTurnsLeft = value;
     }
 
     public boolean skipNext() {
@@ -163,6 +172,8 @@ public class ExplodingKittensGameState extends AbstractGameState {
             return discardPile.equals(other.discardPile) &&
                     Arrays.equals(orderOfPlayerDeath, other.orderOfPlayerDeath) &&
                     playerHandCards.equals(other.playerHandCards) &&
+                    currentPlayerTurnsLeft == other.currentPlayerTurnsLeft &&
+                    nextAttackLevel == other.nextAttackLevel &&
                     inPlay.equals(other.inPlay) &&
                     drawPile.equals(other.drawPile);
         };
@@ -171,7 +182,7 @@ public class ExplodingKittensGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(discardPile, playerHandCards, drawPile, inPlay) + 31 * Arrays.hashCode(orderOfPlayerDeath);
+        return Objects.hash(discardPile, playerHandCards, drawPile, inPlay, nextAttackLevel, currentPlayerTurnsLeft) + 31 * Arrays.hashCode(orderOfPlayerDeath);
     }
 
 }

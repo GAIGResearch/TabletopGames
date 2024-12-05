@@ -6,6 +6,7 @@ import games.explodingkittens.cards.ExplodingKittensCard;
 
 public class Attack extends PlayInterruptibleCard {
 
+    public static int ADDITIONAL_TURNS = 2;
 
     public Attack(int player) {
         super (ExplodingKittensCard.CardType.ATTACK, player);
@@ -13,8 +14,13 @@ public class Attack extends PlayInterruptibleCard {
 
     @Override
     public void _execute(ExplodingKittensGameState state) {
-       state.incrementExtraTurns();
+       int attackLevel = ADDITIONAL_TURNS;
        state.setSkip(true);
+       if (state.getCurrentPlayerTurnsLeft() > 1) {
+           attackLevel += state.getCurrentPlayerTurnsLeft();
+           state.setCurrentPlayerTurnsLeft(1);
+       }
+         state.setNextAttackLevel(attackLevel);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class BasicGameTurn {
         // Each player should play or pass until the game ends
         int expectedPlayer = 0;
         do {
-            System.out.println("Player " + expectedPlayer + " playing");
+       //     System.out.println("Player " + expectedPlayer + " playing");
             assertEquals(expectedPlayer, state.getCurrentPlayer());
             List<AbstractAction> actions = fm.computeAvailableActions(state);
             fm.next(state, actions.get(rnd.nextInt(actions.size())));
@@ -75,6 +75,8 @@ public class BasicGameTurn {
     @Test
     public void playActionDrawsCard() {
         state.drawPile.add(new ExplodingKittensCard(TACOCAT));
+        state.drawPile.add(new ExplodingKittensCard(TACOCAT));
+
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(new Pass(), actions.get(0));
         assertTrue(actions.get(1) instanceof PlayInterruptibleCard);
@@ -103,5 +105,15 @@ public class BasicGameTurn {
         assertFalse(state.isNotTerminalForPlayer(0));
         assertEquals(1, state.discardPile.getSize());
         assertEquals(3, state.drawPile.stream().filter(c -> c.cardType == EXPLODING_KITTEN).count());
+    }
+
+    @Test
+    public void deadPlayerMissesAllFutureTurns() {
+        fm.killPlayer(state, 2);
+        do {
+            assertNotEquals(2, state.getCurrentPlayer());
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            fm.next(state, actions.get(rnd.nextInt(actions.size())));
+        } while (state.isNotTerminal());
     }
 }

@@ -2,15 +2,14 @@ package games.explodingkittens;
 
 import core.actions.AbstractAction;
 import core.components.Deck;
-import games.explodingkittens.actions.Favor;
-import games.explodingkittens.actions.Pass;
-import games.explodingkittens.actions.Shuffle;
+import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
+import static core.CoreConstants.GameResult.LOSE_GAME;
 import static games.explodingkittens.cards.ExplodingKittensCard.CardType.*;
 import static org.junit.Assert.*;
 
@@ -90,4 +89,105 @@ public class SpecialCards {
         }
         assertTrue(containsAll);
     }
+
+    @Test
+    public void skip() {
+        state.getPlayerHand(0).clear();
+        ExplodingKittensCard shuffleCard = new ExplodingKittensCard(SKIP);
+        state.getPlayerHand(0).add(shuffleCard);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+        assertEquals(new Skip(0), actions.get(1));
+        int drawDeck = state.drawPile.getSize();
+
+        assertFalse(state.skip);
+        fm.next(state, new Skip(0));
+        assertFalse(state.skip);
+
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(0, state.getPlayerHand(0).getSize());
+        assertEquals(drawDeck, state.drawPile.getSize());
+    }
+
+    @Test
+    public void attack() {
+        state.getPlayerHand(0).clear();
+        ExplodingKittensCard shuffleCard = new ExplodingKittensCard(ATTACK);
+        state.getPlayerHand(0).add(shuffleCard);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+        assertEquals(new Attack(0), actions.get(1));
+        int drawDeck = state.drawPile.getSize();
+
+        fm.next(state, new Attack(0));
+        assertEquals(drawDeck, state.drawPile.getSize());
+        assertEquals(2, state.currentPlayerTurnsLeft);
+        assertEquals(1, state.getCurrentPlayer());
+
+        fm.next(state, new Pass());
+        assertEquals(1, state.currentPlayerTurnsLeft);
+        assertEquals(1, state.getCurrentPlayer());
+        fm.next(state, new Pass());
+
+        assertEquals(1, state.currentPlayerTurnsLeft);
+        assertEquals(2, state.getCurrentPlayer());
+        assertEquals(drawDeck - 2, state.drawPile.getSize());
+    }
+
+    @Test
+    public void deathInMiddleOfDoubleMove() {
+        ExplodingKittensCard attackCard = new ExplodingKittensCard(ATTACK);
+        state.getPlayerHand(0).add(attackCard);
+        state.getPlayerHand(1).clear();  // remove DEFUSE card
+
+        fm.next(state, new Attack(0));
+        assertEquals(2, state.currentPlayerTurnsLeft);
+        assertEquals(1, state.getCurrentPlayer());
+
+        state.drawPile.add(new ExplodingKittensCard(EXPLODING_KITTEN));
+        fm.next(state, new Pass());
+
+        assertEquals(LOSE_GAME, state.getPlayerResults()[1]);
+        assertEquals(1, state.currentPlayerTurnsLeft);
+        assertEquals(2, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void doubleAttack() {
+        ExplodingKittensCard attackCard = new ExplodingKittensCard(ATTACK);
+        state.getPlayerHand(0).add(attackCard);
+
+        fm.next(state, new Attack(0));
+        assertEquals(2, state.currentPlayerTurnsLeft);
+        assertEquals(1, state.getCurrentPlayer());
+
+        state.getPlayerHand(1).add(attackCard);
+        fm.next(state, new Attack(1));
+
+        assertEquals(4, state.currentPlayerTurnsLeft);
+        assertEquals(2, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void attackAndNope() {
+        ExplodingKittensCard attackCard = new ExplodingKittensCard(ATTACK);
+        state.getPlayerHand(0).add(attackCard);
+        ExplodingKittensCard nopeCard = new ExplodingKittensCard(NOPE);
+        state.getPlayerHand(1).add(nopeCard);
+        int drawDeck = state.drawPile.getSize();
+
+        fm.next(state, new Attack(0));
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(0, state.getTurnOwner());
+
+        fm.next(state, new PlayInterruptibleCard(NOPE, 1));
+        assertEquals(1, state.getCurrentPlayer());
+        assertEquals(1, state.getTurnOwner());
+        assertEquals(drawDeck - 1, state.drawPile.getSize());
+
+        assertEquals(1, state.currentPlayerTurnsLeft);
+    }
+
 }

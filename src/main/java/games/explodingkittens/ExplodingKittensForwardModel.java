@@ -6,6 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IGameEvent;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
@@ -72,6 +73,7 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
         drawPile.shuffle(ekgs.getRnd());
 
         ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];
+        ekgs.currentPlayerTurnsLeft = 1;
         ekgs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
     }
 
@@ -95,6 +97,9 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                 // Draw a card for the current player
                 int currentPlayer = ekgs.getCurrentPlayer();
                 ExplodingKittensCard card = ekgs.drawPile.draw();
+                if (card == null) {
+                    throw new AssertionError("No cards left in the draw pile");
+                }
                 if (card.cardType == EXPLODING_KITTEN) {
                     if (ekgs.playerHandCards.get(currentPlayer).stream().anyMatch(c -> c.cardType == DEFUSE)) {
                         // Exploding kitten drawn, player has defuse
@@ -108,19 +113,22 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                         ekgs.discardPile.add(defuseCard);
                     } else {
                         // Exploding kitten drawn, player is dead
+                        if (ekgs.getPlayerResults()[currentPlayer] == CoreConstants.GameResult.LOSE_GAME) {
+                            throw new AssertionError("Player " + currentPlayer + " is already dead");
+                        }
                         ekgs.discardPile.add(card);
                         killPlayer(ekgs, currentPlayer);
+                        ekgs.currentPlayerTurnsLeft = 1;  // force end of player turn later
                     }
                 } else {
                     card.setOwnerId(currentPlayer);
                     ekgs.playerHandCards.get(currentPlayer).add(card);
                 }
             }
-            if (ekgs.currentAttackLevel > 0) {
-                ekgs.currentAttackLevel--;
-            } else {
+            ekgs.currentPlayerTurnsLeft--;
+            if (ekgs.currentPlayerTurnsLeft == 0 && ekgs.isNotTerminal()) {
                 endPlayerTurn(ekgs);
-                ekgs.currentAttackLevel = ekgs.nextAttackLevel;
+                ekgs.currentPlayerTurnsLeft = Math.max(1, ekgs.nextAttackLevel);
                 ekgs.nextAttackLevel = 0;
             }
         }
@@ -129,6 +137,17 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
 
     public void killPlayer(ExplodingKittensGameState ekgs, int playerID) {
         ekgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, playerID);
+        ekgs.logEvent(new IGameEvent() {
+            @Override
+            public String name() {
+                return "Player " + playerID + " has been killed";
+            }
+
+            @Override
+            public Set<IGameEvent> getValues() {
+                return Set.of();
+            }
+        });
         int players = ekgs.getNPlayers();
         int nPlayersActive = 0;
         for (int i = 0; i < players; i++) {
@@ -172,7 +191,8 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                 case FAVOR:
                     for (int i = 0; i < ekgs.getNPlayers(); i++) {
                         if (i != playerID) {
-                            actions.add(new Favor(playerID, i));
+                            if (ekgs.getPlayerHand(i).getSize() > 0)
+                                actions.add(new Favor(playerID, i));
                         }
                     }
                     break;
