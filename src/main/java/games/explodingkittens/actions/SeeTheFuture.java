@@ -1,38 +1,50 @@
 package games.explodingkittens.actions;
 
+import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
-public class SeeTheFuture extends PlayInterruptibleCard {
+public class SeeTheFuture extends AbstractAction {
 
     public static int SEE_THE_FUTURE_CARDS = 3;
 
-    public SeeTheFuture(int player) {
-        super (ExplodingKittensCard.CardType.SEETHEFUTURE, player);
-    }
-
     @Override
-    public void _execute(ExplodingKittensGameState state) {
+    public boolean execute(AbstractGameState gs) {
+        ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
+        state.setInPlay(ExplodingKittensCard.CardType.ATTACK, state.getCurrentPlayer());
+
         // we set the visibility of the top 3 cards of the draw pile to the current player
         int cardsToSee = Math.min(SEE_THE_FUTURE_CARDS, state.getDrawPile().getSize());
         for (int i = 0; i < cardsToSee; i++) {
-            state.getDrawPile().setVisibilityOfComponent(i, cardPlayer, true);
+            state.getDrawPile().setVisibilityOfComponent(i, state.getCurrentPlayer(), true);
         }
+        return true;
     }
 
     @Override
-    public boolean _equals(Object obj) {
+    public boolean equals(Object obj) {
         return obj instanceof SeeTheFuture;
     }
 
     @Override
-    public int _hashCode() {
+    public int hashCode() {
         return 907409;
     }
 
     @Override
-    public PlayInterruptibleCard _copy() {
-        return new SeeTheFuture(cardPlayer);
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "See the future";
+    }
+
+    @Override
+    public SeeTheFuture copy() {
+        return this;
     }
 
 }

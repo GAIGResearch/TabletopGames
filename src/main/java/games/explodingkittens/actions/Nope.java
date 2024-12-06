@@ -5,37 +5,37 @@ import core.actions.AbstractAction;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
-public class Skip extends AbstractAction {
+public class Nope extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
-        state.setInPlay(ExplodingKittensCard.CardType.SKIP, state.getCurrentPlayer());
-        state.setSkip(true);
+        state.setInPlay(ExplodingKittensCard.CardType.NOPE, state.getCurrentPlayer());
         return true;
     }
 
     @Override
-    public Skip copy() {
+    public AbstractAction copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Skip;
+        return obj instanceof Nope;
     }
 
     @Override
     public int hashCode() {
-        return 3402;
+        return -42943;
+    }
+
+    @Override
+    public String toString() {
+        return "Nope";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
-    }
-    @Override
-    public String toString() {
-        return "Skip draw";
     }
 }

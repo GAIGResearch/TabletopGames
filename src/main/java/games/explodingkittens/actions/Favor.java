@@ -1,38 +1,42 @@
 package games.explodingkittens.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
-public class Favor extends PlayInterruptibleCard {
+public class Favor extends AbstractAction {
 
     public final int targetPlayer;
 
     public Favor(int player, int target) {
-        super (ExplodingKittensCard.CardType.FAVOR, player);
         targetPlayer = target;
     }
 
     @Override
-    public void _execute(ExplodingKittensGameState state) {
+    public boolean execute(AbstractGameState gs) {
+        ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
+        state.setInPlay(ExplodingKittensCard.CardType.FAVOR, state.getCurrentPlayer());
         int cards = state.getPlayerHand(targetPlayer).getSize();
         if (cards > 0) { // edge cases make this possible
-            state.setActionInProgress(new ChoiceOfCardToGive(targetPlayer, cardPlayer));
+            state.setActionInProgress(new ChoiceOfCardToGive(targetPlayer, state.getCurrentPlayer()));
         }
+        return true;
     }
 
     @Override
-    public Favor _copy() {
-        return new Favor(cardPlayer, targetPlayer);
+    public Favor copy() {
+        return this;
     }
 
-    public boolean _equals(Object obj) {
+    @Override
+    public boolean equals(Object obj) {
         return obj instanceof Favor && ((Favor) obj).targetPlayer == targetPlayer;
     }
 
     @Override
-    public int _hashCode() {
-        return targetPlayer;
+    public int hashCode() {
+        return targetPlayer + 4792;
     }
 
 

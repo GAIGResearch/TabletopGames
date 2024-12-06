@@ -4,9 +4,8 @@ import core.actions.AbstractAction;
 import games.explodingkittens.actions.ChoiceOfCardToGive;
 import games.explodingkittens.actions.Favor;
 import games.explodingkittens.actions.Pass;
-import games.explodingkittens.actions.PlayInterruptibleCard;
+import games.explodingkittens.actions.PlayEKCard;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import games.hearts.actions.Play;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,7 +50,7 @@ public class NopeInteractions {
     public void doNotInterruptSingleCatCard() {
         state.getPlayerHand(2).add(new ExplodingKittensCard(NOPE));
         state.getPlayerHand(0).add(new ExplodingKittensCard(RAINBOWCAT));
-        fm.next(state, new PlayInterruptibleCard(RAINBOWCAT, 0));
+        fm.next(state, new PlayEKCard(RAINBOWCAT, 0));
         assertFalse(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
     }
@@ -69,7 +68,7 @@ public class NopeInteractions {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new Pass(), actions.get(0));
-        assertEquals(new PlayInterruptibleCard(NOPE, 2), actions.get(1));
+        assertEquals(new PlayEKCard(NOPE, 2), actions.get(1));
 
         fm.next(state, new Pass());
         assertTrue(state.isActionInProgress());
@@ -88,7 +87,7 @@ public class NopeInteractions {
         assertTrue(state.isActionInProgress());
         assertEquals(2, state.getCurrentPlayer());
 
-        fm.next(state, new PlayInterruptibleCard(NOPE, 2));
+        fm.next(state, new PlayEKCard(NOPE, 2));
         // and also that Nope card is discarded
         assertFalse(state.isActionInProgress()); // because no other NOPE cards
         assertEquals(2, state.discardPile.getSize());
@@ -110,10 +109,10 @@ public class NopeInteractions {
         fm.next(state, new Pass()); // player 1 passes
         assertEquals(2, state.getCurrentPlayer());
 
-        fm.next(state, new PlayInterruptibleCard(NOPE, 2));
+        fm.next(state, new PlayEKCard(NOPE, 2));
         assertTrue(state.isActionInProgress());
         assertEquals(0, state.getCurrentPlayer());
-        fm.next(state, new PlayInterruptibleCard(NOPE, 0));
+        fm.next(state, new PlayEKCard(NOPE, 0));
         assertTrue(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
         fm.next(state, new Pass());  // player 1 passes again
@@ -135,18 +134,18 @@ public class NopeInteractions {
         fm.next(state, new Pass()); // player 1 passes
         assertEquals(2, state.getCurrentPlayer());
 
-        PlayInterruptibleCard nope2 = new PlayInterruptibleCard(NOPE, 2);
+        PlayEKCard nope2 = new PlayEKCard(NOPE, 2);
         fm.next(state, nope2);
         // and also that Nope card is discarded
         assertTrue(state.isActionInProgress());
         assertEquals(0, nope2.getCurrentPlayer(null));
         assertEquals(0, state.getCurrentPlayer());
-        PlayInterruptibleCard nope0 = new PlayInterruptibleCard(NOPE, 0);
+        PlayEKCard nope0 = new PlayEKCard(NOPE, 0);
         fm.next(state, nope0);
         assertEquals(2, nope2.getCurrentPlayer(null));
         assertTrue(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
-        fm.next(state, new PlayInterruptibleCard(NOPE, 1));  // player 1 now Nopes
+        fm.next(state, new PlayEKCard(NOPE, 1));  // player 1 now Nopes
 
         assertFalse(state.isActionInProgress()); // because no other NOPE cards
 

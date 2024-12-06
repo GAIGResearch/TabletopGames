@@ -200,7 +200,7 @@ public class SpecialCards {
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(0, state.getTurnOwner());
 
-        fm.next(state, new PlayInterruptibleCard(NOPE, 1));
+        fm.next(state, new PlayEKCard(NOPE, 1));
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(1, state.getTurnOwner());
         assertEquals(drawDeck - 1, state.drawPile.getSize());

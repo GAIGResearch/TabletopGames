@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import games.explodingkittens.actions.DefuseKitten;
 import games.explodingkittens.actions.Pass;
 import games.explodingkittens.actions.PlaceKitten;
-import games.explodingkittens.actions.PlayInterruptibleCard;
+import games.explodingkittens.actions.PlayEKCard;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class BasicGameTurn {
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(new Pass(), actions.get(0));
-        assertTrue(actions.get(1) instanceof PlayInterruptibleCard);
+        assertTrue(actions.get(1) instanceof PlayEKCard);
         fm.next(state, actions.get(1));
         assertEquals(8, state.playerHandCards.get(1).getSize());
         assertEquals(1, state.discardPile.getSize());

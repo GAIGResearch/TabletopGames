@@ -195,19 +195,19 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                     }
                     break;
                 case SHUFFLE:
-                    actions.add(new Shuffle(playerID));
+                    actions.add(new Shuffle());
                     break;
                 case SKIP:
-                    actions.add(new Skip(playerID));
+                    actions.add(new Skip());
                     break;
                 case ATTACK:
-                    actions.add(new Attack(playerID));
+                    actions.add(new Attack());
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture(playerID));
+                    actions.add(new SeeTheFuture());
                     break;
                 default:
-                    actions.add(new PlayInterruptibleCard(type, playerID));
+                    actions.add(new PlayCatCards(type));
             }
         }
         // TODO: Special case for a pair of identical Cat cards (not implemented in OLD version)

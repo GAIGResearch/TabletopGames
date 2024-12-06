@@ -3,7 +3,6 @@ package games.explodingkittens.gui;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
-import games.explodingkittens.actions.PlayInterruptibleCard;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.awt.*;
@@ -61,10 +60,7 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
      * @return - Exploding kittens card
      */
     private ExplodingKittensCard getStackCard(IExtendedSequence aa) {
-        if (aa instanceof PlayInterruptibleCard pic) {
-            return new ExplodingKittensCard(pic.cardType);
-        }
-        return null;
+        throw new AssertionError("Not implemented");
     }
 
 }

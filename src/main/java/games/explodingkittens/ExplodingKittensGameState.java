@@ -48,11 +48,13 @@ public class ExplodingKittensGameState extends AbstractGameState {
     }
 
     // when a card is played to the table, but before
-    public void setInPlay(ExplodingKittensCard card, int playerID) {
+    public void setInPlay(ExplodingKittensCard.CardType cardType, int playerID) {
+        ExplodingKittensCard card = playerHandCards.get(playerID).stream()
+                .filter(c -> c.cardType == cardType)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Player " + playerID + " does not have card " + cardType + " to play"));
         inPlay.add(card);
-        if (!playerHandCards.get(playerID).remove(card)) {
-            throw new AssertionError("Player " + playerID + " does not have card " + card + " to play");
-        }
+        playerHandCards.get(playerID).remove(card);
     }
 
     @Override

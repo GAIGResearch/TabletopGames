@@ -1,31 +1,41 @@
 package games.explodingkittens.actions;
 
+import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
-public class Shuffle extends PlayInterruptibleCard {
-
-    public Shuffle(int player) {
-        super (ExplodingKittensCard.CardType.SHUFFLE, player);
-    }
+public class Shuffle extends AbstractAction {
 
     @Override
-    public void _execute(ExplodingKittensGameState state) {
+    public boolean execute(AbstractGameState gs) {
+        ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
+        state.setInPlay(ExplodingKittensCard.CardType.SHUFFLE, state.getCurrentPlayer());
         state.getDrawPile().shuffle(state.getRnd());
+        return true;
     }
 
     @Override
-    public boolean _equals(Object obj) {
+    public boolean equals(Object obj) {
         return obj instanceof Shuffle;
     }
 
     @Override
-    public int _hashCode() {
+    public int hashCode() {
         return 909327409;
     }
 
     @Override
-    public PlayInterruptibleCard _copy() {
-        return new Shuffle(cardPlayer);
+    public Shuffle copy() {
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "Shuffle the draw pile";
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }
