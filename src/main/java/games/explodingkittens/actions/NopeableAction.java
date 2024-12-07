@@ -75,9 +75,10 @@ public class NopeableAction implements IExtendedSequence {
         if (action instanceof Nope || action instanceof Pass) {
             // reset last and next player
             lastCardPlayedBy = currentInterrupter;
+            currentInterrupter = -1;
             setNextInterrupter(state);
         }
-        if (lastCardPlayedBy == currentInterrupter) {
+        if (executionComplete(state)) {
             // we have gone round the table
             if (nopes % 2 == 0) {
                 // no one noped the action; execute the action

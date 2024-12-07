@@ -26,6 +26,8 @@ public class PlayEKCard extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
         state.setInPlay(cardType, state.getCurrentPlayer());
+        if (cardType.catCard)
+            state.setInPlay(cardType, state.getCurrentPlayer());  // add an extra one
 
         if (cardType.nopeable) {
             state.setActionInProgress(new NopeableAction(state.getCurrentPlayer(), this, state));

@@ -66,7 +66,6 @@ public class ExplodingKittensCard extends Card {
             this.catCard = catCard;
             // lambda for all cat cards; need to play a pair to take a random card from the target
             this.lambda = (state, target) -> {
-                state.setInPlay(this, state.getCurrentPlayer());  // one has been set in play already
                 if (state.getPlayerHand(target).getSize() > 0) {
                     int index = state.getRnd().nextInt(state.getPlayerHand(target).getSize());
                     ExplodingKittensCard card = state.getPlayerHand(target).get(index);

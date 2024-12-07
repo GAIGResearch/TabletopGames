@@ -237,4 +237,44 @@ public class SpecialCards {
         }
     }
 
+    @Test
+    public void needTwoCatCardsToPlay() {
+        state.getPlayerHand(0).clear();
+        state.getPlayerHand(0).add(new ExplodingKittensCard(TACOCAT));
+        state.getPlayerHand(0).add(new ExplodingKittensCard(RAINBOWCAT));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+
+        state.getPlayerHand(0).add(new ExplodingKittensCard(TACOCAT));
+        actions = fm.computeAvailableActions(state);
+        assertEquals(4, actions.size());
+        assertEquals(new Pass(), actions.get(0));
+        assertEquals(new PlayEKCard(TACOCAT, 1), actions.get(1));
+        assertEquals(new PlayEKCard(TACOCAT, 2), actions.get(2));
+
+        assertEquals(3, state.getPlayerHand(0).getSize());
+        fm.next(state, new PlayEKCard(TACOCAT, 1));
+        assertEquals(1, state.getCurrentPlayer());
+        assertFalse(state.isActionInProgress());
+        assertEquals(2, state.getDiscardPile().getSize());
+        assertTrue(state.getDiscardPile().stream().anyMatch(c -> c.cardType == TACOCAT));
+        assertEquals(3, state.getPlayerHand(0).getSize());
+        assertEquals(7, state.getPlayerHand(1).getSize());
+    }
+
+    @Test
+    public void nopeTwoCatCardsDiscardsBoth() {
+        state.getPlayerHand(0).add(new ExplodingKittensCard(TACOCAT));
+        state.getPlayerHand(0).add(new ExplodingKittensCard(TACOCAT));
+        state.getPlayerHand(3).add(new ExplodingKittensCard(NOPE));
+
+        fm.next(state, new PlayEKCard(TACOCAT, 3));
+        assertTrue(state.isActionInProgress());
+        fm.next(state, new Nope());
+        assertFalse(state.isActionInProgress());
+
+        assertEquals(3, state.getDiscardPile().getSize()); // 2 x TACOCAT + NOPE
+        assertEquals(9, state.getPlayerHand(0).getSize());
+    }
 }
