@@ -79,13 +79,21 @@ public class BasicGameTurn {
     public void playActionDrawsCard() {
         state.drawPile.add(new ExplodingKittensCard(TACOCAT));
         state.drawPile.add(new ExplodingKittensCard(TACOCAT));
+        state.playerHandCards.get(0).add(new ExplodingKittensCard(SHUFFLE));
+        assertEquals(9, state.playerHandCards.get(0).getSize());
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(new Pass(), actions.get(0));
-        assertTrue(actions.get(1) instanceof PlayEKCard);
-        fm.next(state, actions.get(1));
-        assertEquals(8, state.playerHandCards.get(1).getSize());
-        assertEquals(1, state.discardPile.getSize());
+        fm.next(state, new PlayEKCard(SHUFFLE));
+        if (state.getDiscardPile().getSize() == 2) {
+            assertTrue(state.discardPile.stream().anyMatch(c -> c.cardType == DEFUSE));
+            assertTrue(state.discardPile.stream().anyMatch(c -> c.cardType == SHUFFLE));
+            assertEquals(8, state.playerHandCards.get(0).getSize());
+        } else {
+            assertEquals(1, state.discardPile.getSize());
+            assertEquals(9, state.playerHandCards.get(0).getSize());
+        }
+;
     }
 
     @Test

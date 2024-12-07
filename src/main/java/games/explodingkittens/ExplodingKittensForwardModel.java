@@ -190,27 +190,24 @@ public class ExplodingKittensForwardModel extends StandardForwardModel {
                     for (int i = 0; i < ekgs.getNPlayers(); i++) {
                         if (i != playerID) {
                             if (ekgs.isNotTerminalForPlayer(i) && ekgs.getPlayerHand(i).getSize() > 0)
-                                actions.add(new Favor(playerID, i));
+                                actions.add(new PlayEKCard(FAVOR, i));
                         }
                     }
                     break;
-                case SHUFFLE:
-                    actions.add(new Shuffle());
-                    break;
-                case SKIP:
-                    actions.add(new Skip());
-                    break;
-                case ATTACK:
-                    actions.add(new Attack());
-                    break;
-                case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture());
+                case SHUFFLE, SKIP, ATTACK, SEETHEFUTURE:
+                    actions.add(new PlayEKCard(type));
                     break;
                 default:
-                    actions.add(new PlayCatCards(type));
+                    // for Cat Cards we need a pair
+                    for (int i = 0; i < ekgs.getNPlayers(); i++) {
+                        if (i != playerID) {
+                            if (ekgs.isNotTerminalForPlayer(i) && ekgs.getPlayerHand(i).getSize() > 0)
+                                if (ekgs.playerHandCards.get(playerID).stream().filter(c -> c.cardType == type).count() > 1)
+                                    actions.add(new PlayEKCard(type, i));
+                        }
+                    }
             }
         }
-        // TODO: Special case for a pair of identical Cat cards (not implemented in OLD version)
         return actions;
     }
 

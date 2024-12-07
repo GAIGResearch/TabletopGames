@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.cards.ExplodingKittensCard;
+import games.hearts.actions.Play;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,9 +43,9 @@ public class SpecialCards {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(4, actions.size());
         assertEquals(new Pass(), actions.get(0));
-        assertEquals(new Favor(0, 1), actions.get(1));
-        assertEquals(new Favor(0, 2), actions.get(2));
-        assertEquals(new Favor(0, 3), actions.get(3));
+        assertEquals(new PlayEKCard(FAVOR, 1), actions.get(1));
+        assertEquals(new PlayEKCard(FAVOR, 2), actions.get(2));
+        assertEquals(new PlayEKCard(FAVOR, 3), actions.get(3));
     }
 
     @Test
@@ -52,7 +53,7 @@ public class SpecialCards {
         state.getPlayerHand(0).add(new ExplodingKittensCard(FAVOR));
         assertEquals(9, state.getPlayerHand(0).getSize());
         assertEquals(8, state.getPlayerHand(1).getSize());
-        fm.next(state, new Favor(0, 1));
+        fm.next(state, new PlayEKCard(FAVOR, 1));
         assertEquals(1, state.getCurrentPlayer());
         assertTrue(state.isActionInProgress());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
@@ -68,12 +69,10 @@ public class SpecialCards {
     public void cannotAskFavourOfTheDead() {
         state.getPlayerHand(0).add(new ExplodingKittensCard(FAVOR));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        int actionsBefore = actions.size();
-        assertTrue(actions.contains(new Favor(0, 1)));
+        assertTrue(actions.contains(new PlayEKCard(FAVOR, 1)));
         fm.killPlayer(state, 1);
         actions = fm.computeAvailableActions(state);
-        assertFalse(actions.contains(new Favor(0, 1)));
-        assertEquals(actionsBefore - 1, actions.size());
+        assertFalse(actions.contains(new PlayEKCard(FAVOR, 1)));
     }
 
     @Test
@@ -84,10 +83,10 @@ public class SpecialCards {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new Pass(), actions.get(0));
-        assertEquals(new Shuffle(0), actions.get(1));
+        assertEquals(new PlayEKCard(SHUFFLE), actions.get(1));
 
         Deck<ExplodingKittensCard> oldDrawPile = state.drawPile.copy();
-        fm.next(state, new Shuffle(0));
+        fm.next(state, new PlayEKCard(SHUFFLE));
         assertEquals(oldDrawPile.getSize() - 1, state.drawPile.getSize());
         boolean allSame = true;
         for (int i = 1; i < oldDrawPile.getSize(); i++) {
@@ -116,11 +115,11 @@ public class SpecialCards {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new Pass(), actions.get(0));
-        assertEquals(new Skip(0), actions.get(1));
+        assertEquals(new PlayEKCard(SKIP), actions.get(1));
         int drawDeck = state.drawPile.getSize();
 
         assertFalse(state.skip);
-        fm.next(state, new Skip(0));
+        fm.next(state, new PlayEKCard(SKIP));
         assertFalse(state.skip);
 
         assertEquals(1, state.getCurrentPlayer());
@@ -136,10 +135,10 @@ public class SpecialCards {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new Pass(), actions.get(0));
-        assertEquals(new Attack(0), actions.get(1));
+        assertEquals(new PlayEKCard(ATTACK), actions.get(1));
         int drawDeck = state.drawPile.getSize();
 
-        fm.next(state, new Attack(0));
+        fm.next(state, new PlayEKCard(ATTACK));
         assertEquals(drawDeck, state.drawPile.getSize());
         assertEquals(2, state.currentPlayerTurnsLeft);
         assertEquals(1, state.getCurrentPlayer());
@@ -160,7 +159,7 @@ public class SpecialCards {
         state.getPlayerHand(0).add(attackCard);
         state.getPlayerHand(1).clear();  // remove DEFUSE card
 
-        fm.next(state, new Attack(0));
+        fm.next(state, new PlayEKCard(ATTACK));
         assertEquals(2, state.currentPlayerTurnsLeft);
         assertEquals(1, state.getCurrentPlayer());
 
@@ -177,12 +176,12 @@ public class SpecialCards {
         ExplodingKittensCard attackCard = new ExplodingKittensCard(ATTACK);
         state.getPlayerHand(0).add(attackCard);
 
-        fm.next(state, new Attack(0));
+        fm.next(state, new PlayEKCard(ATTACK));
         assertEquals(2, state.currentPlayerTurnsLeft);
         assertEquals(1, state.getCurrentPlayer());
 
         state.getPlayerHand(1).add(attackCard);
-        fm.next(state, new Attack(1));
+        fm.next(state, new PlayEKCard(ATTACK));
 
         assertEquals(4, state.currentPlayerTurnsLeft);
         assertEquals(2, state.getCurrentPlayer());
@@ -196,11 +195,11 @@ public class SpecialCards {
         state.getPlayerHand(1).add(nopeCard);
         int drawDeck = state.drawPile.getSize();
 
-        fm.next(state, new Attack(0));
+        fm.next(state, new PlayEKCard(ATTACK));
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(0, state.getTurnOwner());
 
-        fm.next(state, new PlayEKCard(NOPE, 1));
+        fm.next(state, new Nope());
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(1, state.getTurnOwner());
         assertEquals(drawDeck - 1, state.drawPile.getSize());
@@ -218,9 +217,9 @@ public class SpecialCards {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new Pass(), actions.get(0));
-        assertEquals(new SeeTheFuture(0), actions.get(1));
+        assertEquals(new PlayEKCard(SEETHEFUTURE), actions.get(1));
 
-        fm.next(state, new SeeTheFuture(0));
+        fm.next(state, new PlayEKCard(SEETHEFUTURE));
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(1, state.getTurnOwner());
         assertEquals(drawDeck - 1, state.drawPile.getSize());

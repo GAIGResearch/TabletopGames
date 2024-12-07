@@ -17,10 +17,10 @@ public class NopeableAction implements IExtendedSequence {
 
     int currentInterrupter = -1;
     int lastCardPlayedBy;
-    AbstractAction originalAction;
+    PlayEKCard originalAction;
     int nopes = 0;
 
-    public NopeableAction(int player, AbstractAction action, ExplodingKittensGameState state) {
+    public NopeableAction(int player, PlayEKCard action, ExplodingKittensGameState state) {
         this.lastCardPlayedBy = player;
         this.originalAction = action.copy();
         setNextInterrupter(state);
@@ -28,7 +28,7 @@ public class NopeableAction implements IExtendedSequence {
 
 
     // private constructor for copying
-    private NopeableAction(int lastCardPlayedBy, AbstractAction originalAction, int currentInterrupter, int nopes) {
+    private NopeableAction(int lastCardPlayedBy, PlayEKCard originalAction, int currentInterrupter, int nopes) {
         this.lastCardPlayedBy = lastCardPlayedBy;
         this.originalAction = originalAction.copy();
         this.currentInterrupter = currentInterrupter;
@@ -76,14 +76,12 @@ public class NopeableAction implements IExtendedSequence {
             // reset last and next player
             lastCardPlayedBy = currentInterrupter;
             setNextInterrupter(state);
-        } else {
-            throw new AssertionError("Unexpected action: " + action);
         }
         if (lastCardPlayedBy == currentInterrupter) {
             // we have gone round the table
             if (nopes % 2 == 0) {
                 // no one noped the action; execute the action
-                originalAction.execute(state);
+                originalAction.cardType.execute(state, originalAction.target);
             }
             state.getInPlay().forEach(c -> state.getDiscardPile().add(c));
             state.getInPlay().clear();
