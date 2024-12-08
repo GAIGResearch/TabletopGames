@@ -54,9 +54,11 @@ public class NopeableAction implements IExtendedSequence {
         }
         // Now we see if anyone has a Nope card
         while (currentInterrupter != lastCardPlayedBy) {
-            Deck<ExplodingKittensCard> hand = state.getPlayerHand(currentInterrupter);
-            boolean hasNope = hand.stream().anyMatch(c -> c.cardType == NOPE);
-            if (hasNope) break;
+            if (state.isNotTerminalForPlayer(currentInterrupter)) {
+                Deck<ExplodingKittensCard> hand = state.getPlayerHand(currentInterrupter);
+                boolean hasNope = hand.stream().anyMatch(c -> c.cardType == NOPE);
+                if (hasNope) break;
+            }
             currentInterrupter = (currentInterrupter + 1) % state.getNPlayers();
         }
     }

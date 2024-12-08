@@ -66,7 +66,19 @@ public class NopeInteractions {
         assertTrue(state.isActionInProgress());
         assertEquals(1, state.getCurrentPlayer());
         assertTrue(state.currentActionInProgress() instanceof ChoiceOfCardToGive);
+    }
 
+    @Test
+    public void deadPlayerDoesNotGetANopeOption()  {
+        state.getPlayerHand(2).add(new ExplodingKittensCard(NOPE));
+        state.getPlayerHand(0).add(new ExplodingKittensCard(FAVOR));
+
+        fm.killPlayer(state, 2);
+
+        fm.next(state, new PlayEKCard(FAVOR, 1));
+        assertTrue(state.isActionInProgress());
+        assertTrue(state.currentActionInProgress() instanceof ChoiceOfCardToGive);
+        assertEquals(1, state.getCurrentPlayer());
     }
 
     @Test
