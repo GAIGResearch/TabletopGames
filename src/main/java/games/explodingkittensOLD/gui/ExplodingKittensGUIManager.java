@@ -138,7 +138,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || humanPlayerId.contains(i)
+                        || humanPlayerIds.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
@@ -158,7 +158,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ekgs.getDrawPile());
-            if (humanPlayerId.contains(activePlayer) || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
+            if (humanPlayerIds.contains(activePlayer) || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
                 drawPile.setFront(true);
 
         }

@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.joining;
 public abstract class AbstractGUIManager {
     protected GamePanel parent;
     protected Game game;
-    protected Set<Integer> humanPlayerId;
+    protected Set<Integer> humanPlayerIds;
 
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
@@ -50,7 +50,7 @@ public abstract class AbstractGUIManager {
         this.maxActionSpace = getMaxActionSpace();
         this.parent = parent;
         this.game = game;
-        this.humanPlayerId = human;
+        this.humanPlayerIds = human;
 
         gameStatus = new JLabel();
         playerStatus = new JLabel();
@@ -167,8 +167,8 @@ public abstract class AbstractGUIManager {
         return ac;
     }
 
-    public Set<Integer> getHumanPlayerId() {
-        return humanPlayerId;
+    public Set<Integer> getHumanPlayerIds() {
+        return humanPlayerIds;
     }
 
     /**
@@ -198,7 +198,7 @@ public abstract class AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width / 2 - 10, height, humanPlayerId);
+        createActionHistoryPanel(width / 2 - 10, height, humanPlayerIds);
         wrapper.add(historyContainer);
         return wrapper;
     }

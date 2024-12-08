@@ -14,9 +14,6 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
     // Images for Action Stack
     ArrayList<String> catImagesBkup;
 
-    // This view adds action stack as cards in the discard pile for display
-    Stack<IExtendedSequence> actionStack;
-
     /**
      * Constructor initialising information and adding key/mouse listener for card highlight (left click or ALT + hover
      * allows showing the highlighted card on top of all others).
@@ -24,9 +21,8 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
      * @param visible - true if whole deck visible
      * @param dataPath - path to assets
      */
-    public ExplodingKittensDiscardView(Deck<ExplodingKittensCard> d, Stack<IExtendedSequence> actionStack, boolean visible, String dataPath) {
+    public ExplodingKittensDiscardView(Deck<ExplodingKittensCard> d, boolean visible, String dataPath) {
         super(-1, d, visible, dataPath);
-        this.actionStack = actionStack;
         catImagesBkup = new ArrayList<>();
         catImagesBkup.addAll(catImages);
     }
@@ -39,13 +35,6 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
         Component oldComponent = component;
         @SuppressWarnings("unchecked") Deck<ExplodingKittensCard> deckCopy = ((Deck<ExplodingKittensCard>) component).copy();
 
-        // Add cards played from action stack into the copy of the deck
-        for (IExtendedSequence aa: actionStack) {
-            ExplodingKittensCard card = getStackCard(aa);
-            if (card != null) {
-                deckCopy.add(card);
-            }
-        }
         // set thie copy to tbe the component we draw
         component = deckCopy;
         // and draw it
@@ -54,13 +43,5 @@ public class ExplodingKittensDiscardView extends ExplodingKittensDeckView {
         component = oldComponent;
     }
 
-    /**
-     * Turns an action into a card
-     * @param aa - action to turn to card
-     * @return - Exploding kittens card
-     */
-    private ExplodingKittensCard getStackCard(IExtendedSequence aa) {
-        throw new AssertionError("Not implemented");
-    }
 
 }

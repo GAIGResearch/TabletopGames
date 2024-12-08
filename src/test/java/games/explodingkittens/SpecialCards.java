@@ -208,6 +208,21 @@ public class SpecialCards {
     }
 
     @Test
+    public void attackAndPotentialNopeLoop() {
+        ExplodingKittensCard attackCard = new ExplodingKittensCard(ATTACK);
+        state.getPlayerHand(0).add(attackCard);
+        state.getPlayerHand(1).add(new ExplodingKittensCard(NOPE));
+        state.getPlayerHand(2).add(new ExplodingKittensCard(NOPE));
+
+        fm.next(state, new PlayEKCard(ATTACK));
+        fm.next(state, new Pass());
+        fm.next(state, new Pass());
+        assertEquals(1, state.getCurrentPlayer());
+        assertFalse(state.isActionInProgress());
+        assertEquals(2, state.currentPlayerTurnsLeft);
+    }
+
+    @Test
     public void seeTheFuture() {
         state.getPlayerHand(0).clear();
         ExplodingKittensCard seeTheFutureCard = new ExplodingKittensCard(SEETHEFUTURE);

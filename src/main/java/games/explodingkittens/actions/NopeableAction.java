@@ -71,11 +71,12 @@ public class NopeableAction implements IExtendedSequence {
         ExplodingKittensGameState state = (ExplodingKittensGameState) gs;
         if (action instanceof Nope) {
             nopes++;
-        }
-        if (action instanceof Nope || action instanceof Pass) {
-            // reset last and next player
+            // this resets the count
             lastCardPlayedBy = currentInterrupter;
             currentInterrupter = -1;
+            setNextInterrupter(state);
+        }
+        if (action instanceof Pass) {
             setNextInterrupter(state);
         }
         if (executionComplete(state)) {
