@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.actions.AbstractAction;
 
+import javax.swing.*;
 import java.util.*;
 
 public class ActionStats {
@@ -24,6 +25,15 @@ public class ActionStats {
             squaredTotValue[i] += results[i] * results[i];
         }
         nVisits++;
+    }
+
+    public ActionStats copy() {
+        ActionStats newStats = new ActionStats(totValue.length);
+        newStats.nVisits = nVisits;
+        newStats.validVisits = validVisits;
+        System.arraycopy(totValue, 0, newStats.totValue, 0, totValue.length);
+        System.arraycopy(squaredTotValue, 0, newStats.squaredTotValue, 0, squaredTotValue.length);
+        return newStats;
     }
 
 }
