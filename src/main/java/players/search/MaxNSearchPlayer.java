@@ -3,7 +3,6 @@ package players.search;
 import core.*;
 import core.actions.AbstractAction;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,6 +33,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
 
 
     private long startTime;
+    private SearchResult rootResult;
 
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
@@ -44,7 +44,6 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         return (MaxNSearchParameters) this.parameters;
     }
 
-    // TODO: alpha-beta pruning if paranoid
     // TODO: Use information from iterative deepening to improve the expansion order
 
     @Override
@@ -55,17 +54,21 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         // - MACRO_ACTION: only when the currentPlayer() has changed as a result of applying the action
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
+        rootResult = null;
         if (getParameters().iterativeDeepening) {
             // we do a depth D = 1 search, then D = 2 and so on until we reach maxDepth or exhaust budget
-            SearchResult bestResult = null;
             for (int depth = 1; depth <= getParameters().searchDepth; depth++) {
-                bestResult = expand(gs, actions, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                rootResult = expand(gs, actions, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             }
-            return bestResult == null ? null : bestResult.action;
         } else {
-            return expand(gs, actions, getParameters().searchDepth,
-                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY).action;
+            rootResult = expand(gs, actions, getParameters().searchDepth,
+                    Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
+        return rootResult == null ? null : rootResult.action;
+    }
+
+    public SearchResult getRootResult() {
+        return rootResult;
     }
 
     /**
