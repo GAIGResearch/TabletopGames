@@ -2,11 +2,13 @@ package players.search;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
+import llm.IHasStateHeuristic;
 
 import java.util.Collections;
 import java.util.List;
 
-public class MaxNSearchPlayer extends AbstractPlayer {
+public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeuristic {
     /**
      * This class is a simple implementation of a MaxN search player.
      * (This is the same as Minimax in the case of 2 players if the heuristic is symmetric)
@@ -26,13 +28,14 @@ public class MaxNSearchPlayer extends AbstractPlayer {
      * - ACTION: D is decremented at each decision node
      * - MACRO_ACTION: D is decremented at each decision node where the acting player changes
      * - TURN: D is decremented at each decision node where the turn number changes
-     *
+     * <p>
      * Additionally, the BUDGET can be specified as a cutoff for the search. If this much time passes
      * without the search finishing, the best action found so far is returned (likely to be pretty random).
      */
 
 
     private long startTime;
+
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
@@ -51,6 +54,16 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
         return expand(gs, actions, getParameters().searchDepth).action;
+    }
+
+    @Override
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        getParameters().setParameterValue("heuristic", heuristic);
+    }
+
+    @Override
+    public IStateHeuristic getStateHeuristic() {
+        return getParameters().heuristic;
     }
 
     /**
@@ -107,7 +120,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             SearchResult result = expand(stateCopy, nextActions, newDepth);
 
             // we make the decision based on the actor at state, not the actor at stateCopy
-            if (result.value[state.getCurrentPlayer()]  > bestValue) {
+            if (result.value[state.getCurrentPlayer()] > bestValue) {
                 bestAction = action;
                 bestValues = result.value;
                 bestValue = bestValues[state.getCurrentPlayer()];
@@ -122,7 +135,8 @@ public class MaxNSearchPlayer extends AbstractPlayer {
     @Override
     public MaxNSearchPlayer copy() {
         MaxNSearchPlayer retValue = new MaxNSearchPlayer((MaxNSearchParameters) getParameters().shallowCopy());
-        retValue.setForwardModel(getForwardModel().copy());
+        if (getForwardModel() != null)
+            retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }
 

@@ -1,10 +1,10 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 
 /**
@@ -14,7 +14,7 @@ import games.loveletter.cards.LoveLetterCard;
 public class PriestAction extends PlayCard implements IPrintable {
 
     public PriestAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.Priest, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
+        super(CardType.Priest, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override

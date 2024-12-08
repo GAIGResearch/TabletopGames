@@ -1,0 +1,31 @@
+**Game Implementation Summary**
+
+**Game Rules:**
+
+1. **Dice Rolling:** Players roll four dice, split into two pairs to determine column movements.
+2. **Column Movement:** Each pair dictates movement in one column.
+3. **Turn End:** Players can stop rolling and end their turn at any time to secure progress.
+4. **Winning Columns:** Players win a column by reaching the top with a marker.
+5. **Loss Condition:** Rolling higher numbers after winning a column can cause loss of all placed markers.
+6. **Marker Placement:** Markers cannot be placed in already won columns.
+7. **Game Win:** The first player to claim any three columns wins.
+
+**Strategy:**
+
+1. **Focus Columns:** Prioritize columns with numbers 6, 7, or 8 due to higher probability.
+2. **Avoid Short Columns:** Columns with fewer steps are less advantageous.
+3. **Risk Management:** Stop rolling to secure progress and avoid losing all markers in a column.
+4. **Marker Interaction:** If a player's marker lands on another's, they must roll again until moving or losing their turn (blowing it).
+
+**Game Variant:**
+
+- **Four Players:** Encourages more risk-taking due to increased competition.
+
+**Developer Notes:**
+
+- Implement dice rolling mechanics with split pair results.
+- Include rules for column movement and marker placement.
+- Create logic for winning and losing conditions.
+- Add a focus on strategy with column prioritization.
+- Integrate the interaction rule for markers on the same space.
+- Consider enhancing the game with a four-player mode for increased challenge.

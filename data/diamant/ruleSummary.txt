@@ -1,0 +1,32 @@
+**Game Summary for Implementation**
+
+**Game Overview:**
+- 3-8 players, aged 8+
+- 30-minute playtime
+- Players explore a cave, collect diamonds and rubies, avoid traps
+- Goal: gather the most diamonds by the end of the game
+
+**Game Components:**
+- Board: 5 paths connecting camp to the cave
+- Cards: Decision, Treasure, Trap
+- Barricade tiles: track progress
+- Chests: store rubies and diamonds
+
+**Game Rules:**
+1. **Treasure Collection:** Players gather rubies from Treasure cards, sharing equally and keeping extras.
+2. **Traps:** Two Trap cards end the expedition.
+3. **Movement:** Players simultaneously reveal cards, gather treasure, and decide to continue or exit.
+4. **Exiting:** Exiting players share rubies, and the first to leave takes Relics for Diamonds.
+5. **Game End:** When all players return to camp or two Traps appear.
+6. **Rounds:** After each round, place a Barricade tile, reallocate Rubies and Relics, reshuffle the Expedition deck.
+
+**Strategy:**
+1. **Treasure Collection:** Continue the expedition to gather more treasure but be cautious of Trap cards.
+2. **Timing Exits:** Decide to exit when you have enough rubies to secure your score.
+3. **Leveraging Diamonds:** Maximize treasure collection and use diamonds for victory points.
+
+**Key Mechanics:**
+- Simultaneous card revelation
+- Resource sharing and management
+- Risk-reward decision-making
+- Progress tracking with Barricade tiles

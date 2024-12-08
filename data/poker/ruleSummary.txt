@@ -1,0 +1,29 @@
+**Texas Hold'em Game Rules and Strategy Summary:**
+
+**Objective:** Form the best five-card hand using any combination of two hole cards and five community cards.
+
+**Game Flow:**
+1. **Button & Blinds:**
+   - The button (dealer) moves clockwise.
+   - Player left of the button posts the small blind; next player posts the big blind.
+
+2. **Hole Cards & Betting:**
+   - Each player receives two hole cards.
+   - Betting starts left of the big blind, with options to call, raise, or fold.
+   - Betting continues clockwise, with all remaining players matching the highest bet.
+
+3. **Community Cards & Betting Rounds:**
+   - **Flop:** Three community cards dealt, followed by a betting round.
+   - **Turn:** One more community card dealt, followed by a betting round.
+   - **River:** Final community card dealt, followed by the final betting round.
+
+4. **Hand Rankings (Best to Worst):**
+   - Royal Flush, Four of a Kind, Full House, Flush, Straight, Three of a Kind, Two Pair, Pair, High Card.
+
+**Winning the Pot:**
+- The player with the highest-ranking hand wins the pot.
+- In case of a tie, the pot is split.
+
+**Strategy:**
+- Form a pair or a high card combination with more than one suit.
+- Use any combination of hole cards and community cards to make the best five-card hand.

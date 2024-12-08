@@ -45,7 +45,7 @@ public class GSInfo extends JComponent {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (gs.getCurrentRole() == PuertoRicoConstants.Role.SETTLER
-                        && gui.getHumanPlayerId().contains(gs.getCurrentPlayer())
+                        && gui.getHumanPlayerIds().contains(gs.getCurrentPlayer())
                         && gs.getQuarriesLeft() > 0 && (gs.getCurrentPlayer() == gs.getRoleOwner() || gs.hasActiveBuilding(gs.getCurrentPlayer(), CONSTRUCTION_HUT))) {
                     gui.getAC().addAction(new BuildQuarry());
                 }
@@ -74,7 +74,7 @@ public class GSInfo extends JComponent {
             if (crop == PuertoRicoConstants.Crop.QUARRY) {
                 PRGUIUtils.drawHexagon(g, x, pad + barrelHeight/2 - barrelWidth/2, PRGUIUtils.cropColorMap.get(crop), barrelWidth, barrelWidth);
                 if (gs.getCurrentRole() == PuertoRicoConstants.Role.SETTLER
-                        && gui.getHumanPlayerId().contains(gs.getCurrentPlayer())
+                        && gui.getHumanPlayerIds().contains(gs.getCurrentPlayer())
                         && gs.getQuarriesLeft() > 0 && (gs.getCurrentPlayer() == gs.getRoleOwner() || gs.hasActiveBuilding(gs.getCurrentPlayer(), CONSTRUCTION_HUT))) {
                     g.setColor(highlightColor);
                     Stroke s = g.getStroke();

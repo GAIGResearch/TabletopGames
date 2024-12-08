@@ -40,7 +40,7 @@ public class GSBuildings extends JComponent {
                         break;
                     }
                 }
-                if (clicked != null && gs.getCurrentRole() == PuertoRicoConstants.Role.BUILDER && gui.getHumanPlayerId().contains(gs.getCurrentPlayer())) {
+                if (clicked != null && gs.getCurrentRole() == PuertoRicoConstants.Role.BUILDER && gui.getHumanPlayerIds().contains(gs.getCurrentPlayer())) {
                     // Clicked on a building when it's our choice of building, check if the clicked building is a legal action
 
                     PuertoRicoParameters params = (PuertoRicoParameters) gs.getGameParameters();
@@ -118,7 +118,7 @@ public class GSBuildings extends JComponent {
                 buildingRectMap.put(new Rectangle(x, y, buildingWidth, buildingHeight * size), b);
 
                 // Highlight buildings that can be built by current player
-                if (gs.getCurrentRole() == PuertoRicoConstants.Role.BUILDER && gui.getHumanPlayerId().contains(gs.getCurrentPlayer())) {
+                if (gs.getCurrentRole() == PuertoRicoConstants.Role.BUILDER && gui.getHumanPlayerIds().contains(gs.getCurrentPlayer())) {
                     Stroke s = g.getStroke();
                     g.setStroke(new BasicStroke(3));
                     if (b != null) {

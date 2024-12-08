@@ -74,6 +74,9 @@ public class StrategoGameState extends AbstractGameState{
         return new StrategoHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * GameScore has no meaning in Stratego. This will always return zero for any non-terminal game state.
+     */
     @Override
     public double getGameScore(int playerId) {
         return playerResults[playerId].value;

@@ -44,7 +44,7 @@ public class RolePanel extends JComponent implements IScreenHighlight {
             @Override
             public void mouseClicked(MouseEvent e) {
                 PuertoRicoConstants.Role activeRole = gs.getCurrentRole();
-                if (activeRole != null && !gui.getHumanPlayerId().contains(gs.getCurrentPlayer())) return;
+                if (activeRole != null && !gui.getHumanPlayerIds().contains(gs.getCurrentPlayer())) return;
 
                 for (Map.Entry<Rectangle, PuertoRicoConstants.Role> entry: rectangleRoleMap.entrySet()) {
                     if (entry.getKey().contains(e.getPoint()) && gs.isRoleAvailable(entry.getValue())) {

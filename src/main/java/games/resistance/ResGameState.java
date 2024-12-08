@@ -183,6 +183,9 @@ public class ResGameState extends AbstractGameState {
         teamChoice = ResTeamBuilding.getTeam();
     }
 
+    /**
+     * Returns 0 if the player is a resistance member, 1 if the player is a spy.
+     */
     @Override
     public int getTeam(int player) {
         ResPlayerCards.CardType id = playerHandCards.get(player).get(2).cardType;
@@ -194,15 +197,30 @@ public class ResGameState extends AbstractGameState {
         finalTeamChoice.clear();
     }
 
+    /**
+     * The number of missions already played.
+     */
     public int getMissionsSoFar() {
         return historicTeams.size();
     }
+
+    /**
+     * Returns the playerIDs of the team that went on the ith mission.
+     */
     public List<Integer> getHistoricTeam(int i) {
         return new ArrayList<>(historicTeams.get(i-1));
     }
+
+    /**
+     * Returns the result of the ith mission; true if successful, false if failed.
+     */
     public boolean getHistoricMissionSuccess(int i) {
         return gameBoardValues.get(i-1);
     }
+
+    /**
+     * Returns the number of failed votes on the ith mission.
+     */
     public int getHistoricNoVotes(int i) {
         return noVotesPerMission.get(i-1);
     }
@@ -241,14 +259,17 @@ public class ResGameState extends AbstractGameState {
         return playerHandCards;
     }
 
+    // current leader who is selecting the team
     public int getLeaderID() {
         return leaderID;
     }
 
+    // The final team selected for the mission
     public List<Integer> getFinalTeam() {
         return finalTeamChoice;
     }
 
+    // The list of
     public List<Boolean> getGameBoardValues() {
         return gameBoardValues;
     }
