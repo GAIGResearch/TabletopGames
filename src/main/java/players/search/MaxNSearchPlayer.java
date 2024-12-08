@@ -2,9 +2,9 @@ package players.search;
 
 import core.*;
 import core.actions.AbstractAction;
+import players.mcts.ActionStats;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MaxNSearchPlayer extends AbstractPlayer {
     /**
@@ -35,6 +35,8 @@ public class MaxNSearchPlayer extends AbstractPlayer {
     private long startTime;
     private SearchResult rootResult;
 
+    protected List<Map<AbstractAction, ActionStats>> actionValueEstimates;
+
     public MaxNSearchPlayer(MaxNSearchParameters parameters) {
         super(parameters, "MinMaxSearch");
     }
@@ -55,12 +57,26 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         // - TURN: only when turn number has changed as a result of applying the action
         startTime = System.currentTimeMillis();
         rootResult = null;
+        actionValueEstimates = new ArrayList<>();
         if (getParameters().iterativeDeepening) {
             // we do a depth D = 1 search, then D = 2 and so on until we reach maxDepth or exhaust budget
             for (int depth = 1; depth <= getParameters().searchDepth; depth++) {
+                if (depth == 1)
+                    actionValueEstimates.add(new HashMap<>());
+                else {
+                    // initialise the actionValueEstimates for the next depth with the values from the previous depth
+                    Map<AbstractAction, ActionStats> newMap = new HashMap<>();
+                    for (Map.Entry<AbstractAction, ActionStats> entry : actionValueEstimates.get(0).entrySet()) {
+                        newMap.put(entry.getKey(), entry.getValue().copy());
+                    }
+                    actionValueEstimates.add(0, newMap);
+                }
                 rootResult = expand(gs, actions, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             }
         } else {
+            for (int depth = 0; depth < getParameters().searchDepth; depth++) {
+                actionValueEstimates.add(new HashMap<>());
+            }
             rootResult = expand(gs, actions, getParameters().searchDepth,
                     Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
@@ -103,7 +119,15 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         double bestValue = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
         // we shuffle the actions so that ties are broken at random
-        Collections.shuffle(actions, getRnd());
+        if (params.expandByEstimatedValue) {
+            // sort actions based on actionValueEstimates (with highest value first)
+            actions.sort(Comparator.comparingDouble(a -> -actionValueEstimates.get(searchDepth - 1)
+                    .getOrDefault(a, new ActionStats(state.getNPlayers()))
+                    .totValue[state.getCurrentPlayer()]));
+        } else {
+            Collections.shuffle(actions, getRnd());
+        }
+        Map<AbstractAction, ActionStats> statsMap = actionValueEstimates.get(searchDepth - 1);
         for (AbstractAction action : actions) {
             AbstractGameState stateCopy = state.copy();
             getForwardModel().next(stateCopy, action);
@@ -120,6 +144,13 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             // recurse - we are here just interested in the value of stateCopy, and hence of taking action
             // We are not interested in the best action from stateCopy
             SearchResult result = expand(stateCopy, nextActions, newDepth, alpha, beta);
+            if (params.expandByEstimatedValue) {
+                // we store the value estimates for each action
+                if (!statsMap.containsKey(action)) {
+                    statsMap.put(action, new ActionStats(state.getNPlayers()));
+                }
+                statsMap.get(action).update(result.value);
+            }
 
             // we make the decision based on the actor at state, not the actor at stateCopy
             if (result.value[state.getCurrentPlayer()] > bestValue) {

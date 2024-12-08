@@ -11,9 +11,10 @@ import static org.junit.Assert.*;
 
 public class AlphaBetaPruningTests {
 
-    @Test
-    public void connect4SameMoveAndTimings() {
+    Connect4ForwardModel forwardModel = new Connect4ForwardModel();
 
+    @Test
+    public void connect4AlphaBeta() {
         // the intention here is to run a game of Connect4 from start to finish and confirm that
         // two MaxNSearchPlayer with alphaBetaPruning set to true and false respectively will make the same moves
         // (or moves which have identical values with fixed depth search)
@@ -21,26 +22,126 @@ public class AlphaBetaPruningTests {
 
         // create a game of Connect4
         Connect4GameState gameState = new Connect4GameState(new Connect4GameParameters(), 2);
-        Connect4ForwardModel forwardModel = new Connect4ForwardModel();
         forwardModel.setup(gameState);
 
         // create a MaxNSearchPlayer with alphaBetaPruning set to false
         MaxNSearchParameters paramsOne = new MaxNSearchParameters();
         paramsOne.alphaBetaPruning = false;
+        paramsOne.budget = 1000;
         paramsOne.paranoid = true;
         paramsOne.searchDepth = 4;
-        paramsOne.setRandomSeed(89);
         MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
         player1.setForwardModel(forwardModel);
 
         // create a MaxNSearchPlayer with alphaBetaPruning set to true
         MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
         paramsTwo.alphaBetaPruning = true;
+        paramsTwo.budget = 1000;
         paramsTwo.paranoid = true;
         paramsTwo.searchDepth = 4;
-        paramsTwo.setRandomSeed(89);
         MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
         player2.setForwardModel(forwardModel);
+
+        runGame(gameState, player1, player2);
+    }
+
+
+    @Test
+    public void connect4IterativeDeepening() {
+        // and with the base agent against iterative deepening
+
+        // create a game of Connect4
+        Connect4GameState gameState = new Connect4GameState(new Connect4GameParameters(), 2);
+        forwardModel.setup(gameState);
+
+        // create a MaxNSearchPlayer with iterativeDeepening set to true
+        MaxNSearchParameters paramsOne = new MaxNSearchParameters();
+        paramsOne.iterativeDeepening = true;
+        paramsOne.budget = 1000;
+        paramsOne.paranoid = false;
+        paramsOne.searchDepth = 4;
+        MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
+        player1.setForwardModel(forwardModel);
+
+        // create a MaxNSearchPlayer with alphaBetaPruning set to true
+        MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
+        paramsOne.iterativeDeepening = false;
+        paramsTwo.budget = 1000;
+        paramsTwo.paranoid = false;
+        paramsTwo.searchDepth = 4;
+        MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
+        player2.setForwardModel(forwardModel);
+
+        runGame(gameState, player1, player2);
+    }
+
+    @Test
+    public void connect4NonRandomExpansionOrder() {
+        // and now with move expansion broken by value function (with alphaBetaPruning)
+
+        // create a game of Connect4
+        Connect4GameState gameState = new Connect4GameState(new Connect4GameParameters(), 2);
+        forwardModel.setup(gameState);
+
+        // create a MaxNSearchPlayer with alphaBetaPruning set to false
+        MaxNSearchParameters paramsOne = new MaxNSearchParameters();
+        paramsOne.alphaBetaPruning = true;
+        paramsOne.expandByEstimatedValue = false;
+        paramsOne.budget = 1000;
+        paramsOne.paranoid = true;
+        paramsOne.searchDepth = 4;
+        MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
+        player1.setForwardModel(forwardModel);
+
+        // create a MaxNSearchPlayer with alphaBetaPruning set to true
+        MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
+        paramsTwo.alphaBetaPruning = true;
+        paramsTwo.budget = 1000;
+        paramsTwo.expandByEstimatedValue = true;
+        paramsTwo.paranoid = true;
+        paramsTwo.searchDepth = 4;
+        MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
+        player2.setForwardModel(forwardModel);
+
+        runGame(gameState, player1, player2);
+    }
+
+    @Test
+    public void connect4IterativeNonRandomExpansionOrder() {
+        // iterative deepening with non-random expansion order
+
+        // create a game of Connect4
+        Connect4GameState gameState = new Connect4GameState(new Connect4GameParameters(), 2);
+        forwardModel.setup(gameState);
+
+        // create a MaxNSearchPlayer with alphaBetaPruning set to false
+        MaxNSearchParameters paramsOne = new MaxNSearchParameters();
+        paramsOne.iterativeDeepening = true;
+        paramsOne.alphaBetaPruning = true;
+        paramsOne.budget = 1000;
+        paramsOne.expandByEstimatedValue = false;
+        paramsOne.paranoid = true;
+        paramsOne.searchDepth = 4;
+        MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
+        player1.setForwardModel(forwardModel);
+
+        // create a MaxNSearchPlayer with alphaBetaPruning set to true
+        MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
+        paramsTwo.iterativeDeepening = true;
+        paramsTwo.alphaBetaPruning = true;
+        paramsTwo.budget = 1000;
+        paramsTwo.expandByEstimatedValue = true;
+        paramsTwo.paranoid = true;
+        paramsTwo.searchDepth = 4;
+        MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
+        player2.setForwardModel(forwardModel);
+
+        runGame(gameState, player1, player2);
+    }
+
+
+    // should be called so that the expected faster agent is player2
+    private void runGame(Connect4GameState gameState, MaxNSearchPlayer player1, MaxNSearchPlayer player2) {
 
         long playerOneTime = 0;
         long playerTwoTime = 0;
@@ -54,8 +155,8 @@ public class AlphaBetaPruningTests {
             AbstractAction actionTwo = player2.getAction(gameState, forwardModel.computeAvailableActions(gameState));
             long timeTwo = System.currentTimeMillis() - start - timeOne;
 
-            System.out.println("Player 1 : " + actionOne.toString() + "\tPlayer 2 : " + actionTwo.toString());
-            System.out.println("Player 1 took " + timeOne + "ms, Player 2 took " + timeTwo + "ms");
+     //       System.out.println("Player 1 : " + actionOne.toString() + "\tPlayer 2 : " + actionTwo.toString());
+     //       System.out.println("Player 1 took " + timeOne + "ms, Player 2 took " + timeTwo + "ms");
             //    assertTrue(timeOne > timeTwo);
             totalActions++;
             if (actionOne.equals(actionTwo))
