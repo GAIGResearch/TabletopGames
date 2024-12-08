@@ -54,7 +54,13 @@ public class GiveCard extends AbstractAction {
     }
 
     @Override
+    public String getString(AbstractGameState gameState, int perspectiveID) {
+        if (perspectiveID == giver || perspectiveID == recipient) return toString();
+        return getString(gameState);
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Player " + giver + " gives a card to player " + recipient;
     }
 }

@@ -44,8 +44,13 @@ public class PlaceKitten extends AbstractAction {
     }
 
     @Override
+    public String getString(AbstractGameState gameState, int perspectivePlayer) {
+        return perspectivePlayer == gameState.getCurrentPlayer() ? toString() : getString(gameState);
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        return "Places Exploding Kitten in deck somewhere";
     }
 
     @Override
