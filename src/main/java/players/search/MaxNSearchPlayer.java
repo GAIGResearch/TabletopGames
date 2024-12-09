@@ -111,7 +111,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
                     values[i] = params.heuristic.evaluateState(state, i);
                 }
             }
-            return new SearchResult(null, values, alpha, beta);
+            return new SearchResult(null, values, alpha, beta, null);
         }
 
         // otherwise we recurse to find the best action and value
@@ -128,6 +128,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
             Collections.shuffle(actions, getRnd());
         }
         Map<AbstractAction, ActionStats> statsMap = actionValueEstimates.get(searchDepth - 1);
+        Map<AbstractAction, double[]> actionValues = new HashMap<>();
         for (AbstractAction action : actions) {
             AbstractGameState stateCopy = state.copy();
             getForwardModel().next(stateCopy, action);
@@ -152,6 +153,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
                 statsMap.get(action).update(result.value);
             }
 
+            actionValues.put(action, result.value);
             // we make the decision based on the actor at state, not the actor at stateCopy
             if (result.value[state.getCurrentPlayer()] > bestValue) {
                 bestAction = action;
@@ -163,12 +165,12 @@ public class MaxNSearchPlayer extends AbstractPlayer {
                     // bestValue is already from the perspective of the current player (i.e. negated for opponents)
                     if (getPlayerID() == state.getCurrentPlayer()) {
                         if (bestValue > beta) {
-                            return new SearchResult(bestAction, bestValues, alpha, beta);
+                            return new SearchResult(bestAction, bestValues, alpha, beta, actionValues);
                         }
                         alpha = Math.max(alpha, bestValue);
                     } else {
                         if (-bestValue < alpha) {
-                            return new SearchResult(bestAction, bestValues, alpha, beta);
+                            return new SearchResult(bestAction, bestValues, alpha, beta, actionValues);
                         }
                         beta = Math.min(beta, -bestValue);
                     }
@@ -177,13 +179,13 @@ public class MaxNSearchPlayer extends AbstractPlayer {
 
             if (System.currentTimeMillis() - startTime > params.budget) {
                 // out of time - return best action so far
-                return new SearchResult(bestAction, bestValues, alpha, beta);
+                return new SearchResult(bestAction, bestValues, alpha, beta, actionValues);
             }
         }
         if (bestAction == null) {
             throw new AssertionError("No best action found");
         }
-        return new SearchResult(bestAction, bestValues, alpha, beta);
+        return new SearchResult(bestAction, bestValues, alpha, beta, actionValues);
     }
 
     @Override
@@ -193,7 +195,7 @@ public class MaxNSearchPlayer extends AbstractPlayer {
         return retValue;
     }
 
-    protected record SearchResult(AbstractAction action, double[] value, double alpha, double beta) {
+    protected record SearchResult(AbstractAction action, double[] value, double alpha, double beta, Map<AbstractAction, double[]> allActionValues) {
     }
 
 }

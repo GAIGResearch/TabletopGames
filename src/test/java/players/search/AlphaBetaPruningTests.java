@@ -6,6 +6,8 @@ import games.connect4.Connect4ForwardModel;
 import games.connect4.Connect4GameParameters;
 import games.connect4.Connect4GameState;
 import org.junit.Test;
+import players.PlayerConstants;
+import players.search.MaxNSearchPlayer.SearchResult;
 
 import static org.junit.Assert.*;
 
@@ -27,7 +29,8 @@ public class AlphaBetaPruningTests {
         // create a MaxNSearchPlayer with alphaBetaPruning set to false
         MaxNSearchParameters paramsOne = new MaxNSearchParameters();
         paramsOne.alphaBetaPruning = false;
-        paramsOne.budget = 1000;
+        paramsOne.budget = Integer.MAX_VALUE;
+        paramsOne.budgetType = PlayerConstants.BUDGET_TIME;
         paramsOne.paranoid = true;
         paramsOne.searchDepth = 4;
         MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
@@ -36,7 +39,8 @@ public class AlphaBetaPruningTests {
         // create a MaxNSearchPlayer with alphaBetaPruning set to true
         MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
         paramsTwo.alphaBetaPruning = true;
-        paramsTwo.budget = 1000;
+        paramsTwo.budget = Integer.MAX_VALUE;
+        paramsTwo.budgetType = PlayerConstants.BUDGET_TIME;
         paramsTwo.paranoid = true;
         paramsTwo.searchDepth = 4;
         MaxNSearchPlayer player2 = new MaxNSearchPlayer(paramsTwo);
@@ -155,14 +159,20 @@ public class AlphaBetaPruningTests {
             AbstractAction actionTwo = player2.getAction(gameState, forwardModel.computeAvailableActions(gameState));
             long timeTwo = System.currentTimeMillis() - start - timeOne;
 
-     //       System.out.println("Player 1 : " + actionOne.toString() + "\tPlayer 2 : " + actionTwo.toString());
-     //       System.out.println("Player 1 took " + timeOne + "ms, Player 2 took " + timeTwo + "ms");
+            //       System.out.println("Player 1 : " + actionOne.toString() + "\tPlayer 2 : " + actionTwo.toString());
+            //       System.out.println("Player 1 took " + timeOne + "ms, Player 2 took " + timeTwo + "ms");
             //    assertTrue(timeOne > timeTwo);
             totalActions++;
             if (actionOne.equals(actionTwo))
                 identicalActions++;
-            else
+            else {
                 assertArrayEquals(player1.getRootResult().value(), player2.getRootResult().value(), 0.000001);
+                // we also check that the action chosen by Player2 (the faster one) has the same value for Player 1 (even if not chosen)
+                SearchResult player1Result = player1.getRootResult();
+                SearchResult player2Result = player2.getRootResult();
+                double[] p1ValueForP2Action = player1Result.allActionValues().get(actionTwo);
+                assertArrayEquals(p1ValueForP2Action, player2Result.value(), 0.000001);
+            }
 
             forwardModel.next(gameState, actionOne);
 
