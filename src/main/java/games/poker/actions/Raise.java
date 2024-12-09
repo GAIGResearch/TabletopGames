@@ -31,7 +31,7 @@ public class Raise extends AbstractAction implements IPrintable {
         pgs.getPlayerNeedsToCall()[playerId] = false;
 
         // Others can't check
-        pgs.otherPlayerMustCall(playerId);
+        pgs.getPlayerMustCall(playerId);
 
         return true;
     }

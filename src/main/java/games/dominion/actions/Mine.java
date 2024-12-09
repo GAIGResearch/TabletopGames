@@ -47,7 +47,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
                     .map(c -> new TrashCard(c.cardType(), player))
                     .distinct().collect(toList());
         } else if (!gainedCard) {
-            retValue = state.cardsToBuy().stream()
+            retValue = state.getCardsToBuy().stream()
                     .filter(c -> c.isTreasure && c.cost <= trashValue + BONUS_OVER_TRASHED_VALUE)
                     .map(c -> new GainCard(c, player, DominionConstants.DeckType.HAND))
                     .collect(toList());
@@ -71,7 +71,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
         if (!trashedCard && action instanceof TrashCard && ((TrashCard) action).player == player) {
             trashedCard = true;
             trashValue = ((TrashCard) action).trashedCard.cost;
-            if (state.cardsToBuy().stream().noneMatch(c -> c.isTreasure && c.cost <= trashValue + BONUS_OVER_TRASHED_VALUE))
+            if (state.getCardsToBuy().stream().noneMatch(c -> c.isTreasure && c.cost <= trashValue + BONUS_OVER_TRASHED_VALUE))
                 gainedCard = true; // there are no valid cards to gain, so we skip the next decision
             // this is rare, but can happen if SILVER is exhausted with random players, say
         }

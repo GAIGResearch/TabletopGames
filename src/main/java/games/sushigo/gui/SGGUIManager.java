@@ -149,7 +149,7 @@ public class SGGUIManager extends AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width / 2 - 10, height, humanPlayerId);
+        createActionHistoryPanel(width / 2 - 10, height, humanPlayerIds);
         wrapper.add(historyContainer);
         return wrapper;
     }
@@ -174,7 +174,7 @@ public class SGGUIManager extends AbstractGUIManager {
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
                     playerHands[i].update(parsedGameState);
                     if (i == gameState.getCurrentPlayer()
-                            || humanPlayerId.contains(i)) {
+                            || humanPlayerIds.contains(i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {

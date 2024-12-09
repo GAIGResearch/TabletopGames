@@ -61,6 +61,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         this.roleOwner = getCurrentPlayer();
     }
 
+    // First player (the one who chose the role)
     public int getRoleOwner() {
         return roleOwner;
     }
@@ -197,10 +198,13 @@ public class PuertoRicoGameState extends AbstractGameState {
     public boolean hasActiveBuilding(int playerID, PuertoRicoConstants.BuildingType type) {
         return playerBoards.get(playerID).buildings.stream().anyMatch(b -> b.buildingType == type && b.getOccupation() > 0 && !b.hasBeenUsed());
     }
+
+    // The stores of the crop type that the playerId has
     public int getStoresOf(int playerId, Crop crop) {
         return playerBoards.get(playerId).getStoresOf(crop);
     }
 
+    // the amount of money that the specified player has
     public int getDoubloons(int playerId) {
         return playerBoards.get(playerId).doubloons;
     }
@@ -209,6 +213,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         playerBoards.get(playerId).changeDoubloons(amount);
     }
 
+    // Amount of crop that is available in the general supply
     public int getSupplyOf(Crop crop) {
         return cropSupply.get(crop);
     }
@@ -239,6 +244,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         colonistsOnShip += amount;
     }
 
+    // Which crops have been sold in the market, and therefore cannot be sold again
     public List<Crop> getMarket() {
         return new ArrayList<>(soldInMarket);
     }
@@ -266,6 +272,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         gameEndTriggered = true;
     }
 
+    // Has a game end condition been triggered
     public boolean isLastRound() {
         return gameEndTriggered;
     }

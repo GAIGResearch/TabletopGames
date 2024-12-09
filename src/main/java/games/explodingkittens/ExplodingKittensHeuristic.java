@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
-import games.explodingkittens.actions.IsNopeable;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 public class ExplodingKittensHeuristic extends TunableParameters implements IStateHeuristic {
@@ -62,7 +61,6 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
         return cardValues / (ekgs.playerHandCards.get(playerId).getSize() + 1);
     }
 
-    // TODO: check state more
     double getCardValue(ExplodingKittensGameState ekgs, ExplodingKittensCard card) {
         switch (card.cardType) {
             case EXPLODING_KITTEN:
@@ -70,7 +68,7 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
             case DEFUSE:
                 return defuseValue;
             case NOPE:
-                if (ekgs.actionStack.size() > 0 && ekgs.actionStack.get(0) instanceof IsNopeable) {
+                if (ekgs.isActionInProgress()) {
                     return nopeValue;
                 } else return 0;  // Neutral
             case ATTACK:
@@ -82,49 +80,22 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
             case SHUFFLE:
                 return shuffleValue;
             case SEETHEFUTURE:
-                return seeFutureValue;  // TODO: higher if future not already known, otherwise low
+                return seeFutureValue;
             default:
                 return regularValue;
         }
     }
 
-    /**
-     * Return a copy of this game parameters object, with the same parameters as in the original.
-     *
-     * @return - new game parameters object.
-     */
     @Override
     protected ExplodingKittensHeuristic _copy() {
-        ExplodingKittensHeuristic retValue = new ExplodingKittensHeuristic();
-        retValue.explodingValue = explodingValue;
-        retValue.defuseValue = defuseValue;
-        retValue.regularValue = regularValue;
-        retValue.seeFutureValue = seeFutureValue;
-        retValue.nopeValue = nopeValue;
-        retValue.attackValue = attackValue;
-        retValue.skipValue = skipValue;
-        retValue.favorValue = favorValue;
-        retValue.shuffleValue = shuffleValue;
-        return retValue;
+        return new ExplodingKittensHeuristic();
+        // copying of parameterisable values is done in the super class
     }
 
-    /**
-     * Checks if the given object is the same as the current.
-     *
-     * @param o - other object to test equals for.
-     * @return true if the two objects are equal, false otherwise
-     */
     @Override
     protected boolean _equals(Object o) {
-        if (o instanceof ExplodingKittensHeuristic) {
-            ExplodingKittensHeuristic other = (ExplodingKittensHeuristic) o;
-            return other.explodingValue == explodingValue && other.defuseValue == defuseValue &&
-                    other.regularValue == regularValue && other.seeFutureValue == seeFutureValue &&
-                    other.nopeValue == nopeValue && other.attackValue == attackValue &&
-                    other.skipValue == skipValue && other.favorValue == favorValue &&
-                    other.shuffleValue == shuffleValue;
-        }
-        return false;
+        return o instanceof ExplodingKittensHeuristic;
+        // checking of parameterisable values is done in the super class
     }
 
     /**
@@ -133,7 +104,7 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
      */
     @Override
     public ExplodingKittensHeuristic instantiate() {
-        return this._copy();
+        return (ExplodingKittensHeuristic) this.copy();
     }
 
 

@@ -148,12 +148,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         return new DiamantHeuristic().evaluateState(this, playerId);
     }
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
-     * of victory points, etc.
-     * If a game does not support this directly, then just return 0.0
-     *
-     * @param playerId
-     * @return - double, score of current state
+     * Current score
      */
     @Override
     public double getGameScore(int playerId) {
@@ -216,7 +211,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     /**
      * Returns the number of player already in the cave
     */
-
     public int getNPlayersInCave()
     {
         int n = 0;
@@ -264,7 +258,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         }
     }
 
-    private int getNHazardCardsInMainDeck(DiamantCard.HazardType ht)
+    public int getNHazardCardsInMainDeck(DiamantCard.HazardType ht)
     {
         int n = 0;
         for (int i=0; i<mainDeck.getSize(); i++)

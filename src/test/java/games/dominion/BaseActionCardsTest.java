@@ -41,11 +41,11 @@ public class BaseActionCardsTest {
         DominionAction village = new SimpleAction(CardType.VILLAGE, 0);
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         fm.next(state, village);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(2, state.actionsLeft());
+        assertEquals(2, state.getActionsLeft());
     }
 
     @Test
@@ -54,11 +54,11 @@ public class BaseActionCardsTest {
         DominionAction smithy = new SimpleAction(CardType.SMITHY, 0);
         state.addCard(CardType.SMITHY, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         fm.next(state, smithy);
         assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
     }
 
     @Test
@@ -67,11 +67,11 @@ public class BaseActionCardsTest {
         DominionAction laboratory = new SimpleAction(CardType.LABORATORY, 0);
         state.addCard(CardType.LABORATORY, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         fm.next(state, laboratory);
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
     }
 
     @Test
@@ -80,15 +80,15 @@ public class BaseActionCardsTest {
         DominionAction market = new SimpleAction(CardType.MARKET, 0);
         state.addCard(CardType.MARKET, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(1, state.getBuysLeft());
         fm.next(state, market);
         assertEquals(Play, state.getGamePhase());
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         int money = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
-        assertEquals(money + 1, state.availableSpend(0));
+        assertEquals(money + 1, state.getAvailableSpend(0));
     }
 
     @Test
@@ -97,15 +97,15 @@ public class BaseActionCardsTest {
         DominionAction festival = new SimpleAction(CardType.FESTIVAL, 0);
         state.addCard(CardType.FESTIVAL, 0, DeckType.HAND);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(1, state.buysLeft());
-        int money = state.availableSpend(0);
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(1, state.getBuysLeft());
+        int money = state.getAvailableSpend(0);
         fm.next(state, festival);
         assertEquals(Play, state.getGamePhase());
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(2, state.actionsLeft());
-        assertEquals(money + 2, state.availableSpend(0));
+        assertEquals(2, state.getActionsLeft());
+        assertEquals(money + 2, state.getAvailableSpend(0));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class BaseActionCardsTest {
         assertEquals(state.currentActionInProgress(), cellar);
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
 
         List<AbstractAction> cellarActions = fm.computeAvailableActions(state);
         assertEquals(3, cellarActions.size());
@@ -165,10 +165,10 @@ public class BaseActionCardsTest {
         for (int i = 0; i < 4; i++) {
             if (i != 2) assertEquals(5, state.getDeck(DeckType.HAND, i).getSize());
         }
-        int start = state.availableSpend(2);
+        int start = state.getAvailableSpend(2);
         fm.next(state, militia);
         assertEquals(3, state.getCurrentPlayer());
-        assertEquals(start + 2, state.availableSpend(2));
+        assertEquals(start + 2, state.getAvailableSpend(2));
         do {
             List<AbstractAction> actionsAvailable = fm.computeAvailableActions(state);
             assertTrue(actionsAvailable.stream().allMatch(a -> a instanceof DiscardCard));
@@ -238,7 +238,7 @@ public class BaseActionCardsTest {
         fm.next(state, moat);
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertFalse(state.isDefended(0));
     }
 
@@ -411,13 +411,13 @@ public class BaseActionCardsTest {
         state.addCard(CardType.ESTATE, 0, DeckType.HAND);
         Remodel remodel = new Remodel(0);
         fm.next(state, remodel);
-        int availableSpend = state.availableSpend(0);
+        int availableSpend = state.getAvailableSpend(0);
         fm.next(state, new TrashCard(CardType.ESTATE, 0));
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.stream().allMatch(a -> a instanceof GainCard));
         assertTrue(actions.stream().allMatch(a -> ((GainCard) a).cardType.cost <= 4));
-        List<CardType> allCards = state.cardsToBuy();
+        List<CardType> allCards = state.getCardsToBuy();
         List<CardType> allGainable = actions.stream().map(a -> ((GainCard) a).cardType).collect(toList());
         allCards.removeAll(allGainable);
         assertTrue(allCards.stream().allMatch(c -> c.cost >= 5));
@@ -425,7 +425,7 @@ public class BaseActionCardsTest {
         fm.next(state, new GainCard(CardType.SILVER, 0));
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(availableSpend, state.availableSpend(0));
+        assertEquals(availableSpend, state.getAvailableSpend(0));
     }
 
     @Test
@@ -434,13 +434,13 @@ public class BaseActionCardsTest {
         state.addCard(CardType.REMODEL, 0, DeckType.HAND);
         state.addCard(CardType.ESTATE, 0, DeckType.HAND);
         // now remove all cost 2 cards
-        while (state.cardsToBuy().contains(CardType.ESTATE))
+        while (state.getCardsToBuy().contains(CardType.ESTATE))
             state.removeCardFromTable(CardType.ESTATE);
-        while (state.cardsToBuy().contains(CardType.COPPER))
+        while (state.getCardsToBuy().contains(CardType.COPPER))
             state.removeCardFromTable(CardType.COPPER);
-        while (state.cardsToBuy().contains(CardType.MOAT))
+        while (state.getCardsToBuy().contains(CardType.MOAT))
             state.removeCardFromTable(CardType.MOAT);
-        while (state.cardsToBuy().contains(CardType.CELLAR))
+        while (state.getCardsToBuy().contains(CardType.CELLAR))
             state.removeCardFromTable(CardType.CELLAR);
         Remodel remodel = new Remodel(0);
         fm.next(state, remodel);
@@ -474,13 +474,13 @@ public class BaseActionCardsTest {
         int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
         assertEquals(Play, state.getGamePhase());
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(treasureValue, state.availableSpend(0));
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(treasureValue, state.getAvailableSpend(0));
 
         fm.next(state, new EndPhase(Play));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(treasureValue, state.availableSpend(0));
-        assertEquals(1, state.buysLeft());
+        assertEquals(treasureValue, state.getAvailableSpend(0));
+        assertEquals(1, state.getBuysLeft());
     }
 
     @Test
@@ -494,13 +494,13 @@ public class BaseActionCardsTest {
         int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
         assertEquals(Play, state.getGamePhase());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(treasureValue, state.availableSpend(0));
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(treasureValue, state.getAvailableSpend(0));
 
         fm.next(state, new EndPhase(Play));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(treasureValue + 1, state.availableSpend(0));
-        assertEquals(1, state.buysLeft());
+        assertEquals(treasureValue + 1, state.getAvailableSpend(0));
+        assertEquals(1, state.getBuysLeft());
     }
 
     @Test
@@ -515,13 +515,13 @@ public class BaseActionCardsTest {
         int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
         assertEquals(Play, state.getGamePhase());
         assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(treasureValue, state.availableSpend(0));
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(treasureValue, state.getAvailableSpend(0));
 
         fm.next(state, new EndPhase(Play));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(treasureValue + 1, state.availableSpend(0));
-        assertEquals(1, state.buysLeft());
+        assertEquals(treasureValue + 1, state.getAvailableSpend(0));
+        assertEquals(1, state.getBuysLeft());
     }
 
     @Test
@@ -538,13 +538,13 @@ public class BaseActionCardsTest {
         int treasureValue = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
         assertEquals(Play, state.getGamePhase());
         assertEquals(9, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
-        assertEquals(treasureValue, state.availableSpend(0));
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(treasureValue, state.getAvailableSpend(0));
 
         fm.next(state, new EndPhase(Play));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(treasureValue + 2, state.availableSpend(0));
-        assertEquals(1, state.buysLeft());
+        assertEquals(treasureValue + 2, state.getAvailableSpend(0));
+        assertEquals(1, state.getBuysLeft());
     }
 
     @Test
@@ -553,9 +553,9 @@ public class BaseActionCardsTest {
         state.addCard(CardType.WORKSHOP, 0, DeckType.HAND);
         Workshop workshop = new Workshop(0);
 
-        int startSpend = state.availableSpend(0);
+        int startSpend = state.getAvailableSpend(0);
         fm.next(state, workshop);
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertEquals(0, state.getCurrentPlayer());
         assertFalse(workshop.executionComplete(state));
         List<AbstractAction> availableActions = fm.computeAvailableActions(state);
@@ -568,11 +568,11 @@ public class BaseActionCardsTest {
                 }
         );
         fm.next(state, availableActions.get(3));
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertEquals(0, state.getCurrentPlayer());
         assertTrue(workshop.executionComplete(state));
-        assertEquals(startSpend, state.availableSpend(0));
-        assertEquals(1, state.buysLeft());
+        assertEquals(startSpend, state.getAvailableSpend(0));
+        assertEquals(1, state.getBuysLeft());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 
@@ -583,9 +583,9 @@ public class BaseActionCardsTest {
         state.addCard(CardType.SILVER, 0, DeckType.HAND);
         Mine mine = new Mine(0);
 
-        int startSpend = state.availableSpend(0);
+        int startSpend = state.getAvailableSpend(0);
         fm.next(state, mine);
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertEquals(0, state.getCurrentPlayer());
         assertFalse(mine.executionComplete(state));
         assertEquals(Play, state.getGamePhase());
@@ -605,7 +605,7 @@ public class BaseActionCardsTest {
         assertTrue(availableActions.contains(new GainCard(CardType.GOLD, 0, DeckType.HAND)));
 
         fm.next(state, new GainCard(CardType.GOLD, 0, DeckType.HAND));
-        assertEquals(startSpend + 1, state.availableSpend(0));
+        assertEquals(startSpend + 1, state.getAvailableSpend(0));
         assertTrue(mine.executionComplete(state));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
@@ -621,12 +621,12 @@ public class BaseActionCardsTest {
         Mine mine = new Mine(0);
 
         fm.next(state, mine);
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertEquals(0, state.getCurrentPlayer());
         assertTrue(mine.executionComplete(state));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(0, state.availableSpend(0));
+        assertEquals(0, state.getAvailableSpend(0));
     }
 
     @Test
@@ -684,15 +684,15 @@ public class BaseActionCardsTest {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.MONEYLENDER, 0, DeckType.HAND);
         Moneylender moneylender = new Moneylender(0);
-        int startSpend = state.availableSpend(0);
+        int startSpend = state.getAvailableSpend(0);
         long copperInHand = state.getDeck(DeckType.HAND, 0).stream()
                 .filter(c -> c.cardType() == CardType.COPPER).count();
         fm.next(state, moneylender);
-        assertEquals(startSpend + 2, state.availableSpend(0));
+        assertEquals(startSpend + 2, state.getAvailableSpend(0));
         assertEquals(copperInHand - 1L, state.getDeck(DeckType.HAND, 0).stream()
                 .filter(c -> c.cardType() == CardType.COPPER).count());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getBuysLeft());
         assertEquals(CardType.COPPER, state.getDeck(DeckType.TRASH, -1).get(0).cardType());
     }
 
@@ -707,9 +707,9 @@ public class BaseActionCardsTest {
         Moneylender moneylender = new Moneylender(0);
 
         fm.next(state, moneylender);
-        assertEquals(2, state.availableSpend(0));
+        assertEquals(2, state.getAvailableSpend(0));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getBuysLeft());
     }
 
     @Test
@@ -718,15 +718,15 @@ public class BaseActionCardsTest {
         state.addCard(CardType.POACHER, 0, DeckType.HAND);
         state.addCard(CardType.ESTATE, 0, DeckType.DRAW);
         Poacher poacher = new Poacher(0);
-        int startSpend = state.availableSpend(0);
+        int startSpend = state.getAvailableSpend(0);
         fm.next(state, poacher);
 
-        assertEquals(startSpend + 1, state.availableSpend(0));
-        assertEquals(1, state.actionsLeft());
+        assertEquals(startSpend + 1, state.getAvailableSpend(0));
+        assertEquals(1, state.getActionsLeft());
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(5, state.getDeck(DeckType.DRAW, 0).getSize());
         assertEquals(Play, state.getGamePhase());
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getBuysLeft());
         assertFalse(state.isActionInProgress());
     }
 
@@ -743,12 +743,12 @@ public class BaseActionCardsTest {
 
         fm.next(state, poacher);
         int startSpend = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
-        assertEquals(startSpend + 1, state.availableSpend(0));
-        assertEquals(1, state.actionsLeft());
+        assertEquals(startSpend + 1, state.getAvailableSpend(0));
+        assertEquals(1, state.getActionsLeft());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(4, state.getDeck(DeckType.DRAW, 0).getSize());
         assertEquals(Play, state.getGamePhase());
-        assertEquals(1, state.buysLeft());
+        assertEquals(1, state.getBuysLeft());
         assertTrue(state.isActionInProgress());
 
         List<AbstractAction> availableActions = fm.computeAvailableActions(state);
@@ -763,8 +763,8 @@ public class BaseActionCardsTest {
         int finalSpend = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
         assertTrue(poacher.executionComplete(state));
         assertEquals(Play, state.getGamePhase());
-        assertEquals(finalSpend + 1, state.availableSpend(0));
-        assertEquals(1, state.actionsLeft());
+        assertEquals(finalSpend + 1, state.getAvailableSpend(0));
+        assertEquals(1, state.getActionsLeft());
     }
 
 
@@ -875,7 +875,7 @@ public class BaseActionCardsTest {
         fm.next(state, harbinger);
 
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         assertNull(state.currentActionInProgress());
         assertEquals(Play, state.getGamePhase());
 
@@ -934,15 +934,15 @@ public class BaseActionCardsTest {
         ThroneRoom throneRoom = new ThroneRoom(0);
         fm.next(state, throneRoom);
 
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         assertEquals(throneRoom, state.currentActionInProgress());
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
         assertEquals(DominionCard.create(CardType.MARKET).getAction(0), nextActions.get(0));
 
         fm.next(state, nextActions.get(0));
-        assertEquals(1, state.actionsLeft());
-        assertEquals(2, state.buysLeft());
+        assertEquals(1, state.getActionsLeft());
+        assertEquals(2, state.getBuysLeft());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
 
@@ -952,8 +952,8 @@ public class BaseActionCardsTest {
         assertNotEquals(DominionCard.create(CardType.MARKET).getAction(0, false), nextActions.get(0));
 
         fm.next(state, nextActions.get(0));
-        assertEquals(2, state.actionsLeft());  // we used our action on th eThrone Room, and then each Market gives +1 Action
-        assertEquals(3, state.buysLeft());
+        assertEquals(2, state.getActionsLeft());  // we used our action on th eThrone Room, and then each Market gives +1 Action
+        assertEquals(3, state.getBuysLeft());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
         assertFalse(state.isActionInProgress());
@@ -966,7 +966,7 @@ public class BaseActionCardsTest {
         state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
         ThroneRoom throneRoom = new ThroneRoom(0);
         fm.next(state, throneRoom);
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
     }
 
@@ -985,7 +985,7 @@ public class BaseActionCardsTest {
 
         fm.next(state, nextActions.get(0));
         assertEquals(new Workshop(0), state.currentActionInProgress());
-        assertEquals(0, state.actionsLeft());
+        assertEquals(0, state.getActionsLeft());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
 
@@ -1033,7 +1033,7 @@ public class BaseActionCardsTest {
         assertEquals(throneRoom, state.currentActionInProgress());
         nextActions = fm.computeAvailableActions(state);
         assertEquals(new Merchant(0, true), nextActions.get(0));
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
 
         fm.next(state, nextActions.get(0));
@@ -1041,13 +1041,13 @@ public class BaseActionCardsTest {
         assertEquals(Play, state.getGamePhase());
         nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
-        assertEquals(2, state.actionsLeft());
+        assertEquals(2, state.getActionsLeft());
         assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
 
         fm.next(state, new EndPhase(Play));
         assertEquals(DominionGamePhase.Buy, state.getGamePhase());
         int treasureInHand = state.getDeck(DeckType.HAND, 0).sumInt(DominionCard::treasureValue);
-        assertEquals(treasureInHand + 2, state.availableSpend(0));
+        assertEquals(treasureInHand + 2, state.getAvailableSpend(0));
     }
 
     @Test
@@ -1066,7 +1066,7 @@ public class BaseActionCardsTest {
         assertEquals(DominionCard.create(CardType.MARKET).getAction(0), nextActions.get(1));
 
         fm.next(state, nextActions.get(0));
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         assertNotSame(throneRoom, state.currentActionInProgress());
         assertTrue(state.currentActionInProgress() instanceof ThroneRoom);
         // we now have the second throne room controlling the action flow
@@ -1081,7 +1081,7 @@ public class BaseActionCardsTest {
         assertEquals(1, nextActions.size());
         assertEquals(new EndPhase(Play), nextActions.get(0)); // EnthroneMarket - I
 
-        assertEquals(3, state.buysLeft());
+        assertEquals(3, state.getBuysLeft());
         assertEquals(3, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
     }
@@ -1306,7 +1306,7 @@ public class BaseActionCardsTest {
 
         assertEquals(sentry, state.currentActionInProgress());
         assertEquals(0, state.getCurrentPlayer());
-        assertEquals(1, state.actionsLeft());
+        assertEquals(1, state.getActionsLeft());
         assertEquals(8, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(2, state.getDeck(DeckType.DRAW, 0).getSize());
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);

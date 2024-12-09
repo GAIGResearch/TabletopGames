@@ -33,7 +33,7 @@ public class GSPlantations extends JComponent {
                 for (Map.Entry<Rectangle, Plantation> entry: rectToPlantationMap.entrySet()) {
                     if (entry.getKey().contains(e.getPoint())) {
                         if (gs.getCurrentRole() == PuertoRicoConstants.Role.SETTLER
-                                && gui.getHumanPlayerId().contains(gs.getCurrentPlayer())
+                                && gui.getHumanPlayerIds().contains(gs.getCurrentPlayer())
                                 && gs.getPlayerBoard(gs.getCurrentPlayer()).getPlantations().size() < ((PuertoRicoParameters)gs.getGameParameters()).plantationSlotsOnBoard) {
                             if (entry.getValue() != null) {
                                 gui.getAC().addAction(new DrawPlantation(entry.getValue().crop));
@@ -53,7 +53,7 @@ public class GSPlantations extends JComponent {
     @Override
     protected void paintComponent(Graphics gg) {
         rectToPlantationMap.clear();
-        boolean highlight = gs.getCurrentRole() == PuertoRicoConstants.Role.SETTLER && gui.getHumanPlayerId().contains(gs.getCurrentPlayer()) && gs.getPlayerBoard(gs.getCurrentPlayer()).getPlantations().size() < ((PuertoRicoParameters)gs.getGameParameters()).plantationSlotsOnBoard;
+        boolean highlight = gs.getCurrentRole() == PuertoRicoConstants.Role.SETTLER && gui.getHumanPlayerIds().contains(gs.getCurrentPlayer()) && gs.getPlayerBoard(gs.getCurrentPlayer()).getPlantations().size() < ((PuertoRicoParameters)gs.getGameParameters()).plantationSlotsOnBoard;
 
         // Visible plantations + how many left in deck + how many discount things left
         Graphics2D g = (Graphics2D) gg;

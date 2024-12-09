@@ -16,7 +16,6 @@ import games.loveletter.features.LLStateFeaturesReduced;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -96,8 +95,8 @@ public class TestStateHeuristics {
     @Test
     public void testActionHeuristic() {
         llState.getPlayerHandCards().get(0).clear();
-        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(LoveLetterCard.CardType.Handmaid));
-        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(LoveLetterCard.CardType.Guard));
+        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Handmaid));
+        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Guard));
         LinearActionHeuristic linearActionHeuristic = new LinearActionHeuristic(llActionFeaturesTiny, llStateFeaturesReduced,
                 "src\\test\\java\\players\\heuristics\\LLFeatureWeights.json") {
         };
@@ -109,27 +108,27 @@ public class TestStateHeuristics {
         // Hand should contain a Handmaid and a Guard (Total Value = 5)
         for (AbstractAction action : actions) {
             PlayCard playCard = (PlayCard) action;
-            LoveLetterCard.CardType cardType = playCard.getCardType();
-            if (cardType == LoveLetterCard.CardType.Guard)
+            games.loveletter.cards.CardType cardType = playCard.getCardType();
+            if (cardType == games.loveletter.cards.CardType.Guard)
                 assertEquals(0.1 * 5.0 / 17.0 + 0.2 + 0.01 + 10.0, linearActionHeuristic.evaluateAction(action, llState), 0.0001);
-            else if (cardType == LoveLetterCard.CardType.Handmaid)
+            else if (cardType == games.loveletter.cards.CardType.Handmaid)
                 assertEquals(0.1 * 5.0 / 17.0 + 0.2 + 10.0, linearActionHeuristic.evaluateAction(action, llState), 0.0001);
             else
                 throw new AssertionError("Unexpected action: " + action);
         }
 
         llState.getPlayerHandCards().get(0).clear();
-        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(LoveLetterCard.CardType.Baron));
-        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(LoveLetterCard.CardType.Guard));
+        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Baron));
+        llState.getPlayerHandCards().get(0).add(new LoveLetterCard(games.loveletter.cards.CardType.Guard));
         actions = llFm.computeAvailableActions(llState);
 
         // Hand should contain a Baron and a Guard (Total Value = 4)
         for (AbstractAction action : actions) {
             PlayCard playCard = (PlayCard) action;
-            LoveLetterCard.CardType cardType = playCard.getCardType();
-            if (cardType == LoveLetterCard.CardType.Guard)
+            games.loveletter.cards.CardType cardType = playCard.getCardType();
+            if (cardType == games.loveletter.cards.CardType.Guard)
                 assertEquals(0.1 * 4.0 / 17.0 + 0.2 + 0.01 + 10.0 + 0.07, linearActionHeuristic.evaluateAction(action, llState), 0.0001);
-            else if (cardType == LoveLetterCard.CardType.Baron)
+            else if (cardType == games.loveletter.cards.CardType.Baron)
                 assertEquals(0.1 * 4.0 / 17.0 + 0.2 + 10.0, linearActionHeuristic.evaluateAction(action, llState), 0.0001);
             else
                 throw new AssertionError("Unexpected action: " + action);
