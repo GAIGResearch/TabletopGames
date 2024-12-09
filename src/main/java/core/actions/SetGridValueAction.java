@@ -39,8 +39,7 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SetGridValueAction)) return false;
-        SetGridValueAction<?> that = (SetGridValueAction<?>) o;
+        if (!(o instanceof SetGridValueAction<?> that)) return false;
         return gridBoard == that.gridBoard &&
                 x == that.x &&
                 y == that.y &&
