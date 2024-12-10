@@ -1,14 +1,11 @@
 package games.seasaltpaper;
 
 import core.AbstractParameters;
-import games.loveletter.LoveLetterParameters;
 import games.seasaltpaper.cards.CardColor;
 import games.seasaltpaper.cards.CardSuite;
 import games.seasaltpaper.cards.CardType;
-import org.apache.logging.log4j.core.pattern.AbstractStyleNameConverter;
 import utilities.Pair;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static games.seasaltpaper.cards.CardColor.*;
@@ -38,7 +35,7 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         put(new Pair<>(CardSuite.SHARK, CardType.DUO),
             new Pair<>(5, new CardColor[]{LIGHT_BLUE, BLUE, BLACK, GREEN, PURPLE}));// Light Blue, Blue, Black, Green, Purple
         put(new Pair<>(CardSuite.SWIMMER, CardType.DUO),
-            new Pair<>(5, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, YELLOW, ORANGE}));// Light Blue, Blue, Yellow, LightOrange - 5 total.
+            new Pair<>(5, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, YELLOW, LIGHT_ORANGE}));// Light Blue, Blue, Yellow, LightOrange - 5 total.
         //TODO last swimmer color? only say 4
 
         put(new Pair<>(CardSuite.SHELL, CardType.COLLECTOR),
@@ -46,7 +43,7 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         put(new Pair<>(CardSuite.OCTOPUS, CardType.COLLECTOR),
             new Pair<>(5, new CardColor[]{LIGHT_BLUE, GREEN, GREY, PURPLE, YELLOW})); //Light Blue, Green, Grey, Purple, Yellow
         put(new Pair<>(CardSuite.PENGUIN, CardType.COLLECTOR),
-            new Pair<>(3, new CardColor[]{PINK, ORANGE, PURPLE})); //Pink, LightOrange, Purple
+            new Pair<>(3, new CardColor[]{PINK, LIGHT_ORANGE, PURPLE})); //Pink, LightOrange, Purple
         // TODO PINK VS PURPLE???
         put(new Pair<>(CardSuite.SAILOR, CardType.COLLECTOR),
             new Pair<>(2, new CardColor[]{ORANGE, PINK})); // Orange, Pink
@@ -59,10 +56,10 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         put(new Pair<>(CardSuite.PENGUIN, CardType.MULTIPLIER),
             new Pair<>(1, new CardColor[]{GREEN})); //Green
         put(new Pair<>(CardSuite.SAILOR, CardType.MULTIPLIER),
-            new Pair<>(1, new CardColor[]{ORANGE})); //LightOrange
+            new Pair<>(1, new CardColor[]{LIGHT_ORANGE})); //LightOrange
 
         put(new Pair<>(CardSuite.MERMAID, CardType.MERMAID),
-            new Pair<>(4, new CardColor[]{WHITE, WHITE, WHITE, WHITE,}));// LightGrey
+            new Pair<>(4, new CardColor[]{WHITE, WHITE, WHITE, WHITE}));// LightGrey
 
     }};
 
