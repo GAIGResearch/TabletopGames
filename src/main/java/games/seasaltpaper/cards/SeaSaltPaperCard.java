@@ -1,6 +1,5 @@
 package games.seasaltpaper.cards;
 
-import com.sun.xml.bind.v2.TODO;
 import core.components.Card;
 
 import java.util.Objects;
@@ -15,6 +14,10 @@ public class SeaSaltPaperCard extends Card {
 
     protected final CardType cardType;
 
+    protected final int[] collectorBonus;
+    protected final int duoBonus;
+    protected final int multiplierBonus;
+
     protected boolean isPlayed = false;
 
     public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType) {
@@ -22,6 +25,37 @@ public class SeaSaltPaperCard extends Card {
         this.cardSuite = cardSuite;
         this.cardType = cardType;
         this.componentName = color + " " + cardSuite + " " + cardType;
+        collectorBonus = new int[]{};
+        duoBonus = 0;
+        multiplierBonus = 0;
+    }
+
+    // bonus is either duoBonus or multiplierBonus
+    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, int bonus) {
+        this.color = color;
+        this.cardSuite = cardSuite;
+        this.cardType = cardType;
+        this.componentName = color + " " + cardSuite + " " + cardType;
+        collectorBonus = null;
+
+        if (cardType == CardType.DUO) {
+            duoBonus = bonus;
+            multiplierBonus = 0;
+        }
+        else {
+            duoBonus = 0;
+            multiplierBonus = bonus;
+        }
+    }
+
+    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, int[] collectorBonus) {
+        this.color = color;
+        this.cardSuite = cardSuite;
+        this.cardType = cardType;
+        this.componentName = color + " " + cardSuite + " " + cardType;
+        this.collectorBonus = collectorBonus;
+        duoBonus = 0;
+        multiplierBonus = 0;
     }
 
     @Override
@@ -52,5 +86,17 @@ public class SeaSaltPaperCard extends Card {
     @Override
     public SeaSaltPaperCard copy() {
         return new SeaSaltPaperCard(color, cardSuite, cardType);
+    }
+
+    public int getDuoBonus() {
+        return duoBonus;
+    }
+
+    public int[] getCollectorBonus() {
+        return collectorBonus;
+    }
+
+    public int getMultiplierBonus(){
+        return multiplierBonus;
     }
 }
