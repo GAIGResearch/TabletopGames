@@ -74,6 +74,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     int damage;
     int range;
     boolean skip = false;
+    boolean reduced = false;
 
     public String result = "";
 
@@ -414,6 +415,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         retValue.damage = damage;
         retValue.range = range;
         retValue.skip = skip;
+        retValue.reduced = reduced;
         retValue.result = result;
     }
 
@@ -439,7 +441,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                     other.defendingPlayer == defendingPlayer && other.phase == phase &&
                     other.damage == damage && other.range == range &&
                     other.interruptPlayer == interruptPlayer && other.skip == skip &&
-                    other.result.equals(result);
+                    other.reduced == reduced && other.result.equals(result);
         }
         return false;
     }
@@ -448,7 +450,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public int hashCode() {
         return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, pierce,
                 extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, fatigueHeal,
-                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, result);
+                surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
     }
 
     @Override
@@ -500,6 +502,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 + ". Damage: " + damage
                 + ". Range: " + range
                 + ". Skip: " + skip
+                + ". Reduced: " + reduced
                 + ". " + result
                 + ". Surges used: " + surgesUsed.toString()
         );
@@ -596,6 +599,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void reduceDamage (int damageReduction) {
         damage = Math.max(0, damage - damageReduction);
+        reduced = true;
+    }
+    public boolean getReduced()
+    {
+        return reduced;
     }
     public void addDefence(int defenceBonus) {
         extraDefence += defenceBonus;
@@ -626,7 +634,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     public AttackPhase getPhase() {
         return phase;
     }
-
     public boolean getSkip()
     {
         return skip;
