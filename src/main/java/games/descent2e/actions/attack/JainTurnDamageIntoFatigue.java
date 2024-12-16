@@ -23,11 +23,12 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        int reduction = HeroAbilities.jain(dgs, reduce);
+        int reduction = HeroAbilities.jain(dgs, jain, reduce);
         if (reduction > 0) {
             MeleeAttack currentAttack = (MeleeAttack) dgs.currentActionInProgress();
             assert currentAttack != null;
             currentAttack.reduceDamage(reduction);
+            ((Figure) dgs.getComponentById(jain)).setCurrentAttack(currentAttack);
             //System.out.println("Reduced the damage by " + reduction + " and turned it into Fatigue!");
         }
         ((Figure) dgs.getComponentById(jain)).addActionTaken(toString());
@@ -41,20 +42,34 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+
+        // Can only reduce damage from an Attack action
         Figure f = (Figure) dgs.getComponentById(jain);
         MeleeAttack currentAttack = f.getCurrentAttack();
         if (currentAttack == null)
             return false;
+
+        // Can't reduce if we already did so
+        if (currentAttack.reduced)
+            return false;
+
+        // Can't reduce if we're not the target
         if (currentAttack.defendingFigure != jain)
             return false;
+
+        // Can't reduce if we chose not to
         if (currentAttack.skip)
             return false;
+
+        // Can only reduce before damage is applied
         if (currentAttack.getPhase() != MeleeAttack.AttackPhase.PRE_DAMAGE)
             return false;
-        int damage = currentAttack.getDamage();
+
         // Prevents us from increasing our Fatigue more than the damage we took
+        int damage = currentAttack.getDamage();
         if (damage - reduce < 0)
             return false;
+
         return (reduce + f.getAttributeValue(Figure.Attribute.Fatigue)) <= f.getAttributeMax(Figure.Attribute.Fatigue);
     }
 

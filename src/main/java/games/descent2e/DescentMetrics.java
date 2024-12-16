@@ -1,6 +1,7 @@
 package games.descent2e;
 
 import core.CoreConstants;
+import core.actions.LogEvent;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -16,6 +17,7 @@ import utilities.Vector2D;
 import java.util.*;
 
 import static evaluation.metrics.Event.GameEvent.*;
+import static games.descent2e.components.Figure.Attribute.Health;
 
 public class DescentMetrics implements IMetricsCollection {
 
@@ -695,6 +697,173 @@ public class DescentMetrics implements IMetricsCollection {
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             HashMap<String, Class<?>> retVal = new HashMap<>();
             retVal.put("WinnerType", String.class);
+            return retVal;
+        }
+    }
+
+    public static class NarrativeActions extends AbstractMetric {
+
+        public NarrativeActions() {
+            super();
+        }
+
+        public NarrativeActions(Event.GameEvent... args) {
+            super(args);
+        }
+
+        public NarrativeActions(Set<IGameEvent> events) {
+            super(events);
+        }
+
+        public NarrativeActions(String[] args) {
+            super(args);
+        }
+
+        public NarrativeActions(String[] args, Event.GameEvent... events) {
+            super(args, events);
+        }
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == ABOUT_TO_START)
+            {
+                records.put("Name", "Game Start");
+                records.put("ID", 0);
+                records.put("Position", "-");
+                String setup = getSetup((DescentGameState) e.state).toString();
+                records.put("Actions Taken", setup);
+                return true;
+            }
+
+            if (e.type == GAME_OVER) {
+                records.put("Name", "Game Over");
+                records.put("ID", 1);
+                records.put("Position", "-");
+                String setup = getSetup((DescentGameState) e.state).toString();
+                records.put("Actions Taken", setup);
+                return true;
+            }
+
+            if (e.type == Event.GameEvent.GAME_EVENT) {
+                String[] text = ((LogEvent)e.action).text.split(":")[1].split(";");
+                String figure = text[0].trim();
+                int componentID = Integer.parseInt(text[1].trim());
+                String position = text[2].trim();
+
+                records.put("Name", figure);
+                records.put("ID", componentID);
+                records.put("Position", position);
+
+                DescentGameState dgs = (DescentGameState) e.state;
+                Figure f = (Figure) dgs.getComponentById(componentID);
+                records.put("Actions Taken", f.getActionsTaken().toString());
+                //records.put("Actions Taken", getActionsTaken(dgs, f).toString());
+
+                return true;
+            }
+            return false;
+        }
+
+        private List<String> getSetup(DescentGameState dgs)
+        {
+            List<String> setup = new ArrayList<>();
+            for (Hero hero : dgs.getHeroes())
+            {
+                String h = hero.getComponentName().replace("Hero: ", "") + " - " + hero.getProperty("archetype") + " (" + hero.getProperty("class") + ") - " +
+                        hero.getAttributeValue(Health) + " HP - " + hero.getHandEquipment().toString() + " - " + hero.getPosition().toString();
+                setup.add(h);
+            }
+            for (int i = 0; i < dgs.getMonsters().size(); i++)
+            {
+                for (Monster monster : dgs.getMonsters().get(i))
+                {
+                    String m = monster.getComponentName() + " - " + monster.getAttributeValue(Health) + " HP - " + monster.getPosition().toString();
+                    setup.add(m);
+                }
+            }
+            return setup;
+        }
+
+        private List<String> getActionsTaken(DescentGameState dgs, Figure f) {
+
+            // The list needs to stay in approximately the same order as it was originally
+
+            List<String> actionsTaken = f.getActionsTaken();
+            List<Integer> moves = new ArrayList<>();
+            for (int i = 0; i < actionsTaken.size(); i++)
+            {
+                if (actionsTaken.get(i).contains("Attack by"))
+                {
+                    String attack = actionsTaken.get(i);
+                    String attackType = attack.split("by")[0].replace("Free", "").replace("Heroic Feat:", "").trim();
+                    String target = attack.split("Target:")[1].split(";")[0].trim();
+                    String result = attack.split("Result:")[1].split(";")[0].trim();
+                    String damage = attack.split("Damage:")[1].split(";")[0].trim();
+
+                    String newAttack = attackType + " on " + target;
+                    switch (result){
+                        case "Missed":
+                            newAttack += " - Missed";
+                            break;
+                        case "Kill":
+                            newAttack += " - Defeated";
+                            break;
+                        case "Hit":
+                            if (damage.equals("0"))
+                                newAttack += " - Blocked (No Damage)";
+                            else
+                                newAttack += " - Hit (" + damage + " Damage)";
+                            break;
+                    }
+                    actionsTaken.set(i, newAttack);
+                }
+
+                if (actionsTaken.get(i).contains("Move by"))
+                {
+                    moves.add(i);
+                }
+            }
+            if (!moves.isEmpty()) {
+
+                String lastMove = actionsTaken.get(moves.get(moves.size() - 1));
+                actionsTaken.set(moves.get(moves.size() - 1), "Move to " + lastMove.split("to ")[1]);
+
+                // Get rid of all the Move actions except the last one
+                if (moves.size() > 1) {
+                    for (int i = moves.size() - 1; i > 0; i--) {
+                        actionsTaken.remove(moves.get(i - 1).intValue());
+                    }
+                }
+            }
+            // Remove gaining Movement Point references
+            actionsTaken.removeIf(s -> s.contains("Movement Point"));
+            // Remove Surge references
+            actionsTaken.removeIf(s -> s.contains("Surge"));
+
+            // For some reason, the End Turn action is added twice sometimes
+            // TODO: Figure out why this is happening
+            actionsTaken.removeIf(s -> s.contains("End Turn"));
+            actionsTaken.add("End Turn");
+
+            return actionsTaken;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
+                add(ABOUT_TO_START);
+                add(Event.GameEvent.GAME_EVENT);
+                add(GAME_OVER);
+            }};
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            HashMap<String, Class<?>> retVal = new HashMap<>();
+            retVal.put("Name", String.class);
+            retVal.put("ID", Integer.class);
+            retVal.put("Position", String.class);
+            retVal.put("Actions Taken", String.class);
             return retVal;
         }
     }

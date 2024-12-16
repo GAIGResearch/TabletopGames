@@ -28,6 +28,7 @@ public class Stunned extends DescentAction {
     public boolean execute(DescentGameState dgs) {
         dgs.getActingFigure().removeCondition(DescentTypes.DescentCondition.Stun);
         dgs.getActingFigure().getNActionsExecuted().increment();
+        dgs.getActingFigure().addActionTaken(toString());
         return true;
     }
 

@@ -25,7 +25,7 @@ public class SurgeAttackAction extends DescentAction {
 
     @Override
     public String toString() {
-        return surge.name() + " : " + figureSource;
+        return "Surge: " + surge.name() + " by " + figureSource;
     }
     @Override
     public String getString(AbstractGameState gameState) {

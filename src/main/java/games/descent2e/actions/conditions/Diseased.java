@@ -44,11 +44,13 @@ public class Diseased extends AttributeTest {
         if (result)
         {
             f.removeCondition(DescentTypes.DescentCondition.Disease);
+            f.addActionTaken("Passed Disease Test");
             //System.out.println("Passed Disease Test!");
         }
         else
         {
             //System.out.println("Failed Disease Test!");
+            f.addActionTaken("Failed Disease Test");
             DescentHelper.forcedFatigue(dgs, f, "Disease");
         }
     }

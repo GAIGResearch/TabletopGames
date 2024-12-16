@@ -8,6 +8,7 @@ import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import core.turnorders.TurnOrder;
+import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.components.*;
@@ -468,5 +469,12 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     @Override
     public String toString() {
         return masterBoard.toString();
+    }
+
+    @Override
+    public void addListener(IGameListener listener)
+    {
+        super.addListener(listener);
+        listeners.add(listener);
     }
 }

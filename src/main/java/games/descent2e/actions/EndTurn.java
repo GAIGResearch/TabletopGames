@@ -1,17 +1,13 @@
 package games.descent2e.actions;
 
 import core.AbstractGameState;
+import evaluation.metrics.Event;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
 import games.descent2e.components.Figure;
 
-// TODO REMOVE WHEN NOT DEBUGGING
 import games.descent2e.components.Hero;
-
-import java.util.Random;
-
-import static games.descent2e.DescentHelper.collision;
 
 public class EndTurn extends DescentAction{
 
@@ -34,13 +30,6 @@ public class EndTurn extends DescentAction{
         Figure f = dgs.getActingFigure();
         f.getNActionsExecuted().setToMax();
 
-        // TODO REMOVE WHEN NOT DEBUGGING
-        /*if (f instanceof Hero)
-        {
-            debug_RandomStatus(f);
-        }*/
-
-        f.addActionTaken(toString());
         endOfTurn(dgs, f);
 
         return true;
@@ -52,8 +41,7 @@ public class EndTurn extends DescentAction{
     public static void endOfTurn (DescentGameState dgs, Figure f)
     {
         turnEnded = true;
-
-        f.addActionTaken("--- END OF TURN ---");
+        f.addActionTaken("End Turn");
         //System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ") - [" + f.getPosition() + "]");
         //collision(dgs);
         // Removes all attribute tests taken this turn from the list, so we can check them again next turn
@@ -86,45 +74,6 @@ public class EndTurn extends DescentAction{
         f.setUsedExtraAction(false);
 
         //dgs.getTurnOrder().endPlayerTurn(dgs);
-    }
-
-    // TODO Delete after debugging, don't include in the final version
-    public void debug_RandomStatus(Figure f)
-    {
-        Random random = new Random();
-        int randInt = random.nextInt(2);
-
-        switch(randInt)
-        {
-            case 0:
-                if(!f.hasCondition(DescentTypes.DescentCondition.Disease))
-                {
-                    f.addCondition(DescentTypes.DescentCondition.Disease);
-                    System.out.println("Added Diseased");
-                    break;
-                }
-            case 1:
-                if(!f.hasCondition(DescentTypes.DescentCondition.Poison))
-                {
-                    f.addCondition(DescentTypes.DescentCondition.Poison);
-                    System.out.println("Added Poisoned");
-                    break;
-                }
-            case 2:
-                if(!f.hasCondition(DescentTypes.DescentCondition.Stun))
-                {
-                    f.addCondition(DescentTypes.DescentCondition.Stun);
-                    System.out.println("Added Stun");
-                    break;
-                }
-            case 3:
-                if(!f.hasCondition(DescentTypes.DescentCondition.Immobilize))
-                {
-                    f.addCondition(DescentTypes.DescentCondition.Immobilize);
-                    System.out.println("Added Immobilized");
-                    break;
-                }
-        }
     }
 
     @Override

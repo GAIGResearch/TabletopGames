@@ -79,20 +79,20 @@ public class HeroicFeatExtraAttack extends FreeAttack {
 
         if (isMelee)
         {
-            return String.format("Heroic Feat: Extra Attack (Melee) by " + attackerName + " on " + defenderName + "; " + result);
+            return String.format("Heroic Feat: Extra Melee Attack by " + attackerName + " on " + defenderName + "; " + result);
         }
 
         Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
         Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
-        return String.format("Heroic Feat: Extra Attack (Ranged) by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
+        return String.format("Heroic Feat: Extra Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
     }
 
     @Override
     public String toString() {
-        if (isMelee) return String.format("Heroic Feat: Free Attack (Melee) by %d on %d", attackingFigure, defendingFigure);
-        return String.format("Heroic Feat: Free Attack (Ranged) by %d on %d", attackingFigure, defendingFigure);
+        if (isMelee) return String.format("Heroic Feat: Free Melee Attack by %d on %d", attackingFigure, defendingFigure);
+        return String.format("Heroic Feat: Free Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }
 
     @Override

@@ -98,6 +98,6 @@ public class StunAllInMonsterGroup extends DescentAction {
     }
     @Override
     public String toString() {
-        return "Heroic Feat: Stun Monster Group";
+        return "Heroic Feat: Stun Monster Group (" + monsterName + "s)";
     }
 }

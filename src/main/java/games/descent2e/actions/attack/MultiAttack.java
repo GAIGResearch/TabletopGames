@@ -51,6 +51,12 @@ public class MultiAttack extends RangedAttack {
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        result = "Targets: " + defender.getComponentName().replace("Hero: ", "");
+        for (int i = 1; i < defendingFigures.size(); i++) {
+            result += " & " + (state.getComponentById(defendingFigures.get(i)).getComponentName().replace("Hero: ", ""));
+        }
+        result += "; Result: ";
+
         if (defender instanceof Monster) {
             if (((Monster) defender).hasPassive(MonsterAbilities.MonsterPassive.NIGHTSTALKER))
             {
@@ -69,6 +75,7 @@ public class MultiAttack extends RangedAttack {
     private void setNewTarget(DescentGameState state, int index)
     {
         defendingFigure = defendingFigures.get(index);
+        super.setDefendingFigure(defendingFigures.get(index));
         Figure defender = (Figure) state.getComponentById(defendingFigure);
 
         defender.setCurrentAttack(this);
@@ -90,7 +97,7 @@ public class MultiAttack extends RangedAttack {
     void executePhase(DescentGameState state) {
         switch (phase) {
             case POST_DAMAGE:
-                super.applyDamage(state);
+                applyDamage(state);
                 phase = NEXT_TARGET;
                 break;
             case NEXT_TARGET:
@@ -98,7 +105,7 @@ public class MultiAttack extends RangedAttack {
                 {
                     index++;
                     setNewTarget(state, index);
-                    result += "; ";
+                    result += " | Result: ";
                     // For MultiAttacks, we use the same Attack dice results
                     // But each defender is allowed to roll their own Defence dice
                     phase = PRE_DEFENCE_ROLL;
@@ -136,7 +143,7 @@ public class MultiAttack extends RangedAttack {
             }
 
             if (i < defendingFigures.size() - 1) {
-                string += ", ";
+                string += " and ";
             }
         }
 
@@ -166,7 +173,7 @@ public class MultiAttack extends RangedAttack {
         for (int i = 0; i < defendingFigures.size(); i++) {
             string += defendingFigures.get(i);
             if (i < defendingFigures.size() - 1) {
-                string += ", ";
+                string += " and ";
             }
         }
         return string;

@@ -180,7 +180,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
 
         movePhaseForward(dgs);
 
-        hero.addActionTaken(toString());
+        hero.addActionTaken(getString(dgs));
 
         return true;
     }

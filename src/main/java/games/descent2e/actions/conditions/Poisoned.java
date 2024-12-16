@@ -45,6 +45,7 @@ public class Poisoned extends AttributeTest {
         if (result)
         {
             f.removeCondition(DescentTypes.DescentCondition.Poison);
+            f.addActionTaken("Passed Poisoned Test");
             //System.out.println("Passed Poisoned Test!");
         }
         else
@@ -52,12 +53,14 @@ public class Poisoned extends AttributeTest {
             if (!f.getAttribute(Figure.Attribute.Health).isMinimum())
             {
                 f.getAttribute(Figure.Attribute.Health).decrement();
+                f.addActionTaken("Failed Poisoned Test");
                 //System.out.println("Failed Poisoned Test!");
 
                 // If the figure is defeated by being Poisoned, remove it from the board
                 if(f.getAttribute(Figure.Attribute.Health).isMinimum())
                 {
                     int index = DescentHelper.getFigureIndex(dgs, f);
+                    f.addActionTaken("Defeated by Poison");
                     DescentHelper.figureDeath(dgs, f);
                     dgs.addDefeatedFigure(f, index, "Poisoned");
                 }

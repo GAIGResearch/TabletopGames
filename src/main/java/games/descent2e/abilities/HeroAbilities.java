@@ -127,9 +127,9 @@ public class HeroAbilities {
 
     // Jain Fairwood's Hero Ability
     // When we take damage, we can convert some (or all) of that damage into Fatigue, up to our max Fatigue
-    public static int jain(DescentGameState dgs, int reduce)
+    public static int jain(DescentGameState dgs, int heroId, int reduce)
     {
-        Figure actingFigure = dgs.getActingFigure();
+        Figure actingFigure = (Figure) dgs.getComponentById(heroId);
         if (!(actingFigure instanceof Hero)) return 0;
         if (((Hero) actingFigure).getAbility().equals(DamageToFatigue))
         {

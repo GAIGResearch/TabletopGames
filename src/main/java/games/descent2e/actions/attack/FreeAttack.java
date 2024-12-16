@@ -39,6 +39,8 @@ public class FreeAttack extends RangedAttack{
         state.setAttackDicePool(attackPool);
         state.setDefenceDicePool(defencePool);
 
+        result = "Target: " + defender.getComponentName().replace("Hero: ", "") + "; Result: ";
+
         // This is only applicable for Ranged Attacks
         if (!isMelee) {
             if (defender instanceof Monster) {
@@ -95,20 +97,20 @@ public class FreeAttack extends RangedAttack{
 
         if (isMelee)
         {
-            return String.format("Free Attack (Melee) by " + attackerName + " on " + defenderName + "; " + result);
+            return String.format("Free Melee Attack by " + attackerName + " on " + defenderName + "; " + result);
         }
 
         Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
         Figure defender = (Figure) gameState.getComponentById(defendingFigure);
         String distance = Double.toString(getDistanceFromFigures(attacker, defender));
 
-        return String.format("Free Attack (Ranged) by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
+        return String.format("Free Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + "); " + result);
     }
 
     @Override
     public String toString() {
-        if (isMelee) return String.format("Free Attack (Melee) by %d on %d", attackingFigure, defendingFigure);
-        return String.format("Free Attack (Ranged) by %d on %d", attackingFigure, defendingFigure);
+        if (isMelee) return String.format("Free Melee Attack by %d on %d", attackingFigure, defendingFigure);
+        return String.format("Free Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }
 
     @Override

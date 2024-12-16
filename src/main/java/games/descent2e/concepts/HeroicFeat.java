@@ -63,8 +63,20 @@ public class HeroicFeat {
                 for (int i = 0; i < targets.size(); i++) {
                     for (int j = i + 1; j < targets.size(); j++) {
                         List<Integer> targetPair = new ArrayList<>();
-                        targetPair.add(targets.get(i));
-                        targetPair.add(targets.get(j));
+
+                        int targetA = targets.get(i);
+                        int targetB = targets.get(j);
+
+                        // Ensure that we always put the closest target first
+                        if (DescentHelper.getDistance(f.getPosition(), ((Figure) dgs.getComponentById(targetA)).getPosition()) >
+                                DescentHelper.getDistance(f.getPosition(), ((Figure) dgs.getComponentById(targetB)).getPosition())) {
+                            targetPair.add(targetB);
+                            targetPair.add(targetA);
+                        }
+                        else {
+                            targetPair.add(targetA);
+                            targetPair.add(targetB);
+                        }
 
                         feat = new DoubleAttack(f.getComponentID(), targetPair);
                         if (feat.canExecute(dgs)) myFeats.add(feat);

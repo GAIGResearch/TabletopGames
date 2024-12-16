@@ -68,7 +68,7 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
     }
 
     public String toString() {
-        return "Heroic Feat: Move twice and attack.";
+        return "Heroic Feat: Move twice and attack";
     }
 
     @Override
