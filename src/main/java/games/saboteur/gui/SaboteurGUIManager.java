@@ -3,9 +3,15 @@ package games.saboteur.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.actions.AbstractAction;
 import games.saboteur.SaboteurForwardModel;
 import games.saboteur.SaboteurGameParameters;
 import games.saboteur.SaboteurGameState;
+import games.saboteur.actions.PlacePathCard;
+import games.saboteur.actions.PlayMapCard;
+import games.saboteur.actions.PlayRockFallCard;
+import games.saboteur.actions.PlayToolCard;
+import games.saboteur.components.ActionCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -26,8 +32,6 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     final static int playerAreaWidth = 200;
     final static int playerAreaHeight = 100;
     final static int boardSize = 500;
-    final static int cardWidth = 50;
-    final static int cardHeight = 100;
 
     SaboteurGameState gs;
     SaboteurForwardModel fm;
@@ -96,7 +100,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 top.setLayout(new BoxLayout(top, BoxLayout.X_AXIS));
                 bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
                 for (int i = 0; i < nPlayers; i++) {
-                    SaboteurPlayerView playerHand = new SaboteurPlayerView(gs, i, humanID);
+                    SaboteurPlayerView playerHand = new SaboteurPlayerView(this, gs, i, humanID);
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -126,7 +130,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 }
 
                 mainGameArea.add(top);
-                mainGameArea.add(new SaboteurBoardView(gs));
+                mainGameArea.add(new SaboteurBoardView(this, gs));
                 mainGameArea.add(bottom);
 
                 // Add GUI listener
@@ -136,7 +140,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Saboteur", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, false, this::onActionSelected, this::onMouseEnter, this::onMouseExit);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);
@@ -151,6 +155,40 @@ public class SaboteurGUIManager extends AbstractGUIManager {
                 parent.repaint();
             }
         }
+    }
+
+    protected void onActionSelected(ActionButton actionButton) {
+        gridHighlight = null;
+        componentIDHighlight = -1;
+        cardIdxHighlight = -1;
+        actionCardHighlight = null;
+    }
+
+    Point gridHighlight = null;
+    int componentIDHighlight = -1;
+    int cardIdxHighlight = -1;
+    ActionCard.ActionCardType actionCardHighlight = null;
+
+    protected void onMouseEnter(ActionButton actionButton) {
+        AbstractAction action = actionButton.getButtonAction();
+        if (action instanceof PlacePathCard ppc) {
+            gridHighlight = new Point(ppc.getX(), ppc.getY());
+            componentIDHighlight = ppc.getValueID();
+        } else if (action instanceof PlayMapCard pmc) {
+            gridHighlight = new Point(pmc.getPosition().getX(), pmc.getPosition().getY());
+            actionCardHighlight = ActionCard.ActionCardType.Map;
+        } else if (action instanceof PlayRockFallCard) {
+            actionCardHighlight = ActionCard.ActionCardType.RockFall;
+        } else if (action instanceof PlayToolCard ptc) {
+            cardIdxHighlight = ptc.getCardIdx();
+        }
+    }
+
+    protected void onMouseExit(ActionButton actionButton) {
+        gridHighlight = null;
+        componentIDHighlight = -1;
+        cardIdxHighlight = -1;
+        actionCardHighlight = null;
     }
 
     @Override
@@ -198,7 +236,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
 
             // Update active player highlight
             if (gameState.getCurrentPlayer() != activePlayer) {
-                playerHands[activePlayer].handCards.setCardHighlight(-1);
+                playerHands[activePlayer].setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
             }
 

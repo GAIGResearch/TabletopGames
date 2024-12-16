@@ -16,6 +16,8 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_OWNER;
+import static games.saboteur.components.ActionCard.ActionCardType.BrokenTools;
+import static games.saboteur.components.ActionCard.ActionCardType.FixTools;
 
 public class SaboteurForwardModel extends StandardForwardModel {
 //--------------------------------------------------------------------------------------------------//
@@ -45,14 +47,14 @@ public class SaboteurForwardModel extends StandardForwardModel {
         {
             for (int i = 0; i < entry.getValue(); i++)
             {
-                sgs.drawDeck.add(new PathCard(entry.getKey().a, entry.getKey().b));
+                sgs.drawDeck.add(new PathCard(entry.getKey().a, entry.getKey().b.clone()));
             }
         }
         for (Map.Entry<Pair<ActionCard.ActionCardType, ActionCard.ToolCardType[]>, Integer> entry: sgp.toolCards.entrySet())
         {
             for (int i = 0; i < entry.getValue(); i++)
             {
-                sgs.drawDeck.add(new ActionCard(entry.getKey().a, entry.getKey().b));
+                sgs.drawDeck.add(new ActionCard(entry.getKey().a, entry.getKey().b.clone()));
             }
         }
 
@@ -398,7 +400,8 @@ public class SaboteurForwardModel extends StandardForwardModel {
             }
             for(ActionCard.ToolCardType type : card.toolTypes)
             {
-                if(sgs.isToolFunctional(currentPlayer, type))
+                if(card.actionType == BrokenTools && sgs.isToolFunctional(currentPlayer, type)
+                    || card.actionType == FixTools && !sgs.isToolFunctional(currentPlayer, type))
                 {
                     actions.add(new PlayToolCard(cardIdx, currentPlayer, type, card.actionType == ActionCard.ActionCardType.FixTools));
                 }

@@ -45,6 +45,10 @@ public class PlayToolCard extends AbstractAction {
         return playerID == that.playerID && cardIdx == that.cardIdx && isFunctional == that.isFunctional && toolType == that.toolType;
     }
 
+    public int getCardIdx() {
+        return cardIdx;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(playerID, cardIdx, isFunctional, toolType);

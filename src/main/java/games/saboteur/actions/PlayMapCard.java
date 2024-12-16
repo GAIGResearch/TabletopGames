@@ -14,6 +14,10 @@ public class PlayMapCard extends AbstractAction {
 
     final Vector2D position;
 
+    public Vector2D getPosition() {
+        return position;
+    }
+
     public PlayMapCard(int x, int y)
     {
         this.position = new Vector2D(x, y);

@@ -37,6 +37,26 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         Arrays.fill(gridBoardVisibility, defaultValue);
     }
 
+    private PartialObservableGridBoard(int width, int height, int nPlayers, boolean defaultValue, int componentID)
+    {
+        super(width, height, componentID);
+
+        //filling Visibility for each cell in grid
+        boolean[][] visibilityGrid = new boolean[height][width];
+        for(int i = 0; i < height; i++)
+        {
+            Arrays.fill(visibilityGrid[i], defaultValue);
+        }
+        for(int i = 0; i < nPlayers; i++)
+        {
+            elementVisibility.add(visibilityGrid);
+        }
+
+        //filling Visibility of overall grid for each player
+        gridBoardVisibility = new boolean[nPlayers];
+        Arrays.fill(gridBoardVisibility, defaultValue);
+    }
+
     private PartialObservableGridBoard(Component[][] grid, boolean[] gridBoardVisibility, List<boolean[][]> elementVisibility, int componentID)
     {
         super(grid, componentID);
@@ -71,7 +91,7 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
     }
 //endregion
 //--------------------------------------------------------------------------------------------------//
-//region setters
+
     public void setElementVisibility(int x, int y, int playerID, boolean value)
     {
         checkBoardVisibilityArgument(playerID);
@@ -79,8 +99,18 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         elementVisibility.get(playerID)[y][x] = value;
     }
 
-//endregion
-//--------------------------------------------------------------------------------------------------//
+    public boolean getElementVisibility(int x, int y, int player) {
+        return elementVisibility.get(player)[y][x];
+    }
+
+    public List<Boolean> getElementVisibility(int x, int y) {
+        List<Boolean> vis = new ArrayList<>();
+        for (boolean[][] booleans : elementVisibility) {
+            vis.add(booleans[y][x]);
+        }
+        return vis;
+    }
+
 //region Argument Checks
     public void checkBoardVisibilityArgument(int playerID)
     {
@@ -113,6 +143,12 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(gridCopy, gridBoardVisibility, elementVisibility, componentID);
         copyComponentTo(copy);
         return copy;
+    }
+
+    public PartialObservableGridBoard<T> emptyCopy() {
+        PartialObservableGridBoard<T> g = new PartialObservableGridBoard<>(getWidth(), getHeight(), elementVisibility.size(), true, componentID);
+        copyComponentTo(g);
+        return g;
     }
 
     @Override

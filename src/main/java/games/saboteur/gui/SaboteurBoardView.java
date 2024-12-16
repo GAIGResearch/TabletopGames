@@ -13,6 +13,7 @@ import static games.saboteur.gui.SaboteurGUIManager.boardSize;
 
 public class SaboteurBoardView extends JComponent {
     SaboteurGameState gs;
+    SaboteurGUIManager gui;
     PartialObservableGridBoard<PathCard> board;
     Dimension size;
     Point panPos;
@@ -22,8 +23,9 @@ public class SaboteurBoardView extends JComponent {
     public static int pathSize = 8;
     public static int centerGap = 4;
 
-    public SaboteurBoardView(SaboteurGameState gs) {
+    public SaboteurBoardView(SaboteurGUIManager gui, SaboteurGameState gs) {
         this.gs = gs;
+        this.gui = gui;
         board = gs.getGridBoard();
         size = new Dimension(board.getWidth() * cellWidth, board.getHeight() * cellHeight);
         panPos = new Point(-size.width/2 + boardSize/2, -size.height/2 + boardSize/2);  // Start focused on center
@@ -59,8 +61,11 @@ public class SaboteurBoardView extends JComponent {
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
                 PathCard card = board.getElement(j, i);
-                if (card == null) continue;
-                drawPathCard((Graphics2D) g, card, panPos.x + j * cellWidth, panPos.y + i * cellHeight);
+                if (card != null) drawPathCard((Graphics2D) g, card, panPos.x + j * cellWidth, panPos.y + i * cellHeight);
+                if (gui.gridHighlight != null && gui.gridHighlight.x == j && gui.gridHighlight.y == i) {
+                    g.setColor(Color.green);
+                    g.drawRect(panPos.x + j * cellWidth, panPos.y + i * cellHeight, cellWidth, cellHeight);
+                }
             }
         }
     }
@@ -133,6 +138,6 @@ public class SaboteurBoardView extends JComponent {
 
     @Override
     public Dimension getPreferredSize() {
-        return size;
+        return new Dimension(boardSize, boardSize);
     }
 }

@@ -393,7 +393,6 @@ public enum GameType {
             for (int i = 0; i < game.getPlayers().size(); i++) {
                 if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
                     human.add(i);
-                    break;
                 }
             }
         }

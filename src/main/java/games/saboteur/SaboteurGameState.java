@@ -86,8 +86,18 @@ public class SaboteurGameState extends AbstractGameState
         copy.discardDeck = discardDeck.copy();
         copy.goalDeck = goalDeck.copy();
         copy.roleDeck = roleDeck.copy();
-        copy.gridBoard = gridBoard.copy();  // todo deep copy not working
         copy.nuggetDeck = nuggetDeck.copy();
+        copy.gridBoard = gridBoard.emptyCopy();
+        for (int i = 0; i < gridBoard.getHeight(); i++) {
+            for (int j = 0; j < gridBoard.getWidth(); j++) {
+                PathCard c = gridBoard.getElement(j, i);
+                if (c == null) continue;
+                copy.gridBoard.setElement(j, i, c.copy());
+                for (int p = 0; p < nPlayers; p++) {
+                    copy.gridBoard.setElementVisibility(j, i, p, gridBoard.getElementVisibility(j, i, p));
+                }
+            }
+        }
 
         copy.playerNuggetDecks = new ArrayList<>();
         for (Deck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
