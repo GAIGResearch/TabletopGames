@@ -58,6 +58,8 @@ public class SaboteurForwardModel extends StandardForwardModel {
 
         sgs.discardDeck = new Deck<>("DiscardDeck", sgs.getNPlayers(), HIDDEN_TO_ALL);
         sgs.gridBoard = new PartialObservableGridBoard<>(sgp.gridSize, sgp.gridSize, sgs.getNPlayers(), true);
+        sgs.centerOfGrid = (int) Math.floor(sgp.gridSize / 2.0);
+        sgs.gridBoard.setElement(sgs.centerOfGrid, sgs.centerOfGrid, new PathCard(PathCard.PathCardType.Start, new boolean[]{true,true,true,true}));
         sgs.nuggetDeck = new Deck<>("NuggetDeck", HIDDEN_TO_ALL);
         for (Map.Entry<Integer, Integer> entry : sgp.goldNuggetDeck.entrySet())
         {
@@ -78,8 +80,6 @@ public class SaboteurForwardModel extends StandardForwardModel {
         resetDecks(sgs, sgp);
         resetPathCardOptions(sgs);
         setupStartingHand(sgs);
-
-        int a = 0;
     }
 
     private void setupPlayerDecks(SaboteurGameState sgs)
