@@ -20,8 +20,8 @@ import static games.saboteur.components.ActionCard.ActionCardType.BrokenTools;
 import static games.saboteur.components.ActionCard.ActionCardType.FixTools;
 
 public class SaboteurForwardModel extends StandardForwardModel {
-//--------------------------------------------------------------------------------------------------//
-//region Setup Functions
+
+    //region Setup Functions
     @Override
     protected void _setup(AbstractGameState firstState)
     {
@@ -37,9 +37,11 @@ public class SaboteurForwardModel extends StandardForwardModel {
             }
         }
         sgs.goalDeck = new Deck<>("GoalDeck", HIDDEN_TO_ALL);
-        for(int i = 0; i < 3; i++)  // todo param
+        int treasures = sgp.nTreasures;
+        for(int i = 0; i < sgp.nGoals; i++)
         {
-            sgs.goalDeck.add(new PathCard(PathCard.PathCardType.Goal, new boolean[]{true, true, true, true}));
+            sgs.goalDeck.add(new PathCard(PathCard.PathCardType.Goal, new boolean[]{true, true, true, true}, treasures > 0));
+            treasures--;
         }
 
         sgs.drawDeck = new Deck<>("DrawDeck", HIDDEN_TO_ALL);
@@ -79,9 +81,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
     private void setupRound(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
         resetBoard(sgs, sgp);
-        resetDecks(sgs, sgp);
+        resetDecks(sgs);
         resetPathCardOptions(sgs);
-        setupStartingHand(sgs);
+        setupStartingHand(sgs, sgp);
     }
 
     private void setupPlayerDecks(SaboteurGameState sgs)
@@ -103,19 +105,17 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
     }
 
-    private void setupStartingHand(SaboteurGameState sgs)
+    private void setupStartingHand(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
         for (int i = 0; i < sgs.getNPlayers(); i++)
         {
-            for (int j = 0; j < 5; j++)  // todo param
+            for (int j = 0; j < sgp.nStartingCards; j++)
             {
                 sgs.playerDecks.get(i).add(sgs.drawDeck.draw());
             }
         }
     }
-//endregion
-//--------------------------------------------------------------------------------------------------//
-//region Reset Functions
+
     private void resetBoard(SaboteurGameState sgs, SaboteurGameParameters sgp)
     {
         //Initialise GridBoard with starting card
@@ -154,7 +154,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
     }
 
-    private void resetDecks(SaboteurGameState sgs, SaboteurGameParameters sgp)
+    private void resetDecks(SaboteurGameState sgs)
     {
         sgs.drawDeck.add(sgs.discardDeck);
         sgs.discardDeck.clear();
@@ -203,9 +203,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
         sgs.pathCardOptions.add(new Vector2D(sgs.centerOfGrid, sgs.centerOfGrid + 1));
         sgs.pathCardOptions.add(new Vector2D(sgs.centerOfGrid, sgs.centerOfGrid - 1));
     }
-//endregion
-//--------------------------------------------------------------------------------------------------//
-//region Compute Action Functions
+    //endregion
+
+    //region Compute Action Functions
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState)
     {
@@ -250,7 +250,6 @@ public class SaboteurForwardModel extends StandardForwardModel {
         return actions;
     }
 
-//region GettingPathActions
     //Updates the map of possible path card locations and directions whenever a path card is placed
     private ArrayList<AbstractAction> computePathAction(PathCard card, SaboteurGameState sgs)
     {
@@ -364,8 +363,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
             default -> new Vector2D(999, 999);
         };
     }
-//endregion
-//region GettingActionActions
+
     private ArrayList<AbstractAction> computeActionAction(ActionCard card, int cardIdx, SaboteurGameState sgs)
     {
         ArrayList<AbstractAction> actions = new ArrayList<>();
@@ -429,6 +427,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
         return actions;
     }
+
     private List<AbstractAction> computeActionRockFall(SaboteurGameState sgs)
     {
         List<AbstractAction> actions = new ArrayList<>();
@@ -445,24 +444,9 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
         return actions;
     }
-//endregion
-//endregion
-//--------------------------------------------------------------------------------------------------//
-//region OtherFunctions
-    private void fillDeckViaMap(Deck<SaboteurCard> deck, Map<SaboteurCard, Integer> map)
-    {
-        //add all the Path Cards
-        for (Map.Entry<SaboteurCard, Integer> entry : map.entrySet())
-        {
-            for (int i = 0; i < entry.getValue(); i++)
-            {
-                deck.add(entry.getKey());
-            }
-        }
-    }
-//endregion
-//--------------------------------------------------------------------------------------------------//
-//region AfterAction Functions
+    //endregion
+
+    //region AfterAction Functions
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action)
     {
@@ -662,6 +646,4 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
     }
 //endregion
-//--------------------------------------------------------------------------------------------------//
-
 }

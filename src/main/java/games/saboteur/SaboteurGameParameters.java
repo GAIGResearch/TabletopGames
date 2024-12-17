@@ -19,6 +19,9 @@ public class SaboteurGameParameters extends AbstractParameters
     public int gridSize = 500;
     public int goalSpacingX = 8;
     public int goalSpacingY = 1;
+    public int nGoals = 3;
+    public int nTreasures = 1;
+    public int nStartingCards = 5;
 
     //map combination of specific cards to number of cards in that deck
     public Map<Pair<PathCard.PathCardType,boolean[]>, Integer> pathCardDeck= new HashMap<>();
@@ -147,6 +150,9 @@ public class SaboteurGameParameters extends AbstractParameters
         sgp.gridSize = gridSize;
         sgp.goalSpacingY = goalSpacingY;
         sgp.goalSpacingX = goalSpacingX;
+        sgp.nGoals = nGoals;
+        sgp.nTreasures = nTreasures;
+        sgp.nStartingCards = nStartingCards;
         sgp.pathCardDeck = new HashMap<>();
         for (Map.Entry<Pair<PathCard.PathCardType, boolean[]>, Integer> entry : pathCardDeck.entrySet())
             sgp.pathCardDeck.put(new Pair<>(entry.getKey().a, entry.getKey().b.clone()), entry.getValue());
@@ -165,13 +171,13 @@ public class SaboteurGameParameters extends AbstractParameters
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SaboteurGameParameters that)) return false;
-        if (!super.equals(o)) return false;
-        return nPlayers == that.nPlayers && nNuggets == that.nNuggets && nGoalCards == that.nGoalCards && nRounds == that.nRounds && gridSize == that.gridSize && goalSpacingX == that.goalSpacingX && goalSpacingY == that.goalSpacingY && Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(roleCardDeck, that.roleCardDeck) && Objects.equals(toolCards, that.toolCards) && Objects.equals(actionCards, that.actionCards) && Objects.equals(goalCardDeck, that.goalCardDeck) && Objects.equals(goldNuggetDeck, that.goldNuggetDeck);
+        if (o == null || getClass() != o.getClass()) return false;
+        SaboteurGameParameters that = (SaboteurGameParameters) o;
+        return nPlayers == that.nPlayers && nNuggets == that.nNuggets && nGoalCards == that.nGoalCards && nRounds == that.nRounds && gridSize == that.gridSize && goalSpacingX == that.goalSpacingX && goalSpacingY == that.goalSpacingY && nGoals == that.nGoals && nTreasures == that.nTreasures && nStartingCards == that.nStartingCards && Objects.equals(pathCardDeck, that.pathCardDeck) && Objects.equals(roleCardDeck, that.roleCardDeck) && Objects.equals(toolCards, that.toolCards) && Objects.equals(actionCards, that.actionCards) && Objects.equals(goalCardDeck, that.goalCardDeck) && Objects.equals(goldNuggetDeck, that.goldNuggetDeck);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), nPlayers, nNuggets, nGoalCards, nRounds, gridSize, goalSpacingX, goalSpacingY, pathCardDeck, roleCardDeck, toolCards, actionCards, goalCardDeck, goldNuggetDeck);
+        return Objects.hash(nPlayers, nNuggets, nGoalCards, nRounds, gridSize, goalSpacingX, goalSpacingY, nGoals, nTreasures, nStartingCards, pathCardDeck, roleCardDeck, toolCards, actionCards, goalCardDeck, goldNuggetDeck);
     }
 }

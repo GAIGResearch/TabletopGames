@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class PathCard extends SaboteurCard {
-    static int nOfTreasures = 1;
-
     final private boolean[] directions;
     final public PathCardType type;
     final boolean hasTreasure;
@@ -18,15 +16,14 @@ public class PathCard extends SaboteurCard {
     }
 
     public PathCard(PathCardType type, boolean[] direction) {
+        this(type, direction, false);
+    }
+
+    public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure) {
         super(SaboteurCardType.Path);
         this.type = type;
         this.directions = direction;
-        if (type == PathCardType.Goal && nOfTreasures > 0) {
-            hasTreasure = true;
-            nOfTreasures -= 1;
-        } else {
-            hasTreasure = false;
-        }
+        this.hasTreasure = hasTreasure;
     }
 
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure, int componentID) {

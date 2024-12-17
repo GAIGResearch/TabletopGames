@@ -203,7 +203,9 @@ public class SaboteurGameState extends AbstractGameState
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;  // todo nuggets
+        int sum = 0;
+        for (SaboteurCard card: playerNuggetDecks.get(playerId)) sum += card.nOfNuggets;
+        return sum;
     }
 
     @Override
