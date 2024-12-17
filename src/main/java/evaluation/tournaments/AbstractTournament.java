@@ -23,7 +23,8 @@ public abstract class AbstractTournament implements IGameRunner {
         RANDOM,
         EXHAUSTIVE,
         EXHAUSTIVE_SELF_PLAY,
-        ONE_VS_ALL
+        ONE_VS_ALL,
+        FIXED
     }
     // List of players taking part in the tournament
     protected List<? extends AbstractPlayer> agents;

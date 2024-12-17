@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 
+import static utilities.Utils.createDirectory;
+
 public class TableSawDataProcessor implements IDataProcessor {
 
 
@@ -36,8 +38,7 @@ public class TableSawDataProcessor implements IDataProcessor {
         System.out.println(dts.data);
     }
 
-    private Map<String, List<Table>> getSummarisedData(DataTableSaw dts)
-    {
+    private Map<String, List<Table>> getSummarisedData(DataTableSaw dts) {
         Map<String, List<Table>> summarisedData;
         if (dts.metric.getGamesCompleted() < dts.data.column(0).size()) {
             summarisedData = summariseDataProgression(dts.metric, dts.data);
@@ -53,9 +54,9 @@ public class TableSawDataProcessor implements IDataProcessor {
         DataTableSaw dts = (DataTableSaw) logger;
         Map<String, List<Table>> summarisedData = getSummarisedData(dts);
 
-        for (Map.Entry<String, List<Table>> e: summarisedData.entrySet()) {
+        for (Map.Entry<String, List<Table>> e : summarisedData.entrySet()) {
             System.out.println();
-            for (Table t: e.getValue()) {
+            for (Table t : e.getValue()) {
                 System.out.println(t + "\n");
             }
         }
@@ -69,19 +70,17 @@ public class TableSawDataProcessor implements IDataProcessor {
         File summaryFolder = new File(folderName + "/summaries");
         boolean success = true;
         if (!summaryFolder.exists()) {
-            success = summaryFolder.mkdir();
+            createDirectory(folderName + "/summaries");
         }
         File summaryFolderMetric = new File(folderName + "/summaries/" + dts.metric.getName());
         if (!summaryFolderMetric.exists()) {
-            success = summaryFolderMetric.mkdir();
+            createDirectory(folderName + "/summaries/" + dts.metric.getName());
         }
 
-        if (success) {
-            for (String columnSummary : summarisedData.keySet()) {
-                List<Table> tables = summarisedData.get(columnSummary);
-                for (Table t: tables) {
-                    t.write().csv(summaryFolderMetric + "/" + t.name() + ".csv");
-                }
+        for (String columnSummary : summarisedData.keySet()) {
+            List<Table> tables = summarisedData.get(columnSummary);
+            for (Table t : tables) {
+                t.write().csv(summaryFolderMetric + "/" + t.name() + ".csv");
             }
         }
     }
@@ -118,11 +117,12 @@ public class TableSawDataProcessor implements IDataProcessor {
 
     /**
      * Summarise the data recorded by this metric.
+     *
      * @return a mapping from column name to list of strings, each summarising a column of data,
      * or other customized summary.
      */
     protected Map<String, List<Table>> summariseData(AbstractMetric metric, Table rawData) {
-        Map<String, List<Table>>  allDataSummaries = new HashMap<>();
+        Map<String, List<Table>> allDataSummaries = new HashMap<>();
         for (Column<?> c : rawData.columns()) {
             Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
             Column<?> column = filteredData.column(c.name());
@@ -146,8 +146,9 @@ public class TableSawDataProcessor implements IDataProcessor {
      * Summarise the data recorded by this metric, per game. Only different for categorical (StringColumn) data.
      * Same as summariseData for numerical data, even if progression through game.
      * Prints 2 tables per metric:
-     *  - one showing detailed counts in each game for each categorical value
-     *  - one showing statistics overall for each categorical value (mean, std, min, max etc.)
+     * - one showing detailed counts in each game for each categorical value
+     * - one showing statistics overall for each categorical value (mean, std, min, max etc.)
+     *
      * @return - a list of strings, each summarising a column of data, or other customized summary.
      */
     protected Map<String, List<Table>> summariseDataProgression(AbstractMetric metric, Table rawData) {
@@ -170,12 +171,12 @@ public class TableSawDataProcessor implements IDataProcessor {
                     Table[] tablesPerGame = new Table[nGames];
                     Set<String> categoryNames = new HashSet<>();
                     int i = 0;
-                    for (Object id: gameIds) {
-                        tablesPerGame[i] = ((StringColumn)column.where(filteredData.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
+                    for (Object id : gameIds) {
+                        tablesPerGame[i] = ((StringColumn) column.where(filteredData.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
                         // Needs transposing because the output of previous is several rows with category value, count (2 columns)
                         try {
                             tablesPerGame[i] = tablesPerGame[i].transpose(false, true);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             System.out.println("Error transposing table: " + e);
                         }
                         // Save all column names for the summary table
@@ -185,14 +186,14 @@ public class TableSawDataProcessor implements IDataProcessor {
 
                     // Create summary table with columns for each category
                     Table summaryTable = Table.create("Summary " + column.name());
-                    for (String categoryName: categoryNames) {
+                    for (String categoryName : categoryNames) {
                         summaryTable.addColumns(IntColumn.create(categoryName));
                     }
 
                     // Append all data to the summary table. We'll have 1 column per categorical value
                     // And 1 row per game, with the counts of each category
                     for (i = 0; i < nGames; i++) {
-                        for (String category: categoryNames) {
+                        for (String category : categoryNames) {
                             if (tablesPerGame[i].columnNames().contains(category)) {
                                 IntColumn categoryColumn = tablesPerGame[i].intColumn(category);
                                 summaryTable.intColumn(category).append(categoryColumn);
@@ -208,7 +209,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                     }
 
                     // Make a print table with detail counts per game, transposed for more compact printing
-                    Table printTable = summaryTable.transpose(true,false);
+                    Table printTable = summaryTable.transpose(true, false);
                     printTable.column(0).setName(column.name() + " \\ Game #");
                     // Add table to the summary to print
                     summary.add(printTable);
@@ -244,6 +245,7 @@ public class TableSawDataProcessor implements IDataProcessor {
     /**
      * Plot the data recorded by this metric. Progression over the course of a game, averaged across the different
      * games recorded.
+     *
      * @return - a list of figures, each plotting a column of data, or some customized plots.
      */
     protected Map<String, Figure> plotDataProgression(AbstractMetric metric, Table data) {
@@ -253,7 +255,7 @@ public class TableSawDataProcessor implements IDataProcessor {
         Table[] tablesPerGame = new Table[nGames];
 
         int i = 0;
-        for (Object id: gameIds) {  // todo game ID starts at 2???
+        for (Object id : gameIds) {  // todo game ID starts at 2???
             tablesPerGame[i] = data.where(data.stringColumn("GameID").isEqualTo((String) id));
             int maxTickThisGame = tablesPerGame[i].intColumn("Tick").size();
             if (maxTickThisGame > maxTick) {
@@ -321,8 +323,8 @@ public class TableSawDataProcessor implements IDataProcessor {
                     // Create counts of each category per game
                     Table[] tablesCountsPerGame = new Table[nGames];
                     int idx = 0;
-                    for (Object id: data.column("GameID").unique().asObjectArray()) {
-                        tablesCountsPerGame[idx] = ((StringColumn)column.where(data.stringColumn("GameID").isEqualTo((String) id)))
+                    for (Object id : data.column("GameID").unique().asObjectArray()) {
+                        tablesCountsPerGame[idx] = ((StringColumn) column.where(data.stringColumn("GameID").isEqualTo((String) id)))
                                 .removeMissing()
                                 .countByCategory();
                         idx++;
@@ -351,6 +353,7 @@ public class TableSawDataProcessor implements IDataProcessor {
     /**
      * Defines x-axis label for a progression plot, based on the events the metric listens to.
      * Chooses the lowest level of granularity that the metric listens to.
+     *
      * @param metric - the metric
      * @return - the label
      */
@@ -367,6 +370,7 @@ public class TableSawDataProcessor implements IDataProcessor {
 
     /**
      * Plot the data recorded by this metric.
+     *
      * @return - a list of figures, each plotting a column of data, or some customized plots.
      */
     protected Map<String, Figure> plotData(AbstractMetric metric, Table rawData) {
@@ -380,7 +384,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                     figures.put(column.name(), LinePlot.create(filteredData.name(), Table.create(column, filteredData.column("GameID")), "GameID", column.name()));
                 } else {
                     // Make a bar plot from the categorical count
-                    Table t2 = ((StringColumn)column).countByCategory();
+                    Table t2 = ((StringColumn) column).countByCategory();
 //                    t2 = t2.sortDescendingOn(t2.column(1).name()); //todo this sorts the table, but not the plot when we build it.
                     Layout layout = Layout.builder()
                             .title(filteredData.name())
