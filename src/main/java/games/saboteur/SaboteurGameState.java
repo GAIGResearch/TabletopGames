@@ -68,13 +68,7 @@ public class SaboteurGameState extends AbstractGameState
     protected SaboteurGameState _copy(int playerId)
     {
         SaboteurGameState copy = new SaboteurGameState(gameParameters.copy(), getNPlayers());
-
-        //copying playerDecks
-        copy.playerDecks = new ArrayList<>();
-        for(Deck<SaboteurCard> playerDeck : playerDecks)
-        {
-            copy.playerDecks.add(playerDeck.copy());
-        }
+        copy.rnd = rnd;
 
         //copying brokenToolsDeck
         copy.toolDeck = new ArrayList<>();
@@ -82,12 +76,24 @@ public class SaboteurGameState extends AbstractGameState
         {
             copy.toolDeck.add(new HashMap<>(brokenToolDeck));
         }
-
-        copy.drawDeck = drawDeck.copy();
-        copy.discardDeck = discardDeck.copy();
         copy.goalDeck = goalDeck.copy();
+
+        copy.pathCardOptions = new ArrayList<>();
+        for(Vector2D pathCardOption : pathCardOptions)
+        {
+            copy.pathCardOptions.add(pathCardOption.copy());
+        }
+
+        copy.centerOfGrid = centerOfGrid;
+        copy.nOfMiners = nOfMiners;
+        copy.nOfSaboteurs = nOfSaboteurs;
+
+        copy.discardDeck = discardDeck.copy();
         copy.roleDeck = roleDeck.copy();
         copy.nuggetDeck = nuggetDeck.copy();
+        copy.drawDeck = drawDeck.copy();
+
+        // Board
         copy.gridBoard = gridBoard.emptyCopy();
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
@@ -100,31 +106,86 @@ public class SaboteurGameState extends AbstractGameState
             }
         }
 
-        copy.playerNuggetDecks = new ArrayList<>();
-        for (Deck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
-        {
-            copy.playerNuggetDecks.add(playerNuggetDeck.copy());
-        }
-
-        copy.pathCardOptions = new ArrayList<>();
-        for(Vector2D pathCardOption : pathCardOptions)
-        {
-            copy.pathCardOptions.add(pathCardOption.copy());
-        }
-
-        copy.playerNuggetDecks = new ArrayList<>();
-        for(Deck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
-        {
-            copy.playerNuggetDecks.add(playerNuggetDeck.copy());
-        }
-
-        copy.centerOfGrid = centerOfGrid;
-        copy.nOfMiners = nOfMiners;
-        copy.nOfSaboteurs = nOfSaboteurs;
-
-        // todo partial observability
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
+            // Player cards
+            copy.playerDecks = new ArrayList<>();
+            for (int i = 0, playerNuggetDecksSize = playerDecks.size(); i < playerNuggetDecksSize; i++) {
+                copy.playerDecks.add(playerDecks.get(i).copy());
+                if (i != playerId) {
+                    copy.drawDeck.add(copy.playerDecks.get(i));
+                    copy.playerDecks.get(i).clear();
+                }
+            }
+            copy.drawDeck.shuffle(copy.rnd);
+            for (int i = 0, playerNuggetDecksSize = playerDecks.size(); i < playerNuggetDecksSize; i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
+                        copy.playerDecks.get(i).add(copy.drawDeck.pick(0));
+                    }
+                }
+            }
 
+            // Nuggets
+            copy.playerNuggetDecks = new ArrayList<>();
+            for (int i = 0, playerNuggetDecksSize = playerNuggetDecks.size(); i < playerNuggetDecksSize; i++) {
+                copy.playerNuggetDecks.add(playerNuggetDecks.get(i).copy());
+                if (i != playerId) {
+                    copy.nuggetDeck.add(copy.playerNuggetDecks.get(i));
+                    copy.playerNuggetDecks.get(i).clear();
+                }
+            }
+            copy.nuggetDeck.shuffle(copy.rnd);
+            for (int i = 0, playerNuggetDecksSize = playerNuggetDecks.size(); i < playerNuggetDecksSize; i++) {
+                if (i != playerId) {
+                    for (int j = 0; j < playerNuggetDecks.get(i).getSize(); j++) {
+                        copy.playerNuggetDecks.get(i).add(copy.nuggetDeck.pick(0));
+                    }
+                }
+            }
+
+            // Goals on board, shuffle those unseen by current player
+            for (int i = 0; i < gridBoard.getHeight(); i++) {
+                for (int j = 0; j < gridBoard.getWidth(); j++) {
+                    PathCard c = gridBoard.getElement(j, i);
+                    if (c == null || c.type != PathCard.PathCardType.Goal) continue;
+                    if (!copy.gridBoard.getElementVisibility(j, i, playerId)) {
+                        copy.goalDeck.add(copy.gridBoard.getElement(j, i));
+                    }
+                }
+            }
+            if (copy.goalDeck.getSize() > 0) {
+                copy.goalDeck.shuffle(rnd);
+                for (int i = 0; i < gridBoard.getHeight(); i++) {
+                    for (int j = 0; j < gridBoard.getWidth(); j++) {
+                        PathCard c = gridBoard.getElement(j, i);
+                        if (c == null || c.type != PathCard.PathCardType.Goal) continue;
+                        if (!copy.gridBoard.getElementVisibility(j, i, playerId)) {
+                            copy.gridBoard.setElement(j, i, (PathCard) copy.goalDeck.pick(0));
+                        }
+                    }
+                }
+            }
+
+            // Shuffle discard and role deck to hide info. Current player should have same role
+            copy.discardDeck.shuffle(copy.rnd);
+            SaboteurCard rc = copy.roleDeck.pick(playerId);
+            copy.roleDeck.shuffle(copy.rnd);
+            copy.roleDeck.add(rc, playerId);
+        } else {
+            //copying playerDecks
+            copy.drawDeck = drawDeck.copy();
+            copy.playerDecks = new ArrayList<>();
+            for(Deck<SaboteurCard> playerDeck : playerDecks)
+            {
+                copy.playerDecks.add(playerDeck.copy());
+            }
+
+            // Nuggets
+            copy.playerNuggetDecks = new ArrayList<>();
+            for (Deck<SaboteurCard> playerNuggetDeck : playerNuggetDecks)
+            {
+                copy.playerNuggetDecks.add(playerNuggetDeck.copy());
+            }
         }
 
         return copy;
