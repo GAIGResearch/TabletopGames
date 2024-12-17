@@ -124,7 +124,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
 //            if (name != null && !name.equals("")) {
 //                g.drawString(name, rect.x + 10, rect.y + size + 20);
 //            }
-            g.drawString("" + deck.getSize(), rect.x + 10, rect.y + rect.height - size);
+            if (!front) g.drawString("" + deck.getSize(), rect.x + 10, rect.y + rect.height - size);
         }
     }
 
