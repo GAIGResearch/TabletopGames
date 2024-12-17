@@ -12,7 +12,18 @@ public class ActionCard extends SaboteurCard
     {
         MineCart,
         Lantern,
-        Pickaxe
+        Pickaxe;
+        public String shortString() {
+            switch(this) {
+                case MineCart -> { return "MC";
+                }
+                case Lantern -> { return "Lant";
+                }
+                case Pickaxe -> { return "PAxe";
+                }
+            }
+            return "";
+        }
     }
 
     public enum ActionCardType
@@ -20,7 +31,20 @@ public class ActionCard extends SaboteurCard
         RockFall,
         BrokenTools,
         FixTools,
-        Map
+        Map;
+        public String shortString() {
+            switch(this) {
+                case RockFall -> { return "Rocks";
+                }
+                case Map -> { return "Map";
+                }
+                case BrokenTools -> { return "Brk";
+                }
+                case FixTools -> { return "Fix";
+                }
+            }
+            return "";
+        }
     }
 
     public ActionCard(ActionCardType actionType, ToolCardType[] toolTypes)

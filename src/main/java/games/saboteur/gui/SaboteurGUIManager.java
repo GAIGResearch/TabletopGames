@@ -48,6 +48,8 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 27, 67), 3);
     Border[] playerViewBorders, playerViewBordersHighlight;
 
+    JLabel cardsInDeck;
+
     public SaboteurGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID)
     {
         super(parent, game, ac, humanID);
@@ -57,6 +59,8 @@ public class SaboteurGUIManager extends AbstractGUIManager {
         UIManager.put("TabbedPane.tabsOpaque", false);
 
         if (game != null) {
+            cardsInDeck = new JLabel("");
+
             AbstractGameState gameState = game.getGameState();
             fm = (SaboteurForwardModel) game.getForwardModel();
 
@@ -208,9 +212,9 @@ public class SaboteurGUIManager extends AbstractGUIManager {
 
         gameInfo.add(gameStatus);
         gameInfo.add(playerStatus);
-        gameInfo.add(gamePhase);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
+        gameInfo.add(cardsInDeck);
 
         gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
 
@@ -233,6 +237,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
+            cardsInDeck.setText("Cards in deck: " + ((SaboteurGameState)gameState).getDrawDeck().getSize());
 
             // Update active player highlight
             if (gameState.getCurrentPlayer() != activePlayer) {

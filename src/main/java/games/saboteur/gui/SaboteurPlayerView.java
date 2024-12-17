@@ -7,7 +7,6 @@ import games.saboteur.components.RoleCard;
 import games.saboteur.components.SaboteurCard;
 import gui.views.DeckView;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.Set;
 
@@ -21,7 +20,7 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
 
     public SaboteurPlayerView(SaboteurGUIManager gui, SaboteurGameState gs, int i, Set<Integer> humanID) {
         super(i, gs.getPlayerDecks().get(i), false, SaboteurBoardView.cellWidth, SaboteurBoardView.cellHeight,
-                new Rectangle(5,5,SaboteurBoardView.cellWidth * 8,SaboteurBoardView.cellHeight));
+                new Rectangle(7,7,SaboteurBoardView.cellWidth * 8,SaboteurBoardView.cellHeight));
         this.gs = gs;
         this.gui = gui;
         this.idx = i;
@@ -41,7 +40,24 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
 
         if (front) {
             if (component instanceof ActionCard actionCard) {
-                g.drawString(""+actionCard.actionType.name().charAt(0), rect.x + 5, rect.y + 20);
+                /*
+                 RockFall,
+                 BrokenTools,
+                 FixTools,
+                 Map
+                 */
+                g.drawString(actionCard.actionType.shortString(), rect.x + 5, rect.y + 20);
+                if (actionCard.actionType == ActionCard.ActionCardType.BrokenTools) {
+                    ActionCard.ToolCardType[] toolTypes = actionCard.toolTypes;
+                    for (int i = 0; i < toolTypes.length; i++) {
+                        g.drawString(toolTypes[i].shortString(), rect.x + 5, rect.y + 35 + i*15);
+                    }
+                } else if (actionCard.actionType == ActionCard.ActionCardType.FixTools) {
+                    ActionCard.ToolCardType[] toolTypes = actionCard.toolTypes;
+                    for (int i = 0; i < toolTypes.length; i++) {
+                        g.drawString(toolTypes[i].shortString(), rect.x + 5, rect.y + 35 + i*15);
+                    }
+                }
             } else if (component instanceof PathCard) {
                 drawPathCard(g, (PathCard) component, rect.x, rect.y);
             } else if (component instanceof RoleCard roleCard) {
@@ -53,6 +69,17 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        // Draw player role and number of nugget cards
+        g.setColor(Color.black);
+        g.drawString("Role: " + gs.getRole(idx).name() + "; nuggetCards: " + gs.getPlayerNuggetDecks().get(idx).getSize(), 7, (int) (SaboteurBoardView.cellHeight * 1.5));
+
+        // Draw tool status
+        String tools = "";
+        for (ActionCard.ToolCardType tt: ActionCard.ToolCardType.values()) {
+            tools += tt.name() + ": " + (gs.isToolFunctional(idx, tt) ? "ok" : "broken") + "   ";
+        }
+        g.drawString(tools, 7, (int) (SaboteurBoardView.cellHeight * 1.5) + 20);
     }
 
     public void update(boolean front) {
@@ -61,6 +88,6 @@ public class SaboteurPlayerView extends DeckView<SaboteurCard> {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(SaboteurBoardView.cellWidth*8, SaboteurBoardView.cellHeight*2);
+        return new Dimension(SaboteurBoardView.cellWidth*8, SaboteurBoardView.cellHeight*3);
     }
 }
