@@ -1,7 +1,7 @@
 package games.saboteur.gui;
 
 import games.saboteur.SaboteurGameState;
-import games.saboteur.components.PartialObservableGridBoard;
+import core.components.PartialObservableGridBoard;
 import games.saboteur.components.PathCard;
 
 import javax.swing.*;

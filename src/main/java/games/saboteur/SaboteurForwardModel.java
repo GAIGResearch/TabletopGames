@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.components.PartialObservableGridBoard;
 import games.saboteur.actions.*;
 import games.saboteur.components.*;
 import utilities.Pair;

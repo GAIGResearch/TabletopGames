@@ -1,7 +1,6 @@
-package games.saboteur.components;
+package core.components;
 
-import core.components.Component;
-import core.components.GridBoard;
+import games.saboteur.components.PathCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.components.PartialObservableGridBoard;
 import games.GameType;
 import games.saboteur.components.*;
 import utilities.Vector2D;
