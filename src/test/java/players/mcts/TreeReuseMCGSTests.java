@@ -16,6 +16,8 @@ import games.dominion.metrics.DomStateFeaturesReduced;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.TicTacToeStateVector;
+import games.toads.ToadForwardModel;
+import games.toads.metrics.ToadFeatures001;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
@@ -66,6 +68,19 @@ public class TreeReuseMCGSTests {
         state = game.getGameState();
     }
 
+    public void initialiseToads() {
+        paramsOne.MCGSStateKey = new ToadFeatures001();
+        paramsTwo.MCGSStateKey = new ToadFeatures001();
+        playerOne = new TestMCTSPlayer(paramsOne, MCGSNode::new);
+        playerOne.rolloutTest = false;
+        playerTwo = new TestMCTSPlayer(paramsTwo, MCGSNode::new);
+        playerTwo.rolloutTest = false;
+        fm = new ToadForwardModel();
+        game = GameType.WarOfTheToads.createGameInstance(2, 404);
+        game.reset(List.of(playerOne, playerTwo));
+        state = game.getGameState();
+    }
+
     @Test
     public void treeReuseTest() {
         // TicTacToe may be a good test environment.
@@ -100,6 +115,13 @@ public class TreeReuseMCGSTests {
         runGame();
     }
 
+    @Test
+    public void treeReuseTestToads() {
+        // A test in a more complex game
+        initialiseToads();
+        runGame();
+    }
+
     public void runGame() {
         // For MCGS this should be much simpler than for MCTS
         // We track (copy) the state pre-Action.
@@ -109,6 +131,7 @@ public class TreeReuseMCGSTests {
         // [as we don't prune this until the *next* decision is taken]
         // After the action is taken we confirm that the old root node no longer exists in the tree (i.e. that we do prune states)
         MCGSNode[] oldRoots = new MCGSNode[2];
+        Map[] oldMaps = new Map[2];
         Object[] oldKeys = new Object[]{null, null};
         Object[] oldOldKeys = new Object[]{null, null};
         Object[] oldOldOldKeys = new Object[]{null, null};
@@ -122,6 +145,14 @@ public class TreeReuseMCGSTests {
             oldKeys[currentPlayer] = paramsOne.MCGSStateKey.getKey(state);
             TestMCTSPlayer player = currentPlayer == 0 ? playerOne : playerTwo;
             oldRoots[currentPlayer] = (MCGSNode) player.root; // root from last action taken
+            // however we need to copy the transposition map, as this is just passed by reference to the new root node
+            if (player.root != null) {
+                Map<Object, MCGSNode> mapCopy = new HashMap<>();
+                for (Object key : ((MCGSNode) player.root).getTranspositionMap().keySet()) {
+                    mapCopy.put(key, ((MCGSNode) player.root).getTranspositionMap().get(key));
+                }
+                oldMaps[currentPlayer] = mapCopy;
+            }
             Map<Object, Integer> visitMapBeforeAction = new HashMap<>();
             Map<Object, Integer> depthMapBeforeAction = new HashMap<>();
             if (player.root != null) {
@@ -142,16 +173,20 @@ public class TreeReuseMCGSTests {
             System.out.println("Action: " + nextAction.toString());
             // newRoot is the root of the tree just used - i.e. it is rooted at the state before the action was taken
             MCGSNode newRoot = (MCGSNode) player.getRoot(currentPlayer);
+
+            // Now remove the nodes that were pruned before the action was taken (because they did not have any visits in the previous search)
+            player.recentlyRemovedKeys.forEach(visitMapBeforeAction::remove);
+            player.recentlyRemovedKeys.forEach(depthMapBeforeAction::remove);
             if (!oneAction) {
                 // check tree reuse
                 if (oldRoots[currentPlayer] != null) {
                     assertNotEquals(oldRoots[currentPlayer], newRoot);
-                    if (currentPlayer == 0) {  // the one with reuseTree = true
+                    if (currentPlayer == 0 && newRoot.nVisits > paramsOne.budget) {  // the one with reuseTree = true, and we did re-use some of the nodes
                         // old root still contains the starting state key
-                        assertTrue(oldRoots[currentPlayer].getTranspositionMap().containsKey(oldOldKeys[currentPlayer]));
-                        boolean searchExitedGraph = !oldRoots[currentPlayer].getTranspositionMap().containsKey(oldKeys[currentPlayer]);
+                        assertTrue(oldMaps[currentPlayer].containsKey(oldOldKeys[currentPlayer]));
+                        boolean searchExitedGraph = !oldMaps[currentPlayer].containsKey(oldKeys[currentPlayer]);
                         if (!searchExitedGraph) {
-                            assertSame(newRoot, oldRoots[currentPlayer].getTranspositionMap().get(oldKeys[currentPlayer]));
+                            assertSame(newRoot, oldMaps[currentPlayer].get(oldKeys[currentPlayer]));
                         }
                         System.out.println("Visits: " + newRoot.getVisits());
                         assertEquals(oldVisits[0] + paramsOne.budget, newRoot.getVisits());

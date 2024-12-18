@@ -103,7 +103,7 @@ public enum RunArg {
             "\tFor NTBEA this will be used as a final tournament between the recommended agents from each run.",
             1,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
-    mode("exhaustive|exhaustiveSP|random|sequential\n" +
+    mode("exhaustive|exhaustiveSP|random|sequential|fixed\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
             "\t every possible player in every possible position, and run an equal number of games'\n" +
             "\t for each. This can be unworkable for a given matchup budget for a large number of players.\n" +
@@ -112,6 +112,8 @@ public enum RunArg {
             "\t the same number of games in total. (Unless the number of agents is less than the number of players, \n" +
             "\t in which case self-play will be allowed.)\n" +
             "\t 'sequential' will run tournaments on a ONE_VS_ALL basis between each pair of agents.\n" +
+            "\t 'fixed' will run a fixed tournament, where the same agents occupy the same position for all games.\n" +
+            "\t In this mode the playerDirectory must contain exactly one json file for each position. These will be sorted alphabetically.\n" +
             "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),

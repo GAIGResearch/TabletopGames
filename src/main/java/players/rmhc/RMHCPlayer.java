@@ -25,6 +25,10 @@ public class RMHCPlayer extends AbstractPlayer {
         super(params, "RMHC");
     }
 
+    public RMHCPlayer(RMHCParams params, String name) {
+        super(params, name);
+    }
+
     @Override
     public RMHCParams getParameters() {
         return (RMHCParams) parameters;
@@ -72,7 +76,7 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer copy() {
         RMHCParams newParams = (RMHCParams) parameters.copy();
         newParams.setRandomSeed(rnd.nextInt());
-        RMHCPlayer retValue = new RMHCPlayer(newParams);
+        RMHCPlayer retValue = new RMHCPlayer(newParams, toString());
         retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }

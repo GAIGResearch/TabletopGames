@@ -306,10 +306,10 @@ public abstract class AbstractGameState {
         s.turnCounter = turnCounter;
         s.turnOwner = turnOwner;
         s.firstPlayer = firstPlayer;
-        // If we are copying from a player's perspective, then we branch the RNG so that the master copy
+        // We always branch the RNG on a copy() so that the master RNG
         // is not called an arbitrary number of times. This is to ensure that all shuffles in the main game are
         // the same if we start with the same seed
-        s.rnd = playerId == -1 ? rnd : new Random(System.currentTimeMillis());
+        s.rnd = new Random(redeterminisationRnd.nextLong());
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
