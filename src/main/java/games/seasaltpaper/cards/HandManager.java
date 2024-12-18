@@ -1,6 +1,7 @@
 package games.seasaltpaper.cards;
 
 import core.actions.AbstractAction;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.actions.BoatDuo;
@@ -9,6 +10,7 @@ import games.seasaltpaper.actions.SwimmerSharkDuo;
 import games.seasaltpaper.actions.CrabDuo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class HandManager {
@@ -74,19 +76,24 @@ public class HandManager {
         if (fishDuo[0] != -1 && fishDuo[1] != -1) {
             duoActions.add(new FishDuo(playerId, fishDuo));
         }
-        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1) {
+        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1 && !gs.allProtected()) {
             duoActions.add(new SwimmerSharkDuo(playerId, swimmerSharkDuo));
         }
         return duoActions;
     }
 
-    public static int calculatePoint(SeaSaltPaperGameState gs, int playerID)
-    {
+    public static int calculatePoint(SeaSaltPaperGameState gs, int playerID) {
+        PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
+        Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
+        HashMap<CardSuite, Integer> collectorDict = new HashMap<>();
+        HashMap<CardSuite, Integer> multiplierDict = new HashMap<>();
+
         return 0;
     }
 
-    public static int calculateColorBonus(SeaSaltPaperGameState gs, int playerID)
-    {
+    public static int calculateColorBonus(SeaSaltPaperGameState gs, int playerID) {
+        PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
+        Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
         return 0;
     }
 

@@ -38,6 +38,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         sspgs.playerHands = new ArrayList<>(sspgs.getNPlayers());
         sspgs.playerDiscards = new ArrayList<>(sspgs.getNPlayers());
         sspgs.playerPoints = new int[sspgs.getNPlayers()];
+        sspgs.protectedHands = new boolean[sspgs.getNPlayers()];
         // Set up first round
         setupRound(sspgs);
     }
@@ -47,13 +48,11 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         sspgs.drawPile.clear();
         sspgs.discardPile1.clear();
         sspgs.discardPile2.clear();
+        sspgs.playerCurrentDuoPoints = new int[sspgs.getNPlayers()];
+        for (int i=0; i<sspgs.getNPlayers(); i++) {
+            sspgs.protectedHands[i] = false;
+        }
 
-        //TODO ADD ACTUAL CARDs
-        // Placeholder
-//        for (int i = 0; i < 10; i++) {
-//            sspgs.drawPile.add(new SeaSaltPaperCard(CardColor.BLUE, CardSuite.SHELL, CardType.DUO));
-//        }
-//        sspgs.drawPile.shuffle(sspgs.getRnd());
         setupDrawPile(sspgs);
 
         // Set up player hands and discards
@@ -101,6 +100,10 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         gs.drawPile.shuffle(gs.getRnd());
     }
 
+    private void processEndRound(SeaSaltPaperGameState gs) {
+
+    }
+
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      *
@@ -135,6 +138,11 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 break;
             default:
                 actions.add(new DoNothing());
+        }
+        if (sspgs.lastChance != -1) {
+            // TODO Process LastChance stuff here
+            // Reveal the current player card
+            // protectedHands[currentPlayer] = true;
         }
         return actions;
     }

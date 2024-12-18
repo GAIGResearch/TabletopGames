@@ -31,12 +31,13 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = 0; i < sspgs.getNPlayers(); i++)
         {
-            if (i == playerId)
+            if (i == playerId || sspgs.getProtectedHands()[i])
             {
                 continue;
             }
             int targetHandId = sspgs.getPlayerHands().get(i).getComponentID();
-            actions.add(new DrawCard(targetHandId, playerHandId));
+            int fromIndex = sspgs.getRnd().nextInt(sspgs.getPlayerHands().get(i).getSize()); // randomly choose a card from the target
+            actions.add(new DrawCard(targetHandId, playerHandId, fromIndex));
         }
         return actions;
     }

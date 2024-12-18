@@ -50,7 +50,11 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     Random redeterminisationRnd = new Random(System.currentTimeMillis());
 
-    int[] playerPoints;
+    boolean[] protectedHands;
+
+    int[] playerPoints; // player points of previous rounds
+
+    public int[] playerCurrentDuoPoints;
 
     //final int winScore;
 
@@ -101,32 +105,18 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         return playerPoints[playerId];
     }
 
-
-//    @Override
-//    protected boolean _equals(Object o) {
-//        if (this == o) return true;
-//        if (!(o instanceof SeaSaltPaperGameState)) return false;
-//        if (!super.equals(o)) return false;
-//        SeaSaltPaperGameState that = (SeaSaltPaperGameState) o;
-//        return Objects.equals(playerHands, that.playerHands) &&
-//                Objects.equals(drawPile, that.drawPile) &&
-//                Objects.equals(discardPile1, that.discardPile1) &&
-//                Objects.equals(discardPile2, that.discardPile2) &&
-//                Arrays.equals(playerPoints, that.playerPoints);
-//    }
-
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SeaSaltPaperGameState that = (SeaSaltPaperGameState) o;
-        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(playerPoints, that.playerPoints);
+        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(playerPoints, that.playerPoints);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), currentPhase, playerHands, discardPile1, discardPile2, drawPile, lastChance, redeterminisationRnd);
+        int result = Objects.hash(super.hashCode(), currentPhase, playerHands, playerDiscards, discardPile1, discardPile2, drawPile, lastChance, redeterminisationRnd);
         result = 31 * result + Arrays.hashCode(playerPoints);
         return result;
     }
@@ -141,6 +131,17 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     public List<PartialObservableDeck<SeaSaltPaperCard>> getPlayerHands() { return playerHands; }
 
     public List<Deck<SeaSaltPaperCard>> getPlayerDiscards() { return playerDiscards; }
+
+    public boolean[] getProtectedHands() { return protectedHands; }
+
+    // Check if all hands are protected;
+    public boolean allProtected() {
+        boolean t = false;
+        for (int i=0; i<getNPlayers(); i++) {
+            t = t || protectedHands[i];
+        }
+        return !t;
+    }
 
     public Deck<SeaSaltPaperCard> getDrawPile() { return drawPile; }
 
