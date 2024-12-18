@@ -7,13 +7,13 @@ import games.root_final.RootGameState;
 import games.root_final.RootParameters;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
-import players.human.HumanGUIPlayer;
 
 import java.util.Objects;
 
 public class VagabondExplore extends AbstractAction {
     public final int playerID;
     public Item.ItemType foundItemType;
+
     public VagabondExplore(int playerID){
         this.playerID = playerID;
     }
@@ -45,7 +45,7 @@ public class VagabondExplore extends AbstractAction {
                         }
                         foundItemType = newItem.itemType;
                         currentState.increaseActionsPlayed();
-                        currentState.addGameScorePLayer(playerID,1);
+                        currentState.addGameScorePlayer(playerID,1);
                         currentState.logEvent(Event.GameEvent.GAME_EVENT, currentState.getPlayerFaction(playerID).toString() + " found " + foundItemType.toString());
                         return true;
                     }
@@ -56,8 +56,10 @@ public class VagabondExplore extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return this;
+    public VagabondExplore copy() {
+        VagabondExplore copy = new VagabondExplore(playerID);
+        copy.foundItemType = foundItemType;
+        return copy;
     }
 
     @Override
@@ -72,6 +74,11 @@ public class VagabondExplore extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("Explore", playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + "explores ruins";
     }
 
     @Override

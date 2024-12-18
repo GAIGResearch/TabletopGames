@@ -2,15 +2,16 @@ package games.root_final.cards;
 
 import core.actions.AbstractAction;
 import core.components.Card;
-import games.dominion.cards.DominionCard;
 import games.root_final.RootParameters;
 import games.root_final.components.Item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RootCard extends Card {
-    public enum CardType{
+
+    public enum CardType {
         //Bird
         Armorers,
         Sappers,
@@ -56,11 +57,12 @@ public class RootCard extends Card {
         itemCard,
         unCraftable
     }
-    public final CardType cardtype;
 
+    public final CardType cardtype;
     public CraftingType craftingType;
     public final List<RootParameters.ClearingTypes> craftingCost;
     public final RootParameters.ClearingTypes suit;
+
     public RootCard(CardType cardType, RootParameters.ClearingTypes clearingType){
         super(cardType.toString());
         this.cardtype = cardType;
@@ -69,7 +71,7 @@ public class RootCard extends Card {
         this.craftingCost = getCraftingCost(suit, cardtype);
     }
 
-    public RootCard(CardType cardType, RootParameters.ClearingTypes clearingType, int componentID){
+    protected RootCard(CardType cardType, RootParameters.ClearingTypes clearingType, int componentID){
         super(cardType.toString(), componentID);
         this.cardtype = cardType;
         this.suit = clearingType;
@@ -77,7 +79,7 @@ public class RootCard extends Card {
     }
 
     @Override
-    public Card copy(){
+    public RootCard copy(){
         return new RootCard(cardtype, suit, componentID);
     }
 
@@ -274,10 +276,16 @@ public class RootCard extends Card {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof RootCard other) {
-            return other.cardtype == cardtype && other.suit == suit && componentID == other.componentID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RootCard rootCard = (RootCard) o;
+        return cardtype == rootCard.cardtype && craftingType == rootCard.craftingType && Objects.equals(craftingCost, rootCard.craftingCost) && suit == rootCard.suit;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), cardtype, craftingType, craftingCost, suit);
     }
 }

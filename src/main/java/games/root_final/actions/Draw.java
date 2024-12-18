@@ -10,14 +10,16 @@ import games.root_final.cards.RootCard;
 import java.util.Objects;
 
 public class Draw extends AbstractAction {
-    protected int playerID;
-    protected int numberOfCards;
+    protected final int playerID;
+    protected final int numberOfCards;
     protected final boolean passSubGamePhase;
+
     public Draw(int playerID, int numberOfCards, boolean passSubGamePhase){
         this.playerID = playerID;
         this.numberOfCards = numberOfCards;
         this.passSubGamePhase = passSubGamePhase;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -47,15 +49,14 @@ public class Draw extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public Draw copy() {
         return this; // immutable
     }
 
     @Override
     public boolean equals(Object obj) {
         if(obj == this){return true;}
-        if(obj instanceof Draw){
-            Draw other = (Draw) obj;
+        if(obj instanceof Draw other){
             return playerID == other.playerID && numberOfCards == other.numberOfCards && passSubGamePhase == other.passSubGamePhase;
         }
         return false;
@@ -64,6 +65,11 @@ public class Draw extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("Draw",playerID, numberOfCards, passSubGamePhase);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " draws " + numberOfCards;
     }
 
     @Override

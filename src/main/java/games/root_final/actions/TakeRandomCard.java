@@ -39,7 +39,7 @@ public class TakeRandomCard extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public TakeRandomCard copy() {
         return this;
     }
 
@@ -55,6 +55,11 @@ public class TakeRandomCard extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("TakeRandomCard", playerID, targetPlayerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " takes a random card from p" + targetPlayerID;
     }
 
     @Override

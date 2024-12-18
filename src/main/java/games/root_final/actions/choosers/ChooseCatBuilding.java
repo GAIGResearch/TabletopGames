@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.choosers;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -20,14 +20,11 @@ public class ChooseCatBuilding extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
-        if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat){
-            return true;
-        }
-        return false;
+        return currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat;
     }
 
     @Override
-    public AbstractAction copy() {
+    public ChooseCatBuilding copy() {
         return this;
     }
 
@@ -43,6 +40,11 @@ public class ChooseCatBuilding extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("ChooseCatBuilding", playerID, bt, cost);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " chooses " + bt.toString();
     }
 
     @Override

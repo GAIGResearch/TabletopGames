@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
-import games.root_final.components.RootBoardNodeWithRootEdges;
 
 import java.util.Objects;
 
@@ -13,14 +12,14 @@ public class Build extends AbstractAction {
     public final int locationID;
     public final RootParameters.BuildingType buildingType;
     public final boolean endSubGamePhase;
-
-    public boolean playedBird= false;
+    public final boolean playedBird;
 
     public Build(int location, int playerID, RootParameters.BuildingType buildingType, boolean endSubGamePhase) {
         this.playerID = playerID;
         this.locationID = location;
         this.buildingType = buildingType;
         this.endSubGamePhase = endSubGamePhase;
+        this.playedBird = false;
     }
 
     public Build(int location, int playerID, RootParameters.BuildingType buildingType, boolean endSubGamePhase, boolean playedBird) {
@@ -57,7 +56,7 @@ public class Build extends AbstractAction {
                     if (currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat) {
                         currentState.getGameMap().getNodeByID(locationID).build(RootParameters.BuildingType.Sawmill);
                         try {
-                            currentState.addGameScorePLayer(playerID, rp.sawmillPoints.get(currentState.getBuildingCount(RootParameters.BuildingType.Sawmill)));
+                            currentState.addGameScorePlayer(playerID, rp.sawmillPoints.get(currentState.getBuildingCount(RootParameters.BuildingType.Sawmill)));
                             currentState.removeBuilding(buildingType);
                             return true;
                         } catch (IllegalAccessException e) {
@@ -69,7 +68,7 @@ public class Build extends AbstractAction {
                     if (currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat) {
                         currentState.getGameMap().getNodeByID(locationID).build(RootParameters.BuildingType.Workshop);
                         try {
-                            currentState.addGameScorePLayer(playerID, rp.workshopPoints.get(currentState.getBuildingCount(RootParameters.BuildingType.Workshop)));
+                            currentState.addGameScorePlayer(playerID, rp.workshopPoints.get(currentState.getBuildingCount(RootParameters.BuildingType.Workshop)));
                             currentState.removeBuilding(buildingType);
                             return true;
                         } catch (IllegalAccessException e) {
@@ -81,7 +80,7 @@ public class Build extends AbstractAction {
                     if (currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat) {
                         currentState.getGameMap().getNodeByID(locationID).build(RootParameters.BuildingType.Recruiter);
                         try {
-                            currentState.addGameScorePLayer(playerID, rp.recruiterPoints.get(currentState.getBuildingCount(RootParameters.BuildingType.Recruiter)));
+                            currentState.addGameScorePlayer(playerID, rp.recruiterPoints.get(currentState.getBuildingCount(RootParameters.BuildingType.Recruiter)));
                             currentState.removeBuilding(buildingType);
                             return true;
                         } catch (IllegalAccessException e) {
@@ -128,22 +127,26 @@ public class Build extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Build(locationID, playerID, buildingType, endSubGamePhase, playedBird);
+    public Build copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Build) {
-            Build other = (Build) obj;
-            return other.endSubGamePhase == endSubGamePhase && other.playerID == playerID && locationID == other.locationID && other.buildingType.equals(buildingType) && playedBird==other.playedBird;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Build build = (Build) o;
+        return playerID == build.playerID && locationID == build.locationID && endSubGamePhase == build.endSubGamePhase && playedBird == build.playedBird && buildingType == build.buildingType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, locationID, buildingType);
+        return Objects.hash(playerID, locationID, buildingType, endSubGamePhase, playedBird);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " builds " + buildingType.toString() + " at location " + locationID;
     }
 
     @Override

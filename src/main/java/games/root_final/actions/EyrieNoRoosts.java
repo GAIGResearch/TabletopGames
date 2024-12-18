@@ -18,6 +18,7 @@ public class EyrieNoRoosts extends AbstractAction {
         this.locationID = location;
         this.passSubGamePhase = passSubGamePhase;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState state = (RootGameState) gs;
@@ -43,28 +44,31 @@ public class EyrieNoRoosts extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new EyrieNoRoosts(playerID, locationID, passSubGamePhase);
+    public EyrieNoRoosts copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof EyrieNoRoosts){
-            EyrieNoRoosts other = (EyrieNoRoosts) obj;
-            return playerID == other.playerID && passSubGamePhase == other.passSubGamePhase && locationID == other.locationID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EyrieNoRoosts that = (EyrieNoRoosts) o;
+        return playerID == that.playerID && locationID == that.locationID && passSubGamePhase == that.passSubGamePhase;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("EyrieNoRoosts", playerID, locationID, passSubGamePhase);
+        return Objects.hash(playerID, locationID, passSubGamePhase);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " places a roost and 3 warriors at location " + locationID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + "Places a Roost and 3 warriors at " + gs.getGameMap().getNodeByID(locationID).identifier;
+        return gs.getPlayerFaction(playerID).toString() + " places a Roost and 3 warriors at " + gs.getGameMap().getNodeByID(locationID).identifier;
     }
 }

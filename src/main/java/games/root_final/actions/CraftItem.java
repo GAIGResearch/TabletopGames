@@ -14,35 +14,36 @@ import java.util.Objects;
 public class CraftItem extends AbstractAction {
     public final int playerID;
     public final Item.ItemType itemType;
-    public RootCard card;
+    public final int cardIdx, cardId;
 
-    public CraftItem(int playerID, Item.ItemType itemType, RootCard card){
+    public CraftItem(int playerID, Item.ItemType itemType, int cardIdx, int cardId){
         this.playerID = playerID;
         this.itemType = itemType;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         RootParameters rp = (RootParameters) gs.getGameParameters();
-        if (currentState.getCurrentPlayer() == playerID && itemType == card.getCraftableItem()){
+        if (currentState.getCurrentPlayer() == playerID){
             PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
-            for (int i = 0; i < hand.getSize(); i++){
-                if (hand.get(i).equals(card)){
-                    hand.remove(i);
-                }
-            }
+            RootCard card = hand.get(cardIdx);
 
-            for (Item item: currentState.getCraftableItems()){
-                if (item.itemType == itemType){
-                    currentState.getPlayerCraftedItems(playerID).add(item);
-                    currentState.getCraftableItems().remove(item);
-                    if (currentState.getPlayerFaction(playerID) != RootParameters.Factions.EyrieDynasties || currentState.getRuler().ruler == EyrieRulers.CardType.Builder) {
-                        currentState.addGameScorePLayer(playerID, rp.itemCraftPoints.get(item.itemType));
-                    } else {
-                        currentState.addGameScorePLayer(playerID, rp.itemCraftPoints.get(item.itemType));
+            if (itemType == card.getCraftableItem()) {
+                hand.remove(card);
+
+                for (Item item : currentState.getCraftableItems()) {
+                    if (item.itemType == itemType) {
+                        currentState.getPlayerCraftedItems(playerID).add(item);
+                        currentState.getCraftableItems().remove(item);
+                        if (currentState.getPlayerFaction(playerID) != RootParameters.Factions.EyrieDynasties || currentState.getRuler().ruler == EyrieRulers.CardType.Builder) {
+                            currentState.addGameScorePlayer(playerID, rp.itemCraftPoints.get(item.itemType));
+                        } else {
+                            currentState.addGameScorePlayer(playerID, rp.itemCraftPoints.get(item.itemType));
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
         }
@@ -50,22 +51,26 @@ public class CraftItem extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new CraftItem(playerID, itemType, card);
+    public CraftItem copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof CraftItem ci){
-            return playerID == ci.playerID && itemType == ci.itemType && card.equals(ci.card);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CraftItem craftItem = (CraftItem) o;
+        return playerID == craftItem.playerID && cardIdx == craftItem.cardIdx && cardId == craftItem.cardId && itemType == craftItem.itemType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("CraftItem", playerID, card.hashCode(), itemType);
+        return Objects.hash(playerID, itemType, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " crafts " + itemType.name();
     }
 
     @Override

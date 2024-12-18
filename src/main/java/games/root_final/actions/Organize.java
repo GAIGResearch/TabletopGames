@@ -16,6 +16,7 @@ public class Organize extends AbstractAction {
         this.playerID = playerID;
         this.locationID = locationID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -34,22 +35,26 @@ public class Organize extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public Organize copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof Organize o){
-            return playerID==o.playerID && locationID == o.locationID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Organize organize = (Organize) o;
+        return playerID == organize.playerID && locationID == organize.locationID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Organize", playerID, locationID);
+        return Objects.hash(playerID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " removes warrior and adds sympathy at " + locationID;
     }
 
     @Override

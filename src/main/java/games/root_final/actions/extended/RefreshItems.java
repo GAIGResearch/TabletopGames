@@ -1,9 +1,11 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
+import games.root_final.actions.PassSubGamePhase;
+import games.root_final.actions.Refresh;
 import games.root_final.components.Item;
 
 import java.util.ArrayList;
@@ -12,8 +14,9 @@ import java.util.Objects;
 
 public class RefreshItems extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public boolean done = false;
-    public int refreshedItems = 0;
+
+    boolean done = false;
+    int refreshedItems = 0;
 
     public RefreshItems(int playerID) {
         this.playerID = playerID;
@@ -34,7 +37,7 @@ public class RefreshItems extends AbstractAction implements IExtendedSequence {
         if (refreshedItems < 3 + (currentState.getNumberOfTeas() * 2)) {
             for (Item item : currentState.getSachel()) {
                 if (!item.refreshed) {
-                    Refresh action = new Refresh(playerID, item);
+                    Refresh action = new Refresh(playerID, item.itemType, item.getComponentID());
                     actions.add(action);
                 }
             }
@@ -83,8 +86,7 @@ public class RefreshItems extends AbstractAction implements IExtendedSequence {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof RefreshItems) {
-            RefreshItems other = (RefreshItems) obj;
+        if (obj instanceof RefreshItems other) {
             return playerID == other.playerID && refreshedItems == other.refreshedItems && done == other.done;
         }
         return false;
@@ -93,6 +95,11 @@ public class RefreshItems extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash("RefreshItems", playerID, refreshedItems, done);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " refreshes items";
     }
 
     @Override

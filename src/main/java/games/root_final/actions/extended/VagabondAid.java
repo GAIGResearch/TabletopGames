@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,10 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.ExhaustItem;
+import games.root_final.actions.GiveCard;
+import games.root_final.actions.TakeItem;
+import games.root_final.actions.choosers.ChooseNumber;
 import games.root_final.cards.RootCard;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
@@ -28,9 +32,9 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
         chooseItemGet,
     }
 
-    public Stage stage = Stage.chooseTarget;
-    public int targetID;
-    public boolean done = false;
+    Stage stage = Stage.chooseTarget;
+    int targetID;
+    boolean done = false;
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -69,7 +73,7 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
         RootBoardNodeWithRootEdges clearing = gs.getGameMap().getVagabondClearing();
         for (int i = 0; i < gs.getNPlayers(); i++) {
             if (i != playerID && clearing.isAttackable(gs.getPlayerFaction(i))) {
-                actions.add(new ChooseTargetPlayer(playerID, i));
+                actions.add(new ChooseNumber(playerID, i));
             }
         }
         //can never be empty
@@ -81,25 +85,25 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
         //exhaust item actions
         for (Item bag : gs.getBags()) {
             if (bag.refreshed && !bag.damaged) {
-                ExhaustItem action = new ExhaustItem(playerID, bag);
+                ExhaustItem action = new ExhaustItem(playerID, bag.itemType);
                 if (!actions.contains(action)) actions.add(action);
             }
         }
         for (Item tea : gs.getTeas()) {
             if (tea.refreshed && !tea.damaged) {
-                ExhaustItem action = new ExhaustItem(playerID, tea);
+                ExhaustItem action = new ExhaustItem(playerID, tea.itemType);
                 if (!actions.contains(action)) actions.add(action);
             }
         }
         for (Item coin : gs.getCoins()) {
             if (coin.refreshed && !coin.damaged) {
-                ExhaustItem action = new ExhaustItem(playerID, coin);
+                ExhaustItem action = new ExhaustItem(playerID, coin.itemType);
                 if (!actions.contains(action)) actions.add(action);
             }
         }
         for (Item item : gs.getSachel()) {
             if (item.refreshed && !item.damaged) {
-                ExhaustItem action = new ExhaustItem(playerID, item);
+                ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                 if (!actions.contains(action)) actions.add(action);
             }
         }
@@ -113,7 +117,7 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
         PartialObservableDeck<RootCard> hand = gs.getPlayerHand(playerID);
         for (int i = 0; i < hand.getSize(); i++) {
             if (hand.get(i).suit == clearing.getClearingType() || hand.get(i).suit == RootParameters.ClearingTypes.Bird) {
-                GiveCard action = new GiveCard(playerID, targetID, hand.get(i));
+                GiveCard action = new GiveCard(playerID, targetID, i, hand.get(i).getComponentID());
                 if (!actions.contains(action)) actions.add(action);
             }
         }
@@ -123,7 +127,7 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
     private List<AbstractAction> chooseItemToGet(RootGameState gs) {
         List<AbstractAction> actions = new ArrayList<>();
         for (Item craftedItem : gs.getPlayerCraftedItems(targetID)) {
-            TakeItem action = new TakeItem(playerID, targetID, craftedItem);
+            TakeItem action = new TakeItem(playerID, targetID, craftedItem.itemType);
             if (!actions.contains(action)) actions.add(action);
         }
 
@@ -140,8 +144,8 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
         RootGameState gs = (RootGameState) state;
         switch (stage) {
             case chooseTarget:
-                if (action instanceof ChooseTargetPlayer ctp) {
-                    targetID = ctp.targetID;
+                if (action instanceof ChooseNumber ctp) {
+                    targetID = ctp.number;
                     stage = Stage.chooseItemExhaust;
                     gs.aid(playerID, gs.getPlayerFaction(targetID));
                 }
@@ -190,6 +194,11 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash("Aid", playerID, targetID, stage, done);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to aid";
     }
 
     @Override

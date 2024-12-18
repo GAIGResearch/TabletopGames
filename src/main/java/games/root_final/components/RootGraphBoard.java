@@ -4,12 +4,11 @@ import core.CoreConstants;
 import core.components.Component;
 import core.interfaces.IComponentContainer;
 import games.root_final.RootParameters;
-import games.root_final.components.RootBoardNodeWithRootEdges;
-import games.root_final.components.RootEdge;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class RootGraphBoard extends Component implements IComponentContainer<RootBoardNodeWithRootEdges> {
 
     // List of nodes in the board graph, mapping component ID to object reference
@@ -208,12 +207,11 @@ public class RootGraphBoard extends Component implements IComponentContainer<Roo
         return RootEdge;
     }
 
-    public RootEdge addConnection(int bn1id, int bn2id) {
+    public void addConnection(int bn1id, int bn2id) {
         RootBoardNodeWithRootEdges bn1 = boardNodes.get(bn1id);
         RootBoardNodeWithRootEdges bn2 = boardNodes.get(bn2id);
         RootEdge RootEdge = new RootEdge();
         addConnection(bn1, bn2, RootEdge);
-        return RootEdge;
     }
 
     public void addConnection(RootBoardNodeWithRootEdges bn1, RootBoardNodeWithRootEdges bn2, RootEdge RootEdge) {
@@ -223,16 +221,16 @@ public class RootGraphBoard extends Component implements IComponentContainer<Roo
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof RootGraphBoard) {
-            RootGraphBoard other = (RootGraphBoard) o;
-            return componentID == other.componentID && other.boardNodes.equals(boardNodes);
-        }
-        return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RootGraphBoard that = (RootGraphBoard) o;
+        return Objects.equals(boardNodes, that.boardNodes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(componentID, boardNodes);
+        return Objects.hash(super.hashCode(), boardNodes);
     }
 
     @Override

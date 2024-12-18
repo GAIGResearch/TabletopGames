@@ -13,6 +13,7 @@ public class TakeHit extends AbstractAction {
     public final int locationID;
     public final RootParameters.BuildingType buildingType;
     public final RootParameters.TokenType tokenType;
+
     public TakeHit(int playerID, int location, RootParameters.BuildingType buildingType, RootParameters.TokenType tokenType){
         this.playerID = playerID;
         this.buildingType = buildingType;
@@ -46,23 +47,26 @@ public class TakeHit extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new TakeHit(playerID, locationID, buildingType, tokenType);
+    public TakeHit copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof TakeHit){
-            TakeHit other = (TakeHit) obj;
-            return playerID == other.playerID && locationID == other.locationID && buildingType == other.buildingType && tokenType == other.tokenType;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TakeHit takeHit = (TakeHit) o;
+        return playerID == takeHit.playerID && locationID == takeHit.locationID && buildingType == takeHit.buildingType && tokenType == takeHit.tokenType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("TakeHit", playerID, locationID, buildingType, tokenType);
+        return Objects.hash(playerID, locationID, buildingType, tokenType);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " chooses to remove " + (buildingType != null? buildingType.toString() : tokenType.toString()) + " at " + locationID;
     }
 
     @Override

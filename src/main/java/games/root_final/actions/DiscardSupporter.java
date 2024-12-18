@@ -10,53 +10,56 @@ import java.util.Objects;
 
 public class DiscardSupporter extends AbstractAction {
     protected final int playerID;
-    protected final RootCard card;
+    protected final int cardIdx, cardId;
     protected final boolean passSubGamePhase;
-    public DiscardSupporter(int playerID, RootCard card, boolean passSubGamePhase){
+
+    public DiscardSupporter(int playerID, int cardIdx, int cardId, boolean passSubGamePhase){
         this.playerID = playerID;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
         this.passSubGamePhase = passSubGamePhase;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if(playerID == gs.getCurrentPlayer()) {
             Deck<RootCard> discardPile = currentState.getDiscardPile();
             Deck<RootCard> supporters = currentState.getSupporters();
-            for (int i = 0; i < supporters.getSize(); i++){
-                if(supporters.get(i).equals(card)){
-                    discardPile.add(supporters.get(i));
-                    supporters.remove(i);
-                    return true;
-                }
-            }
+            RootCard card = supporters.pick(cardIdx);
+            discardPile.add(card);
+            return true;
         }
         return false;
     }
 
     @Override
-    public AbstractAction copy() {
-        return new DiscardSupporter(playerID,card, passSubGamePhase);
+    public DiscardSupporter copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(this == obj) return true;
-        if(obj instanceof DiscardSupporter){
-            DiscardSupporter object = (DiscardSupporter) obj;
-            return playerID == object.playerID && object.card.equals(card) && passSubGamePhase == object.passSubGamePhase;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DiscardSupporter that = (DiscardSupporter) o;
+        return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId && passSubGamePhase == that.passSubGamePhase;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Discard Supporter",playerID,card, passSubGamePhase);
+        return Objects.hash(playerID, cardIdx, cardId, passSubGamePhase);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " discards supporter " + cardIdx;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootCard card = (RootCard) gs.getComponentById(cardId);
         return gs.getPlayerFaction(playerID).toString() + " discards supporter " + card.toString();
     }
 }

@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.choosers;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -19,14 +19,11 @@ public class ChooseCraftersToActivate extends AbstractAction {
     }
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (gs.getCurrentPlayer() == playerID){
-            return true;
-        }
-        return false;
+        return gs.getCurrentPlayer() == playerID;
     }
 
     @Override
-    public AbstractAction copy() {
+    public ChooseCraftersToActivate copy() {
         return this;
     }
 
@@ -45,8 +42,13 @@ public class ChooseCraftersToActivate extends AbstractAction {
     }
 
     @Override
+    public String toString() {
+         return "p" + playerID + " activates " + activate.toString() + " to satisfy " + actual.toString() + " requirement";
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " activates " + activate.toString() + " to satisfy " + actual.toString() + "requirement";
+        return gs.getPlayerFaction(playerID).toString() + " activates " + activate.toString() + " to satisfy " + actual.toString() + " requirement";
     }
 }

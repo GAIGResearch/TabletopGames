@@ -10,8 +10,8 @@ import games.root_final.components.RootBoardNodeWithRootEdges;
 import java.util.Objects;
 
 public class PlaceWood extends AbstractAction {
-    public int playerID;
-    public int locationID;
+    public final int playerID;
+    public final int locationID;
 
     public PlaceWood(int playerID, int locationID) {
         this.playerID = playerID;
@@ -30,24 +30,26 @@ public class PlaceWood extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PlaceWood(playerID, locationID);
+    public PlaceWood copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj instanceof PlaceWood) {
-            PlaceWood otherAction = (PlaceWood) obj;
-            return playerID == otherAction.playerID && locationID == otherAction.locationID;
-
-        } else return false;
-
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlaceWood placeWood = (PlaceWood) o;
+        return playerID == placeWood.playerID && locationID == placeWood.locationID;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(playerID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " places wood at " + locationID;
     }
 
     @Override

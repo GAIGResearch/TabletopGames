@@ -8,12 +8,12 @@ import games.root_final.RootParameters;
 import java.util.Objects;
 
 public class PassGamePhase extends AbstractAction {
-
-    protected int playerID;
+    public final int playerID;
 
     public PassGamePhase(int playerID){
         this.playerID = playerID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -34,23 +34,26 @@ public class PassGamePhase extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PassGamePhase(playerID);
+    public PassGamePhase copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this) return true;
-        if(obj instanceof PassGamePhase){
-            PassGamePhase passGamePhase = (PassGamePhase) obj;
-            return passGamePhase.playerID == playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PassGamePhase that = (PassGamePhase) o;
+        return playerID == that.playerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, "PassGamePhase");
+        return Objects.hash(playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " passed";
     }
 
     @Override

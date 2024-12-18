@@ -10,9 +10,10 @@ import java.util.Objects;
 
 public class VagabondRepair extends AbstractAction {
     public final int playerID;
-    public Item item;
+    public final Item.ItemType item;
     public final boolean hammerPlayed;
-    public VagabondRepair(int playerID, Item item, boolean hammerPlayed){
+
+    public VagabondRepair(int playerID, Item.ItemType item, boolean hammerPlayed){
         this.playerID = playerID;
         this.item = item;
         this.hammerPlayed = hammerPlayed;
@@ -21,10 +22,10 @@ public class VagabondRepair extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
-            switch (item.itemType){
+            switch (item){
                 case coin:
                     for (Item itemToRepair: currentState.getCoins()){
-                        if (itemToRepair.equals(item) && itemToRepair.damaged){
+                        if (itemToRepair.itemType.equals(item) && itemToRepair.damaged){
                             itemToRepair.damaged = false;
                             break;
                         }
@@ -32,7 +33,7 @@ public class VagabondRepair extends AbstractAction {
                     break;
                 case tea:
                     for (Item itemToRepair: currentState.getTeas()){
-                        if (itemToRepair.equals(item) && itemToRepair.damaged){
+                        if (itemToRepair.itemType.equals(item) && itemToRepair.damaged){
                             itemToRepair.damaged = false;
                             break;
                         }
@@ -40,7 +41,7 @@ public class VagabondRepair extends AbstractAction {
                     break;
                 case bag:
                     for (Item itemToRepair: currentState.getBags()){
-                        if (itemToRepair.equals(item) && itemToRepair.damaged){
+                        if (itemToRepair.itemType.equals(item) && itemToRepair.damaged){
                             itemToRepair.damaged = false;
                             break;
                         }
@@ -48,7 +49,7 @@ public class VagabondRepair extends AbstractAction {
                     break;
                 default:
                     for (Item itemToRepair: currentState.getSachel()){
-                        if (itemToRepair.equals(item) && itemToRepair.damaged){
+                        if (itemToRepair.itemType.equals(item) && itemToRepair.damaged){
                             itemToRepair.damaged = false;
                             break;
                         }
@@ -71,27 +72,26 @@ public class VagabondRepair extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new VagabondRepair(playerID, item, hammerPlayed);
+    public VagabondRepair copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondRepair vr){
-            return playerID == vr.playerID && item.getComponentID() == vr.item.getComponentID() && hammerPlayed == vr.hammerPlayed;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VagabondRepair that = (VagabondRepair) o;
+        return playerID == that.playerID && hammerPlayed == that.hammerPlayed && item == that.item;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("VagabondRepair", playerID, item.hashCode(), hammerPlayed);
+        return Objects.hash(playerID, item, hammerPlayed);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " repairs " + item.itemType.toString();
+        return gs.getPlayerFaction(playerID).toString() + " repairs " + item.toString();
     }
 }

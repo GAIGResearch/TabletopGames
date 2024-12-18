@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,9 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.Overwork;
+import games.root_final.actions.choosers.ChooseCard;
+import games.root_final.actions.choosers.ChooseNode;
 import games.root_final.cards.RootCard;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
@@ -19,21 +22,24 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
         selectCard,
         Overwork,
     }
+
     public final int playerID;
-    public RootCard card;
-    public int locationID;
-    public boolean done = false;
-    public Stage stage = Stage.selectLocation;
+
+    int locationID;
+    boolean done = false;
+    Stage stage = Stage.selectLocation;
+    int cardIdx = -1, cardId = -1;
 
     public OverworkSequence(int playerID){
         this.playerID = playerID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (gs.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat && currentState.getWood() > 0){
             currentState.increaseActionsPlayed();
-            currentState.setActionInProgress(this);
+            return currentState.setActionInProgress(this);
         }
         return false;
     }
@@ -55,12 +61,12 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
                 PartialObservableDeck<RootCard> hand = gs.getPlayerHand(playerID);
                 for (int i = 0; i < hand.getSize(); i++){
                     if (hand.get(i).suit == selected.getClearingType() || hand.get(i).suit == RootParameters.ClearingTypes.Bird){
-                        actions.add(new ChooseCard(playerID,hand.get(i)));
+                        actions.add(new ChooseCard(playerID, i, hand.get(i).getComponentID()));
                     }
                 }
                 return actions;
             case Overwork:
-                actions.add(new Overwork(playerID, locationID, card));
+                actions.add(new Overwork(playerID, locationID, cardIdx, cardId));
                 return actions;
         }
         return null;
@@ -77,7 +83,8 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
             locationID = n.nodeID;
             stage = Stage.selectCard;
         }else if (action instanceof ChooseCard c){
-            card = c.card;
+            cardId = c.cardId;
+            cardIdx = c.cardIdx;
             stage = Stage.Overwork;
         } else if (action instanceof Overwork o) {
             done = true;
@@ -93,7 +100,8 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
     public OverworkSequence copy() {
         OverworkSequence copy = new OverworkSequence(playerID);
         copy.stage = stage;
-        copy.card = card;
+        copy.cardId = cardId;
+        copy.cardIdx = cardIdx;
         copy.done = done;
         copy.locationID = locationID;
         return copy;
@@ -103,10 +111,7 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
     public boolean equals(Object obj) {
         if (obj == this){return true;}
         if (obj instanceof OverworkSequence os){
-            if (card == null || os.card == null){
-                return playerID == os.playerID && locationID == os.locationID && done== os.done && stage == os.stage && card == os.card;
-            }
-            return playerID == os.playerID && locationID == os.locationID && done== os.done && card.equals(os.card) && stage == os.stage;
+            return playerID == os.playerID && locationID == os.locationID && done== os.done && cardId == os.cardId && cardIdx == os.cardIdx && stage == os.stage;
         }
         return false;
     }
@@ -114,6 +119,11 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
     @Override
     public int hashCode() {
         return Objects.hash("OverworkSequence", playerID, done, locationID, stage);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " overworks";
     }
 
     @Override

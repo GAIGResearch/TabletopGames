@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.choosers;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -11,6 +11,7 @@ public class ChooseNode extends AbstractAction {
     public final int playerID;
     public final int nodeID;
     public boolean birdPlayed=false;
+
     public ChooseNode(int playerID, int nodeID){
         this.playerID= playerID;
         this.nodeID = nodeID;
@@ -22,22 +23,18 @@ public class ChooseNode extends AbstractAction {
     }
     @Override
     public boolean execute(AbstractGameState gs) {
-        if(gs.getCurrentPlayer() == playerID){
-            return true;
-        }
-        return false;
+        return gs.getCurrentPlayer() == playerID;
     }
 
     @Override
-    public AbstractAction copy() {
+    public ChooseNode copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
         if(obj == this){return true;}
-        if (obj instanceof ChooseNode){
-            ChooseNode other = (ChooseNode) obj;
+        if (obj instanceof ChooseNode other){
             return playerID == other.playerID && nodeID == other.nodeID && birdPlayed == other.birdPlayed;
         }
         return false;
@@ -46,6 +43,11 @@ public class ChooseNode extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("ChooseNode", playerID, nodeID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " chooses node " + nodeID;
     }
 
     @Override

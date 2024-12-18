@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,12 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.AddCardToSupporters;
+import games.root_final.actions.Move;
+import games.root_final.actions.Pass;
+import games.root_final.actions.choosers.ChooseNumber;
+import games.root_final.actions.choosers.ChooseCardForSupporters;
+import games.root_final.actions.choosers.ChooseNode;
 import games.root_final.cards.RootCard;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
@@ -15,8 +21,6 @@ import java.util.Objects;
 
 public class March extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public int fromNodeID;
-    public int toNodeID;
 
     public enum Stage {
         chooseFrom,
@@ -26,12 +30,12 @@ public class March extends AbstractAction implements IExtendedSequence {
         OutrageWoodland;
     }
 
-    public Stage stage = Stage.chooseFrom;
-
-    public boolean done = false;
-
-    public int amount = 0;
-    public int movesMade = 0;
+    Stage stage = Stage.chooseFrom;
+    int fromNodeID;
+    int toNodeID;
+    boolean done = false;
+    int amount = 0;
+    int movesMade = 0;
 
     public March(int playerID) {
         this.playerID = playerID;
@@ -66,7 +70,7 @@ public class March extends AbstractAction implements IExtendedSequence {
                 return actions;
             case chooseAmount:
                 for (int i = 1; i <= currentState.getGameMap().getNodeByID(fromNodeID).getWarrior(currentState.getPlayerFaction(playerID)); i++){
-                    actions.add(new ChooseAmount(playerID,i));
+                    actions.add(new ChooseNumber(playerID,i));
                 }
                 return actions;
             case chooseTo:
@@ -84,7 +88,7 @@ public class March extends AbstractAction implements IExtendedSequence {
                 PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
                 for (int i = 0 ; i < hand.getSize(); i++){
                     if (hand.get(i).suit == currentState.getGameMap().getNodeByID(toNodeID).getClearingType() || hand.get(i).suit == RootParameters.ClearingTypes.Bird){
-                        AddCardToSupporters action = new AddCardToSupporters(playerID, hand.get(i));
+                        AddCardToSupporters action = new AddCardToSupporters(playerID, i, hand.get(i).getComponentID());
                         if (!actions.contains(action)) actions.add(action);
                     }
                 }
@@ -122,8 +126,8 @@ public class March extends AbstractAction implements IExtendedSequence {
             fromNodeID = ca.nodeID;
             stage = Stage.chooseAmount;
         }
-        if (stage == Stage.chooseAmount && action instanceof ChooseAmount a) {
-            amount = a.amount;
+        if (stage == Stage.chooseAmount && action instanceof ChooseNumber a) {
+            amount = a.number;
             stage = Stage.chooseTo;
         } else if (stage == Stage.chooseTo && action instanceof Move m) {
             if (gs.getGameMap().getNodeByID(m.to).hasToken(RootParameters.TokenType.Sympathy) && gs.getPlayerFaction(playerID) != RootParameters.Factions.WoodlandAlliance) {
@@ -190,8 +194,7 @@ public class March extends AbstractAction implements IExtendedSequence {
         if (obj == this) {
             return true;
         }
-        if (obj instanceof March) {
-            March other = (March) obj;
+        if (obj instanceof March other) {
             return playerID == other.playerID &&
                     movesMade == other.movesMade &&
                     stage == other.stage &&
@@ -209,8 +212,13 @@ public class March extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
+    public String toString() {
+        return "p" + playerID + " starts marching";
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " Starts marching";
+        return gs.getPlayerFaction(playerID).toString() + " starts marching";
     }
 }

@@ -13,15 +13,17 @@ import java.util.Objects;
 public class Revolt extends AbstractAction {
     public final int playerID;
     public final int locationID;
-    public RootCard cardToDiscard1;
-    public RootCard cardToDiscard2;
+    public final int cardToDiscard1Idx, cardToDiscard1Id;
+    public final int cardToDiscard2Idx, cardToDiscard2Id;
     public final boolean passSubGamePhase;
 
-    public Revolt(int playerID, int location, RootCard cardToDiscard1, RootCard cardToDiscard2, boolean passSubGamePhase) {
+    public Revolt(int playerID, int location, int cardToDiscard1Idx, int cardToDiscard1Id, int cardToDiscard2Idx, int cardToDiscard2Id, boolean passSubGamePhase) {
         this.playerID = playerID;
         this.locationID = location;
-        this.cardToDiscard1 = cardToDiscard1;
-        this.cardToDiscard2 = cardToDiscard2;
+        this.cardToDiscard1Idx = cardToDiscard1Idx;
+        this.cardToDiscard1Id = cardToDiscard1Id;
+        this.cardToDiscard2Idx = cardToDiscard2Idx;
+        this.cardToDiscard2Id = cardToDiscard2Id;
         this.passSubGamePhase = passSubGamePhase;
     }
 
@@ -54,28 +56,13 @@ public class Revolt extends AbstractAction {
     }
 
     private boolean attemptToDiscard(Deck<RootCard> hand, RootGameState state) {
-        int index1 = findCardIndex(hand, cardToDiscard1);
-        int index2 = findCardIndex(hand, cardToDiscard2);
-
-        if (index1 == -1 || index2 == -1) {
-            System.out.println("Required cards not found in hand for discarding.");
-            return false;
-        }
-        state.getDiscardPile().add(hand.get(index1));
-        state.getDiscardPile().add(hand.get(index2));
-        hand.remove(index1);
-        if (index1 < index2) index2--;
-        hand.remove(index2);
+        RootCard card1 = hand.pick(cardToDiscard1Idx);
+        int index2 = cardToDiscard2Idx;
+        if (cardToDiscard1Idx < cardToDiscard2Idx) index2--;
+        RootCard card2 = hand.pick(index2);
+        state.getDiscardPile().add(card1);
+        state.getDiscardPile().add(card2);
         return true;
-    }
-
-    private int findCardIndex(Deck<RootCard> hand, RootCard card) {
-        for (int i = 0; i < hand.getSize(); i++) {
-            if (hand.get(i).equals(card)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     private void executeRevolt(RootGameState state, RootBoardNodeWithRootEdges place) {
@@ -105,22 +92,22 @@ public class Revolt extends AbstractAction {
         for (int i = 0; i < place.getWorkshops(); i++) {
             place.removeBuilding(RootParameters.BuildingType.Workshop);
             state.addBuilding(RootParameters.BuildingType.Workshop);
-            state.addGameScorePLayer(playerID,1);
+            state.addGameScorePlayer(playerID,1);
         }
         for (int i = 0; i < place.getRecruiters(); i++) {
             place.removeBuilding(RootParameters.BuildingType.Recruiter);
             state.addBuilding(RootParameters.BuildingType.Recruiter);
-            state.addGameScorePLayer(playerID,1);
+            state.addGameScorePlayer(playerID,1);
         }
         for (int i = 0; i < place.getSawmill(); i++) {
             place.removeBuilding(RootParameters.BuildingType.Sawmill);
             state.addBuilding(RootParameters.BuildingType.Sawmill);
-            state.addGameScorePLayer(playerID,1);
+            state.addGameScorePlayer(playerID,1);
         }
         for (int i = 0; i < place.getWood(); i++) {
             place.removeWood();
             state.addWood();
-            state.addGameScorePLayer(playerID,1);
+            state.addGameScorePlayer(playerID,1);
         }
 
         //Bird
@@ -131,48 +118,47 @@ public class Revolt extends AbstractAction {
         for (int e = 0; e < place.getRoost(); e++) {
             place.removeBuilding(RootParameters.BuildingType.Roost);
             state.addBuilding(RootParameters.BuildingType.Roost);
-            state.addGameScorePLayer(playerID,1);
+            state.addGameScorePlayer(playerID,1);
         }
     }
 
     private RootParameters.BuildingType getBuildingType(RootParameters.ClearingTypes clearingType) {
-        switch (clearingType) {
-            case Fox:
-                return RootParameters.BuildingType.FoxBase;
-            case Mouse:
-                return RootParameters.BuildingType.MouseBase;
-            case Rabbit:
-                return RootParameters.BuildingType.RabbitBase;
-            default:
-                return null;
-        }
+        return switch (clearingType) {
+            case Fox -> RootParameters.BuildingType.FoxBase;
+            case Mouse -> RootParameters.BuildingType.MouseBase;
+            case Rabbit -> RootParameters.BuildingType.RabbitBase;
+            default -> null;
+        };
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Revolt(playerID, locationID, cardToDiscard1, cardToDiscard2, passSubGamePhase);
+    public Revolt copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof Revolt) {
-            Revolt other = (Revolt) obj;
-            return playerID == other.playerID && locationID==other.locationID && cardToDiscard1.equals(other.cardToDiscard1) && cardToDiscard2.equals(other.cardToDiscard2) && passSubGamePhase == other.passSubGamePhase;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Revolt revolt = (Revolt) o;
+        return playerID == revolt.playerID && locationID == revolt.locationID && cardToDiscard1Idx == revolt.cardToDiscard1Idx && cardToDiscard1Id == revolt.cardToDiscard1Id && cardToDiscard2Idx == revolt.cardToDiscard2Idx && cardToDiscard2Id == revolt.cardToDiscard2Id && passSubGamePhase == revolt.passSubGamePhase;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Revolt", playerID, locationID, cardToDiscard1.hashCode(), cardToDiscard2.hashCode(), passSubGamePhase);
+        return Objects.hash(playerID, locationID, cardToDiscard1Idx, cardToDiscard1Id, cardToDiscard2Idx, cardToDiscard2Id, passSubGamePhase);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " revolts at " + locationID + " by discarding cards " + cardToDiscard1Idx + " and " + cardToDiscard2Idx;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " revolts at " + gs.getGameMap().getNodeByID(locationID).identifier + " by discarding " + cardToDiscard1.cardtype.toString() + " and " + cardToDiscard2.cardtype.toString();
+        RootCard card1 = (RootCard) gs.getComponentById(cardToDiscard1Id);
+        RootCard card2 = (RootCard) gs.getComponentById(cardToDiscard2Id);
+        return gs.getPlayerFaction(playerID).toString()  + " revolts at " + gs.getGameMap().getNodeByID(locationID).identifier + " by discarding " + card1.cardtype.toString() + " and " + card2.cardtype.toString();
     }
 }

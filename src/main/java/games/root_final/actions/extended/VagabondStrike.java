@@ -1,13 +1,15 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.*;
+import games.root_final.actions.choosers.ChooseCardForSupporters;
+import games.root_final.actions.choosers.ChooseNumber;
 import games.root_final.cards.RootCard;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
@@ -30,12 +32,11 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
         Outrage,
         OutrageWoodland,
     }
-    public Stage stage = Stage.chooseTargetPlayer;
-    public boolean done = false;
-    public int locationID;
-    public int targetPlayerID;
-    public int defenderDamage = 1;
-
+    Stage stage = Stage.chooseTargetPlayer;
+    boolean done = false;
+    int locationID;
+    int targetPlayerID;
+    int defenderDamage = 1;
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -85,7 +86,7 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
         RootBoardNodeWithRootEdges clearing = gs.getGameMap().getNodeByID(locationID);
         for (int i = 0; i < gs.getNPlayers(); i++){
             if (i != playerID && clearing.isAttackable(gs.getPlayerFaction(i))){
-                actions.add(new ChooseTargetPlayer(playerID,i));
+                actions.add(new ChooseNumber(playerID,i));
             }
         }
         //can never be empty
@@ -149,25 +150,25 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
                 case Vagabond:
                     for (Item item: gs.getSachel()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
                     for (Item item: gs.getCoins()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
                     for (Item item: gs.getTeas()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
                     for (Item item: gs.getBags()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
@@ -185,7 +186,7 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
         PartialObservableDeck<RootCard> hand = gs.getPlayerHand(playerID);
         for (int i = 0 ; i < hand.getSize(); i++){
             if (hand.get(i).suit == gs.getGameMap().getNodeByID(locationID).getClearingType() || hand.get(i).suit == RootParameters.ClearingTypes.Bird){
-                AddCardToSupporters action = new AddCardToSupporters(playerID, hand.get(i));
+                AddCardToSupporters action = new AddCardToSupporters(playerID, i, hand.get(i).getComponentID());
                 if (!actions.contains(action)) actions.add(action);
             }
         }
@@ -213,8 +214,8 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
         RootGameState gs = (RootGameState) state;
         switch (stage) {
             case chooseTargetPlayer:
-                if (action instanceof ChooseTargetPlayer ct) {
-                    targetPlayerID = ct.targetID;
+                if (action instanceof ChooseNumber ct) {
+                    targetPlayerID = ct.number;
                     stage = Stage.removePiecesDefender;
                 }
                 break;
@@ -222,7 +223,7 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
                 if (action instanceof RemoveWarrior){
                     if (gs.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
                         if (gs.getRelationship(gs.getPlayerFaction(targetPlayerID)) == RootParameters.Relationship.Hostile){
-                            gs.addGameScorePLayer(playerID, 2);
+                            gs.addGameScorePlayer(playerID, 2);
                         } else{
                             gs.setHostile(gs.getPlayerFaction(targetPlayerID));
                             gs.logEvent(Event.GameEvent.GAME_EVENT, gs.getPlayerFaction(targetPlayerID).toString() + " is now Hostile");
@@ -231,7 +232,7 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
                     defenderDamage--;
                 } else if (action instanceof TakeHit td) {
                     defenderDamage--;
-                    gs.addGameScorePLayer(playerID,1);
+                    gs.addGameScorePlayer(playerID,1);
                     if (td.tokenType == RootParameters.TokenType.Sympathy){
                         stage = Stage.Outrage;
                         break;
@@ -297,6 +298,11 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
     @Override
     public int hashCode() {
         return Objects.hash("VagabondStrike", playerID, targetPlayerID, locationID, stage, done);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to strike";
     }
 
     @Override

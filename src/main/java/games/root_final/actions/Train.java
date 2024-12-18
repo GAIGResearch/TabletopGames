@@ -11,11 +11,12 @@ import java.util.Objects;
 
 public class Train extends AbstractAction {
     public final int playerID;
-    public RootCard card;
+    public final int cardIdx, cardId;
 
-    public Train(int playerID, RootCard card){
+    public Train(int playerID, int cardIdx, int cardId){
         this.playerID = playerID;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -24,45 +25,45 @@ public class Train extends AbstractAction {
             Deck<RootCard> hand = state.getPlayerHand(playerID);
             Deck<RootCard> discardPile = state.getDiscardPile();
             state.increaseActionsPlayed();
-            for (int i = 0; i < hand.getSize(); i++){
-                if (hand.get(i).equals(card)){
-                    discardPile.add(hand.get(i));
-                    hand.remove(i);
-                    try {
-                        state.addOfficer();
-                    }catch (Exception e){
-                        System.out.println(e.toString());
-                    }
-                    return true;
-                }
+            RootCard card = hand.pick(cardIdx);
+            discardPile.add(card);
+            try {
+                state.addOfficer();
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
+            return true;
         }
         return false;
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Train(playerID, card);
+    public Train copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof Train){
-            Train other = (Train) obj;
-            return playerID == other.playerID && card.equals(other.card);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Train train = (Train) o;
+        return playerID == train.playerID && cardIdx == train.cardIdx && cardId == train.cardId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Train", playerID, card.hashCode());
+        return Objects.hash(playerID, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " discards card " + cardIdx + " to train an officer";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootCard card = (RootCard) gs.getComponentById(cardId);
         return gs.getPlayerFaction(playerID).toString()  + " discards " + card.cardtype.toString() + " to train an officer";
     }
 }

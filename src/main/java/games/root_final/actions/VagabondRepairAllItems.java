@@ -15,6 +15,7 @@ public class VagabondRepairAllItems extends AbstractAction {
     public VagabondRepairAllItems(int playerID){
         this.playerID = playerID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -38,7 +39,7 @@ public class VagabondRepairAllItems extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public VagabondRepairAllItems copy() {
         return this;
     }
 
@@ -54,6 +55,11 @@ public class VagabondRepairAllItems extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("VagabondRepairAllItems", playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " repairs all items";
     }
 
     @Override

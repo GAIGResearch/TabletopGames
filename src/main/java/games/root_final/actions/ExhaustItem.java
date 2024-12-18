@@ -10,9 +10,9 @@ import java.util.Objects;
 
 public class ExhaustItem extends AbstractAction {
     public final int playerID;
-    public Item item;
+    public final Item.ItemType item;
 
-    public ExhaustItem(int playerID, Item item){
+    public ExhaustItem(int playerID,  Item.ItemType item){
         this.playerID = playerID;
         this.item = item;
     }
@@ -21,10 +21,10 @@ public class ExhaustItem extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
-            switch (item.itemType){
+            switch (item){
                 case bag:
                     for (Item bag: currentState.getBags()){
-                        if (bag.equals(item) && bag.refreshed && !bag.damaged){
+                        if (bag.itemType.equals(item) && bag.refreshed && !bag.damaged){
                             bag.refreshed = false;
                             return true;
                         }
@@ -32,7 +32,7 @@ public class ExhaustItem extends AbstractAction {
                     break;
                 case tea:
                     for (Item tea: currentState.getTeas()){
-                        if (tea.equals(item) && tea.refreshed && !tea.damaged){
+                        if (tea.itemType.equals(item) && tea.refreshed && !tea.damaged){
                             tea.refreshed = false;
                             return true;
                         }
@@ -40,7 +40,7 @@ public class ExhaustItem extends AbstractAction {
                     break;
                 case coin:
                     for (Item coin: currentState.getCoins()){
-                        if (coin.equals(item) && coin.refreshed && !coin.damaged){
+                        if (coin.itemType.equals(item) && coin.refreshed && !coin.damaged){
                             coin.refreshed = false;
                             return true;
                         }
@@ -48,7 +48,7 @@ public class ExhaustItem extends AbstractAction {
                     break;
                 default:
                     for (Item item: currentState.getSachel()){
-                        if (item.equals(this.item) && item.refreshed && !item.damaged){
+                        if (item.itemType.equals(this.item) && item.refreshed && !item.damaged){
                             item.refreshed = false;
                             return true;
                         }
@@ -60,27 +60,31 @@ public class ExhaustItem extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new ExhaustItem(playerID, item);
+    public ExhaustItem copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof ExhaustItem ei){
-            return playerID == ei.playerID && item.getComponentID() == ei.item.getComponentID();
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExhaustItem that = (ExhaustItem) o;
+        return playerID == that.playerID && item == that.item;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Exhaust", playerID, item.hashCode());
+        return Objects.hash(playerID, item);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " exhausts " + item.toString();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " exhausts " + item.itemType.toString();
+        return gs.getPlayerFaction(playerID).toString() + " exhausts " + item.toString();
     }
 }

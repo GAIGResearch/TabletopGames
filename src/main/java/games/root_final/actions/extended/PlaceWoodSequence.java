@@ -1,24 +1,25 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.Pass;
+import games.root_final.actions.PlaceWood;
+import games.root_final.actions.PlaceWoodEverywhere;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 public class PlaceWoodSequence extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public List<Integer> locationIDs;
 
-    public boolean canPlaceEverywhere;
-
-    public boolean done = false;
+    List<Integer> locationIDs;
+    boolean canPlaceEverywhere;
+    boolean done = false;
 
     public PlaceWoodSequence(int playerID){
         this.playerID = playerID;
@@ -55,7 +56,6 @@ public class PlaceWoodSequence extends AbstractAction implements IExtendedSequen
         List<AbstractAction> actions = new ArrayList<>();
         if(canPlaceEverywhere){
             actions.add(new PlaceWoodEverywhere(playerID));
-            return actions;
         }else {
             for (RootBoardNodeWithRootEdges node: gs.getGameMap().getNonForrestBoardNodes()){
                 if (node.hasBuilding(RootParameters.BuildingType.Sawmill) && locationIDs.contains(node.getComponentID()) && gs.getWood() > 0){
@@ -65,8 +65,8 @@ public class PlaceWoodSequence extends AbstractAction implements IExtendedSequen
             if (actions.isEmpty()){
                 actions.add(new Pass(playerID, " No more wood tokens"));
             }
-            return actions;
         }
+        return actions;
     }
 
     @Override
@@ -76,7 +76,6 @@ public class PlaceWoodSequence extends AbstractAction implements IExtendedSequen
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        RootGameState gs = (RootGameState) state;
         if (action instanceof PlaceWoodEverywhere){
             done = true;
         } else if (action instanceof  PlaceWood p) {
@@ -111,8 +110,7 @@ public class PlaceWoodSequence extends AbstractAction implements IExtendedSequen
     @Override
     public boolean equals(Object obj) {
         if (obj == this){return true;}
-        if (obj instanceof PlaceWoodSequence){
-            PlaceWoodSequence other = (PlaceWoodSequence) obj;
+        if (obj instanceof PlaceWoodSequence other){
             return playerID == other.playerID;
         }
         return false;
@@ -121,6 +119,11 @@ public class PlaceWoodSequence extends AbstractAction implements IExtendedSequen
     @Override
     public int hashCode() {
         return Objects.hash("PlaceWoodSequence", playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " starts placing wood";
     }
 
     @Override

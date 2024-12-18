@@ -11,31 +11,28 @@ import java.util.Objects;
 
 public class PlayDomination extends AbstractAction {
     public final int playerID;
-    public RootCard card;
+    public final int cardIdx, cardId;
 
-    public PlayDomination(int playerID, RootCard card){
+    public PlayDomination(int playerID, int cardIdx, int cardId){
         this.playerID = playerID;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID){
-            if (currentState.getGameScore(playerID) >= 10){
+            if (currentState.getGameScore(playerID) >= 10){  // todo param
                 PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
-                for (int i = 0; i< hand.getSize(); i++){
-                    if (hand.get(i).equals(card)){
-                        currentState.setGameScorePlayer(playerID, 0);
-                        switch (hand.get(i).suit){
-                            case Rabbit -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DR);
-                            case Mouse -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DM);
-                            case Fox -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DF);
-                            case Bird -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DB);
-                        }
-                        hand.remove(i);
-                        return true;
-                    }
+                RootCard card = hand.pick(cardIdx);
+                currentState.setGameScorePlayer(playerID, 0);
+                switch (card.suit){
+                    case Rabbit -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DR);
+                    case Mouse -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DM);
+                    case Fox -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DF);
+                    case Bird -> currentState.setPlayerVictoryCondition(playerID, RootParameters.VictoryCondition.DB);
                 }
+                return true;
             }else{
                 System.out.println("Trying to play domination card with less than 10 score");
                 return false;
@@ -45,27 +42,32 @@ public class PlayDomination extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PlayDomination(playerID, card);
+    public PlayDomination copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof PlayDomination pd){
-            return pd.playerID == playerID && pd.card.equals(card);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlayDomination that = (PlayDomination) o;
+        return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("PlayDomination", card.hashCode());
+        return Objects.hash(playerID, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID  + " plays domination";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootCard card = (RootCard) gs.getComponentById(cardId);
         return gs.getPlayerFaction(playerID).toString() + " plays " + card.suit.toString() + " " + card.cardtype.toString();
     }
 }

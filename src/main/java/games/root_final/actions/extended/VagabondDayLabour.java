@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,9 +6,9 @@ import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.TakeFromDiscard;
 import games.root_final.cards.RootCard;
 import games.root_final.components.Item;
-import org.apache.spark.internal.config.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +16,12 @@ import java.util.Objects;
 
 public class VagabondDayLabour extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public boolean done;
+    boolean done;
 
     public VagabondDayLabour(int playerID){
         this.playerID = playerID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -43,7 +44,7 @@ public class VagabondDayLabour extends AbstractAction implements IExtendedSequen
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> discard = gs.getDiscardPile();
         for (int i = 0; i < discard.getSize(); i++){
-            actions.add(new TakeFromDiscard(playerID, discard.get(i)));
+            actions.add(new TakeFromDiscard(playerID, i, discard.get(i).getComponentID()));
         }
         return actions;
     }
@@ -84,6 +85,11 @@ public class VagabondDayLabour extends AbstractAction implements IExtendedSequen
     @Override
     public int hashCode() {
         return Objects.hash("DayLabour", playerID, done);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " performs day labour";
     }
 
     @Override

@@ -32,7 +32,7 @@ public class RemoveAllWood extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public RemoveAllWood copy() {
         return this;
     }
 
@@ -48,6 +48,11 @@ public class RemoveAllWood extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("RemoveAllWood", playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID +  " uses all wood on the map";
     }
 
     @Override

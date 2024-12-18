@@ -9,7 +9,6 @@ import games.root_final.actions.EndTurn;
 import games.root_final.cards.EyrieRulers;
 import games.root_final.cards.RootCard;
 import games.root_final.cards.RootQuestCard;
-import games.root_final.cards.VagabondCharacters;
 import games.root_final.components.*;
 
 import java.util.*;
@@ -53,15 +52,15 @@ public class RootForwardModel extends StandardForwardModel {
         state.playersSetUp = 0;
         state.setGamePhase(RootGameState.RootGamePhase.Setup);
         //Create Root Draw and Discard Card Deck
-        Deck<RootCard> cards = new Deck<RootCard>("Draw Pile", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        Deck<RootCard> cards = new Deck<>("Draw Pile", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         addCards(cards, rp);
         //System.out.println("Deck initialized with " + cards.getSize() + " cards");
-        Deck<RootCard> discardCards = new Deck<RootCard>("Discard Pile", -1, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        Deck<RootCard> discardCards = new Deck<>("Discard Pile", -1, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         cards.shuffle(0, cards.getSize(), state.getRnd());
         state.drawPile = cards;
         state.discardPile = discardCards;
         //Create player Hands and draw initial cards
-        state.playerDecks = new ArrayList<PartialObservableDeck<RootCard>>();
+        state.playerDecks = new ArrayList<>();
         state.playerFactions = new ArrayList<>();
         state.playerCraftedCards = new ArrayList<>();
         state.craftedItems = new ArrayList<>();
@@ -76,32 +75,30 @@ public class RootForwardModel extends StandardForwardModel {
         for (int counter = 0; counter < state.getNPlayers(); counter++) {
             boolean[] visibility = new boolean[state.getNPlayers()];
             visibility[counter] = true;
-            PartialObservableDeck<RootCard> playerCards = new PartialObservableDeck<RootCard>("Player " + counter + " Hand", counter, visibility);
+            PartialObservableDeck<RootCard> playerCards = new PartialObservableDeck<>("Player " + counter + " Hand", counter, visibility);
             for (int e = 0; e < rp.handSize; e++) {
                 playerCards.add(cards.draw());
             }
             state.playerDecks.add(playerCards);
             state.playerFactions.add(rp.getPlayerFaction(counter));
-            state.playerCraftedCards.add(new Deck<RootCard>("Player" + counter + "Crafted Cards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-            state.craftedItems.add(new ArrayList<Item>());
+            state.playerCraftedCards.add(new Deck<>("Player" + counter + "Crafted Cards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
+            state.craftedItems.add(new ArrayList<>());
         }
         //Create player pieces
         for (int counter = 0; counter < state.getNPlayers(); counter++) {
             RootParameters.Factions playerRole = state.getPlayerFaction(counter);
             if (playerRole.equals(RootParameters.Factions.MarquiseDeCat)) {
-                createCatPieces(state, rp, counter);
+                createCatPieces(state, rp);
             } else if (playerRole.equals(RootParameters.Factions.EyrieDynasties)) {
                 createBirdPieces(state, rp, counter);
             } else if (playerRole.equals(RootParameters.Factions.WoodlandAlliance)) {
                 createWoodlandAlliancePieces(state, rp, counter);
             } else if (playerRole.equals(RootParameters.Factions.Vagabond)) {
-                createVagabondPieces(state, rp, counter);
+                createVagabondPieces(state, rp);
             } else {
                 System.out.println("Player faction not assigned");
             }
         }
-
-
     }
 
     protected void addCards(Deck<RootCard> cards, RootParameters rp) {
@@ -135,6 +132,7 @@ public class RootForwardModel extends StandardForwardModel {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     protected RootGraphBoard createRootNodeGraph(boolean summerMap) {
         if (summerMap) {
             RootGraphBoard gameMap = new RootGraphBoard();
@@ -165,7 +163,6 @@ public class RootForwardModel extends StandardForwardModel {
             RootBoardNodeWithRootEdges nodeForrest7 = new RootBoardNodeWithRootEdges(false, "Forrest Seven", RootParameters.ClearingTypes.Forrest, 0);
             RootBoardNodeWithRootEdges nodeForrest8 = new RootBoardNodeWithRootEdges(false, "Forrest Eight", RootParameters.ClearingTypes.Forrest, 0);
             RootBoardNodeWithRootEdges nodeForrest9 = new RootBoardNodeWithRootEdges(false, "Forrest Nine", RootParameters.ClearingTypes.Forrest, 0);
-
 
             node1.setXY(30 * multiplier, 30 * multiplier);
             node2.setXY(140 * multiplier, 20 * multiplier);
@@ -282,59 +279,54 @@ public class RootForwardModel extends StandardForwardModel {
         }
     }
 
-    protected void createCatPieces(RootGameState state, RootParameters rp, int playerID) {
+    protected void createCatPieces(RootGameState state, RootParameters rp) {
         //Create Warriors, Tokens, Buildings and any faction specific components
-        state.CatWarriors = rp.MaxWarriors.get(RootParameters.Factions.MarquiseDeCat);
+        state.CatWarriors = rp.maxWarriors.get(RootParameters.Factions.MarquiseDeCat);
         state.Wood = rp.maxWood;
         state.Keep = true;
         state.Workshops = rp.buildingCount.get(RootParameters.BuildingType.Workshop);
         state.Sawmills = rp.buildingCount.get(RootParameters.BuildingType.Sawmill);
         state.Recruiters = rp.buildingCount.get(RootParameters.BuildingType.Sawmill);
-
-
     }
 
     protected void createBirdPieces(RootGameState state, RootParameters rp, int playerID) {
         //Create Warriors
-        state.EyrieWarriors = rp.MaxWarriors.get(RootParameters.Factions.EyrieDynasties);
+        state.eyrieWarriors = rp.maxWarriors.get(RootParameters.Factions.EyrieDynasties);
         state.eyrieDecree = new ArrayList<>();
         state.playedSuits = new ArrayList<>();
         for (int e = 0; e < 4; e++) {
-            state.eyrieDecree.add(new Deck<RootCard>(rp.decreeInitializer.get((Integer) e).toString() + "decree", playerID, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
+            state.eyrieDecree.add(new Deck<>(rp.decreeInitializer.get((Integer) e).toString() + "decree", playerID, CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
         }
-        state.Roosts = rp.buildingCount.get(RootParameters.BuildingType.Roost);
-        state.rulers = new Deck<EyrieRulers>("Player " + playerID + "Rulers", playerID, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        state.roosts = rp.buildingCount.get(RootParameters.BuildingType.Roost);
+        state.rulers = new Deck<>("Player " + playerID + "Rulers", playerID, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         state.activeRuler = null;
         for (HashMap.Entry<EyrieRulers.CardType, Boolean[]> entry : rp.eyrieRulers.entrySet()) {
             EyrieRulers ruler = new EyrieRulers(entry.getKey(), entry.getValue()[0], entry.getValue()[1], entry.getValue()[2], entry.getValue()[3]);
             state.addRulerToRulers(ruler);
         }
-        state.viziers = new Deck<RootCard>("Player " + playerID + "viziers", playerID, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        state.viziers = new Deck<>("Player " + playerID + "viziers", playerID, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         for (int i = 0; i < rp.maxViziers; i++) {
             RootCard vizier = new RootCard(RootCard.CardType.Vizier,  RootParameters.ClearingTypes.Bird);
             state.viziers.add(vizier);
         }
-
-
     }
 
     protected void createWoodlandAlliancePieces(RootGameState state, RootParameters rp, int playerID) {
-        state.WoodlandWarriors = rp.MaxWarriors.get(RootParameters.Factions.WoodlandAlliance);
-        state.FoxBase = 1;
-        state.MouseBase = 1;
-        state.RabbitBase = 1;
+        state.woodlandWarriors = rp.maxWarriors.get(RootParameters.Factions.WoodlandAlliance);
+        state.foxBase = 1;
+        state.mouseBase = 1;
+        state.rabbitBase = 1;
         state.officers = 0;
-        state.SympathyTokens = rp.sympathyTokens;
+        state.sympathyTokens = rp.sympathyTokens;
         boolean[] visibility = new boolean[state.getNPlayers()];
         visibility[playerID] = true;
-        state.Supporters = new PartialObservableDeck<>("Player " + playerID + " Supporters", playerID, visibility);
-
+        state.supporters = new PartialObservableDeck<>("Player " + playerID + " Supporters", playerID, visibility);
     }
 
-    protected void createVagabondPieces(RootGameState state, RootParameters rp, int playerID) {
-        state.Vagabond = rp.MaxWarriors.get(RootParameters.Factions.Vagabond);
-        state.questDrawPile = new Deck<RootQuestCard>("Quest Draw Pile", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        state.activeQuests = new Deck<RootQuestCard>("Active Quests", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+    protected void createVagabondPieces(RootGameState state, RootParameters rp) {
+        state.vagabond = rp.maxWarriors.get(RootParameters.Factions.Vagabond);
+        state.questDrawPile = new Deck<>("Quest Draw Pile", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        state.activeQuests = new Deck<>("Active Quests", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         for (Map.Entry<RootQuestCard.CardType, RootParameters.ClearingTypes[]> entry : rp.questCardInitializer.entrySet()) {
             for (RootParameters.ClearingTypes clearingType: entry.getValue()){
                 state.questDrawPile.add(new RootQuestCard(entry.getKey(), clearingType));
@@ -343,11 +335,6 @@ public class RootForwardModel extends StandardForwardModel {
         state.questDrawPile.shuffle(0, state.questDrawPile.getSize(), state.getRnd());
         for (int i = 0; i < 3; i++){
             state.activeQuests.add(state.questDrawPile.draw());
-        }
-        state.VagabondCharacters = new Deck<VagabondCharacters>("Vagabond Characters", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-        for (HashMap.Entry<VagabondCharacters.CardType, List<Item.ItemType>> entry : rp.vagabondCharacterInitializer.entrySet()) {
-            VagabondCharacters character = new VagabondCharacters(entry.getKey(), entry.getValue());
-            state.VagabondCharacters.add(character);
         }
 
         state.ruinItems = new ArrayList<>();
@@ -362,13 +349,13 @@ public class RootForwardModel extends StandardForwardModel {
                 state.startingItems.add(new Item(CoreConstants.ComponentType.TOKEN, itemType));
             }
         }
-        state.Sachel = new ArrayList<>();
-        state.Bags = new ArrayList<>();
-        state.Coins = new ArrayList<>();
-        state.Teas = new ArrayList<>();
-        state.FoxQuests = 0;
-        state.MouseQuests = 0;
-        state.RabbitQuests = 0;
+        state.sachel = new ArrayList<>();
+        state.bags = new ArrayList<>();
+        state.coins = new ArrayList<>();
+        state.teas = new ArrayList<>();
+        state.foxQuests = 0;
+        state.mouseQuests = 0;
+        state.rabbitQuests = 0;
 
         state.relationships = new HashMap<>(){{
             put(RootParameters.Factions.MarquiseDeCat, RootParameters.Relationship.Neutral);
@@ -402,7 +389,7 @@ public class RootForwardModel extends StandardForwardModel {
             return RootActionFactory.getEveningActions(gameState);
         } else {
             System.out.println("NO AVAILABLE ACTIONS!!!");
-            return null;
+            return actions;
         }
     }
 
@@ -414,7 +401,7 @@ public class RootForwardModel extends StandardForwardModel {
         state.getGameMap().updateRulers();
         if (state.isActionInProgress()) return;
 
-        if (state.ScoreGameOver() || state.getTurnCounter() > 200) {
+        if (state.scoreGameOver() || state.getTurnCounter() > 200) {
             endGame(state);
         }
         //For End turn action -> handle GamePhase changes and current player changes
@@ -504,14 +491,9 @@ public class RootForwardModel extends StandardForwardModel {
                 int secondPair = 0;
                 for (RootBoardNodeWithRootEdges clearing: gs.getGameMap().getNonForrestBoardNodes()){
                     if (clearing.getCorner() && clearing.rulerID == playerID){
-                        if (clearing.identifier.equals("Top Left")){
-                            firstPair++;
-                        } else if (clearing.identifier.equals("Bottom Right")) {
-                            firstPair++;
-                        } else if (clearing.identifier.equals("Top Right")) {
-                            secondPair++;
-                        } else if (clearing.identifier.equals("Bottom Left")) {
-                            secondPair++;
+                        switch (clearing.identifier) {
+                            case "Top Left", "Bottom Right" -> firstPair++;
+                            case "Top Right", "Bottom Left" -> secondPair++;
                         }
                     }
                 }

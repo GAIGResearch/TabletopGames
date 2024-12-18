@@ -3,11 +3,10 @@ package games.root_final.components;
 import core.CoreConstants;
 import core.components.Component;
 import games.root_final.RootParameters;
-import org.apache.ivy.ant.FixDepsTask;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class RootBoardNodeWithRootEdges extends Component {
     public final String identifier;
     protected final Map<RootEdge, RootBoardNodeWithRootEdges> neighbourRootEdgeMapping;  // Neighbours mapping to RootEdge object encapsulating RootEdge information, connecting this node to the one in the map key
@@ -84,7 +83,6 @@ public class RootBoardNodeWithRootEdges extends Component {
      * Removes neighbour of this node.
      *
      * @param neighbour - neighbour to remove.
-     * @return - true if removed successfully, false otherwise. may fail if neighbour didn't exist in the first place.
      */
     public void removeNeighbour(RootBoardNodeWithRootEdges neighbour, RootEdge RootEdge) {
         neighbourRootEdgeMapping.remove(RootEdge);
@@ -129,8 +127,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof RootBoardNodeWithRootEdges)) return false;
-        RootBoardNodeWithRootEdges that = (RootBoardNodeWithRootEdges) o;
+        if (!(o instanceof RootBoardNodeWithRootEdges that)) return false;
         boolean tmp = corner == that.corner &&
                 wood == that.wood &&
                 keep == that.keep &&
@@ -153,7 +150,6 @@ public class RootBoardNodeWithRootEdges extends Component {
     public int hashCode() {
         return Objects.hash(componentID, ownerId, identifier, corner, currentBuildings, maxBuildings, clearingType, rulerID, catWarriors, keep, wood, workshops, sawmill, recruiter, eyrieWarriors, roost, woodlandWarriors, sympathy, base, vagabond, ruins);
     }
-
 
     public RootBoardNodeWithRootEdges getNeighbour(RootEdge RootEdge) {
         return neighbourRootEdgeMapping.get(RootEdge);
@@ -333,60 +329,50 @@ public class RootBoardNodeWithRootEdges extends Component {
     }
 
     public boolean isAttackable(RootParameters.Factions faction) {
-        switch (faction) {
-            case MarquiseDeCat:
-                return catWarriors > 0 || wood > 0 || keep || workshops > 0 || sawmill > 0 || recruiter > 0;
-            case EyrieDynasties:
-                return eyrieWarriors > 0 || roost > 0;
-            case WoodlandAlliance:
-                return woodlandWarriors > 0 || base || sympathy;
-            case Vagabond:
-                return vagabond > 0;
-        }
-        return false;
+        return switch (faction) {
+            case MarquiseDeCat -> catWarriors > 0 || wood > 0 || keep || workshops > 0 || sawmill > 0 || recruiter > 0;
+            case EyrieDynasties -> eyrieWarriors > 0 || roost > 0;
+            case WoodlandAlliance -> woodlandWarriors > 0 || base || sympathy;
+            case Vagabond -> vagabond > 0;
+        };
     }
-    public boolean hasBuilding(RootParameters.BuildingType bt){
-        switch (bt){
-            case Recruiter:
-                return recruiter > 0;
-            case Workshop:
-                return  workshops > 0;
-            case Sawmill:
-                return  sawmill > 0;
-            case Roost:
-                return roost > 0;
-            case FoxBase:
-                if(clearingType == RootParameters.ClearingTypes.Fox) {
-                    return base;
-                }
-                return false;
-            case MouseBase:
-                if(clearingType == RootParameters.ClearingTypes.Mouse) {
-                    return base;
-                }
-                return false;
-            case RabbitBase:
-                if(clearingType == RootParameters.ClearingTypes.Rabbit){
-                    return base;
-                }
-                return false;
-            case Ruins:
-                return ruins;
-        }
-        return false;
-    }
-    public boolean hasToken(RootParameters.TokenType tt){
-        switch (tt){
-            case Wood:
-                return wood > 0;
-            case Sympathy:
-                return sympathy;
-            case Keep:
-                return keep;
 
-        }
-        return false;
+    public boolean hasBuilding(RootParameters.BuildingType bt){
+        return switch (bt) {
+            case Recruiter -> recruiter > 0;
+            case Workshop -> workshops > 0;
+            case Sawmill -> sawmill > 0;
+            case Roost -> roost > 0;
+            case FoxBase -> {
+                if (clearingType == RootParameters.ClearingTypes.Fox) {
+                    yield base;
+                }
+                yield false;
+            }
+            case MouseBase -> {
+                if (clearingType == RootParameters.ClearingTypes.Mouse) {
+                    yield base;
+                }
+                yield false;
+            }
+            case RabbitBase -> {
+                if (clearingType == RootParameters.ClearingTypes.Rabbit) {
+                    yield base;
+                }
+                yield false;
+            }
+            case Ruins -> ruins;
+        };
     }
+
+    public boolean hasToken(RootParameters.TokenType tt){
+        return switch (tt) {
+            case Wood -> wood > 0;
+            case Sympathy -> sympathy;
+            case Keep -> keep;
+        };
+    }
+
     public void addToken(RootParameters.TokenType tt){
         switch (tt){
             case Sympathy:
@@ -416,6 +402,7 @@ public class RootBoardNodeWithRootEdges extends Component {
                 break;
         }
     }
+
     public void build(RootParameters.BuildingType bt) {
         if (currentBuildings >= maxBuildings) {
             //System.out.println(currentBuildings + " " + maxBuildings);
@@ -444,26 +431,20 @@ public class RootBoardNodeWithRootEdges extends Component {
                     if (clearingType == RootParameters.ClearingTypes.Rabbit) {
                         base = true;
                         currentBuildings++;
-                        break;
-                    } else {
-                        break;
                     }
+                    break;
                 case MouseBase:
                     if (clearingType == RootParameters.ClearingTypes.Mouse) {
                         base = true;
                         currentBuildings++;
-                        break;
-                    } else {
-                        break;
                     }
+                    break;
                 case FoxBase:
                     if (clearingType == RootParameters.ClearingTypes.Fox) {
                         base = true;
                         currentBuildings++;
-                        break;
-                    } else {
-                        break;
                     }
+                    break;
                 case Ruins:
                     ruins = true;
                     currentBuildings++;
@@ -561,7 +542,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     }
 
     public HashMap<RootParameters.BuildingType, Integer> getAllBuildings(){
-        HashMap<RootParameters.BuildingType, Integer> buildings =  new HashMap<>(){
+        return new HashMap<>(){
             {
                 put(RootParameters.BuildingType.Roost, roost);
                 put(RootParameters.BuildingType.Sawmill, sawmill);
@@ -573,7 +554,6 @@ public class RootBoardNodeWithRootEdges extends Component {
                 put(RootParameters.BuildingType.FoxBase, base && clearingType == RootParameters.ClearingTypes.Fox ? 1 :0);
             }
         };
-        return buildings;
     }
 
     public boolean hasBuildingRoom(){
@@ -581,7 +561,7 @@ public class RootBoardNodeWithRootEdges extends Component {
     }
 
     public HashMap<RootParameters.TokenType, Integer> getAllTokens(){
-        HashMap<RootParameters.TokenType, Integer> tokens = new HashMap<>(){
+        return new HashMap<>(){
             {
                 put(RootParameters.TokenType.Wood, wood);
                 put(RootParameters.TokenType.Sympathy, sympathy ? 1 : 0);
@@ -589,11 +569,10 @@ public class RootBoardNodeWithRootEdges extends Component {
             }
 
         };
-        return tokens;
     }
 
     public boolean canMove(int playerID){
         if (rulerID == playerID){return true;}
-        return !getNeighbours().stream().filter(node -> node.rulerID == playerID).collect(Collectors.toList()).isEmpty();
+        return getNeighbours().stream().anyMatch(node -> node.rulerID == playerID);
     }
 }

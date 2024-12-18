@@ -11,11 +11,12 @@ import java.util.Objects;
 public class CraftCard extends AbstractAction {
 
     public final int playerID;
-    public RootCard card;
+    public final int cardIdx, cardId;
 
-    public CraftCard(int playerID, RootCard card) {
+    public CraftCard(int playerID, int cardIdx, int cardId) {
         this.playerID = playerID;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
 
     @Override
@@ -23,41 +24,40 @@ public class CraftCard extends AbstractAction {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID) {
             PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
-            for (int i = 0; i < hand.getSize(); i++) {
-                if (hand.get(i).equals(card)){
-                    currentState.getPlayerCraftedCards(playerID).add(hand.get(i));
-                    hand.remove(i);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public AbstractAction copy() {
-        return new CraftCard(playerID, card);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
+            RootCard card = hand.pick(cardIdx);
+            currentState.getPlayerCraftedCards(playerID).add(card);
             return true;
         }
-        if (obj instanceof CraftCard c) {
-            return playerID == c.playerID && card.equals(c.card);
-        }
         return false;
+    }
+
+    @Override
+    public CraftCard copy() {
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CraftCard craftCard = (CraftCard) o;
+        return playerID == craftCard.playerID && cardIdx == craftCard.cardIdx && cardId == craftCard.cardId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("CraftCard", playerID, card.hashCode());
+        return Objects.hash(playerID, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " crafts card " + cardIdx;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootCard card = (RootCard) gameState.getComponentById(cardId);
         return gs.getPlayerFaction(playerID) + " crafts " + card.cardtype.toString();
     }
 }

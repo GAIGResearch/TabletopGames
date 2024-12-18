@@ -5,9 +5,11 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.root_final.actions.*;
+import games.root_final.actions.choosers.ChooseRuler;
+import games.root_final.actions.extended.*;
 import games.root_final.cards.EyrieRulers;
 import games.root_final.cards.RootCard;
-import games.root_final.cards.VagabondCharacters;
+import games.root_final.cards.VagabondCharacter;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
@@ -86,15 +88,12 @@ public class RootActionFactory {
         return null;
     }
 
-    /**
-     * Cat Action Factory
-     */
+    //region Cats actions
     static List<AbstractAction> getCatSetupActions(AbstractGameState gs) {
         //1st Choose Keep corner + populate clearings with warriors
         //2nd Place Workshop, Sawmill, and Recruiter
         RootGameState currentState = (RootGameState) gs;
         //System.out.println("Setting up Cats " + currentState.playerSubGamePhase);
-        RootParameters rp = (RootParameters) currentState.getGameParameters();
         List<AbstractAction> actions = new ArrayList<>();
         if (currentState.playerSubGamePhase == 0) {
             //Place keep
@@ -151,8 +150,6 @@ public class RootActionFactory {
         return actions;
     }
 
-    ;
-
     static List<AbstractAction> getCatBirdsongActions(AbstractGameState gs) {
         //If less wood than sawmills: choose which sawmills to place
         RootGameState currentState = (RootGameState) gs;
@@ -161,7 +158,7 @@ public class RootActionFactory {
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
             if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
-                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), crafted.get(i)));
+                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
         if (currentState.actionsPlayed == 0 && currentState.getWood() > 0 && !currentState.getGameMap().getSawmills().isEmpty()){
@@ -183,7 +180,7 @@ public class RootActionFactory {
         PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(currentState.getCurrentPlayer());
         for (int i = 0; i < hand.getSize(); i++){
             if (hand.get(i).cardtype == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
-                actions.add(new PlayDomination(currentState.getCurrentPlayer(), hand.get(i)));
+                actions.add(new PlayDomination(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID()));
             }
         }
         if (currentState.playerSubGamePhase == 0) {
@@ -218,7 +215,7 @@ public class RootActionFactory {
                     actions.add(new BattleAction(currentState.getCurrentPlayer()));
                 }
                 //March
-                if(currentState.getCatWarriors() < rp.MaxWarriors.get(currentState.getPlayerFaction(currentState.getCurrentPlayer()))){
+                if(currentState.getCatWarriors() < rp.maxWarriors.get(currentState.getPlayerFaction(currentState.getCurrentPlayer()))){
                     March march = new March(currentState.getCurrentPlayer());
                     actions.add(march);
                 }
@@ -233,7 +230,7 @@ public class RootActionFactory {
                 //Spend blue card or enter evening
                 for (int i = 0; i < hand.getSize(); i++) {
                     if(hand.get(i).suit == RootParameters.ClearingTypes.Bird){
-                        DiscardBirdCard action = new DiscardBirdCard(currentState.getCurrentPlayer(), hand.get(i));
+                        DiscardBirdCard action = new DiscardBirdCard(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID());
                         actions.add(action);
                     }
                 }
@@ -259,7 +256,7 @@ public class RootActionFactory {
             Deck<RootCard> playerHand = currentState.getPlayerHand(gs.getCurrentPlayer());
             if (playerHand.getSize() > rp.maxCardsEndTurn) {
                 for (int i = 0; i < playerHand.getSize(); i++) {
-                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), playerHand.get(i), false);
+                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), i, playerHand.get(i).getComponentID(), false);
                     actions.add(discardAction);
                 }
                 return actions;
@@ -271,10 +268,9 @@ public class RootActionFactory {
         }
         return null;
     }
+    //endregion
 
-    /**
-     * Bird Action Factory
-     */
+    //region Birds actions
     static List<AbstractAction> getBirdSetupActions(AbstractGameState gs) {
         //1st Choose Leader
         //2nd Place Viziers -> can be merged
@@ -285,7 +281,7 @@ public class RootActionFactory {
             //Choose Viziers
             Deck<EyrieRulers> rulers = currentState.getAvailableRulers();
             for (int i = 0; i < rulers.getSize(); i++) {
-                ChooseRuler action = new ChooseRuler(currentState.getCurrentPlayer(), rulers.get(i), true);
+                ChooseRuler action = new ChooseRuler(currentState.getCurrentPlayer(), i, rulers.get(i).getComponentID(), true);
                 actions.add(action);
             }
         } else if (currentState.playerSubGamePhase == 1) {
@@ -303,7 +299,7 @@ public class RootActionFactory {
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
             if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
-                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), crafted.get(i)));
+                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
         if (currentState.playerSubGamePhase == 0) {
@@ -350,7 +346,7 @@ public class RootActionFactory {
         PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(currentState.getCurrentPlayer());
         for (int i = 0; i < hand.getSize(); i++){
             if (hand.get(i).cardtype == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
-                actions.add(new PlayDomination(currentState.getCurrentPlayer(), hand.get(i)));
+                actions.add(new PlayDomination(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID()));
             }
         }
         if (currentState.playerSubGamePhase == 0) {
@@ -373,12 +369,12 @@ public class RootActionFactory {
             for (RootParameters.ClearingTypes clearingType : available) {
                 for (RootBoardNodeWithRootEdges node : currentState.getGameMap().getNodesOfType(clearingType)) {
                     if (currentState.getBirdWarriors() > 0 && node.getRoost() == 1 && currentState.getRuler().ruler != EyrieRulers.CardType.Charismatic) {
-                        Recruit action = new Recruit(node, currentState.getCurrentPlayer(), false,clearingType == RootParameters.ClearingTypes.Bird);
+                        Recruit action = new Recruit(node.getComponentID(), currentState.getCurrentPlayer(), false,clearingType == RootParameters.ClearingTypes.Bird);
                         if (!actions.contains(action)) {
                             actions.add(action);
                         }
                     } else if(currentState.getBirdWarriors() > 1 && node.getRoost() == 1){
-                        Recruit action = new Recruit(node, currentState.getCurrentPlayer(),  2,false,clearingType == RootParameters.ClearingTypes.Bird);
+                        Recruit action = new Recruit(node.getComponentID(), currentState.getCurrentPlayer(),  2,false,clearingType == RootParameters.ClearingTypes.Bird);
                         if (!actions.contains(action)) {
                             actions.add(action);
                         }
@@ -388,7 +384,7 @@ public class RootActionFactory {
             if (actions.isEmpty()) {
                 if (currentState.actionsPlayed < currentState.getDecree().get(0).getSize()) {
                     for(int i = 0; i < currentState.getAvailableRulers().getSize(); i++){
-                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i), true);
+                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i).ruler, true);
                         actions.add(turmoil);
                     }
                 } else {
@@ -412,7 +408,7 @@ public class RootActionFactory {
             if (actions.isEmpty()) {
                 if (currentState.actionsPlayed < currentState.getDecree().get(1).getSize()) {
                     for(int i = 0; i < currentState.getAvailableRulers().getSize(); i++){
-                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i), true);
+                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i).ruler, true);
                         actions.add(turmoil);
                     }
                 } else {
@@ -429,7 +425,7 @@ public class RootActionFactory {
             if(actions.isEmpty()) {
                 if (currentState.actionsPlayed < currentState.getDecree().get(2).getSize()) {
                     for (int i = 0; i < currentState.getAvailableRulers().getSize(); i++) {
-                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i), true);
+                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i).ruler, true);
                         actions.add(turmoil);
                     }
                 } else {
@@ -454,7 +450,7 @@ public class RootActionFactory {
             if (actions.isEmpty()) {
                 if (currentState.actionsPlayed < currentState.getDecree().get(3).getSize()) {
                     for (int i = 0; i < currentState.getAvailableRulers().getSize(); i++) {
-                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i), true);
+                        Turmoil turmoil = new Turmoil(currentState.getCurrentPlayer(), currentState.getAvailableRulers().get(i).ruler, true);
                         actions.add(turmoil);
                     }
                 } else {
@@ -484,7 +480,7 @@ public class RootActionFactory {
             Deck<RootCard> playerHand = currentState.getPlayerHand(gs.getCurrentPlayer());
             if (playerHand.getSize() > rp.maxCardsEndTurn) {
                 for (int i = 0; i < playerHand.getSize(); i++) {
-                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), playerHand.get(i), false);
+                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), i, playerHand.get(i).getComponentID(), false);
                     actions.add(discardAction);
                 }
                 return actions;
@@ -496,10 +492,9 @@ public class RootActionFactory {
         }
         return null;
     }
+    //endregion
 
-    /**
-     * Woodland Alliance Action Factory
-     */
+    //region Woodland Alliance Action Factory
     static List<AbstractAction> getWoodlandAllianceSetupActions(AbstractGameState gs) {
         //Draw Supporters
         RootGameState currentState = (RootGameState) gs;
@@ -525,14 +520,14 @@ public class RootActionFactory {
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
             if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
-                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), crafted.get(i)));
+                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
         if (currentState.playerSubGamePhase == 0){
             if (currentState.getBuildingCount(RootParameters.BuildingType.FoxBase)==1 && currentState.getBuildingCount(RootParameters.BuildingType.MouseBase)==1 && currentState.getBuildingCount(RootParameters.BuildingType.RabbitBase)==1 && currentState.getSupporters().getSize() > 5){
                 Deck<RootCard> supporters = currentState.getSupporters();
                 for (int i = 0; i < supporters.getSize(); i++){
-                    actions.add(new DiscardSupporter(currentState.getCurrentPlayer(), supporters.get(i), false));
+                    actions.add(new DiscardSupporter(currentState.getCurrentPlayer(), i, supporters.get(i).getComponentID(), false));
                 }
             }else{
                 actions.add(new PassSubGamePhase(currentState.getCurrentPlayer(), "does not discard supporters"));
@@ -546,7 +541,7 @@ public class RootActionFactory {
                 for(int i = 0; i < currentState.getSupporters().getSize(); i++){
                     for (int e = i+1; e < currentState.getSupporters().getSize();e++){
                         if(node.hasBuildingRoom() && (currentState.getSupporters().get(i).suit == node.getClearingType() || currentState.getSupporters().get(i).suit == RootParameters.ClearingTypes.Bird) && (currentState.getSupporters().get(e).suit == node.getClearingType() || currentState.getSupporters().get(e).suit == RootParameters.ClearingTypes.Bird)){
-                            Revolt revoltAction = new Revolt(currentState.getCurrentPlayer(), node.getComponentID(), currentState.getSupporters().get(i), currentState.getSupporters().get(e), false);
+                            Revolt revoltAction = new Revolt(currentState.getCurrentPlayer(), node.getComponentID(), i, currentState.getSupporters().get(i).getComponentID(), e, currentState.getSupporters().get(e).getComponentID(), false);
                             actions.add(revoltAction);
                         }
                     }
@@ -557,14 +552,14 @@ public class RootActionFactory {
             if(currentState.getSympathyTokens() == rp.sympathyTokens){
                 for(RootBoardNodeWithRootEdges location: currentState.getGameMap().getNonForrestBoardNodes()){
                     if(!location.getKeep() && !location.getSympathy() && currentState.supportersContainClearingType(location.getClearingType())){
-                        SpreadSympathy action = new SpreadSympathy(currentState.getCurrentPlayer(), location);
+                        SpreadSympathy action = new SpreadSympathy(currentState.getCurrentPlayer(), location.getComponentID());
                         actions.add(action);
                     }
                 }
             }else if (currentState.getSympathyTokens() > 0){
                 for(RootBoardNodeWithRootEdges location: currentState.getGameMap().getNonSympathyNodesAdjacentToSympathy()){
                     if(!location.getKeep() && !location.getSympathy() && currentState.supportersContainClearingType(location.getClearingType())){
-                        SpreadSympathy action = new SpreadSympathy(currentState.getCurrentPlayer(), location);
+                        SpreadSympathy action = new SpreadSympathy(currentState.getCurrentPlayer(), location.getComponentID());
                         actions.add(action);
                     }
                 }
@@ -587,7 +582,7 @@ public class RootActionFactory {
         PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(currentState.getCurrentPlayer());
         for (int i = 0; i < hand.getSize(); i++){
             if (hand.get(i).cardtype == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
-                actions.add(new PlayDomination(currentState.getCurrentPlayer(), hand.get(i)));
+                actions.add(new PlayDomination(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID()));
             }
         }
         if (currentState.playerSubGamePhase == 0) {
@@ -608,7 +603,7 @@ public class RootActionFactory {
 
         }else {
             for (int i = 0; i < hand.getSize(); i++) {
-                Mobilize action = new Mobilize(currentState.getCurrentPlayer(), hand.get(i));
+                Mobilize action = new Mobilize(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID());
                 actions.add(action);
             }
             if (currentState.getWoodlandWarriors() > 0) {
@@ -616,7 +611,7 @@ public class RootActionFactory {
                     for (int i = 0; i < hand.getSize(); i++) {
                         if (node.getClearingType() == hand.get(i).suit || hand.get(i).suit == RootParameters.ClearingTypes.Bird) {
                             if (currentState.getWoodlandWarriors() > 0) {
-                                Train action = new Train(currentState.getCurrentPlayer(), hand.get(i));
+                                Train action = new Train(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID());
                                 if (!actions.contains(action)) actions.add(action);
                             }
                         }
@@ -651,7 +646,7 @@ public class RootActionFactory {
                 }
                 if (currentState.getWoodlandWarriors() > 0 && !currentState.getGameMap().getBaseNodes().isEmpty()){
                     for (RootBoardNodeWithRootEdges node: currentState.getGameMap().getBaseNodes()){
-                        actions.add(new Recruit( node,currentState.getCurrentPlayer(), false));
+                        actions.add(new Recruit(node.getComponentID(), currentState.getCurrentPlayer(), false));
                     }
                 }
                 for (RootBoardNodeWithRootEdges location: currentState.getGameMap().getNonForrestBoardNodes()){
@@ -674,7 +669,7 @@ public class RootActionFactory {
             Deck<RootCard> playerHand = currentState.getPlayerHand(gs.getCurrentPlayer());
             if (playerHand.getSize() > rp.maxCardsEndTurn) {
                 for (int i = 0; i < playerHand.getSize(); i++) {
-                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), playerHand.get(i), false);
+                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), i, playerHand.get(i).getComponentID(), false);
                     actions.add(discardAction);
                 }
                 return actions;
@@ -686,10 +681,9 @@ public class RootActionFactory {
         }
         return null;
     }
+    //endregion
 
-    /**
-     * Vagabond Action Factory
-     */
+    //region Vagabond Action Factory
     static List<AbstractAction> getVagabondSetupActions(AbstractGameState gs) {
         //1st Choose character + starting items + Quests
         RootGameState state = (RootGameState) gs;
@@ -697,17 +691,16 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         if(state.getPlayerFaction(state.getCurrentPlayer()) == RootParameters.Factions.Vagabond){
             if(state.playerSubGamePhase == 0){
-                List<VagabondCharacters> allCharacters = state.VagabondCharacters.stream().toList();
-                for(int i = 0; i < allCharacters.size(); i++ ){
+                for (VagabondCharacter.CardType character : VagabondCharacter.CardType.values()) {
                     //choose character, get starting items...
-                    VagabondSetup action = new VagabondSetup(state.getCurrentPlayer(), allCharacters.get(i), true);
+                    VagabondSetup action = new VagabondSetup(state.getCurrentPlayer(), character, true);
                     actions.add(action);
                 }
             } else if (state.playerSubGamePhase == 1) {
                 //choose starting forest
                 for(RootBoardNodeWithRootEdges startingForrest : state.getGameMap().getBoardNodes()){
                     if(startingForrest.getClearingType() == RootParameters.ClearingTypes.Forrest){
-                        actions.add(new Recruit(startingForrest,state.getCurrentPlayer(), true));
+                        actions.add(new Recruit(startingForrest.getComponentID(), state.getCurrentPlayer(), true));
                     }
                 }
             } else{
@@ -726,7 +719,7 @@ public class RootActionFactory {
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
             if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
-                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), crafted.get(i)));
+                actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
         if(currentState.playerSubGamePhase == 0){
@@ -734,7 +727,7 @@ public class RootActionFactory {
             actions.add(refresh);
         } else if (currentState.playerSubGamePhase == 1) {
             for (RootBoardNodeWithRootEdges neighbour: currentState.getGameMap().getVagabondClearing().getNeighbours()){
-                Slip slip = new Slip(currentState.getCurrentPlayer(), currentState.getGameMap().getVagabondClearing(), neighbour, true);
+                Slip slip = new Slip(currentState.getCurrentPlayer(), currentState.getGameMap().getVagabondClearing().getComponentID(), neighbour.getComponentID(), true);
                 actions.add(slip);
             }
             PassSubGamePhase pass = new PassSubGamePhase(currentState.getCurrentPlayer(), "does not slip");
@@ -760,7 +753,6 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         boolean bootAdded = false;
         boolean swordAdded = false;
-        boolean torchAdded = false;
         boolean crossbowAdded = false;
         boolean hammerAdded = false;
         for (Item item: currentState.getSachel()){
@@ -795,13 +787,13 @@ public class RootActionFactory {
                             actions.add(new VagabondExplore(currentState.getCurrentPlayer()));
                         }
                         //special
-                        if (currentState.VagabondCharacter.character == VagabondCharacters.CardType.Ranger){
+                        if (currentState.vagabondCharacter.characterType == VagabondCharacter.CardType.Ranger){
                             actions.add(new VagabondHideout(currentState.getCurrentPlayer()));
-                        } else if (currentState.VagabondCharacter.character == VagabondCharacters.CardType.Tinker){
+                        } else if (currentState.vagabondCharacter.characterType == VagabondCharacter.CardType.Tinker){
                             if (currentState.getDiscardPile().getSize() > 0){
                                 actions.add(new VagabondDayLabour(currentState.getCurrentPlayer()));
                             }
-                        } else if (currentState.VagabondCharacter.character == VagabondCharacters.CardType.Thief) {
+                        } else if (currentState.vagabondCharacter.characterType == VagabondCharacter.CardType.Thief) {
                             if (currentState.canSteal(currentState.getCurrentPlayer())){
                                 actions.add(new VagabondSteal(currentState.getCurrentPlayer()));
                             }
@@ -812,25 +804,25 @@ public class RootActionFactory {
                         if (!hammerAdded) {
                             for (Item itemToRepair : currentState.getSachel()) {
                                 if (itemToRepair.damaged) {
-                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair, true);
+                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair.itemType, true);
                                     if (!actions.contains(action)) actions.add(action);
                                 }
                             }
                             for (Item itemToRepair : currentState.getCoins()) {
                                 if (itemToRepair.damaged) {
-                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair, true);
+                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair.itemType, true);
                                     if (!actions.contains(action)) actions.add(action);
                                 }
                             }
                             for (Item itemToRepair : currentState.getBags()) {
                                 if (itemToRepair.damaged) {
-                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair, true);
+                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair.itemType, true);
                                     if (!actions.contains(action)) actions.add(action);
                                 }
                             }
                             for (Item itemToRepair : currentState.getTeas()) {
                                 if (itemToRepair.damaged) {
-                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair, true);
+                                    VagabondRepair action = new VagabondRepair(currentState.getCurrentPlayer(), itemToRepair.itemType, true);
                                     if (!actions.contains(action)) actions.add(action);
                                 }
                             }
@@ -885,14 +877,14 @@ public class RootActionFactory {
             }
             return actions;
         } else if (currentState.playerSubGamePhase == 1) {
-            Draw action = new Draw(gs.getCurrentPlayer(), rp.cardsDrawnPerTurn + currentState.Coins.size(), true);
+            Draw action = new Draw(gs.getCurrentPlayer(), rp.cardsDrawnPerTurn + currentState.coins.size(), true);
             actions.add(action);
             return actions;
         } else if (currentState.playerSubGamePhase == 2) {
             Deck<RootCard> playerHand = currentState.getPlayerHand(gs.getCurrentPlayer());
             if (playerHand.getSize() > rp.maxCardsEndTurn) {
                 for (int i = 0; i < playerHand.getSize(); i++) {
-                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), playerHand.get(i), true);
+                    Discard discardAction = new Discard(currentState.getCurrentPlayer(), i, playerHand.get(i).getComponentID(), true);
                     actions.add(discardAction);
                 }
                 return actions;
@@ -901,21 +893,21 @@ public class RootActionFactory {
                 return actions;
             }
         }else if (currentState.playerSubGamePhase == 3) {
-            if (currentState.getSachel().size() + currentState.getDamagedAndExhaustedNonSatchelItems() > 6 + ((currentState.Bags.size() * 2))) {
+            if (currentState.getSachel().size() + currentState.getDamagedAndExhaustedNonSatchelItems() > 6 + ((currentState.bags.size() * 2))) {
                 for (Item satchel : currentState.getSachel()){
-                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), satchel);
+                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), satchel.itemType, satchel.getComponentID());
                     if(!actions.contains(action)) actions.add(action);
                 }
                 for (Item bag : currentState.getBags()){
-                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), bag);
+                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), bag.itemType, bag.getComponentID());
                     if(!actions.contains(action)) actions.add(action);
                 }
                 for (Item tea : currentState.getTeas()){
-                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), tea);
+                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), tea.itemType, tea.getComponentID());
                     if(!actions.contains(action)) actions.add(action);
                 }
                 for (Item coin : currentState.getCoins()){
-                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), coin);
+                    VagabondDiscardItem action = new VagabondDiscardItem(currentState.getCurrentPlayer(), coin.itemType, coin.getComponentID());
                     if(!actions.contains(action)) actions.add(action);
                 }
                 return actions;
@@ -927,8 +919,7 @@ public class RootActionFactory {
             }
         }
 
-        return null;
-
-        //System.out.println("Evening Vagabond " + currentState.playerSubGamePhase);
+        return actions;
     }
+    //endregion
 }

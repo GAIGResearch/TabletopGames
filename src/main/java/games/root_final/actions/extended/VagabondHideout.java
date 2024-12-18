@@ -1,10 +1,12 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.PassGamePhase;
+import games.root_final.actions.VagabondRepair;
 import games.root_final.components.Item;
 
 import java.util.ArrayList;
@@ -13,8 +15,9 @@ import java.util.Objects;
 
 public class VagabondHideout extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public int repaired = 0;
-    public boolean done = false;
+
+    int repaired = 0;
+    boolean done = false;
 
     public VagabondHideout(int playerID){
         this.playerID = playerID;
@@ -42,25 +45,25 @@ public class VagabondHideout extends AbstractAction implements IExtendedSequence
         if (repaired < 3){
             for (Item itemToRepair : rootGameState.getSachel()){
                 if (itemToRepair.damaged){
-                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair, true);
+                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair.itemType, true);
                     if (!actions.contains(action)) actions.add(action);
                 }
             }
             for (Item itemToRepair : rootGameState.getCoins()){
                 if (itemToRepair.damaged){
-                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair, true);
+                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair.itemType, true);
                     if (!actions.contains(action)) actions.add(action);
                 }
             }
             for (Item itemToRepair : rootGameState.getBags()){
                 if (itemToRepair.damaged){
-                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair, true);
+                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair.itemType, true);
                     if (!actions.contains(action)) actions.add(action);
                 }
             }
             for (Item itemToRepair : rootGameState.getTeas()){
                 if (itemToRepair.damaged){
-                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair, true);
+                    VagabondRepair action = new VagabondRepair(rootGameState.getCurrentPlayer(), itemToRepair.itemType, true);
                     if (!actions.contains(action)) actions.add(action);
                 }
             }
@@ -113,6 +116,11 @@ public class VagabondHideout extends AbstractAction implements IExtendedSequence
     @Override
     public int hashCode() {
         return Objects.hash("Hideout", playerID, done, repaired);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " plays hideout";
     }
 
     @Override

@@ -11,7 +11,7 @@ import games.GameType;
 import games.root_final.cards.EyrieRulers;
 import games.root_final.cards.RootCard;
 import games.root_final.cards.RootQuestCard;
-import games.root_final.cards.VagabondCharacters;
+import games.root_final.cards.VagabondCharacter;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 import games.root_final.components.RootGraphBoard;
@@ -24,9 +24,7 @@ import java.util.stream.Collectors;
  */
 public class RootGameState extends AbstractGameState {
     protected RootGraphBoard gameMap;
-
     protected RootParameters.MapType mapType;
-
     protected int[] playerScores;
     protected RootParameters.VictoryCondition[] playerVictoryConditions;
     protected int playerSubGamePhase = 0;
@@ -34,8 +32,9 @@ public class RootGameState extends AbstractGameState {
     protected int playersSetUp = 0;
     protected List<RootParameters.Factions> playerFactions;
     protected RootGamePhase gamePhase;
+
     /**
-     * ALl game pieces
+     * All game pieces
      */
     protected List<PartialObservableDeck<RootCard>> playerDecks;
     protected List<Deck<RootCard>> playerCraftedCards;
@@ -44,13 +43,11 @@ public class RootGameState extends AbstractGameState {
     protected Deck<RootCard> discardPile;
     protected Deck<RootQuestCard> questDrawPile;
     protected Deck<RootQuestCard> activeQuests;
-
     protected List<Item> craftableItems;
     protected List<Item> ruinItems;
     protected List<Item> startingItems;
-    /**
-     * Only for Cats
-     */
+
+    //region Cats state variables
     //Keep can be only placed once that is why the game state is only keeping track of whether the keep was destroyed
     protected boolean Keep;
     protected int CatWarriors;
@@ -58,47 +55,44 @@ public class RootGameState extends AbstractGameState {
     protected int Workshops;
     protected int Recruiters;
     protected int Sawmills;
-    /**
-     * Only for Eyrie
-     */
-    protected int EyrieWarriors;
+    //endregion
+
+    //region Eyrie state variables
+    protected int eyrieWarriors;
     protected List<Deck<RootCard>> eyrieDecree;
     protected List<RootParameters.ClearingTypes> playedSuits;
     protected Deck<EyrieRulers> rulers;
     protected Deck<RootCard> viziers;
     protected EyrieRulers activeRuler;
+    protected int roosts;
+    //endregion
 
-    protected int Roosts;
-
-    /**
-     * Only for Woodland Alliance
-     */
-    protected int WoodlandWarriors;
-    protected int FoxBase;
-    protected int RabbitBase;
-    protected int MouseBase;
-    protected int SympathyTokens;
+    //region Woodland Alliance state variables
+    protected int woodlandWarriors;
+    protected int foxBase;
+    protected int rabbitBase;
+    protected int mouseBase;
+    protected int sympathyTokens;
     protected int officers;
-    protected PartialObservableDeck<RootCard> Supporters;
+    protected PartialObservableDeck<RootCard> supporters;
+    //endregion
 
-
+    //region Vagabond state variables
     /**
-     * Only For Vagabond
      * The Sachel for holding damaged/undamaged items
      */
-    protected Deck<VagabondCharacters> VagabondCharacters;
-    protected VagabondCharacters VagabondCharacter;
-    protected int Vagabond;
-    protected int FoxQuests;
-    protected int MouseQuests;
-    protected int RabbitQuests;
-    protected List<Item> Sachel;
-    protected List<Item> Teas;
-    protected List<Item> Coins;
-    protected List<Item> Bags;
-
+    protected VagabondCharacter vagabondCharacter;
+    protected int vagabond;
+    protected int foxQuests;
+    protected int mouseQuests;
+    protected int rabbitQuests;
+    protected List<Item> sachel;
+    protected List<Item> teas;
+    protected List<Item> coins;
+    protected List<Item> bags;
     protected HashMap<RootParameters.Factions, RootParameters.Relationship> relationships;
     protected HashMap<RootParameters.Factions, Integer> aidNumbers;
+    //endregion
 
     public enum RootGamePhase implements IGamePhase {
         Setup,
@@ -143,7 +137,7 @@ public class RootGameState extends AbstractGameState {
         l.add(discardPile);
         l.addAll(playerCraftedCards);
         l.addAll(craftableItems);
-        for (List list : craftedItems) {
+        for (List<Item> list : craftedItems) {
             l.addAll(list);
         }
         if (getNPlayers() > 1) {
@@ -155,20 +149,19 @@ public class RootGameState extends AbstractGameState {
             l.add(rulers);
         }
         if (getNPlayers() > 2) {
-            l.add(Supporters);
+            l.add(supporters);
         }
         if (getNPlayers() > 3) {
             l.addAll(startingItems);
             l.addAll(ruinItems);
-            if (VagabondCharacter != null) {
-                l.add(VagabondCharacter);
+            if (vagabondCharacter != null) {
+                l.add(vagabondCharacter);
             }
-            l.add(VagabondCharacters);
             l.addAll(craftableItems);
-            l.addAll(Sachel);
-            l.addAll(Bags);
-            l.addAll(Teas);
-            l.addAll(Coins);
+            l.addAll(sachel);
+            l.addAll(bags);
+            l.addAll(teas);
+            l.addAll(coins);
             l.add(questDrawPile);
             l.add(activeQuests);
         }
@@ -180,8 +173,6 @@ public class RootGameState extends AbstractGameState {
     @Override
     protected RootGameState _copy(int playerId) {
         RootGameState copy = new RootGameState(gameParameters, getNPlayers());
-        copy.turnCounter = turnCounter;
-        copy.turnOwner = turnOwner;
         copy.gameMap = gameMap.copy();
         copy.mapType = mapType;
         copy.playerFactions = new ArrayList<>(playerFactions);
@@ -191,7 +182,6 @@ public class RootGameState extends AbstractGameState {
         copy.gamePhase = gamePhase;
         copy.playersSetUp = playersSetUp;
         copy.drawPile = drawPile.copy();
-        copy.setGamePhase(this.getGamePhase());
         copy.setPlayerSubGamePhase(playerSubGamePhase);
         copy.setActionsPlayed(actionsPlayed);
         
@@ -223,7 +213,7 @@ public class RootGameState extends AbstractGameState {
 
         if (getNPlayers() > 1) {
             copy.rulers = rulers.copy();
-            copy.EyrieWarriors = EyrieWarriors;
+            copy.eyrieWarriors = eyrieWarriors;
             copy.eyrieDecree = new ArrayList<>();
             for (int j = 0; j < eyrieDecree.size(); j++) {
                 copy.eyrieDecree.add(eyrieDecree.get(j).copy());
@@ -235,17 +225,17 @@ public class RootGameState extends AbstractGameState {
             if (activeRuler != null) {
                 copy.activeRuler = (EyrieRulers) activeRuler.copy();
             }
-            copy.Roosts = Roosts;
+            copy.roosts = roosts;
         }
 
         if (getNPlayers() > 2) {
-            copy.WoodlandWarriors = WoodlandWarriors;
-            copy.FoxBase = FoxBase;
-            copy.RabbitBase = RabbitBase;
-            copy.MouseBase = MouseBase;
-            copy.SympathyTokens = SympathyTokens;
+            copy.woodlandWarriors = woodlandWarriors;
+            copy.foxBase = foxBase;
+            copy.rabbitBase = rabbitBase;
+            copy.mouseBase = mouseBase;
+            copy.sympathyTokens = sympathyTokens;
             copy.officers = officers;
-            copy.Supporters = Supporters.copy();
+            copy.supporters = supporters.copy();
         }
 
         if (getNPlayers() > 3) {
@@ -260,28 +250,27 @@ public class RootGameState extends AbstractGameState {
                 copy.questDrawPile.shuffle(redeterminisationRnd);
             }
             copy.activeQuests = activeQuests.copy();
-            copy.VagabondCharacters = VagabondCharacters.copy();
-            if (VagabondCharacter != null) copy.VagabondCharacter = VagabondCharacter.copy();
-            copy.Vagabond = Vagabond;
-            copy.Sachel = new ArrayList<>();
-            for (int sachelCounter = 0; sachelCounter < Sachel.size(); sachelCounter++) {
-                copy.Sachel.add(Sachel.get(sachelCounter).copy());
+            if (vagabondCharacter != null) copy.vagabondCharacter = vagabondCharacter.copy();
+            copy.vagabond = vagabond;
+            copy.sachel = new ArrayList<>();
+            for (int sachelCounter = 0; sachelCounter < sachel.size(); sachelCounter++) {
+                copy.sachel.add(sachel.get(sachelCounter).copy());
             }
-            copy.Teas = new ArrayList<>();
-            for (int teaCounter = 0; teaCounter < Teas.size(); teaCounter++) {
-                copy.Teas.add(Teas.get(teaCounter).copy());
+            copy.teas = new ArrayList<>();
+            for (int teaCounter = 0; teaCounter < teas.size(); teaCounter++) {
+                copy.teas.add(teas.get(teaCounter).copy());
             }
-            copy.Coins = new ArrayList<>();
-            for (int coinCounter = 0; coinCounter < Coins.size(); coinCounter++) {
-                copy.Coins.add(Coins.get(coinCounter).copy());
+            copy.coins = new ArrayList<>();
+            for (int coinCounter = 0; coinCounter < coins.size(); coinCounter++) {
+                copy.coins.add(coins.get(coinCounter).copy());
             }
-            copy.Bags = new ArrayList<>();
-            for (int bagCounter = 0; bagCounter < Bags.size(); bagCounter++) {
-                copy.Bags.add(Bags.get(bagCounter).copy());
+            copy.bags = new ArrayList<>();
+            for (int bagCounter = 0; bagCounter < bags.size(); bagCounter++) {
+                copy.bags.add(bags.get(bagCounter).copy());
             }
-            copy.FoxQuests = FoxQuests;
-            copy.RabbitQuests = RabbitQuests;
-            copy.MouseQuests = MouseQuests;
+            copy.foxQuests = foxQuests;
+            copy.rabbitQuests = rabbitQuests;
+            copy.mouseQuests = mouseQuests;
 
             copy.relationships = new HashMap<>() {
                 {
@@ -324,12 +313,12 @@ public class RootGameState extends AbstractGameState {
             }
 
             if (getPlayerFaction(playerId) != RootParameters.Factions.WoodlandAlliance && getNPlayers() > 2) {
-                int supportersSize = copy.Supporters.getSize();
-                copy.drawPile.add(copy.Supporters);
-                copy.Supporters.clear();
+                int supportersSize = copy.supporters.getSize();
+                copy.drawPile.add(copy.supporters);
+                copy.supporters.clear();
                 copy.drawPile.shuffle(redeterminisationRnd);
                 for (int i = 0; i < supportersSize; i++) {
-                    copy.Supporters.add(copy.drawPile.draw());
+                    copy.supporters.add(copy.drawPile.draw());
                 }
             }
         } else {
@@ -355,7 +344,7 @@ public class RootGameState extends AbstractGameState {
         return playerScores[playerId];
     }
 
-    public void addGameScorePLayer(int playerID, int score) {
+    public void addGameScorePlayer(int playerID, int score) {
         if (playerVictoryConditions[playerID] == RootParameters.VictoryCondition.Score) {
             playerScores[playerID] += score;
         }
@@ -456,35 +445,35 @@ public class RootGameState extends AbstractGameState {
     }
 
     public int getBirdWarriors() {
-        return EyrieWarriors;
+        return eyrieWarriors;
     }
 
     public void removeBirdWarrior() {
-        EyrieWarriors--;
+        eyrieWarriors--;
     }
 
     public void addBirdWarrior() {
-        EyrieWarriors++;
+        eyrieWarriors++;
     }
 
     public int getWoodlandWarriors() {
-        return WoodlandWarriors;
+        return woodlandWarriors;
     }
 
     public void removeWoodlandWarrior() {
-        WoodlandWarriors--;
+        woodlandWarriors--;
     }
 
     public int getVagabond() {
-        return Vagabond;
+        return vagabond;
     }
 
     public int getNumberOfTeas() {
-        return Teas.size();
+        return teas.size();
     }
 
     public void removeVagabondWarrior() {
-        Vagabond--;
+        vagabond--;
     }
 
     public void removeWood() {
@@ -497,10 +486,10 @@ public class RootGameState extends AbstractGameState {
                 CatWarriors++;
                 break;
             case EyrieDynasties:
-                EyrieWarriors++;
+                eyrieWarriors++;
                 break;
             case WoodlandAlliance:
-                WoodlandWarriors++;
+                woodlandWarriors++;
                 break;
             case Vagabond:
                 System.out.println("Something went wrong -> attempting to remove a vagabond piece");
@@ -511,8 +500,8 @@ public class RootGameState extends AbstractGameState {
     public void removeBuilding(RootParameters.BuildingType bt) throws IllegalAccessException {
         switch (bt) {
             case Roost:
-                if (Roosts > 0) {
-                    Roosts--;
+                if (roosts > 0) {
+                    roosts--;
                 } else {
                     throw new IllegalAccessException("Trying to place a roost which is not available");
                 }
@@ -539,22 +528,22 @@ public class RootGameState extends AbstractGameState {
                 }
                 break;
             case MouseBase:
-                if (MouseBase > 0) {
-                    MouseBase--;
+                if (mouseBase > 0) {
+                    mouseBase--;
                 } else {
                     throw new IllegalAccessException("MouseBase unavailable");
                 }
                 break;
             case RabbitBase:
-                if (RabbitBase > 0) {
-                    RabbitBase--;
+                if (rabbitBase > 0) {
+                    rabbitBase--;
                 } else {
                     throw new IllegalAccessException("RabbitBase unavailable");
                 }
                 break;
             case FoxBase:
-                if (FoxBase > 0) {
-                    FoxBase--;
+                if (foxBase > 0) {
+                    foxBase--;
                 } else {
                     throw new IllegalAccessException("FoxBase unavailable");
                 }
@@ -568,7 +557,7 @@ public class RootGameState extends AbstractGameState {
                 Wood++;
                 break;
             case Sympathy:
-                SympathyTokens++;
+                sympathyTokens++;
                 break;
             case Keep:
                 //when destroyed the keep is no longer in game
@@ -586,8 +575,8 @@ public class RootGameState extends AbstractGameState {
                 }
                 break;
             case Sympathy:
-                if (SympathyTokens > 0) {
-                    SympathyTokens--;
+                if (sympathyTokens > 0) {
+                    sympathyTokens--;
                 } else {
                     System.out.println("Trying to remove sympathy token which does not exist");
                 }
@@ -601,7 +590,7 @@ public class RootGameState extends AbstractGameState {
     public void addBuilding(RootParameters.BuildingType type) {
         switch (type) {
             case Roost:
-                Roosts++;
+                roosts++;
                 break;
             case Sawmill:
                 Sawmills++;
@@ -613,13 +602,13 @@ public class RootGameState extends AbstractGameState {
                 Recruiters++;
                 break;
             case FoxBase:
-                FoxBase++;
+                foxBase++;
                 break;
             case RabbitBase:
-                RabbitBase++;
+                rabbitBase++;
                 break;
             case MouseBase:
-                MouseBase++;
+                mouseBase++;
                 break;
         }
     }
@@ -628,7 +617,7 @@ public class RootGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof RootGameState that)) return false;
-        return playerSubGamePhase == that.playerSubGamePhase && actionsPlayed == that.actionsPlayed && playersSetUp == that.playersSetUp && Keep == that.Keep && CatWarriors == that.CatWarriors && Wood == that.Wood && Workshops == that.Workshops && Recruiters == that.Recruiters && Sawmills == that.Sawmills && EyrieWarriors == that.EyrieWarriors && Roosts == that.Roosts && WoodlandWarriors == that.WoodlandWarriors && FoxBase == that.FoxBase && RabbitBase == that.RabbitBase && MouseBase == that.MouseBase && SympathyTokens == that.SympathyTokens && officers == that.officers && Vagabond == that.Vagabond && FoxQuests == that.FoxQuests && MouseQuests == that.MouseQuests && RabbitQuests == that.RabbitQuests && Objects.equals(gameMap, that.gameMap) && mapType == that.mapType && Arrays.equals(playerScores, that.playerScores) && Arrays.equals(playerVictoryConditions, that.playerVictoryConditions) && Objects.equals(playerFactions, that.playerFactions) && gamePhase == that.gamePhase && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(playerCraftedCards, that.playerCraftedCards) && Objects.equals(craftedItems, that.craftedItems) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile) && Objects.equals(questDrawPile, that.questDrawPile) && Objects.equals(activeQuests, that.activeQuests) && Objects.equals(craftableItems, that.craftableItems) && Objects.equals(ruinItems, that.ruinItems) && Objects.equals(startingItems, that.startingItems) && Objects.equals(eyrieDecree, that.eyrieDecree) && Objects.equals(playedSuits, that.playedSuits) && Objects.equals(rulers, that.rulers) && Objects.equals(viziers, that.viziers) && Objects.equals(activeRuler, that.activeRuler) && Objects.equals(Supporters, that.Supporters) && Objects.equals(VagabondCharacters, that.VagabondCharacters) && Objects.equals(VagabondCharacter, that.VagabondCharacter) && Objects.equals(Sachel, that.Sachel) && Objects.equals(Teas, that.Teas) && Objects.equals(Coins, that.Coins) && Objects.equals(Bags, that.Bags) && Objects.equals(relationships, that.relationships) && Objects.equals(aidNumbers, that.aidNumbers);
+        return playerSubGamePhase == that.playerSubGamePhase && actionsPlayed == that.actionsPlayed && playersSetUp == that.playersSetUp && Keep == that.Keep && CatWarriors == that.CatWarriors && Wood == that.Wood && Workshops == that.Workshops && Recruiters == that.Recruiters && Sawmills == that.Sawmills && eyrieWarriors == that.eyrieWarriors && roosts == that.roosts && woodlandWarriors == that.woodlandWarriors && foxBase == that.foxBase && rabbitBase == that.rabbitBase && mouseBase == that.mouseBase && sympathyTokens == that.sympathyTokens && officers == that.officers && vagabond == that.vagabond && foxQuests == that.foxQuests && mouseQuests == that.mouseQuests && rabbitQuests == that.rabbitQuests && Objects.equals(gameMap, that.gameMap) && mapType == that.mapType && Arrays.equals(playerScores, that.playerScores) && Arrays.equals(playerVictoryConditions, that.playerVictoryConditions) && Objects.equals(playerFactions, that.playerFactions) && gamePhase == that.gamePhase && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(playerCraftedCards, that.playerCraftedCards) && Objects.equals(craftedItems, that.craftedItems) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile) && Objects.equals(questDrawPile, that.questDrawPile) && Objects.equals(activeQuests, that.activeQuests) && Objects.equals(craftableItems, that.craftableItems) && Objects.equals(ruinItems, that.ruinItems) && Objects.equals(startingItems, that.startingItems) && Objects.equals(eyrieDecree, that.eyrieDecree) && Objects.equals(playedSuits, that.playedSuits) && Objects.equals(rulers, that.rulers) && Objects.equals(viziers, that.viziers) && Objects.equals(activeRuler, that.activeRuler) && Objects.equals(supporters, that.supporters) && Objects.equals(vagabondCharacter, that.vagabondCharacter) && Objects.equals(sachel, that.sachel) && Objects.equals(teas, that.teas) && Objects.equals(coins, that.coins) && Objects.equals(bags, that.bags) && Objects.equals(relationships, that.relationships) && Objects.equals(aidNumbers, that.aidNumbers);
     }
 
     @Override
@@ -636,9 +625,9 @@ public class RootGameState extends AbstractGameState {
         int result = Objects.hash(gameMap, mapType, playerSubGamePhase, actionsPlayed, playersSetUp, playerFactions,
                 gamePhase, playerDecks, playerCraftedCards, craftedItems, drawPile, discardPile, questDrawPile,
                 activeQuests, Keep, CatWarriors, Wood, Workshops,
-                Recruiters, Sawmills, EyrieWarriors, eyrieDecree, playedSuits, rulers, viziers, activeRuler, Roosts,
-                WoodlandWarriors, FoxBase, RabbitBase, MouseBase, SympathyTokens, officers, Supporters, VagabondCharacters,
-                VagabondCharacter, Vagabond, FoxQuests, MouseQuests, RabbitQuests, Sachel, Teas, Coins, Bags, relationships,
+                Recruiters, Sawmills, eyrieWarriors, eyrieDecree, playedSuits, rulers, viziers, activeRuler, roosts,
+                woodlandWarriors, foxBase, rabbitBase, mouseBase, sympathyTokens, officers, supporters,
+                vagabondCharacter, vagabond, foxQuests, mouseQuests, rabbitQuests, sachel, teas, coins, bags, relationships,
                 aidNumbers, startingItems, craftableItems, ruinItems);
         result = 31 * result + Arrays.hashCode(playerScores);
         result = 31 * result + Arrays.hashCode(playerVictoryConditions);
@@ -700,7 +689,7 @@ public class RootGameState extends AbstractGameState {
     }
 
     public PartialObservableDeck<RootCard> getSupporters() {
-        return Supporters;
+        return supporters;
     }
 
     public int getOfficers() {
@@ -708,9 +697,9 @@ public class RootGameState extends AbstractGameState {
     }
 
     public void addOfficer() throws IllegalAccessException {
-        if (WoodlandWarriors > 0) {
+        if (woodlandWarriors > 0) {
             officers++;
-            WoodlandWarriors--;
+            woodlandWarriors--;
         } else {
             throw new IllegalAccessException("Trying to add and officer with no available warriors");
         }
@@ -720,9 +709,9 @@ public class RootGameState extends AbstractGameState {
         playersSetUp++;
     }
 
-    public void setVagabondCharacter(VagabondCharacters character) {
-        if (VagabondCharacter == null) {
-            VagabondCharacter = character;
+    public void setVagabondCharacter(VagabondCharacter character) {
+        if (vagabondCharacter == null) {
+            vagabondCharacter = character;
         }
     }
 
@@ -735,35 +724,35 @@ public class RootGameState extends AbstractGameState {
     }
 
     public List<Item> getSachel() {
-        return Sachel;
+        return sachel;
     }
 
     public int getSympathyTokens() {
-        return SympathyTokens;
+        return sympathyTokens;
     }
 
     public void removeSympathyTokens() {
-        if (SympathyTokens > 0) {
-            SympathyTokens--;
+        if (sympathyTokens > 0) {
+            sympathyTokens--;
         }
     }
 
     public boolean supportersContainClearingType(RootParameters.ClearingTypes clearingType) {
         int counter = 0;
-        for (int i = 0; i < Supporters.getSize(); i++) {
-            if (Supporters.get(i).suit == clearingType || Supporters.get(i).suit == RootParameters.ClearingTypes.Bird) {
+        for (int i = 0; i < supporters.getSize(); i++) {
+            if (supporters.get(i).suit == clearingType || supporters.get(i).suit == RootParameters.ClearingTypes.Bird) {
                 counter++;
             }
         }
         RootParameters rp = (RootParameters) getGameParameters();
-        return counter >= rp.SympathyDiscardCost.get(SympathyTokens);
+        return counter >= rp.sympathyDiscardCost.get(sympathyTokens);
     }
 
     public String getVagabondType() {
-        if (VagabondCharacter == null) {
+        if (vagabondCharacter == null) {
             return "Vagabond";
         }
-        return VagabondCharacter.character.toString();
+        return vagabondCharacter.characterType.toString();
     }
 
     public int getBuildingCount(RootParameters.BuildingType bt) {
@@ -771,10 +760,10 @@ public class RootGameState extends AbstractGameState {
             case Workshop -> Workshops;
             case Recruiter -> Recruiters;
             case Sawmill -> Sawmills;
-            case Roost -> Roosts;
-            case FoxBase -> FoxBase;
-            case MouseBase -> MouseBase;
-            case RabbitBase -> RabbitBase;
+            case Roost -> roosts;
+            case FoxBase -> foxBase;
+            case MouseBase -> mouseBase;
+            case RabbitBase -> rabbitBase;
             default -> 0;
         };
     }
@@ -782,7 +771,7 @@ public class RootGameState extends AbstractGameState {
     public int getTokenCount(RootParameters.TokenType tt) {
         return switch (tt) {
             case Keep -> Keep ? 1 : 0;
-            case Sympathy -> SympathyTokens;
+            case Sympathy -> sympathyTokens;
             case Wood -> Wood;
             default -> 0;
         };
@@ -810,7 +799,7 @@ public class RootGameState extends AbstractGameState {
 
     public int getRefreshedItemCount(Item.ItemType itemType) {
         int result = 0;
-        for (Item item : Sachel) {
+        for (Item item : sachel) {
             if (item.itemType == itemType && item.refreshed && !item.damaged) {
                 result++;
             }
@@ -819,15 +808,15 @@ public class RootGameState extends AbstractGameState {
     }
 
     public List<Item> getTeas() {
-        return Teas;
+        return teas;
     }
 
     public List<Item> getCoins() {
-        return Coins;
+        return coins;
     }
 
     public List<Item> getBags() {
-        return Bags;
+        return bags;
     }
 
     public Item getRandomRuinItem() {
@@ -842,17 +831,17 @@ public class RootGameState extends AbstractGameState {
 
     public int getDamagedAndExhaustedNonSatchelItems() {
         int i = 0;
-        for (Item bag : Bags) {
+        for (Item bag : bags) {
             if (bag.damaged || !bag.refreshed) {
                 i++;
             }
         }
-        for (Item tea : Teas) {
+        for (Item tea : teas) {
             if (tea.damaged || !tea.refreshed) {
                 i++;
             }
         }
-        for (Item coin : Coins) {
+        for (Item coin : coins) {
             if (coin.damaged || !coin.refreshed) {
                 i++;
             }
@@ -1133,7 +1122,7 @@ public class RootGameState extends AbstractGameState {
 
     public int getVagabondUndamagedSwords() {
         int swords = 0;
-        for (Item item : Sachel) {
+        for (Item item : sachel) {
             if (item.itemType == Item.ItemType.sword && !item.damaged) {
                 swords++;
             }
@@ -1199,19 +1188,19 @@ public class RootGameState extends AbstractGameState {
         return false;
     }
 
-    public void CompleteQuest(RootParameters.ClearingTypes clearingType) {
+    public void completeQuest(RootParameters.ClearingTypes clearingType) {
         switch (clearingType) {
-            case Fox -> FoxQuests++;
-            case Rabbit -> RabbitQuests++;
-            case Mouse -> MouseQuests++;
+            case Fox -> foxQuests++;
+            case Rabbit -> rabbitQuests++;
+            case Mouse -> mouseQuests++;
         }
     }
 
     public int getCompletedQuests(RootParameters.ClearingTypes clearingType) {
         return switch (clearingType) {
-            case Mouse -> MouseQuests;
-            case Rabbit -> RabbitQuests;
-            case Fox -> FoxQuests;
+            case Mouse -> mouseQuests;
+            case Rabbit -> rabbitQuests;
+            case Fox -> foxQuests;
             default -> 0;
         };
     }
@@ -1223,7 +1212,7 @@ public class RootGameState extends AbstractGameState {
             aidNumbers.put(faction, aidNumbers.get(faction) + 1);
             if (aidNumbers.get(faction) >= 1) {
                 relationships.put(faction, RootParameters.Relationship.One);
-                addGameScorePLayer(playerID, 1);
+                addGameScorePlayer(playerID, 1);
                 aidNumbers.put(faction, 0);
                 logEvent(Event.GameEvent.GAME_EVENT, faction.toString() + " is now at relationship One");
             }
@@ -1231,7 +1220,7 @@ public class RootGameState extends AbstractGameState {
             aidNumbers.put(faction, aidNumbers.get(faction) + 1);
             if (aidNumbers.get(faction) >= 2) {
                 relationships.put(faction, RootParameters.Relationship.Two);
-                addGameScorePLayer(playerID, 2);
+                addGameScorePlayer(playerID, 2);
                 aidNumbers.put(faction, 0);
                 logEvent(Event.GameEvent.GAME_EVENT, faction.toString() + " is now at relationship Two");
             }
@@ -1239,13 +1228,13 @@ public class RootGameState extends AbstractGameState {
             aidNumbers.put(faction, aidNumbers.get(faction) + 1);
             if (aidNumbers.get(faction) >= 3) {
                 relationships.put(faction, RootParameters.Relationship.Allied);
-                addGameScorePLayer(playerID, 2);
+                addGameScorePlayer(playerID, 2);
                 aidNumbers.put(faction, 0);
                 logEvent(Event.GameEvent.GAME_EVENT, faction.toString() + " is now at relationship Allied");
             }
         } else if (relationships.get(faction) == RootParameters.Relationship.Allied) {
             aidNumbers.put(faction, aidNumbers.get(faction) + 1);
-            addGameScorePLayer(playerID, 2);
+            addGameScorePlayer(playerID, 2);
         }
     }
 
@@ -1271,7 +1260,7 @@ public class RootGameState extends AbstractGameState {
         return playerVictoryConditions[playerID];
     }
 
-    public boolean ScoreGameOver(){
-        return Arrays.stream(playerScores).anyMatch(x -> x >= 30);
+    public boolean scoreGameOver(){
+        return Arrays.stream(playerScores).anyMatch(x -> x >= ((RootParameters)getGameParameters()).scoreToEnd);
     }
 }

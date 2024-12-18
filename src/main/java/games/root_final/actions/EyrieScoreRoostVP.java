@@ -19,7 +19,7 @@ public class EyrieScoreRoostVP extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.EyrieDynasties){
-            currentState.addGameScorePLayer(currentState.getCurrentPlayer(),score);
+            currentState.addGameScorePlayer(currentState.getCurrentPlayer(),score);
             currentState.increaseSubGamePhase();
             return true;
         }
@@ -27,22 +27,26 @@ public class EyrieScoreRoostVP extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public EyrieScoreRoostVP copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof EyrieScoreRoostVP e){
-            return playerID == e.playerID && score == e.score;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EyrieScoreRoostVP that = (EyrieScoreRoostVP) o;
+        return playerID == that.playerID && score == that.score;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Roosts",playerID);
+        return Objects.hash(playerID, score);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " scores " + score + " for built roosts";
     }
 
     @Override

@@ -10,19 +10,19 @@ import java.util.Objects;
 
 public class PlaceSympathy extends AbstractAction {
     public final int playerID;
-    public RootBoardNodeWithRootEdges location;
+    public final int locationID;
 
-    public PlaceSympathy(int playerID, RootBoardNodeWithRootEdges location){
+    public PlaceSympathy(int playerID, int locationID){
         this.playerID = playerID;
-        this.location = location;
+        this.locationID = locationID;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState state = (RootGameState) gs;
         RootParameters rp = (RootParameters) gs.getGameParameters();
         if(playerID == state.getCurrentPlayer() && state.getPlayerFaction(playerID) == RootParameters.Factions.WoodlandAlliance){
-            state.addGameScorePLayer(playerID, rp.sympathyPoints.get(state.getTokenCount(RootParameters.TokenType.Sympathy)));
-            state.getGameMap().getNodeByID(location.getComponentID()).setSympathy();
+            state.addGameScorePlayer(playerID, rp.sympathyPoints.get(state.getTokenCount(RootParameters.TokenType.Sympathy)));
+            state.getGameMap().getNodeByID(state.getGameMap().getNodeByID(locationID).getComponentID()).setSympathy();
             state.removeSympathyTokens();
             return true;
         }
@@ -30,28 +30,31 @@ public class PlaceSympathy extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PlaceSympathy(playerID, location);
+    public PlaceSympathy copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof PlaceSympathy){
-            PlaceSympathy other = (PlaceSympathy) obj;
-            return playerID == other.playerID && location.getComponentID()==other.location.getComponentID();
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlaceSympathy that = (PlaceSympathy) o;
+        return playerID == that.playerID && locationID == that.locationID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("PlaceSympathy", playerID, location.hashCode());
+        return Objects.hash(playerID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " places sympathy token at " + locationID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " places sympathy token at location " + location.identifier;
+        return gs.getPlayerFaction(playerID).toString() + " places sympathy token at location " + gs.getGameMap().getNodeByID(locationID).identifier;
     }
 }

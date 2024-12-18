@@ -8,10 +8,11 @@ import java.util.Objects;
 
 public class Pass extends AbstractAction {
     public final int playerID;
+    public final String message;
 
-    public String message;
     public Pass(int playerID){
         this.playerID = playerID;
+        this.message = "";
     }
     public Pass(int playerID, String message){
         this.playerID = playerID;
@@ -19,33 +20,30 @@ public class Pass extends AbstractAction {
     }
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (gs.getCurrentPlayer() == playerID){
-            return true;
-        }
-        return false;
+        return gs.getCurrentPlayer() == playerID;
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Pass(playerID, message);
+    public Pass copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof Pass){
-            Pass other = (Pass) obj;
-            if (message == null || other.message == null){
-                return playerID == other.playerID && message == other.message;
-            }
-            return playerID == other.playerID && message.equals(other.message);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pass pass = (Pass) o;
+        return playerID == pass.playerID && Objects.equals(message, pass.message);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Pass", playerID);
+        return Objects.hash(playerID, message);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " passes: " + message;
     }
 
     @Override

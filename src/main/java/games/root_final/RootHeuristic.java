@@ -6,7 +6,6 @@ import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
 import games.root_final.components.Item;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RootHeuristic extends TunableParameters implements IStateHeuristic {
@@ -53,7 +52,7 @@ public class RootHeuristic extends TunableParameters implements IStateHeuristic 
 
     private double calculateWinConditionHeuristic(int playerID, RootGameState gameState){
         if (gameState.getPlayerVictoryCondition(playerID) == RootParameters.VictoryCondition.Score) {
-            return Math.min(gameState.getGameScore(playerID), 30);
+            return Math.min(gameState.getGameScore(playerID), ((RootParameters)gameState.getGameParameters()).scoreToEnd);
         } else {
             switch (gameState.getPlayerVictoryCondition(playerID)) {
                 case DM -> {
@@ -92,16 +91,16 @@ public class RootHeuristic extends TunableParameters implements IStateHeuristic 
             case WoodlandAlliance:
                 ret += 10.0 - gameState.getWoodlandWarriors();
                 ret += 0.5 * gameState.getGameMap().getNonForrestBoardNodes().stream().filter(node -> node.rulerID == 2).count();
-                ret += 2* (1.0 - gameState.FoxBase);
-                ret += 2*(1.0 - gameState.RabbitBase);
-                ret += 2*(1.0 - gameState.MouseBase);
-                ret += 10.0 - gameState.SympathyTokens;
+                ret += 2* (1.0 - gameState.foxBase);
+                ret += 2*(1.0 - gameState.rabbitBase);
+                ret += 2*(1.0 - gameState.mouseBase);
+                ret += 10.0 - gameState.sympathyTokens;
                 break;
             case Vagabond:
-                ret += 2* gameState.Sachel.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
-                ret += 2* gameState.Coins.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
-                ret += 2* gameState.Bags.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
-                ret += 2* gameState.Teas.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
+                ret += 2* gameState.sachel.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
+                ret += 2* gameState.coins.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
+                ret += 2* gameState.bags.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
+                ret += 2* gameState.teas.stream().mapToDouble(item -> item.damaged ? 0.5 : (!item.refreshed ? 1.0 : 1.5)).sum();
                 break;
         }
         return ret;
@@ -128,8 +127,8 @@ public class RootHeuristic extends TunableParameters implements IStateHeuristic 
         switch (faction){
             case MarquiseDeCat -> ret += 3.75 *(8 - gameState.Wood);
             case EyrieDynasties -> ret += Math.min((gameState.eyrieDecree.get(0).getSize() + gameState.eyrieDecree.get(1).getSize() + gameState.eyrieDecree.get(2).getSize() + gameState.eyrieDecree.get(3).getSize()), 30.0);
-            case WoodlandAlliance -> ret += Math.min(3.0 * gameState.Supporters.getSize(), 30.0);
-            case Vagabond -> ret += Math.min(gameState.FoxQuests + gameState.RabbitQuests + gameState.MouseQuests + gameState.craftedItems.stream().mapToInt(List<Item>::size).sum(), 30.0);
+            case WoodlandAlliance -> ret += Math.min(3.0 * gameState.supporters.getSize(), 30.0);
+            case Vagabond -> ret += Math.min(gameState.foxQuests + gameState.rabbitQuests + gameState.mouseQuests + gameState.craftedItems.stream().mapToInt(List<Item>::size).sum(), 30.0);
         }
         return ret;
     }

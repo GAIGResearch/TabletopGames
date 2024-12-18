@@ -28,5 +28,9 @@ public class RootEdge extends Component {
         return componentID + ownerId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof RootEdge && super.equals(o);
+    }
 }
 

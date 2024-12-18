@@ -8,9 +8,11 @@ import java.util.Objects;
 
 public class PassSubGamePhase extends AbstractAction {
     public final int playerID;
-    public String message;
+    public final String message;
+
     public PassSubGamePhase(int playerID){
         this.playerID = playerID;
+        this.message = "";
     }
 
     public PassSubGamePhase(int playerID, String message){
@@ -28,25 +30,26 @@ public class PassSubGamePhase extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public PassSubGamePhase copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof PassSubGamePhase other){
-            if (message != null && other.message != null) {
-                return playerID == other.playerID && Objects.equals(message, other.message);
-            }
-            return playerID == other.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PassSubGamePhase that = (PassSubGamePhase) o;
+        return playerID == that.playerID && Objects.equals(message, that.message);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("PassSubGamePhase", playerID);
+        return Objects.hash(playerID, message);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " passes sub-game-phase: " + message;
     }
 
     @Override

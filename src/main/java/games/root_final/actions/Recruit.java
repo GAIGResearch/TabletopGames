@@ -11,37 +11,43 @@ import java.util.List;
 import java.util.Objects;
 
 public class Recruit extends AbstractAction {
-    public RootBoardNodeWithRootEdges location;
-    public int playerID;
-    public int numberOfWarriors = 1;
+    public final int locationID;
+    public final int playerID;
+    public final int numberOfWarriors;
     public final boolean increaseSubGamePhase;
-    public boolean playedBird = false;
-    public Recruit(RootBoardNodeWithRootEdges location, int playerIdx, boolean increaseSubGamePhase){
-        this.location = location;
+    public final boolean playedBird;
+
+    public Recruit(int locationID, int playerIdx, boolean increaseSubGamePhase){
+        this.locationID = locationID;
         this.playerID = playerIdx;
         this.increaseSubGamePhase = increaseSubGamePhase;
+        this.numberOfWarriors = 1;
+        this.playedBird = false;
     }
 
-    public Recruit(RootBoardNodeWithRootEdges location, int playerID, boolean increaseSubGamePhase, boolean playedBird){
-        this.location = location;
+    public Recruit(int locationID, int playerID, boolean increaseSubGamePhase, boolean playedBird){
+        this.locationID = locationID;
         this.playerID = playerID;
         this.increaseSubGamePhase = increaseSubGamePhase;
         this.playedBird = playedBird;
+        this.numberOfWarriors = 1;
     }
 
-    public Recruit(RootBoardNodeWithRootEdges location, int playerID, int amount, boolean increaseSubGamePhase, boolean playedBird){
-        this.location = location;
+    public Recruit(int locationID, int playerID, int amount, boolean increaseSubGamePhase, boolean playedBird){
+        this.locationID = locationID;
         this.playerID = playerID;
         this.numberOfWarriors = amount;
         this.increaseSubGamePhase = increaseSubGamePhase;
         this.playedBird = playedBird;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if(playerID == currentState.getCurrentPlayer()){
             currentState.increaseActionsPlayed();
             if(increaseSubGamePhase){currentState.increaseSubGamePhase();}
+            RootBoardNodeWithRootEdges location = currentState.getGameMap().getNodeByID(locationID);
             for(int i = 0; i< numberOfWarriors; i++) {
                 if (currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat) {
                     if (currentState.getCatWarriors() > 0) {
@@ -84,29 +90,32 @@ public class Recruit extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Recruit(location, playerID, numberOfWarriors, increaseSubGamePhase, playedBird);
+    public Recruit copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if(obj instanceof Recruit)
-        {
-            Recruit other = (Recruit) obj;
-            return location.getComponentID()==other.location.getComponentID() && playerID == other.playerID && numberOfWarriors == other.numberOfWarriors && increaseSubGamePhase == other.increaseSubGamePhase;
-
-        }else return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Recruit recruit = (Recruit) o;
+        return locationID == recruit.locationID && playerID == recruit.playerID && numberOfWarriors == recruit.numberOfWarriors && increaseSubGamePhase == recruit.increaseSubGamePhase && playedBird == recruit.playedBird;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, location, numberOfWarriors, increaseSubGamePhase);
+        return Objects.hash(locationID, playerID, numberOfWarriors, increaseSubGamePhase, playedBird);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " recruits " + numberOfWarriors + " warriors at " + locationID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootBoardNodeWithRootEdges location = gs.getGameMap().getNodeByID(locationID);
         return gs.getPlayerFaction(playerID).toString() + " recruits " + numberOfWarriors + " warriors at " + location.identifier;
     }
 

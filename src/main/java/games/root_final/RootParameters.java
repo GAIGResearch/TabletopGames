@@ -2,22 +2,14 @@ package games.root_final;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.Dice;
 import evaluation.optimisation.TunableParameters;
-import games.battlelore.components.Unit;
-import games.explodingkittens.cards.ExplodingKittensCard;
 import games.root_final.cards.EyrieRulers;
 import games.root_final.cards.RootCard;
 import games.root_final.cards.RootQuestCard;
-import games.root_final.cards.VagabondCharacters;
+import games.root_final.cards.VagabondCharacter;
 import games.root_final.components.Item;
-import scala.Int;
-import utilities.Hash;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -32,7 +24,6 @@ import java.util.Objects;
 public class RootParameters extends AbstractParameters {
 
     public String dataPath = "data/root/";
-    public Dice.Type dieType = Dice.Type.d4;
     public int cardsDrawnPerTurn = 2;
 
     public int maxCardsEndTurn = 5;
@@ -40,11 +31,13 @@ public class RootParameters extends AbstractParameters {
     public int maxWood = 8;
     public int maxViziers = 2;
     public int sympathyTokens = 10;
+    public int scoreToEnd = 30;
 
     public enum MapType {
         Summer,
         Winter,
     }
+
     public enum Relationship {
         Hostile,
         Neutral,
@@ -116,7 +109,7 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    HashMap<BuildingType, Integer> buildingCount = new HashMap<BuildingType, Integer>() {
+    HashMap<BuildingType, Integer> buildingCount = new HashMap<>() {
         {
             put(BuildingType.Roost, 7);
             put(BuildingType.FoxBase, 1);
@@ -238,7 +231,7 @@ public class RootParameters extends AbstractParameters {
     };
 
 
-    public HashMap<EyrieRulers.CardType, Boolean[]> eyrieRulers = new HashMap<EyrieRulers.CardType, Boolean[]>() {
+    public HashMap<EyrieRulers.CardType, Boolean[]> eyrieRulers = new HashMap<>() {
         {
             put(EyrieRulers.CardType.Despot, new Boolean[]{false, true, false, true});
             put(EyrieRulers.CardType.Builder, new Boolean[]{true, true, false, false});
@@ -263,28 +256,28 @@ public class RootParameters extends AbstractParameters {
         }
     };
 
-    HashMap<VagabondCharacters.CardType, List<Item.ItemType>> vagabondCharacterInitializer = new HashMap<>() {
+    public HashMap<VagabondCharacter.CardType, List<Item.ItemType>> vagabondCharacterInitializer = new HashMap<>() {
         {
             ArrayList<Item.ItemType> thiefItems = new ArrayList<>();
             thiefItems.add(Item.ItemType.boot);
             thiefItems.add(Item.ItemType.torch);
             thiefItems.add(Item.ItemType.tea);
             thiefItems.add(Item.ItemType.sword);
-            put(VagabondCharacters.CardType.Thief, thiefItems);
+            put(VagabondCharacter.CardType.Thief, thiefItems);
 
             ArrayList<Item.ItemType> tinkerItems = new ArrayList<>();
             tinkerItems.add(Item.ItemType.boot);
             tinkerItems.add(Item.ItemType.torch);
             tinkerItems.add(Item.ItemType.bag);
             tinkerItems.add(Item.ItemType.hammer);
-            put(VagabondCharacters.CardType.Tinker, tinkerItems);
+            put(VagabondCharacter.CardType.Tinker, tinkerItems);
 
             ArrayList<Item.ItemType> rangerItems = new ArrayList<>();
             rangerItems.add(Item.ItemType.boot);
             rangerItems.add(Item.ItemType.torch);
             rangerItems.add(Item.ItemType.crossbow);
             rangerItems.add(Item.ItemType.sword);
-            put(VagabondCharacters.CardType.Ranger, rangerItems);
+            put(VagabondCharacter.CardType.Ranger, rangerItems);
         }
     };
 
@@ -389,7 +382,7 @@ public class RootParameters extends AbstractParameters {
         Vagabond,
     }
 
-    public HashMap<Integer, Integer> SympathyDiscardCost = new HashMap<Integer, Integer>() {
+    public HashMap<Integer, Integer> sympathyDiscardCost = new HashMap<>() {
         {
             put(10, 1);
             put(9, 1);
@@ -403,14 +396,14 @@ public class RootParameters extends AbstractParameters {
             put(1, 3);
         }
     };
-    public HashMap<Factions, Integer> FactionIndexes = new HashMap<Factions, Integer>() {{
+    public HashMap<Factions, Integer> factionIndexes = new HashMap<>() {{
         put(Factions.MarquiseDeCat, 1);
         put(Factions.EyrieDynasties, 2);
         put(Factions.WoodlandAlliance, 3);
         put(Factions.Vagabond, 4);
     }};
 
-    public HashMap<Factions, Integer> MaxWarriors = new HashMap<Factions, Integer>() {{
+    public HashMap<Factions, Integer> maxWarriors = new HashMap<>() {{
         put(Factions.MarquiseDeCat, 25);
         put(Factions.EyrieDynasties, 20);
         put(Factions.WoodlandAlliance, 10);
@@ -421,12 +414,7 @@ public class RootParameters extends AbstractParameters {
     public Factions player1Role = Factions.EyrieDynasties;
     public Factions player2Role = Factions.WoodlandAlliance;
     public Factions player3Role = Factions.Vagabond;
-
     public Factions[] indexFactions = new Factions[]{player0Role, player1Role, player2Role, player3Role};
-
-    protected Factions[] getIndexFactions() {
-        return indexFactions;
-    }
 
     public Factions getPlayerFaction(int index) {
         return indexFactions[index];
@@ -450,14 +438,17 @@ public class RootParameters extends AbstractParameters {
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        // TODO: compare all variables.
-        return o instanceof RootParameters;
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RootParameters that = (RootParameters) o;
+        return cardsDrawnPerTurn == that.cardsDrawnPerTurn && maxCardsEndTurn == that.maxCardsEndTurn && handSize == that.handSize && maxWood == that.maxWood && maxViziers == that.maxViziers && sympathyTokens == that.sympathyTokens && Objects.equals(dataPath, that.dataPath) && Objects.equals(catBuildingCost, that.catBuildingCost) && Objects.equals(catDrawingBonus, that.catDrawingBonus) && Objects.equals(eyrieDrawingBonus, that.eyrieDrawingBonus) && Objects.equals(buildingCount, that.buildingCount) && Objects.equals(sawmillPoints, that.sawmillPoints) && Objects.equals(workshopPoints, that.workshopPoints) && Objects.equals(recruiterPoints, that.recruiterPoints) && Objects.equals(roostPoints, that.roostPoints) && Objects.equals(sympathyPoints, that.sympathyPoints) && Objects.equals(startingItems, that.startingItems) && Objects.equals(craftableItems, that.craftableItems) && Objects.equals(ruinItems, that.ruinItems) && Objects.equals(itemCraftPoints, that.itemCraftPoints) && Objects.equals(eyrieRulers, that.eyrieRulers) && Objects.equals(decreeInitializer, that.decreeInitializer) && Objects.equals(vagabondCharacterInitializer, that.vagabondCharacterInitializer) && Objects.equals(questCardInitializer, that.questCardInitializer) && Objects.equals(cornerPairs, that.cornerPairs) && Objects.equals(birdCards, that.birdCards) && Objects.equals(rabbitCards, that.rabbitCards) && Objects.equals(mouseCards, that.mouseCards) && Objects.equals(foxCards, that.foxCards) && Objects.equals(sympathyDiscardCost, that.sympathyDiscardCost) && Objects.equals(factionIndexes, that.factionIndexes) && Objects.equals(maxWarriors, that.maxWarriors) && player0Role == that.player0Role && player1Role == that.player1Role && player2Role == that.player2Role && player3Role == that.player3Role && Arrays.equals(indexFactions, that.indexFactions);
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hashcode of all variables.
-        return super.hashCode() + Objects.hash();
+        int result = Objects.hash(dataPath, cardsDrawnPerTurn, maxCardsEndTurn, handSize, maxWood, maxViziers, sympathyTokens, catBuildingCost, catDrawingBonus, eyrieDrawingBonus, buildingCount, sawmillPoints, workshopPoints, recruiterPoints, roostPoints, sympathyPoints, startingItems, craftableItems, ruinItems, itemCraftPoints, eyrieRulers, decreeInitializer, vagabondCharacterInitializer, questCardInitializer, cornerPairs, birdCards, rabbitCards, mouseCards, foxCards, sympathyDiscardCost, factionIndexes, maxWarriors, player0Role, player1Role, player2Role, player3Role);
+        result = 31 * result + Arrays.hashCode(indexFactions);
+        return result;
     }
 }

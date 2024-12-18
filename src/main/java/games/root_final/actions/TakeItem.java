@@ -11,9 +11,9 @@ import java.util.Objects;
 public class TakeItem extends AbstractAction {
     public final int playerID;
     public final int targetID;
-    public Item item;
+    public final Item.ItemType item;
 
-    public TakeItem(int playerID, int targetID, Item item){
+    public TakeItem(int playerID, int targetID, Item.ItemType item){
         this.playerID = playerID;
         this.targetID = targetID;
         this.item = item;
@@ -23,8 +23,8 @@ public class TakeItem extends AbstractAction {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
             for (Item craftedItem: currentState.getPlayerCraftedItems(targetID)){
-                if (craftedItem.equals(item)){
-                    switch (item.itemType){
+                if (craftedItem.itemType.equals(item)){
+                    switch (item){
                         case tea:
                             currentState.getTeas().add(craftedItem);
                             break;
@@ -47,27 +47,31 @@ public class TakeItem extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new TakeItem(playerID, targetID, item);
+    public TakeItem copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof TakeItem ti){
-            return playerID == ti.playerID && targetID == ti.targetID && item.equals(ti.item);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TakeItem takeItem = (TakeItem) o;
+        return playerID == takeItem.playerID && targetID == takeItem.targetID && item == takeItem.item;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("TakeItem", playerID, targetID, item.hashCode());
+        return Objects.hash(playerID, targetID, item);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " takes " + item.toString() + " from p" + targetID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " takes " + item.itemType.toString() + " from " + gs.getPlayerFaction(targetID).toString();
+        return gs.getPlayerFaction(playerID).toString() + " takes " + item.toString() + " from " + gs.getPlayerFaction(targetID).toString();
     }
 }

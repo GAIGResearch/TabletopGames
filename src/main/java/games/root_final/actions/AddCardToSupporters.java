@@ -11,11 +11,13 @@ import java.util.Objects;
 
 public class AddCardToSupporters extends AbstractAction {
     public final int playerID;
-    public RootCard card;
+    public final int cardIdx;
+    public final int cardId;
 
-    public AddCardToSupporters(int playerID, RootCard card){
+    public AddCardToSupporters(int playerID, int cardIdx, int cardId){
         this.playerID = playerID;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
 
     @Override
@@ -23,44 +25,44 @@ public class AddCardToSupporters extends AbstractAction {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID)!= RootParameters.Factions.WoodlandAlliance){
             PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
-            for (int i = 0; i < hand.getSize(); i++){
-                if (hand.get(i).equals(card)){
-                    boolean[] visibility = new boolean[currentState.getNPlayers()];
-                    visibility[playerID] = true;
-                    visibility[currentState.getFactionPlayerID(RootParameters.Factions.WoodlandAlliance)] = true;
-                    currentState.getSupporters().add(hand.get(i), visibility);
-                    hand.remove(i);
-                    return true;
-                }
-            }
+            RootCard card = hand.pick(cardIdx);
+            boolean[] visibility = new boolean[currentState.getNPlayers()];
+            visibility[playerID] = true;
+            visibility[currentState.getFactionPlayerID(RootParameters.Factions.WoodlandAlliance)] = true;
+            currentState.getSupporters().add(card, visibility);
+            return true;
 
         }
         return false;
     }
 
     @Override
-    public AbstractAction copy() {
-        return new AddCardToSupporters(playerID, card);
+    public AddCardToSupporters copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof AddCardToSupporters){
-            AddCardToSupporters other = (AddCardToSupporters) obj;
-            return playerID == other.playerID && card.cardtype == other.card.cardtype && card.suit == other.card.suit;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AddCardToSupporters that = (AddCardToSupporters) o;
+        return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("AddCardToSupporters", playerID, card.cardtype, card.suit);
+        return Objects.hash(playerID, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " adds card " + cardIdx + " to the Supporters deck";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootCard card = (RootCard) gs.getComponentById(cardId);
         return gs.getPlayerFaction(playerID).toString() + " adds " + card.suit.toString() + " " + card.cardtype.toString() + " to the Supporters deck";
     }
 }

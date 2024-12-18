@@ -10,11 +10,13 @@ import java.util.Objects;
 
 public class Refresh extends AbstractAction {
     public final int playerID;
-    public Item item;
+    public final Item.ItemType item;
+    public final int itemID;
 
-    public Refresh(int playerID, Item item){
+    public Refresh(int playerID, Item.ItemType item, int itemID){
         this.playerID = playerID;
         this.item = item;
+        this.itemID = itemID;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -22,7 +24,7 @@ public class Refresh extends AbstractAction {
         if(playerID == state.getCurrentPlayer() && state.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
             state.increaseActionsPlayed();
             for (Item item: state.getSachel()){
-                if (item.getComponentID() == this.item.getComponentID()){
+                if (item.getComponentID() == this.itemID){
                     item.refreshed = true;
                     return true;
                 }
@@ -32,28 +34,31 @@ public class Refresh extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Refresh(playerID, item);
+    public Refresh copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof Refresh){
-            Refresh other = (Refresh) obj;
-            return playerID==other.playerID && item.getComponentID() == other.item.getComponentID();
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Refresh refresh = (Refresh) o;
+        return playerID == refresh.playerID && itemID == refresh.itemID && item == refresh.item;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Refresh", playerID, item.hashCode());
+        return Objects.hash(playerID, item, itemID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " refreshes " + item.toString();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " refreshes " + item.itemType.toString();
+        return gs.getPlayerFaction(playerID).toString()  + " refreshes " + item.toString();
     }
 }

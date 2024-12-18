@@ -32,7 +32,7 @@ public class RemoveWarrior extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public RemoveWarrior copy() {
         return this;
     }
 
@@ -50,6 +50,11 @@ public class RemoveWarrior extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("RemoveWarrior", playerID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " removes a warrior from " + locationID;
     }
 
     @Override

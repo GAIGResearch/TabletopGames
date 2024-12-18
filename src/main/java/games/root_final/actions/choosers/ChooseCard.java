@@ -1,36 +1,28 @@
-package games.root_final.actions;
+package games.root_final.actions.choosers;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.PartialObservableDeck;
 import games.root_final.RootGameState;
 import games.root_final.cards.RootCard;
 
 import java.util.Objects;
 
-public class PlayAmbush extends AbstractAction {
+public class ChooseCard extends AbstractAction {
     public final int playerID;
     public final int cardIdx, cardId;
 
-    public PlayAmbush(int playerID, int cardIdx, int cardId){
+    public ChooseCard(int playerID, int cardIdx, int cardId){
         this.playerID = playerID;
         this.cardIdx = cardIdx;
         this.cardId = cardId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
-        RootGameState currentState = (RootGameState) gs;
-        if (currentState.getCurrentPlayer() == playerID){
-            PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
-            RootCard card = hand.pick(cardIdx);
-            currentState.getDiscardPile().add(card);
-            return true;
-        }
-        return false;
+        return gs.getCurrentPlayer() == playerID;
     }
 
     @Override
-    public PlayAmbush copy() {
+    public ChooseCard copy() {
         return this;
     }
 
@@ -38,7 +30,7 @@ public class PlayAmbush extends AbstractAction {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PlayAmbush that = (PlayAmbush) o;
+        ChooseCard that = (ChooseCard) o;
         return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId;
     }
 
@@ -49,12 +41,13 @@ public class PlayAmbush extends AbstractAction {
 
     @Override
     public String toString() {
-        return "p" + playerID  + " plays ambush";
+        return "p" + playerID + " chooses card " + cardIdx;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " plays ambush";
+        RootCard card = (RootCard) gs.getComponentById(cardId);
+        return gs.getPlayerFaction(playerID).toString() + " chooses " + card.suit.toString() + " card " + card.cardtype.toString();
     }
 }

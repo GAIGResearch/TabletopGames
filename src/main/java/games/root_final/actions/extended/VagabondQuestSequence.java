@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,9 @@ import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.CompleteQuest;
+import games.root_final.actions.ExhaustItem;
+import games.root_final.actions.choosers.ChooseCard;
 import games.root_final.cards.RootQuestCard;
 import games.root_final.components.Item;
 
@@ -23,9 +26,9 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
         CompleteQuest,
     }
 
-    public Stage stage = Stage.chooseQuest;
-    public RootQuestCard card;
-    public boolean done = false;
+    Stage stage = Stage.chooseQuest;
+    int cardIdx = -1, cardId = -1;
+    boolean done = false;
 
     public VagabondQuestSequence(int playerID){
         this.playerID = playerID;
@@ -45,19 +48,22 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         RootGameState gs = (RootGameState) state;
         List<AbstractAction> actions = new ArrayList<>();
+        RootQuestCard card = null;
+        if (cardId != -1) card = (RootQuestCard) gs.getComponentById(cardId);
         switch (stage){
             case chooseQuest:
                 Deck<RootQuestCard> activeQuests = gs.getActiveQuests();
                 for (int i = 0; i < activeQuests.getSize(); i++){
                     if (gs.canCompleteSpecificQuest(activeQuests.get(i))){
-                        actions.add(new ChooseQuestCard(playerID, activeQuests.get(i)));
+                        actions.add(new ChooseCard(playerID, i, activeQuests.get(i).getComponentID()));
                     }
                 }
                 return actions;
             case Exhaust1:
+                if (card == null) return actions;
                 for(Item item: gs.getSachel()){
                     if (item.itemType == card.requirement1 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -65,7 +71,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 for(Item item: gs.getTeas()){
                     if (item.itemType == card.requirement1 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -73,7 +79,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 for(Item item: gs.getBags()){
                     if (item.itemType == card.requirement1 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -81,7 +87,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 for(Item item: gs.getCoins()){
                     if (item.itemType == card.requirement1 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -89,9 +95,10 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 return actions;
             case Exhaust2:
+                if (card == null) return actions;
                 for(Item item: gs.getSachel()){
                     if (item.itemType == card.requirement2 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -99,7 +106,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 for(Item item: gs.getTeas()){
                     if (item.itemType == card.requirement2 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -107,7 +114,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 for(Item item: gs.getBags()){
                     if (item.itemType == card.requirement2 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -115,7 +122,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 for(Item item: gs.getCoins()){
                     if (item.itemType == card.requirement2 && item.refreshed && !item.damaged){
-                        ExhaustItem action = new ExhaustItem(playerID, item);
+                        ExhaustItem action = new ExhaustItem(playerID, item.itemType);
                         if (!actions.contains(action)){
                             actions.add(action);
                         }
@@ -123,8 +130,8 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
                 }
                 return actions;
             case CompleteQuest:
-                actions.add(new CompleteQuest(playerID, card, true));
-                actions.add(new CompleteQuest(playerID, card, false));
+                actions.add(new CompleteQuest(playerID, cardIdx, cardId, true));
+                actions.add(new CompleteQuest(playerID, cardIdx, cardId, false));
                 return actions;
         }
         return actions;
@@ -139,8 +146,9 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         switch (stage){
             case chooseQuest:
-                if (action instanceof ChooseQuestCard cqc) {
-                    card = cqc.card;
+                if (action instanceof ChooseCard cqc) {
+                    cardIdx = cqc.cardIdx;
+                    cardId = cqc.cardId;
                 }
                 stage = Stage.Exhaust1;
                 break;
@@ -166,7 +174,8 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
     public VagabondQuestSequence copy() {
         VagabondQuestSequence copy = new VagabondQuestSequence(playerID);
         copy.done = done;
-        copy.card = card;
+        copy.cardId = cardId;
+        copy.cardIdx = cardIdx;
         copy.stage = stage;
         return copy;
     }
@@ -175,10 +184,7 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
     public boolean equals(Object obj) {
         if (obj == this){return true;}
         if (obj instanceof VagabondQuestSequence v){
-            if (card == null || v.card == null){
-                return playerID == v.playerID && stage == v.stage && card == v.card && done == v.done;
-            }
-            return playerID == v.playerID && stage == v.stage && card.equals(v.card) && done == v.done;
+            return playerID == v.playerID && stage == v.stage && cardId == v.cardId && cardIdx == v.cardIdx && done == v.done;
         }
         return false;
     }
@@ -186,6 +192,11 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
     @Override
     public int hashCode() {
         return Objects.hash("VQuestSequence", playerID, stage, done);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to complete a quest";
     }
 
     @Override

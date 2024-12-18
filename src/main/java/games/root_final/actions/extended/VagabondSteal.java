@@ -1,10 +1,12 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.TakeRandomCard;
+import games.root_final.actions.choosers.ChooseNumber;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
@@ -14,16 +16,15 @@ import java.util.Objects;
 
 public class VagabondSteal extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public int targetID;
 
-    public boolean done = false;
+    int targetID;
+    boolean done = false;
 
     public enum Stage{
         chooseTarget,
         steal,
     }
-
-    public Stage stage = Stage.chooseTarget;
+    Stage stage = Stage.chooseTarget;
 
     public VagabondSteal(int playerID){
         this.playerID = playerID;
@@ -52,7 +53,7 @@ public class VagabondSteal extends AbstractAction implements IExtendedSequence {
             RootBoardNodeWithRootEdges clearing = gs.getGameMap().getVagabondClearing();
             for (int i = 0; i < gs.getNPlayers(); i++){
                 if (i != playerID && clearing.isAttackable(gs.getPlayerFaction(i)) && gs.getPlayerHand(i).getSize() > 0){
-                    actions.add(new ChooseTargetPlayer(playerID,i));
+                    actions.add(new ChooseNumber(playerID,i));
                 }
             }
         } else if (stage == Stage.steal) {
@@ -68,9 +69,9 @@ public class VagabondSteal extends AbstractAction implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (action instanceof ChooseTargetPlayer crp){
+        if (action instanceof ChooseNumber crp){
             stage = Stage.steal;
-            targetID = crp.targetID;
+            targetID = crp.number;
         } else if (action instanceof TakeRandomCard){
             done = true;
         }
@@ -103,6 +104,11 @@ public class VagabondSteal extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash("Steal", playerID, targetID, done, stage);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to steal";
     }
 
     @Override

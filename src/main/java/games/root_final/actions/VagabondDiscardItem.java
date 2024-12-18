@@ -10,21 +10,23 @@ import java.util.Objects;
 
 public class VagabondDiscardItem extends AbstractAction {
     public final int playerID;
-    public Item item;
+    public final Item.ItemType item;
+    public final int itemID;
 
-    public VagabondDiscardItem(int playerID, Item item){
+    public VagabondDiscardItem(int playerID, Item.ItemType item, int itemID){
         this.playerID = playerID;
         this.item = item;
+        this.itemID = itemID;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
-            switch (item.itemType){
+            switch (item){
                 case tea:
                     for (Item teaItem: currentState.getTeas()){
-                        if (teaItem.getComponentID() == item.getComponentID()){
+                        if (teaItem.getComponentID() == itemID){
                             teaItem.damaged = false;
                             teaItem.refreshed = true;
                             currentState.getCraftableItems().add(teaItem);
@@ -35,7 +37,7 @@ public class VagabondDiscardItem extends AbstractAction {
                     break;
                 case bag:
                     for (Item bagItem: currentState.getBags()){
-                        if (bagItem.getComponentID() == item.getComponentID()){
+                        if (bagItem.getComponentID() == itemID){
                             bagItem.refreshed = true;
                             bagItem.damaged = false;
                             currentState.getCraftableItems().add(bagItem);
@@ -46,7 +48,7 @@ public class VagabondDiscardItem extends AbstractAction {
                     break;
                 case coin:
                     for (Item coinItem: currentState.getCoins()){
-                        if (coinItem.getComponentID() == item.getComponentID()){
+                        if (coinItem.getComponentID() == itemID){
                             coinItem.refreshed = true;
                             coinItem.damaged = false;
                             currentState.getCraftableItems().add(coinItem);
@@ -57,7 +59,7 @@ public class VagabondDiscardItem extends AbstractAction {
                     break;
                 default:
                     for (Item sachelItem: currentState.getSachel()){
-                        if (sachelItem.getComponentID() == item.getComponentID()){
+                        if (sachelItem.getComponentID() == itemID){
                             sachelItem.damaged = false;
                             sachelItem.refreshed = true;
                             currentState.getCraftableItems().add(sachelItem);
@@ -74,26 +76,30 @@ public class VagabondDiscardItem extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new VagabondDiscardItem(playerID, item);
+        return new VagabondDiscardItem(playerID, item, itemID);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondDiscardItem vd){
-            return playerID == vd.playerID && item.getComponentID() == vd.item.getComponentID();
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VagabondDiscardItem that = (VagabondDiscardItem) o;
+        return playerID == that.playerID && itemID == that.itemID && item == that.item;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("VagabondDiscardItem", playerID, item.hashCode());
+        return Objects.hash(playerID, item, itemID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID  + " discards " + item.toString();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + " discards " + item.itemType.toString();
+        return gs.getPlayerFaction(playerID).toString() + " discards " + item.toString();
     }
 }

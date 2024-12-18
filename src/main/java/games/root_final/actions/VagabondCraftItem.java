@@ -13,44 +13,43 @@ import java.util.Objects;
 public class VagabondCraftItem extends AbstractAction {
     public final int playerID;
     public final Item.ItemType itemType;
-    public RootCard card;
+    public final int cardIdx, cardId;
 
-    public VagabondCraftItem(int playerID, Item.ItemType itemType, RootCard card){
+    public VagabondCraftItem(int playerID, Item.ItemType itemType, int cardIdx, int cardId){
         this.playerID = playerID;
         this.itemType = itemType;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         RootParameters rp = (RootParameters) gs.getGameParameters();
-        if (currentState.getCurrentPlayer() == playerID && itemType == card.getCraftableItem()){
+        if (currentState.getCurrentPlayer() == playerID){
             PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
-            for (int i = 0; i < hand.getSize(); i++){
-                if (hand.get(i).equals(card)){
-                    hand.remove(i);
-                }
-            }
+            RootCard card = hand.pick(cardIdx);
 
-            for (Item item: currentState.getCraftableItems()){
-                if (item.itemType == itemType){
-                    switch (itemType){
-                        case bag:
-                            currentState.getBags().add(item);
-                            break;
-                        case coin:
-                            currentState.getCoins().add(item);
-                            break;
-                        case tea:
-                            currentState.getTeas().add(item);
-                            break;
-                        default:
-                            currentState.getSachel().add(item);
-                            break;
+            if (itemType == card.getCraftableItem()) {
+                for (Item item: currentState.getCraftableItems()){
+                    if (item.itemType == itemType){
+                        switch (itemType){
+                            case bag:
+                                currentState.getBags().add(item);
+                                break;
+                            case coin:
+                                currentState.getCoins().add(item);
+                                break;
+                            case tea:
+                                currentState.getTeas().add(item);
+                                break;
+                            default:
+                                currentState.getSachel().add(item);
+                                break;
+                        }
+                        currentState.addGameScorePlayer(playerID, rp.itemCraftPoints.get(item.itemType));
+                        currentState.getCraftableItems().remove(item);
+                        return true;
                     }
-                    currentState.addGameScorePLayer(playerID, rp.itemCraftPoints.get(item.itemType));
-                    currentState.getCraftableItems().remove(item);
-                    return true;
                 }
             }
         }
@@ -58,22 +57,26 @@ public class VagabondCraftItem extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new VagabondCraftItem(playerID, itemType, card);
+    public VagabondCraftItem copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondCraftItem ci){
-            return playerID == ci.playerID && itemType == ci.itemType && card.equals(ci.card);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VagabondCraftItem that = (VagabondCraftItem) o;
+        return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId && itemType == that.itemType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("CraftItem", playerID, card.hashCode(), itemType);
+        return Objects.hash(playerID, itemType, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " crafts " + itemType.toString();
     }
 
     @Override

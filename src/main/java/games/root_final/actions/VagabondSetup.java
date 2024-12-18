@@ -2,35 +2,35 @@ package games.root_final.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
-import games.root_final.cards.VagabondCharacters;
+import games.root_final.cards.VagabondCharacter;
 import games.root_final.components.Item;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class VagabondSetup extends AbstractAction {
     public final int playerID;
-    public VagabondCharacters character;
+    public final VagabondCharacter.CardType characterType;
     public final boolean passSubGamePhase;
 
-    public VagabondSetup(int playerID, VagabondCharacters character, boolean passSubGamePhase){
+    public VagabondSetup(int playerID, VagabondCharacter.CardType characterType, boolean passSubGamePhase){
         this.playerID = playerID;
-        this.character =  character;
+        this.characterType = characterType;
         this.passSubGamePhase = passSubGamePhase;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState state = (RootGameState) gs;
         if(state.getCurrentPlayer()==playerID && state.getPlayerFaction(playerID)== RootParameters.Factions.Vagabond){
+            VagabondCharacter character = new VagabondCharacter(characterType, ((RootParameters)gs.getGameParameters()).vagabondCharacterInitializer.get(characterType));
             state.setVagabondCharacter(character);
             if(passSubGamePhase){
                 state.increaseSubGamePhase();
             }
             for (int i = state.getStartingItems().size()-1; i >= 0; i--){
-                if(character.startsWith.contains(state.getStartingItems().get(i).itemType)){
+                if(character.startsWith(state.getStartingItems().get(i).itemType)){
                     if(state.getStartingItems().get(i).itemType == Item.ItemType.bag){
                         state.getBags().add(state.getStartingItems().get(i));
                     }
@@ -51,28 +51,31 @@ public class VagabondSetup extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public VagabondSetup copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this) {return true;}
-        if(obj instanceof VagabondSetup){
-            VagabondSetup other = (VagabondSetup) obj;
-            return playerID == other.playerID && character.character.equals(other.character.character) && passSubGamePhase == other.passSubGamePhase;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VagabondSetup that = (VagabondSetup) o;
+        return playerID == that.playerID && passSubGamePhase == that.passSubGamePhase && characterType == that.characterType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, character);
+        return Objects.hash(playerID, characterType, passSubGamePhase);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " chooses character " + characterType;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " chooses character " + character.character.toString();
+        return gs.getPlayerFaction(playerID).toString()  + " chooses character " + characterType.toString();
     }
 }

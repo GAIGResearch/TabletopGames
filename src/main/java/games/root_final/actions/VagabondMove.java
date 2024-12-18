@@ -6,13 +6,13 @@ import games.root_final.RootGameState;
 import games.root_final.RootParameters;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
-import scala.collection.parallel.ParIterableLike;
 
 import java.util.Objects;
 
 public class VagabondMove extends AbstractAction {
     public final int playerID;
     public final int targetNodeID;
+
     public VagabondMove(int playerID, int targetNodeID){
         this.playerID = playerID;
         this.targetNodeID = targetNodeID;
@@ -49,22 +49,26 @@ public class VagabondMove extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public VagabondMove copy() {
         return this; //immutable
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if (obj instanceof VagabondMove vm){
-            return playerID == vm.playerID && targetNodeID == vm.targetNodeID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VagabondMove that = (VagabondMove) o;
+        return playerID == that.playerID && targetNodeID == that.targetNodeID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("VagabondMove", playerID, targetNodeID);
+        return Objects.hash(playerID, targetNodeID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " moves to " + targetNodeID;
     }
 
     @Override

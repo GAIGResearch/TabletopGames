@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,8 @@ import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.DiscardSupporter;
+import games.root_final.actions.PlaceSympathy;
 import games.root_final.cards.RootCard;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
@@ -15,21 +17,21 @@ import java.util.Objects;
 
 public class SpreadSympathy extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public RootBoardNodeWithRootEdges location;
+    public final int locationID;
 
     public enum Stage {
         Discard,
         Place,
     }
 
-    public Stage stage;
-    public int discardedCards = 0;
-    public int toDiscard;
-    public boolean executionComplete = false;
+    Stage stage;
+    int discardedCards = 0;
+    int toDiscard;
+    boolean executionComplete = false;
 
-    public SpreadSympathy(int playerID, RootBoardNodeWithRootEdges location) {
+    public SpreadSympathy(int playerID, int locationID) {
         this.playerID = playerID;
-        this.location = location;
+        this.locationID = locationID;
         this.stage = Stage.Discard;
     }
 
@@ -39,15 +41,16 @@ public class SpreadSympathy extends AbstractAction implements IExtendedSequence 
         List<AbstractAction> actions = new ArrayList<>();
         if (stage == Stage.Discard) {
             Deck<RootCard> supporters = currentState.getSupporters();
+            RootBoardNodeWithRootEdges location = currentState.getGameMap().getNodeByID(locationID);
             for (int i = 0; i < supporters.getSize(); i++) {
                 if (supporters.get(i).suit == location.getClearingType() || supporters.get(i).suit == RootParameters.ClearingTypes.Bird) {
-                    DiscardSupporter action = new DiscardSupporter(playerID, supporters.get(i), false);
+                    DiscardSupporter action = new DiscardSupporter(playerID, i, supporters.get(i).getComponentID(), false);
                     actions.add(action);
                 }
             }
             return actions;
         } else if (stage == Stage.Place) {
-            PlaceSympathy placeSympathy = new PlaceSympathy(playerID, location);
+            PlaceSympathy placeSympathy = new PlaceSympathy(playerID, locationID);
             actions.add(placeSympathy);
             return actions;
         }
@@ -80,14 +83,14 @@ public class SpreadSympathy extends AbstractAction implements IExtendedSequence 
     public boolean execute(AbstractGameState gs) {
         RootGameState state = (RootGameState) gs;
         RootParameters rp = (RootParameters) gs.getGameParameters();
-        toDiscard = rp.SympathyDiscardCost.get(state.getSympathyTokens());
+        toDiscard = rp.sympathyDiscardCost.get(state.getSympathyTokens());
         state.setActionInProgress(this);
         return true;
     }
 
     @Override
     public SpreadSympathy copy() {
-        SpreadSympathy other = new SpreadSympathy(playerID, location);
+        SpreadSympathy other = new SpreadSympathy(playerID, locationID);
         other.toDiscard = toDiscard;
         other.discardedCards = discardedCards;
         other.stage = stage;
@@ -97,21 +100,25 @@ public class SpreadSympathy extends AbstractAction implements IExtendedSequence 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj instanceof SpreadSympathy) {
-            SpreadSympathy other = (SpreadSympathy) obj;
-            return playerID == other.playerID && location.getComponentID()==other.location.getComponentID();
+        if (obj instanceof SpreadSympathy other) {
+            return playerID == other.playerID && locationID==other.locationID;
 
         } else return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, location);
+        return Objects.hash(playerID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " spreads sympathy at location " + locationID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " spreads sympathy at location " + location.identifier;
+        return gs.getPlayerFaction(playerID).toString()  + " spreads sympathy at location " + locationID;
     }
 }

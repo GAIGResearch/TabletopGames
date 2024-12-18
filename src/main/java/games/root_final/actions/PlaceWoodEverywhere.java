@@ -14,6 +14,7 @@ public class PlaceWoodEverywhere extends AbstractAction {
     public PlaceWoodEverywhere(int playerID){
         this.playerID = playerID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -29,23 +30,26 @@ public class PlaceWoodEverywhere extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public PlaceWoodEverywhere copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof PlaceWoodEverywhere){
-            PlaceWoodEverywhere other = (PlaceWoodEverywhere) obj;
-            return playerID == other.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlaceWoodEverywhere that = (PlaceWoodEverywhere) o;
+        return playerID == that.playerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("PlaceWoodEverywhere", playerID);
+        return Objects.hash(playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " has enough wood to place one at each sawmill";
     }
 
     @Override

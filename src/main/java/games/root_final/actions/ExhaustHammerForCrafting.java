@@ -18,6 +18,7 @@ public class ExhaustHammerForCrafting extends AbstractAction{
         this.activate = activate;
         this.actual = actual;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState state = (RootGameState) gs;
@@ -34,22 +35,26 @@ public class ExhaustHammerForCrafting extends AbstractAction{
     }
 
     @Override
-    public AbstractAction copy() {
+    public ExhaustHammerForCrafting copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof ExhaustHammerForCrafting cca){
-            return playerID == cca.playerID && activate == cca.activate && actual == cca.actual;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExhaustHammerForCrafting that = (ExhaustHammerForCrafting) o;
+        return playerID == that.playerID && activate == that.activate && actual == that.actual;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("ExhaustHammer", playerID, activate, actual);
+        return Objects.hash(playerID, activate, actual);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " exhausts hammer " + activate.toString() + " to satisfy " + actual.toString() + "requirement";
     }
 
     @Override

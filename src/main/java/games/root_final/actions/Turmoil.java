@@ -12,14 +12,16 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class Turmoil extends AbstractAction {
-    public final EyrieRulers ruler;
+    public final EyrieRulers.CardType ruler;
     public final int playerID;
     public final boolean passGamePhase;
-    public Turmoil(int playerID, EyrieRulers eyrieRuler, boolean passGamePhase){
+
+    public Turmoil(int playerID, EyrieRulers.CardType eyrieRuler, boolean passGamePhase){
         ruler = eyrieRuler;
         this.playerID = playerID;
         this.passGamePhase =passGamePhase;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -27,15 +29,23 @@ public class Turmoil extends AbstractAction {
 
         if(currentState.getCurrentPlayer() == playerID){
             Deck<EyrieRulers> rulers = currentState.getAvailableRulers();
-            if(rulers.contains(ruler)){
+            EyrieRulers ruler = null;
+            for (EyrieRulers r : rulers) {
+                if (r.ruler == this.ruler) {
+                    ruler = r;
+                    break;
+                }
+            }
+            if(ruler != null){
                 currentState.setActiveRuler(ruler);
                 currentState.removeRulerFromList(ruler);
                 currentState.increaseActionsPlayed();
                 if (currentState.getAvailableRulers().getSize() == 0){
                     //Although in normal game 4 rulers are sufficient for 1 entire game, less intelligent players might struggle
+                    // todo hack
                     for (HashMap.Entry<EyrieRulers.CardType, Boolean[]> entry : rp.eyrieRulers.entrySet()) {
-                        EyrieRulers ruler = new EyrieRulers(entry.getKey(), entry.getValue()[0], entry.getValue()[1], entry.getValue()[2], entry.getValue()[3]);
-                        currentState.addRulerToRulers(ruler);
+                        EyrieRulers ruler1 = new EyrieRulers(entry.getKey(), entry.getValue()[0], entry.getValue()[1], entry.getValue()[2], entry.getValue()[3]);
+                        currentState.addRulerToRulers(ruler1);
                     }
                 }
                 if(passGamePhase){
@@ -89,28 +99,31 @@ public class Turmoil extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public Turmoil copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if(obj instanceof Turmoil){
-            Turmoil other = (Turmoil) obj;
-            return playerID == other.playerID && ruler.equals(other.ruler) && passGamePhase == other.passGamePhase;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Turmoil turmoil = (Turmoil) o;
+        return playerID == turmoil.playerID && passGamePhase == turmoil.passGamePhase && ruler == turmoil.ruler;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Turmoil", playerID, ruler.hashCode(), passGamePhase);
+        return Objects.hash(ruler, playerID, passGamePhase);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " goes into turmoil and chooses a new ruler: " + ruler.toString();
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " goes into turmoil and chooses a new ruler " + ruler.ruler.toString() ;
+        return gs.getPlayerFaction(playerID).toString()  + " goes into turmoil and chooses a new ruler " + ruler.toString() ;
     }
 }

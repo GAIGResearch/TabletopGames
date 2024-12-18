@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,9 @@ import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.AddToDecree;
+import games.root_final.actions.Pass;
+import games.root_final.actions.choosers.ChooseCard;
 import games.root_final.cards.RootCard;
 
 import java.util.ArrayList;
@@ -14,14 +17,16 @@ import java.util.Objects;
 
 public class AddToDecreeSequence extends AbstractAction implements IExtendedSequence {
     public final int playerID;
+
     public enum Stage{
         chooseCard,
         addToDecree
     }
-    public int cardsAdded = 0;
-    public RootCard card;
-    public boolean done = false;
-    public Stage stage = Stage.chooseCard;
+
+    int cardsAdded = 0;
+    boolean done = false;
+    Stage stage = Stage.chooseCard;
+    int cardId = -1, cardIdx = -1;
 
     public AddToDecreeSequence(int playerID){
         this.playerID = playerID;
@@ -45,7 +50,7 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
         if (stage == Stage.chooseCard){
             Deck<RootCard> hand = gs.getPlayerHand(playerID);
             for (int i = 0; i < hand.getSize(); i++){
-                actions.add(new ChooseCard(playerID, hand.get(i)));
+                actions.add(new ChooseCard(playerID, i, hand.get(i).getComponentID()));
             }
             if (cardsAdded == 1){
                 actions.add(new Pass(playerID, " does not add second card"));
@@ -57,7 +62,7 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
 
         } else if (stage == Stage.addToDecree) {
             for (int i = 0; i < 4; i++){
-                actions.add(new AddToDecree(playerID, i, card, false));
+                actions.add(new AddToDecree(playerID, i, cardIdx, cardId, false));
             }
             return actions;
         }
@@ -73,7 +78,8 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (stage == Stage.chooseCard){
             if (action instanceof ChooseCard cc){
-                card = cc.card;
+                cardId = cc.cardId;
+                cardIdx = cc.cardIdx;
                 stage = Stage.addToDecree;
             } else if (action instanceof Pass) {
                 done = true;
@@ -97,11 +103,8 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
     @Override
     public AddToDecreeSequence copy() {
         AddToDecreeSequence copy = new AddToDecreeSequence(playerID);
-        if (card == null){
-            copy.card = card;
-        }else {
-            copy.card = (RootCard) card.copy();
-        }
+        copy.cardId = cardId;
+        copy.cardIdx = cardIdx;
         copy.cardsAdded = cardsAdded;
         copy.done = done;
         copy.stage = stage;
@@ -109,21 +112,21 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if (obj instanceof AddToDecreeSequence ads){
-            if (card == null || ads.card == null){
-                return playerID == ads.playerID;
-            }
-            return playerID == ads.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AddToDecreeSequence that = (AddToDecreeSequence) o;
+        return playerID == that.playerID && cardsAdded == that.cardsAdded && done == that.done && cardId == that.cardId && cardIdx == that.cardIdx && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        if (card != null) return Objects.hash("AddToDecreeSequence", playerID);
-        return Objects.hash("AddToDecreeSequence", playerID);
+        return Objects.hash(playerID, cardsAdded, done, stage, cardId, cardIdx);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " adds to decree";
     }
 
     @Override
@@ -131,6 +134,5 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
         RootGameState gs = (RootGameState) gameState;
         return gs.getPlayerFaction(playerID).toString() + " adds to decree";
     }
-
 
 }

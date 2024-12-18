@@ -1,10 +1,16 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.Build;
+import games.root_final.actions.Pass;
+import games.root_final.actions.RemoveAllWood;
+import games.root_final.actions.TakeHit;
+import games.root_final.actions.choosers.ChooseCatBuilding;
+import games.root_final.actions.choosers.ChooseNode;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -14,26 +20,28 @@ import java.util.Objects;
 public class CatBuildSequence extends AbstractAction implements IExtendedSequence {
     public final int playerID;
 
-    public enum Stage{
-        selectBuildingType,
-        selectLocation,
-        removeWood,
-        build,
+    public enum Stage {
+        SelectBuildingType,
+        SelectLocation,
+        RemoveWood,
+        Build,
     }
-    public Stage stage = Stage.selectBuildingType;
-    public RootParameters.BuildingType bt;
-    public int locationID;
-    public int cost;
-    public boolean done = false;
+
+    Stage stage = Stage.SelectBuildingType;
+    RootParameters.BuildingType bt;
+    int locationID;
+    int cost;
+    boolean done = false;
 
     public CatBuildSequence(int playerID){
         this.playerID = playerID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (playerID == currentState.getCurrentPlayer() && currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat){
-            currentState.setActionInProgress(this);
+            return currentState.setActionInProgress(this);
         }
         return false;
     }
@@ -44,7 +52,7 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
         RootParameters rp = (RootParameters) state.getGameParameters();
         List<AbstractAction> actions = new ArrayList<>();
         switch (stage){
-            case selectBuildingType:
+            case SelectBuildingType:
                 int sawmillCost = rp.getCatBuildingCost(gameState.getBuildingCount(RootParameters.BuildingType.Sawmill));
                 if (gameState.canBuildSpecificCatBuilding(playerID, sawmillCost)){
                     actions.add(new ChooseCatBuilding(playerID, RootParameters.BuildingType.Sawmill, sawmillCost));
@@ -58,14 +66,14 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
                     actions.add(new ChooseCatBuilding(playerID, RootParameters.BuildingType.Recruiter, recruiterCost));
                 }
                 return actions;
-            case selectLocation:
+            case SelectLocation:
                 for (RootBoardNodeWithRootEdges clearing: gameState.getGameMap().getNonForrestBoardNodes()){
                     if (clearing.rulerID == playerID && clearing.hasBuildingRoom() && gameState.hasEnoughAvailableWood(playerID, clearing.getComponentID(), cost)){
                         actions.add(new ChooseNode(playerID, clearing.getComponentID()));
                     }
                 }
                 return actions;
-            case removeWood:
+            case RemoveWood:
                 if (cost > 0){
                     for (RootBoardNodeWithRootEdges clearing: gameState.getGameMap().getNonForrestBoardNodes()){
                         if (clearing.hasToken(RootParameters.TokenType.Wood) && gameState.isConnected(playerID, clearing.getComponentID(), locationID)){
@@ -76,7 +84,7 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
                     actions.add(new Pass(playerID, "No building cost"));
                 }
                 return actions;
-            case build:
+            case Build:
                 actions.add(new Build(locationID, playerID, bt, false));
                 return actions;
         }
@@ -90,27 +98,25 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        RootGameState gs = (RootGameState) state;
-        RootParameters rp = (RootParameters) state.getGameParameters();
         if (action instanceof ChooseCatBuilding b){
             bt = b.bt;
             cost = b.cost;
-            stage = Stage.selectLocation;
+            stage = Stage.SelectLocation;
         } else if (action instanceof ChooseNode c){
             locationID = c.nodeID;
-            stage = Stage.removeWood;
+            stage = Stage.RemoveWood;
         } else if (action instanceof TakeHit t){
             cost--;
             if (cost == 0){
-                stage = Stage.build;
+                stage = Stage.Build;
             }
         } else if (action instanceof RemoveAllWood r){
             cost = 0;
-            stage = Stage.build;
+            stage = Stage.Build;
         } else if (action instanceof  Build b) {
             done = true;
-        } else if (stage == Stage.removeWood && action instanceof Pass){
-            stage = Stage.build;
+        } else if (stage == Stage.RemoveWood && action instanceof Pass){
+            stage = Stage.Build;
         }
     }
 
@@ -142,6 +148,11 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
     @Override
     public int hashCode() {
         return Objects.hash("BuildSequence", playerID, stage, cost, bt, done, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to build";
     }
 
     @Override

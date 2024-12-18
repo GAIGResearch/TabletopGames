@@ -1,11 +1,8 @@
 package games.root_final.cards;
 
 import core.components.Card;
-import games.dominion.cards.DominionCard;
-import games.root_final.RootParameters;
-import games.root_final.components.Item;
 
-import java.util.List;
+import java.util.Objects;
 
 public class EyrieRulers extends Card {
     public enum CardType{
@@ -18,7 +15,6 @@ public class EyrieRulers extends Card {
     public final boolean vizierRecruit;
     public final boolean vizierMove;
     public final boolean vizierBattle;
-
     public final boolean vizierBuild;
 
     public EyrieRulers(CardType ruler, boolean vizierRecruit, boolean vizierMove, boolean vizierBattle, boolean vizierBuild){
@@ -30,18 +26,9 @@ public class EyrieRulers extends Card {
         this.vizierBuild = vizierBuild;
     }
 
-    public EyrieRulers(CardType ruler, boolean vizierRecruit, boolean vizierMove, boolean vizierBattle, boolean vizierBuild, int componentID){
-        super(ruler.toString(), componentID);
-        this.ruler = ruler;
-        this.vizierRecruit = vizierRecruit;
-        this.vizierMove = vizierMove;
-        this.vizierBattle = vizierBattle;
-        this.vizierBuild = vizierBuild;
-    }
-
     @Override
-    public Card copy(){
-        return new EyrieRulers(ruler, vizierRecruit, vizierMove, vizierBattle, vizierBuild, componentID);
+    public EyrieRulers copy(){
+        return this;  // All final
     }
 
     @Override
@@ -50,11 +37,16 @@ public class EyrieRulers extends Card {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof EyrieRulers) {
-            EyrieRulers other = (EyrieRulers) obj;
-            return other.ruler == ruler;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        EyrieRulers that = (EyrieRulers) o;
+        return vizierRecruit == that.vizierRecruit && vizierMove == that.vizierMove && vizierBattle == that.vizierBattle && vizierBuild == that.vizierBuild && ruler == that.ruler;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), ruler, vizierRecruit, vizierMove, vizierBattle, vizierBuild);
     }
 }

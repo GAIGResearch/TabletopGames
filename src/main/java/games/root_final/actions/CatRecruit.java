@@ -11,8 +11,7 @@ import java.util.Objects;
 public class CatRecruit extends AbstractAction {
     public final int playerID;
 
-    public CatRecruit(int playerID
-    ) {
+    public CatRecruit(int playerID) {
         this.playerID = playerID;
     }
 
@@ -37,15 +36,14 @@ public class CatRecruit extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public CatRecruit copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
         if(obj == this){return true;}
-        if(obj instanceof CatRecruit){
-            CatRecruit other = (CatRecruit) obj;
+        if(obj instanceof CatRecruit other){
             return playerID == other.playerID;
         }
         return false;
@@ -57,8 +55,13 @@ public class CatRecruit extends AbstractAction {
     }
 
     @Override
+    public String toString() {
+        return "p" + playerID + " recruits";
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString() + "Recruits at recruiters";
+        return gs.getPlayerFaction(playerID).toString() + " recruits";
     }
 }

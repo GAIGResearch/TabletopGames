@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -8,11 +8,14 @@ import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.*;
+import games.root_final.actions.choosers.ChooseCard;
+import games.root_final.actions.choosers.ChooseCardForSupporters;
+import games.root_final.actions.choosers.ChooseNode;
+import games.root_final.actions.choosers.ChooseNumber;
 import games.root_final.cards.RootCard;
 import games.root_final.components.Item;
 import games.root_final.components.RootBoardNodeWithRootEdges;
-import games.uno.actions.PlayCard;
-import scala.concurrent.impl.FutureConvertersImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +38,15 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         Outrage,
         OutrageWoodland,
     }
-    public Stage lastStage;
-    public Stage stage = Stage.chooseLocation;
-    public boolean done = false;
-    public int playerDestroyedSympathyID;
-    public int locationID;
-    public int targetPlayerID;
-    public int attackerDamage = 0;
-    public int defenderDamage = 0;
+
+    Stage lastStage;
+    Stage stage = Stage.chooseLocation;
+    boolean done = false;
+    int playerDestroyedSympathyID;
+    int locationID;
+    int targetPlayerID;
+    int attackerDamage = 0;
+    int defenderDamage = 0;
 
     public BattleAction(int playerID) {
         this.playerID = playerID;
@@ -140,7 +144,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         RootBoardNodeWithRootEdges clearing = gs.getGameMap().getNodeByID(locationID);
         for (int i = 0; i < gs.getNPlayers(); i++){
             if (i != playerID && clearing.isAttackable(gs.getPlayerFaction(i))){
-                actions.add(new ChooseTargetPlayer(playerID,i));
+                actions.add(new ChooseNumber(playerID,i));
             }
         }
         //can never be empty
@@ -161,7 +165,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         if (isAmbushable) {
             for (int i = 0; i < defenderHand.getSize(); i++) {
                 if (defenderHand.get(i).cardtype == RootCard.CardType.Ambush && (defenderHand.get(i).suit == clearing.getClearingType() || defenderHand.get(i).suit == RootParameters.ClearingTypes.Bird)) {
-                    PlayAmbush action = new PlayAmbush(targetPlayerID, defenderHand.get(i));
+                    PlayAmbush action = new PlayAmbush(targetPlayerID, i, defenderHand.get(i).getComponentID());
                     actions.add(action);
                 }
             }
@@ -178,7 +182,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         RootBoardNodeWithRootEdges clearing = gs.getGameMap().getNodeByID(locationID);
         for (int i = 0 ; i < attackerHand.getSize(); i++){
             if(attackerHand.get(i).cardtype == RootCard.CardType.Ambush && (attackerHand.get(i).suit == clearing.getClearingType() || attackerHand.get(i).suit == RootParameters.ClearingTypes.Bird)){
-                PlayAmbush action = new PlayAmbush(playerID, attackerHand.get(i));
+                PlayAmbush action = new PlayAmbush(playerID, i, attackerHand.get(i).getComponentID());
                 actions.add(action);
             }
         }
@@ -244,25 +248,25 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                 case Vagabond:
                     for (Item item: gs.getSachel()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
                     for (Item item: gs.getCoins()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
                     for (Item item: gs.getTeas()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
                     for (Item item: gs.getBags()){
                         if(!item.damaged){
-                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item);
+                            DamageItem damageAction = new DamageItem(gs.getCurrentPlayer(), item.itemType);
                             if (!actions.contains(damageAction)) actions.add(damageAction);
                         }
                     }
@@ -281,9 +285,9 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         for (int i = 0; i < craftedCardsAttacker.getSize(); i++){
             if (craftedCardsAttacker.get(i).cardtype == RootCard.CardType.Armorers){
                 //ignore all rolled hits
-                actions.add(new DiscardCraftedCard(playerID, craftedCardsAttacker.get(i)));
+                actions.add(new DiscardCraftedCard(playerID, i, craftedCardsAttacker.get(i).getComponentID()));
             } else if (craftedCardsAttacker.get(i).cardtype == RootCard.CardType.BrutalTactics){
-                actions.add(new PlayBrutalTactics(playerID, craftedCardsAttacker.get(i)));
+                actions.add(new ChooseCard(playerID, i, craftedCardsAttacker.get(i).getComponentID()));
             }
         }
         actions.add(new Pass(player));
@@ -296,9 +300,9 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         for (int i = 0; i < craftedCardsDefender.getSize(); i++){
             if (craftedCardsDefender.get(i).cardtype == RootCard.CardType.Armorers){
                 //ignore all rolled hits
-                actions.add(new DiscardCraftedCard(playerID, craftedCardsDefender.get(i)));
+                actions.add(new DiscardCraftedCard(playerID, i, craftedCardsDefender.get(i).getComponentID()));
             } else if (craftedCardsDefender.get(i).cardtype == RootCard.CardType.Sappers) {
-                actions.add(new DiscardCraftedCard(playerID, craftedCardsDefender.get(i)));
+                actions.add(new DiscardCraftedCard(playerID, i, craftedCardsDefender.get(i).getComponentID()));
             }
         }
         actions.add(new Pass(player));
@@ -310,7 +314,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         PartialObservableDeck<RootCard> hand = gs.getPlayerHand(playerDestroyedSympathyID);
         for (int i = 0 ; i < hand.getSize(); i++){
             if (hand.get(i).suit == gs.getGameMap().getNodeByID(locationID).getClearingType() || hand.get(i).suit == RootParameters.ClearingTypes.Bird){
-                AddCardToSupporters action = new AddCardToSupporters(playerID, hand.get(i));
+                AddCardToSupporters action = new AddCardToSupporters(playerID, i, hand.get(i).getComponentID());
                 if (!actions.contains(action)) actions.add(action);
             }
         }
@@ -352,14 +356,14 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                 }
                 break;
             case chooseTargetPlayer:
-                if (action instanceof ChooseTargetPlayer ct) {
-                    targetPlayerID = ct.targetID;
+                if (action instanceof ChooseNumber ct) {
+                    targetPlayerID = ct.number;
                     lastStage = Stage.chooseTargetPlayer;
                     stage = Stage.targetAmbush;
                 }
                 break;
             case targetAmbush:
-                if (action instanceof PlayAmbush pa) {
+                if (action instanceof PlayAmbush ignored1) {
                     attackerDamage = 2;
                     lastStage = Stage.targetAmbush;
                     stage = Stage.playerAmbush;
@@ -369,7 +373,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                 }
                 break;
             case playerAmbush:
-                if (action instanceof PlayAmbush paa) {
+                if (action instanceof PlayAmbush ignored) {
                     attackerDamage = 0;
                     lastStage = Stage.playerAmbush;
                     stage = Stage.Battle;
@@ -379,10 +383,10 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                 }
                 break;
             case ambushPlayed:
-                if (action instanceof RemoveWarrior rw) {
+                if (action instanceof RemoveWarrior) {
                     if (gs.getPlayerFaction(targetPlayerID) == RootParameters.Factions.Vagabond){
                         if (gs.getRelationship(gs.getPlayerFaction(playerID)) == RootParameters.Relationship.Hostile){
-                            gs.addGameScorePLayer(targetPlayerID, 2);
+                            gs.addGameScorePlayer(targetPlayerID, 2);
                         } else{
                             gs.setHostile(gs.getPlayerFaction(playerID));
                             gs.logEvent(Event.GameEvent.GAME_EVENT, gs.getPlayerFaction(playerID).toString() + " is now Hostile");
@@ -390,7 +394,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     }
                     attackerDamage--;
                 } else if (action instanceof TakeHit th) {
-                    gs.addGameScorePLayer(targetPlayerID,1);
+                    gs.addGameScorePlayer(targetPlayerID,1);
                     attackerDamage--;
                     if (th.tokenType == RootParameters.TokenType.Sympathy) {
                         lastStage = Stage.ambushPlayed;
@@ -420,14 +424,15 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     lastStage = Stage.optionalModifiersAttacker;
                     stage = Stage.optionalModifiersDefender;
                 } else if (action instanceof DiscardCraftedCard dc){
-                    if (dc.card.cardtype == RootCard.CardType.Armorers){
+                    RootCard card = (RootCard) gs.getComponentById(dc.cardId);
+                    if (card.cardtype == RootCard.CardType.Armorers){
                         attackerDamage = 0;
                         lastStage = Stage.optionalModifiersAttacker;
                         stage = Stage.optionalModifiersDefender;
                     }
-                } else if (action instanceof  PlayBrutalTactics pbt) {
+                } else if (action instanceof ChooseCard) {
                     defenderDamage++;
-                    gs.addGameScorePLayer(targetPlayerID,1);
+                    gs.addGameScorePlayer(targetPlayerID,1);
                     lastStage = Stage.optionalModifiersAttacker;
                     stage = Stage.optionalModifiersDefender;
                 }
@@ -437,11 +442,12 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     lastStage = Stage.optionalModifiersDefender;
                     stage = Stage.removePiecesAttacker;
                 } else if (action instanceof DiscardCraftedCard dc){
-                    if (dc.card.cardtype == RootCard.CardType.Armorers){
+                    RootCard card = (RootCard) gs.getComponentById(dc.cardId);
+                    if (card.cardtype == RootCard.CardType.Armorers){
                         defenderDamage = 0;
                         lastStage = Stage.optionalModifiersAttacker;
                         stage = Stage.optionalModifiersDefender;
-                    } else if (dc.card.cardtype == RootCard.CardType.Sappers) {
+                    } else if (card.cardtype == RootCard.CardType.Sappers) {
                         attackerDamage ++;
                         lastStage = Stage.optionalModifiersAttacker;
                         stage = Stage.optionalModifiersDefender;
@@ -453,7 +459,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     attackerDamage--;
                     if (gs.getPlayerFaction(targetPlayerID) == RootParameters.Factions.Vagabond){
                         if (gs.getRelationship(gs.getPlayerFaction(playerID)) == RootParameters.Relationship.Hostile){
-                            gs.addGameScorePLayer(targetPlayerID, 2);
+                            gs.addGameScorePlayer(targetPlayerID, 2);
                         } else{
                             gs.setHostile(gs.getPlayerFaction(playerID));
                             gs.logEvent(Event.GameEvent.GAME_EVENT, gs.getPlayerFaction(playerID).toString() + " is now Hostile");
@@ -461,7 +467,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     }
                 }else if (action instanceof TakeHit ta){
                     attackerDamage--;
-                    gs.addGameScorePLayer(targetPlayerID,1);
+                    gs.addGameScorePlayer(targetPlayerID,1);
                     if (ta.tokenType == RootParameters.TokenType.Sympathy){
                         playerDestroyedSympathyID = targetPlayerID;
                         lastStage = Stage.removePiecesAttacker;
@@ -485,7 +491,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     defenderDamage--;
                     if (gs.getPlayerFaction(playerID) == RootParameters.Factions.Vagabond){
                         if (gs.getRelationship(gs.getPlayerFaction(targetPlayerID)) == RootParameters.Relationship.Hostile){
-                            gs.addGameScorePLayer(playerID, 2);
+                            gs.addGameScorePlayer(playerID, 2);
                         } else{
                             gs.setHostile(gs.getPlayerFaction(targetPlayerID));
                             gs.logEvent(Event.GameEvent.GAME_EVENT, gs.getPlayerFaction(targetPlayerID).toString() + " is now Hostile");
@@ -493,7 +499,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     }
                 } else if (action instanceof TakeHit td) {
                     defenderDamage--;
-                    gs.addGameScorePLayer(playerID,1);
+                    gs.addGameScorePlayer(playerID,1);
                     if (td.tokenType == RootParameters.TokenType.Sympathy){
                         playerDestroyedSympathyID = playerID;
                         lastStage = Stage.removePiecesDefender;
@@ -565,6 +571,11 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash("Battle action", playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to battle";
     }
 
     @Override

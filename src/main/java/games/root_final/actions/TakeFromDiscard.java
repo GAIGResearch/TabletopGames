@@ -5,19 +5,20 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.root_final.RootGameState;
-import games.root_final.RootParameters;
 import games.root_final.cards.RootCard;
 
 import java.util.Objects;
 
 public class TakeFromDiscard extends AbstractAction {
     public final int playerID;
-    public RootCard card;
+    public final int cardIdx, cardId;
 
-    public TakeFromDiscard(int playerID, RootCard card){
+    public TakeFromDiscard(int playerID, int cardIdx, int cardId){
         this.playerID = playerID;
-        this.card = card;
+        this.cardIdx = cardIdx;
+        this.cardId = cardId;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState state = (RootGameState) gs;
@@ -29,39 +30,40 @@ public class TakeFromDiscard extends AbstractAction {
             for (int i = 0; i < state.getNPlayers(); i++) {
                 visibility[i] = true;
             }
-            for (int i = 0; i < discard.getSize(); i++){
-                if (discard.get(i).equals(card)){
-                    hand.add(discard.get(i), visibility);
-                    discard.remove(i);
-                    return true;
-                }
-            }
+            RootCard card = discard.pick(cardIdx);
+            hand.add(card, visibility);
+            return true;
         }
         return false;
     }
 
     @Override
-    public AbstractAction copy() {
-        return new TakeFromDiscard(playerID, card);
+    public TakeFromDiscard copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){ return true;}
-        if (obj instanceof TakeFromDiscard td){
-            return playerID == td.playerID && card.equals(td.card);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TakeFromDiscard that = (TakeFromDiscard) o;
+        return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("TakeFromDiscard", playerID, card.hashCode());
+        return Objects.hash(playerID, cardIdx, cardId);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " takes card " + cardIdx + " from discard";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
+        RootCard card = (RootCard) gs.getComponentById(cardId);
         return gs.getPlayerFaction(playerID).toString() + " takes " + card.suit.toString() + " card " + card.cardtype.toString() + " from the discard pile";
     }
 }

@@ -35,21 +35,26 @@ public class EndTurn extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public EndTurn copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        EndTurn endTurn = (EndTurn) o;
+        return playerID == endTurn.playerID && setup == endTurn.setup;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, "EndingTurn");
+        return Objects.hash(playerID, setup);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " ended turn";
     }
 
     @Override

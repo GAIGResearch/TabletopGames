@@ -1,10 +1,13 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.CatRecruit;
+import games.root_final.actions.CatRecruitSingle;
+import games.root_final.actions.Pass;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -13,14 +16,16 @@ import java.util.Objects;
 
 public class CatRecruitSequence extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public List<Integer> locationIDs;
-    public boolean canRecruitEverywhere;
-    public boolean done = false;
+
+    List<Integer> locationIDs;
+    boolean canRecruitEverywhere;
+    boolean done = false;
 
     public CatRecruitSequence(int playerID){
         this.playerID = playerID;
         locationIDs = new ArrayList<>();
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -34,11 +39,7 @@ public class CatRecruitSequence extends AbstractAction implements IExtendedSeque
                     }
                 }
             }
-            if (currentState.getCatWarriors() >= recruiters ){
-                canRecruitEverywhere = true;
-            }else {
-                canRecruitEverywhere = false;
-            }
+            canRecruitEverywhere = currentState.getCatWarriors() >= recruiters;
             currentState.increaseActionsPlayed();
             currentState.setActionInProgress(this);
             return true;
@@ -52,7 +53,6 @@ public class CatRecruitSequence extends AbstractAction implements IExtendedSeque
         List<AbstractAction> actions = new ArrayList<>();
         if(canRecruitEverywhere){
             actions.add(new CatRecruit(playerID));
-            return actions;
         } else {
             for (RootBoardNodeWithRootEdges clearing: gs.getGameMap().getNonForrestBoardNodes()){
                 if (clearing.hasBuilding(RootParameters.BuildingType.Recruiter) && locationIDs.contains(clearing.getComponentID()) && gs.getCatWarriors() > 0){
@@ -62,8 +62,8 @@ public class CatRecruitSequence extends AbstractAction implements IExtendedSeque
             if (actions.isEmpty()){
                 actions.add(new Pass(playerID, " No more warriors to place"));
             }
-            return actions;
         }
+        return actions;
     }
 
     @Override
@@ -73,7 +73,6 @@ public class CatRecruitSequence extends AbstractAction implements IExtendedSeque
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        RootGameState gs = (RootGameState) state;
         if (action instanceof CatRecruit){
             done = true;
         } else if (action instanceof CatRecruitSingle cs) {
@@ -118,6 +117,11 @@ public class CatRecruitSequence extends AbstractAction implements IExtendedSeque
     @Override
     public int hashCode() {
         return Objects.hash("CatRecruitSequence", playerID, done, canRecruitEverywhere);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to recruit.";
     }
 
     @Override

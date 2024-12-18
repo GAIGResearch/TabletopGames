@@ -17,15 +17,15 @@ public class BattleRoll extends AbstractAction {
 
     public int attackerDamage = 0;
     public int defenderDamage = 0;
-
     public int attackerRoll = 0;
-
     public int defenderRoll = 0;
+
     public BattleRoll(int attackerID, int defenderID, int locationID){
         this.attackerID = attackerID;
         this.defenderID = defenderID;
         this.locationID = locationID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -35,11 +35,10 @@ public class BattleRoll extends AbstractAction {
             int secondRoll = currentState.getRnd().nextInt(4);
             if (currentState.getPlayerFaction(defenderID) != RootParameters.Factions.WoodlandAlliance){
                 attackerRoll = Math.max(firstRoll, secondRoll);
-                defenderRoll = Math.min(firstRoll, secondRoll);
             }else {
                 attackerRoll = Math.min(firstRoll, secondRoll);
-                defenderRoll = Math.min(firstRoll, secondRoll);
             }
+            defenderRoll = Math.min(firstRoll, secondRoll);
             if (currentState.getPlayerFaction(attackerID) == RootParameters.Factions.Vagabond){
                 defenderDamage = Math.min(attackerRoll, currentState.getVagabondUndamagedSwords());
             } else {
@@ -63,9 +62,9 @@ public class BattleRoll extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public BattleRoll copy() {
         BattleRoll copy = new BattleRoll(attackerID, defenderID, locationID);
-        copy.attackerRoll =attackerRoll;
+        copy.attackerRoll = attackerRoll;
         copy.defenderRoll = defenderRoll;
         copy.attackerDamage = attackerDamage;
         copy.defenderDamage =defenderDamage;
@@ -84,6 +83,11 @@ public class BattleRoll extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("BattleRoll", attackerID, defenderID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + attackerID + " rolls for battle";
     }
 
     @Override

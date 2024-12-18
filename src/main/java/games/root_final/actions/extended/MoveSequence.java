@@ -1,4 +1,4 @@
-package games.root_final.actions;
+package games.root_final.actions.extended;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,11 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IExtendedSequence;
 import games.root_final.RootGameState;
 import games.root_final.RootParameters;
+import games.root_final.actions.AddCardToSupporters;
+import games.root_final.actions.Move;
+import games.root_final.actions.Pass;
+import games.root_final.actions.choosers.ChooseNumber;
+import games.root_final.actions.choosers.ChooseCardForSupporters;
 import games.root_final.cards.RootCard;
 import games.root_final.components.RootBoardNodeWithRootEdges;
 
@@ -16,7 +21,7 @@ import java.util.Objects;
 public class MoveSequence extends AbstractAction implements IExtendedSequence {
     public final int playerID;
     public final int fromNodeID;
-    public int toNodeID;
+
     public enum Stage{
         chooseAmount,
         chooseTargetNode,
@@ -24,24 +29,18 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
         OutrageWoodland,
     }
 
-    public Stage stage = Stage.chooseAmount;
-
-    public boolean birdPlayed = false;
-
-    public boolean done = false;
-
-    public int amount = 0;
-
-    public MoveSequence(int playerID, int fromNodeID){
-        this.playerID = playerID;
-        this.fromNodeID = fromNodeID;
-    }
+    int toNodeID;
+    Stage stage = Stage.chooseAmount;
+    boolean birdPlayed = false;
+    boolean done = false;
+    int amount = 0;
 
     public MoveSequence(int playerID, int fromNodeID, boolean birdPlayed){
         this.playerID = playerID;
         this.fromNodeID = fromNodeID;
         this.birdPlayed = birdPlayed;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -64,7 +63,7 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
         switch (stage){
             case chooseAmount:
                 for (int i = 1; i <= gs.getGameMap().getNodeByID(fromNodeID).getWarrior(gs.getPlayerFaction(playerID)); i++){
-                    actions.add(new ChooseAmount(playerID,i));
+                    actions.add(new ChooseNumber(playerID,i));
             }
                 return actions;
             case chooseTargetNode:
@@ -82,7 +81,7 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
                 PartialObservableDeck<RootCard> hand = gs.getPlayerHand(playerID);
                 for (int i = 0 ; i < hand.getSize(); i++){
                     if (hand.get(i).suit == gs.getGameMap().getNodeByID(toNodeID).getClearingType() || hand.get(i).suit == RootParameters.ClearingTypes.Bird){
-                        AddCardToSupporters action = new AddCardToSupporters(playerID, hand.get(i));
+                        AddCardToSupporters action = new AddCardToSupporters(playerID, i, hand.get(i).getComponentID());
                         if (!actions.contains(action)) actions.add(action);
                     }
                 }
@@ -118,8 +117,8 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         RootGameState gs = (RootGameState) state;
-        if (stage == Stage.chooseAmount && action instanceof ChooseAmount a){
-            amount = a.amount;
+        if (stage == Stage.chooseAmount && action instanceof ChooseNumber a){
+            amount = a.number;
             stage = Stage.chooseTargetNode;
         }else if (stage == Stage.chooseTargetNode && action instanceof Move m){
             if (gs.getGameMap().getNodeByID(m.to).hasToken(RootParameters.TokenType.Sympathy) && gs.getPlayerFaction(playerID)!= RootParameters.Factions.WoodlandAlliance){
@@ -167,8 +166,7 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean equals(Object obj) {
         if(obj == this){return true;}
-        if (obj instanceof MoveSequence){
-            MoveSequence other = (MoveSequence) obj;
+        if (obj instanceof MoveSequence other){
             return playerID == other.playerID && fromNodeID == other.fromNodeID && birdPlayed == other.birdPlayed;
         }
         return false;
@@ -177,6 +175,11 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash("MoveSequence", playerID, fromNodeID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " wants to move from " + fromNodeID;
     }
 
     @Override

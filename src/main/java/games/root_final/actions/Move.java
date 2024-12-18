@@ -15,6 +15,7 @@ public class Move extends AbstractAction {
     public final int to;
     public final int amount;
     public final int playerID;
+
     public Move(int from, int to, int amount, int playerIdx){
         this.from = from;
         this.to = to;
@@ -38,24 +39,26 @@ public class Move extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new Move(from,to,amount,playerID);
+    public Move copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if(obj instanceof Move)
-        {
-            Move other = (Move) obj;
-            return from == other.from && to == other.to && amount == other.amount && playerID == other.playerID;
-
-        }else return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Move move = (Move) o;
+        return from == move.from && to == move.to && amount == move.amount && playerID == move.playerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID,to,from,amount);
+        return Objects.hash(from, to, amount, playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " moves " + amount + " units from " + from + " to " + to;
     }
 
     @Override

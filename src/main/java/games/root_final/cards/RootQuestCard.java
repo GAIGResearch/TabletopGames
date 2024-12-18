@@ -7,8 +7,10 @@ import games.root_final.components.Item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RootQuestCard extends Card {
+
     public enum CardType{
         Errand,
         Escort,
@@ -19,13 +21,13 @@ public class RootQuestCard extends Card {
         GuardDuty,
         LogisticsHelp,
         RepairAShed,
-
-
     }
+
     public final CardType cardType;
     public final RootParameters.ClearingTypes suit;
     public Item.ItemType requirement1;
     public Item.ItemType requirement2;
+
     public RootQuestCard(CardType cardType, RootParameters.ClearingTypes clearingType) {
         super(cardType.toString());
         this.cardType = cardType;
@@ -49,38 +51,36 @@ public class RootQuestCard extends Card {
 
     private Item.ItemType getFirstItem(CardType cardType){
         return switch (cardType){
-            case Errand -> Item.ItemType.tea;
-            case Escort -> Item.ItemType.boot;
-            case Fundraising -> Item.ItemType.tea;
-            case GuardDuty -> Item.ItemType.torch;
-            case GiveASpeech -> Item.ItemType.torch;
-            case RepairAShed -> Item.ItemType.torch;
+            case Errand, Fundraising -> Item.ItemType.tea;
+            case Escort, LogisticsHelp -> Item.ItemType.boot;
+            case GuardDuty, GiveASpeech, RepairAShed, FendOffABear -> Item.ItemType.torch;
             case ExpelBandits -> Item.ItemType.sword;
-            case FendOffABear -> Item.ItemType.torch;
-            case LogisticsHelp -> Item.ItemType.boot;
         };
     }
     private Item.ItemType getSecondItem(CardType cardType){
         return switch (cardType){
-            case Errand -> Item.ItemType.boot;
-            case Escort -> Item.ItemType.boot;
+            case Errand, Escort -> Item.ItemType.boot;
             case Fundraising -> Item.ItemType.coin;
-            case GuardDuty -> Item.ItemType.sword;
+            case GuardDuty, ExpelBandits -> Item.ItemType.sword;
             case GiveASpeech -> Item.ItemType.tea;
             case RepairAShed -> Item.ItemType.hammer;
-            case ExpelBandits -> Item.ItemType.sword;
             case FendOffABear -> Item.ItemType.crossbow;
             case LogisticsHelp -> Item.ItemType.bag;
         };
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RootQuestCard that = (RootQuestCard) o;
+        return cardType == that.cardType && suit == that.suit && requirement1 == that.requirement1 && requirement2 == that.requirement2;
+    }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof RootQuestCard other) {
-            return other.cardType == cardType && other.suit == suit;
-        }
-        return false;
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), cardType, suit, requirement1, requirement2);
     }
 
     @Override

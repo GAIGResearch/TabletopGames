@@ -50,24 +50,26 @@ public class PlaceKeep extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PlaceKeep(playerID, locationID);
+    public PlaceKeep copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof PlaceKeep other) {
-            return playerID == other.playerID && locationID == other.locationID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlaceKeep placeKeep = (PlaceKeep) o;
+        return locationID == placeKeep.locationID && playerID == placeKeep.playerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, locationID);
+        return Objects.hash(locationID, playerID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " places keep at " + locationID;
     }
 
     @Override

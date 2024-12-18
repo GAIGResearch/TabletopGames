@@ -16,6 +16,7 @@ public class CatRecruitSingle extends AbstractAction {
         this.playerID = playerID;
         this.locationID = locationID;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
@@ -31,7 +32,7 @@ public class CatRecruitSingle extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public CatRecruitSingle copy() {
         return this;
     }
 
@@ -47,6 +48,11 @@ public class CatRecruitSingle extends AbstractAction {
     @Override
     public int hashCode() {
         return Objects.hash("CatRecruitSingle", playerID, locationID);
+    }
+
+    @Override
+    public String toString() {
+        return "p" + playerID + " recruits 1 warrior at location " + locationID;
     }
 
     @Override
