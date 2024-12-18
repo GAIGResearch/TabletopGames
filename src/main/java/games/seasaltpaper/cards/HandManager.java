@@ -4,14 +4,13 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
 import games.seasaltpaper.actions.BoatDuo;
 import games.seasaltpaper.actions.FishDuo;
 import games.seasaltpaper.actions.SwimmerSharkDuo;
 import games.seasaltpaper.actions.CrabDuo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class HandManager {
 
@@ -85,16 +84,87 @@ public class HandManager {
     public static int calculatePoint(SeaSaltPaperGameState gs, int playerID) {
         PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
         Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
-        HashMap<CardSuite, Integer> collectorDict = new HashMap<>();
-        HashMap<CardSuite, Integer> multiplierDict = new HashMap<>();
+        Map<CardSuite, Integer> collectorDict = new HashMap<>();
+        Map<CardSuite, Integer> multiplierDict = new HashMap<>();
+        Map<CardSuite, Integer> suiteDict = new HashMap<>();
+        int mermaidCount = 0;
 
-        return 0;
+        // Iterate through player hand
+        for (int i=0; i<playerHand.getSize(); i++) {
+            SeaSaltPaperCard c = playerHand.get(i);
+            CardSuite suite = c.getCardSuite();
+            CardType type = c.getCardType();
+
+            if (type != CardType.MULTIPLIER) {  // Don't count multiplier card into overall suite count
+                suiteDict.put(suite, suiteDict.getOrDefault(suite, 0) + 1);
+            }
+            else {
+                multiplierDict.put(suite, multiplierDict.getOrDefault(suite, 0) + 1);
+            }
+
+            if (type == CardType.COLLECTOR) {
+                collectorDict.put(suite, collectorDict.getOrDefault(suite, 0) + 1);
+            }
+
+            if (suite==CardSuite.MERMAID) {mermaidCount++;}
+        }
+
+        // Iterate playerDiscard
+        for (int i=0; i<playerDiscard.getSize(); i++) {
+            CardSuite suite = playerHand.get(i).getCardSuite();
+            suiteDict.put(suite, suiteDict.getOrDefault(suite, 0) + 1);
+        }
+
+        int score = 0;
+        SeaSaltPaperParameters param = (SeaSaltPaperParameters) gs.getGameParameters();
+
+        // Calculate Collection score
+        for (CardSuite suite : collectorDict.keySet()) {
+            score += param.collectorBonusDict.get(suite)[collectorDict.get(suite)];
+        }
+        //Calculate Multiplier score
+        for (CardSuite suite : multiplierDict.keySet()) {
+            if (suiteDict.containsKey(suite)) {
+                score += param.multiplierDict.get(suite) * suiteDict.get(suite);
+            }
+        }
+        //Calculate Mermaid score
+        score += calculateColorBonus(gs, playerID, mermaidCount);
+
+        return score;
     }
 
     public static int calculateColorBonus(SeaSaltPaperGameState gs, int playerID) {
+        return calculateColorBonus(gs, playerID, 1);
+    }
+
+    // Calculate color bonus for the n_colors highest colors
+    public static int calculateColorBonus(SeaSaltPaperGameState gs, int playerID, int n_colors) {
+        if (n_colors == 0) { return 0; }
+
         PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
         Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
-        return 0;
+        Map<CardColor, Integer> colorDict = new HashMap<>();
+
+        // Iterate through player hand
+        for (int i=0; i<playerHand.getSize(); i++) {
+            CardColor color = playerHand.get(i).getCardColor();
+            colorDict.put(color, colorDict.getOrDefault(color, 0) + 1);
+        }
+        // Iterate through player discard
+        for (int i=0; i<playerDiscard.getSize(); i++) {
+            CardColor color = playerDiscard.get(i).getCardColor();
+            colorDict.put(color, colorDict.getOrDefault(color, 0) + 1);
+        }
+
+        ArrayList<Integer> colorBonuses = (ArrayList<Integer>) colorDict.values();
+        Collections.sort(colorBonuses); Collections.reverse(colorBonuses);
+        n_colors = Integer.min(n_colors, colorBonuses.size());
+        int score = 0;
+        for (int i=0; i<n_colors; i++) {
+            score += colorBonuses.get(i);
+        }
+        return score;
     }
 
 }
