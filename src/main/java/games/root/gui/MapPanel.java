@@ -17,7 +17,7 @@ public class MapPanel extends JComponent {
 
     public MapPanel(RootGameState gameState){
         this.gameState = gameState;
-        backgroundImage = ImageIO.GetInstance().getImage("src/main/java/games/root_final/gui/img_1.png");
+        backgroundImage = ImageIO.GetInstance().getImage("data/root/img_1.png");
     }
 
     @Override
@@ -31,7 +31,7 @@ public class MapPanel extends JComponent {
         if (backgroundImage != null) {
             drawImage(g, backgroundImage, 0, 0, 800, 700);
         } else {
-            System.out.println("NO IMAGE");
+//            System.out.println("NO IMAGE");
         }
     }
 
