@@ -7,8 +7,6 @@ import core.components.PartialObservableDeck;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
-import java.util.Arrays;
-
 public abstract class PlayDuo extends AbstractAction {
 
     int playerId;
@@ -21,9 +19,9 @@ public abstract class PlayDuo extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        SeaSaltPaperGameState sspg = (SeaSaltPaperGameState) gs;
-        PartialObservableDeck<SeaSaltPaperCard> playerHand = sspg.getPlayerHands().get(playerId);
-        Deck<SeaSaltPaperCard> playerDiscard = sspg.getPlayerDiscards().get(playerId);
+        SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
+        PartialObservableDeck<SeaSaltPaperCard> playerHand = sspgs.getPlayerHands().get(playerId);
+        Deck<SeaSaltPaperCard> playerDiscard = sspgs.getPlayerDiscards().get(playerId);
 
 //        // make the duo cards visible
 //        boolean[] visibility = new boolean[sspg.getNPlayers()];
@@ -34,8 +32,8 @@ public abstract class PlayDuo extends AbstractAction {
         // discard duo cards and put them into playerDiscard
         SeaSaltPaperCard[] duoCards = {playerHand.peek(cardsIdx[0]), playerHand.peek(cardsIdx[1])};
         playerHand.remove(duoCards[0]); playerHand.remove(duoCards[1]);
-        playerDiscard.add(duoCards[0]); playerDiscard.add(duoCards[1]);;
-
+        playerDiscard.add(duoCards[0]); playerDiscard.add(duoCards[1]);
+        sspgs.playerCurrentDuoPoints[playerId] += duoCards[0].getDuoBonus();
         return true;
     }
 
