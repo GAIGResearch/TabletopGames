@@ -1206,6 +1206,7 @@ public class RootGameState extends AbstractGameState {
     }
 
     public void aid(int playerID, RootParameters.Factions faction) {
+        //noinspection StatementWithEmptyBody
         if (relationships.get(faction) == RootParameters.Relationship.Hostile) {
             //nothing
         } else if (relationships.get(faction) == RootParameters.Relationship.Neutral) {

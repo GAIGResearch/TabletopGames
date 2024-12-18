@@ -21,8 +21,9 @@ public class PlayDomination extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
+        RootParameters rp = (RootParameters) gs.getGameParameters();
         if (currentState.getCurrentPlayer() == playerID){
-            if (currentState.getGameScore(playerID) >= 10){  // todo param
+            if (currentState.getGameScore(playerID) >= rp.minScoreForDomination){
                 PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(playerID);
                 RootCard card = hand.pick(cardIdx);
                 currentState.setGameScorePlayer(playerID, 0);

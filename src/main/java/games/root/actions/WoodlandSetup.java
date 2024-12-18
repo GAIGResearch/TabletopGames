@@ -18,12 +18,13 @@ public class WoodlandSetup extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
+        RootParameters rp = (RootParameters) gs.getGameParameters();
         if(currentState.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.WoodlandAlliance){
             currentState.increaseActionsPlayed();
             if (increaseSubGamePhase){
                 currentState.increaseSubGamePhase();
             }
-            for(int i = 0; i < 3; i++){  // todo param
+            for(int i = 0; i < rp.woodlandSetupSupporters; i++){
                 currentState.getSupporters().add(currentState.getDrawPile().draw());
             }
         }
@@ -50,12 +51,12 @@ public class WoodlandSetup extends AbstractAction {
 
     @Override
     public String toString() {
-        return "p" + playerID + " draws 3 supporters";
+        return "p" + playerID + " draws supporters";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
-        return gs.getPlayerFaction(playerID).toString()  + " draws 3 supporters";
+        return gs.getPlayerFaction(playerID).toString()  + " draws " + ((RootParameters)gs.getGameParameters()).woodlandSetupSupporters + " supporters";
     }
 }
