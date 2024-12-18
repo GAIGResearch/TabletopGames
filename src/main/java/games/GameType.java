@@ -78,10 +78,10 @@ import games.resistance.ResForwardModel;
 import games.resistance.ResGameState;
 import games.resistance.ResParameters;
 import games.resistance.gui.ResGUIManager;
-import games.root_final.RootForwardModel;
-import games.root_final.RootGameState;
-import games.root_final.RootParameters;
-import games.root_final.gui.RootGUIManager;
+import games.root.RootForwardModel;
+import games.root.RootGameState;
+import games.root.RootParameters;
+import games.root.gui.RootGUIManager;
 import games.stratego.StrategoForwardModel;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
@@ -220,8 +220,9 @@ public enum GameType {
             Arrays.asList(SetCollection, PushYourLuck, SimultaneousActionSelection),
             SGGameState.class, SGForwardModel.class, SGParameters.class, SGGUIManager.class),
     Catan(3, 4,
-            Arrays.asList(Strategy, Cards),
-            Arrays.asList(Memory, GridMovement, ModularBoard),
+            Arrays.asList(Strategy, Cards, Economic),
+            Arrays.asList(Memory, GridMovement, ModularBoard, Negotiation, DiceRolling, Income, HexagonGrid,
+                    NetworkAndRouteBuilding, Race, RandomProduction, Trading, VariableSetup),
             CatanGameState.class, CatanForwardModel.class, CatanParameters.class, CatanGUI.class),
     TerraformingMars(1, 5,
             Arrays.asList(Economic, Environmental, Manufacturing, TerritoryBuilding, Cards, Strategy, Exploration),
@@ -263,7 +264,9 @@ public enum GameType {
             Arrays.asList(Strategy, Abstract, Cards),
             Collections.singletonList(TrickTaking),
             ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
-    Root(2, 4, Arrays.asList(Strategy,Wargame), Arrays.asList(HandManagement), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class);
+    Root(2, 4, Arrays.asList(Strategy,Wargame), Arrays.asList(ActionPoints, ActionQueue,
+            ActionRetrieval, AreaMajority, AreaMovement, DiceRolling, HandManagement, MultiUseCards, Negotiation,
+            PointToPointMovement, Race, SuddenDeathEnding, TakeThat, VariablePlayerPowers, VariableSetup), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -568,7 +571,7 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection, ClosedDrafting, NeighbourScope;
+        RoleSelection, ClosedDrafting, NeighbourScope, ActionRetrieval, AreaMajority, AreaMovement, Race, SuddenDeathEnding, MultiUseCards, Negotiation, VariableSetup, NetworkAndRouteBuilding, RandomProduction;
 
         /**
          * @return a list of all games using this mechanic.
