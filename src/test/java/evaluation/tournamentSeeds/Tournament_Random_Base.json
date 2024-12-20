@@ -1,0 +1,12 @@
+{
+        "game" : "Dominion",
+        "nPlayers" : 3,
+        "playerDirectory" : "random",
+        "mode" : "random",
+        "matchups" : 10,
+        "distinctRandomSeeds" : 0,
+        "verbose" : false,
+        "listener" : "GameResultsListener.json",
+        "destDir" : "SeedTest\\Rnd",
+        "seed" : 740334
+}

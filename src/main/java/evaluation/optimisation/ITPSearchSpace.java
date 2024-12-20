@@ -2,6 +2,7 @@ package evaluation.optimisation;
 
 import core.interfaces.ITunableParameters;
 import evodef.AgentSearchSpace;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -69,6 +70,9 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         super(convertToSuperFormatJSON(json, tunableParameters),
                 allParameterTypesWithRecursion(json, tunableParameters));
         initialiseITP(tunableParameters);
+        if (tunableParameters instanceof TunableParameters tp) {
+            tp.setRawJSON(json);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -87,8 +91,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             subJSON.get("class");
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
-                            Object child = registerChild(key, subJSON);
-                            itp.setParameterValue(key, child);
+                            Object child =  JSONUtils.loadClassFromJSON(subJSON);
+                            itp.setParameterValue((String) baseKey, child);
                             if (child instanceof ITunableParameters)
                                 retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
                         } catch (Exception e) {
@@ -96,9 +100,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
                         }
 
-                    } else if (data instanceof JSONArray) {
+                    } else if (data instanceof JSONArray arr) {
                         // we have a set of options for this parameter
-                        JSONArray arr = (JSONArray) data;
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
                         if (debug)
@@ -113,30 +116,13 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         if (debug)
                             System.out.println("Setting default: " + namespaceSplit[namespaceSplit.length - 1] + " = " + data);
                     }
-                } else if (!baseKey.equals("class")) {
+                } else if (!baseKey.equals("class") && !baseKey.equals("args")) {
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
                 }
             }
         }
         return retValue;
     }
-
-    public static Object registerChild(String nameSpace, JSONObject json) {
-        try {
-            if (debug)
-                System.out.println("Registering " + nameSpace);
-            Object child = JSONUtils.loadClassFromJSON(json);
-            if (child instanceof TunableParameters) {
-                TunableParameters tunableChild = (TunableParameters) child;
-                TunableParameters.loadFromJSON(tunableChild, json);
-            }
-            return child;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getMessage() + " when trying to a nested TunableParameters : " + json.get("class"));
-        }
-    }
-
 
     private static Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json, ITunableParameters itp) {
         return extractRecursiveParameters("", json, itp).stream()
@@ -186,15 +172,24 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         return getSearchKeys().indexOf(parameter);
     }
 
-    public Object getAgent(int[] settings) {
+    public Object getAgent(@NotNull int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
+        setTo(settings);
+        return itp.instantiate();
+    }
+    public JSONObject getAgentJSON(int[] settings) {
+        // we first need to update itp with the specified parameters, and then instantiate
+        setTo(settings);
+        return itp.instanceToJSON(true);
+    }
+
+    private void setTo(int[] settings) {
         for (int i = 0; i < settings.length; i++) {
             String pName = tunedIndexToParameterName.get(i);
             Object value = value(i, settings[i]);
             //   Object value = itp.getPossibleValues(pName).get(settings[i]);
             itp.setParameterValue(pName, value);
         }
-        return itp.instantiate();
     }
 
 }

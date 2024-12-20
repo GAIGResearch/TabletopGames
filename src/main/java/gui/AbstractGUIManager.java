@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import players.human.ActionController;
@@ -197,22 +198,22 @@ public abstract class AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width / 2 - 10, height, new HashSet<>());
+        createActionHistoryPanel(width / 2 - 10, height, humanPlayerId);
         wrapper.add(historyContainer);
         return wrapper;
     }
 
-    protected void createActionHistoryPanel(int width, int height, Set<Integer> perspective) {
-        this.historyPerspective = perspective;
-        if (perspective.size() > 0) {
+    protected void createActionHistoryPanel(int width, int height, Set<Integer> perspectiveSet) {
+        this.historyPerspective = perspectiveSet;
+        if (!perspectiveSet.isEmpty()) {
             // we need to create a GameListener for ACTION_CHOSEN events
             game.addListener(new IGameListener() {
                 @Override
                 public void onEvent(Event event) {
                     if (event.type == Event.GameEvent.ACTION_CHOSEN) {
-                        history.add("Player " + event.state.getCurrentPlayer() + " : " + event.action.getString(game.getGameState(), perspective));
+                        history.add("Player " + event.state.getCurrentPlayer() + " : " + event.action.getString(game.getGameState(), perspectiveSet));
                     } else if (event.type == Event.GameEvent.GAME_EVENT) {
-                        history.add(event.toString());
+                        history.add(event.action.toString());
                     } else if (event.type == Event.GameEvent.GAME_OVER) {
                         for (int i = 0; i < event.state.getNPlayers(); i++) {
                             history.add(String.format("Player %d finishes at position %d with score: %.0f", i, event.state.getOrdinalPosition(i), event.state.getGameScore(i)));

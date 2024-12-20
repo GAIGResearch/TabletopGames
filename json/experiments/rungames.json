@@ -3,6 +3,6 @@
   "selfPlay": false,
   "nPlayers": 4,
   "matchups": 1000,
-  "listener": "metrics/catan.json",
+  "listener": "metrics/gamemetrics.json",
   "reportPeriod": 100
 }

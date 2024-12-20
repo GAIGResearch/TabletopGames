@@ -26,7 +26,7 @@ public class MASTActionHeuristic implements IActionHeuristic {
     }
 
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+    public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         Object key = actionKey == null ? action : actionKey.key(action);
         Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(state.getCurrentPlayer());
         if (MAST.containsKey(key)) {
@@ -36,5 +36,4 @@ public class MASTActionHeuristic implements IActionHeuristic {
         }
         return defaultValue;
     }
-
 }

@@ -3,12 +3,11 @@ package core;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
+import core.interfaces.IPlayerDecorator;
 import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult.*;
@@ -16,9 +15,24 @@ import static core.CoreConstants.GameResult.*;
 public abstract class AbstractForwardModel {
 
     public ActionTreeNode root;
-    public List<ActionTreeNode> leaves;
+
+    // Decorator modify (restrict) the actions available to the player.
+    // This enables the Forward Model to be passed to the decision algorithm (e.g. MCTS), and ensure that any
+    // restrictions are applied to the actions available to the player during search, and not just
+    // in the main game loop.
+    protected List<IPlayerDecorator> decorators;
+    protected int decisionPlayerID;
 
     /* Limited access/Final methods */
+
+    public AbstractForwardModel() {
+        this(new ArrayList<>(), -1);
+    }
+
+    public AbstractForwardModel(List<IPlayerDecorator> decorators, int playerID) {
+        this.decorators = new ArrayList<>(decorators);
+        this.decisionPlayerID = playerID;
+    }
 
     /**
      * Combines both super class and sub class setup methods. Called from the game loop.
@@ -73,7 +87,10 @@ public abstract class AbstractForwardModel {
      * @return - List of AbstractAction objects.
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) { return _computeAvailableActions(gameState); }
+
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        return _computeAvailableActions(gameState);
+    }
 
     /**
      * Gets a copy of the FM with a new random number generator.
@@ -157,13 +174,22 @@ public abstract class AbstractForwardModel {
 
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
+        List<AbstractAction> retValue;
         if (gameState.isActionInProgress()) {
-            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace);
+            retValue = gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace);
+        } else if (actionSpace != null && !actionSpace.isDefault()) {
+            retValue = _computeAvailableActions(gameState, actionSpace);
+        } else {
+            retValue = _computeAvailableActions(gameState);
         }
-        if (actionSpace != null && !actionSpace.isDefault()) {
-            return _computeAvailableActions(gameState, actionSpace);
+
+        // Then apply Decorators regardless of source of actions
+        for (IPlayerDecorator decorator : decorators) {
+            if (decorator.decisionPlayerOnly() && gameState.getCurrentPlayer() != decisionPlayerID)
+                continue;
+            retValue = decorator.actionFilter(gameState, retValue);
         }
-        return _computeAvailableActions(gameState);
+        return retValue;
     }
 
     /**
@@ -197,6 +223,16 @@ public abstract class AbstractForwardModel {
      * @return a new Forward Model instance with a different random object.
      */
     public final AbstractForwardModel copy() {
-        return _copy();
+        AbstractForwardModel retValue = _copy();
+        retValue.decorators = new ArrayList<>(decorators);
+        retValue.decisionPlayerID = decisionPlayerID;
+        return retValue;
+    }
+
+    public void addPlayerDecorator(IPlayerDecorator decorator) {
+        decorators.add(decorator);
+    }
+    public void clearPlayerDecorators() {
+        decorators.clear();
     }
 }

@@ -62,4 +62,9 @@ public class PrinceAction extends PlayCard implements IPrintable {
         return pa;
     }
 
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Prince: p" + targetPlayer;
+    }
+
 }

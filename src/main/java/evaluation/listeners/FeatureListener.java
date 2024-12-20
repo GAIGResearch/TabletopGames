@@ -3,10 +3,16 @@ package evaluation.listeners;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
+import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
+import utilities.Utils;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static evaluation.metrics.IDataLogger.ReportDestination.ToBoth;
+import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
 
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
@@ -48,19 +54,22 @@ public abstract class FeatureListener implements IGameListener {
         }
     }
 
+    @Override
+    public boolean setOutputDirectory(String... nestedDirectories) {
+
+        if (logger instanceof FileStatsLogger fileLogger) {
+            fileLogger.setOutPutDirectory(nestedDirectories);
+        }
+        return true;
+    }
 
     protected void writeDataWithStandardHeaders(AbstractGameState state) {
         int totP = state.getNPlayers();
         double[] finalScores = IntStream.range(0, totP).mapToDouble(state::getGameScore).toArray();
-        double[] winLoss = Arrays.stream(state.getPlayerResults()).mapToDouble(r -> {
-            switch (r) {
-                case WIN_GAME:
-                    return 1.0;
-                case DRAW_GAME:
-                    return 0.5;
-                default:
-                    return 0.0;
-            }
+        double[] winLoss = Arrays.stream(state.getPlayerResults()).mapToDouble(r -> switch (r) {
+            case WIN_GAME -> 1.0;
+            case DRAW_GAME -> 0.5;
+            default -> 0.0;
         }).toArray();
         double[] ordinal = IntStream.range(0, totP).mapToDouble(state::getOrdinalPosition).toArray();
         double finalRound = state.getRoundCounter();
@@ -78,10 +87,19 @@ public abstract class FeatureListener implements IGameListener {
             }
             data.put("PlayerCount", (double) getGame().getPlayers().size());
             data.put("TotalRounds", finalRound);
-            data.put("ActionScore", record.actionScore);
+            data.put("TotalTurns", (double) state.getTurnCounter());
+            data.put("TotalTicks", (double) state.getGameTick());
+            for (int i = 0; i < record.actionScores.length; i++) {
+                data.put(record.actionScoreNames[i], record.actionScores[i]);
+            }
             data.put("Win", winLoss[record.player]);
             data.put("Ordinal", ordinal[record.player]);
             data.put("FinalScore", finalScores[record.player]);
+            double bestOtherScore = IntStream.range(0, totP)
+                    .filter(p -> p != record.player)
+                    .mapToDouble(i -> finalScores[i])
+                    .max().orElse(0);
+            data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
             logger.record(data);
         }
         logger.processDataAndNotFinish();
@@ -124,11 +142,11 @@ public abstract class FeatureListener implements IGameListener {
         if (currentPlayerOnly && state.isNotTerminal()) {
             int p = state.getCurrentPlayer();
             double[] phi = extractFeatureVector(action, state, p);
-            currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, 0.0));
+            currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
         } else {
             for (int p = 0; p < state.getNPlayers(); p++) {
                 double[] phi = extractFeatureVector(action, state, p);
-                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, 0.0));
+                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
             }
         }
     }
@@ -139,16 +157,24 @@ public abstract class FeatureListener implements IGameListener {
         final int gameTurn;
         final int gameRound;
         final double currentScore;
-        final double actionScore;
+        final double[] actionScores;
+        final String[] actionScoreNames;
         final double[] array;
 
-        LocalDataWrapper(int player, double[] contents, AbstractGameState state, double actionScore) {
+        LocalDataWrapper(int player, double[] contents, AbstractGameState state, Map<String, Double> actionScore) {
             array = contents;
             this.gameTurn = state.getTurnCounter();
             this.gameRound = state.getRoundCounter();
             this.player = player;
             this.currentScore = state.getGameScore(player);
-            this.actionScore = actionScore;
+            this.actionScores = new double[actionScore.size()];
+            this.actionScoreNames = new String[actionScore.size()];
+            int i = 0;
+            for (String key : actionScore.keySet()) {
+                actionScoreNames[i] = key;
+                actionScores[i] = actionScore.get(key);
+                i++;
+            }
         }
     }
 }

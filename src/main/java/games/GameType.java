@@ -10,6 +10,10 @@ import games.cantstop.*;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.*;
 import games.catan.gui.CatanGUI;
+import games.chinesecheckers.CCForwardModel;
+import games.chinesecheckers.CCGameState;
+import games.chinesecheckers.CCParameters;
+import games.chinesecheckers.gui.CCGUIManager;
 import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
@@ -19,29 +23,49 @@ import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
 import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.hanabi.HanabiForwardModel;
+import games.hanabi.HanabiGameState;
+import games.hanabi.HanabiParameters;
+import games.hanabi.gui.HanabiGUIManager;
+import games.hearts.HeartsForwardModel;
+import games.hearts.HeartsGameState;
+import games.hearts.HeartsParameters;
+import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.monopolydeal.gui.MonopolyDealGUIManager;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;
 import games.puertorico.gui.PuertoRicoGUI;
+import games.resistance.ResForwardModel;
+import games.resistance.ResGameState;
+import games.resistance.ResParameters;
+import games.resistance.gui.ResGUIManager;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
 import games.poker.gui.*;
-import games.dicemonastery.gui.*;
 import games.stratego.*;
 import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
+import games.toads.ToadForwardModel;
+import games.toads.ToadGUIManager;
+import games.toads.ToadGameState;
+import games.toads.ToadParameters;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
-import games.dicemonastery.*;
 import games.dominion.*;
+import games.wonders7.Wonders7ForwardModel;
+import games.wonders7.Wonders7GameParameters;
+import games.wonders7.Wonders7GameState;
+import games.wonders7.gui.Wonders7GUI;
 import gametemplate.GTForwardModel;
 import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
@@ -128,10 +152,6 @@ public enum GameType {
             Arrays.asList(Adventure, Bluffing, Exploration),
             Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
             DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, null),
-    DiceMonastery(2, 4,
-            Arrays.asList(Strategy, Medieval),
-            Arrays.asList(SetCollection, WorkerPlacement, EngineBuilding),
-            DiceMonasteryGameState.class, DiceMonasteryForwardModel.class, DiceMonasteryParams.class, DiceMonasteryGUI.class),
     Dominion(2, 4,
             Arrays.asList(Cards, Strategy),
             Collections.singletonList(DeckManagement),
@@ -173,11 +193,34 @@ public enum GameType {
             Arrays.asList(Strategy, Cards, Economic),
             Arrays.asList(SetCollection, HandManagement, TakeThat),
             MonopolyDealGameState.class, MonopolyDealForwardModel.class, MonopolyDealParameters.class, MonopolyDealGUIManager.class),
-
+    Hanabi(2, 5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
             Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
-            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class);
+            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class),
+    Wonders7(3, 7,
+            Arrays.asList(Strategy, Civilization, Ancient, Cards, CityBuilding, Economic),
+            Arrays.asList(ClosedDrafting, HandManagement, NeighbourScope, SetCollection, SimultaneousActionSelection, VariablePlayerPowers),
+            Wonders7GameState.class, Wonders7ForwardModel.class, Wonders7GameParameters.class, Wonders7GUI.class),
+    Resistance(5, 10,
+            Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
+            Arrays.asList(Memory, GridMovement),
+            ResGameState.class, ResForwardModel.class, ResParameters.class, ResGUIManager.class),
+    Hearts(3,7,Arrays.asList(Cards, Number),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
+    ChineseCheckers(2, 6,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement),
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
+    WarOfTheToads(2, 2,
+            Arrays.asList(Strategy, Abstract, Cards),
+            Collections.singletonList(TrickTaking),
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -269,6 +312,10 @@ public enum GameType {
         try {
             if (dataPath != null) {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class, Long.class);
+                if (constructorGS == null) {
+                    constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class);
+                    return (AbstractParameters) constructorGS.newInstance(dataPath);
+                }
                 return (AbstractParameters) constructorGS.newInstance(dataPath, seed);
             } else {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);
@@ -279,6 +326,7 @@ public enum GameType {
                 return (AbstractParameters) constructorGS.newInstance(seed);
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -404,7 +452,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame;
+        Wargame, Civilization, Ancient, CodeBreaking;
 
         /**
          * @return a list of all games within this category.
@@ -478,7 +526,7 @@ public enum GameType {
         CommandCards,
         MoveThroughDeck,
         TrickTaking,
-        RoleSelection;
+        RoleSelection, ClosedDrafting, NeighbourScope;
 
         /**
          * @return a list of all games using this mechanic.

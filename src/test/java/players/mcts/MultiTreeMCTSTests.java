@@ -17,9 +17,7 @@ import org.junit.Test;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
@@ -32,24 +30,34 @@ public class MultiTreeMCTSTests {
     Token o = TicTacToeConstants.playerMapping.get(1);
 
     AbstractForwardModel fm = new TicTacToeForwardModel();
-    private Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
-            node.getChildren().isEmpty() ||  // first condition is that this is a terminal node
-                    node.getParent() == null || // the root node is different (and is checked above)
-                    node.getVisits() == 1 + node.getChildren().values().stream().mapToInt(arr -> {
-                                int retValue = 0;
-                                if (arr != null)
-                                    for (SingleTreeNode singleTreeNode : arr) {
-                                        if (singleTreeNode != null)
-                                            retValue += singleTreeNode.getVisits();
-                                    }
+    private final Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
+                    node.getParent() == null || // the root node is different (and is checked elsewhere)
+                    node.getChildren().values().stream().flatMap(arr -> {
+                                if (arr == null)
+                                    return new ArrayList<SingleTreeNode>().stream();
+                                return Arrays.stream(arr);
+                            }).filter(Objects::nonNull)
+                            .anyMatch(n -> n.state != null && n.state.isNotTerminalForPlayer(n.decisionPlayer)) ||
+                    node.getVisits() == node.getChildren().values().stream().mapToInt(arr -> {
+                                if (arr == null)
+                                    return 0;
+                                int retValue = 1;
+                                for (SingleTreeNode singleTreeNode : arr) {
+                                    if (singleTreeNode != null)
+                                        retValue += singleTreeNode.getVisits();
+                                }
                                 return retValue;
                             }
                     ).sum();
 
+    private final Predicate<SingleTreeNode> actionVisitsAddUp = node ->
+            node.getVisits() == node.actionValues.values().stream().mapToInt(s -> s.nVisits).sum();
+
     @Before
     public void setup() {
         // default Parameter settings for later changes
-        params = new MCTSParams(9332);
+        params = new MCTSParams();
+        params.setRandomSeed(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
@@ -58,7 +66,7 @@ public class MultiTreeMCTSTests {
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        params.nodesStoreScoreDelta = false;
+        params.maintainMasterState = true;
         params.K = 1.0;
     }
 
@@ -68,7 +76,7 @@ public class MultiTreeMCTSTests {
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
-        TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
+        TicTacToeGameParameters gameParams = new TicTacToeGameParameters();
         gameParams.gridSize = gridSize;
         Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
         game.reset(players);
@@ -82,7 +90,8 @@ public class MultiTreeMCTSTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(3024)));
-        LoveLetterParameters gameParams = new LoveLetterParameters(3812);
+        LoveLetterParameters gameParams = new LoveLetterParameters();
+        gameParams.setRandomSeed(3812);
         Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
         game.reset(players);
         return game;
@@ -108,8 +117,11 @@ public class MultiTreeMCTSTests {
         SingleTreeNode root = mctsPlayer.getRoot(0);
         assertEquals(200, root.getVisits());
 
-        // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits + 1
+        // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits
+        // although there will be some discrepancy as we update the visit on a state when we traverse it - but we may never reach the next state in this tree
         List<SingleTreeNode> problemNodes = root.nonMatchingNodes(childrenVisitsAddUp);
+        assertEquals(0, problemNodes.size(), 15);
+        problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
         assertEquals(0, problemNodes.size());
 
         // TicTacToe is easy as we strictly alternate turns
@@ -167,7 +179,7 @@ public class MultiTreeMCTSTests {
         Game game = createTicTacToe(params, 4);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
-        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+        game.getPlayers().get(state.getCurrentPlayer())
                 ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
@@ -187,7 +199,7 @@ public class MultiTreeMCTSTests {
         // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits + 1
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(childrenVisitsAddUp);
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(childrenVisitsAddUp);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(actionVisitsAddUp);
         assertEquals(0, problemNodes.size());
 
         // Now each tree should only have nodes for its player
@@ -238,12 +250,21 @@ public class MultiTreeMCTSTests {
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(childrenVisitsAddUp);
         System.out.println("Problem nodes for player 0 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 20);
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(actionVisitsAddUp);
+        assertEquals(0, problemNodes.size());
+
         problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(childrenVisitsAddUp);
         System.out.println("Problem nodes for player 1 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 40);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(actionVisitsAddUp);
+        assertEquals(0, problemNodes.size());
+
         problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(childrenVisitsAddUp);
         System.out.println("Problem nodes for player 2 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 80);
+        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(actionVisitsAddUp);
+        assertEquals(0, problemNodes.size());
+
 
         // Now each tree should only have nodes for its player
         problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node.getActor() == 0 || node.getVisits() == 1);
@@ -291,18 +312,18 @@ public class MultiTreeMCTSTests {
                 ._getAction(state, fm.computeAvailableActions(state));
 
 
-        // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
+        // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all trees
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node ->
                 node.getVisits() <= 10 ||
-                        node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
+                        node.nodeValue(1) > node.nodeValue(0) && node.nodeValue(1) > node.nodeValue(2));
         assertEquals(0, problemNodes.size(), 0);
         problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node ->
                 node.getVisits() <= 10 ||
-                        node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
+                        node.nodeValue(1) > node.nodeValue(0) && node.nodeValue(1) > node.nodeValue(2));
         assertEquals(0, problemNodes.size(), 0);
         problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(node ->
                 node.getVisits() <= 10 ||
-                        node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
+                        node.nodeValue(1) > node.nodeValue(0) && node.nodeValue(1) > node.nodeValue(2));
         assertEquals(0, problemNodes.size(), 0);
 
     }
@@ -324,15 +345,15 @@ public class MultiTreeMCTSTests {
                 ._getAction(state, fm.computeAvailableActions(state));
 
 
-        // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node ->
-                        node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
+        // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all trees
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node.getVisits() == 0 || (
+                node.nodeValue(0) == -node.nodeValue(1) && node.nodeValue(0) == -node.nodeValue(2)));
         assertEquals(0, problemNodes.size(), 0);
-        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node ->
-                node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getVisits() == 0 || (
+                node.nodeValue(0) == -node.nodeValue(1) && node.nodeValue(0) == -node.nodeValue(2)));
         assertEquals(0, problemNodes.size(), 0);
-        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(node ->
-                node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
+        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(node -> node.getVisits() == 0 || (
+                node.nodeValue(0) == -node.nodeValue(1) && node.nodeValue(0) == -node.nodeValue(2)));
         assertEquals(0, problemNodes.size(), 0);
 
     }

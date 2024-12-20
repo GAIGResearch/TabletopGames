@@ -9,28 +9,30 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     // List of nodes in the board graph, mapping component ID to object reference
     protected Map<Integer, BoardNodeWithEdges> boardNodes;
 
+    private static final int initialCapacity = 256;
+
     public GraphBoardWithEdges(String name)
     {
         super(CoreConstants.ComponentType.BOARD, name);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     public GraphBoardWithEdges()
     {
         super(CoreConstants.ComponentType.BOARD);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     protected GraphBoardWithEdges(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     GraphBoardWithEdges(int ID)
     {
         super(CoreConstants.ComponentType.BOARD, ID);
-        boardNodes = new HashMap<>();
+        boardNodes = new HashMap<>(initialCapacity);
     }
 
     /**
@@ -40,25 +42,43 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     @Override
     public GraphBoardWithEdges copy()
     {
-        GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
-        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>();
-        HashMap<Integer, Edge> edgeCopies = new HashMap<>();
-        // Copy board nodes
+        // A temporary map to store the copied edges
+        // this slightly odd Edge -> Edge structure avoids the overhead of Integer Boxing/Unboxing compared
+        // to using a Map<Integer, Edge> for the edge IDs
+        HashMap<Edge, Edge> edgeCopies = new HashMap<>(initialCapacity);
+        // copy edges
         for (BoardNodeWithEdges bn: boardNodes.values()) {
-            BoardNodeWithEdges bnCopy = bn.copy();
-            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.getComponentID());
-            bn.copyComponentTo(bnCopy);
-            nodeCopies.put(bn.getComponentID(), bnCopy);
-            // Copy edges
-            for (Edge e: bn.neighbourEdgeMapping.keySet()) {
-                edgeCopies.put(e.componentID, e.copy());
+            // copy edges (then used in the next loop)
+            for (Edge e: bn.getEdges()) {
+                edgeCopies.put(e, e.copy());
             }
         }
-        // Assign neighbours and edges
+
+        // Copy board nodes; we can't use the same trick as with Edges, because the Node change as we wire them up
+        GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
+        HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>(initialCapacity);
         for (BoardNodeWithEdges bn: boardNodes.values()) {
-            BoardNodeWithEdges bnCopy = nodeCopies.get(bn.getComponentID());
-            for (Map.Entry<Edge, BoardNodeWithEdges> e: bn.neighbourEdgeMapping.entrySet()) {
-                bnCopy.addNeighbour(nodeCopies.get(e.getValue().getComponentID()), edgeCopies.get(e.getKey().componentID));
+            BoardNodeWithEdges bnCopy = bn.copy();
+            if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.componentID);
+            Integer key = bn.getComponentID();
+            bn.copyComponentTo(bnCopy);
+            nodeCopies.put(key, bnCopy);
+            if (bn.neighbourEdgeMapping.size() > 3) {
+                throw new AssertionError("Too many neighbours in a node");
+            }
+        }
+
+        // then update the neighbours
+        for (BoardNodeWithEdges bn: boardNodes.values()) {
+            for (Map.Entry entry : bn.neighbourEdgeMapping.entrySet()) {
+                Edge e = (Edge) entry.getKey();
+                BoardNodeWithEdges otherEnd = (BoardNodeWithEdges) entry.getValue();
+                Edge eCopy = edgeCopies.get(e);
+                Integer keyOne = bn.getComponentID();
+                BoardNodeWithEdges vertexOne = nodeCopies.get(keyOne);
+                Integer keyTwo = otherEnd.getComponentID();
+                BoardNodeWithEdges vertexTwo = nodeCopies.get(keyTwo);
+                vertexOne.addNeighbour(vertexTwo, eCopy);
             }
         }
 
@@ -79,11 +99,11 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
     /**
      * Returns the node in the list which matches the given ID
-     * @param id - ID of node to search for.
+     * @param key - ID of node to search for.
      * @return - node matching ID.
      */
-    public BoardNodeWithEdges getNodeByID(int id) {
-        return boardNodes.get(id);
+    public BoardNodeWithEdges getNodeByID(Integer key) {
+        return boardNodes.get(key);
     }
 
     /**
@@ -140,6 +160,8 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public Edge addConnection(int bn1id, int bn2id) {
         BoardNodeWithEdges bn1 = boardNodes.get(bn1id);
         BoardNodeWithEdges bn2 = boardNodes.get(bn2id);
+        // check to see if already a connection
+        if (bn1.getNeighbours().contains(bn2)) return bn1.getEdge(bn2);
         Edge edge = new Edge();
         addConnection(bn1, bn2, edge);
         return edge;

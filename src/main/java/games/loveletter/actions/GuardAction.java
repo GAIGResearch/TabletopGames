@@ -1,5 +1,6 @@
 package games.loveletter.actions;
 
+import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
@@ -40,5 +41,9 @@ public class GuardAction extends PlayCard implements IPrintable {
     @Override
     public GuardAction copy() {
         return this;
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Guard: guess p" + targetPlayer + " has " + targetCardType.name();
     }
 }

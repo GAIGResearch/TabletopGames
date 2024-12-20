@@ -29,7 +29,6 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
     protected void _setup(AbstractGameState firstState) {
         TMGameState gs = (TMGameState) firstState;
         TMGameParameters params = (TMGameParameters) firstState.getGameParameters();
-        Random rnd = new Random(params.getRandomSeed());
 
         gs.playerResources = new HashMap[gs.getNPlayers()];
         gs.playerProduction = new HashMap[gs.getNPlayers()];
@@ -133,8 +132,8 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // Shuffle dekcs
-        gs.projectCards.shuffle(rnd);
-        gs.corpCards.shuffle(rnd);
+        gs.projectCards.shuffle(gs.getRnd());
+        gs.corpCards.shuffle(gs.getRnd());
 
         HashMap<TMTypes.Tag, Counter>[] playerCardsPlayedTags;
         HashSet<AbstractAction>[] playerCardsPlayedEffects;
@@ -204,13 +203,13 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 // Place city + greenery adjacent
                 PlaceTile pt = new PlaceTile(1, TMTypes.Tile.City, TMTypes.MapTileType.Ground, true);
                 List<AbstractAction> actions = pt._computeAvailableActions(gs);
-                PlaceTile action = (PlaceTile) actions.get(rnd.nextInt(actions.size()));
+                PlaceTile action = (PlaceTile) actions.get(gs.getRnd().nextInt(actions.size()));
                 action.execute(gs);
                 TMMapTile mt = (TMMapTile) gs.getComponentById(action.mapTileID);
                 List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                 boolean placed = false;
                 while (!placed) {
-                    Vector2D v = neighbours.get(rnd.nextInt(neighbours.size()));
+                    Vector2D v = neighbours.get(gs.getRnd().nextInt(neighbours.size()));
                     TMMapTile mtn = gs.board.getElement(v.getX(), v.getY());
                     if (mtn != null && mtn.getOwnerId() == -1 && mtn.getTileType() == TMTypes.MapTileType.Ground) {
                         mtn.setTilePlaced(TMTypes.Tile.Greenery, gs);

@@ -4,13 +4,11 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.stratego.components.Piece;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class StrategoGameState extends AbstractGameState{
     GridBoard<Piece> gridBoard;
@@ -36,7 +34,7 @@ public class StrategoGameState extends AbstractGameState{
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters, 2);
+        StrategoGameState s = new StrategoGameState(gameParameters.copy(), 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;
 
@@ -52,12 +50,11 @@ public class StrategoGameState extends AbstractGameState{
             }
         }
 
-        Random random = new Random(gameParameters.getRandomSeed());
         for (Piece piece : gridBoard.getComponents()){
             if (piece != null) {
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
-                    int typeIdx = random.nextInt(pieceTypesHidden.size());
+                    int typeIdx = redeterminisationRnd.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
                     s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));

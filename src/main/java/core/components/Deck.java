@@ -2,6 +2,7 @@ package core.components;
 
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -21,7 +22,7 @@ import static core.CoreConstants.VisibilityMode;
  * * components played on the player's area
  * * Discomponent pile
  */
-public class Deck<T extends Component> extends Component implements IComponentContainer<T> {
+public class Deck<T extends Component> extends Component implements IComponentContainer<T>, Iterable<T> {
 
     protected int capacity;  // Capacity of the deck (maximum number of elements)
     protected List<T> components;  // List of components in this deck
@@ -33,7 +34,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     public Deck(String name, int ownerId, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name);
-        this.components = new ArrayList<>();
+        this.components = new LinkedList<>();   // we always add new components to element 0...so an ArrayList is inefficient
         this.ownerId = ownerId;
         this.capacity = -1;
         this.visibility = visibility;
@@ -41,11 +42,34 @@ public class Deck<T extends Component> extends Component implements IComponentCo
 
     protected Deck(String name, int ownerId, int ID, VisibilityMode visibility) {
         super(CoreConstants.ComponentType.DECK, name, ID);
-        this.components = new ArrayList<>();
+        this.components = new LinkedList<>();
         this.capacity = -1;
         this.ownerId = ownerId;
         this.visibility = visibility;
     }
+
+    @NotNull
+    @Override
+    public Iterator<T> iterator() {
+        return new DeckIterator();
+    }
+
+
+    // Iterator implementation
+    private class DeckIterator implements Iterator<T> {
+        private int currentIndex = 0;
+
+        @Override
+        public boolean hasNext() {
+            return currentIndex < getSize();
+        }
+
+        @Override
+        public T next() {
+            return components.get(currentIndex++);
+        }
+    }
+
 
     /**
      * Loads all decks of cards from a given JSON file.
@@ -117,7 +141,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return the component in position idx from the deck
      */
     public T pick(int idx) {
-        if (components.size() > 0 && idx < components.size() && idx >= 0) {
+        if (!components.isEmpty() && idx < components.size() && idx >= 0) {
             T c = components.get(idx);
             components.remove(idx);
             return c;
@@ -167,7 +191,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return The component peeked.
      */
     public T peek(int idx) {
-        if (components.size() > 0 && idx < components.size()) {
+        if (!components.isEmpty() && idx < components.size()) {
             return components.get(idx);
         }
         return null;
@@ -207,9 +231,9 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      * @return true if within capacity, false otherwise.
      */
     public boolean addToBottom(T c) {
-        if (components.size() == 0)
+        if (components.isEmpty())
             return add(c, 0);
-        else return add(c, components.size() - 1);
+        else return add(c, components.size());
     }
 
     /**
@@ -340,7 +364,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
      *
      * @param components - new components for the deck, overrides old content.
      */
-    public void setComponents(ArrayList<T> components) {
+    public void setComponents(List<T> components) {
         this.components = components;
         for (T comp : components) {
             comp.setOwnerId(ownerId);
@@ -411,10 +435,25 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return dp;
     }
 
+    @SuppressWarnings("unchecked")
     protected void copyTo(Deck<T> deck) {
-        List<T> newComponents = new ArrayList<>();
+        List<T> newComponents = new LinkedList<>();
         for (T c : components) {
             newComponents.add((T) c.copy());
+        }
+        deck.components = newComponents;
+        deck.capacity = capacity;
+
+        //copy type and component.
+        copyComponentTo(deck);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    protected void copyTo(Deck<T> deck, int playerId) {
+        List<T> newComponents = new LinkedList<>();
+        for (T c : components) {
+            newComponents.add((T) c.copy(playerId));
         }
         deck.components = newComponents;
         deck.capacity = capacity;
@@ -431,7 +470,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
             sb.append(",");
         }
 
-        if (sb.length() > 0)
+        if (!sb.isEmpty())
             sb.deleteCharAt(sb.length() - 1);
         else
             sb.append("EmptyDeck");
@@ -442,9 +481,8 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Deck)) return false;
+        if (!(o instanceof Deck<?> deck)) return false;
         if (!super.equals(o)) return false;
-        Deck<?> deck = (Deck<?>) o;
         return capacity == deck.capacity &&
                 Objects.equals(components, deck.components);
     }

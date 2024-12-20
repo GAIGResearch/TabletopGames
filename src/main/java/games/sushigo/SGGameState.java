@@ -7,6 +7,7 @@ import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import games.wonders7.Wonders7GameParameters;
 import org.json.simple.JSONObject;
 import utilities.Pair;
 
@@ -20,7 +21,7 @@ public class SGGameState extends AbstractGameState {
     int nCardsInHand = 0;
 
     List<List<ChooseCard>> cardChoices;  // one list per player, per turn, indicates the actions chosen by the player, saved for simultaneous execution
-    HashMap<SGCard.SGCardType, Counter>[] playedCardTypes;
+    Map<SGCard.SGCardType, Counter>[] playedCardTypes;
     List<Deck<SGCard>> playedCards;
     Counter[] playerScore;
 
@@ -28,7 +29,6 @@ public class SGGameState extends AbstractGameState {
     HashMap<SGCard.SGCardType, Counter>[] playedCardTypesAllGame;
     HashMap<SGCard.SGCardType, Counter>[] pointsPerCardType;
 
-    Random rnd;
     int deckRotations = 0;
 
     /**
@@ -39,7 +39,6 @@ public class SGGameState extends AbstractGameState {
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -111,15 +110,15 @@ public class SGGameState extends AbstractGameState {
 
             // Add player hands unseen back to the draw pile
             for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (hasNotSeenHand(playerId, p)) {
+                if (!hasSeenHand(playerId, p)) {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
-            copy.drawPile.shuffle(rnd);
+            copy.drawPile.shuffle(redeterminisationRnd);
 
             // Now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (hasNotSeenHand(playerId, p)) {
+                if (!hasSeenHand(playerId, p)) {
                     Deck<SGCard> hand = copy.playerHands.get(p);
                     int handSize = hand.getSize();
                     hand.clear();
@@ -152,12 +151,10 @@ public class SGGameState extends AbstractGameState {
      * @param opponentId - id of opponent owning the hand of cards we're checking vision of
      * @return - true if player has not seen the opponent's hand of cards, false otherwise
      */
-    public boolean hasNotSeenHand(int playerId, int opponentId) {
-        if (playerId == opponentId) return false;
-        int opponentSpacesToLeft = opponentId - playerId;
-        if (opponentSpacesToLeft < 0)
-            opponentSpacesToLeft = getNPlayers() + opponentSpacesToLeft;
-        return deckRotations < opponentSpacesToLeft;
+    public boolean hasSeenHand(int playerId, int opponentId) {
+        // Player 0 is one space to the 'Left' of player 1
+        int opponentSpacesToLeft = (playerId - opponentId + getNPlayers()) % getNPlayers();
+        return opponentSpacesToLeft <= deckRotations;
     }
 
     public Counter[] getPlayerScore() {
@@ -203,15 +200,15 @@ public class SGGameState extends AbstractGameState {
         return playerScore[playerId].getValue();
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
+    public Map<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
         return playedCardTypes;
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
+    public Map<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
         return playedCardTypesAllGame;
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
+    public Map<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
         return pointsPerCardType;
     }
 
@@ -249,8 +246,7 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) &&
                 Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) &&
-                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) &&
-                Objects.equals(rnd, that.rnd);
+                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame);
     }
 
     @Override

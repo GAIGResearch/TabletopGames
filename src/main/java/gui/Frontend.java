@@ -116,7 +116,7 @@ public class Frontend extends GUI {
         agentParameters = new PlayerParameters[PlayerType.values().length];
         for (int i = 0; i < playerOptionsString.length; i++) {
             playerOptionsString[i] = PlayerType.values()[i].name();
-            agentParameters[i] = PlayerType.values()[i].createParameterSet(0);
+            agentParameters[i] = PlayerType.values()[i].createParameterSet();
         }
         // We have one JFrame per player, as different players may use the same agent type with different parameters
         playerParameters = new PlayerParameters[nMaxPlayers];
@@ -466,7 +466,7 @@ public class Frontend extends GUI {
             JButton reset = new JButton("Reset");
             reset.addActionListener(e -> {
                 playerParameters[playerIndex].reset();
-                PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet(0);
+                PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet();
                 if (defaultParams != null)
                     for (String param : paramNames) {
                         paramValueOptions.get(param).setSelectedItem(defaultParams.getDefaultParameterValue(param));

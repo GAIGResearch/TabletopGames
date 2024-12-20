@@ -47,7 +47,6 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
                 }
             }
         }
-
         return actions;
         }
 

@@ -3,7 +3,6 @@ package evaluation.metrics.tablessaw;
 import core.Game;
 import core.interfaces.IGameEvent;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
 import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IDataProcessor;
 import tech.tablesaw.api.*;
@@ -84,21 +83,22 @@ public class DataTableSaw implements IDataLogger {
     }
 
     public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
-
         // Add default columns
         Map<String, Class<?>> defaultColumns = metric.getDefaultColumns();
-        for (Map.Entry<String, Class<?>> entry : defaultColumns.entrySet())
-            data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
+        for (Map.Entry<String, Class<?>> entry : defaultColumns.entrySet()) {
+            if (!data.containsColumn(entry.getKey()))
+                data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
+        }
 
         // Add metric-defined columns
         Map<String, Class<?>> columns = metric.getColumns(nPlayersPerGame, playerNames);
         for (Map.Entry<String, Class<?>> entry : columns.entrySet())
-            data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
+            if (!data.containsColumn(entry.getKey())) {
+                data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
 
-        // Iterate through columns and find their name
-        for (String colName : columns.keySet())
-            metric.addColumnName(colName);
-
+                // Keep the name of the column
+                metric.addColumnName(entry.getKey());
+            }
     }
 
     /**
@@ -189,15 +189,18 @@ public class DataTableSaw implements IDataLogger {
                 for (Column<?> c : metricData.columns()) {
                     if (c.name().equals(indexingColumnName)) {
                         for (int id : gameIDs) {
-                            int nIdx = metricData
+                            Optional<?> maxValue = metricData
                                     // Filter the table first by game ID
                                     .where(metricData.stringColumn("GameID").isEqualTo(String.valueOf(id)))
                                     // Then find the indexing column
                                     .column(c.name())
                                     // And count the number of unique values
-                                    .countUnique();
-                            if (nIdx > maxIndex) {
-                                maxIndex = nIdx;
+                                    .max(Comparator.comparing((Object a) -> ((Integer) a)));
+                            if (maxValue.isPresent()) {
+                                int nIdx = (Integer) maxValue.get();
+                                if (nIdx > maxIndex) {
+                                    maxIndex = nIdx;
+                                }
                             }
                         }
                     }
@@ -223,7 +226,7 @@ public class DataTableSaw implements IDataLogger {
         // Add data from all the metrics to each of the columns, row by row, checking for values being equal in colStep to account for missing values in some of the columns
         for (int id: gameIDs) {
             if (!indexingColumnIsGameID) {
-                for (int idx = 0; idx < maxIndex; idx++) {
+                for (int idx = 0; idx <= maxIndex; idx++) {
                     filterAndRecordData(metricTables, allColumnNames, id, indexingColumnName, idx);
                 }
             } else {

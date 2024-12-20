@@ -77,7 +77,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                 gs.drawPile.add(new SGCard(p.a, p.b));
             }
         }
-        gs.drawPile.shuffle(new Random(parameters.getRandomSeed()));
+        gs.drawPile.shuffle(gs.getRnd());
     }
 
     @Override
@@ -144,6 +144,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
 
         // Clear played hands if they get discarded between rounds, they go in the discard pile
         for (int i = 0; i < gs.getNPlayers(); i++) {
+            // We think this copy may be for the properties
             Deck<SGCard> cardsToKeep = gs.playedCards.get(i).copy();
             cardsToKeep.clear();
             for (SGCard card : gs.playedCards.get(i).getComponents()) {
@@ -168,7 +169,7 @@ public class SGForwardModel extends StandardForwardModel implements ITreeActionS
                     // Reshuffle discard into draw pile
                     gs.drawPile.add(gs.discardPile);
                     gs.discardPile.clear();
-                    gs.drawPile.shuffle(new Random(gs.getGameParameters().getRandomSeed()));
+                    gs.drawPile.shuffle(gs.getRnd());
                 }
                 gs.playerHands.get(i).add(gs.drawPile.draw());
             }

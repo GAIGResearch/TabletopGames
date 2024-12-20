@@ -56,7 +56,7 @@ public class LoveLetterCard extends Card {
                         continue;
                     cardActions.add(new PriestAction(play.getCardIdx(), p, targetPlayer, true, discard));
                 }
-                if (cardActions.size() == 0) cardActions.add(new PriestAction(play.getCardIdx(), p, -1, false, discard));
+                if (cardActions.isEmpty()) cardActions.add(new PriestAction(play.getCardIdx(), p, p, false, discard));
                 return cardActions;
             };
             Priest.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepPriestAction(play.getCardIdx(), play.getPlayerID()));
@@ -69,7 +69,7 @@ public class LoveLetterCard extends Card {
                         continue;
                     cardActions.add(new KingAction(play.getCardIdx(), p, targetPlayer, true, discard));
                 }
-                if (cardActions.size() == 0) cardActions.add(new KingAction(play.getCardIdx(), p, -1, false, discard));
+                if (cardActions.isEmpty()) cardActions.add(new KingAction(play.getCardIdx(), p, p, false, discard));
                 return cardActions;
             };
             King.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepKingAction(play.getCardIdx(), play.getPlayerID()));
@@ -82,7 +82,7 @@ public class LoveLetterCard extends Card {
                         continue;
                     cardActions.add(new BaronAction(play.getCardIdx(), p, targetPlayer, true, discard));
                 }
-                if (cardActions.size() == 0) cardActions.add(new BaronAction(play.getCardIdx(), p, -1, false, discard));
+                if (cardActions.isEmpty()) cardActions.add(new BaronAction(play.getCardIdx(), p, p, false, discard));
                 return cardActions;};
             Baron.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepBaronAction(play.getCardIdx(), play.getPlayerID()));
             Prince.generateFlatActions = (gs, play) -> {
@@ -94,7 +94,6 @@ public class LoveLetterCard extends Card {
                         continue;
                     cardActions.add(new PrinceAction(play.getCardIdx(), p, targetPlayer, true, discard));
                 }
-                if (cardActions.size() == 0) cardActions.add(new PrinceAction(play.getCardIdx(), p, -1, false, discard));
                 return cardActions;};
             Prince.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepPrinceAction(play.getCardIdx(), play.getPlayerID()));
             Guard.generateFlatActions = (gs, play) -> {
@@ -120,7 +119,10 @@ public class LoveLetterCard extends Card {
                         }
                     }
                 }
-                if (cardActions.size() == 0) cardActions.add(new GuardAction(play.getCardIdx(), p, -1, null, false, discard));
+                if (cardActions.isEmpty()) {
+                    // Target yourself, but don't guess yourself out of the game
+                    cardActions.add(new GuardAction(play.getCardIdx(), p, p, Guard, false, discard));
+                }
                 return cardActions;
             };
             Guard.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepGuardAction(play.getCardIdx(), play.getPlayerID()));

@@ -27,12 +27,13 @@ public class SkillGrid {
     public void run() {
         // sort in alphabetical order
         agents.sort(Comparator.comparing(AbstractPlayer::toString));
+        config.put(RunArg.mode, "onevsall");
 
         // We iterate through each pair of agents
         // agentTwo is the player that will have a single copy against multiple copies of agentOne
         // For a SkillGrid we'd like to get some results early, so we start with playing everyone against the weakest agent
         for (int agentOneIndex = 0; agentOneIndex < agents.size(); agentOneIndex++) {
-            for (int agentTwoIndex = agentOneIndex + 1; agentTwoIndex< agents.size(); agentTwoIndex++) {
+            for (int agentTwoIndex = agentOneIndex + 1; agentTwoIndex < agents.size(); agentTwoIndex++) {
                 GameType gameType = GameType.valueOf((String) config.get(game));
                 AbstractParameters params = config.get(gameParams).equals("") ? null : AbstractParameters.createFromFile(gameType, (String) config.get(gameParams));
 
@@ -40,14 +41,13 @@ public class SkillGrid {
                         Arrays.asList(agents.get(agentTwoIndex), agents.get(agentOneIndex)),
                         gameType,
                         (Integer) config.get(RunArg.nPlayers),
-                        (Integer) config.get(RunArg.matchups),
-                        AbstractTournament.TournamentMode.ONE_VS_ALL,
-                        params);
+                        params,
+                        config);
 
                 // Add listeners
                 //noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
-                    IGameListener gameTracker = IGameListener.createListener(listenerClass, (String) config.get(metrics));
+                    IGameListener gameTracker = IGameListener.createListener(listenerClass);
                     tournament.addListener(gameTracker);
                     List<String> directories = new ArrayList<>();
                     directories.add((String) config.get(destDir));
@@ -57,10 +57,6 @@ public class SkillGrid {
                 }
 
                 // run tournament
-                tournament.setRandomSeed((Number) config.get(seed));
-                tournament.setVerbose((boolean) config.get(verbose));
-                tournament.setResultsFile((String) config.get(output));
-                tournament.setRandomGameParams((boolean) config.get(randomGameParams));
                 tournament.run();
             }
         }

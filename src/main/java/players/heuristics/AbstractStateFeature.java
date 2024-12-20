@@ -6,7 +6,7 @@ import core.interfaces.IStateFeatureVector;
 
 public abstract class AbstractStateFeature implements IStateFeatureVector {
 
-    String[] coreNames = new String[]{"SCORE", "SCORE_ADV", "ORDINAL", "OUR_TURN", "HAS_WON", "FINAL_ORD", "ROUND"};
+    String[] coreNames = new String[]{"SCORE", "SCORE_ADV", "ORDINAL", "OUR_TURN", "HAS_WON", "FINAL_ORD", "ROUND", "TURN", "TICK"};
 
     protected abstract double maxScore();
     protected abstract double maxRounds();
@@ -41,6 +41,8 @@ public abstract class AbstractStateFeature implements IStateFeatureVector {
         retValue[4] = state.getPlayerResults()[playerID] == CoreConstants.GameResult.WIN_GAME ? 1.0 : 0.0;
         retValue[5] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID) / (double) state.getNPlayers();
         retValue[6] = state.getRoundCounter() / maxRounds();
+        retValue[7] = state.getTurnCounter() / maxRounds();
+        retValue[8] = state.getGameTick();
 
         System.arraycopy(localFeatures, 0, retValue, coreNames.length, localFeatures.length);
         return retValue;

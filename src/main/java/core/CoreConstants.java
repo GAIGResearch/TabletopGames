@@ -34,7 +34,7 @@ public class CoreConstants {
      * this should cover almost all future eventualities.
      */
     public enum VisibilityMode {
-        VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, FIRST_VISIBLE_TO_ALL, LAST_VISIBLE_TO_ALL, MIXED_VISIBILITY
+        VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, TOP_VISIBLE_TO_ALL, BOTTOM_VISIBLE_TO_ALL, MIXED_VISIBILITY
     }
 
     // Default game phases: main, player reaction, end.

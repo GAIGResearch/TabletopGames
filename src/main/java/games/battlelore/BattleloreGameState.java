@@ -13,6 +13,7 @@ import java.util.*;
 
 public class BattleloreGameState extends AbstractGameState {
 
+
     public enum BattleloreGamePhase implements IGamePhase {
         CommandAndOrderStep, //Player Plays One Command Card
         MoveStep,
@@ -175,7 +176,6 @@ public class BattleloreGameState extends AbstractGameState {
         return gameBoard;
     }
 
-
     @Override
     protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{ add(gameBoard); }};
@@ -184,7 +184,6 @@ public class BattleloreGameState extends AbstractGameState {
     @Override
     protected AbstractGameState _copy(int playerId) {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
-
 
         state.gameBoard = gameBoard.copy();
 

@@ -21,7 +21,6 @@ public class CoreParameters extends TunableParameters {
     public ActionSpace actionSpace = new ActionSpace(ActionSpace.Structure.Flat, ActionSpace.Flexibility.Default, ActionSpace.Context.Dependent);
 
     public CoreParameters() {
-        super(0);
         addTunableParameter("verbose", verbose, Arrays.asList(false, true));
         addTunableParameter("recordEventHistory", recordEventHistory, Arrays.asList(false, true));
         addTunableParameter("partial observable", partialObservable, Arrays.asList(false, true));

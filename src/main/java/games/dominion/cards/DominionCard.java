@@ -15,42 +15,13 @@ public class DominionCard extends Card {
     }
 
     public static DominionCard create(CardType type) {
-        switch (type) {
-            case GOLD:
-            case COPPER:
-            case SILVER:
-            case ESTATE:
-            case DUCHY:
-            case PROVINCE:
-            case CURSE:
-            case VILLAGE:
-            case SMITHY:
-            case LABORATORY:
-            case MARKET:
-            case FESTIVAL:
-            case CELLAR:
-            case MILITIA:
-            case MOAT:
-            case REMODEL:
-            case MERCHANT:
-            case MINE:
-            case WORKSHOP:
-            case ARTISAN:
-            case MONEYLENDER:
-            case POACHER:
-            case WITCH:
-            case CHAPEL:
-            case HARBINGER:
-            case THRONE_ROOM:
-            case BANDIT:
-            case BUREAUCRAT:
-            case SENTRY:
-                return new DominionCard(type);
-            case GARDENS:
-                return new Gardens();
-            default:
-                throw new AssertionError("Not yet implemented : " + type);
-        }
+        return switch (type) {
+            case GOLD, COPPER, SILVER, ESTATE, DUCHY, PROVINCE, CURSE, VILLAGE, SMITHY, LABORATORY, MARKET, FESTIVAL,
+                 CELLAR, MILITIA, MOAT, REMODEL, MERCHANT, MINE, WORKSHOP, ARTISAN, MONEYLENDER, POACHER, WITCH, CHAPEL,
+                 HARBINGER, THRONE_ROOM, BANDIT, BUREAUCRAT, SENTRY -> new DominionCard(type);
+            case GARDENS -> new Gardens();
+            default -> throw new AssertionError("Not yet implemented : " + type);
+        };
     }
 
     public boolean isTreasureCard() {

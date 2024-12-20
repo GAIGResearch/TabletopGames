@@ -11,8 +11,14 @@ import java.util.Map;
 public class MASTPlayer extends BoltzmannActionPlayer implements IMASTUser {
 
 
+    // A constructor to just use MAST
     public MASTPlayer(IActionKey actionKey, double temperature, double epsilon, long seed, double defaultValue) {
         super(new MASTActionHeuristic(null, actionKey, defaultValue), temperature, epsilon, seed);
+    }
+
+    // Or we can blend in an external heuristic
+    public MASTPlayer(IActionHeuristic externalHeuristic, double weightOfExternal, IActionKey actionKey, double temperature, double epsilon, double defaultValue) {
+        super(new MASTPlusActionHeuristic(externalHeuristic, actionKey, defaultValue, weightOfExternal), temperature, epsilon, System.currentTimeMillis());
     }
     @Override
     public void setStats(List<Map<Object, Pair<Integer, Double>>> MASTStats) {

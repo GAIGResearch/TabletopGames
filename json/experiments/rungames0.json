@@ -1,0 +1,8 @@
+{
+  "game" : "TicTacToe",
+  "nPlayers" : 2,
+  "mode" : "exhaustive",
+  "matchups" : 100,
+  "verbose" : false,
+  "seed" : 740234
+}

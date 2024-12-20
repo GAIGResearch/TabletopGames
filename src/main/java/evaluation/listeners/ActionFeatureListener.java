@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
+import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
 
 import java.util.HashMap;
@@ -25,15 +26,16 @@ public class ActionFeatureListener extends FeatureListener {
     protected IActionFeatureVector psiFn;
     protected IStateFeatureVector phiFn;
     protected double[] cachedPhi;
-    private Map<AbstractAction, Double> actionValues = new HashMap<>();
+    private Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
 
 
-    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken) {
+    public ActionFeatureListener(IActionFeatureVector psi, IStateFeatureVector phi, Event.GameEvent frequency, boolean includeActionsNotTaken, String fileName) {
         super(frequency, true);
         if (psi == null) throw new AssertionError("Action Features must be provided and cannot be null");
         this.psiFn = psi;
         this.phiFn = phi;
         this.includeActionsNotTaken = includeActionsNotTaken;
+        logger = new FileStatsLogger(fileName);
     }
 
     @Override
@@ -61,7 +63,7 @@ public class ActionFeatureListener extends FeatureListener {
         return retValue;
     }
 
-    protected void processStateWithTargets(AbstractGameState state, AbstractAction action, Map<AbstractAction, Double> targets) {
+    protected void processStateWithTargets(AbstractGameState state, AbstractAction action, Map<String, Map<AbstractAction, Double>> targets) {
         actionValues = targets;
         processState(state, action);
     }
@@ -78,26 +80,31 @@ public class ActionFeatureListener extends FeatureListener {
         }
         if (actionValues.isEmpty()) {
             // the default if not provided
-            actionValues = availableActions.stream().collect(toMap(a -> a, a -> 0.0));
-            actionValues.put(action, 1.0);
+            Map<AbstractAction, Double> av = availableActions.stream().collect(toMap(a -> a, a -> 0.0));
+            av.put(action, 1.0);
+            actionValues.put("CHOSEN", av);
         }
         int p = state.getCurrentPlayer();
         double[] phi = extractFeatureVector(action, state, p);
-        currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScore(action)));  // chosen
+        currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScores(action)));  // chosen
         if (includeActionsNotTaken) {
             for (AbstractAction alternativeAction : availableActions) {
                 if (alternativeAction.equals(action)) continue;
                 phi = extractFeatureVector(alternativeAction, state, p);
-                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScore(alternativeAction))); // not chosen
+                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScores(alternativeAction))); // not chosen
             }
         }
         actionValues.clear();
     }
 
-    private double getActionScore(AbstractAction action) {
-        if (actionValues.containsKey(action))
-            return actionValues.get(action);
-        throw new AssertionError("Action " + action.toString() + " not found in action values map");
+    private Map<String, Double> getActionScores(AbstractAction action) {
+        Map<String, Double> retValue = new HashMap<>();
+        for (String key : actionValues.keySet()) {
+            retValue.put(key, actionValues.get(key).get(action));
+        }
+        if (retValue.isEmpty())
+            throw new AssertionError("Action " + action.toString() + " not found in action values map");
+        return retValue;
     }
 
 

@@ -179,20 +179,26 @@ public class GameMetrics implements IMetricsCollection {
                 put("Copy (ms)", Double.class);
                 put("Actions Available Compute (ms)", Double.class);
                 put("Agent (ms)", Double.class);
+                put("Agent", String.class);
+                put("Player", Integer.class);
             }};
         }
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            records.put("Next (ms)", listener.getGame().getNextTime() / 1e3);
-            records.put("Copy (ms)", listener.getGame().getCopyTime() / 1e3);
-            records.put("Actions Available Compute (ms)", listener.getGame().getActionComputeTime() / 1e3);
-            records.put("Agent (ms)", listener.getGame().getAgentTime() / 1e3);
+            // the times are all recorded in nanoseconds, so we convert to milliseconds
+            records.put("Next (ms)", listener.getGame().getNextTime() / 1e6);
+            records.put("Copy (ms)", listener.getGame().getCopyTime() / 1e6);
+            records.put("Actions Available Compute (ms)", listener.getGame().getActionComputeTime() / 1e6);
+            records.put("Agent (ms)", listener.getGame().getAgentTime() / 1e6);
+            records.put("Agent", listener.getGame().getPlayers().get(e.playerID).toString());
+            records.put("Player", e.playerID);
             return true;
         }
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
+            // ACTION_CHOSEN would be fine except for the recording of the time for 'next'
             return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
@@ -317,6 +323,60 @@ public class GameMetrics implements IMetricsCollection {
             return columns;
         }
     }
+
+
+    /**
+     * Records the actions taken during the game
+     * This is 'Reduced' compared to the Actions metric in that it does not have separate columns for each player
+     * Instead of having separate columns for 'Player-2', 'Player-3' etc, it has a single column 'Player' with
+     * the player ID taking the action. (And similarly for PlayerName)
+     * This simplifies data analysis in some circumstances (in others the Actions metric is more useful)
+     */
+    public static class ActionsReduced extends AbstractMetric {
+        public ActionsReduced() {
+            super();
+        }
+
+        public ActionsReduced(Event.GameEvent... args) {
+            super(args);
+        }
+
+        @Override
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            Game g = listener.getGame();
+            AbstractForwardModel fm = g.getForwardModel();
+            AbstractPlayer currentPlayer = g.getPlayers().get(e.playerID);
+            int size = fm.computeAvailableActions(e.state, currentPlayer.getParameters().actionSpace).size();
+
+            records.put("Player", e.playerID);
+            records.put("PlayerType", currentPlayer.toString());
+            records.put("Size", size);
+
+            records.put("Action", e.action == null ? null : e.action.toString());
+            records.put("ActionClass", e.action.getClass().getSimpleName());
+            records.put("ActionDescription", e.action == null ? null : e.action.getString(e.state));
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(ACTION_CHOSEN);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("Player", Integer.class);
+            columns.put("PlayerType", String.class);
+            columns.put("Size", Integer.class);
+            columns.put("Action", String.class);
+            columns.put("ActionClass", String.class);
+            columns.put("ActionDescription", String.class);
+            return columns;
+        }
+    }
+
+
 
     public static class Winner extends AbstractMetric {
         public Winner() {
