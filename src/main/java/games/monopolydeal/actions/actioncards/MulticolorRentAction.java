@@ -34,15 +34,17 @@ import java.util.Objects;
  * </ol>
  * </p>
  */
-public class MulticolorRentAction extends AbstractAction implements IExtendedSequence {
+public class MulticolorRentAction extends AbstractAction implements IExtendedSequence, IActionCard {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     final int doubleTheRent;
+
     int target;
     int rent;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
+
     public MulticolorRentAction(int playerID, int doubleTheRent) {
         this.playerID = playerID;
         this.doubleTheRent = doubleTheRent;
@@ -76,8 +78,11 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
                 if(MDGS.CheckForJustSayNo(playerID)) availableActions.add(new JustSayNoAction());
                 break;
             case CollectRent:
-                if(MDGS.isBoardEmpty(target)) availableActions.add(new DoNothing());
-                else availableActions.add(new PayRent(target,playerID,rent));
+                if(MDGS.isBoardEmpty(target)) {
+                    availableActions.add(new DoNothing());
+                } else {
+                    availableActions.add(new PayRent(target,playerID,rent));
+                }
                 break;
         }
         return availableActions;
@@ -139,11 +144,11 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MulticolorRentAction that = (MulticolorRentAction) o;
-        return playerID == that.playerID && doubleTheRent == that.doubleTheRent && target == that.target && rent == that.rent && reaction == that.reaction && executed == that.executed && actionState == that.actionState;
+        return playerID == that.playerID && doubleTheRent == that.doubleTheRent;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, doubleTheRent, target, rent, actionState, reaction, executed);
+        return Objects.hash(playerID, doubleTheRent);
     }
     @Override
     public String toString() {
@@ -155,5 +160,9 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return target;
     }
 }

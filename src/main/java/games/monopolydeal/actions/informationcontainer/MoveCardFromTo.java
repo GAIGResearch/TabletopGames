@@ -16,6 +16,7 @@ public class MoveCardFromTo extends AbstractAction {
     final int player;
     public final SetType from,to;
     public final CardType cardType;
+
     public MoveCardFromTo(int playerId, CardType cardType, SetType from, SetType to){
         player = playerId;
         this.cardType = cardType;
@@ -28,7 +29,7 @@ public class MoveCardFromTo extends AbstractAction {
     }
     @Override
     public MoveCardFromTo copy() {
-        return new MoveCardFromTo(player,cardType,from,to);
+        return this;
     }
     @Override
     public boolean equals(Object o) {

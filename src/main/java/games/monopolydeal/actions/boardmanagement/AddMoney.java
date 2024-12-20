@@ -14,7 +14,8 @@ import java.util.Objects;
  */
 public class AddMoney extends AbstractAction {
     final int player;
-    final CardType cardType;
+    public final CardType cardType;
+
     public AddMoney(CardType cardType, int playerId) {
         this.cardType = cardType;
         player = playerId;
@@ -29,7 +30,7 @@ public class AddMoney extends AbstractAction {
     }
     @Override
     public AddMoney copy() {
-        return new AddMoney(cardType,player);
+        return this;
     }
     @Override
     public boolean equals(Object o) {

@@ -6,7 +6,7 @@ import core.actions.DoNothing;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
-import games.monopolydeal.actions.BoardType;
+import games.monopolydeal.cards.BoardType;
 import games.monopolydeal.actions.informationcontainer.PayCardFrom;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
@@ -20,16 +20,16 @@ import java.util.Objects;
  * <p> PayRent uses EAS for the payment of rent in response to a played action card. This EAS calls upon itself recursively paying with a card in each iteration until either the rent has been completely paid or the player has no more cards to pay the rent with.
  * </p>
  */
-public class PayRent extends AbstractAction implements IExtendedSequence {
+public class PayRent extends AbstractAction implements IExtendedSequence, IActionCard {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int payer; // current player
     final int payee; // pays to
     int amtToPay;
+
     boolean boardEmpty;
     CardType cardToPay;
     BoardType boardType;
-
 
     public PayRent(int payer, int payee, int amtToPay) {
         this.payer = payer;
@@ -83,12 +83,11 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
             amtToPay = amtToPay - cardToPay.moneyValue;
             if(MDGS.isBoardEmpty(payer)) boardEmpty = true;
         }
-
     }
+
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        if(amtToPay <= 0 || boardEmpty) return true;
-        else return false;
+        return amtToPay <= 0 || boardEmpty;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -108,16 +107,20 @@ public class PayRent extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PayRent payRent = (PayRent) o;
-        return payer == payRent.payer && payee == payRent.payee && amtToPay == payRent.amtToPay && boardEmpty == payRent.boardEmpty && Objects.equals(cardToPay, payRent.cardToPay) && boardType == payRent.boardType;
+        return payer == payRent.payer && payee == payRent.payee;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(payer, payee, amtToPay, boardEmpty, cardToPay, boardType);
+        return Objects.hash(payer, payee);
     }
     @Override
     public String toString() { return "PayRent action"; }
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return payee;
     }
 }

@@ -1,23 +1,19 @@
 package games.monopolydeal;
 
-import com.clearspring.analytics.util.Lists;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
-import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
-import org.apache.poi.ss.formula.atp.Switch;
-
-import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
-import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
 import java.util.*;
+
+import static core.CoreConstants.VisibilityMode.*;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -29,14 +25,11 @@ import java.util.*;
  */
 public class MonopolyDealGameState extends AbstractGameState {
 
-    MonopolyDealParameters params;
-    Random rnd;
-
     // GameState members
     // Player Data members
-    PartialObservableDeck<MonopolyDealCard>[] playerHands;
-    Deck<MonopolyDealCard>[] playerBanks;
-    PropertySet[][] playerPropertySets;
+    List<Deck<MonopolyDealCard>> playerHands;
+    List<Deck<MonopolyDealCard>> playerBanks;
+    List<PropertySet[]> playerPropertySets;
 
     Deck<MonopolyDealCard> drawPile;
     Deck<MonopolyDealCard> discardPile;
@@ -46,8 +39,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     int boardModificationsLeft;
     boolean deckEmpty = false;
 
-    MonopolyDealHeuristic heuristic;
-
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
@@ -55,23 +46,11 @@ public class MonopolyDealGameState extends AbstractGameState {
     public MonopolyDealGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
-        params = (MonopolyDealParameters) gameParameters;
-        heuristic = new MonopolyDealHeuristic();
-        this._reset();
-    }
-
-    protected void _reset() {
-        playerHands = new PartialObservableDeck[getNPlayers()];
-        playerBanks = new Deck[getNPlayers()];
-        playerPropertySets = new PropertySet[getNPlayers()][11];
-        drawPile = new Deck<>("Draw Pile",HIDDEN_TO_ALL);
-        discardPile = new Deck<>("Discard Pile",VISIBLE_TO_ALL);
-        for(int i=0;i<getNPlayers();i++){
-            boolean[] handVisibility = new boolean[getNPlayers()];
-            handVisibility[i] = true;
-            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
-            playerBanks[i] = new Deck<>("Bank of Player"+i+1,VISIBLE_TO_ALL);
-            initPropertySets(i);
+        playerHands = new ArrayList<>();
+        playerBanks = new ArrayList<>();
+        playerPropertySets = new ArrayList<>();
+        for (int i = 0; i < nPlayers; i++) {
+            playerPropertySets.add(new PropertySet[SetType.values().length]);
         }
     }
 
@@ -93,10 +72,10 @@ public class MonopolyDealGameState extends AbstractGameState {
     protected List<Component> _getAllComponents() {
         // add all components to the list
         List<Component> components = new ArrayList<>();
-        components.addAll(Arrays.asList(playerHands));
-        components.addAll(Arrays.asList(playerBanks));
-        for(int i=0;i<getNPlayers();i++){
-            components.addAll(Arrays.asList(playerPropertySets[i]));
+        components.addAll(playerHands);
+        components.addAll(playerBanks);
+        for (PropertySet[] playerPropertySet : playerPropertySets) {
+            components.addAll(List.of(playerPropertySet));
         }
         components.add(discardPile);
         components.add(drawPile);
@@ -124,23 +103,16 @@ public class MonopolyDealGameState extends AbstractGameState {
         retValue.drawPile = drawPile.copy();
         // Hidden values
         for (int p = 0; p < getNPlayers(); p++) {
-            if (playerId == -1) {
-                // No hidden information
-                retValue.playerHands[p] = playerHands[p].copy();
-
-            } else if (playerId == p) {
-                // Current players hand is visible information
-                retValue.playerHands[p] = playerHands[p].copy();
-            } else{
-                retValue.playerHands[p] = playerHands[p].copy();
-                playerHandSize[p] = retValue.playerHands[p].getSize();
+            retValue.playerHands.add(playerHands.get(p).copy());
+            if (playerId != -1 && getCoreGameParameters().partialObservable && p != playerId) {
+                playerHandSize[p] = retValue.playerHands.get(p).getSize();
 
                 // Adding all hidden cards back to deck
-                retValue.drawPile.add(retValue.playerHands[p]);
-                retValue.playerHands[p].clear();
+                retValue.drawPile.add(retValue.playerHands.get(p));
+                retValue.playerHands.get(p).clear();
             }
         }
-        if(playerId != -1) {
+        if(playerId != -1 && getCoreGameParameters().partialObservable) {
             retValue.drawPile.shuffle(rnd);
             // Redrawing hidden cards into hands
             for (int p = 0; p < getNPlayers(); p++) {
@@ -151,11 +123,12 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         // Completely visible values
         for(int i=0;i<getNPlayers();i++){
-            retValue.playerBanks[i] = playerBanks[i].copy();
-            for(int j=0;j<11;j++)
-                retValue.playerPropertySets[i][j] = playerPropertySets[i][j].copy();
+            retValue.playerBanks.add(playerBanks.get(i).copy());
+            for(int j=0;j<SetType.values().length;j++) {
+                retValue.playerPropertySets.get(i)[j] = playerPropertySets.get(i)[j].copy();
+            }
         }
-//        retValue.playerPropertySets = playerPropertySets.clone();
+
         retValue.discardPile = discardPile.copy();
         retValue.actionsLeft = actionsLeft;
         retValue.deckEmpty = deckEmpty;
@@ -165,7 +138,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public boolean canModifyBoard(int playerID){
         if(boardModificationsLeft>0) {
-            for (PropertySet pSet : playerPropertySets[playerID]) {
+            for (PropertySet pSet : playerPropertySets.get(playerID)) {
                 if (pSet.hasWild) return true;
             }
         }
@@ -177,7 +150,7 @@ public class MonopolyDealGameState extends AbstractGameState {
                 resetDrawPile();
             }
             if(!deckEmpty)
-                playerHands[playerID].add(drawPile.draw());
+                playerHands.get(playerID).add(drawPile.draw());
         }
     }
     public void resetDrawPile(){
@@ -191,10 +164,11 @@ public class MonopolyDealGameState extends AbstractGameState {
         drawPile.shuffle(rnd);
     }
     public void endTurn() {
+        MonopolyDealParameters params = (MonopolyDealParameters) getGameParameters();
         actionsLeft = params.ACTIONS_PER_TURN;
         boardModificationsLeft = params.BOARD_MODIFICATIONS_PER_TURN;
         int nextPlayer = getCurrentPlayer();
-        if(playerHands[nextPlayer].getSize() == 0){
+        if(playerHands.get(nextPlayer).getSize() == 0){
             drawCard(nextPlayer,params.DRAWS_WHEN_EMPTY);
         }
         else{
@@ -203,66 +177,32 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     public void discardCard(CardType cardType, int playerID) {
         MonopolyDealCard card = new MonopolyDealCard(cardType);
-        playerHands[playerID].remove(card);
+        playerHands.get(playerID).remove(card);
         discardPile.add(card);
     }
     public void addMoney(int playerID, CardType money){
         MonopolyDealCard card = new MonopolyDealCard(money);
-        playerBanks[playerID].add(card);
+        playerBanks.get(playerID).add(card);
     }
     public void removeMoneyFrom(int playerID, CardType money) {
         MonopolyDealCard card = new MonopolyDealCard(money);
-        playerBanks[playerID].remove(card);
+        playerBanks.get(playerID).remove(card);
     }
     public boolean isBoardEmpty(int playerID){
-        if (playerBanks[playerID].getSize() == 0) {
-            for (PropertySet pSet : playerPropertySets[playerID]) {
+        if (playerBanks.get(playerID).getSize() == 0) {
+            for (PropertySet pSet : playerPropertySets.get(playerID)) {
                 for (int i=0; i<pSet.getSize(); i++) {
                     if(pSet.get(i).cardType()!= CardType.MulticolorWild) return false;
                 }
             }
-        } else if (playerBanks[playerID].getSize()>0) {
-            return false;
-        }
+        } else return playerBanks.get(playerID).getSize() <= 0;
         return true;
     }
     // initialize propertySet
     public void initPropertySets(int playerID){
-        for(int i=0;i<11;i++) {
-            PropertySet pSet = new PropertySet(getSetType4Init(i).toString(), VISIBLE_TO_ALL, getSetType4Init(i));
-            playerPropertySets[playerID][i] = pSet;
-        }
-    }
-    public SetType getSetType4Init(int i){
-        switch (i){
-            case 0: return SetType.Brown;
-            case 1: return SetType.LightBlue;
-            case 2: return SetType.Pink;
-            case 3: return SetType.Orange;
-            case 4: return SetType.Red;
-            case 5: return SetType.Yellow;
-            case 6: return SetType.Green;
-            case 7: return SetType.Blue;
-            case 8: return SetType.RailRoad;
-            case 9: return SetType.Utility;
-            case 10: return SetType.UNDEFINED;
-            default: throw new AssertionError("Should not happen");
-        }
-    }
-    public int getSetIndx(SetType setType){
-        switch (setType){
-            case Brown: return 0;
-            case LightBlue: return 1;
-            case Pink: return 2;
-            case Orange: return 3;
-            case Red: return 4;
-            case Yellow: return 5;
-            case Green: return 6;
-            case Blue: return 7;
-            case RailRoad: return 8;
-            case Utility: return 9;
-            case UNDEFINED: return 10;
-            default: throw new AssertionError("Should not happen");
+        for(int i=0;i<SetType.values().length;i++) {
+            PropertySet pSet = new PropertySet("Set " + SetType.values()[i].name(), VISIBLE_TO_ALL, SetType.values()[i]);
+            playerPropertySets.get(playerID)[i] = pSet;
         }
     }
     // add property
@@ -273,27 +213,25 @@ public class MonopolyDealGameState extends AbstractGameState {
     public void addPropertyToSet(int playerID, CardType cardType, SetType SType){
         MonopolyDealCard card = new MonopolyDealCard(cardType);
         card.setUseAs(SType);
-        int indx = getSetIndx(SType);
-        playerPropertySets[playerID][indx].add(card);
+        playerPropertySets.get(playerID)[SType.ordinal()].add(card);
     }
     public void removePropertyFrom(int playerID, CardType cardType, SetType from){
         MonopolyDealCard card = new MonopolyDealCard(cardType);
-        int indx = getSetIndx(from);
-        playerPropertySets[playerID][indx].remove(card);
+        card.setUseAs(from);
+        playerPropertySets.get(playerID)[from.ordinal()].remove(card);
     }
     public void movePropertySetFromTo(SetType setType, int target, int playerID) {
-        int indx = getSetIndx(setType);
-        PropertySet pSet = playerPropertySets[target][indx].copy();
+        PropertySet pSet = playerPropertySets.get(target)[setType.ordinal()].copy();
         for(int i=0; i<pSet.getSize(); i++){
-            playerPropertySets[target][indx].remove(pSet.get(i));
-            playerPropertySets[playerID][indx].add(pSet.get(i));
+            playerPropertySets.get(target)[setType.ordinal()].remove(pSet.get(i));
+            playerPropertySets.get(playerID)[setType.ordinal()].add(pSet.get(i));
         }
     }
     public boolean checkForForcedDeal(int playerID){
         boolean target;
         target = checkForSlyDeal(playerID);
         if(target) {
-            for (PropertySet pSet: playerPropertySets[playerID]) {
+            for (PropertySet pSet: playerPropertySets.get(playerID)) {
                 if((!pSet.hasHouse && !pSet.hasHotel) && pSet.getSize() > 0){
                     return true;
                 }
@@ -310,7 +248,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     // Returns true if there is a free property( i.e. property which can be stolen/ traded )
     public boolean checkForFreeProperty(int playerID){
-        for (PropertySet pSet: playerPropertySets[playerID]) {
+        for (PropertySet pSet: playerPropertySets.get(playerID)) {
             if(!pSet.isComplete && pSet.getSize()>0){
                 return true;
             }
@@ -318,7 +256,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         return false;
     }
     public boolean checkForMulticolorRent(int playerID){
-        for (PropertySet pSet: playerPropertySets[playerID]) {
+        for (PropertySet pSet: playerPropertySets.get(playerID)) {
             if(pSet.getSetType() != SetType.UNDEFINED && pSet.getPropertySetSize()>0){
                 return true;
             }
@@ -332,55 +270,39 @@ public class MonopolyDealGameState extends AbstractGameState {
         return false;
     }
     public boolean playerDealBreaker(int playerID){
-        for (PropertySet pSet: playerPropertySets[playerID]) {
+        for (PropertySet pSet: playerPropertySets.get(playerID)) {
             if(pSet.isComplete) return true;
         }
         return false;
     }
     public boolean playerHasSet(int playerID, SetType setType){
-        if(playerPropertySets[playerID][getSetIndx(setType)].getPropertySetSize() > 0) return true;
-        return false;
+        return playerPropertySets.get(playerID)[setType.ordinal()].getPropertySetSize() > 0;
     }
     public boolean checkActionCard(int playerID, CardType cardType){
-        switch (cardType){
-            case ForcedDeal:
-                return checkForForcedDeal(playerID);
-            case SlyDeal:
-                return checkForSlyDeal(playerID);
-            case DealBreaker:
-                return checkForDealBreaker(playerID);
-            case MulticolorRent:
-                return checkForMulticolorRent(playerID);
-            case GreenBlueRent:
-                return playerHasSet(playerID, SetType.Green) || playerHasSet(playerID, SetType.Blue);
-            case BrownLightBlueRent:
-                return playerHasSet(playerID, SetType.Brown) || playerHasSet(playerID, SetType.LightBlue);
-            case PinkOrangeRent:
-                return playerHasSet(playerID, SetType.Pink) || playerHasSet(playerID, SetType.Orange);
-            case RedYellowRent:
-                return playerHasSet(playerID, SetType.Red) || playerHasSet(playerID, SetType.Yellow);
-            case RailRoadUtilityRent:
-                return playerHasSet(playerID, SetType.RailRoad) || playerHasSet(playerID, SetType.Utility);
-            case PassGo:
-            case DebtCollector:
-            case ItsMyBirthday:
-                return true;
-            case JustSayNo:
-            case DoubleTheRent:
-            case House:
-            case Hotel:
-            default:
-                return false;
-        }
+        return switch (cardType) {
+            case ForcedDeal -> checkForForcedDeal(playerID);
+            case SlyDeal -> checkForSlyDeal(playerID);
+            case DealBreaker -> checkForDealBreaker(playerID);
+            case MulticolorRent -> checkForMulticolorRent(playerID);
+            case GreenBlueRent -> playerHasSet(playerID, SetType.Green) || playerHasSet(playerID, SetType.Blue);
+            case BrownLightBlueRent ->
+                    playerHasSet(playerID, SetType.Brown) || playerHasSet(playerID, SetType.LightBlue);
+            case PinkOrangeRent -> playerHasSet(playerID, SetType.Pink) || playerHasSet(playerID, SetType.Orange);
+            case RedYellowRent -> playerHasSet(playerID, SetType.Red) || playerHasSet(playerID, SetType.Yellow);
+            case RailRoadUtilityRent ->
+                    playerHasSet(playerID, SetType.RailRoad) || playerHasSet(playerID, SetType.Utility);
+            case PassGo, DebtCollector, ItsMyBirthday -> true;
+            default -> false;
+        };
     }
     public boolean checkForActionCards(int playerID) {
-        for(int i=0;i<playerHands[playerID].getSize();i++){
-            if(checkActionCard(playerID,playerHands[playerID].get(i).cardType())) return true;
+        for(int i=0;i<playerHands.get(playerID).getSize();i++){
+            if(checkActionCard(playerID,playerHands.get(playerID).get(i).cardType())) return true;
         }
         return false;
     }
     public PropertySet getPlayerPropertySet(int playerID, SetType setType) {
-        return playerPropertySets[playerID][getSetIndx(setType)];
+        return playerPropertySets.get(playerID)[setType.ordinal()];
     }
     public void useAction(int actionCost) {
         actionsLeft = actionsLeft-actionCost;
@@ -389,19 +311,27 @@ public class MonopolyDealGameState extends AbstractGameState {
     public int getActionsLeft(){return actionsLeft;}
     // remove property
     public Deck<MonopolyDealCard> getPlayerHand(int playerID){
-        return playerHands[playerID];
+        return playerHands.get(playerID);
     }
     public void removeCardFromHand(int playerID, CardType cardType){
         MonopolyDealCard card = new MonopolyDealCard(cardType);
-        playerHands[playerID].remove(card);
+        playerHands.get(playerID).remove(card);
     }
     public PropertySet[] getPropertySets(int playerID) {
-        return playerPropertySets[playerID];
+        return playerPropertySets.get(playerID);
     }
-    public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks[playerId]; }
+    public Deck<MonopolyDealCard> getPlayerBank(int playerId) { return playerBanks.get(playerId); }
     public Deck<MonopolyDealCard> getDiscardPile() { return discardPile; }
     public Deck<MonopolyDealCard> getDrawPile(){ return drawPile; }
-    public boolean CheckForJustSayNo(int playerID) { return playerHands[playerID].getComponents().contains(MonopolyDealCard.create(CardType.JustSayNo)); }
+    public boolean CheckForJustSayNo(int playerID) { return playerHands.get(playerID).getComponents().contains(MonopolyDealCard.create(CardType.JustSayNo)); }
+
+    public int getBankValue(int playerID){
+        Deck<MonopolyDealCard> playerBank = getPlayerBank(playerID);
+        int bankValue = 0;
+        for(int i=0;i<playerBank.getSize();i++)
+            bankValue = bankValue + playerBank.get(i).cardMoneyValue();
+        return bankValue;
+    }
 
     public boolean checkForGameEnd() {
         if(deckEmpty) return true;
@@ -418,7 +348,8 @@ public class MonopolyDealGameState extends AbstractGameState {
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
-            return heuristic.evaluateState(this,playerId);
+//            return heuristic.evaluateState(this,playerId);
+            return getGameScore(playerId);
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;
@@ -430,31 +361,34 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     @Override
     public double getGameScore(int playerId) {
+        MonopolyDealParameters params = (MonopolyDealParameters) getGameParameters();
         if(deckEmpty) return 0;
         int count = 0;
-        for (PropertySet pSet:playerPropertySets[playerId]) {
+        for (PropertySet pSet:playerPropertySets.get(playerId)) {
             if(pSet.isComplete){
                 count++;
             }
         }
         return count/(params.SETS_TO_WIN*1.0);
     }
+
     @Override
     public boolean _equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        MonopolyDealGameState state = (MonopolyDealGameState) o;
-        return actionsLeft == state.actionsLeft && boardModificationsLeft == state.boardModificationsLeft && deckEmpty == state.deckEmpty && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
+        MonopolyDealGameState that = (MonopolyDealGameState) o;
+        for (int i = 0; i < nPlayers; i++) {
+            if (!Arrays.equals(playerPropertySets.get(i), that.playerPropertySets.get(i))) return false;
+        }
+        return actionsLeft == that.actionsLeft && boardModificationsLeft == that.boardModificationsLeft && deckEmpty == that.deckEmpty && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerBanks, that.playerBanks) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile);
     }
+
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), drawPile, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
-        result = 31 * result + Arrays.hashCode(playerHands);
-        result = 31 * result + Arrays.hashCode(playerBanks);
-        for(int i=0;i<getNPlayers();i++)
-            result = 31 * result + Arrays.hashCode(playerPropertySets[i]);
-        return result;
+        int retValue = Objects.hash(playerHands, playerBanks, drawPile, discardPile, actionsLeft, boardModificationsLeft, deckEmpty);
+        for (int i = 0; i < nPlayers; i++) {
+            retValue += Arrays.hashCode(playerPropertySets.get(i));
+        }
+        return retValue;
     }
 
     public enum MonopolyDealGamePhase implements IGamePhase {

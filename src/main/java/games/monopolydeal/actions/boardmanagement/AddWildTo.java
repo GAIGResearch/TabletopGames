@@ -7,6 +7,7 @@ import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
 import java.util.Objects;
 
@@ -16,38 +17,43 @@ import java.util.Objects;
 public class AddWildTo extends AbstractAction {
 
     final int player;
-    final PropertySet pSet;
+    final int pSetId;
+    final SetType pSetType;
 
     public AddWildTo(PropertySet pSet, int playerID){
         this.player = playerID;
-        this.pSet = pSet;
+        this.pSetId = pSet.getComponentID();
+        this.pSetType = pSet.getSetType();
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState state = (MonopolyDealGameState) gs;
         state.removeCardFromHand(player, CardType.MulticolorWild);
+        PropertySet pSet = (PropertySet) state.getComponentById(pSetId);
         state.addPropertyToSet(player,CardType.MulticolorWild,pSet.getSetType());
         state.useAction(1);
         return true;
     }
     @Override
     public AddWildTo copy() {
-        return new AddWildTo(pSet,player);
+        return this;
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddWildTo addWildTo = (AddWildTo) o;
-        return player == addWildTo.player && Objects.equals(pSet, addWildTo.pSet);
+        return player == addWildTo.player && pSetId == addWildTo.pSetId && pSetType == addWildTo.pSetType;
     }
+
     @Override
     public int hashCode() {
-        return Objects.hash(player, pSet);
+        return Objects.hash(player, pSetId, pSetType);
     }
+
     @Override
     public String toString() {
-        return "Add MulticolorWild to "+ pSet.toString();
+        return "Add MulticolorWild to "+ pSetType;
     }
     @Override
     public String getString(AbstractGameState gameState) {

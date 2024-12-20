@@ -10,25 +10,20 @@ public enum CardType {
     Money2(2),
     Money1(1),
 
-    PassGo(1,true),
+    PassGo(1,true),  //y
     DoubleTheRent(1,true),
-
-    ItsMyBirthday(2,true),
-    DebtCollector(5,true),
-
-    SlyDeal(3,true),
-    ForcedDeal(3,true),
-
-    DealBreaker(5,true),
+    ItsMyBirthday(2,true), //y
+    DebtCollector(5,true), //y
+    SlyDeal(3,true), //y
+    ForcedDeal(3,true), //y
+    DealBreaker(5,true), //y
     JustSayNo(4,true),
-
-    MulticolorRent(1,true),
-    GreenBlueRent(1,true),
-    BrownLightBlueRent(1,true),
-    PinkOrangeRent(1,true),
-    RailRoadUtilityRent(1,true),
-    RedYellowRent(1,true),
-
+    MulticolorRent(1,true), //y
+    GreenBlueRent(1,true), //y/5
+    BrownLightBlueRent(1,true), //y/5
+    PinkOrangeRent(1,true),  //y/5
+    RailRoadUtilityRent(1,true), //y/5
+    RedYellowRent(1,true), //y/5
     House(3,true),
     Hotel(4,true),
 

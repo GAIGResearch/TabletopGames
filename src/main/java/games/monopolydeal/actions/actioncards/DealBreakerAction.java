@@ -31,20 +31,23 @@ import java.util.Objects;
  * </ol>
  * </p>
  */
-public class DealBreakerAction extends AbstractAction implements IExtendedSequence {
+public class DealBreakerAction extends AbstractAction implements IExtendedSequence, IActionCard {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+
     int target;
     SetType setType;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
+
     public DealBreakerAction(int playerID) {
         this.playerID = playerID;
         target = playerID;
         actionState = ActionState.Target;
     }
+
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
@@ -135,12 +138,12 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DealBreakerAction that = (DealBreakerAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && setType == that.setType && actionState == that.actionState;
+        return playerID == that.playerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, setType, actionState, reaction, executed);
+        return Objects.hash(playerID);
     }
 
     @Override
@@ -150,5 +153,9 @@ public class DealBreakerAction extends AbstractAction implements IExtendedSequen
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return target;
     }
 }

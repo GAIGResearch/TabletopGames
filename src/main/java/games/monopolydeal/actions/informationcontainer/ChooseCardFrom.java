@@ -27,21 +27,24 @@ public class ChooseCardFrom extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         return true;
     }
+
     @Override
     public ChooseCardFrom copy() {
-        return new ChooseCardFrom(take,from,actionType);
+        return this;
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChooseCardFrom that = (ChooseCardFrom) o;
-        return Objects.equals(take, that.take) && Objects.equals(from, that.from);
+        return actionType == that.actionType && take == that.take && from == that.from;
     }
+
     @Override
     public int hashCode() {
-        return Objects.hash(take, from);
+        return Objects.hash(take, from, actionType);
     }
+
     @Override
     public String toString() {
         if(actionType == 0)

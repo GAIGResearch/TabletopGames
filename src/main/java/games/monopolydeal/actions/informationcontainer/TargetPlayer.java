@@ -10,7 +10,7 @@ import java.util.Objects;
  * <p>A simple action which does not execute any command but acts as an information container for other EAS.</p>
  */
 public class TargetPlayer extends AbstractAction {
-    public int target;
+    public final int target;
     public TargetPlayer(int target){
         this.target = target;
     }
@@ -20,7 +20,7 @@ public class TargetPlayer extends AbstractAction {
     }
     @Override
     public TargetPlayer copy() {
-        return new TargetPlayer(target);
+        return this;
     }
     @Override
     public boolean equals(Object o) {

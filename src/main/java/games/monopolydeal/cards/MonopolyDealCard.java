@@ -1,7 +1,6 @@
 package games.monopolydeal.cards;
 
 import core.components.Card;
-import games.monopolydeal.MonopolyDealGameState;
 
 import java.util.Objects;
 
@@ -21,51 +20,15 @@ public class MonopolyDealCard extends Card{
         this.useAs = type.getSetType();
     }
     public static MonopolyDealCard create(CardType type) {
-        switch (type) {
-            case Money10:
-            case Money1:
-            case Money2:
-            case Money3:
-            case Money4:
-            case Money5:
-            case PassGo:
-            case DoubleTheRent:
-            case ItsMyBirthday:
-            case DebtCollector:
-            case SlyDeal:
-            case ForcedDeal:
-            case DealBreaker:
-            case JustSayNo:
-            case MulticolorRent:
-            case GreenBlueRent:
-            case BrownLightBlueRent:
-            case PinkOrangeRent:
-            case RailRoadUtilityRent:
-            case RedYellowRent:
-            case House:
-            case Hotel:
-            case BrownProperty:
-            case BlueProperty:
-            case GreenProperty:
-            case LightBlueProperty:
-            case OrangeProperty:
-            case PinkProperty:
-            case RailRoadProperty:
-            case UtilityProperty:
-            case RedProperty:
-            case YellowProperty:
-            case MulticolorWild:
-            case GreenBlueWild:
-            case BrownLightBlueWild:
-            case PinkOrangeWild:
-            case RailRoadGreenWild:
-            case RailRoadLightBlueWild:
-            case RailRoadUtilityWild:
-            case RedYellowWild:
-                return new MonopolyDealCard(type);
-            default:
-                throw new AssertionError("Not yet implemented : " + type);
-        }
+        return switch (type) {
+            case Money10, Money1, Money2, Money3, Money4, Money5, PassGo, DoubleTheRent, ItsMyBirthday, DebtCollector,
+                 SlyDeal, ForcedDeal, DealBreaker, JustSayNo, MulticolorRent, GreenBlueRent, BrownLightBlueRent,
+                 PinkOrangeRent, RailRoadUtilityRent, RedYellowRent, House, Hotel, BrownProperty, BlueProperty,
+                 GreenProperty, LightBlueProperty, OrangeProperty, PinkProperty, RailRoadProperty, UtilityProperty,
+                 RedProperty, YellowProperty, MulticolorWild, GreenBlueWild, BrownLightBlueWild, PinkOrangeWild,
+                 RailRoadGreenWild, RailRoadLightBlueWild, RailRoadUtilityWild, RedYellowWild ->
+                    new MonopolyDealCard(type);
+        };
     }
     public boolean isActionCard() {
         return type.isAction;
@@ -96,17 +59,14 @@ public class MonopolyDealCard extends Card{
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof MonopolyDealCard) {
-            MonopolyDealCard other = (MonopolyDealCard) obj;
-            return other.type == type;
+        if (obj instanceof MonopolyDealCard other) {
+            return other.type == type && other.useAs == useAs;
         }
         return false;
     }
 
     public boolean isNotMulticolor() {
-        if(type == CardType.MulticolorWild)
-            return false;
-        return true;
+        return type != CardType.MulticolorWild;
     }
 
     public SetType getAlternateSetType(MonopolyDealCard card) {

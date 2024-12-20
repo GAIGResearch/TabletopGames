@@ -42,23 +42,21 @@ public class DiscardCard extends AbstractAction {
      * @return - new AbstractAction object with the same properties.
      */
     @Override
-    public AbstractAction copy() {
-        return new DiscardCard(type, player);
-        // no state
+    public DiscardCard copy() {
+        return this;
     }
 
     @Override
-    public String getString(AbstractGameState state) {
-        return String.format("Player %d discards %s", player, type);
-    }
+    public String getString(AbstractGameState state) {return toString();}
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof DiscardCard) {
-            DiscardCard dc = (DiscardCard) other;
-            return dc.player == player && dc.type == type;
-        }
-        return false;
+    public String toString() {return "Discard " + type;}
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        DiscardCard that = (DiscardCard) o;
+        return player == that.player && type == that.type;
     }
 
     @Override

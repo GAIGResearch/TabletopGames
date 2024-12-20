@@ -13,6 +13,7 @@ import java.util.Objects;
  */
 public class ChoosePropertySet extends AbstractAction {
     public final SetType setType;
+
     public ChoosePropertySet(SetType setType){
         this.setType = setType;
     }
@@ -22,7 +23,7 @@ public class ChoosePropertySet extends AbstractAction {
     }
     @Override
     public ChoosePropertySet copy() {
-        return new ChoosePropertySet(setType);
+        return this;
     }
     @Override
     public boolean equals(Object o) {

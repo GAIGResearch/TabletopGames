@@ -10,7 +10,7 @@ import games.monopolydeal.cards.MonopolyDealCard;
 /**
  * <p>A simple action which discards a JustSayNo card from a player's hand. This is used as a reaction for denying the effects for other action cards.</p>
  */
-public class JustSayNoAction extends AbstractAction {
+public class JustSayNoAction extends AbstractAction implements IActionCard {
     @Override
     public boolean execute(AbstractGameState gs) {
         MonopolyDealGameState MDGS = (MonopolyDealGameState) gs;
@@ -19,7 +19,7 @@ public class JustSayNoAction extends AbstractAction {
     }
     @Override
     public JustSayNoAction copy() {
-        return new JustSayNoAction();
+        return this;
     }
     @Override
     public boolean equals(Object obj) {
@@ -27,7 +27,7 @@ public class JustSayNoAction extends AbstractAction {
     }
     @Override
     public int hashCode() {
-        return 123;
+        return 1232389;
     }
     @Override
     public String toString() {
@@ -36,5 +36,9 @@ public class JustSayNoAction extends AbstractAction {
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return gs.getTurnOwner();
     }
 }

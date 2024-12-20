@@ -80,12 +80,6 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         MoveCardFromTo actionTaken = (MoveCardFromTo) action;
         CardType cardType = actionTaken.cardType;
 
-        // Debugging
-        if(cardType==CardType.House)
-        {
-            int i=0;
-        }
-
         SetType from = actionTaken.from;
         SetType to = actionTaken.to;
 
@@ -93,12 +87,6 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         MDGS.removePropertyFrom(playerID,cardType,from);
         MDGS.addPropertyToSet(playerID,cardType,to);
         MDGS.modifyBoard();
-
-        // Debugging
-        if(cardType==CardType.House)
-        {
-            int i=0;
-        }
 
         executed = true;
 
@@ -121,11 +109,11 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ModifyBoard that = (ModifyBoard) o;
-        return playerID == that.playerID && executed == that.executed;
+        return playerID == that.playerID;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, executed);
+        return Objects.hash(playerID);
     }
     @Override
     public String toString() { return "Modify Board"; }

@@ -29,14 +29,16 @@ import java.util.Objects;
  * </ol>
  * </p>
  */
-public class DebtCollectorAction extends AbstractAction implements IExtendedSequence {
+public class DebtCollectorAction extends AbstractAction implements IExtendedSequence, IActionCard {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+
     int target;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
+
     public DebtCollectorAction(int playerID) {
         this.playerID = playerID;
         actionState = ActionState.Target;
@@ -120,12 +122,12 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DebtCollectorAction action = (DebtCollectorAction) o;
-        return playerID == action.playerID && target == action.target && reaction == action.reaction && executed == action.executed && actionState == action.actionState;
+        return playerID == action.playerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, actionState, reaction, executed);
+        return Objects.hash(playerID);
     }
 
     @Override
@@ -135,5 +137,9 @@ public class DebtCollectorAction extends AbstractAction implements IExtendedSequ
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return target;
     }
 }

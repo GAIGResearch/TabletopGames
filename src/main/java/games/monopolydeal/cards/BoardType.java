@@ -1,4 +1,4 @@
-package games.monopolydeal.actions;
+package games.monopolydeal.cards;
 
 public enum BoardType {
     Bank,

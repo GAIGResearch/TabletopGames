@@ -15,6 +15,7 @@ import java.util.Objects;
 public class AddProperty extends AbstractAction {
     final int player;
     final CardType cardType;
+
     public AddProperty(CardType cardType, int playerId) {
         this.cardType = cardType;
         player = playerId;
@@ -29,7 +30,7 @@ public class AddProperty extends AbstractAction {
     }
     @Override
     public AddProperty copy() {
-        return new AddProperty(cardType,player);
+        return this;
     }
     @Override
     public boolean equals(Object o) {

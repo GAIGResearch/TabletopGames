@@ -25,6 +25,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
     boolean executed;
+
     public AddToBoard(int playerID) {
         this.playerID = playerID;
     }
@@ -104,11 +105,11 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddToBoard that = (AddToBoard) o;
-        return playerID == that.playerID && executed == that.executed;
+        return playerID == that.playerID;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, executed);
+        return Objects.hash(playerID);
     }
     @Override
     public String toString() { return "Add to Board"; }

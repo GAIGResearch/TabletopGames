@@ -32,16 +32,18 @@ import java.util.Objects;
  * </ol>
  * </p>
  */
-public class SlyDealAction extends AbstractAction implements IExtendedSequence {
+public class SlyDealAction extends AbstractAction implements IExtendedSequence, IActionCard {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+
     int target;
     CardType take;
     SetType from;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
+
     public SlyDealAction(int playerID) {
         this.playerID = playerID;
         actionState = ActionState.Target;
@@ -141,16 +143,20 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SlyDealAction that = (SlyDealAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(from, that.from) && actionState == that.actionState;
+        return playerID == that.playerID;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, take, from, actionState, reaction, executed);
+        return Objects.hash(playerID);
     }
     @Override
     public String toString() { return "SlyDeal action"; }
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return target;
     }
 }

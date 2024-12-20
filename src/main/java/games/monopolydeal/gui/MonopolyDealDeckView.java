@@ -8,9 +8,6 @@ import utilities.ImageIO;
 
 import java.awt.*;
 
-import static games.monopolydeal.gui.MonopolyDealGUIManager.*;
-
-
 public class MonopolyDealDeckView extends DeckView<MonopolyDealCard> {
 
     String dataPath;
@@ -27,9 +24,8 @@ public class MonopolyDealDeckView extends DeckView<MonopolyDealCard> {
         Image cardFace = getCardImage(card);
         CardView.drawCard(g, rect, card, cardFace, backOfCard, front);
     }
+
     private Image getCardImage(MonopolyDealCard card){
-        Image img = null;
-        img = ImageIO.GetInstance().getImage(dataPath + card.cardType() + ".png");
-        return img;
+        return ImageIO.GetInstance().getImage(dataPath + card.cardType() + ".png");
     }
 }

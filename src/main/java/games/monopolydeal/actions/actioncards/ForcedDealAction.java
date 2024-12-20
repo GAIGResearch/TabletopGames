@@ -9,7 +9,6 @@ import games.monopolydeal.actions.ActionState;
 import games.monopolydeal.actions.informationcontainer.ChooseCardFrom;
 import games.monopolydeal.actions.informationcontainer.TargetPlayer;
 import games.monopolydeal.cards.CardType;
-import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
 
@@ -33,15 +32,17 @@ import java.util.Objects;
  * </ol>
  * </p>
  */
-public class ForcedDealAction extends AbstractAction implements IExtendedSequence {
+public class ForcedDealAction extends AbstractAction implements IExtendedSequence, IActionCard {
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+
     int target;
     CardType take,give;
     SetType tFrom,gFrom;
     ActionState actionState;
     boolean reaction = false;
     boolean executed = false;
+
     public ForcedDealAction(int playerID) {
         this.playerID = playerID;
         target = playerID;
@@ -161,16 +162,20 @@ public class ForcedDealAction extends AbstractAction implements IExtendedSequenc
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ForcedDealAction that = (ForcedDealAction) o;
-        return playerID == that.playerID && target == that.target && reaction == that.reaction && executed == that.executed && Objects.equals(take, that.take) && Objects.equals(give, that.give) && tFrom == that.tFrom && gFrom == that.gFrom && actionState == that.actionState;
+        return playerID == that.playerID;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, target, take, give, tFrom, gFrom, actionState, reaction, executed);
+        return Objects.hash(playerID);
     }
     @Override
     public String toString() { return "ForcedDeal action"; }
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();
+    }
+
+    public int getTarget(MonopolyDealGameState gs) {
+        return target;
     }
 }

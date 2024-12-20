@@ -15,7 +15,7 @@ public class EndPhase extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public EndPhase copy() {
         return new EndPhase();
     }
 
@@ -27,7 +27,7 @@ public class EndPhase extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 1;
+        return 1728310;
     }
 
     @Override

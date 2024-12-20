@@ -12,7 +12,7 @@ public enum SetType {
     Red(3,new int[]{2,3,6}),
     Utility(2,new int[]{1,2}),
     Yellow(3,new int[]{2,4,6}),
-    UNDEFINED(10,new int[]{0,0,0,0});
+    UNDEFINED(100,new int[]{0,0,0,0});
 
     public final int setSize;
     public final int[] rent;

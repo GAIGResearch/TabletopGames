@@ -17,6 +17,7 @@ public class AddBuilding extends AbstractAction {
     final int player;
     final CardType cardType;
     final SetType setType;
+
     public AddBuilding(CardType cardType, int playerId, SetType setType) {
         this.cardType = cardType;
         this.setType = setType;
@@ -36,19 +37,21 @@ public class AddBuilding extends AbstractAction {
     }
     @Override
     public AddBuilding copy() {
-        return new AddBuilding(cardType,player,setType);
+        return this;
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddBuilding that = (AddBuilding) o;
-        return player == that.player && Objects.equals(cardType, that.cardType) && setType == that.setType;
+        return player == that.player && cardType == that.cardType && setType == that.setType;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(player, cardType, setType);
     }
+
     @Override
     public String toString() {
         return "Add " + cardType.toString() + " to " + setType;
