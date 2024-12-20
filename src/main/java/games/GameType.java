@@ -61,6 +61,8 @@ import games.loveletter.gui.LoveLetterGUIManager;
 import games.mastermind.MMForwardModel;
 import games.mastermind.MMGameState;
 import games.mastermind.MMParameters;
+import games.monopolydeal.gui.MonopolyDealGUIManager;
+import games.mastermind.*;
 import games.mastermind.gui.MMGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
@@ -130,6 +132,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
+import games.monopolydeal.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
@@ -235,6 +238,10 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+    MonopolyDeal(2, 5,
+            Arrays.asList(Strategy, Cards, Economic),
+            Arrays.asList(SetCollection, HandManagement, TakeThat),
+            MonopolyDealGameState.class, MonopolyDealForwardModel.class, MonopolyDealParameters.class, MonopolyDealGUIManager.class),
     Hanabi(2, 5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
