@@ -28,7 +28,7 @@ public class HeartsParameters extends AbstractParameters {
     public final FrenchCard startingCard = new FrenchCard(FrenchCard.FrenchCardType.Number, FrenchCard.Suite.Clubs, 2);
     public final int queenOfSpades = 13;
     public final int cardsPassedPerRound = 3;
-    public final int matchScore = 100;
+    public final int matchScore = 50;
 
     // Number of cards per player - index to array is nPlayers
     public final int[] numberOfCardsPerPlayer = new int[]{0, 0, 0,

@@ -381,12 +381,12 @@ public class Game {
         int id = 0;
         if (this.players != null)
             for (AbstractPlayer player : this.players) {
+                // Give player their ID
+                player.playerID = id++;
                 // Create a FM copy for this player (different random seed)
                 player.setForwardModel(this.forwardModel.copy());
                 // Create initial state observation
-                AbstractGameState observation = gameState.copy(id);
-                // Give player their ID
-                player.playerID = id++;
+                AbstractGameState observation = gameState.copy(player.playerID);
                 // Allow player to initialize
 
                 player.initializePlayer(observation);
@@ -532,15 +532,15 @@ public class Game {
         s = System.nanoTime();
         boolean errorInbound = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace).isEmpty();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
-        if (observedActions.size() == 0) {
+        if (observedActions.isEmpty()) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
             IExtendedSequence topOfStack = null;
             AbstractAction lastAction = null;
-            if (actionsInProgress.size() > 0) {
+            if (!actionsInProgress.isEmpty()) {
                 topOfStack = actionsInProgress.peek();
             }
             if (gameState.getHistory().size() > 1) {
-                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
+                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
             }
             System.out.println("---\nActions in progress:");
             for (IExtendedSequence action: actionsInProgress)
@@ -575,7 +575,7 @@ public class Game {
 
         // Either ask player which action to use or, in case no actions are available, report the updated observation
         AbstractAction action = null;
-        if (observedActions.size() > 0) {
+        if (!observedActions.isEmpty()) {
             if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer || currentPlayer instanceof HumanConsolePlayer) || observedActions.get(0) instanceof DoNothing)) {
                 // Can only do 1 action, so do it.
                 action = observedActions.get(0);
@@ -586,10 +586,14 @@ public class Game {
                 if (debug)
                     System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
+                if (!observedActions.contains(action)) {
+                    throw new AssertionError("Action played that was not in the list of available actions: " + action);
+                }
+
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
-                agentTime += (System.nanoTime() - s);
+                agentTime = (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -599,6 +603,7 @@ public class Game {
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
             listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction, activePlayer)));
+
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -619,7 +624,8 @@ public class Game {
         } else {
             // Resolve action and game rules, time it
             s = System.nanoTime();
-            forwardModel.next(gameState, action);
+            // we copy the action before using it..so that the action returned by oneAction() does not have a state link
+            forwardModel.next(gameState, action.copy());
             nextTime = (System.nanoTime() - s);
         }
 

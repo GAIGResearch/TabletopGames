@@ -3,7 +3,6 @@ package players.rmhc;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 
@@ -12,8 +11,6 @@ import java.util.*;
 
 public class RMHCPlayer extends AbstractPlayer {
     private Individual bestIndividual;
-    private final Random randomGenerator;
-
     // Budgets
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
@@ -21,16 +18,15 @@ public class RMHCPlayer extends AbstractPlayer {
     private int copyCalls = 0;
 
     public RMHCPlayer() {
-        long seed = System.currentTimeMillis();
-        randomGenerator = new Random(seed);
-        parameters = new RMHCParams();
-        parameters.setRandomSeed(seed);
+        this(new RMHCParams());
     }
 
     public RMHCPlayer(RMHCParams params) {
-        randomGenerator = new Random(params.getRandomSeed());
-        parameters = params;
-        setName("RMHC");
+        super(params, "RMHC");
+    }
+
+    public RMHCPlayer(RMHCParams params, String name) {
+        super(params, name);
     }
 
     @Override
@@ -49,7 +45,7 @@ public class RMHCPlayer extends AbstractPlayer {
         RMHCParams params = getParameters();
 
         // Initialise individual
-        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, params.getHeuristic());
+        bestIndividual = new Individual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), rnd, params.getHeuristic());
         fmCalls += bestIndividual.length;
 
         // Run evolution
@@ -79,8 +75,8 @@ public class RMHCPlayer extends AbstractPlayer {
     @Override
     public RMHCPlayer copy() {
         RMHCParams newParams = (RMHCParams) parameters.copy();
-        newParams.setRandomSeed(randomGenerator.nextInt());
-        RMHCPlayer retValue = new RMHCPlayer(newParams);
+        newParams.setRandomSeed(rnd.nextInt());
+        RMHCPlayer retValue = new RMHCPlayer(newParams, toString());
         retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }

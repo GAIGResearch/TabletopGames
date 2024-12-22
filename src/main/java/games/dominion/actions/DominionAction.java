@@ -34,7 +34,7 @@ public abstract class DominionAction extends AbstractAction {
             System.out.println(gs);
             throw new AssertionError("Attempting to play an action out of turn : " + this);
         }
-        if (!dummyAction && state.actionsLeft() < 1) {
+        if (!dummyAction && state.getActionsLeft() < 1) {
             System.out.println(gs);
             throw new AssertionError("Insufficient actions to play action card " + this);
         }
@@ -68,8 +68,7 @@ public abstract class DominionAction extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof DominionAction) {
-            DominionAction other = (DominionAction) obj;
+        if (obj instanceof DominionAction other) {
             return type == other.type && player == other.player && dummyAction == other.dummyAction;
         }
         return false;

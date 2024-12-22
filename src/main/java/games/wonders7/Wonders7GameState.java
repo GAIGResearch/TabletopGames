@@ -27,6 +27,8 @@ public class Wonders7GameState extends AbstractGameState {
 
     public int direction;
 
+    protected Random cardRnd;
+
     public Wonders7GameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
 
@@ -35,6 +37,15 @@ public class Wonders7GameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++) {
             playerResources.add(new HashMap<>());
         }
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        // if either wonder or card distribution seeds are set to something other than -1,
+        // then this seed is fixed. The game random seed will be used in all cases where these are -1 (the default)
+        Wonders7GameParameters params = (Wonders7GameParameters) gameParameters;
+        cardRnd = params.cardShuffleSeed == -1 ? rnd : new Random(params.cardShuffleSeed);
     }
 
     @Override
@@ -86,19 +97,26 @@ public class Wonders7GameState extends AbstractGameState {
         copy.currentAge = currentAge;
         copy.direction = direction;
         copy.wonderBoardDeck = wonderBoardDeck.copy();
+        copy.cardRnd = new Random(redeterminisationRnd.nextLong());
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // Player does not know the other players hands and discard pile (except for next players hadn)
-            // All the cards of other players and discard pile are shuffled
+            // Seven Wonders does not use PartialObservableDecks
+            // However a player knows the cards in the hands of players now holding hands that the player used to have
+            // (there is one exception to this, in that any card used to build a wonder from the hand of cards is not known)
+            // (we ignore this exception for now; as this is a small effect compared to know cards other players mostly have)
+
+
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.ageDeck.add(copy.playerHands.get(i)); // Groups other players cards (except for next players hand) into the ageDeck (along with any cards that were not in the game at that age)
+                if (!isHandKnownTo(playerId, i)) {
+                    copy.ageDeck.add(copy.playerHands.get(i));
+                    // Groups other players cards (except for next players hand) into the ageDeck
+                    // (along with any cards that were not in the game at that age)
                 }
             }
             copy.ageDeck.add(copy.discardPile); // Groups the discard pile into the ageDeck
-            copy.ageDeck.shuffle(rnd); // Shuffle all the cards
+            copy.ageDeck.shuffle(redeterminisationRnd); // Shuffle all the cards
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
+                if (!isHandKnownTo(playerId, i)) {
                     Deck<Wonder7Card> hand = copy.playerHands.get(i);
                     int nCards = hand.getSize();
                     hand.clear();  // Empties the accurate player hands, except for the next players hand
@@ -116,9 +134,33 @@ public class Wonders7GameState extends AbstractGameState {
             copy.turnActions = new AbstractAction[getNPlayers()];
             if (turnActions[playerId] != null)
                 copy.turnActions[playerId] = turnActions[playerId].copy();
-            // we know our action (if one has been chosen, but no one elses
+            // we know our action (if one has been chosen, but no one elses)
         }
         return copy;
+    }
+
+    /**
+     * we do know the contents of the hands of players up to T to our left or right, where T
+     * is the number of cards we have played.
+     *
+     * @param playerId   - id of player whose vision we're checking
+     * @param opponentId - id of opponent owning the hand of cards we're checking vision of
+     * @return - true if player has seen the opponent's hand of cards, false otherwise
+     */
+    public boolean isHandKnownTo(int playerId, int opponentId) {
+        if (playerId == opponentId) return true;  // always know your own hand
+        Wonders7GameParameters params = (Wonders7GameParameters) gameParameters;
+        // a player knows a number of other hands equal to the number of cards they have played
+        int handsKnown = params.nWonderCardsPerPlayer - playerHands.get(playerId).getSize();
+
+        // 'Left' means we pass to lower numbered players, 'Right' means we pass to higher numbered players
+        int opponentSpacesToLeft = (playerId - opponentId + getNPlayers()) % getNPlayers();
+        int opponentSpacesToRight = (opponentId  - playerId + getNPlayers()) % getNPlayers();
+
+        if (direction == 1) {  // this passes to lower numbered players
+            return handsKnown >= opponentSpacesToLeft;
+        } else  // this passes to higher numbered players
+            return handsKnown >= opponentSpacesToRight;
     }
 
     @Override
@@ -187,15 +229,16 @@ public class Wonders7GameState extends AbstractGameState {
         return playerHands;
     }
 
-    public Deck<Wonder7Card> getPlayedCards(int index) {
-        return playedCards.get(index);
-    } // Get player 'played' cards
+    // Cards played to the specified player's tableau
+    public Deck<Wonder7Card> getPlayedCards(int playerId) {
+        return playedCards.get(playerId);
+    }
 
     public Deck<Wonder7Card> getDiscardPile() {
         return discardPile;
     }
 
-    public AbstractAction getTurnAction(int index) {
+    AbstractAction getTurnAction(int index) {
         return turnActions[index];
     }
 
@@ -203,23 +246,20 @@ public class Wonders7GameState extends AbstractGameState {
         turnActions[index] = action;
     }
 
-    public Wonder7Board getPlayerWonderBoard(int index) {
-        return playerWonderBoard[index];
+    public Wonder7Board getPlayerWonderBoard(int playerId) {
+        return playerWonderBoard[playerId];
     }
 
-    public void setPlayerWonderBoard(int index, Wonder7Board wonder) {
-        playerWonderBoard[index] = wonder;
+    public void setPlayerWonderBoard(int playerId, Wonder7Board wonder) {
+        playerWonderBoard[playerId] = wonder;
     }
 
-
-    public List<HashMap<Wonders7Constants.Resource, Integer>> getAllPlayerResources() {
-        return playerResources;
-    } // Return all player's resources hashmap
-
-    public HashMap<Wonders7Constants.Resource, Integer> getPlayerResources(int index) {
-        return playerResources.get(index);
+    // A summary Map of all the resources a player has from their played cards and Wonder Board
+    public HashMap<Wonders7Constants.Resource, Integer> getPlayerResources(int playerId) {
+        return playerResources.get(playerId);
     } // Return players resource hashmap
 
+    // The number of Resources of the specified type a player has
     public int getResource(int player, Wonders7Constants.Resource resource) {
         return playerResources.get(player).get(resource);
     }

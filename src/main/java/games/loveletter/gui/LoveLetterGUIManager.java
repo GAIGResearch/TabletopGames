@@ -254,6 +254,8 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
         pane.setOpaque(false);
         pane.getViewport().setBackground(new Color(229, 218, 209, 255));
         pane.setPreferredSize(new Dimension(width, height));
+        pane.getVerticalScrollBar().setUnitIncrement(16);
+        pane.getHorizontalScrollBar().setUnitIncrement(16);
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }
@@ -282,7 +284,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                         PlayCard pc = (PlayCard) action;
                         if (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx) {
                             actionButtons[k].setVisible(true);
-                            actionButtons[k].setButtonAction(action, action.toString());
+                            actionButtons[k].setButtonAction(action, action.getString(gameState));
                             k++;
                         }
                     }

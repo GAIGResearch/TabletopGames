@@ -37,6 +37,9 @@ import games.hearts.HeartsParameters;
 import games.hearts.gui.HeartsGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
+import games.monopolydeal.gui.MonopolyDealGUIManager;
+import games.mastermind.*;
+import games.mastermind.gui.MMGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
 import games.puertorico.*;
@@ -55,6 +58,10 @@ import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.*;
 import games.tictactoe.gui.*;
+import games.toads.ToadForwardModel;
+import games.toads.ToadGUIManager;
+import games.toads.ToadGameState;
+import games.toads.ToadParameters;
 import games.uno.*;
 import games.uno.gui.*;
 import games.virus.*;
@@ -68,10 +75,12 @@ import gametemplate.GTGUIManager;
 import gametemplate.GTGameState;
 import gametemplate.GTParameters;
 import gui.*;
+import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -80,6 +89,7 @@ import static core.CoreConstants.*;
 import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
+import games.monopolydeal.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
@@ -189,6 +199,10 @@ public enum GameType {
             new ArrayList<>(),
             new ArrayList<>(),
             DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class),
+    MonopolyDeal(2, 5,
+            Arrays.asList(Strategy, Cards, Economic),
+            Arrays.asList(SetCollection, HandManagement, TakeThat),
+            MonopolyDealGameState.class, MonopolyDealForwardModel.class, MonopolyDealParameters.class, MonopolyDealGUIManager.class),
     Hanabi(2, 5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
     PuertoRico(3, 5,
             Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
@@ -208,7 +222,15 @@ public enum GameType {
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class);
+            CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Mastermind(1,1,
+            Arrays.asList(Simple, Abstract, CodeBreaking),
+            Arrays.asList(),
+            MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
+    WarOfTheToads(2, 2,
+            Arrays.asList(Strategy, Abstract, Cards),
+            Collections.singletonList(TrickTaking),
+            ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class);
 
 
     // Core classes where the game is defined
@@ -248,6 +270,40 @@ public enum GameType {
         this(minPlayers, maxPlayers, categories, mechanics, gameStateClass, forwardModelClass, parameterClass, guiManagerClass, null);
     }
 
+    public String loadRulebook() {
+        String pdfFilePath = "data/" + this.name().toLowerCase() + "/rulebook.pdf";
+        String ruleSummaryPath = "data/" + this.name().toLowerCase() + "/ruleSummary.txt";
+        // The first time we process the rulebook we create rule and strategy summaries for use
+        // with LLM-created heuristics (etc.)
+
+        File ruleSummaryFile = new File(ruleSummaryPath);
+        if (ruleSummaryFile.exists()) {
+            try {
+                Scanner scanner = new Scanner(ruleSummaryFile);
+                StringBuilder sb = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    sb.append(scanner.nextLine()).append("\n");
+                }
+                return sb.toString();
+            } catch (FileNotFoundException e) {
+                throw new AssertionError("File exists but could not be read: " + ruleSummaryPath);
+            }
+        }
+
+        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+        String rulesText = summariser.processText("game rules and strategy", 500);
+        // Then write this to file
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
+            writer.write(rulesText);
+            writer.close();
+        } catch (IOException e) {
+            throw new AssertionError("Error writing rule summary file: " + ruleSummaryPath);
+        }
+
+        return rulesText;
+    }
+
     // Getters
     public int getMinPlayers() {
         return minPlayers;
@@ -267,6 +323,22 @@ public enum GameType {
 
     public String getDataPath() {
         return dataPath;
+    }
+
+    public Class<? extends AbstractGameState> getGameStateClass() {
+        return gameStateClass;
+    }
+
+    public Class<? extends AbstractForwardModel> getForwardModelClass() {
+        return forwardModelClass;
+    }
+
+    public Class<? extends AbstractGUIManager> getGuiManagerClass() {
+        return guiManagerClass;
+    }
+
+    public Class<? extends AbstractParameters> getParameterClass() {
+        return parameterClass;
     }
 
     public AbstractGameState createGameState(AbstractParameters params, int nPlayers) {
@@ -314,6 +386,7 @@ public enum GameType {
                 return (AbstractParameters) constructorGS.newInstance(seed);
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
@@ -439,7 +512,7 @@ public enum GameType {
         Economic,
         Environmental,
         Manufacturing,
-        Wargame, Civilization, Ancient;
+        Wargame, Civilization, Ancient, CodeBreaking;
 
         /**
          * @return a list of all games within this category.

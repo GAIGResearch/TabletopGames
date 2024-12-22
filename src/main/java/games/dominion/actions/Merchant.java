@@ -43,7 +43,7 @@ class MerchantBuyEffect implements IDelayedAction {
     @Override
     public void execute(DominionGameState state) {
         if (state.getCurrentPlayer() != player) {
-            throw new AssertionError("Should only be executed when current player if " + player);
+            throw new AssertionError("Should only be executed when current player is " + player);
         }
         Deck<DominionCard> hand = state.getDeck(DominionConstants.DeckType.HAND, player);
         if (hand.stream().anyMatch(c -> c.cardType() == BONUS_SPEND_CARD_TYPE)) {

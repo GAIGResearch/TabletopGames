@@ -53,10 +53,15 @@ public class GTGameState extends AbstractGameState {
      * <p>If the playerID is NOT -1 and If any components are not visible to the given player (e.g. cards in the hands
      * of other players or a face-down deck), then these components should instead be randomized (in the previous examples,
      * the cards in other players' hands would be combined with the face-down deck, shuffled together, and then new cards drawn
-     * for the other players).</p>
+     * for the other players). This process is also called 'redeterminisation'.</p>
+     * <p>There are some utilities to assist with this in utilities.DeterminisationUtilities. One firm is guideline is
+     * that the standard random number generator from getRnd() should not be used in this method. A separate Random is provided
+     * for this purpose - redeterminisationRnd.
+     *  This is to avoid this RNG stream being distorted by the number of player actions taken (where those actions are not themselves inherently random)</p>
      * <p>If the playerID passed is -1, then full observability is assumed and the state should be faithfully deep-copied.</p>
      *
      * <p>Make sure the return type matches the class type, and is not AbstractGameState.</p>
+     *
      *
      * @param playerId - player observing this game state.
      */

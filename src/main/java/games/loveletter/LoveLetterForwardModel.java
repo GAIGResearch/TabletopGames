@@ -8,6 +8,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.ITreeActionSpace;
 import games.GameType;
 import games.loveletter.actions.PlayCard;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.ActionTreeNode;
 
@@ -29,12 +30,11 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         llgs.effectProtection = new boolean[llgs.getNPlayers()];
         // Set up all variables
-        llgs.drawPile = new PartialObservableDeck<>("drawPile", llgs.getNPlayers());
+        llgs.drawPile = new PartialObservableDeck<>("drawPile", -1, llgs.getNPlayers(), VisibilityMode.HIDDEN_TO_ALL);
         llgs.reserveCards = new Deck<>("reserveCards", VisibilityMode.VISIBLE_TO_ALL);
         llgs.affectionTokens = new int[llgs.getNPlayers()];
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
         llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
-        llgs.rnd = new Random(llgs.getGameParameters().getRandomSeed());
 
         // Set up first round
         setupRound(llgs, null);
@@ -59,7 +59,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         // Add all cards to the draw pile
         llgs.drawPile.clear();
-        for (HashMap.Entry<LoveLetterCard.CardType, Integer> entry : llp.cardCounts.entrySet()) {
+        for (HashMap.Entry<CardType, Integer> entry : llp.cardCounts.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++) {
                 LoveLetterCard card = new LoveLetterCard(entry.getKey());
                 llgs.drawPile.add(card);
@@ -67,7 +67,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         }
 
         // Remove one card from the game
-        llgs.drawPile.shuffle(llgs.rnd);
+        llgs.drawPile.shuffle(llgs.getRnd());
         llgs.removedCard = llgs.drawPile.draw();
 
         // In min-player game, N more cards are on the side, but visible to all players at all times
@@ -112,13 +112,12 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         }
 
         if (previousWinners != null) {
-            // Random winner starts next round
-            int nextPlayer = llgs.rnd.nextInt(previousWinners.size());
-            int n = -1;
-            for (int i : previousWinners) {
-                n++;
-                if (n == nextPlayer) {
-                    llgs.setTurnOwner(i);
+            // Next winner in turn order starts
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                int p = (i + 1) % llgs.getNPlayers();
+                if (previousWinners.contains(p)) {
+                    llgs.setTurnOwner(p);
+                    break;
                 }
             }
         }
@@ -173,23 +172,16 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
 
         // Round ends when only a single player is left, or when there are no cards left in the draw pile
         if (playersAlive == 1 || llgs.getRemainingCards() == 0) {
-            boolean tie = false;
-            LoveLetterCard.CardType highestCard = null;
-            for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] != GameResult.LOSE_ROUND && llgs.playerHandCards.get(i).getSize() > 0) {
-                    if (highestCard == null) {
-                        highestCard = llgs.playerHandCards.get(i).peek().cardType;
-                    } else if (highestCard == llgs.playerHandCards.get(i).peek().cardType) tie = true;
-                }
-            }
 
             // End the round and add up points
             Set<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
 
-            if (llgs.getCoreGameParameters().recordEventHistory && playersAlive == 1) {
-                llgs.recordHistory("Winner only player left: " + soleWinner + " (" + actionPlayed.toString() + ")");
-            } else if (llgs.getCoreGameParameters().recordEventHistory && llgs.getRemainingCards() == 0) {
-                llgs.recordHistory("No more cards remaining. Winners: " + winners.toString());
+            if (llgs.getCoreGameParameters().recordEventHistory) {
+                if (playersAlive == 1) {
+                    llgs.recordHistory("Winner only player left: " + soleWinner + " (" + actionPlayed.toString() + ")");
+                } else if (llgs.getRemainingCards() == 0) {
+                    llgs.recordHistory("No more cards remaining. Winners: " + winners.toString());
+                }
             }
 
             GameResult result = GameResult.WIN_ROUND;
@@ -335,19 +327,19 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
         Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
 
         // in case a player holds the countess and either the king or the prince, the countess needs to be played
-        LoveLetterCard.CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
+        CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
 
         // We create the respective actions for each card on the player's hand
         for (int card = 0; card < playerDeck.getSize(); card++) {
-            LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
-            if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
+            CardType cardType = playerDeck.getComponents().get(card).cardType;
+            if (cardType != CardType.Countess && cardTypeForceCountess != null) continue;
             int cardIdx;
             if (actionSpace.context == ActionSpace.Context.Dependent) cardIdx = card;
             else cardIdx = -1;  // Independent and default
             if (actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default) {
-                actions.addAll(cardType.getFlatActions(llgs, cardIdx, playerID, true));
+                actions.addAll(cardType.flatActions(llgs, cardIdx, playerID, true));
             } else if (actionSpace.structure == ActionSpace.Structure.Deep) {
-                actions.addAll(cardType.getDeepActions(llgs, cardIdx, playerID, true));
+                actions.addAll(cardType.deepActions(llgs, cardIdx, playerID, true));
             }
 
         }
@@ -364,10 +356,10 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
             PlayCard llAction = (PlayCard) action;
 
             // TODO - Probaly a better way to get the card names
-            LoveLetterCard.CardType[] soloCards = new LoveLetterCard.CardType[]{
-                    LoveLetterCard.CardType.Handmaid,
-                    LoveLetterCard.CardType.Countess,
-                    LoveLetterCard.CardType.Princess
+            CardType[] soloCards = new CardType[]{
+                    CardType.Handmaid,
+                    CardType.Countess,
+                    CardType.Princess
             };
 
             // Actions stored in the card type layer (Layer 1)
@@ -379,7 +371,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements ITre
             else {
                 ActionTreeNode cardNode = root.findChildrenByName(llAction.getCardType().toString().toLowerCase());
                 ActionTreeNode playerNode = cardNode.findChildrenByName("player" + llAction.getTargetPlayer());
-                if (llAction.getCardType() == LoveLetterCard.CardType.Guard) {
+                if (llAction.getCardType() == CardType.Guard) {
                     if (llAction.getTargetCardType() == null) {
                         playerNode.getChildren().get(0).setAction(action);
                     } else {

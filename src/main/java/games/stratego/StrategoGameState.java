@@ -34,7 +34,7 @@ public class StrategoGameState extends AbstractGameState{
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters, 2);
+        StrategoGameState s = new StrategoGameState(gameParameters.copy(), 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;
 
@@ -54,7 +54,7 @@ public class StrategoGameState extends AbstractGameState{
             if (piece != null) {
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
-                    int typeIdx = rnd.nextInt(pieceTypesHidden.size());
+                    int typeIdx = redeterminisationRnd.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
                     s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));
@@ -74,6 +74,9 @@ public class StrategoGameState extends AbstractGameState{
         return new StrategoHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * GameScore has no meaning in Stratego. This will always return zero for any non-terminal game state.
+     */
     @Override
     public double getGameScore(int playerId) {
         return playerResults[playerId].value;

@@ -16,16 +16,15 @@ import java.util.Random;
  */
 public class BasicMCTSPlayer extends AbstractPlayer {
 
-    Random rnd;
     public BasicMCTSPlayer() {
         this(System.currentTimeMillis());
     }
 
     public BasicMCTSPlayer(long seed) {
-        parameters = new BasicMCTSParams();
+        super(new BasicMCTSParams(), "Basic MCTS");
+        // for clarity we create a new set of parameters here, but we could just use the default parameters
         parameters.setRandomSeed(seed);
         rnd = new Random(seed);
-        setName("Basic MCTS");
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
         BasicMCTSParams params = getParameters();
@@ -37,9 +36,8 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     public BasicMCTSPlayer(BasicMCTSParams params) {
-        parameters = params;
+        super(params, "Basic MCTS");
         rnd = new Random(params.getRandomSeed());
-        setName("Basic MCTS");
     }
 
     @Override

@@ -1,20 +1,9 @@
 {
   "class": "evaluation.listeners.MetricsGameListener",
   "args": [
-    {"enum" : "evaluation.metrics.IDataLogger$ReportDestination", "value" : "ToFile"},
     [
-      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawData"},
-      {"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "RawDataPerEvent"}
-    ],
-    [
-      {"class": "evaluation.metrics.GameMetrics$GameScore" },
-      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
-      {"class": "games.descent2e.DescentMetrics$WinnerType" },
-      {"class": "games.descent2e.DescentMetrics$HealthPoints" },
-      {"class": "games.descent2e.DescentMetrics$Positions"},
-      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
-      {"class": "evaluation.metrics.GameMetrics$Winner" },
-      {"class": "evaluation.metrics.GameMetrics$Actions" },
-      {"class": "evaluation.metrics.GameMetrics$RoundCounter" }
+    {"class": "evaluation.metrics.GameMetrics$GameDuration" },
+    {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "evaluation.metrics.GameMetrics$Winner" }
     ]]
 }

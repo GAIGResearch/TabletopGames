@@ -119,7 +119,7 @@ public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
-        TMGameState copy = new TMGameState(gameParameters, getNPlayers());
+        TMGameState copy = new TMGameState(gameParameters.copy(), getNPlayers());
 
         // General public info
         copy.generation = generation;

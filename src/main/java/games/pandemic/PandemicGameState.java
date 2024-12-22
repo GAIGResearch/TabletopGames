@@ -237,9 +237,9 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled
-                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).nForecastCards, hiddenDeck.getSize(), rnd);
+                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).nForecastCards, hiddenDeck.getSize(), redeterminisationRnd);
                         } else {
-                            hiddenDeck.shuffle(rnd);  // We know what cards are in there, a simple shuffle is enough
+                            hiddenDeck.shuffle(redeterminisationRnd);  // We know what cards are in there, a simple shuffle is enough
                         }
                         a.putComponent(e.getKey(), hiddenDeck);
                     } else {

@@ -211,7 +211,7 @@ class BasicTreeNode {
             uctValue += explorationTerm;
 
             // Apply small noise to break ties randomly
-            uctValue = noise(uctValue,params.epsilon, player.rnd.nextDouble());
+            uctValue = noise(uctValue,params.epsilon, player.getRnd().nextDouble());
 
             // Assign value
             if (uctValue > bestValue) {
@@ -296,7 +296,7 @@ class BasicTreeNode {
                 double childValue = node.nVisits;
 
                 // Apply small noise to break ties randomly
-                childValue = noise(childValue, player.getParameters().epsilon, player.rnd.nextDouble());
+                childValue = noise(childValue, player.getParameters().epsilon, player.getRnd().nextDouble());
 
                 // Save best value (highest visit count)
                 if (childValue > bestValue) {

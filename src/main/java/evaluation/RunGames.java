@@ -4,8 +4,6 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameRunner;
 import evaluation.listeners.IGameListener;
-import evaluation.tournaments.AbstractTournament;
-import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import evaluation.tournaments.SkillGrid;
 import games.GameType;
@@ -20,6 +18,7 @@ import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,7 +29,6 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static evaluation.RunArg.*;
-import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
 import static java.util.stream.Collectors.toList;
 
 
@@ -43,7 +41,6 @@ public class RunGames implements IGameRunner {
     Map<GameType, int[]> gamesAndPlayerCounts;
     private LinkedList<AbstractPlayer> agents;
     private String timeDir;
-    AbstractTournament.TournamentMode tournamentMode;
 
     /**
      * Main function, creates and runs the tournament with the given settings and players.
@@ -58,48 +55,30 @@ public class RunGames implements IGameRunner {
 
         /* 1. Settings for the tournament */
         RunGames runGames = new RunGames();
-        runGames.config = parseConfig(args, Usage.RunGames);
+        runGames.config = parseConfig(args, Collections.singletonList(Usage.RunGames));
 
-        String setupFile = runGames.config.getOrDefault(RunArg.config, "").toString();
-        if (!setupFile.equals("")) {
-            // Read from file instead
-            try {
-                FileReader reader = new FileReader(setupFile);
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(reader);
-                runGames.config = parseConfig(json, Usage.RunGames);
-            } catch (FileNotFoundException ignored) {
-                throw new AssertionError("Config file not found : " + setupFile);
-                //    parseConfig(runGames, args);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        }
         runGames.initialiseGamesAndPlayerCount();
         if (!runGames.config.get(RunArg.gameParams).equals("") && runGames.gamesAndPlayerCounts.keySet().size() > 1)
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
         // 2. Setup
-
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!runGames.config.get(playerDirectory).equals("")) {
             agents.addAll(PlayerFactory.createPlayers((String) runGames.config.get(playerDirectory)));
         } else {
-            agents.add(new MCTSPlayer());
-//            agents.add(new BasicMCTSPlayer());
+       //     agents.add(new MCTSPlayer());
+            agents.add(new BasicMCTSPlayer());
             agents.add(new RandomPlayer());
             agents.add(new RMHCPlayer());
             agents.add(new OSLAPlayer());
         }
         runGames.agents = agents;
 
-        runGames.tournamentMode = ((boolean) runGames.config.get(selfPlay)) ? SELF_PLAY : NO_SELF_PLAY;
         if (!runGames.config.get(focusPlayer).equals("")) {
             // if a focus Player is provided, then this override some other settings
-            runGames.config.put(mode, "exhaustive"); // this is irrelevant in this case
+            runGames.config.put(mode, "onevsall");
             AbstractPlayer fp = PlayerFactory.createPlayer((String) runGames.config.get(focusPlayer));
             agents.add(0, fp);  // convention is that they go first in the list of agents
-            runGames.tournamentMode = ONE_VS_ALL;
         }
 
         runGames.timeDir = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
@@ -127,14 +106,12 @@ public class RunGames implements IGameRunner {
 
                 AbstractParameters params = config.get(gameParams).equals("") ? null : AbstractParameters.createFromFile(gameType, (String) config.get(gameParams));
 
-                RoundRobinTournament tournament = config.get(mode).equals("exhaustive") || tournamentMode == ONE_VS_ALL ?
-                        new RoundRobinTournament(agents, gameType, playerCount, params, tournamentMode, config) :
-                        new RandomRRTournament(agents, gameType, playerCount, params, tournamentMode, config);
+                RoundRobinTournament tournament = new RoundRobinTournament(agents, gameType, playerCount, params, config);
 
                 // Add listeners
                 //noinspection unchecked
                 for (String listenerClass : ((List<String>) config.get(listener))) {
-                    IGameListener gameTracker = IGameListener.createListener(listenerClass, (String) config.get(metrics));
+                    IGameListener gameTracker = IGameListener.createListener(listenerClass);
                     tournament.addListener(gameTracker);
                     String outputDir = (String) config.get(destDir);
                     List<String> directories = new ArrayList<>(Arrays.asList(outputDir.split(Pattern.quote(File.separator))));
@@ -148,10 +125,6 @@ public class RunGames implements IGameRunner {
                 }
 
                 // run tournament
-                tournament.setRandomSeed((Number) config.get(RunArg.seed));
-                tournament.setVerbose((boolean) config.get(verbose));
-                tournament.setResultsFile((String) config.get(output));
-                tournament.setRandomGameParams((boolean) config.get(randomGameParams));
                 tournament.run();
             }
         }

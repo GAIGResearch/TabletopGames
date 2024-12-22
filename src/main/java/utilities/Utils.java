@@ -1,5 +1,7 @@
 package utilities;
 
+import evaluation.RunArg;
+import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.json.simple.JSONObject;
 
 import java.awt.*;
@@ -75,6 +77,33 @@ public abstract class Utils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Given a total budget of games, and number of players and agents, calculates how many games should be played
+     * For each possible permutation of players.
+     * This is a helper function to avoid the need for users of Tournaments to (mis-)calculate this themselves.
+     *
+     * @param nPlayers        - the number of players in each game
+     * @param nAgents         - the number of agents we are comparing
+     * @param totalGameBudget - the desired total number of games to play
+     *                        //     * @param allowBudgetBreach - if true then we will return the value closest to the totalGameBudget, even if it exceeds it
+     *                        //     *                         if false then we will return the value that is less than or equal to the totalGameBudget
+     * @return the number of permutations possible
+     */
+    public static int gamesPerMatchup(int nPlayers, int nAgents, int totalGameBudget, boolean selfPlay) {
+        long permutationsOfPlayers = playerPermutations(nPlayers, nAgents, selfPlay);
+        return (int) (totalGameBudget / permutationsOfPlayers);
+        // line below is if we are happy to breach the budget limit
+        // int gamesPerMatchupHigh = (int) Math.ceil((double) totalGameBudget / permutationsOfPlayers);
+    }
+
+    public static int playerPermutations(int nPlayers, int nAgents, boolean selfPlay) {
+        if (selfPlay) {
+            return (int) Math.pow(nAgents, nPlayers);
+        } else {
+            return (int) (CombinatoricsUtils.factorial(nAgents) / CombinatoricsUtils.factorial(nAgents - nPlayers));
+        }
     }
 
     /**
@@ -171,56 +200,43 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
-    /**
-     * we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
-     * exploreEpsilon is the percentage chance of taking a random action
-     *
-     * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
-     * @param <T>
-     * @return
-     */
-    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, double randomNumber) {
-        Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
-        // we then add on the exploration bonus
-        if (exploreEpsilon > 0.0) {
-            double exploreBonus = exploreEpsilon / normalisedMap.size();
-            normalisedMap = normalisedMap.entrySet().stream().collect(
-                    toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - exploreEpsilon) + exploreBonus));
-        }
+    public static int sampleFrom(double[] probabilities, double random) {
         double cdf = 0.0;
-        for (T item : normalisedMap.keySet()) {
-            cdf += normalisedMap.get(item);
-            if (cdf >= randomNumber)
-                return item;
+        for (int i = 0; i < probabilities.length; i++) {
+            cdf += probabilities[i];
+            if (cdf >= random)
+                return i;
         }
         throw new AssertionError("Should never get here!");
     }
 
-    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, double randomNumber) {
-        double temp = Math.max(temperature, 0.001);
-        // first we find the largest value, and subtract that from all values
-        double maxValue = itemsAndValues.values().stream().mapToDouble(d -> d).max().orElse(0.0);
-        Map<T, Double> tempModified = itemsAndValues.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, e -> Math.exp((e.getValue() - maxValue) / temp)));
-        return sampleFrom(tempModified, exploreEpsilon, randomNumber);
-    }
-
-    public static double entropyOf(double... data) {
-        double sum = Arrays.stream(data).sum();
-        double[] normalised = Arrays.stream(data).map(d -> d / sum).toArray();
-        return Arrays.stream(normalised).map(d -> -d * Math.log(d)).sum();
-    }
-
-    public static <T> Map<T, Double> normaliseMap(Map<T, ? extends Number> input) {
-        int lessThanZero = (int) input.values().stream().filter(n -> n.doubleValue() < 0.0).count();
-        if (lessThanZero > 0)
-            throw new AssertionError("Probability has negative values!");
-        double sum = input.values().stream().mapToDouble(Number::doubleValue).sum();
-        if (sum == 0.0) {
-            // the sum is zero, with no negative values. Hence all values are zero, and we return a uniform distribution.
-            return input.keySet().stream().collect(toMap(key -> key, key -> 1.0 / input.size()));
+    public static double[] pdf(double[] potentials) {
+        // convert potentials into legal pdf
+        double[] pdf = new double[potentials.length];
+        double sum = Arrays.stream(potentials).sum();
+        if (Double.isNaN(sum) || Double.isInfinite(sum) || sum <= 0.0)  // default to uniform distribution
+            return Arrays.stream(potentials).map(d -> 1.0 / potentials.length).toArray();
+        for (int i = 0; i < potentials.length; i++) {
+            if (potentials[i] < 0.0) {
+                throw new IllegalArgumentException("Negative potential in pdf");
+            }
+            pdf[i] = potentials[i] / sum;
         }
-        return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
+        return pdf;
+    }
+
+    public static double[] exponentiatePotentials(double[] potentials, double temperature) {
+        double[] positivePotentials = new double[potentials.length];
+        double largestPotential = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < potentials.length; i++) {
+            if (potentials[i] > largestPotential) {
+                largestPotential = potentials[i];
+            }
+        }
+        for (int i = 0; i < potentials.length; i++) {
+            positivePotentials[i] = Math.exp((potentials[i] - largestPotential) / temperature);
+        }
+        return positivePotentials;
     }
 
     public static double clamp(double value, double min, double max) {
@@ -355,6 +371,7 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
+
     public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
@@ -570,5 +587,6 @@ public abstract class Utils {
     public static List<String> enumNames(Enum<?> e) {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
+
 
 }

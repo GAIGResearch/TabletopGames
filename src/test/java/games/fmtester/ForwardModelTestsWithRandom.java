@@ -1,4 +1,4 @@
-package games.fmtester;
+package test.games.fmtester;
 
 import evaluation.ForwardModelTester;
 import org.junit.Test;
@@ -6,10 +6,14 @@ import org.junit.Test;
 public class ForwardModelTestsWithRandom {
 
     @Test
+    public void testMonopolyDeal() {
+        ForwardModelTester fmt = new ForwardModelTester("game=MonopolyDeal", "nGames=5", "nPlayers=2");
+    }
+    @Test
     public void testDescent2e() {
         ForwardModelTester fmt = new ForwardModelTester("game=Descent2e", "nGames=5", "nPlayers=2");
     }
-    /*@Test
+    @Test
     public void testBattleLore() {
         ForwardModelTester fmt = new ForwardModelTester("game=Battlelore", "nGames=5", "nPlayers=2");
     }
@@ -95,5 +99,10 @@ public class ForwardModelTestsWithRandom {
     @Test
     public void testHearts() {
         ForwardModelTester fmt = new ForwardModelTester("game=Hearts", "nGames=2", "nPlayers=4");
-    }*/
+    }
+
+    @Test
+    public void testMastermind() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Mastermind", "nGames=10", "nPlayers=1");
+    }
 }

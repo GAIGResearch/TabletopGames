@@ -11,6 +11,7 @@ public class DominionParameters extends TunableParameters {
 
     List<CardType> cardsUsed = new ArrayList<>();
     String dataPath = "data/dominion/";
+    public int initialShuffleSeed = -1;
 
     public int HAND_SIZE = 5;
     public int PILES_EXHAUSTED_FOR_GAME_END = 3;
@@ -34,6 +35,7 @@ public class DominionParameters extends TunableParameters {
         addTunableParameter("COPPER_SUPPLY", 32, Arrays.asList(10,20,32,40,50));
         addTunableParameter("SILVER_SUPPLY", 40, Arrays.asList(10,20,30,40,50));
         addTunableParameter("GOLD_SUPPLY", 30, Arrays.asList(10,20,30,40,50));
+        addTunableParameter("initialShuffleSeed", -1);
         _reset();
     }
 
@@ -48,6 +50,7 @@ public class DominionParameters extends TunableParameters {
         COPPER_SUPPLY = (int) getParameterValue("COPPER_SUPPLY");
         SILVER_SUPPLY = (int) getParameterValue("SILVER_SUPPLY");
         GOLD_SUPPLY = (int) getParameterValue("GOLD_SUPPLY");
+        initialShuffleSeed = (int) getParameterValue("initialShuffleSeed");
     }
 
     public DominionParameters(String[] cards) {
@@ -61,6 +64,7 @@ public class DominionParameters extends TunableParameters {
         }
     }
 
+    // Used by unit tests only
     public static DominionParameters sizeDistortion() {
         DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
@@ -77,6 +81,7 @@ public class DominionParameters extends TunableParameters {
         return retValue;
     }
 
+    // Used by unit tests only
     public static DominionParameters improvements() {
         DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
@@ -104,16 +109,6 @@ public class DominionParameters extends TunableParameters {
     protected AbstractParameters _copy() {
         DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed = new ArrayList<>(cardsUsed);
-        retValue.dataPath = dataPath;
-        retValue.HAND_SIZE = HAND_SIZE;
-        retValue.PILES_EXHAUSTED_FOR_GAME_END = PILES_EXHAUSTED_FOR_GAME_END;
-        retValue.KINGDOM_CARDS_OF_EACH_TYPE = KINGDOM_CARDS_OF_EACH_TYPE;
-        retValue.CURSE_CARDS_PER_PLAYER = CURSE_CARDS_PER_PLAYER;
-        retValue.STARTING_COPPER = STARTING_COPPER;
-        retValue.STARTING_ESTATES = STARTING_ESTATES;
-        retValue.COPPER_SUPPLY = COPPER_SUPPLY;
-        retValue.SILVER_SUPPLY = SILVER_SUPPLY;
-        retValue.GOLD_SUPPLY = GOLD_SUPPLY;
         retValue.VICTORY_CARDS_PER_PLAYER = VICTORY_CARDS_PER_PLAYER.clone();
         return retValue;
     }
@@ -128,7 +123,8 @@ public class DominionParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (o instanceof DominionParameters) {
             DominionParameters dp = (DominionParameters) o;
-            return dp.cardsUsed.equals(cardsUsed);
+            return dp.cardsUsed.equals(cardsUsed) &&
+                    Arrays.equals(dp.VICTORY_CARDS_PER_PLAYER, VICTORY_CARDS_PER_PLAYER);
         }
         return false;
     }

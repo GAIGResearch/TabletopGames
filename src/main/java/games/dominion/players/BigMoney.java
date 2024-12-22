@@ -8,9 +8,15 @@ import games.dominion.actions.BuyCard;
 import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class BigMoney extends AbstractPlayer {
+
+    public BigMoney() {
+        super(null, "BigMoney");
+    }
 
     /**
      * Generate a valid action to play in the game. Valid actions can be found by accessing
@@ -21,22 +27,23 @@ public class BigMoney extends AbstractPlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         DominionGameState state = (DominionGameState) gameState;
+        DominionGameState.DominionGamePhase phase = (DominionGameState.DominionGamePhase) state.getGamePhase();
         int player = gameState.getCurrentPlayer();
-        int cash = state.availableSpend(player);
+        int cash = state.getAvailableSpend(player);
         int provinces = state.getCardsIncludedInGame().getOrDefault(CardType.PROVINCE, 0);
 
-        if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
-            return new EndPhase();
+        if (phase != DominionGameState.DominionGamePhase.Buy)
+            return new EndPhase(phase);
         List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
 
         switch (cash) {
             case 0:
             case 1:
-                return new EndPhase();
+                return new EndPhase(phase);
             case 2:
                 if (provinces < 4 && actions.contains(new BuyCard(CardType.ESTATE, player)))
                     return new BuyCard(CardType.ESTATE, player);
-                return new EndPhase();
+                return new EndPhase(phase);
             case 3:
             case 4:
                 return new BuyCard(CardType.SILVER, player);

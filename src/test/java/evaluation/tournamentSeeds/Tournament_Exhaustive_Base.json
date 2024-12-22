@@ -1,8 +1,7 @@
 {
         "game" : "Dominion",
         "nPlayers" : 3,
-        "playerDirectory" : "Dominion_Agents",
-        "selfPlay" : false,
+        "playerDirectory" : "Random_Agents",
         "mode" : "exhaustive",
         "matchups" : 10,
         "distinctRandomSeeds" : 0,

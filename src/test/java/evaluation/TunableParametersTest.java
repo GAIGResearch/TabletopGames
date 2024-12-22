@@ -2,6 +2,7 @@ package evaluation;
 
 import evaluation.optimisation.ITPSearchSpace;
 import games.puertorico.PuertoRicoActionHeuristic001;
+import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import players.heuristics.CoarseTunableHeuristic;
@@ -12,13 +13,11 @@ import players.simple.BoltzmannActionParams;
 import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.Assert.*;
+import static players.PlayerConstants.BUDGET_TIME;
 import static players.heuristics.CoarseTunableHeuristic.HeuristicType.*;
 
 public class TunableParametersTest {
@@ -106,7 +105,7 @@ public class TunableParametersTest {
     public void loadSearchSpaceIncludesSubParams() {
         String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_MASTRollout.json";
         ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
-        assertEquals(9, itp.getSearchKeys().size());
+        assertEquals(8, itp.getSearchKeys().size());
         int MASTBoltzmannIndex = itp.getIndexOf("MASTBoltzmann");
         int heuristicTypeIndex = itp.getIndexOf("heuristic.heuristicType");
         assertTrue(MASTBoltzmannIndex > -1);
@@ -117,7 +116,7 @@ public class TunableParametersTest {
         List<CoarseTunableHeuristic.HeuristicType> expectedArray = Arrays.asList(WIN_ONLY, SCORE_PLUS, LEADER);
         assertEquals(expectedArray, itp.getSearchValues().get(heuristicTypeIndex));
 
-        int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
         settings[heuristicTypeIndex] = 1;
         settings[MASTBoltzmannIndex] = 3;
         MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
@@ -156,5 +155,50 @@ public class TunableParametersTest {
         MCTSParams copy = (MCTSParams) params.copy();
         assertNotEquals(startingSeed, copy.getRandomSeed());
         assertEquals(startingSeed, params.getRandomSeed());
+    }
+
+    @Test
+    public void toJSONWithDefaults() {
+        params.setParameterValue("rolloutPolicyParams", bap);
+        params.setParameterValue("maxTreeDepth", 67);
+
+        JSONObject json = params.instanceToJSON(false);
+        assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
+
+        MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(params.allParametersAndValuesEqual(noChange));
+
+        assertEquals(67, json.get("maxTreeDepth"));
+        assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
+        assertEquals(0.56, ((JSONObject) json.get("rolloutPolicyParams")).get("temperature"));
+        assertEquals(Math.sqrt(2), (Double) json.get("K"), 0.002);
+        assertEquals(false, json.get("useMASTAsActionHeuristic"));
+        assertEquals("BUDGET_FM_CALLS", json.get("budgetType"));
+
+        assertEquals(MCTSParams.class, params.instanceFromJSON(json).getClass());
+        MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
+    }
+
+    @Test
+    public void toJSONWithoutDefaults() {
+        params.setParameterValue("rolloutPolicyParams", bap);
+        params.setParameterValue("maxTreeDepth", 67);
+        params.setParameterValue("budgetType", BUDGET_TIME);
+
+        JSONObject json = params.instanceToJSON(true);
+
+        MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(params.allParametersAndValuesEqual(noChange));
+
+        assertEquals(67, json.get("maxTreeDepth"));
+        assertEquals(0.56, ((JSONObject) json.get("rolloutPolicyParams")).get("temperature"));
+        assertFalse(json.containsKey("K"));
+        assertFalse(json.containsKey("useMASTAsActionHeuristic"));
+        assertFalse(json.containsKey("selectionPolicy"));
+        assertEquals("BUDGET_TIME", json.get("budgetType"));
+
+        MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
+        assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
     }
 }

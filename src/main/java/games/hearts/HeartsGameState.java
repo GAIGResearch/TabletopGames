@@ -67,6 +67,9 @@ public class HeartsGameState extends AbstractGameState {
         return drawDeck;
     }
 
+    /**
+     * returns a List in playerID order of the player hands
+     */
     public List<Deck<FrenchCard>> getPlayerDecks() {
         return playerDecks;
     }
@@ -110,6 +113,7 @@ public class HeartsGameState extends AbstractGameState {
         }
     }
 
+    // The player's points from all previous hands
     public int getPlayerPoints(int playerID) {
         return playerPoints.getOrDefault(playerID, 0);
     }
@@ -167,7 +171,7 @@ public class HeartsGameState extends AbstractGameState {
                     copy.pendingPasses.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(rnd);
+            copy.drawDeck.shuffle(redeterminisationRnd);
 
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
@@ -193,10 +197,7 @@ public class HeartsGameState extends AbstractGameState {
     }
 
     /**
-     * For Hearts a lower score is better than a high one. So we return the negative of the player's score.
-     *
-     * @param playerId - player observing the state.
-     * @return
+     * For Hearts a lower score is better than a high one. So we return the negative of the player's points.
      */
     @Override
     public double getGameScore(int playerId) {
@@ -247,6 +248,10 @@ public class HeartsGameState extends AbstractGameState {
         return result;
     }
 
+    /**
+     * A player's trick deck is the Deck of cards they have won (only the ones with points) in
+     * previous tricks this round.
+     */
     public List<Deck<FrenchCard>> getPlayerTrickDecks() {
         return trickDecks;
     }

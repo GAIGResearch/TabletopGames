@@ -3,17 +3,12 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
 import utilities.Pair;
-import utilities.RandomWrapper;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static utilities.Utils.entropyOf;
 
 /**
  * MultiTreeNode is really a wrapper for SingleTreeNode when we are using MultiTree MCTS.
@@ -25,37 +20,31 @@ import static utilities.Utils.entropyOf;
 public class MultiTreeNode extends SingleTreeNode {
 
     boolean debug = false;
-    int decisionPlayer;
     SingleTreeNode[] roots;
     SingleTreeNode[] currentLocation;
     AbstractAction[] lastAction;
     boolean[] nodeExpanded;
-    boolean[] expansionActionTaken;
     boolean[] maxDepthReached;
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        if (player.getParameters().information == MCTSEnums.Information.Closed_Loop)
-            player.getParameters().information = MCTSEnums.Information.Open_Loop;
-        // Closed Loop is not yet supported for MultiTree search
-        // TODO: implement this (not too difficult, but some tricky bits as we shift from tree to rollout and back again)
-        this.decisionPlayer = state.getCurrentPlayer();
+        this.decisionPlayer = player.getPlayerID();
         this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
+        if (params.information == MCTSEnums.Information.Closed_Loop)
+           params.information = MCTSEnums.Information.Open_Loop;
+        // Closed Loop is not yet supported for MultiTree search
+        // TODO: implement this (not too difficult, but some tricky bits as we shift from tree to rollout and back again)
+
         this.rnd = rnd;
         mctsPlayer = player;
         // only root node maintains MAST statistics
         MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
-        MASTFunction = (a, s) -> {
-            Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
-            if (MAST.containsKey(a)) {
-                Pair<Integer, Double> stats = MAST.get(a);
-                return stats.b / (stats.a + params.noiseEpsilon);
-            }
-            return 0.0;
-        };
+        if (params.useMASTAsActionHeuristic) {
+            params.actionHeuristic = new MASTActionHeuristic(MASTStatistics, params.MASTActionKey, params.MASTDefaultValue);
+        }
         instantiate(null, null, state);
 
         roots = new SingleTreeNode[state.getNPlayers()];
@@ -65,7 +54,6 @@ public class MultiTreeNode extends SingleTreeNode {
         currentLocation = new SingleTreeNode[state.getNPlayers()];
         currentLocation[this.decisionPlayer] = roots[decisionPlayer];
     }
-
     /**
      * oneSearchIteration() implements the strategy for tree search (plus expansion, rollouts, backup and so on)
      * Its result is purely stored in the tree generated from root
@@ -78,23 +66,18 @@ public class MultiTreeNode extends SingleTreeNode {
         AbstractGameState currentState = this.openLoopState;  // this will have been set correctly before calling this method
         SingleTreeNode currentNode;
 
-        double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                .mapToDouble(i -> params.heuristic.evaluateState(currentState, i)).toArray();
-
         if (!currentState.isNotTerminal())
             return;
 
         // arrays to store the expansion actions taken, and whether we have expanded - indexed by player
         lastAction = new AbstractAction[currentLocation.length];
         nodeExpanded = new boolean[currentLocation.length];
-        expansionActionTaken = new boolean[currentLocation.length];
         maxDepthReached = new boolean[currentLocation.length];
-        for (int i = 0; i < currentLocation.length; i++)
-            currentLocation[i] = roots[i];
+        System.arraycopy(roots, 0, currentLocation, 0, currentLocation.length);
 
         actionsInTree = new ArrayList<>();
+        currentNodeTrajectory = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
-
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
             if (debug)
@@ -121,83 +104,76 @@ public class MultiTreeNode extends SingleTreeNode {
                     throw new AssertionError("We should always have something to choose from");
 
                 AbstractAction chosen = agent.getAction(currentState, availableActions);
-                actionsInRollout.add(new Pair<>(currentActor, chosen));
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);
 
-                advance(currentState, chosen, true);
+                advanceState(currentState, chosen, true);
             } else {  // in the tree still for this player
                 // currentNode is the last node that this actor was at in their tree
                 currentNode = currentLocation[currentActor];
                 currentNode.setActionsFromOpenLoopState(currentState);
-                List<AbstractAction> unexpanded = currentNode.unexpandedActions();
-                AbstractAction chosen;
-                if (!unexpanded.isEmpty()) {
-                    // We have an unexpanded action
-                    if (expansionActionTaken[currentActor])
-                        throw new AssertionError("We have already picked an expansion action for this player");
-                    chosen = currentNode.expand(unexpanded);
-                    lastAction[currentActor] = chosen;
-                    expansionActionTaken[currentActor] = true;
-                    if (debug)
-                        System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen, false);
-                    // we will create the new node once we get back to a point when it is this player's action again
-                } else {
-                    chosen = currentNode.treePolicyAction(true);
-                    lastAction[currentActor] = chosen;
-                    if (debug)
-                        System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen, false);
-                }
-                actionsInTree.add(new Pair<>(currentActor, chosen));
+
+                AbstractAction chosen = currentNode.treePolicyAction(true);
+                lastAction[currentActor] = chosen;
+
+                if (debug)
+                    System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
+                advanceState(currentState, chosen, false);
+                currentNodeTrajectory.add(currentNode);
+
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
-            // we terminate if the game is over, or if we have exceeded our rollout count AND we have either expanded a node
-            // for the decisionPlayer, or they are out of the game (in which case they will never get to expand a node)
-        } while (currentState.isNotTerminal() &&
-                !(actionsInRollout.size() >= params.rolloutLength &&
-                        (maxDepthReached[decisionPlayer] || nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
-
-        for (int i = 0; i < nodeExpanded.length; i++) {
-            updateCurrentLocation(i, currentState);
-        }
+            // we terminate if the game is over, or if we have exceeded our rollout count
+        } while (currentState.isNotTerminal() && !finishRollout(currentState));
 
         // Evaluate final state and return normalised score
         double[] finalValues = new double[state.getNPlayers()];
 
         for (int i = 0; i < finalValues.length; i++) {
-            finalValues[i] = params.heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
+            finalValues[i] = params.heuristic.evaluateState(currentState, i);
         }
-        for (SingleTreeNode singleTreeNode : currentLocation) {
-            if (singleTreeNode != null)
-                singleTreeNode.backUp(finalValues);
+        for (int p = 0; p < roots.length; p++) {
+            if (currentLocation[p] != null) { // the currentLocation will be null if the player has not acted at all (if, say they have been eliminated)
+                // the full actions in tree and rollout are stored on the overall root
+                // for each player-specific sub-tree we filter these to just their actions
+                if (p != currentLocation[p].decisionPlayer)
+                    throw new AssertionError("We should only be backing up for the decision player");
+
+                currentLocation[p].root.actionsInTree = new ArrayList<>();
+                currentLocation[p].root.currentNodeTrajectory = new ArrayList<>();
+                for (int i = 0; i < actionsInTree.size(); i++) {
+                    if (actionsInTree.get(i).a == p) {
+                        currentLocation[p].root.actionsInTree.add(actionsInTree.get(i));
+                        if (i < currentNodeTrajectory.size())
+                            currentLocation[p].root.currentNodeTrajectory.add(currentNodeTrajectory.get(i));
+                    }
+                }
+                currentLocation[p].backUp(finalValues);
+            }
         }
         rolloutActionsTaken += actionsInRollout.size();
         root.updateMASTStatistics(actionsInTree, actionsInRollout, finalValues);
     }
 
-    private void expandNode(int currentActor, AbstractGameState currentState) {
-        // we now expand a node
-        currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState);
-        // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
-        nodeExpanded[currentActor] = true;
-        if (debug)
-            System.out.printf("Node expanded for P%d : %s %n", currentActor, currentLocation[currentActor].unexpandedActions().stream().map(Objects::toString).collect(Collectors.joining()));
-    }
 
     private void updateCurrentLocation(int playerId, AbstractGameState state) {
         if (lastAction[playerId] != null && !nodeExpanded[playerId]) { // we have a previous action and are not yet in rollout
-            if (expansionActionTaken[playerId]) {
-                expandNode(playerId, state);
-            } else {
-                currentLocation[playerId] = currentLocation[playerId].nextNodeInTree(lastAction[playerId]);
+            // nextNodeInTree returns null if this is an expansion node
+            SingleTreeNode newLocation = currentLocation[playerId].nextNodeInTree(lastAction[playerId]);
+            if (newLocation == null) {
+                // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
+                nodeExpanded[playerId] = true;
+                if (debug)
+                    System.out.printf("Node expanded for P%d : %s %n", playerId, lastAction[playerId]);
+                newLocation = currentLocation[playerId].expandNode(lastAction[playerId], state);
             }
-            lastAction[playerId] = null;
-            // we reset this as we have processed the action (required so that when we terminate the loop of
-            // tree/rollout policies we know what remains to be cleared up
+            currentLocation[playerId] = newLocation;
         }
+        lastAction[playerId] = null;
+        // we reset this as we have processed the action (required so that when we terminate the loop of
+        // tree/rollout policies we know what remains to be cleared up
+
     }
 
     @Override
@@ -209,49 +185,8 @@ public class MultiTreeNode extends SingleTreeNode {
         return roots[player];
     }
 
-
-    protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
-        Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("round", state.getRoundCounter());
-        stats.put("turn", state.getTurnCounter());
-        stats.put("turnOwner", state.getCurrentPlayer());
-        stats.put("iterations", numIters);
-        stats.put("rolloutActions", rolloutActionsTaken / numIters);
-        stats.put("time", timeTaken);
-        int validRoots = (int) Arrays.stream(roots).filter(Objects::nonNull).count();
-        for (SingleTreeNode node : roots) {
-            if (node == null) continue;
-            boolean mainPlayer = node.decisionPlayer == this.decisionPlayer;
-            TreeStatistics treeStats = new TreeStatistics(node);
-
-            int copy = node.copyCount + (node == roots[decisionPlayer] ? this.copyCount : 0);
-            int fm = node.fmCallsCount + (node == roots[decisionPlayer] ? this.fmCallsCount : 0);
-            double multiplier = mainPlayer ? 1 : 1.0 / (validRoots - 1.0);
-            String suffix = mainPlayer ? "-main" : "-other";
-            BiFunction<Object, Object, Double> addFn = (v1, v2) -> ((double) v1 + ((double) v2));
-
-            stats.merge("copyCalls" + suffix, copy * multiplier, addFn);
-            stats.merge("fmCalls" + suffix, fm * multiplier, addFn);
-            stats.merge("totalNodes" + suffix, treeStats.totalNodes * multiplier, addFn);
-            stats.merge("leafNodes" + suffix, treeStats.totalLeaves * multiplier, addFn);
-            stats.merge("terminalNodes" + suffix, treeStats.totalTerminalNodes * multiplier, addFn);
-            stats.merge("maxDepth" + suffix, treeStats.depthReached * multiplier, addFn);
-            stats.merge("nActionsRoot" + suffix, node.children.size() * multiplier, addFn);
-            stats.merge("nActionsTree" + suffix, treeStats.meanActionsAtNode * multiplier, addFn);
-            stats.merge("maxActionsAtNode" + suffix, treeStats.maxActionsAtNode * multiplier, addFn);
-
-            OptionalInt maxVisits = Arrays.stream(node.actionVisits()).max();
-            stats.merge("maxVisitProportion" + suffix, (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters * multiplier, addFn);
-            double[] visitProportions = Arrays.stream(node.actionVisits()).asDoubleStream().map(d -> d / node.getVisits()).toArray();
-            stats.merge("visitEntropy" + suffix, entropyOf(visitProportions) * multiplier, addFn);
-            AbstractAction bestAction = node.bestAction();
-            stats.put("bestAction" + suffix, bestAction);
-            stats.put("bestValue" + suffix, node.actionTotValue(bestAction, node.decisionPlayer) / node.actionVisits(bestAction));
-            stats.put("normalisedBestValue" + suffix, Utils.normalise(node.actionTotValue(bestAction, node.decisionPlayer) / node.actionVisits(bestAction), node.lowReward, node.highReward));
-            stats.put("lowReward" + suffix, node.lowReward);
-            stats.put("highReward" + suffix, node.highReward);
-        }
-        statsLogger.record(stats);
+    public void resetRoot(int player) {
+        roots[player] = null;
     }
 
 }

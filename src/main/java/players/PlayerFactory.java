@@ -54,10 +54,8 @@ public class PlayerFactory {
     public static AbstractPlayer fromJSONObject(JSONObject json) {
         // first of all we check for algorithm
         Object algo = json.get("class");
-        if (!(algo instanceof String))
+        if (!(algo instanceof String className))
             throw new AssertionError("No valid class property in JSON file");
-
-        String className = (String) algo;
 
         Object instantiatedObject;
         try {
@@ -69,8 +67,7 @@ public class PlayerFactory {
             throw new AssertionError("Error loading Class");
         }
 
-        if (instantiatedObject instanceof TunableParameters) {
-            TunableParameters params = (TunableParameters) instantiatedObject;
+        if (instantiatedObject instanceof TunableParameters params) {
             TunableParameters.loadFromJSON(params, json);
             return (AbstractPlayer) params.instantiate();
         }
@@ -85,9 +82,6 @@ public class PlayerFactory {
      * "mcts", "rmhc", "osla", "random", "className"
      * The first four of these will return the appropriate player with default parameters
      * Anything else is interpreted as a class name that implements AbstractPlayer with a no-argument constructor
-     *
-     * @param data
-     * @return
      */
     public static AbstractPlayer createPlayer(String data) {
         return createPlayer(data, Function.identity());
@@ -96,9 +90,7 @@ public class PlayerFactory {
     /**
      * This allows the raw file to be modified first
      *
-     * @param data
      * @param preprocessor - a function to be applied to the raw JSON string before the player is instantiated from it
-     * @return
      */
     public static AbstractPlayer createPlayer(String data, Function<String, String> preprocessor) {
         // The idea here is that we first check to see if data is a filename.
@@ -115,21 +107,14 @@ public class PlayerFactory {
         // if we get here then the file does not exist
 
         String input = data.toLowerCase();
-        switch (input) {
-            case "random":
-                return new RandomPlayer();
-            case "osla":
-                return new OSLAPlayer();
-            case "mcts":
-//                return new MCTSPlayer(new MCTSParams(System.currentTimeMillis()));
-                return new BasicMCTSPlayer();
-            case "rmhc":
-                return new RMHCPlayer(new RMHCParams());
-            case "rhea":
-                return new RHEAPlayer(new RHEAParams());
-            default:
-                throw new AssertionError("Unknown file or player key : " + input);
-        }
+        return switch (input) {
+            case "random" -> new RandomPlayer();
+            case "osla" -> new OSLAPlayer();
+            case "mcts" -> new BasicMCTSPlayer();
+            case "rmhc" -> new RMHCPlayer(new RMHCParams());
+            case "rhea" -> new RHEAPlayer(new RHEAParams());
+            default -> throw new AssertionError("Unknown file or player key : " + input);
+        };
     }
 
     public static List<AbstractPlayer> createPlayers(String opponentDescriptor) {
