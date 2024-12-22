@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -647,4 +647,20 @@ public abstract class AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }
+
+    public boolean isGameOver()
+    {
+        return gameStatus.equals(GAME_END);
+    }
+
+    public int getWinner()
+    {
+        if(gameStatus.equals(GAME_END)){
+            for(int playerId = 0; playerId < nPlayers; playerId++)
+                if(playerResults[playerId] == WIN_GAME)
+                    return playerId;
+        }
+        return -1;
+    }
+
 }

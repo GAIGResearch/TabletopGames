@@ -54,7 +54,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
             double Q = noise(valState[actionIndex], getParameters().noiseEpsilon, rnd.nextDouble());
 
-            if (Q > maxQ) {
+            if (Q > maxQ || bestAction == null) {
                 maxQ = Q;
                 bestAction = action;
             }

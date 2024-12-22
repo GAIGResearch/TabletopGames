@@ -1,0 +1,13 @@
+##  Tic-Tac-Toe: Core Game Rules
+
+Tic-Tac-Toe is a simple yet strategic game played on a 3x3 grid.  Two players, typically designated "X" and "O," take turns placing their mark on an empty square. The goal is to be the first to achieve a line of three of your own marks – either horizontally, vertically, or diagonally.
+
+**Here's a breakdown of the core gameplay:**
+
+* **The Grid:**  The game is played on a 3x3 grid, often drawn on paper or a whiteboard.
+* **Players:**  Two players participate, one playing as "X" and the other as "O."
+* **Turns:**  Players alternate turns, placing their mark in an empty square on the grid.
+* **Winning Condition:** The first player to achieve a line of three of their own marks (horizontally, vertically, or diagonally) wins the game.
+* **Tie Game:** If all squares are filled without a player achieving three in a row, the game ends in a tie.
+
+**Simple and Engaging:**  Tic-Tac-Toe is a quick and engaging game that can be enjoyed by people of all ages. It's a great way to introduce strategic thinking and develop problem-solving skills. 

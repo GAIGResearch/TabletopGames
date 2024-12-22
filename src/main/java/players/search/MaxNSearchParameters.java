@@ -43,7 +43,7 @@ public class MaxNSearchParameters extends PlayerParameters {
             heuristic = new GameDefaultHeuristic();
         }
         if (budgetType != PlayerConstants.BUDGET_TIME) {
-            System.out.println("Warning: SearchPlayer only supports time-based budget limits. Setting to BUDGET_TIME.");
+      //      System.out.println("Warning: SearchPlayer only supports time-based budget limits. Setting to BUDGET_TIME.");
             budgetType = PlayerConstants.BUDGET_TIME;
         }
         if (expandByEstimatedValue && !alphaBetaPruning) {

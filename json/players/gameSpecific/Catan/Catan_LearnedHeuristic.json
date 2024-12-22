@@ -17,5 +17,5 @@
         "backupPolicy" : "MaxMC",
         "maxBackupThreshold" : 30,
         "class" : "players.mcts.MCTSParams",
-        "budget" : -999
+        "budget" : 40
 }

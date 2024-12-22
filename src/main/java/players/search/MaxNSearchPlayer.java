@@ -3,10 +3,12 @@ package players.search;
 import core.*;
 import core.actions.AbstractAction;
 import players.mcts.ActionStats;
+import core.interfaces.IStateHeuristic;
+import llm.IHasStateHeuristic;
 
 import java.util.*;
 
-public class MaxNSearchPlayer extends AbstractPlayer {
+public class MaxNSearchPlayer extends AbstractPlayer implements IHasStateHeuristic {
     /**
      * This class is a simple implementation of a MaxN search player.
      * (This is the same as Minimax in the case of 2 players if the heuristic is symmetric)
@@ -85,6 +87,16 @@ public class MaxNSearchPlayer extends AbstractPlayer {
 
     public SearchResult getRootResult() {
         return rootResult;
+    }
+
+    @Override
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        getParameters().setParameterValue("heuristic", heuristic);
+    }
+
+    @Override
+    public IStateHeuristic getStateHeuristic() {
+        return getParameters().heuristic;
     }
 
     /**
@@ -191,7 +203,8 @@ public class MaxNSearchPlayer extends AbstractPlayer {
     @Override
     public MaxNSearchPlayer copy() {
         MaxNSearchPlayer retValue = new MaxNSearchPlayer((MaxNSearchParameters) getParameters().shallowCopy());
-        retValue.setForwardModel(getForwardModel().copy());
+        if (getForwardModel() != null)
+            retValue.setForwardModel(getForwardModel().copy());
         return retValue;
     }
 

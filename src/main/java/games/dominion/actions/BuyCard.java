@@ -27,7 +27,7 @@ public class BuyCard extends GainCard {
         // ii) Removing the card from the table and adding it to the player's discard pile
         // iii) Updating the available money and buy actions
         DominionGameState state = (DominionGameState) gs;
-        if (state.buysLeft() > 0 && state.availableSpend(buyingPlayer) >= cardType.cost) {
+        if (state.getBuysLeft() > 0 && state.getAvailableSpend(buyingPlayer) >= cardType.cost) {
             boolean success = super.execute(state);
             if (success) {
                 state.changeBuys(-1);

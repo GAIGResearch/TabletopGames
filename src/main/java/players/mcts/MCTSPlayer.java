@@ -8,6 +8,7 @@ import core.interfaces.IActionHeuristic;
 import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
+import llm.IHasStateHeuristic;
 import players.IAnyTimePlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 
-public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
+public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasStateHeuristic {
 
     // Heuristics used for the agent
     protected boolean debug = false;
@@ -358,6 +359,15 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public int getBudget() {
         return parameters.budget;
+    }
+
+    @Override
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        getParameters().setParameterValue("heuristic", heuristic);
+    }
+    @Override
+    public IStateHeuristic getStateHeuristic() {
+        return getParameters().heuristic;
     }
 
     @Override
