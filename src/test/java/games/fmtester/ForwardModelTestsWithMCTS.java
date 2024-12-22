@@ -17,14 +17,14 @@ public class ForwardModelTestsWithMCTS {
     }
     @Test
     public void testCatan() {
-        new ForwardModelTester("game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Catan.json");
+        new ForwardModelTester("game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\catan\\Catan_LearnedHeuristic.json");
     }
 
     @Test
     public void testCatanNoTrading() {
         CatanParameters cp = new CatanParameters();
         cp.setParameterValue("tradingAllowed", false);
-        new ForwardModelTester(cp, "game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Catan.json");
+        new ForwardModelTester(cp, "game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\catan\\Catan_LearnedHeuristic.json");
     }
     @Test
     public void testColtExpress() {
