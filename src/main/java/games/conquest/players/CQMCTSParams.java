@@ -13,6 +13,7 @@ public class CQMCTSParams extends PlayerParameters {
     public int maxTreeDepth = 100; // effectively no limit
     public double epsilon = 1e-6;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public boolean flexibleBudget = true;
 
     public CQMCTSParams() {
         super();
@@ -20,6 +21,7 @@ public class CQMCTSParams extends PlayerParameters {
         addTunableParameter("maxTreeDepth", 100, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("flexibleBudget", true);
     }
 
     @Override

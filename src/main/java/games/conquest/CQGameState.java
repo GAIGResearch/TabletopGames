@@ -214,7 +214,7 @@ public class CQGameState extends AbstractGameState {
         List<AbstractAction> actions = new ArrayList<>();
         if (!phase.equals(CQGamePhase.SelectionPhase))
             actions.add(new EndTurn());
-        int hash = this.hashCode();
+        int hash;
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
         if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
@@ -292,9 +292,10 @@ public class CQGameState extends AbstractGameState {
      * scaled to their cost and their current relative health.
      *
      * @param playerId The player to check troop health for
-     * @return the metric for alive-ness of troops
+     * @return the metric for alive-ness of troops, between 0 and 1
      */
     public double getTroopHealthMetric(int playerId) {
+        // TODO: greater value for killing troops
         HashSet<Troop> allTroops = getAllTroops(playerId);
         HashSet<Troop> livingTroops = getTroops(playerId);
         int totalTroopCost = getTotalTroopCost(allTroops);
@@ -518,6 +519,25 @@ public class CQGameState extends AbstractGameState {
     }
 
     /**
+     * Give some leniency to command usage, since the effects of commands are delayed
+     * So the full negative reward for command usage should not be give immediately.
+     * Specifically, act like there is no point cost to using a command, while it's your current turn.
+     * No leniency is given for the cooldown for the command, meaning there is still a small penalty to using commands
+     * @param playerId The player to check the command point leniency for
+     * @return the number of points to be 'awarded back' to the heuristic score for this turn
+     */
+    private int commandLeniency(int playerId) {
+        List<Command> allCommands = getCommands(playerId).getVisibleComponents(playerId);
+        int points = 0;
+        for (Command cmd : allCommands) {
+            if (cmd.getCooldown() != cmd.getCommandType().cooldown) continue;
+            // Command was used this turn. Don't account for the point cost until next turn
+            points += cmd.getCost();
+        }
+        return points;
+    }
+
+    /**
      * Heuristic used: Compute a metric that compares living troops to dead troops, and scales living troops to their hp
      * Then take the difference between these two metrics, and add a metric for command points and command cooldowns.
      * A player with a lot of command points and available commands, and lots of troops living, with an enemy with few troops living,
@@ -541,10 +561,13 @@ public class CQGameState extends AbstractGameState {
         }
         double cooldownFraction = currentCooldown / (double) totalCooldown;
         // Low points is bad, some points is good, more points is slightly better
-        int points = getCommandPoints(playerId);
+        int points = getCommandPoints(playerId) + commandLeniency(playerId);
         double expPoints = 1 - Math.exp(-points / 25.0);
+        if (commandLeniency(playerId) > 0) {
+//            System.out.println("Points: " + getCommandPoints(playerId) + ", " + commandLeniency(playerId) + " -> " + expPoints);
+        }
         // to the final score, add points, subtract cooldowns
-        runningScore += (expPoints - cooldownFraction);
+        runningScore += (expPoints - cooldownFraction / 2.0);
         return runningScore > 0 ? runningScore / 3 : runningScore / 2;
     }
 

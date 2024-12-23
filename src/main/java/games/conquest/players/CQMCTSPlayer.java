@@ -27,7 +27,7 @@ public class CQMCTSPlayer extends AbstractPlayer {
         params.K = Math.sqrt(2);
         params.maxTreeDepth = 5;
         params.epsilon = 1e-6;
-
+        params.flexibleBudget = true;
     }
 
     public CQMCTSPlayer(CQMCTSParams params) {
@@ -61,10 +61,12 @@ public class CQMCTSPlayer extends AbstractPlayer {
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         createRoot(gameState); // if root doesn't exist right now, create it
         if (root.depth == 0) { // TODO: or root.nVisits == 0?
-            root.mctsSearch();
+            root.mctsSearch(getParameters().flexibleBudget);
         }
-        System.out.println(root);
-        AbstractAction best = root.bestAction();
+        AbstractAction best = root.selectedAction;
+        if (best == null) {
+            System.out.println("No best action... what?");
+        }
         // Now prepare the player for the next move
         root = root.children.get(best);
         while (root != null && root.children.size() == 1) {
@@ -74,6 +76,9 @@ public class CQMCTSPlayer extends AbstractPlayer {
         }
         if (root != null && this.getPlayerID() != root.playerId) {
             root = null;
+        }
+        if (!possibleActions.contains(best)) {
+            System.out.println("Not possible to play this action");
         }
         return best;
     }

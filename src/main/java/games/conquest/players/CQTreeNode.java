@@ -18,8 +18,11 @@ import static utilities.Utils.noise;
  * match up multiple paths to reach the same node.
  */
 public class CQTreeNode {
+    boolean debug = false;
+
     CQTreeNode root;
     HashMap<CQTreeNode, AbstractAction> parents;
+    CQTreeNode parent = null; // The specific parent node used to access this node in a MCTS run
     Map<AbstractAction, CQTreeNode> children = new HashMap<>();
     Map<AbstractAction, Integer> childVisits = new HashMap();
     int nVisits = 0;
@@ -31,13 +34,12 @@ public class CQTreeNode {
     final int depth;
     private AbstractGameState state;
 
-    Stack<CQTreeNode> history;
-
     // for root node: save a list of all states and their nodes
     Map<Integer, CQTreeNode> stateNodeMap = null;
 
     private CQMCTSPlayer player;
     private Random rnd;
+    public AbstractAction selectedAction = null;
 
     public CQTreeNode(CQMCTSPlayer player, CQTreeNode parent, AbstractGameState gameState, Random rnd) {
         this.player = player;
@@ -60,9 +62,29 @@ public class CQTreeNode {
     }
 
     /**
+     * Check if the current best move will result in at least one full turn completed
+     * @return true if you'd finish a turn by repeatedly selecting the best move; false otherwise
+     */
+    boolean incompleteTurn() {
+        CQTreeNode node = this;
+        int player = node.playerId;
+        while (player == node.playerId) {
+            if (node.selectedAction == null) {
+                return true;
+            }
+            node = node.children.get(node.selectedAction);
+        }
+        // loop finished without returning, so we've reached the opponent move.
+        return false;
+    }
+
+    void mctsSearch() {
+        mctsSearch(true);
+    }
+    /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    void mctsSearch() {
+    void mctsSearch(boolean flexibleBudget) {
         CQMCTSParams params = player.getParameters();
 
         // Variables for tracking time budget
@@ -71,6 +93,7 @@ public class CQTreeNode {
         long remaining;
         int remainingLimit = params.breakMS;
         ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
+        int budget = params.budget;
         if (params.budgetType == BUDGET_TIME) {
             elapsedTimer.setMaxTimeMillis(params.budget);
         }
@@ -111,6 +134,11 @@ public class CQTreeNode {
                     stop = fmCallsCount > params.budget;
                 }
             }
+            if (stop && flexibleBudget && incompleteTurn()) {
+                // Flexible budget: allow for more time if the best move does not reach the end of the turn
+                budget += params.budget;
+                System.out.println("Increased budget to " + budget);
+            }
         }
     }
 
@@ -121,14 +149,20 @@ public class CQTreeNode {
      */
     private void backUp(double result) {
         CQTreeNode n = this;
-        while (!root.history.isEmpty()) { // keep looping until back at start of history
+        // TODO: Math.max(result, n.totValue)? Or that, but divide by depth?
+        while (n.parent != null) { // Follow trace of parent nodes up to root
             n.nVisits++;
             n.totValue += result;
             // Get the next node up
-            CQTreeNode nextN = root.history.pop();
+            CQTreeNode nextN = n.parent;
             // leave an increment for the child node we just came from
             nextN.childVisits.merge(n.parents.get(nextN), 1, Integer::sum);
             // Move to the next level
+//            if (nextN.nVisits + 1 != nextN.childVisits.get(n.parents.get(nextN))) {
+//                System.out.println("Mismatch... weird?");
+//            }
+            // clean up and move up a node
+            n.parent = null;
             n = nextN;
         }
         // increment root node after backing up all the way
@@ -140,6 +174,7 @@ public class CQTreeNode {
      * UCB run, but instead of checking child.nVisits, use the visits tracked from this node.
      * We use the `childVisits` for keeping track of that.
      * To ensure this works properly, backup needs to increment the correct childVisits.
+     * <a href="https://stackoverflow.com/a/50198274/1256925">Inspiration from here</a>
      * @return the selected action using UCB
      */
     private AbstractAction ucb() {
@@ -157,7 +192,7 @@ public class CQTreeNode {
 
             // Find child value
             double hvVal = child.totValue;
-            int visits = childVisits.getOrDefault(action, 0);
+            int visits = child.nVisits;
             double childValue = hvVal / (visits + params.epsilon);
 
             // default to standard UCB
@@ -188,9 +223,9 @@ public class CQTreeNode {
         return bestAction;
     }
 
-    private CQTreeNode enterNextState(AbstractAction action, Stack<CQTreeNode> history) {
+    private CQTreeNode enterNextState(AbstractAction action) {
         CQTreeNode next = children.get(action);
-        history.push(next);
+        next.parent = this;
         return next;
     }
 
@@ -203,9 +238,6 @@ public class CQTreeNode {
      * @return - new node added to the tree.
      */
     private CQTreeNode treePolicy() {
-        history = new Stack<>();
-        history.push(this); // root node is always at the top
-
         CQTreeNode cur = this;
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.state.isNotTerminal() && cur.depth < player.getParameters().maxTreeDepth) {
@@ -216,7 +248,8 @@ public class CQTreeNode {
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
-                cur = cur.enterNextState(actionChosen, history);
+                cur.selectedAction = actionChosen; // keep track of most recently selected action
+                cur = cur.enterNextState(actionChosen);
             }
         }
         return cur;
@@ -248,6 +281,7 @@ public class CQTreeNode {
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
         AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
+        selectedAction = chosen; // keep track of most recently selected action
 
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
@@ -264,7 +298,7 @@ public class CQTreeNode {
         // then keep track of the links back and forth
         tn.parents.put(this, chosen);
         children.put(chosen, tn);
-        this.root.history.push(tn); // when expanding, ensure the action is also logged in history
+        tn.parent = this;
         return tn;
     }
 
@@ -288,12 +322,17 @@ public class CQTreeNode {
         double bestValue = -Double.MAX_VALUE;
         AbstractAction bestAction = null;
 
+        if (children.keySet().size() == 0) {
+            System.out.println("No actions? What?");
+        }
         for (AbstractAction action : children.keySet()) {
             if (children.get(action) != null) {
-                int nodeVisits = childVisits.getOrDefault(action, 0);
+                CQTreeNode child = children.get(action);
+                double nodeValue = child.totValue / child.nVisits;
                 double epsilon = player.getParameters().epsilon;
                 // Apply small noise to break ties randomly
-                double childValue = noise(nodeVisits, epsilon, player.getRnd().nextDouble());
+                double childValue = noise(nodeValue, epsilon, player.getRnd().nextDouble());
+                // double childValue = noise(nodeVisits, epsilon, player.getRnd().nextDouble());
 
                 // Save best value (highest visit count)
                 if (childValue > bestValue) {
@@ -302,16 +341,10 @@ public class CQTreeNode {
                 }
             }
         }
-        if (bestAction instanceof ApplyCommand) {
-            System.out.println("Why apply commands?");
-        }
-        if (bestAction == null) {
-            throw new AssertionError("Unexpected - no selection made: "+bestAction);
-        }
         return bestAction;
     }
 
     public String toString() {
-        return String.format("MTreeNode, visits: %d, totValue: %f, states: %d", nVisits, totValue, stateNodeMap == null ? 0 : stateNodeMap.size());
+        return String.format("MTreeNode, visits: %d, totValue/visits: %f, states: %d", nVisits, totValue/nVisits, stateNodeMap == null ? 0 : stateNodeMap.size());
     }
 }
