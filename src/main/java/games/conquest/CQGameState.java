@@ -214,7 +214,7 @@ public class CQGameState extends AbstractGameState {
         List<AbstractAction> actions = new ArrayList<>();
         if (!phase.equals(CQGamePhase.SelectionPhase))
             actions.add(new EndTurn());
-        int hash;
+        int hash = this.hashCode();
         Troop currentTroop = selectedTroop == -1 ? null : (Troop) getComponentById(selectedTroop);
         if (!getCommands(uid, true).isEmpty()) {
             for (Command c : getCommands(uid, true)) {
