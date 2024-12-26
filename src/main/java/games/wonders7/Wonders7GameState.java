@@ -16,7 +16,7 @@ import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 public class Wonders7GameState extends AbstractGameState {
 
     int currentAge; // int from 1,2,3 of current age
-    List<HashMap<Wonders7Constants.Resource, Integer>> playerResources; // Each player's full resource counts
+    List<EnumMap<Wonders7Constants.Resource, Integer>> playerResources; // Each player's full resource counts
     List<Deck<Wonder7Card>> playerHands; // Player Hands
     List<Deck<Wonder7Card>> playedCards; // Player used cards
     Deck<Wonder7Card> ageDeck; // The 'draw deck' for the Age
@@ -35,7 +35,7 @@ public class Wonders7GameState extends AbstractGameState {
         // Each player starts off with no resources
         playerResources = new ArrayList<>(); // New arraylist , containing different hashmaps for each player
         for (int i = 0; i < getNPlayers(); i++) {
-            playerResources.add(new HashMap<>());
+            playerResources.add(new EnumMap<>(Wonders7Constants.Resource.class)); // Adds a new hashmap for each player
         }
     }
 
@@ -80,8 +80,8 @@ public class Wonders7GameState extends AbstractGameState {
                 copy.turnActions[i] = turnActions[i].copy();
         }
 
-        for (HashMap<Wonders7Constants.Resource, Integer> map : playerResources) {
-            copy.playerResources.add(new HashMap<>(map));
+        for (Map<Wonders7Constants.Resource, Integer> map : playerResources) {
+            copy.playerResources.add(new EnumMap<>(map));
         }
         for (Deck<Wonder7Card> deck : playerHands) {
             copy.playerHands.add(deck.copy());
@@ -177,9 +177,9 @@ public class Wonders7GameState extends AbstractGameState {
     public double getGameScore(int playerId) {
         // return the players score for the current game state.
         // This may not apply for all games
-        List<HashMap<Wonders7Constants.Resource, Integer>> playerResourcesCopy = new ArrayList<>();
-        for (HashMap<Wonders7Constants.Resource, Integer> map : playerResources) {
-            playerResourcesCopy.add(new HashMap<>(map));
+        List<Map<Wonders7Constants.Resource, Integer>> playerResourcesCopy = new ArrayList<>();
+        for (Map<Wonders7Constants.Resource, Integer> map : playerResources) {
+            playerResourcesCopy.add(new EnumMap<>(map));
         }
         // Evaluate military conflicts
         int nextplayer = (playerId + 1) % getNPlayers();
@@ -283,8 +283,20 @@ public class Wonders7GameState extends AbstractGameState {
      * This does not check to see if the resource is available, only the cost
      */
     public int costOfResource(Wonders7Constants.Resource resource,  int buyer, int seller) {
+        // For the moment we'll hardcode the Marketplace and TradingPost functionality here (it is not used elsewhere)
+        // In the future this can be replaced with a more general mechanism
+        if (resource.isRare()) {
+            if (playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("Marketplace"))) {
+                return getParams().nCostDiscountedResource;
+            }
+        } else if (resource.isBasic()) {
+            if (seller == (buyer - 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("East Trading Post"))) {
+                return getParams().nCostDiscountedResource;
+            }
+            if (seller == (buyer + 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("West Trading Post"))) {
+                return getParams().nCostDiscountedResource;            }
+        }
         return getParams().nCostNeighbourResource;
-        // TODO: Once marketplaces etc are implemented, then update this to take those into account
     }
 
     // The number of Resources of the specified type a player has

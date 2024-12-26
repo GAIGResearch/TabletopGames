@@ -210,7 +210,8 @@ public class Wonder7Card extends Card {
         List<TradeSource> used = new ArrayList<>();
         int availableCoins = wgs.getPlayerResources(player).get(Coin);
         for (TradeSource tradeSource : tradeSources) {
-            if (tradeSource.cost() < availableCoins) {
+            if (neededResources.get(tradeSource.resource()) == 0) continue;  // we have already bought all we need
+            if (tradeSource.cost() <= availableCoins) {
                 used.add(tradeSource);
                 availableCoins -= tradeSource.cost();
             } else {
@@ -222,12 +223,14 @@ public class Wonder7Card extends Card {
                     return new Pair<>(false, Collections.emptyList());  // can't afford to buy the resources
                 }
             }
+            // remove the resource from the needed list
+            neededResources.put(tradeSource.resource(), neededResources.get(tradeSource.resource()) - 1);
         }
 
         // we can afford the resources. The last check is to see if we can reduce the price with wild cards
         List<TradeSource> usedCopy = new ArrayList<>(used);
         Collections.reverse(usedCopy);  // sort so most expensive first
-        for (TradeSource tradeSource : used) {
+        for (TradeSource tradeSource : usedCopy) {
             if (tradeSource.resource().isBasic() && basicWild > 0) {
                 basicWild--;
                 used.remove(tradeSource);
