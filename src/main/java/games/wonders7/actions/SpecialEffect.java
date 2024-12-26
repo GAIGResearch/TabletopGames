@@ -29,17 +29,7 @@ public class SpecialEffect extends DrawCard {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds the played card
-        Wonder7Card card = null;
-        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
-            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
-                card = cardSearch;
-                break;
-            }
-        }
-
-        if (card == null) {
-            throw new AssertionError("Card not found in player hand");
-        }
+        Wonder7Card card = wgs.findCardInHand(player, cardName);
 
         Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
         switch (board.type){

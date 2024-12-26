@@ -212,6 +212,9 @@ public class Wonders7GameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++) allCards.add(getPlayedCards(i));
         return (int) allCards.stream().filter(c -> c.getCardType() == type).count();
     }
+    public Wonders7GameParameters getParams() {
+        return (Wonders7GameParameters) gameParameters;
+    }
 
     public int getCurrentAge() {
         return currentAge;
@@ -254,10 +257,35 @@ public class Wonders7GameState extends AbstractGameState {
         playerWonderBoard[playerId] = wonder;
     }
 
+    public Wonder7Card findCardInHand(int player, String cardName) {
+        Wonder7Card card = null;
+        for (Wonder7Card cardSearch : getPlayerHand(player).getComponents()) { // Goes through each card in the playerHand
+            if (cardName.equals(cardSearch.cardName)) { // If cardName is the one searching for (being played)
+                card = cardSearch;
+                break;
+            }
+        }
+
+        if (card == null) {
+            throw new AssertionError("Card not found in player hand");
+        }
+        return card;
+    }
+
+
     // A summary Map of all the resources a player has from their played cards and Wonder Board
-    public HashMap<Wonders7Constants.Resource, Integer> getPlayerResources(int playerId) {
+    public Map<Wonders7Constants.Resource, Integer> getPlayerResources(int playerId) {
         return playerResources.get(playerId);
-    } // Return players resource hashmap
+    } // Return players resource map
+
+    /**
+     * This returns the cost for buyer to acquire resource from seller
+     * This does not check to see if the resource is available, only the cost
+     */
+    public int costOfResource(Wonders7Constants.Resource resource,  int buyer, int seller) {
+        return getParams().nCostNeighbourResource;
+        // TODO: Once marketplaces etc are implemented, then update this to take those into account
+    }
 
     // The number of Resources of the specified type a player has
     public int getResource(int player, Wonders7Constants.Resource resource) {

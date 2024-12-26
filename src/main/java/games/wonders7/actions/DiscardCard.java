@@ -22,17 +22,7 @@ public class DiscardCard extends DrawCard {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds card being removed in player Hand
-        Wonder7Card card = null;
-        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
-            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
-                card = cardSearch;
-                break;
-            }
-        }
-
-        if (card == null) {
-            throw new AssertionError("Card not found in player hand");
-        }
+        Wonder7Card card = wgs.findCardInHand(player, cardName);
 
         // Player gets 3 coins from discarding card
         int playerValue = wgs.getPlayerResources(player).get(Wonders7Constants.Resource.Coin); // No. Coins player has

@@ -49,7 +49,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             wgs.playedCards.add(new Deck<>("Played Cards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
         }
 
-        // Cards that have been discarded all players
+        // Cards that have been discarded by all players
         wgs.discardPile = new Deck<>("Discarded Cards", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Shuffles wonder-boards
@@ -136,7 +136,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         }
         // We now check that all players have the same number of cards in hand
         int cardsExpected = wgs.getPlayerHand(0).getSize();
-        for (int p = 1; p < wgs.getNPlayers(); p++)  {
+        for (int p = 1; p < wgs.getNPlayers(); p++) {
             if (wgs.getPlayerHand(p).getSize() != cardsExpected) {
                 throw new AssertionError("Player " + p + " has " + wgs.getPlayerHand(p).getSize() + " cards in hand, but player 0 has " + cardsExpected);
             }
@@ -178,10 +178,8 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         for (Wonder7Card card : playerHand.getComponents()) { // Goes through each card in hand
             if (card.isAlreadyPlayed(player, wgs)) continue;
 
-            if (card.isFree(player, wgs)) { // Checks if player has prerequisite
-                actions.add((new PlayCard(player, card.cardName, true)));
-            } else if (card.isPlayable(player, wgs)) {  // Meets the costs / can pay neighbours for resources
-                actions.add(new PlayCard(player, card.cardName, false));
+            if (card.isPlayable(player, wgs).a) {  // Is free / Meets the costs / can pay neighbours for resources
+                actions.add(new PlayCard(player, card.cardName, card.isFree(player, wgs)));
             }
         }
 
@@ -320,13 +318,13 @@ public class Wonders7ForwardModel extends StandardForwardModel {
     protected void createAgeDeck(Wonders7GameState wgs) {
         // This method will create the deck for the current Era and
         // All the hashmaps containing different number of resources
-
-        // TODO: Implement missing commercial cards (which will also involve updating the code to for buying resources)
-
+        // TODO: This does not take any account of the number of players! All cards are included in a single deck!
         switch (wgs.currentAge) {
             // ALL THE CARDS IN DECK 1
             case 1:
 
+                // TODO: Timber Yard provides either a Wood, or a Clay....we do not have this optionality supported!
+                // TODO: Similarly for Clay Pit, Forest Cave, Mine, Tree Farm, Excavation
                 wgs.ageDeck.add(new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin), createCardHash(Wood)));
                 wgs.ageDeck.add(new Wonder7Card("Clay Pit", RawMaterials, createCardHash(Coin), createCardHash(Clay)));
                 wgs.ageDeck.add(new Wonder7Card("Excavation", RawMaterials, createCardHash(Coin), createCardHash(Stone)));
@@ -354,6 +352,8 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                     wgs.ageDeck.add(new Wonder7Card("Workshop", ScientificStructures, createCardHash(Glass), createCardHash(Cog)));
                     wgs.ageDeck.add(new Wonder7Card("Scriptorium", ScientificStructures, createCardHash(Papyrus), createCardHash(Tablet)));
                     // Commercial Structures (Yellow)
+                    // TODO: Add East and West Trading Posts
+                    // TODO: Add Marketplace
                     // MilitaryStructures (Red)
                     wgs.ageDeck.add(new Wonder7Card("Stockade", MilitaryStructures, createCardHash(Wood), createCardHash(Shield)));
                     wgs.ageDeck.add(new Wonder7Card("Barracks", MilitaryStructures, createCardHash(Ore), createCardHash(Shield)));
@@ -370,6 +370,9 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 2:
 
                 // Extra cards for 6 players
+
+                // TODO: Same issue for Forums and Caravanserai, in that they provide a choice of resources
+                // TODO: Caravanserai not included at all
                 wgs.ageDeck.add(new Wonder7Card("ForumG", CommercialStructures, createCardHash(Clay, Clay), createCardHash(Glass)));
                 wgs.ageDeck.add(new Wonder7Card("ForumT", CommercialStructures, createCardHash(Clay, Clay), createCardHash(Textile)));
                 wgs.ageDeck.add(new Wonder7Card("ForumP", CommercialStructures, createCardHash(Clay, Clay), createCardHash(Papyrus)));
@@ -395,6 +398,10 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                     wgs.ageDeck.add(new Wonder7Card("Dispensary", ScientificStructures, createCardHash(Ore, Ore, Glass), createCardHash(Compass), "Apothecary"));
                     wgs.ageDeck.add(new Wonder7Card("School", ScientificStructures, createCardHash(Wood, Papyrus), createCardHash(Tablet)));
                     // Commercial Structures (Yellow)
+                    // TODO: Add Caranavanserai
+                    // TODO: Add Forum (and remove the fake ones at the top)
+                    // TODO: Add Vineyard
+                    // TODO: Add Bazaar
                     // MilitaryStructures (Red)
                     wgs.ageDeck.add(new Wonder7Card("Stables", MilitaryStructures, createCardHash(Clay, Wood, Ore), createCardHash(Shield, Shield), "Apothecary"));
                     wgs.ageDeck.add(new Wonder7Card("Archery Range", MilitaryStructures, createCardHash(Wood, Wood, Ore), createCardHash(Shield, Shield), "Workshop"));
@@ -439,6 +446,12 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                     wgs.ageDeck.add(new Wonder7Card("Fortification", MilitaryStructures, createCardHash(Ore, Ore, Ore, Stone), createCardHash(new Pair<>(Shield, 3)), "Walls"));
 
                 }
+
+                // TODO: Add Lighthouse
+                // TODO: Add Haven
+                // TODO: Add Chamber of Commerce
+                // TODO: Add Arena
+                // TODO: Add Ludus
                 for (int i = 0; i < 3; i++) {
                     // Civilian Structures (Blue)
                     wgs.ageDeck.add(new Wonder7Card("Town Hall", CivilianStructures, createCardHash(Stone, Stone, Ore, Glass), createCardHash(new Pair<>(Victory, 6))));
@@ -447,6 +460,8 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                     wgs.ageDeck.add(new Wonder7Card("Arsenal", MilitaryStructures, createCardHash(Wood, Wood, Ore, Textile), createCardHash(new Pair<>(Shield, 3))));
                     wgs.ageDeck.add(new Wonder7Card("Circus", MilitaryStructures, createCardHash(Stone, Stone, Stone, Ore), createCardHash(new Pair<>(Shield, 3)), "Training Ground"));
                 }
+
+                // TODO: Add Guild (Purple) cards for end-game VP
         }
     }
 }

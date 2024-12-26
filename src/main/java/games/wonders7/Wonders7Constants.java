@@ -12,15 +12,27 @@ public class Wonders7Constants {
         Stone,
         Clay,
         Ore,
+        BasicWild,
         Glass,
         Papyrus,
         Textile,
+        RareWild,
         Cog,
         Compass,
         Tablet,
         Shield,
         Victory,
-        Coin
+        Coin;
+
+        public boolean isBasic() {
+            return this == Wood || this == Stone || this == Clay || this == Ore;
+        }
+        public boolean isRare() {
+            return this == Glass || this == Papyrus || this == Textile;
+        }
+    }
+
+    public record TradeSource(Resource resource, int cost, int fromPlayer) {
     }
 
     @SafeVarargs

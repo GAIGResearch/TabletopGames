@@ -24,18 +24,8 @@ public class BuildStage extends AbstractAction {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds the played card
-        Wonder7Card card = null;
-        for (Wonder7Card cardSearch: wgs.getPlayerHand(player).getComponents()){ // Goes through each card in the playerHand
-            if (cardName.equals(cardSearch.cardName)){ // If cardName is the one searching for (being played)
-                card = cardSearch;
-                break;
-            }
-        }
+        Wonder7Card card = wgs.findCardInHand(player, cardName);
 
-        if (card == null) {
-            throw new AssertionError("Card not found in player hand");
-        }
-        
         // The second stage has been built, now the player can play their special action (if they have the wonder)
         if (wgs.getPlayerWonderBoard(player).wonderStage == 2){
             Wonder7Board board = wgs.getPlayerWonderBoard(player);
