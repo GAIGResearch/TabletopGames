@@ -185,8 +185,7 @@ public class Wonder7Card extends Card {
                 new TradingOption(Collections.emptyList(),
                         remainingRequirements,
                         tradeSources,
-                        wgs.getPlayerResources(player).get(Coin)));
-        // TODO: remove cost of base card (once test fails)
+                        wgs.getPlayerResources(player).get(Coin) - constructionCost.getOrDefault(Coin, 0L).intValue()));
 
         if (allPossibleOptions.isEmpty()) {
             return new Pair<>(false, Collections.emptyList());  // no way to satisfy the requirements
@@ -204,9 +203,9 @@ public class Wonder7Card extends Card {
                                                            int neighbour) {
         List<TradeSource> tradeSources = new ArrayList<>();
         for (Resource resource : wgs.getPlayerResources(neighbour).keySet()) {
-            if (!resource.isBasic() && !resource.isRare()) continue; // ignore Coins, Victory etc. symbols
+            if (!resource.isTradeable()) continue; // ignore Coins, Victory etc. symbols
             // is this relevant to us?
-            if (neededResources.stream().anyMatch(r -> r.includes(resource))) {
+            if (neededResources.stream().anyMatch(resource::includes)) {
                 for (int i = 0; i < wgs.getPlayerResources(neighbour).get(resource); i++)
                     tradeSources.add(new TradeSource(resource, wgs.costOfResource(resource, player, neighbour), neighbour));
             }
@@ -232,7 +231,7 @@ public class Wonder7Card extends Card {
                 // we have run out of money, so this branch is invalid
                 return Collections.emptyList();
             }
-            Set<Resource> matchingRequirements = current.remainingRequirements.stream()
+            Set<Resource> matchingRequirements = remainingRequirements.stream()
                     .filter(tradeSource.resource()::includes)
                     .collect(Collectors.toSet());
             if (matchingRequirements.isEmpty()) {

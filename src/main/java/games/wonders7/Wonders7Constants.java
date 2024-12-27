@@ -45,11 +45,11 @@ public class Wonders7Constants {
         }
 
         public boolean isBasic() {
-            return this == BasicWild || this == Wood || this == Stone || this == Clay || this == Ore;
+            return this.resources[0] == Wood || this.resources[0] == Stone || this.resources[0] == Clay || this.resources[0] == Ore;
         }
 
         public boolean isRare() {
-            return this == Glass || this == Papyrus || this == Textile || this == RareWild;
+            return this.resources[0] == Glass || this.resources[0] == Papyrus || this.resources[0] == Textile;
         }
 
         public boolean isTradeable() {

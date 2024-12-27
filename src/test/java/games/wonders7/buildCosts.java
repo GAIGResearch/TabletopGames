@@ -154,16 +154,37 @@ public class buildCosts {
 
     @Test
     public void hasMoneyForEitherTradeOrBaseCost() {
-        fail("Not implemented");
+        // technically this is redundant, as there are no cards in the base game that cost coins and resources
+        Wonder7Card testCard = new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin, Stone), createCardHash(Wood));
+
+        state.getPlayerHand(0).add(testCard);
+        state.getPlayerResources(0).put(Coin, 2);
+        state.getPlayerResources(0).put(Stone, 0);
+
+        state.getPlayerResources(1).put(Stone, 1);
+        assertEquals(new Pair<>(false, Collections.emptyList()), testCard.isPlayable(0, state));
     }
 
     @Test
     public void cannotBuyWildCardResourcesFromNeighbours() {
-        fail("Not implemented");
+        state.getPlayerHand(0).add(library);
+        state.getPlayerResources(0).put(Stone, 1);
+        state.getPlayerResources(0).put(RareWild, 1);
+
+        state.getPlayerResources(1).put(BasicWild, 1);
+        assertEquals(new Pair<>(false, Collections.emptyList()), library.isPlayable(0, state));
+
+        state.getPlayerResources(1).put(Stone, 1);
+        assertEquals(new Pair<>(true, List.of(new TradeSource(Stone, 2, 1))), library.isPlayable(0, state));
     }
 
     @Test
     public void canUseCompositeResourcesFromNeighbours() {
-        fail("Not implemented");
+        state.getPlayerHand(0).add(library);
+        state.getPlayerResources(0).put(Stone, 1);
+        state.getPlayerResources(0).put(RareWild, 1);
+
+        state.getPlayerResources(1).put(Wood_Stone, 1);
+        assertEquals(new Pair<>(true, List.of(new TradeSource(Wood_Stone, 2, 1))), library.isPlayable(0, state));
     }
 }
