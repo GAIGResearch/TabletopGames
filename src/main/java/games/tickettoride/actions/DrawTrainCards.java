@@ -56,10 +56,13 @@ public class DrawTrainCards extends AbstractAction {
         Deck<Card> trainCardDeck = (Deck<Card>) gameArea.getComponent(TicketToRideConstants.trainCardDeckHash);
 
         Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
+
+        System.out.println( playerID + " has these cards before drawing: " + playerTrainCardHandDeck);
+
         new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
 
 
-        System.out.println( playerID + " now has after drawing" + playerTrainCardHandDeck);
+        System.out.println( playerID + " now has these cards after drawing: "  + playerTrainCardHandDeck);
         return true;
     }
 

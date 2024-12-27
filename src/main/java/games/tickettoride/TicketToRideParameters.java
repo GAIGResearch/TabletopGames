@@ -58,8 +58,8 @@ public class TicketToRideParameters extends AbstractParameters {
     }
 
 
-    public HashMap<Integer, Integer> getPointsPerRoute() {
-        return (HashMap<Integer, Integer>) pointsPerRoute;
+    public int getPointsPerRoute(int cost) {
+        return pointsPerRoute.get(cost);
     }
 
     @Override

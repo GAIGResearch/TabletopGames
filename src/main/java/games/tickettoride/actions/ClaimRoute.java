@@ -81,8 +81,12 @@ public class ClaimRoute extends AbstractAction {
 
         Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
         edge.setProperty(routeClaimedProp );
-        System.out.println("Claim route" + colorOfRoute);
 
+
+        System.out.println(tgs.getGameScore(playerID) + " points before");
+        tgs.addScore(playerID, tp.getPointsPerRoute(costOfRoute));
+        System.out.println("Claim route of color: " + colorOfRoute + " and size of " + costOfRoute);
+        System.out.println(tgs.getGameScore(playerID) + " points after");
         System.out.println("player hand after " + playerTrainCardHandDeck);
 
         return true;
