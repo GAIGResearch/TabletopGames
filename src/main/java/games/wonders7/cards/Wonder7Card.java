@@ -9,6 +9,8 @@ import games.wonders7.Wonders7GameState;
 import utilities.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static games.wonders7.Wonders7Constants.Resource.Coin;
 
@@ -90,8 +92,8 @@ public class Wonder7Card extends Card {
         String makes = mapToStr(resourcesProduced);
         return "{" + cardName +
                 "(" + type + ")" +
-                (!cost.equals("") ? ":cost=" + cost : ",free") +
-                (!makes.equals("") ? ",makes=" + makes : "") + "}  ";
+                (!cost.isEmpty() ? ":cost=" + cost : ",free") +
+                (!makes.isEmpty() ? ",makes=" + makes : "") + "}  ";
     }
 
     private String mapToStr(Map<Resource, Long> m) {
@@ -133,113 +135,139 @@ public class Wonder7Card extends Card {
     public Pair<Boolean, List<TradeSource>> isPlayable(int player, Wonders7GameState wgs) {
         if (isAlreadyPlayed(player, wgs))
             return new Pair<>(false, Collections.emptyList()); // If player already has an identical structure (can't play another
-        if (isFree(player, wgs)) return new Pair<>(true, Collections.emptyList()); // If player can play for free (has prerequisite card
+        if (isFree(player, wgs))
+            return new Pair<>(true, Collections.emptyList()); // If player can play for free (has prerequisite card
 
         // Collects the resources player does not have
-        Map<Resource, Long> neededResources = new HashMap<>();
+        List<Resource> remainingRequirements = new ArrayList<>();
         for (Resource resource : constructionCost.keySet()) { // Goes through every resource the player needs
             if ((wgs.getPlayerResources(player).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
                 if (resource == Coin)
                     return new Pair<>(false, Collections.emptyList()); // If player can't afford the card (not enough coins)
-                neededResources.put(resource, constructionCost.get(resource) - wgs.getPlayerResources(player).get(resource));
+                for (int i = 0; i < constructionCost.get(resource) - wgs.getPlayerResources(player).get(resource); i++)
+                    remainingRequirements.add(resource);
             }
         }
-        if (neededResources.isEmpty()) return new Pair<>(true, Collections.emptyList()); // If player can afford the card (no resources needed)
+        if (remainingRequirements.isEmpty())
+            return new Pair<>(true, Collections.emptyList()); // If player can afford the card (no resources needed)
         // at this point we have paid anything for which we have the direct resources
-        // Now we consider wild cards, and then purchase options from neighbours
+        // Now we consider composite resources and purchase options from neighbours
 
-        // we now allocate the cost to buy for each of the needed resources (we do this at the individual level in case we pay for one of a pair
-        // and use a wildcard for the other
+        // we include this in a single algorithm to allow for recursive analysis of all trading options
+        // our composite resources have a cost of zero, so will always be allocated first.
 
+        List<TradeSource> compositeSources = new ArrayList<>();
+        for (Resource resource : wgs.getPlayerResources(player).keySet()) {
+            if (resource.isComposite()) {
+                for (int i = 0; i < wgs.getPlayerResources(player).get(resource); i++)
+                    compositeSources.add(new TradeSource(resource, 0, -1));
+            }
+        }
 
-        // get neighbour resources
+        // get neighbour resources (that would help satisfy our requirements)
         int leftNeighbour = (wgs.getNPlayers() + player - 1) % wgs.getNPlayers();
         int rightNeighbour = (player + 1) % wgs.getNPlayers();
-        Map<Resource, Integer> neighbourLResources = wgs.getPlayerResources(leftNeighbour); // Resources available to the neighbour on left
-        Map<Resource, Integer> neighbourRResources = wgs.getPlayerResources(rightNeighbour); // Resources available to the neighbour on right
+        List<TradeSource> leftNeighbourHas = extractNeighbourTradeOptions(player, wgs, remainingRequirements, leftNeighbour);
+        List<TradeSource> rightNeighbourHas = extractNeighbourTradeOptions(player, wgs, remainingRequirements, rightNeighbour);
 
-        // now many wild resources do we have
-        int basicWild = wgs.getPlayerResources(player).getOrDefault(Resource.BasicWild, 0);
-        int rareWild = wgs.getPlayerResources(player).getOrDefault(Resource.RareWild, 0);
+        // Now amalgamate these three sets of possibilities
+        List<TradeSource> tradeSources = new ArrayList<>(compositeSources);
+        tradeSources.addAll(leftNeighbourHas);
+        tradeSources.addAll(rightNeighbourHas);
 
-        // tradeSources lists all the possible purchases from neighbours, with costs
-        List<TradeSource> tradeSources = new ArrayList<>();
-        int missingBasic = 0;
-        int missingRare = 0;
-        for (Resource resource : neededResources.keySet()) {
-            if (!resource.isBasic() && !resource.isRare()) {
-                throw new AssertionError("Unknown construction resource type: " + resource);
-            }
-            int available = 0;
-            for (int i = 0; i < neighbourLResources.getOrDefault(resource, 0); i++) {
-                tradeSources.add(new TradeSource(resource, wgs.costOfResource(resource, player, leftNeighbour), leftNeighbour));
-                available++;
-            }
-            for (int i = 0; i < neighbourRResources.getOrDefault(resource, 0); i++) {
-                tradeSources.add(new TradeSource(resource, wgs.costOfResource(resource, player, rightNeighbour), rightNeighbour));
-                available++;
-            }
-
-            // at this stage we can check to see if construction is impossible
-            int wild = resource.isBasic() ? basicWild : rareWild;
-            int alreadyMissing = resource.isBasic() ? missingBasic : missingRare;
-            if (available + wild + alreadyMissing < neededResources.get(resource)) {
-                return new Pair<>(false, Collections.emptyList());  // impossible to get needed resources
-            }
-            if (available < neededResources.get(resource)) {
-                if (resource.isBasic()) {
-                    missingBasic += (int) (neededResources.get(resource) - available);
-                } else {
-                    missingRare += (int) (neededResources.get(resource) - available);
-                }
-            }
-        }
-        // update the wild resources to be the spare ones left over after using them for the unavailable resources
-        basicWild -= missingBasic;
-        rareWild -= missingRare;
-
-        // there are potentially sufficient available resources to build the card, so we
-        // check if we can afford to buy the resources we need
-
-        tradeSources.sort(Comparator.comparingInt(TradeSource::cost));
+        // sort in increasing order of cost, with composite resources after non-composite
+        tradeSources.sort(Comparator.comparingInt(TradeSource::cost).thenComparingInt(ts -> ts.resource().isComposite() ? 1 : 0));
 
         // now we go through the trade sources in increasing order of cost, and buy the resources we need
-        // from the previous step we know how many wild resources we have left over, after using them for the unavailable
-        // resources; so we use these on the most expensive resources
+        // a composite resource is applied to all possible requirements...which branches the search so that all possibilities are considered
 
-        List<TradeSource> used = new ArrayList<>();
-        int availableCoins = wgs.getPlayerResources(player).get(Coin);
-        for (TradeSource tradeSource : tradeSources) {
-            if (neededResources.get(tradeSource.resource()) == 0) continue;  // we have already bought all we need
-            if (tradeSource.cost() <= availableCoins) {
-                used.add(tradeSource);
-                availableCoins -= tradeSource.cost();
+        List<TradingOption> allPossibleOptions = getTradingOptions(
+                new TradingOption(Collections.emptyList(),
+                        remainingRequirements,
+                        tradeSources,
+                        wgs.getPlayerResources(player).get(Coin)));
+        // TODO: remove cost of base card (once test fails)
+
+        if (allPossibleOptions.isEmpty()) {
+            return new Pair<>(false, Collections.emptyList());  // no way to satisfy the requirements
+        }
+        // Now find the cheapest option
+        TradingOption cheapestOption = allPossibleOptions.stream()
+                .min(Comparator.comparingInt(o -> o.plannedPurchases.stream().mapToInt(TradeSource::cost).sum()))
+                .get();
+
+        // then remove the resources with a cost of zero
+        return new Pair<>(true, cheapestOption.plannedPurchases.stream().filter(ts -> ts.cost() > 0).collect(Collectors.toList()));
+    }
+
+    private List<TradeSource> extractNeighbourTradeOptions(int player, Wonders7GameState wgs, List<Resource> neededResources,
+                                                           int neighbour) {
+        List<TradeSource> tradeSources = new ArrayList<>();
+        for (Resource resource : wgs.getPlayerResources(neighbour).keySet()) {
+            if (!resource.isBasic() && !resource.isRare()) continue; // ignore Coins, Victory etc. symbols
+            // is this relevant to us?
+            if (neededResources.stream().anyMatch(r -> r.includes(resource))) {
+                for (int i = 0; i < wgs.getPlayerResources(neighbour).get(resource); i++)
+                    tradeSources.add(new TradeSource(resource, wgs.costOfResource(resource, player, neighbour), neighbour));
+            }
+        }
+        return tradeSources;
+    }
+
+    // helper record for recursive analysis of all trading options
+    record TradingOption(List<TradeSource> plannedPurchases, List<Resource> remainingRequirements,
+                         List<TradeSource> tradeSources, int coinsLeft) {
+    }
+
+    private List<TradingOption> getTradingOptions(TradingOption current) {
+        // We loop over the remaining tradeSources until we find one that can satisfy a requirement.
+        // If it can satisfy a unique requirement, we add it to the plannedPurchases,
+        // remove the requirement from the remainingRequirements and keep looping.
+        List<TradeSource> usedTradeSources = new ArrayList<>(current.plannedPurchases);
+        List<TradeSource> remainingTradeSources = new ArrayList<>(current.tradeSources);
+        List<Resource> remainingRequirements = new ArrayList<>(current.remainingRequirements);
+        int coinsLeft = current.coinsLeft;
+        for (TradeSource tradeSource : current.tradeSources) {
+            if (tradeSource.cost() > coinsLeft) {
+                // we have run out of money, so this branch is invalid
+                return Collections.emptyList();
+            }
+            Set<Resource> matchingRequirements = current.remainingRequirements.stream()
+                    .filter(tradeSource.resource()::includes)
+                    .collect(Collectors.toSet());
+            if (matchingRequirements.isEmpty()) {
+                // this trade source is not relevant, we remove it and do not branch
+                remainingTradeSources.remove(tradeSource);
+            } else if (matchingRequirements.size() > 1) {
+                // we can use this resource to satisfy multiple requirements
+                // so we branch
+                List<TradingOption> allOptions = new ArrayList<>();
+                for (Resource requirement : matchingRequirements) {
+                    List<TradeSource> newPlannedPurchases = new ArrayList<>(usedTradeSources);
+                    newPlannedPurchases.add(tradeSource);
+                    List<Resource> newRemainingRequirements = new ArrayList<>(remainingRequirements);
+                    newRemainingRequirements.remove(requirement);
+                    List<TradeSource> newTradeSources = new ArrayList<>(remainingTradeSources);
+                    newTradeSources.remove(tradeSource);
+                    List<TradingOption> newOptions = getTradingOptions(
+                            new TradingOption(newPlannedPurchases, newRemainingRequirements, newTradeSources, coinsLeft - tradeSource.cost()));
+                    allOptions.addAll(newOptions);
+                }
+                return allOptions;
             } else {
-                if (tradeSource.resource().isBasic() && basicWild > 0) {
-                    basicWild--;
-                } else if (tradeSource.resource().isRare() && rareWild > 0) {
-                    rareWild--;
-                } else {
-                    return new Pair<>(false, Collections.emptyList());  // can't afford to buy the resources
+                // we can use this resource to satisfy a single requirement, so no branching required
+                usedTradeSources.add(tradeSource);
+                remainingTradeSources.remove(tradeSource);
+                remainingRequirements.remove(matchingRequirements.iterator().next());
+                coinsLeft -= tradeSource.cost();
+                if (remainingRequirements.isEmpty()) {
+                    // we have satisfied all requirements, so this is a valid option
+                    return List.of(new TradingOption(usedTradeSources, remainingRequirements, remainingTradeSources, coinsLeft));
                 }
             }
-            // remove the resource from the needed list
-            neededResources.put(tradeSource.resource(), neededResources.get(tradeSource.resource()) - 1);
         }
-
-        // we can afford the resources. The last check is to see if we can reduce the price with wild cards
-        List<TradeSource> usedCopy = new ArrayList<>(used);
-        Collections.reverse(usedCopy);  // sort so most expensive first
-        for (TradeSource tradeSource : usedCopy) {
-            if (tradeSource.resource().isBasic() && basicWild > 0) {
-                basicWild--;
-                used.remove(tradeSource);
-            } else if (tradeSource.resource().isRare() && rareWild > 0) {
-                rareWild--;
-                used.remove(tradeSource);
-            }
-        }
-        return new Pair<>(true, used);
+        // if we get here, we have exhausted all trade sources without meeting requirements, so this branch is invalid
+        return Collections.emptyList();
     }
 
     @Override

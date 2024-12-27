@@ -322,15 +322,12 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         switch (wgs.currentAge) {
             // ALL THE CARDS IN DECK 1
             case 1:
-
-                // TODO: Timber Yard provides either a Wood, or a Clay....we do not have this optionality supported!
-                // TODO: Similarly for Clay Pit, Forest Cave, Mine, Tree Farm, Excavation
-                wgs.ageDeck.add(new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin), createCardHash(Wood)));
-                wgs.ageDeck.add(new Wonder7Card("Clay Pit", RawMaterials, createCardHash(Coin), createCardHash(Clay)));
-                wgs.ageDeck.add(new Wonder7Card("Excavation", RawMaterials, createCardHash(Coin), createCardHash(Stone)));
-                wgs.ageDeck.add(new Wonder7Card("Forest Cave", RawMaterials, createCardHash(Coin), createCardHash(Wood)));
-                wgs.ageDeck.add(new Wonder7Card("Tree Farm", RawMaterials, createCardHash(Coin), createCardHash(Wood)));
-                wgs.ageDeck.add(new Wonder7Card("Mine", RawMaterials, createCardHash(Coin), createCardHash(Ore)));
+                wgs.ageDeck.add(new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin), createCardHash(Wood_Stone)));
+                wgs.ageDeck.add(new Wonder7Card("Clay Pit", RawMaterials, createCardHash(Coin), createCardHash(Ore_Clay)));
+                wgs.ageDeck.add(new Wonder7Card("Excavation", RawMaterials, createCardHash(Coin), createCardHash(Stone_Clay)));
+                wgs.ageDeck.add(new Wonder7Card("Forest Cave", RawMaterials, createCardHash(Coin), createCardHash(Wood_Ore)));
+                wgs.ageDeck.add(new Wonder7Card("Tree Farm", RawMaterials, createCardHash(Coin), createCardHash(Wood_Clay)));
+                wgs.ageDeck.add(new Wonder7Card("Mine", RawMaterials, createCardHash(Coin), createCardHash(Stone_Ore)));
 
                 for (int i = 0; i < 2; i++) {
                     // Raw Materials (Brown)

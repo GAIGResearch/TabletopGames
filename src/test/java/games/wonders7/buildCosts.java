@@ -151,4 +151,19 @@ public class buildCosts {
         assertEquals(new Pair<>(true, Collections.emptyList()), library.isPlayable(0, state));
     }
 
+
+    @Test
+    public void hasMoneyForEitherTradeOrBaseCost() {
+        fail("Not implemented");
+    }
+
+    @Test
+    public void cannotBuyWildCardResourcesFromNeighbours() {
+        fail("Not implemented");
+    }
+
+    @Test
+    public void canUseCompositeResourcesFromNeighbours() {
+        fail("Not implemented");
+    }
 }
