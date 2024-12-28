@@ -127,29 +127,26 @@ public class Wonder7Card extends Card {
     }
 
     /**
-     * This method checks if the player can play the card.
-     * Further, if they can play the card it returns the additional costs they have to pay
-     * to other players to acquire their resources
-     * This is a List<TradeSource> (TradeSource is a record with fields Resource, cost, fromPlayer) defined in Wonders7Constants
+     * Returns a list of all possible build options (trade sources) for the player
+     * An empty List<List<TradeSource>> means the player cannot play the card
+     * A list that contains an empty List<TradeSource> means the player can play the card for free
+     * <p>
+     * This includes the player's own composite resources (at a cost of zero).
      */
-    public Pair<Boolean, List<TradeSource>> isPlayable(int player, Wonders7GameState wgs) {
-        if (isAlreadyPlayed(player, wgs))
-            return new Pair<>(false, Collections.emptyList()); // If player already has an identical structure (can't play another
-        if (isFree(player, wgs))
-            return new Pair<>(true, Collections.emptyList()); // If player can play for free (has prerequisite card
+    public List<List<TradeSource>> buildOptions(int player, Wonders7GameState wgs) {
 
         // Collects the resources player does not have
         List<Resource> remainingRequirements = new ArrayList<>();
         for (Resource resource : constructionCost.keySet()) { // Goes through every resource the player needs
             if ((wgs.getPlayerResources(player).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
                 if (resource == Coin)
-                    return new Pair<>(false, Collections.emptyList()); // If player can't afford the card (not enough coins)
+                    return Collections.emptyList(); // If player can't afford the card (not enough coins)
                 for (int i = 0; i < constructionCost.get(resource) - wgs.getPlayerResources(player).get(resource); i++)
                     remainingRequirements.add(resource);
             }
         }
         if (remainingRequirements.isEmpty())
-            return new Pair<>(true, Collections.emptyList()); // If player can afford the card (no resources needed)
+            return List.of(Collections.emptyList()); // If player can afford the card (no resources needed)
         // at this point we have paid anything for which we have the direct resources
         // Now we consider composite resources and purchase options from neighbours
 
@@ -188,15 +185,35 @@ public class Wonder7Card extends Card {
                         wgs.getPlayerResources(player).get(Coin) - constructionCost.getOrDefault(Coin, 0L).intValue()));
 
         if (allPossibleOptions.isEmpty()) {
-            return new Pair<>(false, Collections.emptyList());  // no way to satisfy the requirements
+            return Collections.emptyList();  // no way to satisfy the requirements
         }
+        return allPossibleOptions.stream().map(to -> to.plannedPurchases).collect(Collectors.toList());
+    }
+
+    /**
+     * This method checks if the player can play the card.
+     * Further, if they can play the card it returns the additional costs they have to pay
+     * to other players to acquire their resources
+     * This is a List<TradeSource> (TradeSource is a record with fields Resource, cost, fromPlayer) defined in Wonders7Constants
+     */
+    public Pair<Boolean, List<TradeSource>> isPlayable(int player, Wonders7GameState wgs) {
+        if (isAlreadyPlayed(player, wgs))
+            return new Pair<>(false, Collections.emptyList()); // If player already has an identical structure (can't play another
+        if (isFree(player, wgs))
+            return new Pair<>(true, Collections.emptyList()); // If player can play for free (has prerequisite card
+
+        List<List<TradeSource>> allPossibleOptions = buildOptions(player, wgs);
+
+        if (allPossibleOptions.isEmpty())
+            return new Pair<>(false, Collections.emptyList()); // If player can't afford the card (not enough coins)
+
         // Now find the cheapest option
-        TradingOption cheapestOption = allPossibleOptions.stream()
-                .min(Comparator.comparingInt(o -> o.plannedPurchases.stream().mapToInt(TradeSource::cost).sum()))
-                .get();
+        List<TradeSource> cheapestOption = allPossibleOptions.stream()
+                .min(Comparator.comparingInt(ts -> ts.stream().mapToInt(TradeSource::cost).sum()))
+                .orElse(Collections.emptyList());
 
         // then remove the resources with a cost of zero
-        return new Pair<>(true, cheapestOption.plannedPurchases.stream().filter(ts -> ts.cost() > 0).collect(Collectors.toList()));
+        return new Pair<>(true, cheapestOption.stream().filter(ts -> ts.cost() > 0).collect(Collectors.toList()));
     }
 
     private List<TradeSource> extractNeighbourTradeOptions(int player, Wonders7GameState wgs, List<Resource> neededResources,
