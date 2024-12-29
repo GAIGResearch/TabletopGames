@@ -2,7 +2,6 @@ package games.wonders7;
 
 import games.wonders7.Wonders7Constants.TradeSource;
 import games.wonders7.actions.PlayCard;
-import games.wonders7.cards.Wonder7Board;
 import games.wonders7.cards.Wonder7Card;
 import org.junit.Before;
 import org.junit.Test;

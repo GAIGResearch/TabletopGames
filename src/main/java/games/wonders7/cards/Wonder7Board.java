@@ -19,7 +19,7 @@ public class Wonder7Board extends Card {
         TheColossusOfRhodes(
                 createHashList(createCardHash(Wood, Wood),
                         createCardHash(Clay, Clay, Clay),
-                        createCardHash(Ore, Ore, Ore)),
+                        createCardHash(Ore, Ore, Ore, Ore)),
                 createHashList(createCardHash(Victory, Victory, Victory),
                         createCardHash(Shield, Shield),
                         createCardHash(new Pair<>(Victory, 7))),

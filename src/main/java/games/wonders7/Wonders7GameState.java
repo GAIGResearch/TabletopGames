@@ -12,6 +12,8 @@ import games.wonders7.cards.Wonder7Board;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static games.wonders7.Wonders7Constants.Resource.Shield;
+import static games.wonders7.Wonders7Constants.Resource.Victory;
 
 public class Wonders7GameState extends AbstractGameState {
 
@@ -155,7 +157,7 @@ public class Wonders7GameState extends AbstractGameState {
 
         // 'Left' means we pass to lower numbered players, 'Right' means we pass to higher numbered players
         int opponentSpacesToLeft = (playerId - opponentId + getNPlayers()) % getNPlayers();
-        int opponentSpacesToRight = (opponentId  - playerId + getNPlayers()) % getNPlayers();
+        int opponentSpacesToRight = (opponentId - playerId + getNPlayers()) % getNPlayers();
 
         if (direction == 1) {  // this passes to lower numbered players
             return handsKnown >= opponentSpacesToLeft;
@@ -173,36 +175,38 @@ public class Wonders7GameState extends AbstractGameState {
         return new Wonders7Heuristic().evaluateState(this, playerId);
     }
 
+    protected void updateEndOfAgeMilitaryVPs() {
+        for (int player = 0; player < nPlayers; player++) {
+            int nextplayer = (player + 1) % getNPlayers();
+            if (playerResources.get(player).get(Shield) > playerResources.get(nextplayer).get(Shield)) {
+                // IF PLAYER WINS
+                playerResources.get(player).put(Victory, playerResources.get(player).get(Victory) + (2 * currentAge - 1)); // 2N-1 POINTS FOR PLAYER i
+                playerResources.get(nextplayer).put(Victory, playerResources.get(nextplayer).get(Victory) - 1); // -1 FOR THE PLAYER i+1
+            } else if (playerResources.get(player).get(Shield) < playerResources.get(nextplayer).get(Shield)) { // IF PLAYER i+1 WINS
+                playerResources.get(player).put(Victory, playerResources.get(player).get(Victory) - 1);// -1 POINT FOR THE PLAYER i
+                playerResources.get(nextplayer).put(Victory, playerResources.get(nextplayer).get(Victory) + (2 * currentAge - 1));// 2N-1 POINTS FOR PLAYER i+1
+            }
+        }
+    }
+
     @Override
     public double getGameScore(int playerId) {
         // return the players score for the current game state.
-        // This may not apply for all games
-        List<Map<Wonders7Constants.Resource, Integer>> playerResourcesCopy = new ArrayList<>();
-        for (Map<Wonders7Constants.Resource, Integer> map : playerResources) {
-            playerResourcesCopy.add(new EnumMap<>(map));
-        }
-        // Evaluate military conflicts
-        int nextplayer = (playerId + 1) % getNPlayers();
-        if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)) { // IF PLAYER i WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory) + (2 * currentAge - 1)); // 2N-1 POINTS FOR PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory) - 1); // -1 FOR THE PLAYER i+1
-        } else if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)) { // IF PLAYER i+1 WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory) - 1);// -1 POINT FOR THE PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory) + (2 * currentAge - 1));// 2N-1 POINTS FOR PLAYER i+1
-        }
-
-        int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
+        // this just looks at current VP (including science based on evaluation now)
+        int vp = playerResources.get(playerId).get(Victory);
         // Treasury
-        vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
+        vp += playerResources.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
         // Scientific
-        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog), 2);
-        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass), 2);
-        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet), 2);
+        vp += (int) Math.pow(playerResources.get(playerId).get(Wonders7Constants.Resource.Cog), 2);
+        vp += (int) Math.pow(playerResources.get(playerId).get(Wonders7Constants.Resource.Compass), 2);
+        vp += (int) Math.pow(playerResources.get(playerId).get(Wonders7Constants.Resource.Tablet), 2);
         // Sets of different science symbols
-        vp += 7 * Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog), playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass)), playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet));
+        vp += 7 * Math.min(Math.min(
+                playerResources.get(playerId).get(Wonders7Constants.Resource.Cog),
+                playerResources.get(playerId).get(Wonders7Constants.Resource.Compass)),
+                playerResources.get(playerId).get(Wonders7Constants.Resource.Tablet));
 
-        playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, vp);
-        return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
+        return vp;
     }
 
 
@@ -212,6 +216,7 @@ public class Wonders7GameState extends AbstractGameState {
         for (int i = 0; i < getNPlayers(); i++) allCards.add(getPlayedCards(i));
         return (int) allCards.stream().filter(c -> c.getCardType() == type).count();
     }
+
     public Wonders7GameParameters getParams() {
         return (Wonders7GameParameters) gameParameters;
     }
@@ -282,7 +287,7 @@ public class Wonders7GameState extends AbstractGameState {
      * This returns the cost for buyer to acquire resource from seller
      * This does not check to see if the resource is available, only the cost
      */
-    public int costOfResource(Wonders7Constants.Resource resource,  int buyer, int seller) {
+    public int costOfResource(Wonders7Constants.Resource resource, int buyer, int seller) {
         // For the moment we'll hardcode the Marketplace and TradingPost functionality here (it is not used elsewhere)
         // In the future this can be replaced with a more general mechanism
         if (resource.isRare()) {
@@ -294,7 +299,8 @@ public class Wonders7GameState extends AbstractGameState {
                 return getParams().nCostDiscountedResource;
             }
             if (seller == (buyer + 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("West Trading Post"))) {
-                return getParams().nCostDiscountedResource;            }
+                return getParams().nCostDiscountedResource;
+            }
         }
         return getParams().nCostNeighbourResource;
     }

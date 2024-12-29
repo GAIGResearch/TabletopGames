@@ -228,23 +228,14 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             wgs.reverse(); // Turn Order reverses at end of Age
 
             // Resolves military conflicts
-            for (int i = 0; i < wgs.getNPlayers(); i++) {
-                int nextplayer = (i + 1) % wgs.getNPlayers();
-                if (wgs.getPlayerResources(i).get(Shield) > wgs.getPlayerResources(nextplayer).get(Shield)) { // IF PLAYER i WINS
-                    wgs.getPlayerResources(i).put(Victory, wgs.getPlayerResources(i).get(Victory) + (2 * wgs.currentAge - 1)); // 2N-1 POINTS FOR PLAYER i
-                    wgs.getPlayerResources(nextplayer).put(Victory, wgs.getPlayerResources(nextplayer).get(Victory) - 1); // -1 FOR THE PLAYER i+1
-                } else if (wgs.getPlayerResources(i).get(Shield) < wgs.getPlayerResources(nextplayer).get(Shield)) { // IF PLAYER i+1 WINS
-                    wgs.getPlayerResources(i).put(Victory, wgs.getPlayerResources(i).get(Victory) - 1);// -1 POINT FOR THE PLAYER i
-                    wgs.getPlayerResources(nextplayer).put(Victory, wgs.getPlayerResources(nextplayer).get(Victory) + (2 * wgs.currentAge - 1));// 2N-1 POINTS FOR PLAYER i+1
-                }
-            }
+            wgs.updateEndOfAgeMilitaryVPs();
 
             wgs.getAgeDeck().clear();
             wgs.currentAge += 1; // Next age starts
             checkGameEnd(wgs); // Checks if the game has ended!
         }
-
     }
+
 
     protected void checkGameEnd(Wonders7GameState wgs) {
         if (wgs.currentAge == 4) {
