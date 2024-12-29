@@ -15,6 +15,7 @@ import static games.wonders7.Wonders7Constants.createHashList;
 
 public class Wonder7Board extends Card {
     public enum Wonder {
+        // TODO: This currently just implements the A sides...adding the B sides will require a couple of extra abilities to be implemented
         TheColossusOfRhodes(
                 createHashList(createCardHash(Wood, Wood),
                         createCardHash(Clay, Clay, Clay),
@@ -23,26 +24,29 @@ public class Wonder7Board extends Card {
                         createCardHash(Shield, Shield),
                         createCardHash(new Pair<>(Victory, 7))),
                 Ore),
-        TheLighthouseOfAlexandria(null, null, Glass),
-        // TODO: Functionality of Lighthouse of Alexandria
+        TheLighthouseOfAlexandria(
+                createHashList(createCardHash(Stone, Stone), createCardHash(Ore, Ore), createCardHash(Papyrus, Textile)),
+                createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(BasicWild), createCardHash(new Pair<>(Victory, 7))),
+                Glass),
         TheTempleOfArtemisInEphesus(
                 createHashList(createCardHash(Stone, Stone), createCardHash(Wood, Wood), createCardHash(Papyrus, Papyrus)),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Coin, 9)), createCardHash(new Pair<>(Victory,7))),
                 Papyrus),
-        TheHangingGardensOfBabylon(null, null, Clay),
-        // TODO: Functionality of Hanging Gardens of Babylon
+        TheHangingGardensOfBabylon(
+                createHashList(createCardHash(Clay, Clay), createCardHash(Ore, Ore, Textile), createCardHash(Wood, Wood, Wood, Wood)),
+                createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(ScienceWild), createCardHash(new Pair<>(Victory,7))),
+                Wood),
         TheStatueOfZeusInOlympia(createHashList(createCardHash(Wood, Wood), createCardHash(Stone, Stone), createCardHash(Ore, Ore)),
                 createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory, 7))),
-                Wood),
+                Clay),
         // TODO: Functionality of Statue of Zeus in Olympia (middle stage is different; construct the first card of an unbuilt colour for free)
         TheMausoleumOfHalicarnassus(createHashList(createCardHash(Clay, Clay), createCardHash(new Pair<>(Ore, 4)), createCardHash(Textile, Textile)),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 7))),
                 Textile),
         // TODO: Functionality of Mausoleum of Halicarnassus (middle stage is build for free from Discard pile)
-        ThePyramidsOfGiza(createHashList(createCardHash(Stone, Stone), createCardHash(new Pair<>(Wood,3)), createCardHash(new Pair<>(Stone, 4))),
+        ThePyramidsOfGiza(createHashList(createCardHash(Wood, Wood), createCardHash(Clay, Clay, Textile), createCardHash(new Pair<>(Stone, 4))),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 5)), createCardHash(new Pair<>(Victory, 7))),
                 Stone);
-        // TODO: (Low priority) Functionality of the reverse side of each of the Wonders (and assignation at random of these)
 
         public final Map<Wonders7Constants.Resource, Long> resourcesProduced; // Default wonder production
         public final List<Map<Wonders7Constants.Resource, Long>> constructionCosts; // Cost of each stage

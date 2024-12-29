@@ -26,6 +26,7 @@ public class Wonders7Constants {
         Cog,
         Compass,
         Tablet,
+        ScienceWild(Cog, Compass, Tablet),
         Shield,
         Victory,
         Coin;

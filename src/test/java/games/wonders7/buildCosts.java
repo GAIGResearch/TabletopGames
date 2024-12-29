@@ -28,6 +28,8 @@ public class buildCosts {
     Wonder7Card apothecary = new Wonder7Card("Apothecary", ScientificStructures, createCardHash(Textile), createCardHash(Compass));
     Wonder7Card library = new Wonder7Card("Library", ScientificStructures, createCardHash(Stone, Stone, Textile), createCardHash(Tablet), "Scriptorium");
     Wonder7Card scriptorium = new Wonder7Card("Scriptorium", ScientificStructures, createCardHash(Stone, Stone, Textile), createCardHash(Tablet));
+    Wonder7Card temple = new Wonder7Card("Temple", CivilianStructures, createCardHash(Wood, Clay, Glass), createCardHash(Victory, Victory, Victory), "Altar");
+
 
     @Before
     public void setup() {
@@ -186,5 +188,52 @@ public class buildCosts {
 
         state.getPlayerResources(1).put(Wood_Stone, 1);
         assertEquals(new Pair<>(true, List.of(new TradeSource(Wood_Stone, 2, 1))), library.isPlayable(0, state));
+    }
+
+    @Test
+    public void checkNoMultiplePurchaseOptions() {
+        state.getPlayerHand(0).add(library);
+        state.getPlayerResources(0).put(Stone, 1);
+        state.getPlayerResources(0).put(RareWild, 1);
+
+        state.getPlayerResources(1).put(Stone, 1);
+        state.getPlayerResources(3).put(Wood_Stone, 1);
+
+        List<List<TradeSource>> options = library.buildOptions(0, state);
+
+        // Currently we only check options if we have a composite resource that could be allocated in multiple ways
+        // If we have two non-composite resources at the same price, we just pick the first one
+        // TODO: This would need to be changed to implement full functionality of providing a player choice on build options
+        assertEquals(1, options.size());
+    }
+
+    @Test
+    public void checkMultiplePurchaseOptions() {
+        state.getPlayerHand(0).add(temple); // needs Wood, Clay, Glass
+        state.getPlayerResources(0).put(Stone, 1);
+        state.getPlayerResources(0).put(Wood, 0);
+        state.getPlayerResources(0).put(Clay, 0);
+        state.getPlayerResources(0).put(RareWild, 1);
+        state.getPlayerResources(0).put(Glass, 1);
+
+        state.getPlayerResources(1).put(Stone_Clay, 1);
+        state.getPlayerResources(3).put(Wood_Stone, 1);
+
+        List<List<TradeSource>> options = temple.buildOptions(0, state);
+        assertEquals(0, options.size());
+
+        // Compared to the previous test, we now have two different ways to pay for the card
+        state.getPlayerResources(0).put(BasicWild, 1);
+        options = temple.buildOptions(0, state);
+        assertEquals(2, options.size());
+
+        assertTrue(options.contains(List.of(
+                new TradeSource(BasicWild, 0, -1),
+                new TradeSource(Stone_Clay, 2, 1)))
+        );
+        assertTrue(options.contains(List.of(
+                new TradeSource(BasicWild, 0, -1),
+                new TradeSource(Wood_Stone, 2, 3)))
+        );
     }
 }
