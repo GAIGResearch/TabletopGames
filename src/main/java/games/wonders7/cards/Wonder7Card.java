@@ -137,6 +137,17 @@ public class Wonder7Card extends Card {
         }
     }
 
+    public int endGameVP(Wonders7GameState state, int playerId) {
+        int vp = 0;
+        for (CardEffect e : endGameEffects) {
+            if (e instanceof GainResourceEffect gre) {
+                if (gre.resource == Resource.Victory)
+                    vp += gre.gain(state, playerId);
+            }
+        }
+        return vp;
+    }
+
     @Override
     public String toString() {
         String cost = mapToStr(constructionCost);

@@ -53,29 +53,28 @@ public class Wonder7Guilds {
 
     public Wonder7Card shipownersGuild = new Wonder7Card("Shipowners Guild", Guilds, createCardHash(Wood, Wood, Wood, Glass, Papyrus),
             Collections.emptyList(),
-            List.of(new GainResourceEffect(Victory, CommercialStructures, 1, true, false),
+            List.of(new GainResourceEffect(Victory, ManufacturedGoods, 1, true, false),
                     new GainResourceEffect(Victory, RawMaterials, 1, true, false),
-                    new GainResourceEffect(Victory, ManufacturedGoods, 1, true, false)));
+                    new GainResourceEffect(Victory, Guilds, 1, true, false)));
 
     public Wonder7Card buildersGuild = new Wonder7Card("Builders Guild", Guilds, createCardHash(Stone, Stone, Stone, Clay, Clay, Glass),
             Collections.emptyList(),
-            List.of((state, player) -> {
-                int retValue = 0;
-                for (int i = -1; i <= 1; i++) {
-                    retValue += state.getPlayerWonderBoard((player + i + state.getNPlayers()) % state.getNPlayers()).wonderStage - 1;
-                }
-                state.getPlayerResources(player).put(Victory, state.getPlayerResources(player).get(Victory) + retValue);
-            }));
+            List.of(
+                    new GainResourceEffect(Victory,
+                            (state, player) -> {
+                                int retValue = 0;
+                                for (int i = -1; i <= 1; i++) {
+                                    retValue += state.getPlayerWonderBoard((player + i + state.getNPlayers()) % state.getNPlayers()).wonderStage - 1;
+                                }
+                                return retValue;
+                            })
+            ));
 
     public Wonder7Card decoratorsGuild = new Wonder7Card("Decorators Guild", Guilds, createCardHash(Ore, Ore, Stone, Stone, Glass, Glass),
             Collections.emptyList(),
-            List.of((state, player) -> {
-                int vp = 0;
-                for (int i = -1; i <= 1; i++) {
-                    vp += state.getPlayerWonderBoard((player + i + state.getNPlayers()) % state.getNPlayers()).wonderStage == 3 ? 3 : 0;
-                }
-                state.getPlayerResources(player).put(Victory, state.getPlayerResources(player).get(Victory) + vp);
-            }));
+            List.of(
+                    new GainResourceEffect(Victory,
+                    (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1 == state.getPlayerWonderBoard(player).type.wonderStages) ? 7 : 0)));
 
     public Wonder7Card scientistsGuild = new Wonder7Card("Scientists Guild",
             Guilds, createCardHash(Wood, Wood, Ore, Ore, Papyrus),

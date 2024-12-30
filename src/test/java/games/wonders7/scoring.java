@@ -213,6 +213,7 @@ public class scoring {
 
     @Test
     public void shipownersGuild(){
+        assertEquals(1, state.getGameScore(1), 0.001);
         state.getPlayedCards(1).add(guilds.shipownersGuild);
         state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
         state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
@@ -221,6 +222,7 @@ public class scoring {
         state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
         state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
         state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", Guilds, createCardHash(Wood)));
+        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ScientificStructures, createCardHash(Wood)));
         assertEquals(5, state.getGameScore(1), 0.001);
     }
 

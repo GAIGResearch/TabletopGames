@@ -197,6 +197,11 @@ public class Wonders7GameState extends AbstractGameState {
         vp += playerResources.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
         // Scientific
         vp += getSciencePoints(playerId);
+
+        // then consider the endgame effects of cards
+        for (Wonder7Card card : playedCards.get(playerId)) {
+            vp += card.endGameVP(this, playerId);
+        }
         return vp;
     }
 
