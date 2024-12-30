@@ -25,28 +25,28 @@ public class Wonder7Board extends Card {
                         createCardHash(new Pair<>(Victory, 7))),
                 Ore),
         TheLighthouseOfAlexandria(
-                createHashList(createCardHash(Stone, Stone), createCardHash(Ore, Ore), createCardHash(Papyrus, Textile)),
+                createHashList(createCardHash(Stone, Stone), createCardHash(Ore, Ore, Ore), createCardHash(Wood, Wood, Wood, Wood)),
                 createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(BasicWild), createCardHash(new Pair<>(Victory, 7))),
                 Glass),
         TheTempleOfArtemisInEphesus(
-                createHashList(createCardHash(Stone, Stone), createCardHash(Wood, Wood), createCardHash(Papyrus, Papyrus)),
+                createHashList(createCardHash(Clay, Clay), createCardHash(Wood, Wood), createCardHash(Ore, Ore, Glass)),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Coin, 9)), createCardHash(new Pair<>(Victory,7))),
                 Papyrus),
         TheHangingGardensOfBabylon(
                 createHashList(createCardHash(Clay, Clay), createCardHash(Ore, Ore, Textile), createCardHash(Wood, Wood, Wood, Wood)),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(ScienceWild), createCardHash(new Pair<>(Victory,7))),
                 Wood),
-        TheStatueOfZeusInOlympia(createHashList(createCardHash(Wood, Wood), createCardHash(Stone, Stone), createCardHash(Ore, Ore)),
+        TheStatueOfZeusInOlympia(createHashList(createCardHash(Stone, Stone), createCardHash(Wood, Wood), createCardHash(Clay, Clay, Clay)),
                 createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory, 7))),
                 Clay),
-        // TODO: Functionality of Statue of Zeus in Olympia (middle stage is different; construct the first card of an unbuilt colour for free)
-        TheMausoleumOfHalicarnassus(createHashList(createCardHash(Clay, Clay), createCardHash(new Pair<>(Ore, 4)), createCardHash(Textile, Textile)),
+        // TODO: Functionality of Statue of Zeus in Olympia (middle stage is different; construct the first card of any unbuilt colour for free)
+        TheMausoleumOfHalicarnassus(createHashList(createCardHash(Ore, Ore), createCardHash(Glass, Papyrus), createCardHash(Stone, Stone, Stone)),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 7))),
                 Textile),
         // TODO: Functionality of Mausoleum of Halicarnassus (middle stage is build for free from Discard pile)
         ThePyramidsOfGiza(createHashList(createCardHash(Wood, Wood), createCardHash(Clay, Clay, Textile), createCardHash(new Pair<>(Stone, 4))),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 5)), createCardHash(new Pair<>(Victory, 7))),
-                Stone);
+                Clay);
 
         public final Map<Wonders7Constants.Resource, Long> resourcesProduced; // Default wonder production
         public final List<Map<Wonders7Constants.Resource, Long>> constructionCosts; // Cost of each stage

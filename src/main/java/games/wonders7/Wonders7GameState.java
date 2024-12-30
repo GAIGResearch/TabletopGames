@@ -198,9 +198,12 @@ public class Wonders7GameState extends AbstractGameState {
         // Scientific
         vp += getSciencePoints(playerId);
 
+        // now consider guild effects
+        for (Wonder7Card card : playedCards.get(playerId).getComponents()) {
+            vp += card.countVP(this, playerId);
+        }
         return vp;
     }
-
 
     public int getSciencePoints(int player) {
         int wild = playerResources.get(player).get(ScienceWild);
@@ -227,13 +230,6 @@ public class Wonders7GameState extends AbstractGameState {
                 maxPoints = points;
         }
         return maxPoints;
-    }
-
-    public int cardsOfType(Wonder7Card.Type type) {
-        Deck<Wonder7Card> allCards;
-        allCards = new Deck<>("temp", VISIBLE_TO_ALL);
-        for (int i = 0; i < getNPlayers(); i++) allCards.add(getPlayedCards(i));
-        return (int) allCards.stream().filter(c -> c.getCardType() == type).count();
     }
 
     public Wonders7GameParameters getParams() {

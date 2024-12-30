@@ -16,6 +16,10 @@ import static games.wonders7.Wonders7Constants.Resource.Coin;
 
 public class Wonder7Card extends Card {
 
+    public interface GuildEffect {
+        int countVP(Wonders7GameState state, int playerId);
+    }
+
     public enum Type {
         RawMaterials,
         ManufacturedGoods,
@@ -30,8 +34,9 @@ public class Wonder7Card extends Card {
     public final String cardName; // Name of card
     public final Map<Resource, Long> constructionCost; // The resources required to construct structure
     public final Map<Resource, Long> resourcesProduced; // Resources the card creates
-    //public final HashMap<Wonder7Card, Integer> prerequisite; // THE STRUCTURES REQUIRED TO BUILD CARD FOR FREE
     public final String prerequisiteCard;
+    protected GuildEffect guildEffect = null;
+
 
     // A normal card with construction cost, produces resources
     public Wonder7Card(String name, Type type,
@@ -67,23 +72,41 @@ public class Wonder7Card extends Card {
         this.prerequisiteCard = "";
     }
 
+    // A card with a guild effect (end of game VP)
+    public Wonder7Card(String name, Type type,
+                       Map<Wonders7Constants.Resource, Long> constructionCost,
+                       GuildEffect effect) {
+        super(name);
+        this.cardName = name;
+        this.type = type;
+        this.constructionCost = constructionCost;
+        this.resourcesProduced = new HashMap<>();
+        this.prerequisiteCard = "";
+        this.guildEffect = effect;
+    }
+
     protected Wonder7Card(String name, Type type,
                           Map<Resource, Long> constructionCost,
-                          Map<Resource, Long> resourcesProduced, String prerequisiteCard, int componentID) {
+                          Map<Resource, Long> resourcesProduced, String prerequisiteCard,
+                          GuildEffect effect, int componentID) {
         super(name, componentID);
         this.cardName = name;
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = resourcesProduced;
         this.prerequisiteCard = prerequisiteCard;
+        this.guildEffect = effect;
     }
 
     public int getNProduced(Resource resource) {
         return resourcesProduced.get(resource).intValue();
     }
 
-    public int getNCost(Resource resource) {
-        return constructionCost.get(resource).intValue();
+    public int countVP(Wonders7GameState state, int playerId) {
+        if (guildEffect != null) {
+            return guildEffect.countVP(state, playerId);
+        }
+        return 0;
     }
 
     @Override
@@ -288,7 +311,7 @@ public class Wonder7Card extends Card {
 
     @Override
     public Card copy() {
-        return new Wonder7Card(cardName, type, constructionCost, resourcesProduced, prerequisiteCard, componentID);
+        return new Wonder7Card(cardName, type, constructionCost, resourcesProduced, prerequisiteCard, guildEffect, componentID);
     }
 
     @Override
