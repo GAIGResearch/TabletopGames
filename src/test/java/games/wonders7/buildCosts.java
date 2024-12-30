@@ -64,6 +64,7 @@ public class buildCosts {
 
     @Test
     public void canBuildByBuyingFromNeighbour() {
+        state.getPlayerResources(1).put(Textile, 1);
         assertEquals(0, state.getPlayerResources(0).get(Textile).intValue());
         assertEquals(1, state.getPlayerResources(1).get(Textile).intValue());
         state.getPlayerHand(0).add(library);
@@ -217,6 +218,8 @@ public class buildCosts {
 
         state.getPlayerResources(1).put(Stone_Clay, 1);
         state.getPlayerResources(3).put(Wood_Stone, 1);
+        state.getPlayerResources(3).put(Clay, 0);
+        state.getPlayerResources(1).put(Clay, 0);
 
         List<List<TradeSource>> options = temple.buildOptions(0, state);
         assertEquals(0, options.size());

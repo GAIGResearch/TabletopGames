@@ -12,8 +12,7 @@ import games.wonders7.cards.Wonder7Board;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
-import static games.wonders7.Wonders7Constants.Resource.Shield;
-import static games.wonders7.Wonders7Constants.Resource.Victory;
+import static games.wonders7.Wonders7Constants.Resource.*;
 
 public class Wonders7GameState extends AbstractGameState {
 
@@ -197,18 +196,38 @@ public class Wonders7GameState extends AbstractGameState {
         // Treasury
         vp += playerResources.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
         // Scientific
-        vp += (int) Math.pow(playerResources.get(playerId).get(Wonders7Constants.Resource.Cog), 2);
-        vp += (int) Math.pow(playerResources.get(playerId).get(Wonders7Constants.Resource.Compass), 2);
-        vp += (int) Math.pow(playerResources.get(playerId).get(Wonders7Constants.Resource.Tablet), 2);
-        // Sets of different science symbols
-        vp += 7 * Math.min(Math.min(
-                playerResources.get(playerId).get(Wonders7Constants.Resource.Cog),
-                playerResources.get(playerId).get(Wonders7Constants.Resource.Compass)),
-                playerResources.get(playerId).get(Wonders7Constants.Resource.Tablet));
+        vp += getSciencePoints(playerId);
 
         return vp;
     }
 
+
+    public int getSciencePoints(int player) {
+        int wild = playerResources.get(player).get(ScienceWild);
+        int cog = playerResources.get(player).get(Cog);
+        int compass = playerResources.get(player).get(Compass);
+        int tablet = playerResources.get(player).get(Tablet);
+
+        return sciencePoints(cog, compass, tablet, wild);
+    }
+
+    private int sciencePoints(int cog, int compass, int tablet, int wild) {
+        if (wild == 0)
+            return cog * cog + compass * compass + tablet * tablet + 7 * Math.min(Math.min(cog, compass), tablet);
+
+        // otherwise we recursively consider all possible allocations of the wild
+        int maxPoints = 0;
+        for (int i = 0; i <= 3; i++) {
+            int points = sciencePoints(
+                    cog + (i == 0 ? 1 : 0),
+                    compass + (i == 1 ? 1 : 0),
+                    tablet + (i == 2 ? 1 : 0),
+                    wild - 1);
+            if (points > maxPoints)
+                maxPoints = points;
+        }
+        return maxPoints;
+    }
 
     public int cardsOfType(Wonder7Card.Type type) {
         Deck<Wonder7Card> allCards;

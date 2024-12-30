@@ -71,11 +71,51 @@ public class scoring {
 
     @Test
     public void scienceScoringBasic() {
-        fail("Not yet implemented");
+
+        state.getPlayerResources(0).put(Cog, 2);
+        state.getPlayerResources(1).put(Compass, 1);
+        state.getPlayerResources(2).put(Tablet, 3);
+        state.getPlayerResources(3).put(Coin, 0);
+
+        assertEquals(5, state.getGameScore(0), 0.001);
+        assertEquals(2, state.getGameScore(1), 0.001);
+        assertEquals(10, state.getGameScore(2), 0.001);
+        assertEquals(0, state.getGameScore(3), 0.001);
+
+        state.getPlayerResources(1).put(Cog, 1);
+        state.getPlayerResources(1).put(Tablet, 1);
+        state.getPlayerResources(2).put(Compass, 3);
+
+        assertEquals(5, state.getGameScore(0), 0.001);
+        assertEquals(11, state.getGameScore(1), 0.001);
+        assertEquals(19, state.getGameScore(2), 0.001);
+        assertEquals(0, state.getGameScore(3), 0.001);
+
+        state.getPlayerResources(2).put(Cog, 2);
+
+        assertEquals(37, state.getGameScore(2), 0.001);
     }
 
     @Test
     public void scienceScoringWithWilds() {
-        fail("Not yet implemented");
+        state.getPlayerResources(0).put(Cog, 2);
+        state.getPlayerResources(1).put(ScienceWild, 1);
+        state.getPlayerResources(2).put(Tablet, 3);
+        state.getPlayerResources(3).put(Coin, 0);
+
+        assertEquals(5, state.getGameScore(0), 0.001);
+        assertEquals(2, state.getGameScore(1), 0.001);
+        assertEquals(10, state.getGameScore(2), 0.001);
+        assertEquals(0, state.getGameScore(3), 0.001);
+
+        state.getPlayerResources(0).put(ScienceWild, 1);
+        state.getPlayerResources(1).put(ScienceWild, 2);
+
+        assertEquals(10, state.getGameScore(0), 0.001);
+        assertEquals(5, state.getGameScore(1), 0.001);
+
+        state.getPlayerResources(1).put(ScienceWild, 3);
+
+        assertEquals(11, state.getGameScore(1), 0.001);
     }
 }
