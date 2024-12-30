@@ -450,6 +450,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                 }
 
                 // TODO: Add Guild (Purple) cards for end-game VP
+
         }
     }
 }
