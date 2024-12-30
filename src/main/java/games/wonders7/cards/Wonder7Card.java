@@ -4,21 +4,15 @@ import core.components.Card;
 import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7Constants.Resource;
 import games.wonders7.Wonders7Constants.TradeSource;
-import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
 import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static games.wonders7.Wonders7Constants.Resource.Coin;
 
 public class Wonder7Card extends Card {
-
-    public interface GuildEffect {
-        int countVP(Wonders7GameState state, int playerId);
-    }
 
     public enum Type {
         RawMaterials,
@@ -34,8 +28,18 @@ public class Wonder7Card extends Card {
     public final String cardName; // Name of card
     public final Map<Resource, Long> constructionCost; // The resources required to construct structure
     public final Map<Resource, Long> resourcesProduced; // Resources the card creates
-    public final String prerequisiteCard;
-    protected GuildEffect guildEffect = null;
+    public final List<String> prerequisiteCard;
+    protected List<CardEffect> instantEffects = Collections.emptyList();
+    protected List<CardEffect> endGameEffects = Collections.emptyList();
+
+    public Wonder7Card(String name, Type type) {
+        super(name);
+        this.cardName = name;
+        this.type = type;
+        this.constructionCost = new HashMap<>();
+        this.resourcesProduced = new HashMap<>();
+        this.prerequisiteCard = Collections.emptyList();
+    }
 
 
     // A normal card with construction cost, produces resources
@@ -47,7 +51,7 @@ public class Wonder7Card extends Card {
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = "";
+        this.prerequisiteCard = Collections.emptyList();
     }
 
     // Card has prerequisite cards
@@ -59,7 +63,20 @@ public class Wonder7Card extends Card {
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = prerequisiteCard;
+        this.prerequisiteCard = List.of(prerequisiteCard);
+    }
+
+    // Card has prerequisite cards
+    public Wonder7Card(String name, Type type,
+                       Map<Resource, Long> constructionCost,
+                       Map<Resource, Long> resourcesProduced,
+                       List<String> prerequisiteCards) {
+        super(name);
+        this.cardName = name;
+        this.type = type;
+        this.constructionCost = constructionCost;
+        this.resourcesProduced = resourcesProduced;
+        this.prerequisiteCard = prerequisiteCards;
     }
 
     // A free card (no construction cost)
@@ -69,44 +86,55 @@ public class Wonder7Card extends Card {
         this.type = type;
         this.constructionCost = new HashMap<>(); // Card costs nothing
         this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = "";
+        this.prerequisiteCard = Collections.emptyList();
     }
 
-    // A card with a guild effect (end of game VP)
+    // A card with a card effect (either instantaneous, or end of game VP)
     public Wonder7Card(String name, Type type,
                        Map<Wonders7Constants.Resource, Long> constructionCost,
-                       GuildEffect effect) {
+                       List<CardEffect> instantEffects,
+                       List<CardEffect> endGameEffects) {
         super(name);
         this.cardName = name;
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = new HashMap<>();
-        this.prerequisiteCard = "";
-        this.guildEffect = effect;
+        this.prerequisiteCard = Collections.emptyList();
+        this.instantEffects = instantEffects;
+        this.endGameEffects = endGameEffects;
     }
+
 
     protected Wonder7Card(String name, Type type,
                           Map<Resource, Long> constructionCost,
-                          Map<Resource, Long> resourcesProduced, String prerequisiteCard,
-                          GuildEffect effect, int componentID) {
+                          Map<Resource, Long> resourcesProduced, List<String> prerequisiteCard,
+                          List<CardEffect> instantEffects,
+                          List<CardEffect> endGameEffects,
+                          int componentID) {
         super(name, componentID);
         this.cardName = name;
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = resourcesProduced;
         this.prerequisiteCard = prerequisiteCard;
-        this.guildEffect = effect;
+        this.instantEffects = instantEffects;
+        this.endGameEffects = endGameEffects;
     }
 
     public int getNProduced(Resource resource) {
         return resourcesProduced.get(resource).intValue();
     }
 
-    public int countVP(Wonders7GameState state, int playerId) {
-        if (guildEffect != null) {
-            return guildEffect.countVP(state, playerId);
+    public void applyInstantCardEffects(Wonders7GameState state, int playerId) {
+        for (CardEffect e : instantEffects) {
+            e.apply(state, playerId);
         }
-        return 0;
+    }
+
+    public void applyEndGameEffects(Wonders7GameState state, int playerId) {
+        for (CardEffect e : endGameEffects) {
+            e.apply(state, playerId);
+        }
     }
 
     @Override
@@ -132,7 +160,7 @@ public class Wonder7Card extends Card {
     public boolean isFree(int player, Wonders7GameState wgs) {
         // Checks if the player has prerequisite cards and can play for free
         for (Wonder7Card card : wgs.getPlayedCards(player).getComponents()) {
-            if (prerequisiteCard.equals(card.cardName)) {
+            if (prerequisiteCard.contains(card.cardName)) {
                 return true;
             }
         }
@@ -311,13 +339,12 @@ public class Wonder7Card extends Card {
 
     @Override
     public Card copy() {
-        return new Wonder7Card(cardName, type, constructionCost, resourcesProduced, prerequisiteCard, guildEffect, componentID);
+        return new Wonder7Card(cardName, type, constructionCost, resourcesProduced, prerequisiteCard, instantEffects, endGameEffects, componentID);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Wonder7Card) {
-            Wonder7Card card = (Wonder7Card) o;
+        if (o instanceof Wonder7Card card) {
             return super.equals(o) && card.cardName.equals(cardName) &&
                     card.type == type;
         }

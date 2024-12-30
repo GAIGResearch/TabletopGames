@@ -197,11 +197,6 @@ public class Wonders7GameState extends AbstractGameState {
         vp += playerResources.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
         // Scientific
         vp += getSciencePoints(playerId);
-
-        // now consider guild effects
-        for (Wonder7Card card : playedCards.get(playerId).getComponents()) {
-            vp += card.countVP(this, playerId);
-        }
         return vp;
     }
 
