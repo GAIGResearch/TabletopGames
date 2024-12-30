@@ -33,12 +33,7 @@ public class Wonder7Card extends Card {
     protected List<CardEffect> endGameEffects = Collections.emptyList();
 
     public Wonder7Card(String name, Type type) {
-        super(name);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = new HashMap<>();
-        this.resourcesProduced = new HashMap<>();
-        this.prerequisiteCard = Collections.emptyList();
+        this(name, type, Collections.emptyMap(), Collections.emptyMap());
     }
 
 
@@ -46,24 +41,14 @@ public class Wonder7Card extends Card {
     public Wonder7Card(String name, Type type,
                        Map<Resource, Long> constructionCost,
                        Map<Resource, Long> resourcesProduced) {
-        super(name);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = constructionCost;
-        this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = Collections.emptyList();
+        this(name, type, constructionCost, resourcesProduced, Collections.emptyList());
     }
 
     // Card has prerequisite cards
     public Wonder7Card(String name, Type type,
                        Map<Resource, Long> constructionCost,
                        Map<Resource, Long> resourcesProduced, String prerequisiteCard) {
-        super(name);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = constructionCost;
-        this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = List.of(prerequisiteCard);
+        this(name, type, constructionCost, resourcesProduced, List.of(prerequisiteCard));
     }
 
     // Card has prerequisite cards
@@ -71,22 +56,12 @@ public class Wonder7Card extends Card {
                        Map<Resource, Long> constructionCost,
                        Map<Resource, Long> resourcesProduced,
                        List<String> prerequisiteCards) {
-        super(name);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = constructionCost;
-        this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = prerequisiteCards;
+        this(name, type, constructionCost, resourcesProduced, Collections.emptyList(), Collections.emptyList(), prerequisiteCards);
     }
 
     // A free card (no construction cost)
     public Wonder7Card(String name, Type type, Map<Resource, Long> resourcesProduced) {
-        super(name);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = new HashMap<>(); // Card costs nothing
-        this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = Collections.emptyList();
+        this(name, type, Collections.emptyMap(), resourcesProduced);
     }
 
     // A card with a card effect (either instantaneous, or end of game VP)
@@ -94,20 +69,31 @@ public class Wonder7Card extends Card {
                        Map<Wonders7Constants.Resource, Long> constructionCost,
                        List<CardEffect> instantEffects,
                        List<CardEffect> endGameEffects) {
+        this(name, type, constructionCost, Collections.emptyMap(), instantEffects, endGameEffects, Collections.emptyList());
+    }
+
+    // A card with a card effect (either instantaneous, or end of game VP)
+    public Wonder7Card(String name, Type type,
+                       Map<Wonders7Constants.Resource, Long> constructionCost,
+                       Map<Wonders7Constants.Resource, Long> resourcesProduced,
+                       List<CardEffect> instantEffects,
+                       List<CardEffect> endGameEffects,
+                       List<String> prerequisiteCard) {
         super(name);
         this.cardName = name;
         this.type = type;
         this.constructionCost = constructionCost;
-        this.resourcesProduced = new HashMap<>();
-        this.prerequisiteCard = Collections.emptyList();
+        this.resourcesProduced = resourcesProduced;
         this.instantEffects = instantEffects;
         this.endGameEffects = endGameEffects;
+        this.prerequisiteCard = prerequisiteCard;
     }
 
 
     protected Wonder7Card(String name, Type type,
                           Map<Resource, Long> constructionCost,
-                          Map<Resource, Long> resourcesProduced, List<String> prerequisiteCard,
+                          Map<Resource, Long> resourcesProduced,
+                          List<String> prerequisiteCard,
                           List<CardEffect> instantEffects,
                           List<CardEffect> endGameEffects,
                           int componentID) {

@@ -249,4 +249,10 @@ public class scoring {
         assertEquals(1, state.getPlayerResources(3).get(ScienceWild), 0.001);
         assertEquals(2, state.getGameScore(3), 0.001);
     }
+
+
+    @Test
+    public void playingLighthouseGivesCoinForItself() {
+        fail("Not implemented yet");
+    }
 }
