@@ -9,7 +9,7 @@ import games.wonders7.actions.*;
 import games.wonders7.cards.GainResourceEffect;
 import games.wonders7.cards.Wonder7Board;
 import games.wonders7.cards.Wonder7Card;
-import org.apache.xmlbeans.impl.validator.ValidatingInfoXMLStreamReader;
+import games.wonders7.cards.Wonder7Guilds;
 import utilities.Pair;
 
 import java.util.*;
@@ -18,10 +18,13 @@ import java.util.stream.Collectors;
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.Wonders7Constants.createCardHash;
 import static games.wonders7.cards.Wonder7Card.Type.*;
+import games.wonders7.cards.Wonder7Guilds;
 
 public class Wonders7ForwardModel extends StandardForwardModel {
 // The rationale of the ForwardModel is that it contains the core game logic, while the GameState contains the underlying game data. 
 // Usually this means that ForwardModel is stateless, and this is a good principle to adopt, but as ever there will always be exceptions.
+
+    Wonder7Guilds guilds = new Wonder7Guilds();
 
     public void _setup(AbstractGameState state) {
         Wonders7GameState wgs = (Wonders7GameState) state;
@@ -501,8 +504,11 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                             wgs.ageDeck.add(new Wonder7Card("Arsenal", MilitaryStructures, createCardHash(Wood, Wood, Ore, Textile), createCardHash(new Pair<>(Shield, 3))));
                             wgs.ageDeck.add(new Wonder7Card("Circus", MilitaryStructures, createCardHash(Stone, Stone, Stone, Ore), createCardHash(new Pair<>(Shield, 3)), "Training Ground"));
                         }
-                        // TODO: Add Guild (Purple) cards for end-game VP
-
+                        // We add two Guild cards per player
+                        guilds.allGuilds.shuffle(wgs.cardRnd);
+                        for (int i = 0; i < wgs.getNPlayers() + 2; i++) {
+                            wgs.ageDeck.add(guilds.allGuilds.draw());
+                        }
                         break;
                     default:
                         throw new AssertionError("Number of players not supported: " + wgs.getNPlayers());
