@@ -12,7 +12,7 @@ import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.Type.*;
 import static org.junit.Assert.*;
 
-public class scoring {
+public class ScoringTests {
 
     Wonders7ForwardModel fm = new Wonders7ForwardModel();
     Wonders7GameParameters params;
@@ -286,6 +286,5 @@ public class scoring {
         state.getPlayerWonderBoard(2).wonderStage = 4;
         assertEquals(6, state.getPlayerResources(2).get(Coin), 0.001);
         assertEquals(5, state.getGameScore(2), 0.001);
-
     }
 }

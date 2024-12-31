@@ -8,16 +8,13 @@ import org.junit.Test;
 import utilities.Pair;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
-import static games.wonders7.Wonders7Constants.createCardHash;
 import static games.wonders7.cards.Wonder7Card.CardType.*;
-import static games.wonders7.cards.Wonder7Card.Type.*;
 import static org.junit.Assert.*;
 
-public class buildCosts {
+public class BuildCosts {
 
     Wonders7ForwardModel fm = new Wonders7ForwardModel();
     Wonders7GameParameters params;

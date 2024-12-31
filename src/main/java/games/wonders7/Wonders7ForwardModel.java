@@ -205,7 +205,6 @@ public class Wonders7ForwardModel extends StandardForwardModel {
     protected void createWonderDeck(Wonders7GameState wgs) {
         // Create all the possible wonders a player could be assigned
         for (Wonder7Board.Wonder wonder : Wonder7Board.Wonder.values()) {
-            if (wonder.constructionCosts == null) continue;  // Not implemented yet
             wgs.wonderBoardDeck.add(new Wonder7Board(wonder));
         }
     }
@@ -234,10 +233,6 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                 endGame(wgs);
             } else {
                 ageSetup(wgs);
-//                for (int player = 0; player < wgs.getNPlayers(); player++) {
-//                    // reset the wonder board effect (no longer used in second edition)...left here for reference
-//                    wgs.getPlayerWonderBoard(player).effectUsed = false;
-//                }
             }
         }
     }

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.Wonders7Constants.createCardHash;
+import static games.wonders7.cards.Wonder7Board.Wonder.TheStatueOfZeusInOlympia;
 import static games.wonders7.cards.Wonder7Card.Type.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -331,12 +332,6 @@ public class Wonder7Card extends Card {
         }
     }
 
-    public void applyEndGameEffects(Wonders7GameState state, int playerId) {
-        for (CardEffect e : endGameEffects) {
-            e.apply(state, playerId);
-        }
-    }
-
     public int endGameVP(Wonders7GameState state, int playerId) {
         int vp = 0;
         for (CardEffect e : endGameEffects) {
@@ -374,6 +369,12 @@ public class Wonder7Card extends Card {
             if (prerequisiteCard.contains(card.cardType)) {
                 return true;
             }
+        }
+        Wonder7Board wonder = wgs.getPlayerWonderBoard(player);
+        if (wonder.type == TheStatueOfZeusInOlympia && wonder.wonderStage > 2) {
+            // if this is the first card of the type, then it is buildable for free
+            if (wgs.getPlayedCards(player).getComponents().stream().noneMatch(c -> c.type == type))
+                return true;
         }
         return constructionCost.isEmpty(); // Card is free (no construction cost)
     }

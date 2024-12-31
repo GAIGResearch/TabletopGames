@@ -37,13 +37,13 @@ public class Wonder7Board extends Card {
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(ScienceWild), createCardHash(new Pair<>(Victory,7))),
                 Wood),
         TheStatueOfZeusInOlympia(createHashList(createCardHash(Stone, Stone), createCardHash(Wood, Wood), createCardHash(Clay, Clay, Clay)),
-                createHashList(createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory,3)), createCardHash(new Pair<>(Victory, 7))),
+                createHashList(createCardHash(new Pair<>(Victory,3)), Collections.emptyMap(), createCardHash(new Pair<>(Victory, 7))),
                 Clay),
-        // TODO: Functionality of Statue of Zeus in Olympia (middle stage is different; construct the first card of any unbuilt colour for free)
+        // Functionality of Statue of Zeus in Olympia (middle stage is different; construct the first card of any unbuilt colour for free)
         TheMausoleumOfHalicarnassus(createHashList(createCardHash(Ore, Ore), createCardHash(Glass, Papyrus), createCardHash(Stone, Stone, Stone)),
-                createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 7))),
+                createHashList(createCardHash(new Pair<>(Victory, 3)), Collections.emptyMap(), createCardHash(new Pair<>(Victory, 7))),
                 Textile),
-        // TODO: Functionality of Mausoleum of Halicarnassus (middle stage is build for free from Discard pile)
+        // Functionality of Mausoleum of Halicarnassus (middle stage is build for free from Discard pile at the end of the age)
         ThePyramidsOfGiza(createHashList(createCardHash(Wood, Wood), createCardHash(Clay, Clay, Textile), createCardHash(new Pair<>(Stone, 4))),
                 createHashList(createCardHash(new Pair<>(Victory, 3)), createCardHash(new Pair<>(Victory, 5)), createCardHash(new Pair<>(Victory, 7))),
                 Clay);

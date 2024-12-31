@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class shuffleTests {
+public class ShuffleTests {
 
     Wonders7ForwardModel fm = new Wonders7ForwardModel();
     Wonders7GameParameters params;
