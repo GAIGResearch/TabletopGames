@@ -354,7 +354,7 @@ public class Wonders7GameState extends AbstractGameState {
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), currentAge, playerResources, playerHands, playedCards, ageDeck, discardPile, wonderBoardDeck, direction);
         result = 31 * result + Arrays.hashCode(playerWonderBoard);
-        result = 31 * result + Arrays.hashCode(turnActions);
+        result = 31 * 31 * result + Arrays.hashCode(turnActions);
         return result;
     }
 
