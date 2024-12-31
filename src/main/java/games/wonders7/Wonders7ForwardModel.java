@@ -194,13 +194,6 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             }
         }
 
-        // All player can use special effect on wonder board
-        if ((!wgs.getPlayerWonderBoard(player).effectUsed)) {
-            for (int i = 0; i < playerHand.getSize(); i++) { // Goes through each card in hand
-                actions.add(new SpecialEffect(player, playerHand.get(i).cardType));
-            }
-        }
-
         // All discard-able cards in player hand
         for (int i = 0; i < playerHand.getSize(); i++) {
             actions.add(new DiscardCard(playerHand.get(i).cardType, player));
@@ -236,72 +229,23 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
             wgs.getAgeDeck().clear();
             wgs.currentAge += 1; // Next age starts
-            checkGameEnd(wgs); // Checks if the game has ended!
-        }
-    }
-
-    protected void checkGameEnd(Wonders7GameState wgs) {
-        if (wgs.currentAge == 4) {
-            // Calculate victory points in order of:
-            // treasury, scientific, commercial and finally guilds
-            int[] vp = new int[wgs.getNPlayers()];
-            for (int i = 0; i < wgs.getNPlayers(); i++) {
-                // apply guild effects (these add Victory points)
-                for (Wonder7Card card : wgs.playedCards.get(i).getComponents()) {
-                    card.applyEndGameEffects(wgs, i);
-                }
-
-                vp[i] = wgs.getPlayerResources(i).get(Victory);
-                // Treasury
-                vp[i] += wgs.getPlayerResources(i).get(Coin) / 3;
-                // Scientific
-                vp[i] += wgs.getSciencePoints(i);
-            }
-
-            int winner = 0;
-            for (int i = 0; i < wgs.getNPlayers(); i++) {
-                // If a player has more victory points
-                if (wgs.getPlayerResources(i).get(Victory) > wgs.getPlayerResources(winner).get(Victory)) {
-                    wgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, winner); // SETS PREVIOUS WINNER AS LOST
-                    wgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i); // SETS NEW WINNER AS PLAYER i
-                    winner = i;
-                }
-                // In a tie, break with coins
-                else if (wgs.getPlayerResources(i).get(Victory).equals(wgs.getPlayerResources(winner).get(Victory))) {
-                    if (wgs.getPlayerResources(i).get(Coin) >= wgs.getPlayerResources(winner).get(Coin)) {
-                        wgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, winner);
-                        wgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i);
-                        winner = i;
-                    } else {
-                        wgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
-                    }
-                } else {
-                    wgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i); // Sets this player as LOST
-                }
-            }
-
-            wgs.setGameStatus(CoreConstants.GameResult.GAME_END);
-            /*System.out.println("");
-            System.out.println("!---------------------------------------- THE FINAL AGE HAS ENDED!!! ----------------------------------------!");
-            System.out.println("");
-            System.out.println("The winner is Player  " + winner +"!!!!"); */
-        } else {
-            /*System.out.println("");
-            System.out.println("!---------------------------------------- AGE "+wgs.currentAge+" HAS NOW STARTED!!!!! ----------------------------------------!");
-            System.out.println(""); */
-            ageSetup(wgs);
-
-            for (int player = 0; player < wgs.getNPlayers(); player++) {
-                if (wgs.getPlayerWonderBoard(player).wonderStage > 2) {
-                    Wonder7Board board = wgs.getPlayerWonderBoard(player);
-                    switch (board.type) {
-                        case TheLighthouseOfAlexandria:
-                        case TheMausoleumOfHalicarnassus:
-                        case TheHangingGardensOfBabylon:
-                        case TheStatueOfZeusInOlympia:
-                            wgs.getPlayerWonderBoard(player).effectUsed = false;
-                        default:
-                            break;
+            if (wgs.currentAge == 4) {
+                // game is over
+                endGame(wgs);
+            } else {
+                ageSetup(wgs);
+                for (int player = 0; player < wgs.getNPlayers(); player++) {
+                    if (wgs.getPlayerWonderBoard(player).wonderStage > 2) {
+                        Wonder7Board board = wgs.getPlayerWonderBoard(player);
+                        switch (board.type) {
+                            case TheLighthouseOfAlexandria:
+                            case TheMausoleumOfHalicarnassus:
+                            case TheHangingGardensOfBabylon:
+                            case TheStatueOfZeusInOlympia:
+                                wgs.getPlayerWonderBoard(player).effectUsed = false;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
