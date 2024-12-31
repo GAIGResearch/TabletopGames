@@ -234,20 +234,10 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                 endGame(wgs);
             } else {
                 ageSetup(wgs);
-                for (int player = 0; player < wgs.getNPlayers(); player++) {
-                    if (wgs.getPlayerWonderBoard(player).wonderStage > 2) {
-                        Wonder7Board board = wgs.getPlayerWonderBoard(player);
-                        switch (board.type) {
-                            case TheLighthouseOfAlexandria:
-                            case TheMausoleumOfHalicarnassus:
-                            case TheHangingGardensOfBabylon:
-                            case TheStatueOfZeusInOlympia:
-                                wgs.getPlayerWonderBoard(player).effectUsed = false;
-                            default:
-                                break;
-                        }
-                    }
-                }
+//                for (int player = 0; player < wgs.getNPlayers(); player++) {
+//                    // reset the wonder board effect (no longer used in second edition)...left here for reference
+//                    wgs.getPlayerWonderBoard(player).effectUsed = false;
+//                }
             }
         }
     }

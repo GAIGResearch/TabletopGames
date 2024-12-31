@@ -61,6 +61,7 @@ public class PlayCard extends DrawCard {
                 }
             }
         }
+        wgs.getPlayedCards(player).add(card);
 
         // Gives player resources produced from card
         Set<Resource> keys = card.resourcesProduced.keySet(); // Gets all the resources the card provides
@@ -70,12 +71,15 @@ public class PlayCard extends DrawCard {
             playerResources.put(resource, playerValue + cardValue); // Adds the resources provided by the card to the players resource count
         }
 
+        // trigger any instant effects
+        card.applyInstantCardEffects(wgs, player);
+
         // remove the card from the players hand to the playedDeck
         boolean cardFound = playerHand.remove(card);
         if (!cardFound) {
             throw new AssertionError("Card not found in player hand");
         }
-        wgs.getPlayedCards(player).add(card);
+
         return true;
     }
 

@@ -250,7 +250,42 @@ public class scoring {
 
 
     @Test
-    public void playingLighthouseGivesCoinForItself() {
-        fail("Not implemented yet");
+    public void playingLighthouseGivesCoinAndVPForItself() {
+        assertEquals(3, state.getPlayerResources(1).get(Coin), 0.001);
+        state.getPlayerHand(1).add(Wonder7Card.factory(Lighthouse));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Tavern));
+        fm.next(state, new PlayCard(1, Lighthouse, true));
+        assertEquals(5, state.getPlayerResources(1).get(Coin), 0.001);
+        assertEquals(3, state.getGameScore(1), 0.001);
+        state.getPlayedCards(1).add(Wonder7Card.factory(Forum));
+        assertEquals(4, state.getGameScore(1), 0.001);
+        assertEquals(5, state.getPlayerResources(1).get(Coin), 0.001);
+    }
+
+    @Test
+    public void vineyardGivesMoney() {
+        assertEquals(1, state.getGameScore(1), 0.001);
+        state.getPlayerHand(1).add(Wonder7Card.factory(Vineyard));
+        state.getPlayedCards(0).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(1).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(2).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Apothecary));
+        fm.next(state, new PlayCard(1, Vineyard, true));
+        assertEquals(2, state.getGameScore(1), 0.001);
+        assertEquals(6, state.getPlayerResources(1).get(Coin), 0.001);
+    }
+
+    @Test
+    public void arenaGivesMoneyAndPointsIndependently() {
+        state.getPlayerHand(2).add(Wonder7Card.factory(Arena));
+        state.getPlayerWonderBoard(2).wonderStage = 2;
+        fm.next(state, new PlayCard(2, Arena, true));
+        assertEquals(6, state.getPlayerResources(2).get(Coin), 0.001);
+        assertEquals(3, state.getGameScore(2), 0.001);
+
+        state.getPlayerWonderBoard(2).wonderStage = 4;
+        assertEquals(6, state.getPlayerResources(2).get(Coin), 0.001);
+        assertEquals(5, state.getGameScore(2), 0.001);
+
     }
 }
