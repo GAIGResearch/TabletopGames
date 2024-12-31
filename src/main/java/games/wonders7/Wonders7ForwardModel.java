@@ -9,7 +9,7 @@ import games.wonders7.actions.*;
 import games.wonders7.cards.GainResourceEffect;
 import games.wonders7.cards.Wonder7Board;
 import games.wonders7.cards.Wonder7Card;
-import games.wonders7.cards.Wonder7Guilds;
+import org.apache.hadoop.fs.Stat;
 import utilities.Pair;
 
 import java.util.*;
@@ -17,15 +17,13 @@ import java.util.stream.Collectors;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.Wonders7Constants.createCardHash;
+import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.Type.*;
 
-import games.wonders7.cards.Wonder7Guilds;
 
 public class Wonders7ForwardModel extends StandardForwardModel {
 // The rationale of the ForwardModel is that it contains the core game logic, while the GameState contains the underlying game data. 
 // Usually this means that ForwardModel is stateless, and this is a good principle to adopt, but as ever there will always be exceptions.
-
-    Wonder7Guilds guilds = new Wonder7Guilds();
 
     public void _setup(AbstractGameState state) {
         Wonders7GameState wgs = (Wonders7GameState) state;
@@ -185,27 +183,27 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             if (card.isAlreadyPlayed(player, wgs)) continue;
 
             if (card.isPlayable(player, wgs).a) {  // Is free / Meets the costs / can pay neighbours for resources
-                actions.add(new PlayCard(player, card.cardName, card.isFree(player, wgs)));
+                actions.add(new PlayCard(player, card.cardType, card.isFree(player, wgs)));
             }
         }
 
         // If next stage is playable or not
         if (wgs.getPlayerWonderBoard(player).isPlayable(wgs)) {
             for (int i = 0; i < playerHand.getSize(); i++) { // Goes through each card in hand
-                actions.add(new BuildStage(player, playerHand.get(i).cardName));
+                actions.add(new BuildStage(player, playerHand.get(i).cardType));
             }
         }
 
         // All player can use special effect on wonder board
         if ((!wgs.getPlayerWonderBoard(player).effectUsed)) {
             for (int i = 0; i < playerHand.getSize(); i++) { // Goes through each card in hand
-                actions.add(new SpecialEffect(player, playerHand.get(i).cardName));
+                actions.add(new SpecialEffect(player, playerHand.get(i).cardType));
             }
         }
 
         // All discard-able cards in player hand
         for (int i = 0; i < playerHand.getSize(); i++) {
-            actions.add(new DiscardCard(playerHand.get(i).cardName, player));
+            actions.add(new DiscardCard(playerHand.get(i).cardType, player));
         }
 
         return actions.stream().map(ChooseCard::new).collect(Collectors.toList());
@@ -318,68 +316,59 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 1:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(new Wonder7Card("Pawnshop", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Baths", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Tavern", CommercialStructures, createCardHash(Coin, Coin, Coin, Coin, Coin)));
-                        wgs.ageDeck.add(new Wonder7Card("East Trading Post", CommercialStructures));
-                        wgs.ageDeck.add(new Wonder7Card("West Trading Post", CommercialStructures));
-                        wgs.ageDeck.add(new Wonder7Card("Stockade", MilitaryStructures, createCardHash(Wood), createCardHash(Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Workshop", ScientificStructures, createCardHash(Glass), createCardHash(Cog)));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(Pawnshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Baths));
+                        wgs.ageDeck.add(Wonder7Card.factory(Tavern));
+                        wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost));
+                        wgs.ageDeck.add(Wonder7Card.factory(WestTradingPost));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stockade));
+                        wgs.ageDeck.add(Wonder7Card.factory(Workshop));
                     case 6:
-                        wgs.ageDeck.add(new Wonder7Card("Tree Farm", RawMaterials, createCardHash(Coin), createCardHash(Wood_Clay)));
-                        wgs.ageDeck.add(new Wonder7Card("Mine", RawMaterials, createCardHash(Coin), createCardHash(Stone_Ore)));
-                        wgs.ageDeck.add(new Wonder7Card("Press", ManufacturedGoods, createCardHash(Papyrus)));
-                        wgs.ageDeck.add(new Wonder7Card("Loom", ManufacturedGoods, createCardHash(Textile)));
-                        wgs.ageDeck.add(new Wonder7Card("GlassWorks", ManufacturedGoods, createCardHash(Glass)));
-                        wgs.ageDeck.add(new Wonder7Card("Theatre", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Marketplace", CommercialStructures));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(TreeFarm));
+                        wgs.ageDeck.add(Wonder7Card.factory(Mine));
+                        wgs.ageDeck.add(Wonder7Card.factory(Press));
+                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
+                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
+                        wgs.ageDeck.add(Wonder7Card.factory(Theatre));
+                        wgs.ageDeck.add(Wonder7Card.factory(Marketplace));
                     case 5:
-                        wgs.ageDeck.add(new Wonder7Card("Stone Pit", RawMaterials, createCardHash(Stone)));
-                        wgs.ageDeck.add(new Wonder7Card("Clay Pool", RawMaterials, createCardHash(Clay)));
-                        wgs.ageDeck.add(new Wonder7Card("Forest Cave", RawMaterials, createCardHash(Coin), createCardHash(Wood_Ore)));
-                        wgs.ageDeck.add(new Wonder7Card("Altar", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Tavern", CommercialStructures, createCardHash(Coin, Coin, Coin, Coin, Coin)));
-                        wgs.ageDeck.add(new Wonder7Card("Barracks", MilitaryStructures, createCardHash(Ore), createCardHash(Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Apothecary", ScientificStructures, createCardHash(Textile), createCardHash(Compass)));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(StonePit));
+                        wgs.ageDeck.add(Wonder7Card.factory(ClayPool));
+                        wgs.ageDeck.add(Wonder7Card.factory(ForestCave));
+                        wgs.ageDeck.add(Wonder7Card.factory(Altar));
+                        wgs.ageDeck.add(Wonder7Card.factory(Tavern));
+                        wgs.ageDeck.add(Wonder7Card.factory(Barracks));
+                        wgs.ageDeck.add(Wonder7Card.factory(Apothecary));
                     case 4:
-                        wgs.ageDeck.add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-                        wgs.ageDeck.add(new Wonder7Card("Ore Vein", RawMaterials, createCardHash(Ore)));
-                        wgs.ageDeck.add(new Wonder7Card("Excavation", RawMaterials, createCardHash(Coin), createCardHash(Stone_Clay)));
-                        wgs.ageDeck.add(new Wonder7Card("Pawnshop", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Tavern", CommercialStructures, createCardHash(Coin, Coin, Coin, Coin, Coin)));
-                        wgs.ageDeck.add(new Wonder7Card("Guard Tower", MilitaryStructures, createCardHash(Clay), createCardHash(Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Scriptorium", ScientificStructures, createCardHash(Papyrus), createCardHash(Tablet)));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(LumberYard));
+                        wgs.ageDeck.add(Wonder7Card.factory(OreVein));
+                        wgs.ageDeck.add(Wonder7Card.factory(Excavation));
+                        wgs.ageDeck.add(Wonder7Card.factory(Pawnshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Tavern));
+                        wgs.ageDeck.add(Wonder7Card.factory(GuardTower));
+                        wgs.ageDeck.add(Wonder7Card.factory(Scriptorium));
                     case 3:
-                        wgs.ageDeck.add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-                        wgs.ageDeck.add(new Wonder7Card("Stone Pit", RawMaterials, createCardHash(Stone)));
-                        wgs.ageDeck.add(new Wonder7Card("Clay Pool", RawMaterials, createCardHash(Clay)));
-                        wgs.ageDeck.add(new Wonder7Card("Ore Vein", RawMaterials, createCardHash(Ore)));
-                        wgs.ageDeck.add(new Wonder7Card("Clay Pit", RawMaterials, createCardHash(Coin), createCardHash(Ore_Clay)));
-                        wgs.ageDeck.add(new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin), createCardHash(Wood_Stone)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Press", ManufacturedGoods, createCardHash(Papyrus)));
-                        wgs.ageDeck.add(new Wonder7Card("Loom", ManufacturedGoods, createCardHash(Textile)));
-                        wgs.ageDeck.add(new Wonder7Card("GlassWorks", ManufacturedGoods, createCardHash(Glass)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Baths", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Altar", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-                        wgs.ageDeck.add(new Wonder7Card("Theatre", CivilianStructures, createCardHash(Victory, Victory, Victory)));
-
-                        wgs.ageDeck.add(new Wonder7Card("East Trading Post", CommercialStructures));
-                        wgs.ageDeck.add(new Wonder7Card("West Trading Post", CommercialStructures));
-                        wgs.ageDeck.add(new Wonder7Card("Marketplace", CommercialStructures));
-
-                        wgs.ageDeck.add(new Wonder7Card("Stockade", MilitaryStructures, createCardHash(Wood), createCardHash(Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Barracks", MilitaryStructures, createCardHash(Ore), createCardHash(Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Guard Tower", MilitaryStructures, createCardHash(Clay), createCardHash(Shield)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Apothecary", ScientificStructures, createCardHash(Textile), createCardHash(Compass)));
-                        wgs.ageDeck.add(new Wonder7Card("Workshop", ScientificStructures, createCardHash(Glass), createCardHash(Cog)));
-                        wgs.ageDeck.add(new Wonder7Card("Scriptorium", ScientificStructures, createCardHash(Papyrus), createCardHash(Tablet)));
+                        wgs.ageDeck.add(Wonder7Card.factory(LumberYard));
+                        wgs.ageDeck.add(Wonder7Card.factory(StonePit));
+                        wgs.ageDeck.add(Wonder7Card.factory(ClayPool));
+                        wgs.ageDeck.add(Wonder7Card.factory(OreVein));
+                        wgs.ageDeck.add(Wonder7Card.factory(ClayPit));
+                        wgs.ageDeck.add(Wonder7Card.factory(TimberYard));
+                        wgs.ageDeck.add(Wonder7Card.factory(Press));
+                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
+                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
+                        wgs.ageDeck.add(Wonder7Card.factory(Baths));
+                        wgs.ageDeck.add(Wonder7Card.factory(Altar));
+                        wgs.ageDeck.add(Wonder7Card.factory(Theatre));
+                        wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost));
+                        wgs.ageDeck.add(Wonder7Card.factory(WestTradingPost));
+                        wgs.ageDeck.add(Wonder7Card.factory(Marketplace));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stockade));
+                        wgs.ageDeck.add(Wonder7Card.factory(Barracks));
+                        wgs.ageDeck.add(Wonder7Card.factory(GuardTower));
+                        wgs.ageDeck.add(Wonder7Card.factory(Apothecary));
+                        wgs.ageDeck.add(Wonder7Card.factory(Workshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Scriptorium));
                         break;
                     default:
                         throw new AssertionError("Number of players not supported: " + wgs.getNPlayers());
@@ -388,73 +377,59 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 2:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(new Wonder7Card("Statue", CivilianStructures, createCardHash(Ore, Ore, Wood), createCardHash(new Pair<>(Victory, 4)), "Pawnshop"));
-                        wgs.ageDeck.add(new Wonder7Card("Aqueduct", CivilianStructures, createCardHash(Stone, Stone, Stone), createCardHash(new Pair<>(Victory, 5)), "Baths"));
-                        wgs.ageDeck.add(new Wonder7Card("Walls", MilitaryStructures, createCardHash(Stone, Stone, Stone), createCardHash(Shield, Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Training Ground", MilitaryStructures, createCardHash(Ore, Ore, Wood), createCardHash(Shield, Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("School", ScientificStructures, createCardHash(Wood, Papyrus), createCardHash(Tablet)));
-                        wgs.ageDeck.add(new Wonder7Card("Forum", CommercialStructures, createCardHash(Clay, Clay), createCardHash(BasicWild), List.of("East Trading Post", "West Trading Post")));
-                        wgs.ageDeck.add(new Wonder7Card("Bazaar", CommercialStructures, Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, true)),
-                                Collections.emptyList()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Statue));
+                        wgs.ageDeck.add(Wonder7Card.factory(Aqueduct));
+                        wgs.ageDeck.add(Wonder7Card.factory(Walls));
+                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround));
+                        wgs.ageDeck.add(Wonder7Card.factory(School));
+                        wgs.ageDeck.add(Wonder7Card.factory(Forum));
+                        wgs.ageDeck.add(Wonder7Card.factory(Bazaar));
                     case 6:
-                        wgs.ageDeck.add(new Wonder7Card("Temple", CivilianStructures, createCardHash(Wood, Clay, Glass), createCardHash(new Pair<>(Victory, 4))));
-                        wgs.ageDeck.add(new Wonder7Card("Archery Range", MilitaryStructures, createCardHash(Wood, Wood, Ore), createCardHash(Shield, Shield), "Workshop"));
-                        wgs.ageDeck.add(new Wonder7Card("Training Ground", MilitaryStructures, createCardHash(Ore, Ore, Wood), createCardHash(Shield, Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Library", ScientificStructures, createCardHash(Stone, Stone, Textile), createCardHash(Tablet), "Scriptorium"));
-                        wgs.ageDeck.add(new Wonder7Card("Caravansery", CommercialStructures, createCardHash(Wood, Wood), createCardHash(BasicWild), "Marketplace"));
-                        wgs.ageDeck.add(new Wonder7Card("Forum", CommercialStructures, createCardHash(Clay, Clay), createCardHash(BasicWild), List.of("East Trading Post", "West Trading Post")));
-                        wgs.ageDeck.add(new Wonder7Card("Vineyard", CommercialStructures, Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, true)),
-                                Collections.emptyList()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Temple));
+                        wgs.ageDeck.add(Wonder7Card.factory(ArcheryRange));
+                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround));
+                        wgs.ageDeck.add(Wonder7Card.factory(Library));
+                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery));
+                        wgs.ageDeck.add(Wonder7Card.factory(Forum));
+                        wgs.ageDeck.add(Wonder7Card.factory(Vineyard));
                     case 5:
-                        wgs.ageDeck.add(new Wonder7Card("Loom", ManufacturedGoods, createCardHash(Textile)));
-                        wgs.ageDeck.add(new Wonder7Card("GlassWorks", ManufacturedGoods, createCardHash(Glass)));
-                        wgs.ageDeck.add(new Wonder7Card("Press", ManufacturedGoods, createCardHash(Papyrus)));
-                        wgs.ageDeck.add(new Wonder7Card("Courthouse", CivilianStructures, createCardHash(Clay, Clay, Textile), createCardHash(new Pair<>(Victory, 4)), "Scriptorium"));
-                        wgs.ageDeck.add(new Wonder7Card("Stables", MilitaryStructures, createCardHash(Clay, Wood, Ore), createCardHash(Shield, Shield), "Apothecary"));
-                        wgs.ageDeck.add(new Wonder7Card("Laboratory", ScientificStructures, createCardHash(Clay, Clay, Papyrus), createCardHash(Cog), "Workshop"));
-                        wgs.ageDeck.add(new Wonder7Card("Caravansery", CommercialStructures, createCardHash(Wood, Wood), createCardHash(BasicWild), "Marketplace"));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
+                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
+                        wgs.ageDeck.add(Wonder7Card.factory(Press));
+                        wgs.ageDeck.add(Wonder7Card.factory(Courthouse));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stables));
+                        wgs.ageDeck.add(Wonder7Card.factory(Laboratory));
+                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery));
                     case 4:
-                        wgs.ageDeck.add(new Wonder7Card("Sawmill", RawMaterials, createCardHash(Coin), createCardHash(Wood, Wood)));
-                        wgs.ageDeck.add(new Wonder7Card("Quarry", RawMaterials, createCardHash(Coin), createCardHash(Stone, Stone)));
-                        wgs.ageDeck.add(new Wonder7Card("Foundry", RawMaterials, createCardHash(Coin), createCardHash(Ore, Ore)));
-                        wgs.ageDeck.add(new Wonder7Card("Brickyard", RawMaterials, createCardHash(Coin), createCardHash(Clay, Clay)));
-                        wgs.ageDeck.add(new Wonder7Card("Training Ground", MilitaryStructures, createCardHash(Ore, Ore, Wood), createCardHash(Shield, Shield)));
-                        wgs.ageDeck.add(new Wonder7Card("Dispensary", ScientificStructures, createCardHash(Ore, Ore, Glass), createCardHash(Compass), "Apothecary"));
-                        wgs.ageDeck.add(new Wonder7Card("Bazaar", CommercialStructures, Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, true)),
-                                Collections.emptyList()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Sawmill));
+                        wgs.ageDeck.add(Wonder7Card.factory(Quarry));
+                        wgs.ageDeck.add(Wonder7Card.factory(Foundry));
+                        wgs.ageDeck.add(Wonder7Card.factory(Brickyard));
+                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround));
+                        wgs.ageDeck.add(Wonder7Card.factory(Dispensary));
+                        wgs.ageDeck.add(Wonder7Card.factory(Bazaar));
                     case 3:
-                        wgs.ageDeck.add(new Wonder7Card("Sawmill", RawMaterials, createCardHash(Coin), createCardHash(Wood, Wood)));
-                        wgs.ageDeck.add(new Wonder7Card("Quarry", RawMaterials, createCardHash(Coin), createCardHash(Stone, Stone)));
-                        wgs.ageDeck.add(new Wonder7Card("Foundry", RawMaterials, createCardHash(Coin), createCardHash(Ore, Ore)));
-                        wgs.ageDeck.add(new Wonder7Card("Brickyard", RawMaterials, createCardHash(Coin), createCardHash(Clay, Clay)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Loom", ManufacturedGoods, createCardHash(Textile)));
-                        wgs.ageDeck.add(new Wonder7Card("GlassWorks", ManufacturedGoods, createCardHash(Glass)));
-                        wgs.ageDeck.add(new Wonder7Card("Press", ManufacturedGoods, createCardHash(Papyrus)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Aqueduct", CivilianStructures, createCardHash(Stone, Stone, Stone), createCardHash(new Pair<>(Victory, 5)), "Baths"));
-                        wgs.ageDeck.add(new Wonder7Card("Temple", CivilianStructures, createCardHash(Wood, Clay, Glass), createCardHash(new Pair<>(Victory, 4))));
-                        wgs.ageDeck.add(new Wonder7Card("Courthouse", CivilianStructures, createCardHash(Clay, Clay, Textile), createCardHash(new Pair<>(Victory, 4)), "Scriptorium"));
-                        wgs.ageDeck.add(new Wonder7Card("Statue", CivilianStructures, createCardHash(Ore, Ore, Wood), createCardHash(new Pair<>(Victory, 4)), "Pawnshop"));
-
-                        wgs.ageDeck.add(new Wonder7Card("Stables", MilitaryStructures, createCardHash(Clay, Wood, Ore), createCardHash(Shield, Shield), "Apothecary"));
-                        wgs.ageDeck.add(new Wonder7Card("Archery Range", MilitaryStructures, createCardHash(Wood, Wood, Ore), createCardHash(Shield, Shield), "Workshop"));
-                        wgs.ageDeck.add(new Wonder7Card("Walls", MilitaryStructures, createCardHash(Stone, Stone, Stone), createCardHash(Shield, Shield)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Library", ScientificStructures, createCardHash(Stone, Stone, Textile), createCardHash(Tablet), "Scriptorium"));
-                        wgs.ageDeck.add(new Wonder7Card("Laboratory", ScientificStructures, createCardHash(Clay, Clay, Papyrus), createCardHash(Cog), "Workshop"));
-                        wgs.ageDeck.add(new Wonder7Card("Dispensary", ScientificStructures, createCardHash(Ore, Ore, Glass), createCardHash(Compass), "Apothecary"));
-                        wgs.ageDeck.add(new Wonder7Card("School", ScientificStructures, createCardHash(Wood, Papyrus), createCardHash(Tablet)));
-
-                        wgs.ageDeck.add(new Wonder7Card("Caravansery", CommercialStructures, createCardHash(Wood, Wood), createCardHash(BasicWild), "Marketplace"));
-                        wgs.ageDeck.add(new Wonder7Card("Forum", CommercialStructures, createCardHash(Clay, Clay), createCardHash(BasicWild), List.of("East Trading Post", "West Trading Post")));
-                        wgs.ageDeck.add(new Wonder7Card("Vineyard", CommercialStructures, Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, true)),
-                                Collections.emptyList()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Sawmill));
+                        wgs.ageDeck.add(Wonder7Card.factory(Quarry));
+                        wgs.ageDeck.add(Wonder7Card.factory(Foundry));
+                        wgs.ageDeck.add(Wonder7Card.factory(Brickyard));
+                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
+                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
+                        wgs.ageDeck.add(Wonder7Card.factory(Press));
+                        wgs.ageDeck.add(Wonder7Card.factory(Aqueduct));
+                        wgs.ageDeck.add(Wonder7Card.factory(Temple));
+                        wgs.ageDeck.add(Wonder7Card.factory(Courthouse));
+                        wgs.ageDeck.add(Wonder7Card.factory(Statue));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stables));
+                        wgs.ageDeck.add(Wonder7Card.factory(ArcheryRange));
+                        wgs.ageDeck.add(Wonder7Card.factory(Walls));
+                        wgs.ageDeck.add(Wonder7Card.factory(Library));
+                        wgs.ageDeck.add(Wonder7Card.factory(Laboratory));
+                        wgs.ageDeck.add(Wonder7Card.factory(Dispensary));
+                        wgs.ageDeck.add(Wonder7Card.factory(School));
+                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery));
+                        wgs.ageDeck.add(Wonder7Card.factory(Forum));
+                        wgs.ageDeck.add(Wonder7Card.factory(Vineyard));
                         break;
                     default:
                         throw new AssertionError("Number of players not supported: " + wgs.getNPlayers());
@@ -463,113 +438,66 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 3:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(new Wonder7Card("Palace", CivilianStructures, createCardHash(Stone, Ore, Wood, Clay, Glass, Papyrus, Textile), createCardHash(new Pair<>(Victory, 8))));
-                        wgs.ageDeck.add(new Wonder7Card("Castrum", MilitaryStructures, createCardHash(Clay, Clay, Wood, Papyrus), createCardHash(new Pair<>(Shield, 3))));
-                        wgs.ageDeck.add(new Wonder7Card("Fortification", MilitaryStructures, createCardHash(Ore, Ore, Ore, Clay), createCardHash(new Pair<>(Shield, 3)), "Walls"));
-                        wgs.ageDeck.add(new Wonder7Card("University", ScientificStructures, createCardHash(Wood, Wood, Papyrus, Glass), createCardHash(Tablet), "Library"));
-                        wgs.ageDeck.add(new Wonder7Card("Observatory", ScientificStructures, createCardHash(Ore, Ore, Glass, Textile), createCardHash(Cog), "Laboratory"));
-                        wgs.ageDeck.add(new Wonder7Card("Ludus", CommercialStructures,
-                                createCardHash(Stone, Ore),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, MilitaryStructures, 3, true, false)),
-                                List.of(new GainResourceEffect(Victory, MilitaryStructures, 1, true, false)),
-                                Collections.emptyList()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Palace));
+                        wgs.ageDeck.add(Wonder7Card.factory(Castrum));
+                        wgs.ageDeck.add(Wonder7Card.factory(Fortifications));
+                        wgs.ageDeck.add(Wonder7Card.factory(University));
+                        wgs.ageDeck.add(Wonder7Card.factory(Observatory));
+                        wgs.ageDeck.add(Wonder7Card.factory(Ludus));
                     case 6:
-                        wgs.ageDeck.add(new Wonder7Card("Town Hall", CivilianStructures, createCardHash(Stone, Stone, Ore, Glass), createCardHash(new Pair<>(Victory, 6))));
-                        wgs.ageDeck.add(new Wonder7Card("Pantheon", CivilianStructures, createCardHash(Clay, Clay, Ore, Glass, Papyrus, Textile), createCardHash(new Pair<>(Victory, 7)), "Altar"));
-                        wgs.ageDeck.add(new Wonder7Card("Lighthouse", CommercialStructures,
-                                createCardHash(Stone, Glass),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, CommercialStructures, 1, true, false)),
-                                List.of(new GainResourceEffect(Victory, CommercialStructures, 1, true, false)),
-                                List.of("Caravansery")));
-                        wgs.ageDeck.add(new Wonder7Card("Chamber of Commerce", CommercialStructures,
-                                createCardHash(Clay, Clay, Papyrus),
-                                List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, false)),
-                                List.of(new GainResourceEffect(Victory, ManufacturedGoods, 2, true, false))
-                        ));
-                        wgs.ageDeck.add(new Wonder7Card("Circus", MilitaryStructures, createCardHash(Stone, Stone, Stone, Ore), createCardHash(new Pair<>(Shield, 3)), "Training Ground"));
-                        wgs.ageDeck.add(new Wonder7Card("Lodge", ScientificStructures, createCardHash(Clay, Clay, Papyrus, Textile), createCardHash(Compass), "Dispensary"));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(TownHall));
+                        wgs.ageDeck.add(Wonder7Card.factory(Pantheon));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lighthouse));
+                        wgs.ageDeck.add(Wonder7Card.factory(ChamberOfCommerce));
+                        wgs.ageDeck.add(Wonder7Card.factory(Circus));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lodge));
                     case 5:
-                        wgs.ageDeck.add(new Wonder7Card("Senate", CivilianStructures, createCardHash(Wood, Wood, Stone, Ore), createCardHash(new Pair<>(Victory, 6)), "Library"));
-                        wgs.ageDeck.add(new Wonder7Card("Ludus", CommercialStructures,
-                                createCardHash(Stone, Ore),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, MilitaryStructures, 3, true, false)),
-                                List.of(new GainResourceEffect(Victory, MilitaryStructures, 1, true, false)),
-                                Collections.emptyList()));
-                        wgs.ageDeck.add(new Wonder7Card("Arena", CommercialStructures,
-                                createCardHash(Stone, Stone, Ore),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin,
-                                        (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1) * 3)),
-                                List.of(new GainResourceEffect(Victory,
-                                        (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1))),
-                                List.of("Dispensary")));
-                        wgs.ageDeck.add(new Wonder7Card("Siege Workshop", MilitaryStructures, createCardHash(Clay, Clay, Clay, Wood), createCardHash(new Pair<>(Shield, 3)), "Laboratory"));
-                        wgs.ageDeck.add(new Wonder7Card("Arsenal", MilitaryStructures, createCardHash(Wood, Wood, Ore, Textile), createCardHash(new Pair<>(Shield, 3))));
-                        wgs.ageDeck.add(new Wonder7Card("Study", ScientificStructures, createCardHash(Wood, Papyrus, Textile), createCardHash(Cog), "School"));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(Senate));
+                        wgs.ageDeck.add(Wonder7Card.factory(Ludus));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arena));
+                        wgs.ageDeck.add(Wonder7Card.factory(SiegeWorkshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arsenal));
+                        wgs.ageDeck.add(Wonder7Card.factory(Study));
                     case 4:
-                        wgs.ageDeck.add(new Wonder7Card("Gardens", CivilianStructures, createCardHash(Clay, Clay, Wood), createCardHash(new Pair<>(Victory, 5)), "Theatre"));
-                        wgs.ageDeck.add(new Wonder7Card("Chamber of Commerce", CommercialStructures,
-                                createCardHash(Clay, Clay, Papyrus),
-                                List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, false)),
-                                List.of(new GainResourceEffect(Victory, ManufacturedGoods, 2, true, false))
-                        ));
-                        wgs.ageDeck.add(new Wonder7Card("Haven", CommercialStructures,
-                                createCardHash(Wood, Ore, Textile),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, false)),
-                                List.of(new GainResourceEffect(Victory, RawMaterials, 1, true, false)),
-                                List.of("Caravansery")));
-                        wgs.ageDeck.add(new Wonder7Card("Circus", MilitaryStructures, createCardHash(Stone, Stone, Stone, Ore), createCardHash(new Pair<>(Shield, 3)), "Training Ground"));
-                        wgs.ageDeck.add(new Wonder7Card("Castrum", MilitaryStructures, createCardHash(Clay, Clay, Wood, Papyrus), createCardHash(new Pair<>(Shield, 3))));
-                        wgs.ageDeck.add(new Wonder7Card("University", ScientificStructures, createCardHash(Wood, Wood, Papyrus, Glass), createCardHash(Tablet), "Library"));
-
+                        wgs.ageDeck.add(Wonder7Card.factory(Gardens));
+                        wgs.ageDeck.add(Wonder7Card.factory(ChamberOfCommerce));
+                        wgs.ageDeck.add(Wonder7Card.factory(Haven));
+                        wgs.ageDeck.add(Wonder7Card.factory(Circus));
+                        wgs.ageDeck.add(Wonder7Card.factory(Castrum));
+                        wgs.ageDeck.add(Wonder7Card.factory(University));
                     case 3:
-                        wgs.ageDeck.add(new Wonder7Card("Gardens", CivilianStructures, createCardHash(Clay, Clay, Wood), createCardHash(new Pair<>(Victory, 5)), "Theatre"));
-                        wgs.ageDeck.add(new Wonder7Card("Senate", CivilianStructures, createCardHash(Wood, Wood, Stone, Ore), createCardHash(new Pair<>(Victory, 6)), "Library"));
-                        wgs.ageDeck.add(new Wonder7Card("Town Hall", CivilianStructures, createCardHash(Stone, Stone, Ore, Glass), createCardHash(new Pair<>(Victory, 6))));
-                        wgs.ageDeck.add(new Wonder7Card("Pantheon", CivilianStructures, createCardHash(Clay, Clay, Ore, Glass, Papyrus, Textile), createCardHash(new Pair<>(Victory, 7)), "Altar"));
-                        wgs.ageDeck.add(new Wonder7Card("Palace", CivilianStructures, createCardHash(Stone, Ore, Wood, Clay, Glass, Papyrus, Textile), createCardHash(new Pair<>(Victory, 8))));
-
-                        wgs.ageDeck.add(new Wonder7Card("University", ScientificStructures, createCardHash(Wood, Wood, Papyrus, Glass), createCardHash(Tablet), "Library"));
-                        wgs.ageDeck.add(new Wonder7Card("Lodge", ScientificStructures, createCardHash(Clay, Clay, Papyrus, Textile), createCardHash(Compass), "Dispensary"));
-                        wgs.ageDeck.add(new Wonder7Card("Study", ScientificStructures, createCardHash(Wood, Papyrus, Textile), createCardHash(Cog), "School"));
-                        wgs.ageDeck.add(new Wonder7Card("Academy", ScientificStructures, createCardHash(Stone, Stone, Stone, Glass), createCardHash(Compass), "School"));
-                        wgs.ageDeck.add(new Wonder7Card("Observatory", ScientificStructures, createCardHash(Ore, Ore, Glass, Textile), createCardHash(Cog), "Laboratory"));
-
-                        wgs.ageDeck.add(new Wonder7Card("Siege Workshop", MilitaryStructures, createCardHash(Clay, Clay, Clay, Wood), createCardHash(new Pair<>(Shield, 3)), "Laboratory"));
-                        wgs.ageDeck.add(new Wonder7Card("Arsenal", MilitaryStructures, createCardHash(Wood, Wood, Ore, Textile), createCardHash(new Pair<>(Shield, 3))));
-                        wgs.ageDeck.add(new Wonder7Card("Fortification", MilitaryStructures, createCardHash(Ore, Ore, Ore, Clay), createCardHash(new Pair<>(Shield, 3)), "Walls"));
-
-                        wgs.ageDeck.add(new Wonder7Card("Arena", CommercialStructures,
-                                createCardHash(Stone, Stone, Ore),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin,
-                                        (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1) * 3)),
-                                List.of(new GainResourceEffect(Victory,
-                                        (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1))),
-                                List.of("Dispensary")));
-                        wgs.ageDeck.add(new Wonder7Card("Lighthouse", CommercialStructures,
-                                createCardHash(Stone, Glass),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, CommercialStructures, 1, true, false)),
-                                List.of(new GainResourceEffect(Victory, CommercialStructures, 1, true, false)),
-                                List.of("Caravansery")));
-                        wgs.ageDeck.add(new Wonder7Card("Haven", CommercialStructures,
-                                createCardHash(Wood, Ore, Textile),
-                                Collections.emptyMap(),
-                                List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, false)),
-                                List.of(new GainResourceEffect(Victory, RawMaterials, 1, true, false)),
-                                List.of("Caravansery")));
+                        wgs.ageDeck.add(Wonder7Card.factory(Gardens));
+                        wgs.ageDeck.add(Wonder7Card.factory(Senate));
+                        wgs.ageDeck.add(Wonder7Card.factory(TownHall));
+                        wgs.ageDeck.add(Wonder7Card.factory(Pantheon));
+                        wgs.ageDeck.add(Wonder7Card.factory(Palace));
+                        wgs.ageDeck.add(Wonder7Card.factory(University));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lodge));
+                        wgs.ageDeck.add(Wonder7Card.factory(Study));
+                        wgs.ageDeck.add(Wonder7Card.factory(Academy));
+                        wgs.ageDeck.add(Wonder7Card.factory(Observatory));
+                        wgs.ageDeck.add(Wonder7Card.factory(SiegeWorkshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arsenal));
+                        wgs.ageDeck.add(Wonder7Card.factory(Fortifications));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arena));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lighthouse));
+                        wgs.ageDeck.add(Wonder7Card.factory(Haven));
 
                         // We add two Guild cards per player
-                        guilds.allGuilds.shuffle(wgs.cardRnd);
+                        List<Wonder7Card> allGuilds = new ArrayList<>();
+                        allGuilds.add(Wonder7Card.factory(WorkersGuild));
+                        allGuilds.add(Wonder7Card.factory(CraftsmenGuild));
+                        allGuilds.add(Wonder7Card.factory(TradersGuild));
+                        allGuilds.add(Wonder7Card.factory(PhilosophersGuild));
+                        allGuilds.add(Wonder7Card.factory(SpiesGuild));
+                        allGuilds.add(Wonder7Card.factory(DecoratorsGuild));
+                        allGuilds.add(Wonder7Card.factory(ShipownersGuild));
+                        allGuilds.add(Wonder7Card.factory(BuildersGuild));
+                        allGuilds.add(Wonder7Card.factory(MagistratesGuild));
+                        allGuilds.add(Wonder7Card.factory(ScientistsGuild));
+                        Collections.shuffle(allGuilds, wgs.getRnd());
                         for (int i = 0; i < wgs.getNPlayers() + 2; i++) {
-                            wgs.ageDeck.add(guilds.allGuilds.draw());
+                            wgs.ageDeck.add(allGuilds.get(i));
                         }
                         break;
                     default:

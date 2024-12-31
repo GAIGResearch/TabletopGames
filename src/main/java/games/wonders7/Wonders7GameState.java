@@ -13,6 +13,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static games.wonders7.Wonders7Constants.Resource.*;
+import static games.wonders7.cards.Wonder7Card.CardType.*;
 
 public class Wonders7GameState extends AbstractGameState {
 
@@ -281,10 +282,10 @@ public class Wonders7GameState extends AbstractGameState {
         playerWonderBoard[playerId] = wonder;
     }
 
-    public Wonder7Card findCardInHand(int player, String cardName) {
+    public Wonder7Card findCardInHand(int player, Wonder7Card.CardType cardType) {
         Wonder7Card card = null;
         for (Wonder7Card cardSearch : getPlayerHand(player).getComponents()) { // Goes through each card in the playerHand
-            if (cardName.equals(cardSearch.cardName)) { // If cardName is the one searching for (being played)
+            if (cardType == cardSearch.cardType) { // If cardName is the one searching for (being played)
                 card = cardSearch;
                 break;
             }
@@ -310,14 +311,14 @@ public class Wonders7GameState extends AbstractGameState {
         // For the moment we'll hardcode the Marketplace and TradingPost functionality here (it is not used elsewhere)
         // In the future this can be replaced with a more general mechanism
         if (resource.isRare()) {
-            if (playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("Marketplace"))) {
+            if (playedCards.get(buyer).stream().anyMatch(c -> c.cardType == Marketplace)) {
                 return getParams().nCostDiscountedResource;
             }
         } else if (resource.isBasic()) {
-            if (seller == (buyer - 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("East Trading Post"))) {
+            if (seller == (buyer - 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardType == EastTradingPost)) {
                 return getParams().nCostDiscountedResource;
             }
-            if (seller == (buyer + 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardName.equals("West Trading Post"))) {
+            if (seller == (buyer + 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardType == WestTradingPost)) {
                 return getParams().nCostDiscountedResource;
             }
         }

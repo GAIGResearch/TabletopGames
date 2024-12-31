@@ -1,13 +1,14 @@
 package games.wonders7;
 
 import games.wonders7.actions.PlayCard;
+import games.wonders7.cards.Wonder7Board;
 import games.wonders7.cards.Wonder7Card;
-import games.wonders7.cards.Wonder7Guilds;
 import org.junit.Before;
 import org.junit.Test;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.Wonders7Constants.createCardHash;
+import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.Type.*;
 import static org.junit.Assert.*;
 
@@ -16,8 +17,6 @@ public class scoring {
     Wonders7ForwardModel fm = new Wonders7ForwardModel();
     Wonders7GameParameters params;
     Wonders7GameState state;
-    Wonder7Guilds guilds = new Wonder7Guilds();
-
 
     @Before
     public void setup() {
@@ -61,7 +60,7 @@ public class scoring {
 
         for (int i = 0; i < 4; i++) {
             state.getPlayerHand(i).clear();
-            state.getPlayerHand(i).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
+            state.getPlayerHand(i).add(Wonder7Card.factory(Wonder7Card.CardType.LumberYard));
         }
 
         fm.checkAgeEnd(state);
@@ -124,51 +123,50 @@ public class scoring {
 
     @Test
     public void workersGuild(){
-        state.getPlayedCards(0).add(guilds.workersGuild);
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ScientificStructures, createCardHash(Wood)));
-        state.getPlayedCards(2).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-        state.getPlayedCards(3).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
+        state.getPlayedCards(0).add(Wonder7Card.factory(WorkersGuild));
+        state.getPlayedCards(0).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(1).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Apothecary));
+        state.getPlayedCards(2).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(3).add(Wonder7Card.factory(LumberYard));
 
         assertEquals(3, state.getGameScore(0), 0.001);
 
         state.getPlayedCards(2).remove(0);
-        state.getPlayedCards(3).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
+        state.getPlayedCards(3).add(Wonder7Card.factory(LumberYard));
         assertEquals(4, state.getGameScore(0), 0.001);
     }
 
     @Test
     public void craftsmenGuild(){
-        state.getPlayedCards(1).add(guilds.craftsmenGuild);
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
-
+        state.getPlayedCards(1).add(Wonder7Card.factory(CraftsmenGuild));
+        state.getPlayedCards(0).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Loom));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Loom));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Loom));
         assertEquals(3, state.getGameScore(1), 0.001);
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Press));
         assertEquals(5, state.getGameScore(1), 0.001);
     }
 
     @Test
     public void magistratesGuild(){
-        state.getPlayedCards(2).add(guilds.magistratesGuild);
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", CivilianStructures, createCardHash(Wood)));
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", CivilianStructures, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", CivilianStructures, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", CivilianStructures, createCardHash(Wood)));
-        state.getPlayedCards(2).add(new Wonder7Card("Lumber Yard", CivilianStructures, createCardHash(Wood)));
+        state.getPlayedCards(2).add(Wonder7Card.factory(MagistratesGuild));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Baths));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Baths));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Baths));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Baths));
+        state.getPlayedCards(2).add(Wonder7Card.factory(Baths));
 
         assertEquals(3, state.getGameScore(2), 0.001);
     }
 
     @Test
     public void tradersGuild(){
-        state.getPlayedCards(3).add(guilds.tradersGuild);
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", CommercialStructures, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", CommercialStructures, createCardHash(Wood)));
-        state.getPlayedCards(2).add(new Wonder7Card("Lumber Yard", CommercialStructures, createCardHash(Wood)));
+        state.getPlayedCards(3).add(Wonder7Card.factory(TradersGuild));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Tavern));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Tavern));
+        state.getPlayedCards(2).add(Wonder7Card.factory(Tavern));
         assertEquals(3, state.getGameScore(3), 0.001);
         state.getPlayedCards(0).remove(0);
         assertEquals(2, state.getGameScore(3), 0.001);
@@ -176,11 +174,11 @@ public class scoring {
 
     @Test
     public void philosophersGuild(){
-        state.playedCards.get(0).add(guilds.philosophersGuild);
-        state.playedCards.get(0).add(new Wonder7Card("Lumber Yard", ScientificStructures, createCardHash(Wood)));
+        state.playedCards.get(0).add(Wonder7Card.factory(PhilosophersGuild));
+        state.playedCards.get(0).add(Wonder7Card.factory(Apothecary));
 
         assertEquals(1, state.getGameScore(0), 0.001);
-        state.playedCards.get(1).add(new Wonder7Card("Lumber Yard", ScientificStructures, createCardHash(Wood)));
+        state.playedCards.get(1).add(Wonder7Card.factory(Apothecary));
         assertEquals(2, state.getGameScore(0), 0.001);
         assertEquals(1, state.getGameScore(1), 0.001);
         assertEquals(1, state.getGameScore(3), 0.001);
@@ -188,8 +186,8 @@ public class scoring {
 
     @Test
     public void spiesGuild(){
-        state.playedCards.get(0).add(guilds.spiesGuild);
-        state.playedCards.get(1).add(new Wonder7Card("Lumber Yard", MilitaryStructures, createCardHash(Wood)));
+        state.playedCards.get(0).add(Wonder7Card.factory(SpiesGuild));
+        state.playedCards.get(1).add(Wonder7Card.factory(Stockade));
         assertEquals(2, state.getGameScore(0), 0.001);
         state.getPlayedCards(0).remove(0);
         assertEquals(1, state.getGameScore(0), 0.001);
@@ -198,7 +196,7 @@ public class scoring {
 
     @Test
     public void buildersGuild(){
-        state.playedCards.get(0).add(guilds.buildersGuild);
+        state.playedCards.get(0).add(Wonder7Card.factory(BuildersGuild));
         assertEquals(1, state.getGameScore(0), 0.001);
         state.getPlayerWonderBoard(0).changeStage();
         assertEquals(2, state.getGameScore(0), 0.001);
@@ -214,22 +212,22 @@ public class scoring {
     @Test
     public void shipownersGuild(){
         assertEquals(1, state.getGameScore(1), 0.001);
-        state.getPlayedCards(1).add(guilds.shipownersGuild);
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
-        state.getPlayedCards(0).add(new Wonder7Card("Lumber Yard", Guilds, createCardHash(Wood)));
+        state.getPlayedCards(1).add(Wonder7Card.factory(ShipownersGuild));
+        state.getPlayedCards(0).add(Wonder7Card.factory(LumberYard));
+        state.getPlayedCards(0).add(Wonder7Card.factory(Glassworks));
+        state.getPlayedCards(0).add(Wonder7Card.factory(ScientistsGuild));
         assertEquals(2, state.getGameScore(1), 0.001);
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ManufacturedGoods, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", Guilds, createCardHash(Wood)));
-        state.getPlayedCards(1).add(new Wonder7Card("Lumber Yard", ScientificStructures, createCardHash(Wood)));
+        state.getPlayedCards(1).add(Wonder7Card.factory(StonePit));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Loom));
+        state.getPlayedCards(1).add(Wonder7Card.factory(PhilosophersGuild));
+        state.getPlayedCards(1).add(Wonder7Card.factory(University));
         assertEquals(5, state.getGameScore(1), 0.001);
     }
 
 
     @Test
     public void decoratorsGuild(){
-        state.getPlayedCards(2).add(guilds.decoratorsGuild);
+        state.getPlayedCards(2).add(Wonder7Card.factory(DecoratorsGuild));
         for (int i = 1; i <= state.getPlayerWonderBoard(2).type.wonderStages; i++){
             assertEquals(1, state.getGameScore(2), 0.001);
             state.getPlayerWonderBoard(2).changeStage();
@@ -244,8 +242,8 @@ public class scoring {
 
     @Test
     public void scientistsGuild(){
-        state.getPlayerHand(3).add(guilds.scientistsGuild);
-        fm.next(state, new PlayCard(3, "Scientists Guild", true));
+        state.getPlayerHand(3).add(Wonder7Card.factory(ScientistsGuild));
+        fm.next(state, new PlayCard(3, ScientistsGuild, true));
         assertEquals(1, state.getPlayerResources(3).get(ScienceWild), 0.001);
         assertEquals(2, state.getGameScore(3), 0.001);
     }

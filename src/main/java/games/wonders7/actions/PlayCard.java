@@ -3,10 +3,8 @@ package games.wonders7.actions;
 import core.AbstractGameState;
 import core.actions.DrawCard;
 import core.components.Deck;
-import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7Constants.Resource;
 import games.wonders7.Wonders7Constants.TradeSource;
-import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
 import games.wonders7.cards.Wonder7Card;
 import utilities.Pair;
@@ -17,14 +15,14 @@ import static games.wonders7.Wonders7Constants.Resource.Coin;
 
 public class PlayCard extends DrawCard {
 
-    public final String cardName;
+    public final Wonder7Card.CardType cardType;
     public final int player;
     public final boolean free;
 
     // Player chooses card to play
-    public PlayCard(int player, String cardName, boolean free) {
+    public PlayCard(int player, Wonder7Card.CardType card, boolean free) {
         super();
-        this.cardName = cardName;
+        this.cardType = card;
         this.player = player;
         this.free = free;
     }
@@ -37,7 +35,7 @@ public class PlayCard extends DrawCard {
         Deck<Wonder7Card> playerHand = wgs.getPlayerHand(player);
         Map<Resource, Integer> playerResources = wgs.getPlayerResources(player);
 
-        Wonder7Card card = wgs.findCardInHand(player, cardName);
+        Wonder7Card card = wgs.findCardInHand(player, cardType);
 
         cardId = card.getComponentID();
 
@@ -48,7 +46,7 @@ public class PlayCard extends DrawCard {
                 throw new AssertionError("Card not playable");
             }
             // first pay direct coin cost
-            playerResources.put(Coin, playerResources.get(Coin) - card.constructionCost.getOrDefault(Coin, 0L).intValue());
+            playerResources.put(Coin, playerResources.get(Coin) - card.constructionCost.getOrDefault(Coin, 0));
             // then pay trade costs
             List<TradeSource> tradeSources = buildDetails.b;
             for (TradeSource tradeSource : tradeSources) {
@@ -83,7 +81,7 @@ public class PlayCard extends DrawCard {
 
     @Override
     public String toString() {
-        return "Player " + player + " played card " + cardName + (free ? " (free)" : "");
+        return "Player " + player + " played card " + cardType + (free ? " (free)" : "");
     }
 
     @Override
@@ -97,12 +95,12 @@ public class PlayCard extends DrawCard {
         if (!(o instanceof PlayCard)) return false;
         if (!super.equals(o)) return false;
         PlayCard playCard = (PlayCard) o;
-        return player == playCard.player && free == playCard.free && Objects.equals(cardName, playCard.cardName);
+        return player == playCard.player && free == playCard.free && cardType == playCard.cardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardName, player, free);
+        return Objects.hash(super.hashCode(), cardType.ordinal(), player, free);
     }
 
     @Override

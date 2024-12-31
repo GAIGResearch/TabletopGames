@@ -13,6 +13,7 @@ import java.util.List;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.Wonders7Constants.createCardHash;
+import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.Type.*;
 import static org.junit.Assert.*;
 
@@ -22,13 +23,12 @@ public class buildCosts {
     Wonders7GameParameters params;
     Wonders7GameState state;
 
-    Wonder7Card lumberyard = new Wonder7Card("Lumber Yard", RawMaterials, createCardHash(Wood));
-    Wonder7Card timberyard = new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin), createCardHash(Wood));
-    Wonder7Card apothecary = new Wonder7Card("Apothecary", ScientificStructures, createCardHash(Textile), createCardHash(Compass));
-    Wonder7Card library = new Wonder7Card("Library", ScientificStructures, createCardHash(Stone, Stone, Textile), createCardHash(Tablet), "Scriptorium");
-    Wonder7Card scriptorium = new Wonder7Card("Scriptorium", ScientificStructures, createCardHash(Stone, Stone, Textile), createCardHash(Tablet));
-    Wonder7Card temple = new Wonder7Card("Temple", CivilianStructures, createCardHash(Wood, Clay, Glass), createCardHash(Victory, Victory, Victory), "Altar");
-
+    Wonder7Card lumberyard = Wonder7Card.factory(LumberYard);
+    Wonder7Card timberyard = Wonder7Card.factory(TimberYard);
+    Wonder7Card apothecary = Wonder7Card.factory(Apothecary);
+    Wonder7Card library = Wonder7Card.factory(Library);
+    Wonder7Card scriptorium = Wonder7Card.factory(Scriptorium);
+    Wonder7Card temple = Wonder7Card.factory(Temple);
 
     @Before
     public void setup() {
@@ -58,7 +58,7 @@ public class buildCosts {
         state.getPlayerHand(0).add(timberyard);
 
         assertEquals(3, state.getPlayerResources(0).get(Coin).intValue());
-        fm.next(state, new PlayCard(0, "Timber Yard", false));
+        fm.next(state, new PlayCard(0, TimberYard, false));
         assertEquals(2, state.getPlayerResources(0).get(Coin).intValue());
     }
 
@@ -73,7 +73,7 @@ public class buildCosts {
         assertEquals(new Pair<>(true, List.of(new TradeSource(Textile, 2, 1))), library.isPlayable(0, state));
 
         // then building it should transfer money
-        fm.next(state, new PlayCard(0, "Library", false));
+        fm.next(state, new PlayCard(0, Library, false));
         assertEquals(1, state.getPlayerResources(0).get(Coin).intValue());
         assertEquals(5, state.getPlayerResources(1).get(Coin).intValue());
         assertFalse(state.getPlayerHand(0).contains(library));
@@ -92,7 +92,7 @@ public class buildCosts {
         assertEquals(new Pair<>(true, Collections.emptyList()), library.isPlayable(0, state));
 
         // then building it should not transfer money
-        fm.next(state, new PlayCard(0, "Library", false));
+        fm.next(state, new PlayCard(0, Library, false));
         assertEquals(3, state.getPlayerResources(0).get(Coin).intValue());
         assertEquals(3, state.getPlayerResources(1).get(Coin).intValue());
         assertFalse(state.getPlayerHand(0).contains(library));
@@ -105,7 +105,7 @@ public class buildCosts {
         state.getPlayerResources(1).put(Textile, 1);
         state.getPlayerResources(3).put(Textile, 1);
 
-        state.playedCards.get(0).add(new Wonder7Card("Marketplace", CommercialStructures, createCardHash(Coin), new HashMap<>()));
+        state.playedCards.get(0).add(Wonder7Card.factory(Marketplace));
         assertEquals(0, state.getPlayerResources(0).get(Textile).intValue());
         Pair<Boolean, List<TradeSource>> required = apothecary.isPlayable(0, state);
 
@@ -123,7 +123,7 @@ public class buildCosts {
         state.getPlayerResources(0).put(Stone, 0);
         state.getPlayerResources(0).put(Textile, 1);
         state.getPlayerResources(0).put(Coin, 1);  // 1 coin is not enough to buy the card
-        state.playedCards.get(0).add(new Wonder7Card("East Trading Post", CommercialStructures, createCardHash(Coin), new HashMap<>()));
+        state.playedCards.get(0).add(Wonder7Card.factory(EastTradingPost));
 
         // P0 now has 1 Coin, 1 Textile and needs to buy 2 Stone
         assertEquals(new Pair<>(false, Collections.emptyList()), library.isPlayable(0, state));
@@ -139,7 +139,7 @@ public class buildCosts {
 
         // iii) now flip to the West Trading Post - they should now spend the coin to player 1
         state.playedCards.get(0).clear();
-        state.playedCards.get(0).add(new Wonder7Card("West Trading Post", CommercialStructures, createCardHash(Coin), new HashMap<>()));
+        state.playedCards.get(0).add(Wonder7Card.factory(WestTradingPost));
         assertEquals(new Pair<>(true, List.of(new TradeSource(Stone, 1, 1))), library.isPlayable(0, state));
 
     }
@@ -153,19 +153,6 @@ public class buildCosts {
         assertEquals(new Pair<>(true, Collections.emptyList()), library.isPlayable(0, state));
     }
 
-
-    @Test
-    public void hasMoneyForEitherTradeOrBaseCost() {
-        // technically this is redundant, as there are no cards in the base game that cost coins and resources
-        Wonder7Card testCard = new Wonder7Card("Timber Yard", RawMaterials, createCardHash(Coin, Stone), createCardHash(Wood));
-
-        state.getPlayerHand(0).add(testCard);
-        state.getPlayerResources(0).put(Coin, 2);
-        state.getPlayerResources(0).put(Stone, 0);
-
-        state.getPlayerResources(1).put(Stone, 1);
-        assertEquals(new Pair<>(false, Collections.emptyList()), testCard.isPlayable(0, state));
-    }
 
     @Test
     public void cannotBuyWildCardResourcesFromNeighbours() {

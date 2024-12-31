@@ -11,12 +11,12 @@ import java.util.Objects;
 import java.util.Set;
 
 public class BuildStage extends AbstractAction {
-    public final String cardName;
+    public final Wonder7Card.CardType cardType;
     private final int player;
 
-    public BuildStage(int player, String cardName){
+    public BuildStage(int player, Wonder7Card.CardType cardType){
         this.player = player;
-        this.cardName = cardName;
+        this.cardType = cardType;
     }
 
     @Override
@@ -24,7 +24,7 @@ public class BuildStage extends AbstractAction {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds the played card
-        Wonder7Card card = wgs.findCardInHand(player, cardName);
+        Wonder7Card card = wgs.findCardInHand(player, cardType);
 
         // The second stage has been built, now the player can play their special action (if they have the wonder)
         if (wgs.getPlayerWonderBoard(player).wonderStage == 2){
@@ -72,12 +72,12 @@ public class BuildStage extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof BuildStage)) return false;
         BuildStage that = (BuildStage) o;
-        return player == that.player && cardName.equals(that.cardName);
+        return player == that.player && cardType == that.cardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(cardName, player);
+        return Objects.hash(cardType.ordinal(), player);
     }
 
     @Override

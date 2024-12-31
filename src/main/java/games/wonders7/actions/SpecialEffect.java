@@ -12,14 +12,14 @@ import java.util.Set;
 
 public class SpecialEffect extends DrawCard {
 
-    public final String cardName;
+    public final Wonder7Card.CardType cardType;
     public final int player;
 
     // Player chooses card to play
-    public SpecialEffect(int player, String cardName){
+    public SpecialEffect(int player, Wonder7Card.CardType cardType){
         super();
         this.player = player;
-        this.cardName = cardName;
+        this.cardType = cardType;
     }
 
 
@@ -29,7 +29,7 @@ public class SpecialEffect extends DrawCard {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
 
         // Finds the played card
-        Wonder7Card card = wgs.findCardInHand(player, cardName);
+        Wonder7Card card = wgs.findCardInHand(player, cardType);
 
         Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
         switch (board.type){
@@ -62,7 +62,7 @@ public class SpecialEffect extends DrawCard {
 
     @Override
     public String toString() {
-        return "Player " + player + " uses Wonder special effect with card " + cardName;
+        return "Player " + player + " uses Wonder special effect with card " + cardType;
     }
 
     @Override
@@ -76,12 +76,12 @@ public class SpecialEffect extends DrawCard {
         if (!(o instanceof SpecialEffect)) return false;
         if (!super.equals(o)) return false;
         SpecialEffect that = (SpecialEffect) o;
-        return player == that.player && Objects.equals(cardName, that.cardName);
+        return player == that.player && cardType == that.cardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardName, player);
+        return Objects.hash(super.hashCode(), cardType.ordinal(), player);
     }
 
     @Override
