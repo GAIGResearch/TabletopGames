@@ -276,6 +276,16 @@ public class ScoringTests {
     }
 
     @Test
+    public void bazaarDoesNotIncludeResourcesOnWonder() {
+        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheLighthouseOfAlexandria);  // Mfg goods
+        state.playerWonderBoard[2] = new Wonder7Board(Wonder7Board.Wonder.TheTempleOfArtemisInEphesus);  // Raw materials
+        state.getPlayerHand(1).add(Wonder7Card.factory(Bazaar));
+        state.getPlayedCards(1).add(Wonder7Card.factory(Press));
+        fm.next(state, new PlayCard(1, Bazaar, true));
+        assertEquals(5, state.getPlayerResources(1).get(Coin), 0.001);
+    }
+
+    @Test
     public void arenaGivesMoneyAndPointsIndependently() {
         state.getPlayerHand(2).add(Wonder7Card.factory(Arena));
         state.getPlayerWonderBoard(2).wonderStage = 2;
