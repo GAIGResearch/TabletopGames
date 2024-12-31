@@ -77,7 +77,7 @@ public class Wonder7Board extends Card {
         super(type.toString());
         this.type = type;
         this.wonderStage = 1;
-        this.effectUsed = true;
+        this.effectUsed = false;
     }
 
     // Copy constructor
@@ -85,7 +85,7 @@ public class Wonder7Board extends Card {
         super(type.toString(),componentID);
         this.type = type;
         this.wonderStage = 1;
-        this.effectUsed = true;
+        this.effectUsed = false;
     }
 
     @Override

@@ -18,13 +18,19 @@ public class PlayCard extends DrawCard {
     public final Wonder7Card.CardType cardType;
     public final int player;
     public final boolean free;
+    public final boolean fromDiscard;
 
     // Player chooses card to play
-    public PlayCard(int player, Wonder7Card.CardType card, boolean free) {
+    public PlayCard(int player, Wonder7Card.CardType card, boolean free, boolean fromDiscard) {
         super();
         this.cardType = card;
         this.player = player;
         this.free = free;
+        this.fromDiscard = fromDiscard;
+    }
+
+    public PlayCard(int player, Wonder7Card.CardType card, boolean free) {
+        this(player, card, free, false);
     }
 
 
@@ -35,7 +41,9 @@ public class PlayCard extends DrawCard {
         Deck<Wonder7Card> playerHand = wgs.getPlayerHand(player);
         Map<Resource, Integer> playerResources = wgs.getPlayerResources(player);
 
-        Wonder7Card card = wgs.findCardInHand(player, cardType);
+        Wonder7Card card = fromDiscard
+                ? wgs.findCardInDiscard(cardType)
+                : wgs.findCardInHand(player, cardType);
 
         cardId = card.getComponentID();
 
@@ -75,7 +83,7 @@ public class PlayCard extends DrawCard {
         card.applyInstantCardEffects(wgs, player);
 
         // remove the card from the players hand to the playedDeck
-        boolean cardFound = playerHand.remove(card);
+        boolean cardFound = fromDiscard ? wgs.getDiscardPile().remove(card) : playerHand.remove(card);
         if (!cardFound) {
             throw new AssertionError("Card not found in player hand");
         }
@@ -99,12 +107,12 @@ public class PlayCard extends DrawCard {
         if (!(o instanceof PlayCard)) return false;
         if (!super.equals(o)) return false;
         PlayCard playCard = (PlayCard) o;
-        return player == playCard.player && free == playCard.free && cardType == playCard.cardType;
+        return player == playCard.player && free == playCard.free && cardType == playCard.cardType && fromDiscard == playCard.fromDiscard;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardType.ordinal(), player, free);
+        return Objects.hash(cardType.ordinal(), player, free, fromDiscard) + 31 * super.hashCode();
     }
 
     @Override

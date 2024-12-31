@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.OneShotExtendedAction;
 import core.components.Deck;
 import games.wonders7.actions.*;
 import games.wonders7.cards.GainResourceEffect;
@@ -17,8 +18,10 @@ import java.util.stream.Collectors;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
 import static games.wonders7.Wonders7Constants.createCardHash;
+import static games.wonders7.cards.Wonder7Board.Wonder.TheMausoleumOfHalicarnassus;
 import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.Type.*;
+import static java.util.stream.Collectors.toList;
 
 
 public class Wonders7ForwardModel extends StandardForwardModel {
@@ -96,47 +99,27 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         wgs.setTurnOwner(0);
     }
 
-
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction actionTaken) {
         Wonders7GameState wgs = (Wonders7GameState) state;
-        int direction = wgs.getDirection();
         // EVERYBODY NOW PLAYS THEIR CARDS (ACTION ROUND)
         if (checkActionRound(wgs)) {
-            for (int i = 0; i < wgs.getNPlayers(); i++) {
-                wgs.setTurnOwner(i); // PLAYER i DOES THE ACTION THEY SELECTED, NOT ANOTHER PLAYERS ACTION
-                wgs.getTurnAction(i).execute(wgs); // EXECUTE THE ACTION
-                wgs.setTurnAction(i, null); // REMOVE EXECUTED ACTION
-            }
-            wgs.setTurnOwner(0);
+            executeAllActions(wgs);
 
-            // PLAYER HANDS ARE NOW ROTATED AROUND EACH PLAYER
-            Deck<Wonder7Card> temp = wgs.getPlayerHands().get(0);
-            if (direction == 1) {
-                for (int i = 0; i < wgs.getNPlayers(); i++) {
-                    if (i == wgs.getNPlayers() - 1) {
-                        wgs.getPlayerHands().set(i, temp);
-                    } // makes sure the last player receives first players original hand
-                    else {
-                        wgs.getPlayerHands().set(i, wgs.getPlayerHands().get(i + 1));
-                    } // Rotates hands clockwise
-                }
-            } else {
-                temp = wgs.getPlayerHand((wgs.getNPlayers() - 1) % wgs.getNPlayers());
-                for (int i = (wgs.getNPlayers() - 1) % wgs.getNPlayers(); i > -1; i--) {
-                    if (i % wgs.getNPlayers() == 0) {
-                        wgs.getPlayerHands().set(i, temp);
-                    } // makes sure the last player receives first players original hand
-                    else {
-                        wgs.getPlayerHands().set(i, wgs.getPlayerHands().get(i - 1));
-                    } // Rotates hands anticlockwise
+            // then if Halicarnassus triggers, put that functionality on the stack
+            for (int p = 0; p < wgs.getNPlayers(); p++) {
+                if (wgs.getPlayerWonderBoard(p).type == TheMausoleumOfHalicarnassus &&
+                        wgs.getPlayerWonderBoard(p).wonderStage > 2 &&
+                        !wgs.getPlayerWonderBoard(p).effectUsed) {
+                    wgs.setActionInProgress(new BuildFromDiscard(p));
+                    wgs.getPlayerWonderBoard(p).effectUsed = true;
+                    return;
                 }
             }
+
+            rotateHands(wgs);
+
             checkAgeEnd(wgs); // Check for Age end;
-
-        } else {
-            // we are still choosing cards for each player
-            // this is covered by the code below
         }
         // We now check that all players have the same number of cards in hand
         int cardsExpected = wgs.getPlayerHand(0).getSize();
@@ -161,6 +144,39 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             }
         }
 
+    }
+
+    private void executeAllActions(Wonders7GameState wgs) {
+        for (int i = 0; i < wgs.getNPlayers(); i++) {
+            wgs.setTurnOwner(i); // PLAYER i DOES THE ACTION THEY SELECTED, NOT ANOTHER PLAYERS ACTION
+            wgs.getTurnAction(i).execute(wgs); // EXECUTE THE ACTION
+            wgs.setTurnAction(i, null); // REMOVE EXECUTED ACTION
+        }
+        wgs.setTurnOwner(0);
+    }
+
+    public void rotateHands(Wonders7GameState wgs) {
+        Deck<Wonder7Card> temp = wgs.getPlayerHands().get(0);
+        if (wgs.direction == 1) {
+            for (int i = 0; i < wgs.getNPlayers(); i++) {
+                if (i == wgs.getNPlayers() - 1) {
+                    wgs.getPlayerHands().set(i, temp);
+                } // makes sure the last player receives first players original hand
+                else {
+                    wgs.getPlayerHands().set(i, wgs.getPlayerHands().get(i + 1));
+                } // Rotates hands clockwise
+            }
+        } else {
+            temp = wgs.getPlayerHand((wgs.getNPlayers() - 1) % wgs.getNPlayers());
+            for (int i = (wgs.getNPlayers() - 1) % wgs.getNPlayers(); i > -1; i--) {
+                if (i % wgs.getNPlayers() == 0) {
+                    wgs.getPlayerHands().set(i, temp);
+                } // makes sure the last player receives first players original hand
+                else {
+                    wgs.getPlayerHands().set(i, wgs.getPlayerHands().get(i - 1));
+                } // Rotates hands anticlockwise
+            }
+        }
     }
 
     protected boolean checkActionRound(AbstractGameState gameState) {
@@ -209,7 +225,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         }
     }
 
-    protected void checkAgeEnd(AbstractGameState gameState) {
+    public void checkAgeEnd(AbstractGameState gameState) {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
         if (wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize() == 1) {  // If all players hands are empty
 

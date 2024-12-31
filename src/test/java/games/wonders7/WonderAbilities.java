@@ -1,6 +1,7 @@
 package games.wonders7;
 
 import core.actions.AbstractAction;
+import games.wonders7.actions.BuildFromDiscard;
 import games.wonders7.actions.ChooseCard;
 import games.wonders7.actions.PlayCard;
 import games.wonders7.cards.Wonder7Board;
@@ -9,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Random;
 
 import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.CardType.Temple;
@@ -19,6 +21,7 @@ public class WonderAbilities {
     Wonders7ForwardModel fm = new Wonders7ForwardModel();
     Wonders7GameParameters params;
     Wonders7GameState state;
+    Random rnd = new Random(309842);
 
     @Before
     public void setup() {
@@ -60,17 +63,48 @@ public class WonderAbilities {
     }
 
     @Test
-    public void halicarnassusLevel2BuildsForFreeFromDiscardPileAtEndOfAge() {
+    public void halicarnassusLevel2BuildsForFreeFromDiscardPileAtEndOfTurn() {
         state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus);
         // at the end of the Age (and only then), if the second stage is built then the player can build a card from the discard pile for free
-        fail("Not implemented");
+        state.getDiscardPile().add(Wonder7Card.factory(Arena));
+        for (int i = 0; i < 7; i++) { // take 7 actions (2 turns minus 1)
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        state.playerWonderBoard[1].wonderStage = 2;  // stage one; should not do anything
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        fm.next(state, actions.get(0));
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+
+        state.playerWonderBoard[1].wonderStage = 3;  // stage two; should allow building from discard pile
+        for (int i = 0; i < 4; i++) { // four actions
+            actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        assertTrue(state.isActionInProgress());
+        assertEquals(1, state.getCurrentPlayer());
+        assertTrue(state.currentActionInProgress() instanceof BuildFromDiscard);
+        actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlayCard));
+        int discardSize = state.getDiscardPile().getSize();
+        fm.next(state, actions.get(0));
+        assertEquals(discardSize - 1, state.getDiscardPile().getSize());
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertTrue(state.playerWonderBoard[1].effectUsed);
+
+        // now check we do not build another one
+        for (int i = 0; i < 8; i++) { // four actions
+            actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+            assertFalse(state.isActionInProgress());
+            assertTrue(state.playerWonderBoard[1].effectUsed);
+        }
     }
 
-    @Test
-    public void halicarnassusLevel1DoesNotBuildForFreeFromDiscardPileAtEndOfAge() {
-        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus);
-        // at the end of the Age (and only then), if the second stage is built then the player can build a card from the discard pile for free
-        fail("Not implemented");
-    }
 
 }

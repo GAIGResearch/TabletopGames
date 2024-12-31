@@ -282,9 +282,9 @@ public class Wonders7GameState extends AbstractGameState {
         playerWonderBoard[playerId] = wonder;
     }
 
-    public Wonder7Card findCardInHand(int player, Wonder7Card.CardType cardType) {
+    public Wonder7Card findCardIn(Deck<Wonder7Card> deck, Wonder7Card.CardType cardType) {
         Wonder7Card card = null;
-        for (Wonder7Card cardSearch : getPlayerHand(player).getComponents()) { // Goes through each card in the playerHand
+        for (Wonder7Card cardSearch : deck.getComponents()) { // Goes through each card in the deck
             if (cardType == cardSearch.cardType) { // If cardName is the one searching for (being played)
                 card = cardSearch;
                 break;
@@ -292,9 +292,16 @@ public class Wonders7GameState extends AbstractGameState {
         }
 
         if (card == null) {
-            throw new AssertionError("Card not found in player hand");
+            throw new AssertionError("Card not found in deck");
         }
         return card;
+    }
+
+    public Wonder7Card findCardInHand(int player, Wonder7Card.CardType cardType) {
+        return findCardIn(playerHands.get(player), cardType);
+    }
+    public Wonder7Card findCardInDiscard(Wonder7Card.CardType cardType) {
+        return findCardIn(discardPile, cardType);
     }
 
 
