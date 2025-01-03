@@ -564,7 +564,7 @@ public class CQGameState extends AbstractGameState {
         int points = getCommandPoints(playerId) + commandLeniency(playerId);
         double expPoints = 1 - Math.exp(-points / 25.0);
         if (commandLeniency(playerId) > 0) {
-//            System.out.println("Points: " + getCommandPoints(playerId) + ", " + commandLeniency(playerId) + " -> " + expPoints);
+//            System.out.println("Point / leniency: " + getCommandPoints(playerId) + ", " + commandLeniency(playerId) + " -> " + expPoints + "... " + cooldownFraction);
         }
         // to the final score, add points, subtract cooldowns
         runningScore += (expPoints - cooldownFraction / 2.0);
@@ -603,10 +603,15 @@ public class CQGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop, getCurrentPlayer(),
-                gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints), getGameTick()
-        );
+        try {
+            return Objects.hash(
+                    getGamePhase(), Arrays.deepHashCode(cells), troops, locationToTroopMap, selectedTroop, getCurrentPlayer(),
+                    gridBoard, Arrays.hashCode(chosenCommands), Arrays.hashCode(commandPoints), getGameTick()
+            );
+        } catch (Exception e) {
+            System.out.println(e);
+            return 1;
+        }
     }
 
     /**

@@ -14,6 +14,7 @@ public class CQMCTSParams extends PlayerParameters {
     public double epsilon = 1e-6;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public boolean flexibleBudget = true;
+    public int rolloutLength = 0;
 
     public CQMCTSParams() {
         super();
@@ -22,6 +23,7 @@ public class CQMCTSParams extends PlayerParameters {
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("flexibleBudget", true);
+        addTunableParameter("rolloutLength", 0);
     }
 
     @Override

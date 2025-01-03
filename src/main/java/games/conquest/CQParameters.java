@@ -25,8 +25,8 @@ import static games.conquest.components.CommandType.*;
  */
 public class CQParameters extends TunableParameters {
     // Game parameters
-    public final int gridWidth = 20;
-    public final int gridHeight = 20;
+    public final int gridWidth = 16;
+    public final int gridHeight = 16;
     public final int setupPoints = 1000;
     public final int maxTroops = 10;
     public final int maxCommands = 4;

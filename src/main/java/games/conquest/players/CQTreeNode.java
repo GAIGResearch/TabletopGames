@@ -2,11 +2,14 @@ package games.conquest.players;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.interfaces.IActionHeuristic;
 import games.conquest.actions.ApplyCommand;
+import games.conquest.actions.EndTurn;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static players.PlayerConstants.*;
@@ -27,6 +30,7 @@ public class CQTreeNode {
     Map<AbstractAction, Integer> childVisits = new HashMap();
     int nVisits = 0;
     double totValue = 0.0;
+    CQActionHeuristic heuristic = new CQActionHeuristic();
 
     final int playerId;
 
@@ -68,11 +72,15 @@ public class CQTreeNode {
     boolean incompleteTurn() {
         CQTreeNode node = this;
         int player = node.playerId;
-        while (player == node.playerId) {
-            if (node.selectedAction == null) {
+        while (player == node.playerId && node.state.isNotTerminal()) {
+            AbstractAction next = node.greedy();
+            if (debug) {
+                System.out.println(next);
+            }
+            if (next == null) { // TODO: Niet selectedAction gebruiken
                 return true;
             }
-            node = node.children.get(node.selectedAction);
+            node = node.children.get(next);
         }
         // loop finished without returning, so we've reached the opponent move.
         return false;
@@ -85,6 +93,7 @@ public class CQTreeNode {
      * Performs full MCTS search, using the defined budget limits.
      */
     void mctsSearch(boolean flexibleBudget) {
+        // TODO: Use commands instead of avoiding conflict
         CQMCTSParams params = player.getParameters();
 
         // Variables for tracking time budget
@@ -110,7 +119,7 @@ public class CQTreeNode {
             // Selection + expansion: navigate tree until a node not fully expanded is found,
             // add a new node to the tree. This also fills `history` with all actions taken.
             CQTreeNode selected = treePolicy();
-            double delta = player.getParameters().getHeuristic().evaluateState(selected.state, player.getPlayerID());
+            double delta = selected.rollOut();
             // Back up the value of the last node through the tree
             selected.backUp(delta);
             // Finished iteration
@@ -128,15 +137,20 @@ public class CQTreeNode {
                 }
                 case BUDGET_ITERATIONS ->
                     // Iteration budget
-                        stop = numIters >= params.budget;
+                        stop = numIters >= budget;
                 case BUDGET_FM_CALLS -> {
                     // FM calls budget
-                    stop = fmCallsCount > params.budget;
+                    stop = fmCallsCount > budget;
                 }
             }
             if (stop && flexibleBudget && incompleteTurn()) {
                 // Flexible budget: allow for more time if the best move does not reach the end of the turn
-                budget += params.budget;
+                if (params.budgetType == BUDGET_TIME) {
+                    elapsedTimer.setMaxTimeMillis(params.budget);
+                } else {
+                    budget += params.budget;
+                }
+                stop = false;
                 System.out.println("Increased budget to " + budget);
             }
         }
@@ -168,6 +182,30 @@ public class CQTreeNode {
         // increment root node after backing up all the way
         n.nVisits++;
         n.totValue += result;
+    }
+
+    public AbstractAction greedy() {
+        List<AbstractAction> actions = new ArrayList<>();
+        float best = Float.NEGATIVE_INFINITY;
+        for (AbstractAction action : children.keySet()) {
+            CQTreeNode child = children.get(action);
+            if (child == null) {
+                continue;
+            }
+            // store score in a float to avoid floating point errors in the final decimal of a (double)
+            float score = (float) (child.totValue / child.nVisits);
+            if (score == best) {
+                // Same score -> add it to the list of scores
+                actions.add(action);
+            } else if (score > best) {
+                best = (float) (child.totValue / child.nVisits);
+                // Better score -> forget all worse performing children,
+                // start tracking actions with the same score as this action
+                actions.clear();
+                actions.add(action);
+            }
+        }
+        return heuristic.bestAction(actions, null);
     }
 
     /**
@@ -221,6 +259,60 @@ public class CQTreeNode {
 
         root.fmCallsCount++;  // log one iteration complete
         return bestAction;
+    }
+
+    private AbstractAction randomAction(AbstractGameState state) {
+        List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(state);
+        List<Double> actionValues = actions.stream().map(
+                act -> heuristic.evaluateAction(act, state, actions)
+        ).toList();
+        double totalValue = actionValues.stream().mapToDouble(Double::doubleValue).sum();
+        double rand = rnd.nextDouble() * totalValue;
+        for (int i=0; i<actions.size(); i++) {
+            rand -= actionValues.get(i);
+            if (rand <= 0)
+                return actions.get(i);
+        }
+        return actions.get(actions.size() - 1); // fallback
+    }
+
+    /**
+     * Perform a Monte Carlo rollout from this node.
+     *
+     * @return - value of rollout.
+     */
+    private double rollOut() {
+        int rolloutDepth = 0; // counting from end of tree
+
+        // If rollouts are enabled, select actions for the rollout in line with the rollout policy
+        AbstractGameState rolloutState = state.copy();
+        if (player.getParameters().rolloutLength > 0) {
+            while (!finishRollout(rolloutState, rolloutDepth)) {
+                AbstractAction next = randomAction(rolloutState);
+                advance(rolloutState, next);
+                rolloutDepth++;
+            }
+        }
+        // Evaluate final state and return normalised score
+        double value = player.getParameters().getHeuristic().evaluateState(rolloutState, player.getPlayerID());
+        if (Double.isNaN(value))
+            throw new AssertionError("Illegal heuristic value - should be a number");
+        return value;
+    }
+
+    /**
+     * Checks if rollout is finished. Rollouts end on maximum length, or if game ended.
+     *
+     * @param rollerState - current state
+     * @param depth       - current depth
+     * @return - true if rollout finished, false otherwise
+     */
+    private boolean finishRollout(AbstractGameState rollerState, int depth) {
+        if (depth >= player.getParameters().rolloutLength)
+            return true;
+
+        // End of game
+        return !rollerState.isNotTerminal();
     }
 
     private CQTreeNode enterNextState(AbstractAction action) {
@@ -277,10 +369,11 @@ public class CQTreeNode {
      */
     private CQTreeNode expand() {
         // Find random child not already created
-        Random r = new Random(player.getParameters().getRandomSeed());
+//        Random r = new Random(player.getParameters().getRandomSeed());
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
-        AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
+        AbstractAction chosen = heuristic.bestAction(notChosen, null);
+//        AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
         selectedAction = chosen; // keep track of most recently selected action
 
         // copy the current state and advance it using the chosen action
@@ -288,6 +381,10 @@ public class CQTreeNode {
         AbstractGameState nextState = state.copy();
 
         int nextHash = advance(nextState, chosen.copy());
+        if (chosen instanceof EndTurn && nextState.getCurrentPlayer() == state.getCurrentPlayer()) {
+            System.out.println("Current player == next player, after end turn");
+            System.out.println(state + " / " + nextState);
+        }
         // First attempt to look up this hash in the list of previously seen states.
         // If we have encountered it before, we'll just re-use it here
         CQTreeNode tn = root.stateNodeMap.get(nextHash);
@@ -310,6 +407,11 @@ public class CQTreeNode {
      */
     private int advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
+        while (act instanceof EndTurn && playerId == gs.getCurrentPlayer()) {
+            // sometimes it doesn't properly end the turn. Try ending the turn again I guess...
+            player.getForwardModel().next(gs, act);
+//            System.out.println("Corrected improperly ending turn.");
+        }
         root.fmCallsCount++;
         return gs.hashCode();
     }
@@ -322,7 +424,7 @@ public class CQTreeNode {
         double bestValue = -Double.MAX_VALUE;
         AbstractAction bestAction = null;
 
-        if (children.keySet().size() == 0) {
+        if (children.keySet().isEmpty()) {
             System.out.println("No actions? What?");
         }
         for (AbstractAction action : children.keySet()) {

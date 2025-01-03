@@ -6,6 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import core.components.PartialObservableDeck;
+import games.conquest.actions.EndTurn;
 import games.conquest.components.*;
 import utilities.Vector2D;
 
@@ -46,7 +47,7 @@ public class CQForwardModel extends StandardForwardModel {
         cqgs.setGamePhase(CQGameState.CQGamePhase.SelectionPhase);
 
         cqgs.locationToTroopMap = new HashMap<Vector2D, Integer>();
-        cqgs.cells = new Cell[cqp.gridHeight][cqp.gridWidth];
+        cqgs.cells = new Cell[cqp.gridWidth][cqp.gridHeight];
         cqgs.troops = new HashSet<Troop>();
         cqgs.gridBoard = new GridBoard<>(cqp.gridWidth, cqp.gridHeight);
         cqgs.chosenCommands = new PartialObservableDeck[]{
@@ -142,10 +143,11 @@ public class CQForwardModel extends StandardForwardModel {
     }
 
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.isActionInProgress()) return;
+        if (currentState.isActionInProgress() && !(action instanceof EndTurn)) return;
         CQGameState cqgs = (CQGameState) currentState;
-        CQParameters cqp = (CQParameters) currentState.getGameParameters();
+//        CQParameters cqp = (CQParameters) currentState.getGameParameters();
         // This is only called after an EndTurn action, so end the turn:
+        int x = cqgs.getCurrentPlayer();
         cqgs.endTurn();
         endPlayerTurn(cqgs);
     }
