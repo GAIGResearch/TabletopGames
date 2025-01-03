@@ -4,18 +4,17 @@ import core.components.Card;
 import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7Constants.*;
 import games.wonders7.Wonders7GameState;
+import org.jetbrains.annotations.NotNull;
 import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
-import static games.wonders7.Wonders7Constants.createCardHash;
 import static games.wonders7.cards.Wonder7Board.Wonder.TheStatueOfZeusInOlympia;
 import static games.wonders7.cards.Wonder7Card.Type.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static java.util.Map.entry;
 
 public class Wonder7Card extends Card {
 
@@ -265,7 +264,11 @@ public class Wonder7Card extends Card {
                 return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Stone, 2, Glass, 2),
                         emptyMap(), emptyList(),
                         List.of(new GainResourceEffect(Victory,
-                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1 == state.getPlayerWonderBoard(player).type.wonderStages) ? 7 : 0)), emptyList());
+                                (state, player) -> {
+                                    int totalStagesOfWonder = state.getPlayerWonderBoard(player).totalWonderStages;
+                                    int stagesBuilt = state.getPlayerWonderBoard(player).wonderStage - 1;
+                                    return (stagesBuilt == totalStagesOfWonder) ? 7 : 0;
+                                })), emptyList());
             case ScientistsGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Wood, 2, Ore, 2, Papyrus, 1),
                         Map.of(ScienceWild, 1));
@@ -354,6 +357,11 @@ public class Wonder7Card extends Card {
     }
 
     private String mapToStr(Map<Resource, Integer> m) {
+        return getString(m);
+    }
+
+    @NotNull
+    public static String getString(Map<Resource, Integer> m) {
         StringBuilder s = new StringBuilder();
         for (Map.Entry<Resource, Integer> e : m.entrySet()) {
             if (e.getValue() > 0) s.append(e.getValue()).append(" ").append(e.getKey()).append(",");
@@ -371,7 +379,7 @@ public class Wonder7Card extends Card {
             }
         }
         Wonder7Board wonder = wgs.getPlayerWonderBoard(player);
-        if (wonder.type == TheStatueOfZeusInOlympia && wonder.wonderStage > 2) {
+        if (wonder.wonderType() == TheStatueOfZeusInOlympia  && wonder.getSide() == 0 && wonder.wonderStage > 2) {
             // if this is the first card of the type, then it is buildable for free
             if (wgs.getPlayedCards(player).getComponents().stream().noneMatch(c -> c.type == type))
                 return true;

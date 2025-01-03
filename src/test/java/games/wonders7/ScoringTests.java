@@ -7,9 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
-import static games.wonders7.Wonders7Constants.createCardHash;
 import static games.wonders7.cards.Wonder7Card.CardType.*;
-import static games.wonders7.cards.Wonder7Card.Type.*;
 import static org.junit.Assert.*;
 
 public class ScoringTests {
@@ -228,13 +226,14 @@ public class ScoringTests {
     @Test
     public void decoratorsGuild(){
         state.getPlayedCards(2).add(Wonder7Card.factory(DecoratorsGuild));
-        for (int i = 1; i <= state.getPlayerWonderBoard(2).type.wonderStages; i++){
+        Wonder7Board board = state.getPlayerWonderBoard(2);
+        for (int i = 1; i <= board.totalWonderStages; i++){
             assertEquals(1, state.getGameScore(2), 0.001);
-            state.getPlayerWonderBoard(2).changeStage();
+            board.changeStage();
         }
         assertEquals(8, state.getGameScore(2), 0.001);
 
-        for (int i = 1; i <= state.getPlayerWonderBoard(3).type.wonderStages; i++){
+        for (int i = 1; i <= state.getPlayerWonderBoard(3).totalWonderStages; i++){
             state.getPlayerWonderBoard(3).changeStage();
         }
         assertEquals(8, state.getGameScore(2), 0.001);
@@ -277,8 +276,8 @@ public class ScoringTests {
 
     @Test
     public void bazaarDoesNotIncludeResourcesOnWonder() {
-        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheLighthouseOfAlexandria);  // Mfg goods
-        state.playerWonderBoard[2] = new Wonder7Board(Wonder7Board.Wonder.TheTempleOfArtemisInEphesus);  // Raw materials
+        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheLighthouseOfAlexandria, 0);  // Mfg goods
+        state.playerWonderBoard[2] = new Wonder7Board(Wonder7Board.Wonder.TheTempleOfArtemisInEphesus, 0);  // Raw materials
         state.getPlayerHand(1).add(Wonder7Card.factory(Bazaar));
         state.getPlayedCards(1).add(Wonder7Card.factory(Press));
         fm.next(state, new PlayCard(1, Bazaar, true));
@@ -288,12 +287,13 @@ public class ScoringTests {
     @Test
     public void arenaGivesMoneyAndPointsIndependently() {
         state.getPlayerHand(2).add(Wonder7Card.factory(Arena));
-        state.getPlayerWonderBoard(2).wonderStage = 2;
+        state.getPlayerWonderBoard(2).changeStage();
         fm.next(state, new PlayCard(2, Arena, true));
         assertEquals(6, state.getPlayerResources(2).get(Coin), 0.001);
         assertEquals(3, state.getGameScore(2), 0.001);
 
-        state.getPlayerWonderBoard(2).wonderStage = 4;
+        state.getPlayerWonderBoard(2).changeStage();
+        state.getPlayerWonderBoard(2).changeStage();
         assertEquals(6, state.getPlayerResources(2).get(Coin), 0.001);
         assertEquals(5, state.getGameScore(2), 0.001);
     }

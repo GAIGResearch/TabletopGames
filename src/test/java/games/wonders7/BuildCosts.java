@@ -204,6 +204,8 @@ public class BuildCosts {
         state.getPlayerResources(3).put(Wood_Stone, 1);
         state.getPlayerResources(3).put(Clay, 0);
         state.getPlayerResources(1).put(Clay, 0);
+        state.getPlayerResources(1).put(Wood, 0);
+        state.getPlayerResources(3).put(Wood, 0);
 
         List<List<TradeSource>> options = temple.buildOptions(0, state);
         assertEquals(0, options.size());

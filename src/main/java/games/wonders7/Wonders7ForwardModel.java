@@ -4,24 +4,18 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.actions.OneShotExtendedAction;
 import core.components.Deck;
 import games.wonders7.actions.*;
-import games.wonders7.cards.GainResourceEffect;
 import games.wonders7.cards.Wonder7Board;
 import games.wonders7.cards.Wonder7Card;
-import org.apache.hadoop.fs.Stat;
-import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static games.wonders7.Wonders7Constants.Resource.*;
-import static games.wonders7.Wonders7Constants.createCardHash;
 import static games.wonders7.cards.Wonder7Board.Wonder.TheMausoleumOfHalicarnassus;
 import static games.wonders7.cards.Wonder7Card.CardType.*;
-import static games.wonders7.cards.Wonder7Card.Type.*;
-import static java.util.stream.Collectors.toList;
+
 
 
 public class Wonders7ForwardModel extends StandardForwardModel {
@@ -60,20 +54,15 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         wgs.discardPile = new Deck<>("Discarded Cards", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Shuffles wonder-boards
-        createWonderDeck(wgs); // Adds Wonders into game
-        wgs.wonderBoardDeck.shuffle(params.wonderShuffleSeed != -1 ? new Random(params.wonderShuffleSeed) : wgs.getRnd());
+        createWonderDeck(wgs, new Random(params.wonderShuffleSeed)); // Adds Wonders into game
 
         // Gives each player wonder board and manufactured goods from the wonder
         for (int player = 0; player < wgs.getNPlayers(); player++) {
             wgs.setPlayerWonderBoard(player, wgs.wonderBoardDeck.draw());// Each player has one designated Wonder board
 
             // Players get their wonder board manufacturedGoods added to their resources
-            Set<Wonders7Constants.Resource> keys = wgs.getPlayerWonderBoard(player).type.resourcesProduced.keySet(); // Gets all the resources the stage provides
-            for (Wonders7Constants.Resource resource : keys) {  // Goes through all keys for each resource
-                int stageValue = Math.toIntExact(wgs.getPlayerWonderBoard(player).type.resourcesProduced.get(resource)); // Number of resource the card provides
-                int playerValue = wgs.getPlayerResources(player).get(resource); // Number of resource the player owns
-                wgs.getPlayerResources(player).put(resource, stageValue + playerValue); // Adds the resources provided by the stage to the players resource count
-            }
+            Wonders7Constants.Resource wonderResource = wgs.getPlayerWonderBoard(player).wonderType().resourcesProduced;
+            wgs.getPlayerResources(player).put(wonderResource, 1);
             // add coins
             wgs.getPlayerResources(player).put(Coin, params.startingCoins);
         }
@@ -108,9 +97,11 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
             // then if Halicarnassus triggers, put that functionality on the stack
             for (int p = 0; p < wgs.getNPlayers(); p++) {
-                if (wgs.getPlayerWonderBoard(p).type == TheMausoleumOfHalicarnassus &&
-                        wgs.getPlayerWonderBoard(p).wonderStage > 2 &&
-                        !wgs.getPlayerWonderBoard(p).effectUsed) {
+                Wonder7Board wonderBoard = wgs.getPlayerWonderBoard(p);
+                if (wonderBoard.wonderType() == TheMausoleumOfHalicarnassus &&
+                        !wonderBoard.effectUsed &&
+                        (wonderBoard.getSide() == 0 && wonderBoard.nextStageToBuild() > 2 ) ||
+                        (wonderBoard.getSide() == 1 && wonderBoard.nextStageToBuild() > 1)) {
                     wgs.setActionInProgress(new BuildFromDiscard(p));
                     wgs.getPlayerWonderBoard(p).effectUsed = true;
                     return;
@@ -218,11 +209,13 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         return actions.stream().map(ChooseCard::new).collect(Collectors.toList());
     }
 
-    protected void createWonderDeck(Wonders7GameState wgs) {
+    protected void createWonderDeck(Wonders7GameState wgs, Random rnd) {
         // Create all the possible wonders a player could be assigned
+        // this takes all seven boards and pre-shuffles them to one side or the other
         for (Wonder7Board.Wonder wonder : Wonder7Board.Wonder.values()) {
-            wgs.wonderBoardDeck.add(new Wonder7Board(wonder));
+            wgs.wonderBoardDeck.add(new Wonder7Board(wonder, rnd.nextInt(2)));
         }
+        wgs.wonderBoardDeck.shuffle(rnd);
     }
 
     public void checkAgeEnd(AbstractGameState gameState) {

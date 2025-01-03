@@ -33,7 +33,7 @@ public class WonderAbilities {
 
     @Test
     public void olympiaLevel2BuildsFirstCardOfColourForFree() {
-        state.playerWonderBoard[0] = new Wonder7Board(Wonder7Board.Wonder.TheStatueOfZeusInOlympia);
+        state.playerWonderBoard[0] = new Wonder7Board(Wonder7Board.Wonder.TheStatueOfZeusInOlympia, 0);
         state.getPlayerHand(0).add(Wonder7Card.factory(Palace));
         state.getPlayerHand(0).add(Wonder7Card.factory(University));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
@@ -64,7 +64,7 @@ public class WonderAbilities {
 
     @Test
     public void halicarnassusLevel2BuildsForFreeFromDiscardPileAtEndOfTurn() {
-        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus);
+        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus, 0);
         // at the end of the Age (and only then), if the second stage is built then the player can build a card from the discard pile for free
         state.getDiscardPile().add(Wonder7Card.factory(Arena));
         for (int i = 0; i < 7; i++) { // take 7 actions (2 turns minus 1)
@@ -72,13 +72,13 @@ public class WonderAbilities {
             int index = rnd.nextInt(actions.size());
             fm.next(state, actions.get(index));
         }
-        state.playerWonderBoard[1].wonderStage = 2;  // stage one; should not do anything
+        state.playerWonderBoard[1].changeStage();  // stage one; should not do anything
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         fm.next(state, actions.get(0));
         assertFalse(state.isActionInProgress());
         assertEquals(0, state.getCurrentPlayer());
 
-        state.playerWonderBoard[1].wonderStage = 3;  // stage two; should allow building from discard pile
+        state.playerWonderBoard[1].changeStage();  // stage two; should allow building from discard pile
         for (int i = 0; i < 4; i++) { // four actions
             actions = fm.computeAvailableActions(state);
             int index = rnd.nextInt(actions.size());
@@ -106,5 +106,9 @@ public class WonderAbilities {
         }
     }
 
+    @Test
+    public void halicarnassusNightSideResetsEffectUsed() {
+        fail("Not implemented");
+    }
 
 }
