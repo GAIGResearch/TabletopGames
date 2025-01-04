@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import static games.wonders7.cards.Wonder7Card.CardType.*;
 import static games.wonders7.cards.Wonder7Card.CardType.Temple;
@@ -172,8 +173,9 @@ public class WonderAbilities {
         // This does not apply to other players; or on the second action [we add an impossibly expensive card to the hand at the start of each age]
         int checks = 0;
         do {
-            if (state.getRoundCounter() % 7  == 0 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
+            if (state.getRoundCounter() % 6 == 0 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
                 // before the first action of each Age
+                assertEquals(state.playerHands.get(2).getSize(), 7);
                 for (int p = 0; p < 4; p++) {
                     state.getPlayerHand(p).remove(6);  // remove random card, add expensive one
                     state.getPlayerHand(p).add(Wonder7Card.factory(Palace));
@@ -183,10 +185,10 @@ public class WonderAbilities {
             if (state.getRoundCounter() > 2 && state.getPlayerWonderBoard(2).nextStageToBuild() == 1)
                 state.getPlayerWonderBoard(2).changeStage();
             List<AbstractAction> availableActions = fm.computeAvailableActions(state);
-            if (state.getRoundCounter() % 7 == 0 && !state.isActionInProgress()) {
+            if (state.getRoundCounter() % 6 == 0 && !state.isActionInProgress()) {
                 // before the first action of each Age
                 assertTrue(availableActions.stream().allMatch(a -> a instanceof ChooseCard));
-      //          System.out.println("Player " + state.getCurrentPlayer() + " has " + availableActions.size() + " actions");
+                //          System.out.println("Player " + state.getCurrentPlayer() + " has " + availableActions.size() + " actions");
                 assertEquals(state.getCurrentPlayer() == 2 && state.getRoundCounter() > 2,
                         availableActions.contains(new ChooseCard(new PlayCard(state.getCurrentPlayer(), Palace, true))));
                 checks++;
@@ -208,7 +210,7 @@ public class WonderAbilities {
         // This does not apply to other players; or on the second action [we add an impossibly expensive card to the hand at the start of each age]
         int checks = 0;
         do {
-            if (state.getRoundCounter() % 6  == 5 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
+            if (state.getRoundCounter() % 6 == 5 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
                 // before the last action of each Age
                 for (int p = 0; p < 4; p++) {
                     state.getPlayerHand(p).remove(1);  // remove random card, add expensive one
@@ -222,14 +224,14 @@ public class WonderAbilities {
             if (state.getRoundCounter() % 6 == 5 && !state.isActionInProgress()) {
                 // for the last card of the age
                 assertTrue(availableActions.stream().allMatch(a -> a instanceof ChooseCard));
-                          System.out.println("Player " + state.getCurrentPlayer() + " has " + availableActions.size() + " actions");
+                System.out.println("Player " + state.getCurrentPlayer() + " has " + availableActions.size() + " actions");
                 assertEquals(state.getCurrentPlayer() == 2 && state.getRoundCounter() > 9,
                         availableActions.contains(new ChooseCard(new PlayCard(state.getCurrentPlayer(), Palace, true))));
                 checks++;
             }
 
             // we play the last card to avoid ever building the palace
-            fm.next(state, availableActions.get(availableActions.size()-1));
+            fm.next(state, availableActions.get(availableActions.size() - 1));
         } while (state.isNotTerminal());
 
         assertEquals(12, checks);
@@ -237,7 +239,30 @@ public class WonderAbilities {
 
     @Test
     public void babylonNightSideBuildFinalDiscardForFree() {
+        state.playerWonderBoard[0] = new Wonder7Board(Wonder7Board.Wonder.TheHangingGardensOfBabylon, 1);
+        // We build the first stage of this wonder during Age 2. We check that in Age 1 the player does not build a card for free
+        // but does build a free extra card in the other two ages.
+        // We also check that all other players do not get this benefit.
 
+        int checks = 0;
+        do {
+            // we build the wonder during the second Age (so we can check it does not apply for the first age)
+            if (state.getRoundCounter() > 9 && state.getPlayerWonderBoard(0).nextStageToBuild() == 1)
+                state.getPlayerWonderBoard(0).changeStage();
+
+            for (int i = 0; i < 4; i++) {
+                List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+                fm.next(state, availableActions.get(availableActions.size() - 1));  // will always be a Discard - so nothing built outside of wonder
+            }
+
+            if (state.getPlayerHand(0).getSize() == 0 || state.getPlayerHand(0).getSize() == 7) {
+                checks++;
+                for (int p = 0; p < 4; p++)
+                    assertEquals( p == 0 ? state.getCurrentAge() - 2 : 0, state.getPlayedCards(p).getSize());
+            }
+        } while (state.isNotTerminal());
+
+        assertEquals(3, checks);
     }
 
 }

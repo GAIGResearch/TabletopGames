@@ -223,7 +223,24 @@ public class Wonders7ForwardModel extends StandardForwardModel {
 
     public void checkAgeEnd(AbstractGameState gameState) {
         Wonders7GameState wgs = (Wonders7GameState) gameState;
+
+
         if (wgs.getPlayerHand(wgs.getCurrentPlayer()).getSize() == 1) {  // If all players hands are empty
+
+            // if the relevant stage of Babylon is built, then auto-build the last card in hand
+            for (int p = 0; p < wgs.getNPlayers(); p++) {
+                Wonder7Board wonderBoard = wgs.getPlayerWonderBoard(p);
+                if (wonderBoard.wonderType() == Wonder7Board.Wonder.TheHangingGardensOfBabylon &&
+                        wonderBoard.getSide() == 1 &&
+                        wonderBoard.nextStageToBuild() > 1) {
+                    if (wgs.getPlayerHand(p).getSize() > 1) {
+                        throw new AssertionError("Babylon should have only one card in hand at this point");
+                    }
+                    Wonder7Card cardToBuildForFree = wgs.getPlayerHand(p).get(0);
+                    PlayCard action = new PlayCard(p, cardToBuildForFree.cardType, true);
+                    action.execute(wgs);
+                }
+            }
 
             for (int i = 0; i < wgs.getNPlayers(); i++) {
                 if (wgs.getPlayerHand(i).getSize() > 0) {
