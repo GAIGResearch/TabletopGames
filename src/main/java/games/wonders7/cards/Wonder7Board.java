@@ -151,6 +151,7 @@ public class Wonder7Board extends Card {
 
     public void changeStage() {
         wonderStage++;
+        effectUsed = false;
     }
 
     @Override

@@ -100,8 +100,8 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                 Wonder7Board wonderBoard = wgs.getPlayerWonderBoard(p);
                 if (wonderBoard.wonderType() == TheMausoleumOfHalicarnassus &&
                         !wonderBoard.effectUsed &&
-                        (wonderBoard.getSide() == 0 && wonderBoard.nextStageToBuild() > 2 ) ||
-                        (wonderBoard.getSide() == 1 && wonderBoard.nextStageToBuild() > 1)) {
+                        ((wonderBoard.getSide() == 0 && wonderBoard.nextStageToBuild() == 3 ) ||
+                        (wonderBoard.getSide() == 1 && wonderBoard.nextStageToBuild() > 1))) {
                     wgs.setActionInProgress(new BuildFromDiscard(p));
                     wgs.getPlayerWonderBoard(p).effectUsed = true;
                     return;

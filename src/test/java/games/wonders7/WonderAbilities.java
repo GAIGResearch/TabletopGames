@@ -104,11 +104,63 @@ public class WonderAbilities {
             assertFalse(state.isActionInProgress());
             assertTrue(state.playerWonderBoard[1].effectUsed);
         }
+        // then build next stage, and check we do not trigger the earlier one
+        state.playerWonderBoard[1].changeStage();
+        assertFalse(state.playerWonderBoard[1].effectUsed);
+        for (int i = 0; i < 8; i++) { // four actions
+            actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+            assertFalse(state.isActionInProgress());
+        }
     }
 
     @Test
     public void halicarnassusNightSideResetsEffectUsed() {
-        fail("Not implemented");
+        state.playerWonderBoard[1] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus, 1);
+        state.getDiscardPile().add(Wonder7Card.factory(Arena));
+        for (int i = 0; i < 7; i++) { // take 7 actions (2 turns minus 1)
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        state.playerWonderBoard[1].changeStage();  // stage one;  should allow building from discard pile
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertTrue(state.isActionInProgress());
+        assertEquals(1, state.getCurrentPlayer());
+        assertTrue(state.currentActionInProgress() instanceof BuildFromDiscard);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlayCard));
+        int discardSize = state.getDiscardPile().getSize();
+        fm.next(state, actions.get(0));
+        assertEquals(discardSize - 1, state.getDiscardPile().getSize());
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getCurrentPlayer());
+        assertTrue(state.playerWonderBoard[1].effectUsed);
+
+        for (int i = 0; i < 8; i++) { // 8 actions
+            actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+            assertFalse(state.isActionInProgress());
+        }
+        assertTrue(state.playerWonderBoard[1].effectUsed);
+        state.playerWonderBoard[1].changeStage();  // stage two; should allow building from discard pile
+        assertFalse(state.playerWonderBoard[1].effectUsed);
+
+        // now check we build another one (after the four actions to play cards)
+        for (int i = 0; i < 4; i++) { // four actions
+            assertFalse(state.isActionInProgress());
+            actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        assertTrue(state.isActionInProgress());
+        assertTrue(state.playerWonderBoard[1].effectUsed); // this is set once BuildToDiscard is added to stack
+        assertEquals(1, state.getCurrentPlayer());
+        assertTrue(state.currentActionInProgress() instanceof BuildFromDiscard);
+        actions = fm.computeAvailableActions(state);
+        assertTrue(actions.stream().allMatch(a -> a instanceof PlayCard));
     }
 
 }
