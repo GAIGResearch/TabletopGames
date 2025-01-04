@@ -384,6 +384,18 @@ public class Wonder7Card extends Card {
             if (wgs.getPlayedCards(player).getComponents().stream().noneMatch(c -> c.type == type))
                 return true;
         }
+        // then check for Olympia night side (first slot means first card is free)
+        if (wonder.wonderType() == TheStatueOfZeusInOlympia && wonder.getSide() == 1 && wonder.wonderStage > 1) {
+            if (wgs.getPlayerHand(player).getSize() == 7) {
+                return true;
+            }
+        }
+        // and second slot means last card is free
+        if (wonder.wonderType() == TheStatueOfZeusInOlympia && wonder.getSide() == 1 && wonder.wonderStage > 2) {
+            if (wgs.getPlayerHand(player).getSize() == 2) {
+                return true;
+            }
+        }
         return constructionCost.isEmpty(); // Card is free (no construction cost)
     }
 

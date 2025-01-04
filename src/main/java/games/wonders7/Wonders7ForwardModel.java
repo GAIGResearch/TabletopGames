@@ -95,6 +95,9 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         if (checkActionRound(wgs)) {
             executeAllActions(wgs);
 
+            endRound(wgs); // Ends the round, increments the round counter
+            // this ensures that one round is one turn per player
+
             // then if Halicarnassus triggers, put that functionality on the stack
             for (int p = 0; p < wgs.getNPlayers(); p++) {
                 Wonder7Board wonderBoard = wgs.getPlayerWonderBoard(p);
@@ -229,7 +232,6 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                 }
             }
 
-            endRound(wgs); // Ends the round,
             wgs.reverse(); // Turn Order reverses at end of Age
 
             // Resolves military conflicts

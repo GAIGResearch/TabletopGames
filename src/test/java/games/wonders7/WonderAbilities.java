@@ -163,4 +163,81 @@ public class WonderAbilities {
         assertTrue(actions.stream().allMatch(a -> a instanceof PlayCard));
     }
 
+    @Test
+    public void olympiaNightSideFirstCardOfAge() {
+        state.playerWonderBoard[2] = new Wonder7Board(Wonder7Board.Wonder.TheStatueOfZeusInOlympia, 1);
+        // We build the first stage of this wonder, then check that with random play, on the first card built
+        // by player 2 for each Age, they can build all cards in their hand for free
+
+        // This does not apply to other players; or on the second action [we add an impossibly expensive card to the hand at the start of each age]
+        int checks = 0;
+        do {
+            if (state.getRoundCounter() % 7  == 0 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
+                // before the first action of each Age
+                for (int p = 0; p < 4; p++) {
+                    state.getPlayerHand(p).remove(6);  // remove random card, add expensive one
+                    state.getPlayerHand(p).add(Wonder7Card.factory(Palace));
+                }
+            }
+            // we build the wonder during the first Age (so we can check it does not apply for the first card)
+            if (state.getRoundCounter() > 2 && state.getPlayerWonderBoard(2).nextStageToBuild() == 1)
+                state.getPlayerWonderBoard(2).changeStage();
+            List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+            if (state.getRoundCounter() % 7 == 0 && !state.isActionInProgress()) {
+                // before the first action of each Age
+                assertTrue(availableActions.stream().allMatch(a -> a instanceof ChooseCard));
+      //          System.out.println("Player " + state.getCurrentPlayer() + " has " + availableActions.size() + " actions");
+                assertEquals(state.getCurrentPlayer() == 2 && state.getRoundCounter() > 2,
+                        availableActions.contains(new ChooseCard(new PlayCard(state.getCurrentPlayer(), Palace, true))));
+                checks++;
+            }
+
+            fm.next(state, availableActions.get(state.getRnd().nextInt(availableActions.size())));
+        } while (state.isNotTerminal());
+
+        assertEquals(12, checks);
+    }
+
+    @Test
+    public void olympiaNightSideLastCardOfAge() {
+        state.playerWonderBoard[2] = new Wonder7Board(Wonder7Board.Wonder.TheStatueOfZeusInOlympia, 1);
+        // We build the first stage of this wonder, then check that with random play, on the first card built
+        // by player 2 for each Age, they can build all cards in their hand for free
+        state.playerWonderBoard[2].changeStage();
+
+        // This does not apply to other players; or on the second action [we add an impossibly expensive card to the hand at the start of each age]
+        int checks = 0;
+        do {
+            if (state.getRoundCounter() % 6  == 5 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
+                // before the last action of each Age
+                for (int p = 0; p < 4; p++) {
+                    state.getPlayerHand(p).remove(1);  // remove random card, add expensive one
+                    state.getPlayerHand(p).add(Wonder7Card.factory(Palace));
+                }
+            }
+            // we build the wonder during the second Age (so we can check it does not apply for the first card)
+            if (state.getRoundCounter() > 9 && state.getPlayerWonderBoard(2).nextStageToBuild() == 2)
+                state.getPlayerWonderBoard(2).changeStage();
+            List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+            if (state.getRoundCounter() % 6 == 5 && !state.isActionInProgress()) {
+                // for the last card of the age
+                assertTrue(availableActions.stream().allMatch(a -> a instanceof ChooseCard));
+                          System.out.println("Player " + state.getCurrentPlayer() + " has " + availableActions.size() + " actions");
+                assertEquals(state.getCurrentPlayer() == 2 && state.getRoundCounter() > 9,
+                        availableActions.contains(new ChooseCard(new PlayCard(state.getCurrentPlayer(), Palace, true))));
+                checks++;
+            }
+
+            // we play the last card to avoid ever building the palace
+            fm.next(state, availableActions.get(availableActions.size()-1));
+        } while (state.isNotTerminal());
+
+        assertEquals(12, checks);
+    }
+
+    @Test
+    public void babylonNightSideBuildFinalDiscardForFree() {
+
+    }
+
 }
