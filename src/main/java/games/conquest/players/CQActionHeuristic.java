@@ -20,13 +20,13 @@ public class CQActionHeuristic implements IActionHeuristic {
             return 1.0;
         } else if (action instanceof ApplyCommand) {
             // When evaluating a turn, evaluate using commands last
-            return 0.8;
+            return 0.6;
         } else if (action instanceof EndTurn) {
             // Consider ending your turn last, after having checked possible useful moves
-            return 0.4;
+            return 0.61;
         } else {
             // SelectTroop or MoveTroop action
-            return 0.6;
+            return 0.7;
         }
     }
 

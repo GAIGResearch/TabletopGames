@@ -1,10 +1,10 @@
 {
   "class" : "players.mcts.MCTSParams",
   "budgetType" : "BUDGET_TIME",
-  "budget" : 1000,
+  "budget" : 5000,
   "rolloutTermination" : "END_TURN",
-  "rolloutLength" : 100,
-  "maxTreeDepth" : 10,
+  "rolloutLength" : 10,
+  "maxTreeDepth" : 20,
   "information": "Closed_Loop",
   "selectionPolicy": "SIMPLE",
   "treePolicy": "UCB",
@@ -19,5 +19,6 @@
   "normaliseRewards": true,
   "pUCT": true,
   "pUCTTemperature": 0.0,
-  "backupPolicy": "MonteCarlo"
+  "backupPolicy": "MonteCarlo",
+  "actionHeuristic": "games.conquest.players.CQActionHeuristic"
 }

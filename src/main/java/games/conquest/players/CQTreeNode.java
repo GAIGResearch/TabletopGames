@@ -146,6 +146,7 @@ public class CQTreeNode {
             if (stop && flexibleBudget && incompleteTurn()) {
                 // Flexible budget: allow for more time if the best move does not reach the end of the turn
                 if (params.budgetType == BUDGET_TIME) {
+                    elapsedTimer.reset();
                     elapsedTimer.setMaxTimeMillis(params.budget);
                 } else {
                     budget += params.budget;

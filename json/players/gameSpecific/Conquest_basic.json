@@ -1,0 +1,10 @@
+{
+  "class" : "games.conquest.players.CQMCTSParams",
+  "budgetType" : "BUDGET_FM_CALLS",
+  "budget" : 5000,
+  "maxTreeDepth" : 20,
+  "epsilon": 1e-6,
+  "K" : 0.5,
+  "rolloutLength": 10,
+  "flexibleBudget": true
+}
