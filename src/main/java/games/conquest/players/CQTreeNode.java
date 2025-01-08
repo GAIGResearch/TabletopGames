@@ -106,6 +106,7 @@ public class CQTreeNode {
         if (params.budgetType == BUDGET_TIME) {
             elapsedTimer.setMaxTimeMillis(params.budget);
         }
+        root.fmCallsCount = 0;
 
         // Tracking number of iterations for iteration budget
         int numIters = 0;
@@ -140,7 +141,7 @@ public class CQTreeNode {
                         stop = numIters >= budget;
                 case BUDGET_FM_CALLS -> {
                     // FM calls budget
-                    stop = fmCallsCount > budget;
+                    stop = root.fmCallsCount > budget;
                 }
             }
             if (stop && flexibleBudget && incompleteTurn()) {
@@ -206,7 +207,7 @@ public class CQTreeNode {
                 actions.add(action);
             }
         }
-        return heuristic.bestAction(actions, null);
+        return heuristic.bestAction(actions, state);
     }
 
     /**
@@ -373,7 +374,7 @@ public class CQTreeNode {
 //        Random r = new Random(player.getParameters().getRandomSeed());
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
-        AbstractAction chosen = heuristic.bestAction(notChosen, null);
+        AbstractAction chosen = heuristic.bestAction(notChosen, state);
 //        AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
         selectedAction = chosen; // keep track of most recently selected action
 

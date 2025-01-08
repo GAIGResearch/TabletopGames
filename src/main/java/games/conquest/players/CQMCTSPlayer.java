@@ -65,6 +65,12 @@ public class CQMCTSPlayer extends AbstractPlayer {
             root.mctsSearch(getParameters().flexibleBudget);
         }
         AbstractAction best = root.greedy();
+        if (best instanceof EndTurn && root.children.size() > 1) {
+            // Ending turn has been deemed the best turn, but what if applying a command improves things?
+            // re-evaluate for one more budget allocation to be sure
+            root.mctsSearch(false);
+        }
+        best = root.greedy();
         if (best == null) {
             System.out.println("No best action... what?");
         }

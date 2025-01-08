@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
 import core.interfaces.IActionKey;
+import games.conquest.CQGameState;
 import games.conquest.actions.ApplyCommand;
 import games.conquest.actions.AttackTroop;
 import games.conquest.actions.EndTurn;
@@ -15,14 +16,22 @@ import java.util.Map;
 public class CQActionHeuristic implements IActionHeuristic {
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
+        CQGameState cqgs = (CQGameState) state;
         if (action instanceof AttackTroop) {
             // If able to attack something, always evaluate the result first
             return 1.0;
         } else if (action instanceof ApplyCommand) {
+            ApplyCommand ac = (ApplyCommand) action;
             // When evaluating a turn, evaluate using commands last
-            return 0.6;
+            if (ac.getCmdType().enemy) {
+                return 0.6; // TODO: some conditional to check proximity to friendly troop
+            } else if (ac.targetsTroop(cqgs.getSelectedTroop())) {
+                return 0.7;
+            } else {
+                return 0.6;
+            }
         } else if (action instanceof EndTurn) {
-            // Consider ending your turn last, after having checked possible useful moves
+            // First explore what happens if you end your turn, as a baseline to compare to applying commands later
             return 0.61;
         } else {
             // SelectTroop or MoveTroop action

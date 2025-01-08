@@ -6,6 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.conquest.CQGameState;
 import games.conquest.components.Command;
 import games.conquest.components.CommandType;
+import games.conquest.components.Troop;
 import utilities.Vector2D;
 
 import java.util.Objects;
@@ -30,6 +31,14 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
     public CQAction(int pid, int cmd, Vector2D target, int stateHash) {
         this(pid, target, stateHash);
         cmdHighlight = cmd;
+    }
+
+    public boolean targetsTroop(Troop troop) {
+        if (troop == null) return false;
+        return troop.getLocation().equals(highlight);
+    }
+    public CommandType getCmdType() {
+        return cmdType;
     }
 
     /**

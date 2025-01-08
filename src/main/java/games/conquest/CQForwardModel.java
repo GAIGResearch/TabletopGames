@@ -145,6 +145,7 @@ public class CQForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (currentState.isActionInProgress() && !(action instanceof EndTurn)) return;
         CQGameState cqgs = (CQGameState) currentState;
+        System.out.println("Doing an afterAction! Ending for " + cqgs.getCurrentPlayer());
 //        CQParameters cqp = (CQParameters) currentState.getGameParameters();
         // This is only called after an EndTurn action, so end the turn:
         int x = cqgs.getCurrentPlayer();

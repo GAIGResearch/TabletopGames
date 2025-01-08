@@ -4,6 +4,9 @@ import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IActionHeuristic;
+import games.conquest.CQGameState;
+import games.conquest.actions.EndTurn;
+import games.conquest.components.Troop;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -907,7 +910,16 @@ public class SingleTreeNode {
                 AbstractPlayer agent = rolloutState.getCurrentPlayer() == root.decisionPlayer ? params.getRolloutStrategy() : params.getOpponentModel();
                 next = agent.getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
+                System.out.println("Going to advance...");
                 advanceState(rolloutState, next, true);
+                if (rolloutState instanceof CQGameState && next instanceof EndTurn) {
+                    System.out.println("foo " + next);
+                    CQGameState cqgs = (CQGameState) rolloutState;
+                    for (Troop t : cqgs.getTroops(lastActorInRollout ^ 1)) {
+                        if (t.hasMoved())
+                            System.out.println("Troop still moved after advanceState...?");
+                    }
+                }
             }
         }
         // Evaluate final state and return normalised score

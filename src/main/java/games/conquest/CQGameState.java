@@ -97,6 +97,13 @@ public class CQGameState extends AbstractGameState {
      * @return A set of troops for the given owner
      */
     public HashSet<Troop> getTroops(int uid) {
+        if (uid == -1) {
+            // simply list all living troops
+            return troops
+                    .stream()
+                    .filter(Troop::isAlive)
+                    .collect(Collectors.toCollection(HashSet::new));
+        }
         return troops
                 .stream()
                 .filter(t -> t.getOwnerId() == uid && t.isAlive())
@@ -295,7 +302,6 @@ public class CQGameState extends AbstractGameState {
      * @return the metric for alive-ness of troops, between 0 and 1
      */
     public double getTroopHealthMetric(int playerId) {
-        // TODO: greater value for killing troops
         HashSet<Troop> allTroops = getAllTroops(playerId);
         HashSet<Troop> livingTroops = getTroops(playerId);
         int totalTroopCost = getTotalTroopCost(allTroops);
@@ -305,7 +311,7 @@ public class CQGameState extends AbstractGameState {
         double deadTroopCost = (totalTroopCost - livingTroopCost) / (double) totalTroopCost;
         // dead troops count as negative score; alive troop count as positive score, based on their health.
         // all troops being dead counts as -1; all troops being full health counts as 1.
-        return -deadTroopCost + relativeTroopCost;
+        return -2*deadTroopCost + relativeTroopCost;
     }
 
     /*======= METHODS THAT EXECUTE SOME ACTION =======*/
@@ -346,10 +352,14 @@ public class CQGameState extends AbstractGameState {
     public void endTurn() {
         setGamePhase(CQGamePhase.SelectionPhase);
         selectedTroop = -1;
-        for (Troop troop : troops) {
+        for (Troop troop : getTroops(-1)) {
             troop.step(getCurrentPlayer());
         }
         int nextPlayer = getCurrentPlayer() ^ 1;
+        for (Troop troop : getTroops(nextPlayer)) {
+            if (troop.hasMoved())
+                System.out.println("Troop was not stepped correctly, somehow...");
+        }
         commandPoints[nextPlayer] += 25;
         List<Command> list = chosenCommands[nextPlayer].getComponents();
         for (Command cmd : list) {
