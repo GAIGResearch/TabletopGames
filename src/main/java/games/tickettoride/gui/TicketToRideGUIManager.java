@@ -3,15 +3,19 @@ package games.tickettoride.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+
 import games.tickettoride.TicketToRideGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+
 
 /**
  * <p>This class allows the visualisation of the game. The game components (accessible through {@link Game#getGameState()}
@@ -52,6 +56,20 @@ public class TicketToRideGUIManager extends AbstractGUIManager {
     public TicketToRideGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null) return;
+
+        this.game = game;
+        gameState = (TicketToRideGameState) game.getGameState();
+
+        this.gameState = (TicketToRideGameState) game.getGameState();
+
+        boardView = new TicketToRideBoardView(gameState);
+
+        parent.add(boardView, BorderLayout.CENTER);
+
+
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
 
         // TODO: set up GUI components and add to `parent`
     }

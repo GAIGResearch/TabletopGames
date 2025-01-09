@@ -58,15 +58,19 @@ public class TicketToRideBoardView extends JComponent {
     int panX, panY;
 
     public TicketToRideBoardView(AbstractGameState gs) {
+        System.out.println( "In board view  doing constructor");
         gameState = (TicketToRideGameState) gs;
         this.graphBoard = ((TicketToRideGameState) gs).getWorld();
-        String dataPath = ((TicketToRideParameters)gs.getGameParameters()).getDataPath() + "/img/";
+        String dataPath = ((TicketToRideParameters)gs.getGameParameters()).getDataPath() + "img/";
+        System.out.println( dataPath +  " data path");
 
         // Background and card backs
-        this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);
+        background = ImageIO.GetInstance().getImage(dataPath + "ticketToRideBg.png");
         cardBackInf = ImageIO.GetInstance().getImage(dataPath + "trainCardBlueBg.png");
         cardBackPD = ImageIO.GetInstance().getImage(dataPath + "trainCardRedBg.png");
 
+
+        System.out.println( background +  " background");
 
         width = (int)(background.getWidth(null) * scale);
         height = (int)(background.getHeight(null) * scale);
