@@ -1,0 +1,11 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    [
+      {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "evaluation.metrics.GameMetrics$Winner" },
+      {"class": "games.monopolydeal.MonopolyDealMetrics$GameDuration" },
+      {"class": "games.monopolydeal.MonopolyDealMetrics$FinalHeuristicScore"},
+      {"class": "games.monopolydeal.MonopolyDealMetrics$CardsUsed"}
+    ]]
+}

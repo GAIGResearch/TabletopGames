@@ -13,6 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static games.loveletter.cards.CardType.Guard;
+import static games.loveletter.cards.CardType.getMaxCardValue;
+import static java.util.stream.Collectors.toList;
 import static utilities.Utils.enumNames;
 
 public class LLStateFeatures extends AbstractStateFeature {

@@ -60,10 +60,10 @@ public class LoveLetterFeatures implements IStateFeatureVector {
 //        final double maxCards = 16;
 //        double[] results = getObservationVector();
 //        results[8] = results[8] / maxCards;
-//        for (int i = 0; i < LoveLetterCard.CardType.values().length; i++) {
+//        for (int i = 0; i < CardType.values().length; i++) {
 //            // todo 5 is the max, which is guard other cards only have 1 each - should get it somehow
-//            results[9+i] = results[9+i] / 5; // ((LoveLetterParameters) gameParameters).cardCounts.get(LoveLetterCard.CardType.values()[i]);
-////            results[i] = LoveLetterCard.CardType.values()[i]
+//            results[9+i] = results[9+i] / 5; // ((LoveLetterParameters) gameParameters).cardCounts.get(CardType.values()[i]);
+////            results[i] = CardType.values()[i]
 //        }
 //        int nTokensWin = ((LoveLetterParameters) gameParameters).nTokensWin2;
 //        switch (nPlayers) {
