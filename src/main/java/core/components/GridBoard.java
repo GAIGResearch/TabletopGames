@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
 import static core.CoreConstants.imgHash;
 import static utilities.Utils.getNeighbourhood;
 
+/**
+ * GridBoard is a 2D grid of Components. It can be used to represent a board in a game, a map, or any other 2D grid.
+ * Each cell on the grid can contain a Component of any type.
+ * @param <T>
+ */
 public class GridBoard<T extends Component> extends Component implements IComponentContainer<T> {
 
     private int width;  // Width of the board

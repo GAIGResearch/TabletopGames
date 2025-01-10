@@ -29,6 +29,14 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
         gridBoard = null;
     }
 
+    /**
+     * This returns the player id of the token at the given position. Or -1 if this is empty.
+     */
+    public int getPlayerAt(int x, int y) {
+        Token token = gridBoard.getElement(x, y);
+        return token == null ? -1 : token.getOwnerId();
+    }
+
     @Override
     protected GameType _getGameType() {
         return GameType.Connect4;
@@ -59,12 +67,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
-     * of victory points, etc.
-     * If a game does not support this directly, then just return 0.0
-     *
-     * @param playerId
-     * @return - double, score of current state
+     * Score is not relevant for Connect4. This will be 0.0 if a game is nto finished.
      */
     @Override
     public double getGameScore(int playerId) {

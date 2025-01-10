@@ -1,0 +1,31 @@
+**Game Rules:**
+
+1. **Objective:** Avoid taking tricks containing hearts or the queen of spades.
+2. **Deck:** Standard 52-card deck.
+3. **Players:** 4.
+4. **Scoring:**
+   - Hearts: 1 point each.
+   - Queen of Spades: 13 points.
+   - Other cards: 0 points.
+   - First player to reach 100 points loses. Lowest score wins.
+5. **Passing:**
+   - Each player passes 3 cards to another player.
+   - Passing direction rotates clockwise each round.
+
+**Strategies:**
+
+1. **Queen of Spades:**
+   - Avoid leading with the queen of spades.
+   - Pass low spades to avoid being stuck with high spades alone.
+
+2. **Hearts:**
+   - Save high hearts (especially the queen, king, and ace of hearts) for late-game use to prevent opponents from shooting the moon.
+   - Try to avoid leading with hearts early in the game.
+
+3. **Trick Avoidance:**
+   - Avoid taking tricks with hearts or the queen of spades.
+   - If you must take a trick with points, try to take it from an opponent with a higher score.
+
+4. **Shooting the Moon:**
+   - Aim to take all hearts and the queen of spades in one hand to score 0 points and pass 26 points to each opponent.
+   - Be cautious, as failing to shoot the moon results in a high score.

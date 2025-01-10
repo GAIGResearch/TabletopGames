@@ -4,7 +4,7 @@ import core.AbstractParameters;
 import core.Game;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
-import games.loveletter.cards.LoveLetterCard;
+import games.loveletter.cards.CardType;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,15 +18,15 @@ public class LoveLetterParameters extends TunableParameters {
     String dataPath = "data/loveletter/";
 
     // Occurrence count for each card
-    public HashMap<LoveLetterCard.CardType, Integer> cardCounts = new HashMap<LoveLetterCard.CardType, Integer>() {{
-        put(LoveLetterCard.CardType.Princess, 1);
-        put(LoveLetterCard.CardType.Countess, 1);
-        put(LoveLetterCard.CardType.King, 1);
-        put(LoveLetterCard.CardType.Prince, 2);
-        put(LoveLetterCard.CardType.Handmaid, 2);
-        put(LoveLetterCard.CardType.Baron, 2);
-        put(LoveLetterCard.CardType.Priest, 2);
-        put(LoveLetterCard.CardType.Guard, 5);
+    public HashMap<CardType, Integer> cardCounts = new HashMap<CardType, Integer>() {{
+        put(CardType.Princess, 1);
+        put(CardType.Countess, 1);
+        put(CardType.King, 1);
+        put(CardType.Prince, 2);
+        put(CardType.Handmaid, 2);
+        put(CardType.Baron, 2);
+        put(CardType.Priest, 2);
+        put(CardType.Guard, 5);
     }};
 
     // How many cards each player draws
@@ -44,7 +44,7 @@ public class LoveLetterParameters extends TunableParameters {
         addTunableParameter("nTokensWin2", 7, Arrays.asList(3,4,5,6,7,8,9,10));
         addTunableParameter("nTokensWin3", 5, Arrays.asList(3,4,5,6,7,8,9,10));
         addTunableParameter("nTokensWin4", 4, Arrays.asList(3,4,5,6,7,8,9,10));
-        for (LoveLetterCard.CardType c: cardCounts.keySet()) {
+        for (CardType c: cardCounts.keySet()) {
             addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
         }
         _reset();

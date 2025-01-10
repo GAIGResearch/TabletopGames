@@ -1,0 +1,34 @@
+**Stratego Game Rules and Strategy Summary**
+
+**Objective:** Capture the opponent's flag or render them unable to move.
+
+**Board:** 10x10 grid.
+
+**Pieces:** Each player has 40 pieces, each with a unique rank and movement ability.
+
+**Movement:**
+- Most pieces move one space at a time.
+- The Scout can move any distance.
+
+**Attacking:**
+- Pieces reveal their rank when attacking.
+- Higher ranked piece always captures the lower, except when equal ranks attack each other (both are removed).
+- Special rules:
+  - Bomb: Captures adjacent pieces when attacked.
+  - Spy: Captures Marshal or Flag, but loses to any other piece or when attacked.
+  - Miner: Captures Bombs.
+
+**Endgame:**
+- Game ends in draw if both flags are protected and only non-Miner pieces remain.
+
+**Strategy:**
+- Concealment: Hide pieces' ranks to mislead the opponent.
+- Bluffing: Make moves to deceive the opponent about your pieces' identities.
+- Setup: Strategically place pieces at the start of the game for optimal defense and offense.
+
+**Pace:** Fast-paced, with no standard notation. Digital interfaces may record moves.
+
+**Unique Abilities:**
+- Marshal: Most powerful.
+- Spy: Weakest, but can capture Marshal or Flag.
+- Other pieces have distinct movement abilities and ranks.

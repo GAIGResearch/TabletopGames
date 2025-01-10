@@ -78,9 +78,9 @@ public class DominionPlayerView extends JComponent {
         // There is no need to updateComponent on the DeckViews, as once initialised, the same Deck is retained throughout a Game
         // (if we ignore the copies of GameState used in MCTS etc.)
         if (state.getCurrentPlayer() == playerId) {
-            actions = state.actionsLeft();
-            spendAvailable = state.availableSpend(playerId);
-            buys = state.buysLeft();
+            actions = state.getActionsLeft();
+            spendAvailable = state.getAvailableSpend(playerId);
+            buys = state.getBuysLeft();
         } else {
             actions = 0;
             spendAvailable = 0;
