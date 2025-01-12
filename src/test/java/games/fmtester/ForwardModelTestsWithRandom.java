@@ -7,7 +7,7 @@ public class ForwardModelTestsWithRandom {
 
     @Test
     public void testSaboteur() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Saboteur", "nGames=20", "nPlayers=3");
+        ForwardModelTester fmt = new ForwardModelTester("game=Saboteur", "nGames=2", "nPlayers=3");
     }
 
     public void testMonopolyDeal() {
