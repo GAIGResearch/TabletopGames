@@ -46,6 +46,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{
             add(gridBoard);
+            addAll(Connect4Constants.playerMapping);
         }};
     }
 

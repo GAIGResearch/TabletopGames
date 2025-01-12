@@ -37,6 +37,8 @@ public class MMGameState extends AbstractGameState {
             add(answerCode);
             add(guessBoard);
             add(resultBoard);
+            addAll(MMConstants.resultColours);
+            addAll(MMConstants.guessColours);
         }};
     }
 

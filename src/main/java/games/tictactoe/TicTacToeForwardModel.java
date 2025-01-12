@@ -69,7 +69,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements ITree
         // Check columns
         for (int x = 0; x < gridBoard.getWidth(); x++) {
             Token c = gridBoard.getElement(x, 0);
-            if (!c.getTokenType().equals(TicTacToeConstants.emptyCell)) {
+            if (c != null && !c.getTokenType().equals(TicTacToeConstants.emptyCell)) {
                 boolean win = true;
                 for (int y = 1; y < gridBoard.getHeight(); y++) {
                     Token o = gridBoard.getElement(x, y);
