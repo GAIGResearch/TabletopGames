@@ -36,7 +36,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         }
     }
 
-    TurnPhase currentPhase = TurnPhase.DRAW;
+    TurnPhase currentPhase = TurnPhase.START;
 
     //TODO: Make playerHands separate from played cards
     List<PartialObservableDeck<SeaSaltPaperCard>> playerHands;
@@ -52,7 +52,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     boolean[] protectedHands;
 
-    int[] playerPoints; // player points of previous rounds
+    int[] playerTotalScores; // player points of previous rounds
 
     public int[] playerCurrentDuoPoints;
 
@@ -76,7 +76,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        //TODO Redeterminise hidden info
+        //TODO Redeterminise hidden info (unless playerID == -1)
 //        System.out.println("COPY WAS USED FOR SOME REASON");
         SeaSaltPaperGameState sspgs = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
         sspgs.drawPile = drawPile.copy();
@@ -90,20 +90,26 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         for (int i = 0; i < getNPlayers(); i++) {
             sspgs.playerDiscards.add(playerDiscards.get(i).copy());
         }
-        sspgs.playerPoints = playerPoints.clone();
+
+        sspgs.playerTotalScores = playerTotalScores.clone();
+        sspgs.playerCurrentDuoPoints = playerCurrentDuoPoints.clone();
+        sspgs.protectedHands = protectedHands.clone();
+
+        sspgs.lastChance = lastChance;
         sspgs.currentPhase = currentPhase;
         return sspgs;
     }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return HandManager.calculatePoint(this, playerId) + playerPoints[playerId];
+        return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
     }
 
     @Override
     public double getGameScore(int playerId) {
-        return playerPoints[playerId];
+        return playerTotalScores[playerId];
     }
+
 
     @Override
     public boolean _equals(Object o) {
@@ -111,13 +117,15 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SeaSaltPaperGameState that = (SeaSaltPaperGameState) o;
-        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(playerPoints, that.playerPoints);
+        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(protectedHands, that.protectedHands) && Arrays.equals(playerTotalScores, that.playerTotalScores) && Arrays.equals(playerCurrentDuoPoints, that.playerCurrentDuoPoints);
     }
 
     @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), currentPhase, playerHands, playerDiscards, discardPile1, discardPile2, drawPile, lastChance, redeterminisationRnd);
-        result = 31 * result + Arrays.hashCode(playerPoints);
+        result = 31 * result + Arrays.hashCode(protectedHands);
+        result = 31 * result + Arrays.hashCode(playerTotalScores);
+        result = 31 * result + Arrays.hashCode(playerCurrentDuoPoints);
         return result;
     }
 
@@ -136,11 +144,11 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     // Check if all hands are protected;
     public boolean allProtected() {
-        boolean t = false;
+        boolean t = true;
         for (int i=0; i<getNPlayers(); i++) {
-            t = t || protectedHands[i];
+            t = t && protectedHands[i];
         }
-        return !t;
+        return t;
     }
 
     public Deck<SeaSaltPaperCard> getDrawPile() { return drawPile; }
@@ -149,9 +157,15 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     public Deck<SeaSaltPaperCard> getDiscardPile2() { return discardPile2; }
     public Deck<SeaSaltPaperCard>[] getDiscardPiles() { return new Deck[]{discardPile1, discardPile2};}
 
-    public int[] getPlayerPoints() { return playerPoints; }
+    public int[] getPlayerTotalScores() { return playerTotalScores; }
     public TurnPhase getCurrentPhase() { return currentPhase;}
     public void resetTurn() { currentPhase = TurnPhase.START; }
 
 
+    public void setLastChance(int playerID) {
+        if (playerID >= getNPlayers()) {
+            throw new RuntimeException("Last Chance playerID " + playerID + " is not supposed to exist");
+        }
+        lastChance = playerID;
+    }
 }

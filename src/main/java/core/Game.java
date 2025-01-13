@@ -18,6 +18,7 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
 import players.mcts.MCTSPlayer;
+import players.rhea.RHEAPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
 import players.simple.FirstActionPlayer;
@@ -827,18 +828,21 @@ public class Game {
 //        String gameType = Utils.getArg(args, "game", "Uno");
         String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 10);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+//        players.add(new MCTSPlayer());
+//        players.add(new HumanConsolePlayer());
+//        players.add(new HumanConsolePlayer());
         players.add(new RandomPlayer());
-//        players.add(new HumanConsolePlayer());
-//        players.add(new HumanConsolePlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 //        players.add(new BasicMCTSPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());

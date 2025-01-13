@@ -1,7 +1,11 @@
 package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
+import games.seasaltpaper.SeaSaltPaperGameState;
+
+import java.util.Arrays;
 
 public class LastChance extends AbstractAction {
 
@@ -14,6 +18,10 @@ public class LastChance extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
+        sspgs.setLastChance(playerId);
+//        // Reveal playerId hand
+//        sspgs.getPlayerHands().get(playerId).setVisibility(CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         return true;
     }
 

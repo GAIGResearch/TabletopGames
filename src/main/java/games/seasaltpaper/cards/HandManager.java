@@ -111,7 +111,7 @@ public class HandManager {
 
         // Iterate playerDiscard
         for (int i=0; i<playerDiscard.getSize(); i++) {
-            CardSuite suite = playerHand.get(i).getCardSuite();
+            CardSuite suite = playerDiscard.get(i).getCardSuite();
             suiteDict.put(suite, suiteDict.getOrDefault(suite, 0) + 1);
         }
 
@@ -120,7 +120,7 @@ public class HandManager {
 
         // Calculate Collection score
         for (CardSuite suite : collectorDict.keySet()) {
-            score += param.collectorBonusDict.get(suite)[collectorDict.get(suite)];
+            score += param.collectorBonusDict.get(suite)[collectorDict.get(suite) - 1];
         }
         //Calculate Multiplier score
         for (CardSuite suite : multiplierDict.keySet()) {
@@ -130,6 +130,10 @@ public class HandManager {
         }
         //Calculate Mermaid score
         score += calculateColorBonus(gs, playerID, mermaidCount);
+
+        //Duo points
+        //TODO properly implement this to also count unplayed duo cards
+        score += gs.playerCurrentDuoPoints[playerID];
 
         return score;
     }
@@ -157,7 +161,7 @@ public class HandManager {
             colorDict.put(color, colorDict.getOrDefault(color, 0) + 1);
         }
 
-        ArrayList<Integer> colorBonuses = (ArrayList<Integer>) colorDict.values();
+        ArrayList<Integer> colorBonuses = new ArrayList<>(colorDict.values());
         Collections.sort(colorBonuses); Collections.reverse(colorBonuses);
         n_colors = Integer.min(n_colors, colorBonuses.size());
         int score = 0;

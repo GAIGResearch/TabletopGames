@@ -37,14 +37,17 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
         sspgs.playerHands = new ArrayList<>(sspgs.getNPlayers());
         sspgs.playerDiscards = new ArrayList<>(sspgs.getNPlayers());
-        sspgs.playerPoints = new int[sspgs.getNPlayers()];
+        sspgs.playerTotalScores = new int[sspgs.getNPlayers()];
         sspgs.protectedHands = new boolean[sspgs.getNPlayers()];
+        //sspgs.playerCurrentDuoPoints = new int[sspgs.getNPlayers()];
         // Set up first round
         setupRound(sspgs);
     }
 
     protected void setupRound(SeaSaltPaperGameState sspgs)
     {
+        sspgs.currentPhase = TurnPhase.DRAW;
+        sspgs.lastChance = -1;
         sspgs.drawPile.clear();
         sspgs.discardPile1.clear();
         sspgs.discardPile2.clear();
@@ -101,7 +104,63 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
     }
 
     private void processEndRound(SeaSaltPaperGameState gs) {
+        if (gs.lastChance != -1 )
+        {
+            processEndRoundLastChance(gs);
+        }
+        else {
+            for (int i=0; i<gs.getNPlayers(); i++) {
+                gs.playerTotalScores[i] += HandManager.calculatePoint(gs, i);
+            }
+        }
 
+        int max = 0;
+        for (int i=0; i<gs.getNPlayers(); i++) {
+            if (max < gs.playerTotalScores[i]) {
+                max = gs.playerTotalScores[i];
+            }
+        }
+        SeaSaltPaperParameters param = (SeaSaltPaperParameters) gs.getGameParameters();
+        // Victory condition reached, end the game
+        if (max >= param.victoryCondition[gs.getNPlayers() - 2]) {
+            endGame(gs); // TODO implement 4 Mermaid insta win
+        }
+        else {
+            int nextPlayer = (gs.getCurrentPlayer() + 1) % gs.getNPlayers();
+            endRound(gs, nextPlayer);
+            setupRound(gs);
+        }
+    }
+
+    private void processEndRoundLastChance(SeaSaltPaperGameState gs) {
+        int[] playerScores = new int[gs.getNPlayers()];
+        int max = 0;
+        for (int i=0; i<gs.getNPlayers(); i++) {
+            playerScores[i] = HandManager.calculatePoint(gs, i);
+            if (max < playerScores[i]) {
+                max = playerScores[i];
+            }
+        }
+        // LastChance BET WON
+        if (playerScores[gs.lastChance] >= max) {
+            for (int i=0; i<gs.getNPlayers(); i++) {
+                gs.playerTotalScores[i] += HandManager.calculateColorBonus(gs, i);
+                if (i == gs.lastChance) {
+                    gs.playerTotalScores[i] += playerScores[i];
+                }
+            }
+        }
+        // LastChance BET LOSS
+        else {
+            for (int i=0; i<gs.getNPlayers(); i++) {
+                if (i == gs.lastChance) {
+                    gs.playerTotalScores[i] += HandManager.calculateColorBonus(gs, i);
+                }
+                else {
+                    gs.playerTotalScores[i] += playerScores[i];
+                }
+            }
+        }
     }
 
     /**
@@ -131,18 +190,13 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 System.out.println("this is duo/stop phase");
                 actions.addAll(HandManager.generateDuoActions(sspgs, sspgs.getCurrentPlayer()));
                 actions.add(new DoNothing());
-                if (HandManager.calculatePoint(sspgs, sspgs.getCurrentPlayer()) >= 7) {
+                if (HandManager.calculatePoint(sspgs, sspgs.getCurrentPlayer()) >= 7 && sspgs.lastChance == -1) {
                     actions.add(new Stop(gameState.getCurrentPlayer()));
                     actions.add(new LastChance(gameState.getCurrentPlayer()));
                 }
                 break;
             default:
                 actions.add(new DoNothing());
-        }
-        if (sspgs.lastChance != -1) {
-            // TODO Process LastChance stuff here
-            // Reveal the current player card
-            // protectedHands[currentPlayer] = true;
         }
         return actions;
     }
@@ -153,15 +207,31 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 
         System.out.println("ACTIONS EXECUTED XD!!");
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gameState;
+        if (action instanceof Stop) {
+            processEndRound(sspgs);
+            return;
+//            sspgs.currentPhase = TurnPhase.FINISH;
+        }
         if (!(action instanceof PlayDuo)) {
             sspgs.currentPhase = sspgs.currentPhase.next();
         }
         if (sspgs.currentPhase == TurnPhase.FINISH) // Current player's turn is finished, end the turn
         {
+            if (sspgs.lastChance != -1) {
+                //Process LastChance stuff
+                sspgs.protectedHands[sspgs.getCurrentPlayer()] = true;
+                sspgs.getPlayerHands().get(sspgs.getCurrentPlayer()).setVisibility(VisibilityMode.VISIBLE_TO_ALL);
+                // if all players have gone after LastChance
+                if (sspgs.allProtected()) {
+                    processEndRound(sspgs);
+                    return;
+                }
+            }
             int nextPlayer = (sspgs.getCurrentPlayer() + 1) % sspgs.getNPlayers();
             endPlayerTurn(sspgs, nextPlayer);
             sspgs.currentPhase = sspgs.currentPhase.next();
         }
+
     }
 
 }

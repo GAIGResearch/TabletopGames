@@ -16,6 +16,8 @@ public class SeaSaltPaperParameters extends AbstractParameters {
     public String dataPath = "data/seasaltpaper/";
     int discardPileCount = 2;
 
+    int[] victoryCondition = new int[]{40, 35, 30};
+
     // TODO make collector bonus of suites that do not have collector card empty array
     public int[] boatCollectorBonus = new int[]{};
     public int[] fishCollectorBonus = new int[]{};
