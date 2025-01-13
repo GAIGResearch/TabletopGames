@@ -6,7 +6,9 @@ import games.seasaltpaper.cards.CardSuite;
 import games.seasaltpaper.cards.CardType;
 import utilities.Pair;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static games.seasaltpaper.cards.CardColor.*;
 import static games.seasaltpaper.cards.CardSuite.*;
@@ -18,7 +20,6 @@ public class SeaSaltPaperParameters extends AbstractParameters {
 
     int[] victoryCondition = new int[]{40, 35, 30};
 
-    // TODO make collector bonus of suites that do not have collector card empty array
     public int[] boatCollectorBonus = new int[]{};
     public int[] fishCollectorBonus = new int[]{};
     public int[] shellCollectorBonus = new int[]{0, 2, 4, 6, 8, 10};
@@ -75,7 +76,6 @@ public class SeaSaltPaperParameters extends AbstractParameters {
             new Pair<>(5, new CardColor[]{LIGHT_BLUE, BLUE, BLACK, GREEN, PURPLE}));// Light Blue, Blue, Black, Green, Purple
         put(new Pair<>(SWIMMER, CardType.DUO),
             new Pair<>(5, new CardColor[]{LIGHT_BLUE, LIGHT_BLUE, BLUE, YELLOW, LIGHT_ORANGE}));// Light Blue, Blue, Yellow, LightOrange - 5 total.
-        //TODO last swimmer color? only say 4
 
         put(new Pair<>(SHELL, CardType.COLLECTOR),
             new Pair<>(6, new CardColor[]{GREEN, GREY, LIGHT_BLUE, BLUE, BLACK, YELLOW})); // Green, Grey, LightBlue, Blue, Black, Yellow
@@ -83,10 +83,8 @@ public class SeaSaltPaperParameters extends AbstractParameters {
             new Pair<>(5, new CardColor[]{LIGHT_BLUE, GREEN, GREY, PURPLE, YELLOW})); //Light Blue, Green, Grey, Purple, Yellow
         put(new Pair<>(PENGUIN, CardType.COLLECTOR),
             new Pair<>(3, new CardColor[]{PINK, LIGHT_ORANGE, PURPLE})); //Pink, LightOrange, Purple
-        // TODO PINK VS PURPLE???
         put(new Pair<>(SAILOR, CardType.COLLECTOR),
             new Pair<>(2, new CardColor[]{ORANGE, PINK})); // Orange, Pink
-        //TODO Orange vs. LightOrange????
 
         put(new Pair<>(BOAT, CardType.MULTIPLIER),
             new Pair<>(1, new CardColor[]{PURPLE})); //Purple
@@ -109,15 +107,56 @@ public class SeaSaltPaperParameters extends AbstractParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        return new SeaSaltPaperParameters();
+        SeaSaltPaperParameters p = new SeaSaltPaperParameters();
+        p.dataPath = dataPath;
+        p.discardPileCount = discardPileCount;
+
+        p.victoryCondition = victoryCondition.clone();
+        p.boatCollectorBonus = boatCollectorBonus.clone();
+        p.fishCollectorBonus = fishCollectorBonus.clone();
+        p.shellCollectorBonus = shellCollectorBonus.clone();
+        p.octopusCollectorBonus = octopusCollectorBonus.clone();
+        p.penguinCollectorBonus = penguinCollectorBonus.clone();
+        p.sailorCollectorBonus = sailorCollectorBonus.clone();
+        p.sharkCollectorBonus = sharkCollectorBonus.clone();
+
+        p.collectorBonusDict = new HashMap<>(collectorBonusDict);
+        p.duoBonusDict = new HashMap<>(duoBonusDict);
+        p.multiplierDict = new HashMap<>(multiplierDict);
+        p.cardsInit = new HashMap<>(cardsInit);
+
+        return p;
     }
 
     @Override
     public boolean _equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        return false;
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        return false;
+        return equals(o);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SeaSaltPaperParameters that = (SeaSaltPaperParameters) o;
+        return discardPileCount == that.discardPileCount && Objects.equals(dataPath, that.dataPath) && Arrays.equals(victoryCondition, that.victoryCondition) && Arrays.equals(boatCollectorBonus, that.boatCollectorBonus) && Arrays.equals(fishCollectorBonus, that.fishCollectorBonus) && Arrays.equals(shellCollectorBonus, that.shellCollectorBonus) && Arrays.equals(octopusCollectorBonus, that.octopusCollectorBonus) && Arrays.equals(penguinCollectorBonus, that.penguinCollectorBonus) && Arrays.equals(sailorCollectorBonus, that.sailorCollectorBonus) && Arrays.equals(sharkCollectorBonus, that.sharkCollectorBonus) && Objects.equals(collectorBonusDict, that.collectorBonusDict) && Objects.equals(duoBonusDict, that.duoBonusDict) && Objects.equals(multiplierDict, that.multiplierDict) && Objects.equals(cardsInit, that.cardsInit);
+    }
 
+    @Override
+    public int hashCode() {
+//        int result = 0;
+        int result = Objects.hash(super.hashCode(), dataPath, discardPileCount, collectorBonusDict, duoBonusDict, multiplierDict, cardsInit);
+        result = 31 * result + Arrays.hashCode(victoryCondition);
+        result = 31 * result + Arrays.hashCode(boatCollectorBonus);
+        result = 31 * result + Arrays.hashCode(fishCollectorBonus);
+        result = 31 * result + Arrays.hashCode(shellCollectorBonus);
+        result = 31 * result + Arrays.hashCode(octopusCollectorBonus);
+        result = 31 * result + Arrays.hashCode(penguinCollectorBonus);
+        result = 31 * result + Arrays.hashCode(sailorCollectorBonus);
+        result = 31 * result + Arrays.hashCode(sharkCollectorBonus);
+        return result;
+    }
 }

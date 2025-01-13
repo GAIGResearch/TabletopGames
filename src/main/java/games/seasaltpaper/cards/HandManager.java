@@ -75,7 +75,7 @@ public class HandManager {
         if (fishDuo[0] != -1 && fishDuo[1] != -1) {
             duoActions.add(new FishDuo(playerId, fishDuo));
         }
-        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1 && !gs.allProtected()) {
+        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1 && !gs.allEnemyProtected(playerId)) {
             duoActions.add(new SwimmerSharkDuo(playerId, swimmerSharkDuo));
         }
         return duoActions;

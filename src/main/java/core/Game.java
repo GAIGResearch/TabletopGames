@@ -829,7 +829,7 @@ public class Game {
         String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
-        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+        long seed = Utils.getArg(args, "seed", 0);
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
@@ -840,8 +840,8 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-//        players.add(new BasicMCTSPlayer());
+//        players.add(new RandomPlayer());
+        players.add(new BasicMCTSPlayer(seed));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());

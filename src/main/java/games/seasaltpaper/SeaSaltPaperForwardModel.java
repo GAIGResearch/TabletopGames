@@ -187,7 +187,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer()));
                 break;
             case DUO:
-                System.out.println("this is duo/stop phase");
+//                System.out.println("this is duo/stop phase");
                 actions.addAll(HandManager.generateDuoActions(sspgs, sspgs.getCurrentPlayer()));
                 actions.add(new DoNothing());
                 if (HandManager.calculatePoint(sspgs, sspgs.getCurrentPlayer()) >= 7 && sspgs.lastChance == -1) {
@@ -205,7 +205,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         if (gameState.isActionInProgress()) return;
 
-        System.out.println("ACTIONS EXECUTED XD!!");
+//        System.out.println("ACTIONS EXECUTED XD!!");
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gameState;
         if (action instanceof Stop) {
             processEndRound(sspgs);

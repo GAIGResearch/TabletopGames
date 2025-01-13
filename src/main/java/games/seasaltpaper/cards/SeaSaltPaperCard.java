@@ -2,6 +2,7 @@ package games.seasaltpaper.cards;
 
 import core.components.Card;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -14,49 +15,55 @@ public class SeaSaltPaperCard extends Card {
 
     protected final CardType cardType;
 
-    protected final int[] collectorBonus;
-    protected final int duoBonus;
-    protected final int multiplierBonus;
+//    protected final int[] collectorBonus;
+//    protected final int duoBonus;
+//    protected final int multiplierBonus;
 
-    protected boolean isPlayed = false;
 
     public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType) {
         this.color = color;
         this.cardSuite = cardSuite;
         this.cardType = cardType;
         this.componentName = color + " " + cardSuite + " " + cardType;
-        collectorBonus = new int[]{};
-        duoBonus = 0;
-        multiplierBonus = 0;
+//        collectorBonus = new int[]{};
+//        duoBonus = 0;
+//        multiplierBonus = 0;
+    }
+
+    private SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, String componentName, int componentID) {
+        super(componentName, componentID);
+        this.color = color;
+        this.cardSuite = cardSuite;
+        this.cardType = cardType;
     }
 
     // bonus is either duoBonus or multiplierBonus
-    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, int bonus) {
-        this.color = color;
-        this.cardSuite = cardSuite;
-        this.cardType = cardType;
-        this.componentName = color + " " + cardSuite + " " + cardType;
-        collectorBonus = null;
+//    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, int bonus) {
+//        this.color = color;
+//        this.cardSuite = cardSuite;
+//        this.cardType = cardType;
+//        this.componentName = color + " " + cardSuite + " " + cardType;
+//        collectorBonus = null;
+//
+//        if (cardType == CardType.DUO) {
+//            duoBonus = bonus;
+//            multiplierBonus = 0;
+//        }
+//        else {
+//            duoBonus = 0;
+//            multiplierBonus = bonus;
+//        }
+//    }
 
-        if (cardType == CardType.DUO) {
-            duoBonus = bonus;
-            multiplierBonus = 0;
-        }
-        else {
-            duoBonus = 0;
-            multiplierBonus = bonus;
-        }
-    }
-
-    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, int[] collectorBonus) {
-        this.color = color;
-        this.cardSuite = cardSuite;
-        this.cardType = cardType;
-        this.componentName = color + " " + cardSuite + " " + cardType;
-        this.collectorBonus = collectorBonus;
-        duoBonus = 0;
-        multiplierBonus = 0;
-    }
+//    public SeaSaltPaperCard(CardColor color, CardSuite cardSuite, CardType cardType, int[] collectorBonus) {
+//        this.color = color;
+//        this.cardSuite = cardSuite;
+//        this.cardType = cardType;
+//        this.componentName = color + " " + cardSuite + " " + cardType;
+//        this.collectorBonus = collectorBonus;
+//        duoBonus = 0;
+//        multiplierBonus = 0;
+//    }
 
     @Override
     public String toString() {
@@ -75,28 +82,31 @@ public class SeaSaltPaperCard extends Card {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SeaSaltPaperCard that = (SeaSaltPaperCard) o;
-        return isPlayed == that.isPlayed && color == that.color && cardSuite == that.cardSuite && cardType == that.cardType;
+        return color == that.color && cardSuite == that.cardSuite && cardType == that.cardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), color, cardSuite, cardType, isPlayed);
+        return Objects.hash(super.hashCode(), color, cardSuite, cardType);
     }
 
     @Override
     public SeaSaltPaperCard copy() {
-        return new SeaSaltPaperCard(color, cardSuite, cardType);
+        SeaSaltPaperCard copy =  new SeaSaltPaperCard(color, cardSuite, cardType, componentName, componentID);
+        copyComponentTo(copy);
+        return copy;
+//        return this;
     }
 
-    public int getDuoBonus() {
-        return duoBonus;
-    }
-
-    public int[] getCollectorBonus() {
-        return collectorBonus;
-    }
-
-    public int getMultiplierBonus(){
-        return multiplierBonus;
-    }
+//    public int getDuoBonus() {
+//        return duoBonus;
+//    }
+//
+//    public int[] getCollectorBonus() {
+//        return collectorBonus;
+//    }
+//
+//    public int getMultiplierBonus(){
+//        return multiplierBonus;
+//    }
 }

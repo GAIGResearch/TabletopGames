@@ -32,7 +32,7 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
         super.execute(gs);
         SeaSaltPaperGameState sspg = (SeaSaltPaperGameState) gs;
         if (sspg.getDiscardPile1().getSize() == 0 && sspg.getDiscardPile2().getSize() == 0) {
-            System.out.println("BOTH PILES GONE BRUH");
+//            System.out.println("BOTH PILES GONE BRUH");
             return false;
         }
         currentStep = Step.CHOOSE_PILE;

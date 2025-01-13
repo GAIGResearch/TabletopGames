@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 public abstract class PlayDuo extends AbstractAction {
@@ -33,7 +34,8 @@ public abstract class PlayDuo extends AbstractAction {
         SeaSaltPaperCard[] duoCards = {playerHand.peek(cardsIdx[0]), playerHand.peek(cardsIdx[1])};
         playerHand.remove(duoCards[0]); playerHand.remove(duoCards[1]);
         playerDiscard.add(duoCards[0]); playerDiscard.add(duoCards[1]);
-        sspgs.playerCurrentDuoPoints[playerId] += duoCards[0].getDuoBonus();
+        SeaSaltPaperParameters params = (SeaSaltPaperParameters) sspgs.getGameParameters();
+        sspgs.playerCurrentDuoPoints[playerId] += params.duoBonusDict.get(duoCards[0].getCardSuite());
         return true;
     }
 

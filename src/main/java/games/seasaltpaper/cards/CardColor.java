@@ -25,5 +25,6 @@ public enum CardColor
     public Color getColor() {
         return color;
     }
+
 }
 

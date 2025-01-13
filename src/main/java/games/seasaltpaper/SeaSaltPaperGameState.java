@@ -48,7 +48,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     int lastChance = -1; // index of the player that play "lastChance", -1 for no one
 
-    Random redeterminisationRnd = new Random(System.currentTimeMillis());
+//    Random redeterminisationRnd = new Random(System.currentTimeMillis());
+    Random redeterminisationRnd = new Random(0);;
 
     boolean[] protectedHands;
 
@@ -122,7 +123,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), currentPhase, playerHands, playerDiscards, discardPile1, discardPile2, drawPile, lastChance, redeterminisationRnd);
+//        int result = 0;
+        int result = Objects.hash(super.hashCode(), currentPhase, lastChance, playerHands, playerDiscards, discardPile1, discardPile2, drawPile);
         result = 31 * result + Arrays.hashCode(protectedHands);
         result = 31 * result + Arrays.hashCode(playerTotalScores);
         result = 31 * result + Arrays.hashCode(playerCurrentDuoPoints);
@@ -146,6 +148,15 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     public boolean allProtected() {
         boolean t = true;
         for (int i=0; i<getNPlayers(); i++) {
+            t = t && protectedHands[i];
+        }
+        return t;
+    }
+
+    public boolean allEnemyProtected(int playerId) {
+        boolean t = true;
+        for (int i=0; i<getNPlayers(); i++) {
+            if (i == playerId) { continue; }
             t = t && protectedHands[i];
         }
         return t;

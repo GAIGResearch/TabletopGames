@@ -2,6 +2,7 @@ package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.actions.DrawCard;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
@@ -31,13 +32,15 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = 0; i < sspgs.getNPlayers(); i++)
         {
-            if (i == playerId || sspgs.getProtectedHands()[i])
-            {
+            if (i == playerId || sspgs.getProtectedHands()[i] || sspgs.getPlayerHands().get(i).getSize() == 0) {
                 continue;
             }
             int targetHandId = sspgs.getPlayerHands().get(i).getComponentID();
             int fromIndex = sspgs.getRnd().nextInt(sspgs.getPlayerHands().get(i).getSize()); // randomly choose a card from the target
             actions.add(new DrawCard(targetHandId, playerHandId, fromIndex));
+        }
+        if (actions.isEmpty()) {
+            actions.add(new DoNothing());
         }
         return actions;
     }
