@@ -1,5 +1,6 @@
 package evaluation;
 
+import core.AbstractPlayer;
 import evaluation.optimisation.ITPSearchSpace;
 import games.puertorico.PuertoRicoActionHeuristic001;
 import org.json.simple.JSONObject;
@@ -104,22 +105,22 @@ public class TunableParametersTest {
     @Test
     public void loadSearchSpaceIncludesSubParams() {
         String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_MASTRollout.json";
-        ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
-        assertEquals(8, itp.getSearchKeys().size());
+        ITPSearchSpace<AbstractPlayer> itp = new ITPSearchSpace<>(params, searchSpace);
+        assertEquals(8, itp.getDimensions().size());
         int MASTBoltzmannIndex = itp.getIndexOf("MASTBoltzmann");
         int heuristicTypeIndex = itp.getIndexOf("heuristic.heuristicType");
         assertTrue(MASTBoltzmannIndex > -1);
         assertTrue(heuristicTypeIndex > -1);
-        assertEquals(5, itp.getSearchValues().get(MASTBoltzmannIndex).size());
-        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.getSearchValues().get(MASTBoltzmannIndex));
-        assertEquals(3, itp.getSearchValues().get(heuristicTypeIndex).size());
+        assertEquals(5, itp.allValues(MASTBoltzmannIndex).size());
+        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.allValues(MASTBoltzmannIndex));
+        assertEquals(3, itp.allValues(heuristicTypeIndex).size());
         List<CoarseTunableHeuristic.HeuristicType> expectedArray = Arrays.asList(WIN_ONLY, SCORE_PLUS, LEADER);
-        assertEquals(expectedArray, itp.getSearchValues().get(heuristicTypeIndex));
+        assertEquals(expectedArray, itp.allValues(heuristicTypeIndex));
 
         int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
         settings[heuristicTypeIndex] = 1;
         settings[MASTBoltzmannIndex] = 3;
-        MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
+        MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertEquals(10.0, params.MASTBoltzmann, 0.001);
         assertTrue(params.getHeuristic() instanceof  CoarseTunableHeuristic);
@@ -136,12 +137,12 @@ public class TunableParametersTest {
         // temperature should be
         int temperatureIndex = itp.getIndexOf("rolloutPolicyParams.temperature");
         assertTrue(temperatureIndex > -1);
-        assertEquals(5, itp.getSearchValues().get(temperatureIndex).size());
-        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.getSearchValues().get(temperatureIndex));
+        assertEquals(5, itp.allValues(temperatureIndex).size());
+        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.allValues(temperatureIndex));
 
         int[] settings = new int[] {0, 0, 0, 0, 0};
 
-        MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
+        MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertTrue(params.getRolloutStrategy() instanceof  BoltzmannActionPlayer);
         BoltzmannActionPlayer rollout = (BoltzmannActionPlayer) params.getRolloutStrategy();

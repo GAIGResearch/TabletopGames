@@ -1,9 +1,7 @@
 package evaluation.optimisation;
 
-import evodef.SearchSpace;
+import evaluation.optimisation.ntbea.*;
 import games.GameType;
-import ntbea.MultiNTupleBanditEA;
-import ntbea.NTupleSystem;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -39,7 +37,7 @@ public class MultiNTBEA extends NTBEA {
     @Override
     protected void runTrials() {
         multiPlayerEvaluator.reset();
-        searchFramework.runTrial(multiPlayerEvaluator, params.iterationsPerRun);
+        searchFramework.runTrial((SolutionEvaluator) multiPlayerEvaluator, params.iterationsPerRun);
     }
 
 
@@ -71,7 +69,7 @@ public class MultiNTBEA extends NTBEA {
 
         // For very large search spaces, we use the sampled points to reduce risks of memory problems with very large arrays
         int searchSpaceSize = IntStream.range(0, ss.nDims()).reduce(1, (acc, i) -> acc * ss.nValues(i));
-        Set<int[]> allSampledPoints = model.getSampledPoints();
+        List<int[]> allSampledPoints = model.getSampledPoints();
         if (searchSpaceSize < allSampledPoints.size()) {
             allTuples.add(new int[0]);
             for (int d = 0; d < ss.nDims(); d++) {
@@ -81,10 +79,7 @@ public class MultiNTBEA extends NTBEA {
             allTuples = new ArrayList<>(allSampledPoints);
         }
         Map<int[], Double> tuplesWithValue = allTuples.stream().collect(toMap(t -> t, model::getMeanEstimate));
-        double[] bestD = model.getBestOfSampled();
-        int[] best = new int[bestD.length];
-        for (int i = 0; i < bestD.length; i++)
-            best[i] = (int) (bestD[i] + 0.5);
+        int[] best = model.getBestSampled();
         double bestValue = model.getMeanEstimate(best);
 
         Set<int[]> bestSet = new HashSet<>();

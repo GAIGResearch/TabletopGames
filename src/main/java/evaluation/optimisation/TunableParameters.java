@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.toList;
  * <p>
  * Any inheriting class does not need to explicitly copy any data inserted via addTunableParameter(...)
  */
-public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
+public abstract class TunableParameters<T> extends AbstractParameters implements ITunableParameters<T> {
 
     private static boolean debug = false;
     private JSONObject rawJSON;
@@ -42,7 +42,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      *
      * @param filename The file with the JSON format data
      */
-    public static void loadFromJSONFile(TunableParameters params, String filename) {
+    public static void loadFromJSONFile(TunableParameters<?> params, String filename) {
         try {
             FileReader reader = new FileReader(filename);
             JSONParser jsonParser = new JSONParser();
@@ -56,7 +56,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     /**
      * Instantiate parameters from a JSONObject
      */
-    public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
+    public static void loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
         for (String pName : allParams) {
             if (debug)
@@ -87,18 +87,18 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * @param name         Name of the parameter. This will be validated as one of a possible set of expectedKeys
      * @param json         The JSONObject containing the data we want to extract the parameter from.
      * @param defaultValue The default value to use for the parameter if we can't find it in json.
-     * @param <T>          The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
+     * @param <K>          The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
      * @return The value of the parameter found.
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
+    private static <K> K getParam(String name, JSONObject json, K defaultValue, TunableParameters<?> params) {
         Object finalData = json.getOrDefault(name, defaultValue);
         if (finalData == null)
             return null;
         Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
         if (finalData instanceof JSONObject subJson) {
-            T retValue = JSONUtils.loadClassFromJSON(subJson);
-            if (retValue instanceof TunableParameters subParams) {
+            K retValue = JSONUtils.loadClassFromJSON(subJson);
+            if (retValue instanceof TunableParameters<?> subParams) {
          //       TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
@@ -107,13 +107,13 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         }
         Class<?> requiredClass = params.getParameterTypes().get(name);
         if (data.getClass() == requiredClass)
-            return (T) data;
+            return (K) data;
         if (data.getClass() == Integer.class && requiredClass == Double.class)
-            return (T) Double.valueOf((Integer) data);
+            return (K) Double.valueOf((Integer) data);
         if (data.getClass() == String.class && requiredClass.isEnum()) {
             Optional<?> matchingValue = Arrays.stream(requiredClass.getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {
-                return (T) matchingValue.get();
+                return (K) matchingValue.get();
             }
             throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(requiredClass.getEnumConstants()));
         }
@@ -297,7 +297,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         }
         // Then, if value is TunableParameter itself, we 'lift' its attributes up to the top level
         // and remove any previous ones
-        if (value instanceof TunableParameters subParams) {
+        if (value instanceof TunableParameters<?> subParams) {
             List<String> oldParamNames = parameterNames.stream().filter(n -> n.startsWith(parameterName + ".")).toList();
             // we now remove these
             oldParamNames.forEach(parameterNames::remove);

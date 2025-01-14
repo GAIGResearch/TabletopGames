@@ -4,9 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IStateHeuristic;
-import evodef.MultiSolutionEvaluator;
-import evodef.SearchSpace;
 import games.GameType;
+import evaluation.optimisation.ntbea.*;
 
 import java.util.*;
 
@@ -69,7 +68,7 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
         List<AbstractPlayer> allPlayers = new ArrayList<>(nTeams);
 
         for (int i = 0; i < nTeams; i++) {
-            AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings.get(i));
+            AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.instantiate(settings.get(i));
             allPlayers.add(tunedPlayer);
         }
 

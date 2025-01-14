@@ -1,20 +1,15 @@
 package evaluation.optimisation;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
-import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
-import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
-import ntbea.NTupleBanditEA;
-import ntbea.NTupleSystem;
+import evaluation.optimisation.ntbea.*;
 import org.json.simple.JSONObject;
-import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -57,7 +52,7 @@ public class NTBEA {
         // Now initialise the other bits and pieces needed for the NTBEA package
         this.params = parameters;
         landscapeModel = new NTupleSystem(params.searchSpace);
-        landscapeModel.setUse3Tuple(params.useThreeTuples);
+        landscapeModel.use3Tuple = params.useThreeTuples;
         landscapeModel.addTuples();
 
         searchFramework = new NTupleBanditEA(landscapeModel, params.kExplore, params.neighbourhoodSize);
@@ -151,7 +146,7 @@ public class NTBEA {
                 // i.e. we effectively add an extra 'run' for each elite
                 for (int[] elite : elites) {
                     winnerSettings.add(elite);
-                    winnersPerRun.add(params.searchSpace.getAgent(elite));
+                    winnersPerRun.add(params.searchSpace.instantiate(elite));
                 }
             }
 
@@ -241,7 +236,7 @@ public class NTBEA {
         }
         writeAgentJSON(bestResult.b,
                 params.destDir + File.separator + "Recommended_Final.json");
-        return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
+        return new Pair<>(params.searchSpace.instantiate(bestResult.b), bestResult.b);
     }
 
     protected void runTrials() {
@@ -257,16 +252,14 @@ public class NTBEA {
         if (params.verbose)
             logResults();
 
-        int[] thisWinnerSettings = Arrays.stream(landscapeModel.getBestOfSampled())
-                .mapToInt(d -> (int) d)
-                .toArray();
+        int[] thisWinnerSettings = landscapeModel.getBestSampled();
 
         // now run the evaluation games on the final recommendation (if any...if not we report the NTBEA landscape estimate)
         Pair<Double, Double> scoreOfBestAgent = params.evalGames == 0
-                ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0)
+                ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestSampled()), 0.0)
                 : evaluateWinner(thisWinnerSettings);
 
-        winnersPerRun.add(params.searchSpace.getAgent(thisWinnerSettings));
+        winnersPerRun.add(params.searchSpace.instantiate(thisWinnerSettings));
         winnerSettings.add(thisWinnerSettings);
         Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(scoreOfBestAgent, thisWinnerSettings);
         if (params.verbose)
@@ -299,8 +292,8 @@ public class NTBEA {
     private void logResults() {
 
         System.out.println("Current best sampled point (using mean estimate): " +
-                Arrays.toString(landscapeModel.getBestOfSampled()) +
-                String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled())));
+                Arrays.toString(landscapeModel.getBestSampled()) +
+                String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestSampled())));
 
         String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, params.searchSpace.nDims())
                 .map(size -> landscapeModel.getTuples().stream()
@@ -372,7 +365,7 @@ public class NTBEA {
             if (!fileExists) {
                 List<String> headers = new ArrayList<>();
                 headers.addAll(Arrays.asList("estimated value", "standard error"));
-                headers.addAll(params.searchSpace.getSearchKeys());
+                headers.addAll(IntStream.range(0, params.searchSpace.nDims()).mapToObj(params.searchSpace::name).toList());
                 writer.write(String.join("\t", headers) + "\n");
             }
             // then write the output

@@ -1,34 +1,37 @@
 package evaluation.optimisation;
 
 import core.interfaces.ITunableParameters;
-import evodef.AgentSearchSpace;
-import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import utilities.JSONUtils;
 import utilities.Pair;
+import evaluation.optimisation.ntbea.*;
 
-import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 /**
  * This is a wrapper around ITunableParameters<T> (the TAG standard) to implement the AgentSearchSpace
  * interface used by the NTBEA library.
  */
-public class ITPSearchSpace extends AgentSearchSpace<Object> {
+public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
     static boolean debug = false;
-    ITunableParameters itp;
-    Map<Integer, String> tunedIndexToParameterName = new HashMap<>();
+    ITunableParameters<T> itp;
+
+    // TODO: moving SearchSpace into TAG means I can remove the need to do everything in a one-line
+    // constructor. I may also need / be able to move some of this into AgentSearchSpace
+    // I want the same three constructors:
+    // ITunableParameters only
+    // ITunableParameters + JSON file
+    // ITunableParameters + JSONObject
+    // This may also enable me to overcome the current restriction of not being able to have
+    // arbitrary Objects as the top level of selection
 
     /**
      * Constructor of a SearchSpace to use all the default values defined by an
@@ -36,9 +39,15 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      *
      * @param tunableParameters The ITunableParameters object we want to optimise over.
      */
-    public ITPSearchSpace(ITunableParameters tunableParameters) {
-        super(convertToSuperFormatString(tunableParameters.getJSONDescription(), tunableParameters), tunableParameters.getParameterTypes());
-        initialiseITP(tunableParameters);
+    public ITPSearchSpace(ITunableParameters<T> tunableParameters) {
+        itp = tunableParameters;
+        List<String> parameterNames = itp.getParameterNames();
+        List<List<Object>> allPossibleValues = new ArrayList<>();
+        for (String name : parameterNames) {
+            List<Object> possibleValues = itp.getPossibleValues(name);
+            allPossibleValues.add(possibleValues);
+        }
+        super.initialise(parameterNames, allPossibleValues);
     }
 
     /**
@@ -61,21 +70,64 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
      * @param jsonFile          The location of a JSON file to override the defaults of the ITunableParameters
      *                          interface.
      */
-    public ITPSearchSpace(ITunableParameters tunableParameters, String jsonFile) {
-        super(convertToSuperFormatFile(jsonFile, tunableParameters), tunableParameters.getParameterTypes());
-        initialiseITP(tunableParameters);
+    public ITPSearchSpace(ITunableParameters<T> tunableParameters, String jsonFile) {
+        this(tunableParameters, JSONUtils.loadJSONFile(jsonFile));
     }
 
-    public ITPSearchSpace(ITunableParameters tunableParameters, JSONObject json) {
-        super(convertToSuperFormatJSON(json, tunableParameters),
-                allParameterTypesWithRecursion(json, tunableParameters));
-        initialiseITP(tunableParameters);
+    public ITPSearchSpace(ITunableParameters<T> tunableParameters, JSONObject json) {
+        itp = tunableParameters;
+        Map<String, Class<?>> parameterTypes = allParameterTypesWithRecursion(json);
+        List<List<Object>> allPossibleValues = new ArrayList<>();
+        List<String> parameterNames = new ArrayList<>();
+        for (String nameAndValues : parameterTypes.keySet()) {
+            // Now get possible values from JSON
+            Class<?> clazz = parameterTypes.get(nameAndValues);
+            String[] firstSplit = nameAndValues.split("=");
+            if (firstSplit.length != 2)
+                throw new AssertionError("Unexpected format of nameAndValues " + nameAndValues);
+            String name = firstSplit[0];
+            String[] values = firstSplit[1].split(", ");
+
+            List<Object> possibleValues = new ArrayList<>();
+            for (String v : values) {
+                String strValue = v.trim();
+                if (clazz.isEnum()) {
+                    Class<? extends Enum> enumCl = (Class<? extends Enum>) clazz;
+                    possibleValues.add(Enum.valueOf(enumCl, strValue));
+                } else if (clazz == Double.class || clazz == double.class) {
+                    possibleValues.add(Double.valueOf(strValue));
+                } else if (clazz == Integer.class || clazz == int.class) {
+                    possibleValues.add(Integer.valueOf(strValue));
+                } else if (clazz == Long.class || clazz == long.class) {
+                    possibleValues.add(Long.valueOf(strValue).intValue());
+                } else if (clazz == Boolean.class || clazz == boolean.class) {
+                    possibleValues.add(Boolean.valueOf(strValue));
+                } else if (clazz == String.class) {
+                    possibleValues.add(strValue);
+                } else {
+                    throw new AssertionError("Unsupported Clazz in Parameter Tuning " + clazz);
+                }
+            }
+
+            allPossibleValues.add(possibleValues);
+            parameterNames.add(name);
+        }
+        super.initialise(parameterNames, allPossibleValues);
         if (tunableParameters instanceof TunableParameters tp) {
             tp.setRawJSON(json);
         }
     }
 
     @SuppressWarnings("unchecked")
+/**
+ * This returns a List of Pairs. Each Pair contains a String that is made up of:
+ *      - the name of the parameter that can vary (with namespace prepended where there has been recursion),
+ *      - "="
+ *      - and a comma delimited list of the values this parameter can take
+ * Then the Class of the parameter as the second member of the Pair.
+ * // TODO: This was mandated by old library usage. Can now be refactored to avoid need
+ * // to split on ",", and hence allow arbitrary classes as tunable moieties.
+ */
     private static List<Pair<String, Class<?>>> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters itp) {
         List<Pair<String, Class<?>>> retValue = new ArrayList<>();
         for (Object baseKey : json.keySet()) {
@@ -91,12 +143,11 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             subJSON.get("class");
                             if (debug)
                                 System.out.println("Starting recursion on " + key);
-                            Object child =  JSONUtils.loadClassFromJSON(subJSON);
+                            Object child = JSONUtils.loadClassFromJSON(subJSON);
                             itp.setParameterValue((String) baseKey, child);
                             if (child instanceof ITunableParameters)
                                 retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, (ITunableParameters) child));
                         } catch (Exception e) {
-                            e.printStackTrace();
                             throw new AssertionError(e.getMessage() + " problem creating SearchSpace " + data);
                         }
 
@@ -124,59 +175,20 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         return retValue;
     }
 
-    private static Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json, ITunableParameters itp) {
+    protected Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json) {
         return extractRecursiveParameters("", json, itp).stream()
                 .collect(
-                        toMap(p -> p.a.split("=")[0], p -> p.b)
+                        toMap(p -> p.a, p -> p.b)
                 );
     }
 
-    private static List<String> convertToSuperFormatJSON(JSONObject json, ITunableParameters itp) {
-        return extractRecursiveParameters("", json, itp).stream().map(p -> p.a).collect(toList());
-    }
-
-    private static List<String> convertToSuperFormatString(String json, ITunableParameters itp) {
-        try {
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(json);
-            return convertToSuperFormatJSON(rawData, itp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getClass() + " : " + e.getMessage() + " : problem loading ITPSearchSpace from String " + json);
-        }
-
-    }
-
-    private static List<String> convertToSuperFormatFile(String jsonFile, ITunableParameters itp) {
-        try {
-            FileReader reader = new FileReader(jsonFile);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            return convertToSuperFormatJSON(rawData, itp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getMessage() + " : problem loading ITPSearchSpace from file " + jsonFile);
-        }
-
-    }
-
-    private void initialiseITP(ITunableParameters tunableParameters) {
-        itp = tunableParameters;
-        tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
-                .collect(toMap(i -> i, i -> getSearchKeys().get(i)));
-    }
-
-    public int getIndexOf(String parameter) {
-        if (!getSearchKeys().contains(parameter))
-            return -1;
-        return getSearchKeys().indexOf(parameter);
-    }
-
-    public Object getAgent(@NotNull int[] settings) {
+    @Override
+    public T instantiate(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         setTo(settings);
         return itp.instantiate();
     }
+
     public JSONObject getAgentJSON(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         setTo(settings);
@@ -185,7 +197,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
 
     private void setTo(int[] settings) {
         for (int i = 0; i < settings.length; i++) {
-            String pName = tunedIndexToParameterName.get(i);
+            String pName = name(i);
             Object value = value(i, settings[i]);
             //   Object value = itp.getPossibleValues(pName).get(settings[i]);
             itp.setParameterValue(pName, value);
