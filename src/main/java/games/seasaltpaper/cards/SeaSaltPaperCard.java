@@ -92,9 +92,9 @@ public class SeaSaltPaperCard extends Card {
 
     @Override
     public SeaSaltPaperCard copy() {
-        SeaSaltPaperCard copy =  new SeaSaltPaperCard(color, cardSuite, cardType, componentName, componentID);
-        copyComponentTo(copy);
-        return copy;
+        SeaSaltPaperCard c =  new SeaSaltPaperCard(color, cardSuite, cardType, componentName, componentID);
+        copyComponentTo(c);
+        return c;
 //        return this;
     }
 

@@ -78,7 +78,6 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     @Override
     protected AbstractGameState _copy(int playerId) {
         //TODO Redeterminise hidden info (unless playerID == -1)
-//        System.out.println("COPY WAS USED FOR SOME REASON");
         SeaSaltPaperGameState sspgs = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
         sspgs.drawPile = drawPile.copy();
         sspgs.discardPile1 = discardPile1.copy();
@@ -160,6 +159,20 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
             t = t && protectedHands[i];
         }
         return t;
+    }
+
+    // check if there's a valid target for SwimmerSharkDuo
+    public boolean allEnemiesProtectedOrEmpty(int playerId) {
+        boolean t = true;
+        for (int i=0; i<getNPlayers(); i++) {
+            if (i == playerId) { continue; }
+            t = t && (protectedHands[i] || playerHands.get(i).getSize() == 0) ;
+        }
+        return t;
+    }
+
+    public boolean allDiscardPilesEmpty() {
+        return discardPile1.getSize() == 0 && discardPile1.getSize() == 0;
     }
 
     public Deck<SeaSaltPaperCard> getDrawPile() { return drawPile; }

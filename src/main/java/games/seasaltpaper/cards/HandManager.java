@@ -65,8 +65,7 @@ public class HandManager {
                 duoCards[1] = i;
             }
         }
-        if (crabDuo[0] != -1 && crabDuo[1] != -1) {
-            // TODO check at least one discard pile is not empty
+        if (crabDuo[0] != -1 && crabDuo[1] != -1 && !gs.allDiscardPilesEmpty()) { // checked if both piles are empty
             duoActions.add(new CrabDuo(playerId, crabDuo));
         }
         if (boatDuo[0] != -1 && boatDuo[1] != -1) {
@@ -75,7 +74,8 @@ public class HandManager {
         if (fishDuo[0] != -1 && fishDuo[1] != -1) {
             duoActions.add(new FishDuo(playerId, fishDuo));
         }
-        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1 && !gs.allEnemyProtected(playerId)) {
+        if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1 && !gs.allEnemiesProtectedOrEmpty(playerId)) {
+            // checked if all enemies are either protected or empty hand
             duoActions.add(new SwimmerSharkDuo(playerId, swimmerSharkDuo));
         }
         return duoActions;

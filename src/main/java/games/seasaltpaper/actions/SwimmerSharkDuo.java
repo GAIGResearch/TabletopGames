@@ -40,7 +40,8 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
             actions.add(new DrawCard(targetHandId, playerHandId, fromIndex));
         }
         if (actions.isEmpty()) {
-            actions.add(new DoNothing());
+//            actions.add(new DoNothing());
+            System.out.println("NO VALID TARGET FOR SWIMMERSHARK!!"); // SHOULD NEVER GET HERE
         }
         return actions;
     }

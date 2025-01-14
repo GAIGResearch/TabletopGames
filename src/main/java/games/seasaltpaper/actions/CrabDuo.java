@@ -29,14 +29,14 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
         SeaSaltPaperGameState sspg = (SeaSaltPaperGameState) gs;
         if (sspg.getDiscardPile1().getSize() == 0 && sspg.getDiscardPile2().getSize() == 0) {
-//            System.out.println("BOTH PILES GONE BRUH");
+            System.out.println("BOTH PILES GONE BRUH"); // SHOULD NEVER REACH HERE, ALREADY CHECKED WHEN GENERATED
             return false;
         }
         currentStep = Step.CHOOSE_PILE;
         gs.setActionInProgress(this);
+        super.execute(gs);
         return true;
     }
 
