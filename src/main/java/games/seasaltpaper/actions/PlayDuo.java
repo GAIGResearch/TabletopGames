@@ -35,7 +35,7 @@ public abstract class PlayDuo extends AbstractAction {
         playerHand.remove(duoCards[0]); playerHand.remove(duoCards[1]);
         playerDiscard.add(duoCards[0]); playerDiscard.add(duoCards[1]);
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) sspgs.getGameParameters();
-        sspgs.playerCurrentDuoPoints[playerId] += params.duoBonusDict.get(duoCards[0].getCardSuite());
+        sspgs.playerPlayedDuoPoints[playerId] += params.duoBonusDict.get(duoCards[0].getCardSuite());
         return true;
     }
 

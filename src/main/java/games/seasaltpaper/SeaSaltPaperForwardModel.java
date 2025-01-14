@@ -51,7 +51,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         sspgs.drawPile.clear();
         sspgs.discardPile1.clear();
         sspgs.discardPile2.clear();
-        sspgs.playerCurrentDuoPoints = new int[sspgs.getNPlayers()];
+        sspgs.playerPlayedDuoPoints = new int[sspgs.getNPlayers()];
         for (int i=0; i<sspgs.getNPlayers(); i++) {
             sspgs.protectedHands[i] = false;
         }

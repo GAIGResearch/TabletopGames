@@ -55,7 +55,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     int[] playerTotalScores; // player points of previous rounds
 
-    public int[] playerCurrentDuoPoints;
+    public int[] playerPlayedDuoPoints;
 
     //final int winScore;
 
@@ -92,7 +92,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         }
 
         sspgs.playerTotalScores = playerTotalScores.clone();
-        sspgs.playerCurrentDuoPoints = playerCurrentDuoPoints.clone();
+        sspgs.playerPlayedDuoPoints = playerPlayedDuoPoints.clone();
         sspgs.protectedHands = protectedHands.clone();
 
         sspgs.lastChance = lastChance;
@@ -117,7 +117,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SeaSaltPaperGameState that = (SeaSaltPaperGameState) o;
-        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(protectedHands, that.protectedHands) && Arrays.equals(playerTotalScores, that.playerTotalScores) && Arrays.equals(playerCurrentDuoPoints, that.playerCurrentDuoPoints);
+        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(protectedHands, that.protectedHands) && Arrays.equals(playerTotalScores, that.playerTotalScores) && Arrays.equals(playerPlayedDuoPoints, that.playerPlayedDuoPoints);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         int result = Objects.hash(super.hashCode(), currentPhase, lastChance, playerHands, playerDiscards, discardPile1, discardPile2, drawPile);
         result = 31 * result + Arrays.hashCode(protectedHands);
         result = 31 * result + Arrays.hashCode(playerTotalScores);
-        result = 31 * result + Arrays.hashCode(playerCurrentDuoPoints);
+        result = 31 * result + Arrays.hashCode(playerPlayedDuoPoints);
         return result;
     }
 

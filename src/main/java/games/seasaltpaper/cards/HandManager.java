@@ -9,6 +9,7 @@ import games.seasaltpaper.actions.BoatDuo;
 import games.seasaltpaper.actions.FishDuo;
 import games.seasaltpaper.actions.SwimmerSharkDuo;
 import games.seasaltpaper.actions.CrabDuo;
+import shapeless.ops.nat;
 
 import java.util.*;
 
@@ -86,6 +87,7 @@ public class HandManager {
         Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
         Map<CardSuite, Integer> collectorDict = new HashMap<>();
         Map<CardSuite, Integer> multiplierDict = new HashMap<>();
+        Map<CardSuite, Integer> duoDict = new HashMap<>();
         Map<CardSuite, Integer> suiteDict = new HashMap<>();
         int mermaidCount = 0;
 
@@ -104,6 +106,9 @@ public class HandManager {
 
             if (type == CardType.COLLECTOR) {
                 collectorDict.put(suite, collectorDict.getOrDefault(suite, 0) + 1);
+            }
+            else if (type == CardType.DUO) {
+                duoDict.put(suite, duoDict.getOrDefault(suite, 0) + 1);
             }
 
             if (suite==CardSuite.MERMAID) {mermaidCount++;}
@@ -129,11 +134,26 @@ public class HandManager {
             }
         }
         //Calculate Mermaid score
+        if (mermaidCount >= 4) {
+            return 999; // Instant Win
+            // TODO implement this properly as its own event
+        }
         score += calculateColorBonus(gs, playerID, mermaidCount);
 
-        //Duo points
-        //TODO properly implement this to also count unplayed duo cards
-        score += gs.playerCurrentDuoPoints[playerID];
+        //Calculate Duo points
+        // Duo cards in hand (not played)
+        for (CardSuite suite : duoDict.keySet()) {
+            if (suite == CardSuite.SHARK) { continue; }
+            int pair;
+            if (suite == CardSuite.SWIMMER) {
+                pair = Math.min(duoDict.get(CardSuite.SWIMMER), duoDict.getOrDefault(CardSuite.SHARK, 0));
+            }
+            else {
+                pair = duoDict.get(suite) / 2;
+            }
+            score += pair * param.duoBonusDict.get(suite);
+        }
+        score += gs.playerPlayedDuoPoints[playerID]; // Duo cards played
 
         return score;
     }
