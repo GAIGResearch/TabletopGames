@@ -48,8 +48,6 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     int lastChance = -1; // index of the player that play "lastChance", -1 for no one
 
-//    Random redeterminisationRnd = new Random(System.currentTimeMillis());
-    Random redeterminisationRnd = new Random(0);;
 
     boolean[] protectedHands;
 
@@ -77,27 +75,44 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        //TODO Redeterminise hidden info (unless playerID == -1)
-        SeaSaltPaperGameState sspgs = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
-        sspgs.drawPile = drawPile.copy();
-        sspgs.discardPile1 = discardPile1.copy();
-        sspgs.discardPile2 = discardPile2.copy();
-        sspgs.playerHands = new ArrayList<>();
+        SeaSaltPaperGameState gsCopy = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
+
+        gsCopy.drawPile = drawPile.copy();
+        gsCopy.discardPile1 = discardPile1.copy();
+        gsCopy.discardPile2 = discardPile2.copy();
+        gsCopy.playerHands = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
-            sspgs.playerHands.add(playerHands.get(i).copy());
+            gsCopy.playerHands.add(playerHands.get(i).copy());
         }
-        sspgs.playerDiscards = new ArrayList<>();
+        gsCopy.playerDiscards = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
-            sspgs.playerDiscards.add(playerDiscards.get(i).copy());
+            gsCopy.playerDiscards.add(playerDiscards.get(i).copy());
         }
 
-        sspgs.playerTotalScores = playerTotalScores.clone();
-        sspgs.playerPlayedDuoPoints = playerPlayedDuoPoints.clone();
-        sspgs.protectedHands = protectedHands.clone();
+        //Redeterminize hidden info (unless playerID == -1)
+        // TODO individual card visibility? DiscardPiles are fully observable for now
+        if (playerId != -1 && getCoreGameParameters().partialObservable) {
+            for (int i=0; i < getNPlayers(); i++) {
+                if (i == playerId) { continue; }
+                gsCopy.drawPile.add(gsCopy.playerHands.get(i));
+                gsCopy.playerHands.get(i).clear();
+            }
+            gsCopy.drawPile.shuffle(redeterminisationRnd);
+            for (int i=0; i < getNPlayers(); i++) {
+                if (i == playerId) { continue; }
+                for (int j=0; j < playerHands.get(i).getSize(); j++) {
+                    gsCopy.playerHands.get(i).add(gsCopy.drawPile.draw());
+                }
+            }
+        }
 
-        sspgs.lastChance = lastChance;
-        sspgs.currentPhase = currentPhase;
-        return sspgs;
+        gsCopy.playerTotalScores = playerTotalScores.clone();
+        gsCopy.playerPlayedDuoPoints = playerPlayedDuoPoints.clone();
+        gsCopy.protectedHands = protectedHands.clone();
+
+        gsCopy.lastChance = lastChance;
+        gsCopy.currentPhase = currentPhase;
+        return gsCopy;
     }
 
     @Override
@@ -117,7 +132,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SeaSaltPaperGameState that = (SeaSaltPaperGameState) o;
-        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Objects.equals(redeterminisationRnd, that.redeterminisationRnd) && Arrays.equals(protectedHands, that.protectedHands) && Arrays.equals(playerTotalScores, that.playerTotalScores) && Arrays.equals(playerPlayedDuoPoints, that.playerPlayedDuoPoints);
+        return lastChance == that.lastChance && currentPhase == that.currentPhase && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerDiscards, that.playerDiscards) && Objects.equals(discardPile1, that.discardPile1) && Objects.equals(discardPile2, that.discardPile2) && Objects.equals(drawPile, that.drawPile) && Arrays.equals(protectedHands, that.protectedHands) && Arrays.equals(playerTotalScores, that.playerTotalScores) && Arrays.equals(playerPlayedDuoPoints, that.playerPlayedDuoPoints);
     }
 
     @Override
