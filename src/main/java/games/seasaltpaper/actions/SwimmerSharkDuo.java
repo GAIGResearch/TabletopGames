@@ -2,10 +2,12 @@ package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.actions.DrawCard;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.cards.HandManager;
+import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,8 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
         }
         if (actions.isEmpty()) {
 //            actions.add(new DoNothing());
-            System.out.println("NO VALID TARGET FOR SWIMMERSHARK!!"); // SHOULD NEVER GET HERE
+//            System.out.println("NO VALID TARGET FOR SWIMMERSHARK!!"); // SHOULD NEVER GET HERE
+            throw new RuntimeException("NO VALID TARGET FOR SWIMMERSHARK!! SHOULD ALREADY BE CHECKED!!");
         }
         return actions;
     }
@@ -53,7 +56,11 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        executed = true;
+        // handle player hand visibility of the player and the target
+        if (action instanceof DrawCard d) {
+            executed = true;
+            HandManager.handleAfterDrawDeckVisibility(d, state, playerId);
+        }
     }
 
     @Override

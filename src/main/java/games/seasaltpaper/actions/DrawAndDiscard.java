@@ -29,16 +29,22 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
     public DrawAndDiscard(int playerId)
     {
         this.playerId = playerId;
-        drawnCardsId = new int[NUMBER_OF_CARDS_DRAWN];
+//        drawnCardsId = new int[NUMBER_OF_CARDS_DRAWN];
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        DrawMultiple drawMultiple = new DrawMultiple(NUMBER_OF_CARDS_DRAWN, playerId);
+        SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
+        int n = Math.min(sspgs.getDrawPile().getSize(), NUMBER_OF_CARDS_DRAWN);
+        DrawMultiple drawMultiple = new DrawMultiple(n, playerId);
         if (!(drawMultiple.execute(gs))) {
             return false;
         }
         drawnCardsId = drawMultiple.getDrawnCardsId();
+        if (drawnCardsId != null && drawnCardsId.length == 1) { // No discard if only one card drawn
+            currentStep = Step.DONE;
+            return true;
+        }
         currentStep = Step.DISCARD;
         gs.setActionInProgress(this);
         return true;

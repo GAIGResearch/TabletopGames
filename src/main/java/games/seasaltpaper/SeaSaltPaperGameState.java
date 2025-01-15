@@ -76,6 +76,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     @Override
     protected AbstractGameState _copy(int playerId) {
         SeaSaltPaperGameState gsCopy = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
+        SeaSaltPaperParameters params = (SeaSaltPaperParameters) gameParameters;
 
         gsCopy.drawPile = drawPile.copy();
         gsCopy.discardPile1 = discardPile1.copy();
@@ -90,18 +91,51 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         }
 
         //Redeterminize hidden info (unless playerID == -1)
-        // TODO individual card visibility? DiscardPiles are fully observable for now
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
-            for (int i=0; i < getNPlayers(); i++) {
-                if (i == playerId) { continue; }
-                gsCopy.drawPile.add(gsCopy.playerHands.get(i));
-                gsCopy.playerHands.get(i).clear();
+            // TODO handle discardPiles too
+            if (params.individualVisibility) { // Using individual visibility
+                // Only add invisible cards back to drawPile
+                for (int i=0; i < getNPlayers(); i++) {
+                    if (i == playerId) { continue; }
+                    ArrayList<SeaSaltPaperCard> shuffledCards = new ArrayList<>(); // Cards to be removed from playerHands and redeterminized
+                    for (int j=0; j < playerHands.get(i).getSize(); j++) {
+                        SeaSaltPaperCard cardCopy = gsCopy.playerHands.get(i).get(j);
+                        SeaSaltPaperCard cardOriginal = playerHands.get(i).get(j);
+                        if (!cardOriginal.isVisible(playerId)) { // if card not visible to playerId
+                            shuffledCards.add(cardCopy);
+                        }
+                        else {
+                            cardCopy.copyVisibility(cardOriginal); // copy visibility
+                        }
+                    }
+                    for (SeaSaltPaperCard c : shuffledCards) {
+                        gsCopy.playerHands.get(i).remove(c);
+                        gsCopy.drawPile.add(c);
+                    }
+                }
+                gsCopy.drawPile.shuffle(redeterminisationRnd);
+                for (int i=0; i < getNPlayers(); i++) {
+                    if (i == playerId) { continue; }
+                    while (gsCopy.playerHands.get(i).getSize() < playerHands.get(i).getSize()) {
+                        SeaSaltPaperCard c = gsCopy.drawPile.draw();
+                        c.setVisible(i, true); // Set the card visible to the owner
+                        gsCopy.playerHands.get(i).add(c);
+                    }
+                }
             }
-            gsCopy.drawPile.shuffle(redeterminisationRnd);
-            for (int i=0; i < getNPlayers(); i++) {
-                if (i == playerId) { continue; }
-                for (int j=0; j < playerHands.get(i).getSize(); j++) {
-                    gsCopy.playerHands.get(i).add(gsCopy.drawPile.draw());
+            else { // Without using individual visibility
+                // TODO redeterminize discardPiles?
+                for (int i=0; i < getNPlayers(); i++) {
+                    if (i == playerId) { continue; }
+                    gsCopy.drawPile.add(gsCopy.playerHands.get(i));
+                    gsCopy.playerHands.get(i).clear();
+                }
+                gsCopy.drawPile.shuffle(redeterminisationRnd);
+                for (int i=0; i < getNPlayers(); i++) {
+                    if (i == playerId) { continue; }
+                    for (int j=0; j < playerHands.get(i).getSize(); j++) {
+                        gsCopy.playerHands.get(i).add(gsCopy.drawPile.draw());
+                    }
                 }
             }
         }

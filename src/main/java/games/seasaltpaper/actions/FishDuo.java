@@ -13,7 +13,13 @@ public class FishDuo extends PlayDuo {
     public boolean execute(AbstractGameState gs) {
         super.execute(gs);
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
+        if (sspgs.getDrawPile().getSize() == 0) {
+//            System.out.println("NO CARDS LEFT IN DRAW PILE FOR FISH DUO!!!"); // SHOULD NEVER REACH HERE
+            throw new RuntimeException("NO CARDS LEFT IN DRAW PILE FOR FISH DUO!!!\n SHOULD ALREADY BE CHECKED BEFORE!");
+//            return false;
+        }
         SeaSaltPaperCard card = sspgs.getDrawPile().draw();
+        card.setVisible(playerId, true);
         sspgs.getPlayerHands().get(playerId).add(card);
         return true;
     }

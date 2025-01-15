@@ -1,6 +1,8 @@
 package games.seasaltpaper.cards;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.seasaltpaper.SeaSaltPaperGameState;
@@ -9,7 +11,6 @@ import games.seasaltpaper.actions.BoatDuo;
 import games.seasaltpaper.actions.FishDuo;
 import games.seasaltpaper.actions.SwimmerSharkDuo;
 import games.seasaltpaper.actions.CrabDuo;
-import shapeless.ops.nat;
 
 import java.util.*;
 
@@ -72,7 +73,7 @@ public class HandManager {
         if (boatDuo[0] != -1 && boatDuo[1] != -1) {
             duoActions.add(new BoatDuo(playerId, boatDuo));
         }
-        if (fishDuo[0] != -1 && fishDuo[1] != -1) {
+        if (fishDuo[0] != -1 && fishDuo[1] != -1 && gs.getDrawPile().getSize() > 0) {
             duoActions.add(new FishDuo(playerId, fishDuo));
         }
         if (swimmerSharkDuo[0] != -1 && swimmerSharkDuo[1] != -1 && !gs.allEnemiesProtectedOrEmpty(playerId)) {
@@ -189,6 +190,33 @@ public class HandManager {
             score += colorBonuses.get(i);
         }
         return score;
+    }
+
+    // Turn deck invisible for the targets
+    public static void setDeckVisibility(Deck<SeaSaltPaperCard> deck, List<Integer> targets, boolean visible) {
+        for (int i=0; i < deck.getSize(); i++) {
+            for (int playerId : targets) {
+                deck.get(i).setVisible(playerId, visible);
+            }
+        }
+    }
+
+    // After a draw action
+    // Turn deckFrom invisible to everyone but the playerId and the target
+    // Turn drawn card visible to the playerId
+    public static void handleAfterDrawDeckVisibility(DrawCard d, AbstractGameState gs, int playerId) {
+        // Turn deckFrom invisible to everyone else
+        Deck<SeaSaltPaperCard> deckFrom = (Deck<SeaSaltPaperCard>) gs.getComponentById(d.getDeckFrom());
+        ArrayList<Integer> targets = new ArrayList<>();
+        for (int i=0; i < gs.getNPlayers(); i++) {
+            if (i != deckFrom.getOwnerId() && i != playerId) {
+                targets.add(i);
+            }
+        }
+        HandManager.setDeckVisibility(deckFrom, targets, false);
+        // Turn the drawn card visible for playerId
+        SeaSaltPaperCard c = (SeaSaltPaperCard) d.getCard(gs);
+        c.setVisible(playerId, true);
     }
 
 }

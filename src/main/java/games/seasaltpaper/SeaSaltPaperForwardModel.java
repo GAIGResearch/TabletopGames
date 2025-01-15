@@ -78,6 +78,8 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         // Set-up discard piles
         sspgs.discardPile1.add(sspgs.drawPile.draw());
         sspgs.discardPile2.add(sspgs.drawPile.draw());
+        sspgs.discardPile1.get(0).setVisible(true);
+        sspgs.discardPile2.get(0).setVisible(true);
 
         // Reset player status
         for (int i = 0; i < sspgs.getNPlayers(); i++) {
@@ -184,7 +186,12 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                     actions.add(new DrawCard(sspgs.discardPile2.getComponentID(), currentPlayerHandId));
                 }
                 // Draw 2 from draw pile, then discard 1 to one of the discard pile
-                actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer()));
+                if (sspgs.getDrawPile().getSize() > 0) {
+                    actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer()));
+                }
+                if (actions.isEmpty()) {
+                    actions.add(new DoNothing());
+                }
                 break;
             case DUO:
 //                System.out.println("this is duo/stop phase");
@@ -210,13 +217,16 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         if (action instanceof Stop) {
             processEndRound(sspgs);
             return;
-//            sspgs.currentPhase = TurnPhase.FINISH;
         }
         if (!(action instanceof PlayDuo)) {
             sspgs.currentPhase = sspgs.currentPhase.next();
         }
         if (sspgs.currentPhase == TurnPhase.FINISH) // Current player's turn is finished, end the turn
         {
+            if (sspgs.drawPile.getSize() == 0) { // End the round if drawPile is empty
+                processEndRound(sspgs);
+                return;
+            }
             if (sspgs.lastChance != -1) {
                 //Process LastChance stuff
                 sspgs.protectedHands[sspgs.getCurrentPlayer()] = true;

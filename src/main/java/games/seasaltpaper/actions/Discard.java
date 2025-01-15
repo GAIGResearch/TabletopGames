@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.cards.HandManager;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 public class Discard extends AbstractAction implements IPrintable {
@@ -29,6 +30,7 @@ public class Discard extends AbstractAction implements IPrintable {
         PartialObservableDeck<SeaSaltPaperCard> playerHand = sspgs.getPlayerHands().get(playerID);
         playerHand.remove(discardCard);
         discardPile.add(discardCard);
+        discardCard.setVisible(true); // set discard card visible to everyone
         return true;
     }
 

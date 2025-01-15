@@ -33,12 +33,14 @@ public class DrawMultiple extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
         for (int i=0; i < drawnCardsId.length; i++) {
-            if (sspgs.getDrawPile().getSize() <= 0) {
+            if (sspgs.getDrawPile().getSize() == 0) {
                 // TODO print or throw exception here?
-                System.out.println("NO CARDS LEFT FROM DRAW PILE!!!!");
-                return false;
+//                System.out.println("NO CARDS LEFT FROM DRAW PILE!!!!");
+                throw new RuntimeException("NO CARDS LEFT FROM DRAW PILE!!!! SHOULD NEVER REACH HERE");
+//                return false;
             }
             SeaSaltPaperCard drawnCard = sspgs.getDrawPile().draw();
+            drawnCard.setVisible(playerID, true);
             sspgs.getPlayerHands().get(playerID).add(drawnCard);
             drawnCardsId[i] = drawnCard.getComponentID();
         }
