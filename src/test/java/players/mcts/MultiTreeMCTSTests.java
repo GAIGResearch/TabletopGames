@@ -66,7 +66,6 @@ public class MultiTreeMCTSTests {
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        params.nodesStoreScoreDelta = false;
         params.maintainMasterState = true;
         params.K = 1.0;
     }
@@ -180,7 +179,7 @@ public class MultiTreeMCTSTests {
         Game game = createTicTacToe(params, 4);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
-        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+        game.getPlayers().get(state.getCurrentPlayer())
                 ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));

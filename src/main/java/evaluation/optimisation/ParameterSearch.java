@@ -5,14 +5,14 @@ import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static evaluation.RunArg.game;
-import static evaluation.RunArg.parseConfig;
+import static evaluation.RunArg.*;
 import static utilities.Utils.getArg;
 
 public class ParameterSearch {
@@ -25,7 +25,7 @@ public class ParameterSearch {
         }
 
         // Config
-        Map<RunArg, Object> config = parseConfig(args, RunArg.Usage.ParameterSearch);
+        Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(RunArg.Usage.ParameterSearch));
 
         String setupFile = config.getOrDefault(RunArg.config, "").toString();
         if (!setupFile.isEmpty()) {
@@ -57,7 +57,7 @@ public class ParameterSearch {
             return;
         }
         String searchSpaceFile = config.get(RunArg.searchSpace).toString();
-        if (searchSpaceFile.equals("")) {
+        if (searchSpaceFile.isEmpty()) {
             System.out.println("No search space file provided. Please provide a search space file.");
             return;
         }
@@ -65,14 +65,17 @@ public class ParameterSearch {
         NTBEAParameters params = new NTBEAParameters(config);
         params.printSearchSpaceDetails();
 
-        if (params.mode == NTBEAParameters.Mode.MultiNTBEA) {
-            MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
-            multiNTBEA.run();
-        } else {
-            NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
-            singleNTBEA.run();
+        switch (params.mode) {
+            case NTBEA:
+            case CoopNTBEA:
+            case StableNTBEA:
+                NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
+                singleNTBEA.run();
+                break;
+            case MultiNTBEA:
+                MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
+                multiNTBEA.run();
+                break;
         }
     }
-
-
 }

@@ -32,7 +32,7 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
-        List<AbstractAction> retValue = state.cardsToBuy().stream()
+        List<AbstractAction> retValue = state.getCardsToBuy().stream()
                 .filter(c -> c.cost <= COST_OF_GAINED_CARD)
                 .map(c -> new GainCard(c, state.getCurrentPlayer()))
                 .collect(toList());

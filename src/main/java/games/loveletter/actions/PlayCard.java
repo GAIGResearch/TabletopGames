@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Objects;
@@ -12,15 +13,15 @@ import java.util.Objects;
 public class PlayCard extends AbstractAction {
     protected final int playerID;
     final int targetPlayer;
-    protected final LoveLetterCard.CardType cardType;
-    final LoveLetterCard.CardType forcedCountessCardType;
+    protected final CardType cardType;
+    final CardType forcedCountessCardType;
     final boolean canExecuteEffect;
     final boolean discard;
     protected final int cardIdx;
 
-    LoveLetterCard.CardType targetCardType, otherCardInHand;
+    CardType targetCardType, otherCardInHand;
 
-    public PlayCard(LoveLetterCard.CardType cardType, int cardIdx, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
+    public PlayCard(CardType cardType, int cardIdx, int playerID, int targetPlayer, CardType targetCardType, CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
         this.cardType = cardType;
         this.playerID = playerID;
         this.targetPlayer = targetPlayer;
@@ -30,7 +31,7 @@ public class PlayCard extends AbstractAction {
         this.discard = discard;
         this.cardIdx = cardIdx;
     }
-    public PlayCard(int cardIdx, int playerID, boolean discard, LoveLetterCard.CardType targetCardType) {
+    public PlayCard(int cardIdx, int playerID, boolean discard, CardType targetCardType) {
         this.cardType = null;
         this.playerID = playerID;
         this.targetPlayer = -1;
@@ -110,14 +111,16 @@ public class PlayCard extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PlayCard)) return false;
-        PlayCard playCard = (PlayCard) o;
-        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardIdx == playCard.cardIdx && cardType == playCard.cardType && forcedCountessCardType == playCard.forcedCountessCardType && targetCardType == playCard.targetCardType && otherCardInHand == playCard.otherCardInHand;
+        if (!(o instanceof PlayCard playCard)) return false;
+
+        // cardidx not included because it is ignored for some action space structures
+        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardType == playCard.cardType && forcedCountessCardType == playCard.forcedCountessCardType && targetCardType == playCard.targetCardType && otherCardInHand == playCard.otherCardInHand;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, targetPlayer, cardType, forcedCountessCardType, canExecuteEffect, discard, cardIdx, targetCardType, otherCardInHand);
+        // cardidx not included because it is ignored for some action space structures
+        return Objects.hash(playerID, targetPlayer, cardType, forcedCountessCardType, canExecuteEffect, discard, targetCardType, otherCardInHand);
     }
 
     @Override
@@ -135,15 +138,15 @@ public class PlayCard extends AbstractAction {
         return targetPlayer;
     }
 
-    public LoveLetterCard.CardType getCardType() {
+    public CardType getCardType() {
         return cardType;
     }
 
-    public LoveLetterCard.CardType getForcedCountessCardType() {
+    public CardType getForcedCountessCardType() {
         return forcedCountessCardType;
     }
 
-    public LoveLetterCard.CardType getTargetCardType() {
+    public CardType getTargetCardType() {
         return targetCardType;
     }
 
@@ -155,7 +158,7 @@ public class PlayCard extends AbstractAction {
         return discard;
     }
 
-    public LoveLetterCard.CardType getOtherCardInHand() {
+    public CardType getOtherCardInHand() {
         return otherCardInHand;
     }
 

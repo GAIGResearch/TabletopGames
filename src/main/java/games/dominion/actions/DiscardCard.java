@@ -51,8 +51,13 @@ public class DiscardCard extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState state) {
+    public String toString() {
         return String.format("Player %d discards %s", player, type);
+    }
+
+    @Override
+    public String getString(AbstractGameState state) {
+        return toString();
     }
 
     @Override

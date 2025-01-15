@@ -43,6 +43,7 @@ public class OMATests {
         params.budget = 5000;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.K = 1.0;
+        params.omaVisits = 10;
     }
 
     public Game createTicTacToe(MCTSParams params, int gridSize) {

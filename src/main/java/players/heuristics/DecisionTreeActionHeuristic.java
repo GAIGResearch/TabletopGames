@@ -19,7 +19,7 @@ public class DecisionTreeActionHeuristic extends AbstractDecisionTreeHeuristic i
         this.actionFeatures = actionFeatures;
     }
     @Override
-    public double evaluateAction(AbstractAction action, AbstractGameState state) {
+    public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         if (drModel == null) return 0;  // no model, no prediction (this is fine
         // get the features for the state and action
         int playerId = state.getCurrentPlayer();

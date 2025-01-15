@@ -64,6 +64,7 @@ public class DominionParameters extends TunableParameters {
         }
     }
 
+    // Used by unit tests only
     public static DominionParameters sizeDistortion() {
         DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);
@@ -80,6 +81,7 @@ public class DominionParameters extends TunableParameters {
         return retValue;
     }
 
+    // Used by unit tests only
     public static DominionParameters improvements() {
         DominionParameters retValue = new DominionParameters();
         retValue.cardsUsed.add(CardType.ARTISAN);

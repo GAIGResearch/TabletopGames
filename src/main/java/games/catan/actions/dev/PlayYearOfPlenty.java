@@ -8,10 +8,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanCard;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class PlayYearOfPlenty extends AbstractAction {
     public final CatanParameters.Resource[] resources;
@@ -28,7 +25,7 @@ public class PlayYearOfPlenty extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
         Deck<CatanCard> playerDevDeck = cgs.getPlayerDevCards(player);
-        HashMap<CatanParameters.Resource, Counter> playerResources = cgs.getPlayerResources(player);
+        Map<CatanParameters.Resource, Counter> playerResources = cgs.getPlayerResources(player);
 
         Optional<CatanCard> yearOfPlenty = playerDevDeck.stream()
                 .filter(card -> card.cardType == CatanCard.CardType.YEAR_OF_PLENTY)

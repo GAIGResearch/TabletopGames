@@ -23,16 +23,17 @@ public class CatanGameState extends AbstractGameState {
     protected int[] scores; // score for each player
     protected int[] victoryPoints; // secret points from victory cards
     protected int[] knights, roadLengths; // knight count and road length for each player
-    protected List<HashMap<CatanParameters.Resource, Counter>> exchangeRates; // exchange rate with bank for each resource
+    protected List<Map<CatanParameters.Resource, Counter>> exchangeRates; // exchange rate with bank for each resource
     protected int largestArmyOwner; // playerID of the player currently holding the largest army
     protected int longestRoadOwner; // playerID of the player currently holding the longest road
     protected int longestRoadLength, largestArmySize;
     int rollValue;
+    Random diceRnd;
 
-    List<HashMap<CatanParameters.Resource, Counter>> playerResources;
-    List<HashMap<BuyAction.BuyType, Counter>> playerTokens;
+    List<Map<CatanParameters.Resource, Counter>> playerResources;
+    List<Map<BuyAction.BuyType, Counter>> playerTokens;
     List<Deck<CatanCard>> playerDevCards;
-    HashMap<CatanParameters.Resource, Counter> resourcePool;
+    Map<CatanParameters.Resource, Counter> resourcePool;
     Deck<CatanCard> devCards;
     boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
 
@@ -40,6 +41,7 @@ public class CatanGameState extends AbstractGameState {
     public int negotiationStepsCount;
     public int nTradesThisTurn;
 
+    // Details of the current trade offer (if any, may be null)
     public AbstractAction getTradeOffer() {
         return tradeOffer;
     }
@@ -48,7 +50,7 @@ public class CatanGameState extends AbstractGameState {
         this.tradeOffer = tradeOffer;
     }
 
-    public List<HashMap<BuyAction.BuyType, Counter>> getPlayerTokens() {
+    public List<Map<BuyAction.BuyType, Counter>> getPlayerTokens() {
         return playerTokens;
     }
 
@@ -85,7 +87,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(catanGraph);
             for (int i = 0; i < nPlayers; i++) {
                 addAll(exchangeRates.get(i).values());
@@ -141,6 +143,7 @@ public class CatanGameState extends AbstractGameState {
         this.rollValue = rollValue;
     }
 
+    // value of the currently rolled dice
     public int getRollValue() {
         return rollValue;
     }
@@ -178,6 +181,7 @@ public class CatanGameState extends AbstractGameState {
         }
     }
 
+    // The number of knights that each player has
     public int[] getKnights() {
         return Arrays.copyOf(knights, knights.length);
     }
@@ -192,7 +196,7 @@ public class CatanGameState extends AbstractGameState {
         return victoryPoints.clone();
     }
 
-    public HashMap<CatanParameters.Resource, Counter> getPlayerResources(int playerID) {
+    public Map<CatanParameters.Resource, Counter> getPlayerResources(int playerID) {
         return playerResources.get(playerID);
     }
 
@@ -232,10 +236,11 @@ public class CatanGameState extends AbstractGameState {
         return scores;
     }
 
-    public HashMap<CatanParameters.Resource, Counter> getExchangeRates(int playerID) {
+    public Map<CatanParameters.Resource, Counter> getExchangeRates(int playerID) {
         return exchangeRates.get(playerID);
     }
 
+    // The road distance between two adjacent settlements, one at x, y, the other along the specified edgeIdx
     public int getRoadDistance(int x, int y, int edgeIdx) {
         // As the settlements are the nodes, we expand them to find roads
         // calculates the distance length of the road
@@ -304,6 +309,7 @@ public class CatanGameState extends AbstractGameState {
         return expandRoad(roadSet, unexpanded, expanded);
     }
 
+    // The number of resource cards in a player's hand
     public int getNResourcesInHand(int player) {
         int deckSize = 0;
         for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(player).entrySet()) {
@@ -409,6 +415,8 @@ public class CatanGameState extends AbstractGameState {
         copy.tradeOffer = tradeOffer != null? tradeOffer.copy() : null;
         copy.negotiationStepsCount = negotiationStepsCount;
 
+        copy.diceRnd = new Random(redeterminisationRnd.nextLong());
+
         copy.devCards = devCards.copy();
 
         copy.exchangeRates = new ArrayList<>();
@@ -417,30 +425,30 @@ public class CatanGameState extends AbstractGameState {
         copy.playerTokens = new ArrayList<>();
         copy.victoryPoints = victoryPoints.clone();
 
-        // Resources in hand are shuffled if PO
-        List<CatanParameters.Resource> availableRes = new ArrayList<>();
-
-        // PO
-        if (playerId != -1 || !getCoreGameParameters().partialObservable) {
-            for (CatanParameters.Resource r : resourcePool.keySet()) {
-                int nAvailable = ((CatanParameters) gameParameters).n_resource_cards - resourcePool.get(r).getValue();
-                if (nAvailable > 0) {
-                    for (int j = 0; j < nAvailable; j++) {
-                        availableRes.add(r);
-                    }
-                }
-            }
-        }
+//        // Resources in hand are shuffled if PO
+//        List<CatanParameters.Resource> availableRes = new ArrayList<>();
+//
+//        // PO
+//        if (playerId != -1 || !getCoreGameParameters().partialObservable) {
+//            for (CatanParameters.Resource r : resourcePool.keySet()) {
+//                int nAvailable = ((CatanParameters) gameParameters).n_resource_cards - resourcePool.get(r).getValue();
+//                if (nAvailable > 0) {
+//                    for (int j = 0; j < nAvailable; j++) {
+//                        availableRes.add(r);
+//                    }
+//                }
+//            }
+//        }
 
         for (int i = 0; i < getNPlayers(); i++) {
-            HashMap<CatanParameters.Resource, Counter> exchangeRate = new HashMap<>();
+            Map<CatanParameters.Resource, Counter> exchangeRate = new HashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: exchangeRates.get(i).entrySet()) {
                 exchangeRate.put(e.getKey(), e.getValue().copy());
             }
             copy.exchangeRates.add(exchangeRate);
 
             // Resources in hand
-            HashMap<CatanParameters.Resource, Counter> playerRes = new HashMap<>();
+            Map<CatanParameters.Resource, Counter> playerRes = new HashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
                 playerRes.put(e.getKey(), e.getValue().copy());
             }
@@ -453,24 +461,24 @@ public class CatanGameState extends AbstractGameState {
             if (playerId != -1 || !getCoreGameParameters().partialObservable) {
                 if (i != playerId) {
                     // Resources in hand are hidden
-                    for (CatanParameters.Resource r : playerResources.get(i).keySet()) {
-                        copy.playerResources.get(i).get(r).setValue(0);
-                    }
+//                    for (CatanParameters.Resource r : playerResources.get(i).keySet()) {
+//                        copy.playerResources.get(i).get(r).setValue(0);
+//                    }
 
                     // VP from dev cards hidden too
                     copy.victoryPoints[i] = 0;
                 } else {
-                    // Remove from list of resources that may be in other player's hands the ones we know are in our hand
-                    for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
-                        for (int j = 0; j < e.getValue().getValue(); j++) {
-                            availableRes.remove(e.getKey());
-                        }
-                    }
+//                    // Remove from list of resources that may be in other player's hands the ones we know are in our hand
+//                    for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
+//                        for (int j = 0; j < e.getValue().getValue(); j++) {
+//                            availableRes.remove(e.getKey());
+//                        }
+//                    }
                 }
             }
 
             // Player tokens
-            HashMap<BuyAction.BuyType, Counter> playerTok = new HashMap<>();
+            Map<BuyAction.BuyType, Counter> playerTok = new HashMap<>();
             for (Map.Entry<BuyAction.BuyType, Counter> e: playerTokens.get(i).entrySet()) {
                 playerTok.put(e.getKey(), e.getValue().copy());
             }
@@ -497,17 +505,17 @@ public class CatanGameState extends AbstractGameState {
             copy.shuffleDevelopmentCards(playerId);
 
             // Resources in hand are hidden
-            for (int i = 0; i < nPlayers; i++) {
-                if (i != playerId) {
-                    int nInHand = getNResourcesInHand(i);
-                    for (int j = 0; j < nInHand; j++) {
-                        if (availableRes.isEmpty()) break;
-                        CatanParameters.Resource r = availableRes.remove(rnd.nextInt(availableRes.size()));
-                        copy.playerResources.get(i).get(r).increment();
-                    }
-                }
-
-            }
+//            for (int i = 0; i < nPlayers; i++) {
+//                if (i != playerId) {
+//                    int nInHand = getNResourcesInHand(i);
+//                    for (int j = 0; j < nInHand; j++) {
+//                        if (availableRes.isEmpty()) break;
+//                        CatanParameters.Resource r = availableRes.remove(rnd.nextInt(availableRes.size()));
+//                        copy.playerResources.get(i).get(r).increment();
+//                    }
+//                }
+//
+//            }
         }
 
         return copy;
@@ -526,6 +534,7 @@ public class CatanGameState extends AbstractGameState {
     public double getGameScore(int playerId) {
         return scores[playerId];
     }
+
 
     private void shuffleDevelopmentCards(int playerId) {
         // Dev cards in hand are hidden and shuffled with the main deck
@@ -556,7 +565,7 @@ public class CatanGameState extends AbstractGameState {
         }
     }
 
-    public HashMap<CatanParameters.Resource, Counter> getResourcePool() {
+    public Map<CatanParameters.Resource, Counter> getResourcePool() {
         return resourcePool;
     }
 
@@ -586,17 +595,15 @@ public class CatanGameState extends AbstractGameState {
 
     /**
      * Check if can place road on edge of tile
-     * @param edgeIdx- index of the edge on tile
+     * @param edge - Edge
      * @param tile- tile on which we would like to build a road
      * @param player- playerID
      * @return true if can place road on given edge, false otherwise
      */
-    public boolean checkRoadPlacement(int edgeIdx, CatanTile tile, int player) {
+    public boolean checkRoadPlacement(CatanTile tile, int v1, int v2, Edge edge, int player) {
         GraphBoardWithEdges graph = getGraph();
-        BoardNodeWithEdges origin = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[edgeIdx]);  // this is one node connected with this edge
-        Edge edge = origin.getEdgeByID(tile.getEdgeIDs()[edgeIdx]);
-        BoardNodeWithEdges end = origin.getNeighbour(edge);  // this is one node connected with this edge
-
+        BoardNodeWithEdges origin = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[v1]);
+        BoardNodeWithEdges end = graph.getNodeByID(tile.getVerticesBoardNodeIDs()[v2]);
 
         // check if road is already taken
         if (edge == null || edge.getOwnerId() != -1) {
@@ -608,11 +615,14 @@ public class CatanGameState extends AbstractGameState {
             return true;
         }
 
-        // check if there is a road on a neighbouring edge
-        Set<Edge> roads = origin.getEdges();
-        roads.addAll(end.getEdges());
-        for (Edge rd : roads) {
-            if (!rd.equals(edge) && rd.getOwnerId() == player) {
+        // check if there is a road of ours on a neighbouring edge
+        for (Edge rd : origin.getEdges()) {
+            if (rd.getOwnerId() == player) {
+                return true;
+            }
+        }
+        for (Edge rd : end.getEdges()) {
+            if (rd.getOwnerId() == player) {
                 return true;
             }
         }

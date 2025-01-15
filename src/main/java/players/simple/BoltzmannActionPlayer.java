@@ -6,10 +6,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
 import utilities.Utils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * This implementation of AbstractPlayer uses a Boltzmann distribution to select actions.
@@ -53,12 +50,31 @@ public class BoltzmannActionPlayer extends AbstractPlayer {
 
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+        double[] actionPDF = createPDF(gameState, possibleActions);
+        if (epsilon > 0.0 && rnd.nextDouble() < epsilon)
+            return possibleActions.get(rnd.nextInt(possibleActions.size()));
+        return possibleActions.get(Utils.sampleFrom(actionPDF, rnd.nextDouble()));
+    }
+
+    private double[] createPDF(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         double[] actionValues = actionHeuristic.evaluateAllActions(possibleActions, gameState);
-        Map<AbstractAction, Double> actionToValueMap = new HashMap<>();
-        for (int i = 0; i < possibleActions.size(); i++) {
-            actionToValueMap.put(possibleActions.get(i), actionValues[i]);
+        double[] boltzmann = Utils.exponentiatePotentials(actionValues, temperature);
+        return Utils.pdf(boltzmann);
+    }
+
+    // for testing
+    public double valueOf(AbstractAction action, AbstractGameState gameState) {
+        return actionHeuristic.evaluateAction(action, gameState, new ArrayList<>());
+    }
+
+    // for testing
+    public double probabilityOf(AbstractAction action, AbstractGameState gameState, List<AbstractAction> allActions) {
+        double[] actionValues = actionHeuristic.evaluateAllActions(allActions, gameState);
+        double sum = 0;
+        for (double value : actionValues) {
+            sum += Math.exp(value / temperature);
         }
-        return Utils.sampleFrom(actionToValueMap, temperature, epsilon, rnd.nextDouble());
+        return Math.exp(actionHeuristic.evaluateAction(action, gameState, new ArrayList<>()) / temperature) / sum;
     }
 
     @Override

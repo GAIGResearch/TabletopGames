@@ -5,8 +5,7 @@ import core.Game;
 import evaluation.features.StateKeyFromFeatureVector;
 import evaluation.features.TurnAndPlayerOnly;
 import games.GameType;
-import games.dotsboxes.DBEdgeAndScoreKey;
-import games.dotsboxes.DBStateFeaturesReduced;
+import games.dotsboxes.*;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.features.LLHandCards;
 import games.loveletter.features.LLStateFeaturesReduced;
@@ -45,7 +44,6 @@ public class MCGSTests {
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
-        params.nodesStoreScoreDelta = false;
         params.maintainMasterState = true;
         params.K = 1.0;
     }
@@ -106,7 +104,7 @@ public class MCGSTests {
     @Test
     public void OneIterationHasDepthOne() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGS;
-        params.MCGSStateKey = s -> String.valueOf(s.hashCode());
+        params.MCGSStateKey = (s, i) -> String.valueOf(s.hashCode());
         params.budget = 1;
         Game game = createDotsAndBoxes(params);
         do {
@@ -145,6 +143,7 @@ public class MCGSTests {
         Game game = createDotsAndBoxes(params);
         do {
             int p = game.getGameState().getCurrentPlayer();
+            System.out.println(game.getTick());
             game.oneAction();
             if (p == 0 && game.getTick() < 50) {
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
@@ -181,7 +180,7 @@ public class MCGSTests {
     public void DotsAndBoxesFullRunActionVisitsSelfOnly() {
         // In this case we run through a whole game, relying on the predicate test
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MCGSSelfOnly;
-        params.MCGSStateKey = new StateKeyFromFeatureVector(new DBStateFeaturesReduced());
+        params.MCGSStateKey = new StateKeyFromFeatureVector(new DBStateFeatures());
         params.budget = 1000;
         Game game = createDotsAndBoxes(params);
         do {
@@ -193,7 +192,7 @@ public class MCGSTests {
                 if (game.getTick() < 10) // at this point we are at no risk of the game ending during search
                     assertEquals(root.getVisits(), root.getTranspositionMap().size(), 1);
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
-                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !((String)s).startsWith("0-")).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
                 problemNodes = root.nonMatchingNodes(allNodesForPlayerZero);
@@ -216,7 +215,7 @@ public class MCGSTests {
                 MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
                 if (root == null) continue;
                 assertTrue(params.budget + 1 >= root.getTranspositionMap().size());
-                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+                assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !((String)s).startsWith("0-")).count());
                 //                        root.getTranspositionMap().get(s).openLoopState.isNotTerminalForPlayer(0)).count());
                 List<SingleTreeNode> problemNodes = root.nonMatchingNodes(actionVisitsAddUp);
                 assertEquals(0, problemNodes.size());
@@ -258,7 +257,7 @@ public class MCGSTests {
         // We now have a total space of 7 + 6 + 5 + 5 + 4 + 3 + 2 + 1 = 33 states
         game.oneAction();
         MCGSNode root = (MCGSNode) mctsPlayer.getRoot(0);
-        assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !s.startsWith("0-")).count());
+        assertEquals(0, root.getTranspositionMap().keySet().stream().filter(s -> !((String)s).startsWith("0-")).count());
         assertEquals(33, root.getTranspositionMap().size());
     }
 }

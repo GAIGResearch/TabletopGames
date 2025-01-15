@@ -1,15 +1,9 @@
 package games.sushigo;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
-import core.interfaces.IStateFeatureJSON;
-import core.interfaces.IStateFeatureVector;
 import evaluation.features.TunableStateFeatures;
 import games.sushigo.cards.SGCard;
-import org.json.simple.JSONObject;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.IntStream;
 
 public class SGSimpleFeatures extends TunableStateFeatures {

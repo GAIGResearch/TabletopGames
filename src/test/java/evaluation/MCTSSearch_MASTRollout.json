@@ -11,7 +11,6 @@
         "opponentTreePolicy" : ["OneTree", "MultiTree", "SelfOnly"],
         "rolloutType" : "MAST",
         "oppModelType" : ["RANDOM", "MAST"],
-        "expansionPolicy" : "RANDOM",
         "MAST" : ["Tree", "Rollout", "Both"],
         "MASTGamma" : [0.0, 0.5, 0.9, 1.0],
         "MASTDefaultValue" : [-100.0, -10.0, 0.0, 10.0, 100.0],
@@ -22,7 +21,6 @@
         "exploreEpsilon" : 0.30,
         "rolloutTermination" : "DEFAULT",
         "maintainMasterState" : false,
-        "nodesStoreScoreDelta" : [false, true],
         "heuristic" : {
                 "class" : "players.heuristics.CoarseTunableHeuristic",
                 "heuristicType" : ["WIN_ONLY", "SCORE_PLUS", "LEADER"]

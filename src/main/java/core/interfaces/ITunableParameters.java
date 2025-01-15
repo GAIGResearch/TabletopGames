@@ -60,8 +60,26 @@ public interface ITunableParameters {
 
     /**
      * @return A JSONString of these Tunable Parameters
+     * This is required for interfacing with the NTBEA library
+     * It is a representation of the parameter space (use instanceToJSON() for a representation of the current settings)
      */
     String getJSONDescription();
+
+    /**
+     * @return a TunableParameters object instantiated from JSON
+     * This only supports specific settings, and not the full range of possible settings
+     * (For that use a SearchSpace)
+     * @param jsonObject
+     */
+    ITunableParameters instanceFromJSON(JSONObject jsonObject);
+
+    /**
+     *
+     * @return a JSON representation of the current parameter settings
+     * This is designed to be used for saving the current settings to a file for later instantiation
+     * with fromJSON
+     */
+    JSONObject instanceToJSON(boolean excludeDefaultValues);
 
     /**
      * Retrieves the default values of all parameters (as per original game).
@@ -89,6 +107,17 @@ public interface ITunableParameters {
             setParameterValue(name, values.get(descriptor));
         }
     }
+
+    /**
+     * Method that reloads all the locally stored values from currentValues
+     * This is in case sub-classes decide to use the frankly more intuitive access via
+     * params.paramName
+     * instead of
+     * params.getParameterValue("paramName")
+     * (the latter is also more typo-prone if we hardcode strings everywhere)
+     */
+     void _reset();
+
 
     /**
      * Retrieve the values of all parameters.

@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
 
+import java.util.List;
 import java.util.Random;
 
 public class RandomHeuristic implements IActionHeuristic {
@@ -15,7 +16,7 @@ public class RandomHeuristic implements IActionHeuristic {
     }
 
     @Override
-    public double evaluateAction(AbstractAction abstractAction, AbstractGameState abstractGameState) {
+    public double evaluateAction(AbstractAction abstractAction, AbstractGameState abstractGameState, List<AbstractAction> contextActions) {
         return rnd.nextDouble();
     }
 }

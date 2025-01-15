@@ -34,7 +34,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         if (!gainedCard) {
-            return state.cardsToBuy().stream()
+            return state.getCardsToBuy().stream()
                     .filter(c -> c.cost <= MAX_COST_OF_GAINED_CARD)
                     .map(c -> new GainCard(c, player, DeckType.HAND))
                     .collect(toList());

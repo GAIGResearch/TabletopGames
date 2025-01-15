@@ -13,14 +13,14 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
+import utilities.Pair;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static core.CoreConstants.GameResult.GAME_ONGOING;
-import static java.util.stream.Collectors.toList;
+import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -53,7 +53,9 @@ public abstract class AbstractGameState {
     protected ElapsedCpuChessTimer[] playerTimer;
 
     // A record of all actions taken to reach this game state
-    private List<AbstractAction> history = new ArrayList<>();
+    // The history is stored as a list of pairs, where the first element is the player who took the action
+    // this is in chronological order
+    private List<Pair<Integer, AbstractAction>> history = new ArrayList<>();
     private List<String> historyText = new ArrayList<>();
 
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
@@ -158,10 +160,14 @@ public abstract class AbstractGameState {
         return gameType;
     }
 
+
+    protected void setHistoryAt(int index, Pair<Integer, AbstractAction> action) {
+        history.set(index, action);
+    }
     /**
      * @return All actions that have been executed on this state since reset()/initialisation
      */
-    public List<AbstractAction> getHistory() { return new ArrayList<>(history);}
+    public List<Pair<Integer, AbstractAction>> getHistory() { return new ArrayList<>(history);}
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
@@ -175,7 +181,7 @@ public abstract class AbstractGameState {
      * In general getCurrentPlayer() should be used to find the current player.
      * getTurnOwner() will give a different answer if an Extended Action Sequence is in progress.
      * In this case getTurnOwner() returns the underlying player on whose turn the Action Sequence was initiated.
-     * @return
+     * @return the player whose turn it currently is (which may be different to the next player to act)
      */
     public int getTurnOwner() {return turnOwner;}
     public int getFirstPlayer() {return firstPlayer;}
@@ -209,7 +215,7 @@ public abstract class AbstractGameState {
      * Use this as a default; there is no need to create your own.
      * The one exception to this guideline is in the copy() method, where redeterminisation should *not* use this generator.
      * It should use redeterminisationRnd instead.
-     * @return
+     * @return the Random to use for game decisions/events
      */
     public Random getRnd() {
         return rnd;
@@ -300,10 +306,10 @@ public abstract class AbstractGameState {
         s.turnCounter = turnCounter;
         s.turnOwner = turnOwner;
         s.firstPlayer = firstPlayer;
-        // If we are copying from a player's perspective, then we branch the RNG so that the master copy
+        // We always branch the RNG on a copy() so that the master RNG
         // is not called an arbitrary number of times. This is to ensure that all shuffles in the main game are
         // the same if we start with the same seed
-        s.rnd = playerId == -1 ? rnd : new Random(System.currentTimeMillis());
+        s.rnd = new Random(redeterminisationRnd.nextLong());
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -337,7 +343,7 @@ public abstract class AbstractGameState {
      * @param action The action that has just been applied (or is about to be applied) to the game state
      */
     protected final void recordAction(AbstractAction action, int player) {
-        history.add(action);
+        history.add(new Pair<>(player, action.copy()));
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 
@@ -459,7 +465,7 @@ public abstract class AbstractGameState {
     /**
      * This sets the number of tieBreak levels in a game.
      * If we reach this level then we stop recursing.
-     * @return
+     * @return the number of levels of tiebreaks in the game
      */
     public int getTiebreakLevels() {return 5;}
 
@@ -521,8 +527,7 @@ public abstract class AbstractGameState {
 
     private List<Integer> unknownComponents(IComponentContainer<?> container, int player) {
         ArrayList<Integer> retValue = new ArrayList<>();
-        if (container instanceof PartialObservableDeck<?>) {
-            PartialObservableDeck<?> pod = (PartialObservableDeck<?>) container;
+        if (container instanceof PartialObservableDeck<?> pod) {
             for (int i = 0; i < pod.getSize(); i++) {
                 if (!pod.getVisibilityForPlayer(i, player))
                     retValue.add(pod.get(i).getComponentID());
@@ -532,18 +537,18 @@ public abstract class AbstractGameState {
                 case VISIBLE_TO_ALL:
                     break;
                 case HIDDEN_TO_ALL:
-                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case VISIBLE_TO_OWNER:
                     if (((Component) container).getOwnerId() != player)
-                        retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                        retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
-                case FIRST_VISIBLE_TO_ALL:
+                case TOP_VISIBLE_TO_ALL:
                     // add everything as unseen, and then remove the first element
-                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).collect(toList()));
+                    retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     retValue.remove(container.getComponents().get(0).getComponentID());
                     break;
-                case LAST_VISIBLE_TO_ALL:
+                case BOTTOM_VISIBLE_TO_ALL:
                     // add in the ID of the last item only
                     int length = container.getComponents().size();
                     retValue.add(container.getComponents().get(length - 1).getComponentID());
@@ -604,15 +609,12 @@ public abstract class AbstractGameState {
 
     /**
      * The equals method is final, but is left here so it is next to hashcode, which is not final
-     * @param o
-     * @return
      */
 
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractGameState)) return false;
-        AbstractGameState gameState = (AbstractGameState) o;
+        if (!(o instanceof AbstractGameState gameState)) return false;
         return Objects.equals(gameParameters, gameState.gameParameters) &&
                 gameStatus == gameState.gameStatus &&
                 nPlayers == gameState.nPlayers && roundCounter == gameState.roundCounter &&
@@ -632,13 +634,11 @@ public abstract class AbstractGameState {
     /**
      * Override the hashCode as needed for individual game states
      * (It is OK for two java objects to be not equal and have the same hashcode)
-     *
      *         we deliberately exclude history and allComponents from the hashcode
      *         this is because history is deliberately erased at times to hide hidden information (and is read-only)
      *         and allComponents is not always populated (it is a convenience to get hold of all components in a game
      *         at the superclass level - the actually important components are instantiated in sub-classes, and should be
      *         included in the hashCode() method implemented there
-     * @return
      */
     @Override
     public int hashCode() {
@@ -647,4 +647,20 @@ public abstract class AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }
+
+    public boolean isGameOver()
+    {
+        return gameStatus.equals(GAME_END);
+    }
+
+    public int getWinner()
+    {
+        if(gameStatus.equals(GAME_END)){
+            for(int playerId = 0; playerId < nPlayers; playerId++)
+                if(playerResults[playerId] == WIN_GAME)
+                    return playerId;
+        }
+        return -1;
+    }
+
 }
