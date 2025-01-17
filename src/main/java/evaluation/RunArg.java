@@ -58,6 +58,10 @@ public enum RunArg {
             "\tThe json-format file is needed if non-default settings for the IGameHeuristic are used.",
             "Win",
             new Usage[]{Usage.ParameterSearch}),
+    finalPercent("The proportion of the tuningBudget used to determine the best agent across each iteration. \n" +
+            "\t The remainder is divided amongst the iterations.\n",
+            0.5,
+            new Usage[]{Usage.SkillLadder}),
     focusPlayer("(Optional) A JSON file that defines the 'focus' of the tournament.\n" +
             "\t The 'focus' player will be present in every single game.\n" +
             "\t In this case an equal number of games will be run with the focusPlayer\n" +
@@ -112,7 +116,7 @@ public enum RunArg {
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
             "\t every possible player in every possible position, and run an equal number of games'\n" +
             "\t for each. This can be unworkable for a given matchup budget for a large number of players.\n" +
-            "\t 'exhaustiveSP' is the same as exhaustive, but allows for self-play; 'exhaustive' will not duplicate agents in any game.\n"+
+            "\t 'exhaustiveSP' is the same as exhaustive, but allows for self-play; 'exhaustive' will not duplicate agents in any game.\n" +
             "\t 'random' will have a random matchup, while ensuring no duplicates, and that all players get the\n" +
             "\t the same number of games in total. (Unless the number of agents is less than the number of players, \n" +
             "\t in which case self-play will be allowed.)\n" +
@@ -179,12 +183,20 @@ public enum RunArg {
             "\t One tuning process is run for each iteration of SkillLadder.\n",
             1000,
             new Usage[]{Usage.SkillLadder}),
-    finalPercent("The proportion of the tuningBudget used to determine the best agent across each iteration. \n" +
-            "\t The remainder is divided amongst the iterations.\n",
-            0.5,
-            new Usage[]{Usage.SkillLadder}),
+    useNTuples("If true we use N-tuples; this can add extra noise for optimisation",
+            true,
+            new Usage[]{Usage.ParameterSearch}),
     useThreeTuples("If true then we use 3-tuples as well as 1-, 2- and N-tuples",
             false,
+            new Usage[]{Usage.ParameterSearch}),
+    simpleRegret("If true (default is false), then we use sqrt(N)/1+n for exploration instead of \n" +
+            "sqrt(log(N)/n). The latter is derived in a cumulative regret situation, which we are less worried about.",
+            false,
+            new Usage[]{Usage.ParameterSearch}),
+    noiseCombination("Defines the exponent in the geenralised mean used to combine exploration terms\n" +
+            "across tuples. 1 is equivalent to a simple mean, higher values will overweight larger values until \n" +
+            "a value approaching infinity is equivalent to a Max function.",
+            1.0,
             new Usage[]{Usage.ParameterSearch}),
     verbose("If true, then the result of each game is reported. Default is false.",
             false,

@@ -16,12 +16,12 @@ public class MultiNTBEA extends NTBEA {
         super(parameters, game, nPlayers);
         params.evalGames = 0;  // these are not used in the multi-player case (yet)
 
-        searchFramework = new MultiNTupleBanditEA(landscapeModel, params.kExplore, params.neighbourhoodSize, nPlayers);
+        searchFramework = new MultiNTupleBanditEA(landscapeModel, params.neighbourhoodSize, nPlayers);
 
         // Initialise the GameEvaluator that will do all the heavy lifting
         multiPlayerEvaluator = new GameMultiPlayerEvaluator(
                 game,
-                params.searchSpace,
+                (ITPSearchSpace<?>) params.searchSpace,
                 nPlayers,
                 stateHeuristic,
                 params.seed

@@ -15,8 +15,8 @@ public class MultiNTupleBanditEA extends NTupleBanditEA {
     public int playerCount;
     MultiSolutionEvaluator evaluator;
 
-    public MultiNTupleBanditEA(LandscapeModel model, double kExplore, int nNeighbours, int players) {
-        super(model, kExplore, nNeighbours);
+    public MultiNTupleBanditEA(LandscapeModel model, int nNeighbours, int players) {
+        super(model, nNeighbours);
         playerCount = players;
     }
 

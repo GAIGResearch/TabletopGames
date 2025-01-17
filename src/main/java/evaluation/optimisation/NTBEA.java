@@ -28,8 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static evaluation.RunArg.byTeam;
-import static evaluation.RunArg.matchups;
+import static evaluation.RunArg.*;
 import static java.util.stream.Collectors.joining;
 
 public class NTBEA {
@@ -51,11 +50,14 @@ public class NTBEA {
     public NTBEA(NTBEAParameters parameters, GameType game, int nPlayers) {
         // Now initialise the other bits and pieces needed for the NTBEA package
         this.params = parameters;
-        landscapeModel = new NTupleSystem(params.searchSpace);
+        landscapeModel = new NTupleSystem(params.searchSpace, params.kExplore);
         landscapeModel.use3Tuple = params.useThreeTuples;
+        landscapeModel.useNTuple = params.useNTuples;
+        landscapeModel.simpleRegret = params.simpleRegret;
+        landscapeModel.generalisedMeanCoefficient = params.noiseMeanType;
         landscapeModel.addTuples();
 
-        searchFramework = new NTupleBanditEA(landscapeModel, params.kExplore, params.neighbourhoodSize);
+        searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
         this.game = game;
         this.nPlayers = nPlayers;
         // Set up opponents
@@ -117,7 +119,7 @@ public class NTBEA {
     @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
-            JSONObject json = params.searchSpace.getAgentJSON(settings);
+            JSONObject json = ((ITPSearchSpace<?>) params.searchSpace).getAgentJSON(settings);
             json.put("budget", params.budget);
             writer.write(JSONUtils.prettyPrint(json, 1));
         } catch (IOException e) {
@@ -146,7 +148,7 @@ public class NTBEA {
                 // i.e. we effectively add an extra 'run' for each elite
                 for (int[] elite : elites) {
                     winnerSettings.add(elite);
-                    winnersPerRun.add(params.searchSpace.instantiate(elite));
+                    winnersPerRun.add(((ITPSearchSpace<?>) params.searchSpace).instantiate(elite));
                 }
             }
 
@@ -236,7 +238,7 @@ public class NTBEA {
         }
         writeAgentJSON(bestResult.b,
                 params.destDir + File.separator + "Recommended_Final.json");
-        return new Pair<>(params.searchSpace.instantiate(bestResult.b), bestResult.b);
+        return new Pair<>(((ITPSearchSpace<?>) params.searchSpace).instantiate(bestResult.b), bestResult.b);
     }
 
     protected void runTrials() {
@@ -259,7 +261,7 @@ public class NTBEA {
                 ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestSampled()), 0.0)
                 : evaluateWinner(thisWinnerSettings);
 
-        winnersPerRun.add(params.searchSpace.instantiate(thisWinnerSettings));
+        winnersPerRun.add(((ITPSearchSpace<?>) params.searchSpace).instantiate(thisWinnerSettings));
         winnerSettings.add(thisWinnerSettings);
         Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(scoreOfBestAgent, thisWinnerSettings);
         if (params.verbose)
@@ -345,7 +347,7 @@ public class NTBEA {
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%d", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                        .map(p -> String.format("\t%s:\t%s\n", params.searchSpace.name(p.a), valueToString(p.a, p.b, params.searchSpace)))
+                        .map(p -> String.format("\t%s:\t%s\n", params.searchSpace.name(p.a), valueToString(p.a, p.b, ((ITPSearchSpace<?>) params.searchSpace))))
                         .collect(joining(" ")));
     }
 
@@ -371,7 +373,7 @@ public class NTBEA {
             // then write the output
             String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
             String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                    .map(p -> valueToString(p.a, p.b, params.searchSpace))
+                    .map(p -> valueToString(p.a, p.b, ((ITPSearchSpace<?>) params.searchSpace)))
                     .collect(joining("\t"));
             writer.write(firstPart + values + "\n");
             writer.flush();
@@ -379,12 +381,11 @@ public class NTBEA {
 
 
         } catch (IOException e) {
-            e.printStackTrace();
             System.out.println(e.getMessage() + " : Error accessing file " + params.logFile);
         }
     }
 
-    private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace ss) {
+    private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace<?> ss) {
         Object value = ss.value(paramIndex, valueIndex);
         String valueString = value.toString();
         if (value instanceof Integer) {

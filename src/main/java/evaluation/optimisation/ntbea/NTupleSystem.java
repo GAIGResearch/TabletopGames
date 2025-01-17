@@ -16,12 +16,17 @@ public class NTupleSystem implements LandscapeModel {
     public boolean use3Tuple = false;
     public boolean useNTuple = true;
 
-    int minTupleSize = 2;
+    public double generalisedMeanCoefficient = 1.0;
+    public boolean simpleRegret = false;
 
-    SearchSpace searchSpace;
+    int minTupleSize = 1;
 
-    public NTupleSystem(SearchSpace space) {
+    final SearchSpace searchSpace;
+    final double kExplore;
+
+    public NTupleSystem(SearchSpace space, double kExplore) {
         searchSpace = space;
+        this.kExplore = kExplore;
     }
 
     @Override
@@ -31,6 +36,7 @@ public class NTupleSystem implements LandscapeModel {
         for (int[] p : sampledPoints) {
             if (getMeanEstimate(p) > best) {
                 retValue = p;
+                best = getMeanEstimate(p);
             }
         }
         return retValue;
@@ -94,38 +100,37 @@ public class NTupleSystem implements LandscapeModel {
 
     @Override
     public double getLowerBound(int[] x) {
-        return getMeanEstimate(x) - getExplorationEstimate(x);
+        return getMeanEstimate(x) - kExplore * getExplorationEstimate(x);
     }
 
     @Override
     public double getUpperBound(int[] x) {
-        return getMeanEstimate(x) + getExplorationEstimate(x);
+        return getMeanEstimate(x) + kExplore * getExplorationEstimate(x);
     }
 
     protected double getExplorationEstimate(int[] x) {
-        // just takes the average of the exploration vector
+        // just takes the generalised mean of the exploration vector
         double[] vec = getExplorationVector(x);
-        return Arrays.stream(vec).sum() / vec.length;
+        double sumPow = Arrays.stream(vec).map(i -> Math.pow(i, generalisedMeanCoefficient)).sum();
+        return Math.pow(sumPow / vec.length, 1.0 / generalisedMeanCoefficient);
     }
 
     protected double[] getExplorationVector(int[] x) {
         // idea is simple: we just provide a summary over all
-        // the samples, comparing each to the maximum in that N-Tuple
+        // the samples
         double[] retValue = new double[tuples.size()];
         for (int i = 0; i < retValue.length; i++) {
             NTuple tuple = tuples.get(i);
             var ss = tuple.getStats(x);
-            if (ss != null) {
-                retValue[i] = Math.sqrt(Math.log((1 + tuple.nSamples())) / (epsilon + ss.n()));
+            int n = (ss == null ? 0 : ss.n());
+            if (simpleRegret) {
+                retValue[i] = Math.sqrt(1 + tuple.nSamples) / (epsilon + n);
             } else {
-                retValue[i] = Math.sqrt(Math.log((1 + tuple.nSamples)) / epsilon);
+                retValue[i] = Math.sqrt(Math.log((1 + tuple.nSamples) / (epsilon + n)));
             }
         }
         return retValue;
     }
-
-
-    // note that there is a smarter way to add different n-tuples, but this way is easiest
 
     public void add1Tuples() {
         for (int i = 0; i < searchSpace.nDims(); i++) {

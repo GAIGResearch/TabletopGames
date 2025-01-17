@@ -3,6 +3,7 @@ package evaluation.optimisation;
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 import evaluation.RunArg;
+import evaluation.optimisation.ntbea.SearchSpace;
 import games.GameType;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
@@ -35,12 +36,15 @@ public class NTBEAParameters {
     public long seed;
     public String evalMethod;
     public boolean useThreeTuples;
+    public boolean useNTuples;
+    public double noiseMeanType;
+    public boolean simpleRegret;
     public boolean verbose;
     public Mode mode;
     public String logFile;
     public List<String> listenerClasses;
     public String destDir;
-    public ITPSearchSpace searchSpace;
+    public SearchSpace searchSpace;
     public AbstractParameters gameParams;
     public boolean byTeam;
 
@@ -61,6 +65,9 @@ public class NTBEAParameters {
         budget = (int) args.get(RunArg.budget);
         evalMethod = (String) args.get(RunArg.evalMethod);
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
+        useNTuples = (boolean) args.get(RunArg.useNTuples);
+        noiseMeanType = (double) args.get(RunArg.noiseCombination);
+        simpleRegret = (boolean) args.get(RunArg.simpleRegret);
         verbose = (boolean) args.get(RunArg.verbose);
         seed = args.get(RunArg.seed) instanceof Long ? ((Long)args.get(RunArg.seed)).intValue() : (int) args.get(RunArg.seed)  ;
         byTeam = (boolean) args.get(RunArg.byTeam);
@@ -78,29 +85,30 @@ public class NTBEAParameters {
         }
 
         String searchSpaceFile =  (String) args.get(RunArg.searchSpace);
-        boolean fileExists = (new File(searchSpaceFile)).exists();
-        JSONObject json = null;
-        try {
-            String className = searchSpaceFile;
-            Constructor<ITunableParameters> constructor;
-            if (fileExists) {
-                // We import the file as a JSONObject
-                String rawJSON = JSONUtils.readJSONFile(searchSpaceFile, preprocessor);
-                json = (JSONObject) parser.parse(rawJSON);
-                className = (String) json.get("class");
-                if (className == null) {
-                    System.out.println("No class property found in SearchSpaceJSON file. This is required to specify the ITunableParameters class that the file complements");
-                    return;
+        if (!searchSpaceFile.equals("functionTest")) {
+            boolean fileExists = (new File(searchSpaceFile)).exists();
+            JSONObject json = null;
+            try {
+                String className = searchSpaceFile;
+                Constructor<ITunableParameters<?>> constructor;
+                if (fileExists) {
+                    // We import the file as a JSONObject
+                    String rawJSON = JSONUtils.readJSONFile(searchSpaceFile, preprocessor);
+                    json = (JSONObject) parser.parse(rawJSON);
+                    className = (String) json.get("class");
+                    if (className == null) {
+                        System.out.println("No class property found in SearchSpaceJSON file. This is required to specify the ITunableParameters class that the file complements");
+                        return;
+                    }
                 }
+                Class<ITunableParameters<?>> itpClass = (Class<ITunableParameters<?>>) Class.forName(className);
+                constructor = itpClass.getConstructor();
+                ITunableParameters<?> itp = constructor.newInstance();
+                // We then initialise the ITPSearchSpace with this ITP and the JSON details
+                searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
+            } catch (Exception e) {
+                throw new AssertionError(e.getClass() + " : " + e.getMessage() + "\nError loading ITunableParameters class in " + searchSpaceFile);
             }
-            Class<ITunableParameters> itpClass = (Class<ITunableParameters>) Class.forName(className);
-            constructor = itpClass.getConstructor();
-            ITunableParameters itp = constructor.newInstance();
-            // We then initialise the ITPSearchSpace with this ITP and the JSON details
-            searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "\nError loading ITunableParameters class in " + searchSpaceFile);
         }
     }
 

@@ -13,25 +13,14 @@ public class NTupleBanditEA {
 
     // public NTupleSystem banditLandscapeModel;
     protected LandscapeModel landscapeModel;
-
-    // the exploration rate normally called K or C - called kExplore here for clarity
-    public double kExplore;
     // the number of neighbours to explore around the current point each time
     // they are only explored IN THE FITNESS LANDSCAPE MODEL, not by sampling the fitness function
     int nNeighbours;
 
-    double epsilon = 0.5;
-
     public int nSamples = 1;
 
-    public void setSamplingRate(int n) {
-        nSamples = n;
-    }
-
-
-    public NTupleBanditEA(LandscapeModel model, double kExplore, int nNeighbours) {
+    public NTupleBanditEA(LandscapeModel model, int nNeighbours) {
         landscapeModel = model;
-        this.kExplore = kExplore;
         this.nNeighbours = nNeighbours;
     }
 
@@ -54,7 +43,6 @@ public class NTupleBanditEA {
 
         nNeighbours = (int) Math.min(nNeighbours, SearchSpaceUtil.size(searchSpace) / 4);
         if (nNeighbours < 5) nNeighbours = 5;
-        //     System.out.println("Set neighbours to: " + nNeighbours);
 
         // then each time around the loop try the following
         // create a neighbourhood set of points and pick the best one that combines it's exploitation and evaluation scores
@@ -64,9 +52,6 @@ public class NTupleBanditEA {
         for (int i = 0; i < nEvals; i++) {
             // each time around the loop we make one fitness evaluation of p
             // and add this NEW information to the memory
-            //int prevEvals = evaluator.nEvals();
-
-            // the new version enables resampling
             double fitness;
             if (nSamples == 1) {
                 fitness = evaluator.evaluate(p);
@@ -82,7 +67,7 @@ public class NTupleBanditEA {
             int nDims = searchSpace.nDims();
             double bestSoFar = Double.NEGATIVE_INFINITY;
             int[] settingToTryNext = new int[0];
-            for (int n = 0; i < nNeighbours; i++) {
+            for (int n = 0; n < nNeighbours; n++) {
                 int[] pp = Arrays.copyOf(p, p.length);
                 boolean mutation = false;
                 for (int d = 0; d < nDims; d++) {
@@ -100,16 +85,15 @@ public class NTupleBanditEA {
                 }
 
                 double estimatedUpperBound = landscapeModel.getUpperBound(pp);
-                if (estimatedUpperBound > bestSoFar)
+                if (estimatedUpperBound > bestSoFar) {
                     settingToTryNext = pp;
+                    bestSoFar = estimatedUpperBound;
+                }
             }
 
+            if (settingToTryNext.length == 0)
+                throw new AssertionError("No option found?");
             p = settingToTryNext;
         }
-    }
-
-    public NTupleBanditEA setEpsilon(double epsilon) {
-        this.epsilon = epsilon;
-        return this;
     }
 }

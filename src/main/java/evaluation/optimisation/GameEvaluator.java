@@ -63,7 +63,7 @@ public class GameEvaluator implements SolutionEvaluator {
         this.game = game;
         this.params = params;
         this.gameParams = params.gameParams;
-        this.searchSpace = params.searchSpace;
+        this.searchSpace = (ITPSearchSpace<?>) params.searchSpace;
         this.nPlayers = nPlayers;
         this.stateHeuristic = stateHeuristic;
         this.gameHeuristic = gameHeuristic;
