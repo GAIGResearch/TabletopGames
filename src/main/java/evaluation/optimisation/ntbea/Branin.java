@@ -4,9 +4,8 @@ import static java.lang.Math.PI;
 
 public class Branin extends NTBEAFunction {
 
-    public Branin() {
-        dimension = 2;
-    }
+    @Override
+    public int dimension() {return 2;}
 
     @Override
     public double functionValue(double[] x) {

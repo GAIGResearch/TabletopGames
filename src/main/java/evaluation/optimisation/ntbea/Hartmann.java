@@ -12,7 +12,11 @@ public class Hartmann extends NTBEAFunction {
         this.a = a;
         this.c = c;
         this.p = p;
-        dimension = a[0].length;
+    }
+
+    @Override
+    public int dimension() {
+        return a[0].length;
     }
 
     @Override

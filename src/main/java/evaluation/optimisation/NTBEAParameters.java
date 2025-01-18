@@ -36,6 +36,7 @@ public class NTBEAParameters {
     public long seed;
     public String evalMethod;
     public boolean useThreeTuples;
+    public boolean useTwoTuples;
     public boolean useNTuples;
     public double noiseMeanType;
     public boolean simpleRegret;
@@ -65,6 +66,7 @@ public class NTBEAParameters {
         budget = (int) args.get(RunArg.budget);
         evalMethod = (String) args.get(RunArg.evalMethod);
         useThreeTuples = (boolean) args.get(RunArg.useThreeTuples);
+        useTwoTuples = (boolean) args.get(RunArg.useTwoTuples);
         useNTuples = (boolean) args.get(RunArg.useNTuples);
         noiseMeanType = (double) args.get(RunArg.noiseCombination);
         simpleRegret = (boolean) args.get(RunArg.simpleRegret);

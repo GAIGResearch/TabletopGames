@@ -17,7 +17,7 @@ public class FunctionSearchSpace implements SearchSpace {
 
     @Override
     public int nDims() {
-        return function.dimension;
+        return function.dimension();
     }
 
     @Override

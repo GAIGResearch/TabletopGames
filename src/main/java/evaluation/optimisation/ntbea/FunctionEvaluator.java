@@ -28,7 +28,7 @@ public class FunctionEvaluator implements SolutionEvaluator {
 
     public double actualBaseValue(int[] input) {
         // we now convert settings into the relevant values to feed to the function
-        double[] settings = new double[fun.dimension];
+        double[] settings = new double[fun.dimension()];
         for (int i = 0; i < settings.length; i++) {
             settings[i] = (double) searchSpace.value(i, input[i]);
         }

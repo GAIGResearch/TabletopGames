@@ -57,7 +57,7 @@ public class FunctionReport {
         config.put(searchSpace, "functionTest");
         config.put(game, "TicTacToe");
         NTBEAParameters params = new NTBEAParameters(config);
-        NTBEAFunction function = Hartmann.Hartmann6;
+        NTBEAFunction function = new TestFunction002();
         params.searchSpace = new FunctionSearchSpace((Integer) config.get(nPlayers),  function);
         FunctionEvaluator evaluator = new FunctionEvaluator(function, params.searchSpace);
 
@@ -71,9 +71,7 @@ public class FunctionReport {
         landscapeModel.generalisedMeanCoefficient = params.noiseMeanType;
         landscapeModel.addTuples();
 
-
         NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
-
 
         double[] valuesFound = new double[params.repeats];
 

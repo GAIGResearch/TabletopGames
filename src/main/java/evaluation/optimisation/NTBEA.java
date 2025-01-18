@@ -52,6 +52,7 @@ public class NTBEA {
         this.params = parameters;
         landscapeModel = new NTupleSystem(params.searchSpace, params.kExplore);
         landscapeModel.use3Tuple = params.useThreeTuples;
+        landscapeModel.use2Tuple = params.useTwoTuples;
         landscapeModel.useNTuple = params.useNTuples;
         landscapeModel.simpleRegret = params.simpleRegret;
         landscapeModel.generalisedMeanCoefficient = params.noiseMeanType;

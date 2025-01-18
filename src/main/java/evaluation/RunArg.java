@@ -186,7 +186,10 @@ public enum RunArg {
     useNTuples("If true we use N-tuples; this can add extra noise for optimisation",
             true,
             new Usage[]{Usage.ParameterSearch}),
-    useThreeTuples("If true then we use 3-tuples as well as 1-, 2- and N-tuples",
+    useTwoTuples("If true then we use 2-tuples as well as 1-tuples",
+            true,
+            new Usage[]{Usage.ParameterSearch}),
+    useThreeTuples("If true then we use 3-tuples as well as 1-tuples",
             false,
             new Usage[]{Usage.ParameterSearch}),
     simpleRegret("If true (default is false), then we use sqrt(N)/1+n for exploration instead of \n" +

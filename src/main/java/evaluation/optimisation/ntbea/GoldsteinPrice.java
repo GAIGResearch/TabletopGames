@@ -4,9 +4,8 @@ import static java.lang.Math.max;
 
 public class GoldsteinPrice extends NTBEAFunction {
 
-    public GoldsteinPrice() {
-        dimension = 2;
-    }
+    @Override
+    public int dimension() {return 2;}
 
     @Override
     public double functionValue(double[] x) {
