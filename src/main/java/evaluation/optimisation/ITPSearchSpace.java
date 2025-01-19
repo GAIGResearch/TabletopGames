@@ -8,7 +8,6 @@ import utilities.Pair;
 import evaluation.optimisation.ntbea.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,15 +22,6 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
     static boolean debug = false;
     ITunableParameters<T> itp;
-
-    // TODO: moving SearchSpace into TAG means I can remove the need to do everything in a one-line
-    // constructor. I may also need / be able to move some of this into AgentSearchSpace
-    // I want the same three constructors:
-    // ITunableParameters only
-    // ITunableParameters + JSON file
-    // ITunableParameters + JSONObject
-    // This may also enable me to overcome the current restriction of not being able to have
-    // arbitrary Objects as the top level of selection
 
     /**
      * Constructor of a SearchSpace to use all the default values defined by an

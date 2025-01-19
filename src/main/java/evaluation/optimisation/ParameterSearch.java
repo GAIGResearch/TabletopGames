@@ -65,17 +65,7 @@ public class ParameterSearch {
         NTBEAParameters params = new NTBEAParameters(config);
         params.printSearchSpaceDetails();
 
-        switch (params.mode) {
-            case NTBEA:
-            case CoopNTBEA:
-            case StableNTBEA:
-                NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
-                singleNTBEA.run();
-                break;
-            case MultiNTBEA:
-                MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
-                multiNTBEA.run();
-                break;
-        }
+        NTBEA singleNTBEA = params.instantiate();
+        singleNTBEA.run();
     }
 }
