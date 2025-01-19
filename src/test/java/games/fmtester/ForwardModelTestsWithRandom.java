@@ -37,10 +37,6 @@ public class ForwardModelTestsWithRandom {
     public void testDominion() {
         ForwardModelTester fmt = new ForwardModelTester("game=Dominion", "nGames=2", "nPlayers=3");
     }
-//    @Test
-//    public void testDiceMonastery() {
-//        ForwardModelTester fmt = new ForwardModelTester("game=DiceMonastery", "nGames=2", "nPlayers=3");
-//    }
     @Test
     public void testDotsAndBoxes() {
         ForwardModelTester fmt = new ForwardModelTester("game=DotsAndBoxes", "nGames=2", "nPlayers=3");
@@ -53,10 +49,6 @@ public class ForwardModelTestsWithRandom {
     public void testLoveLetter() {
         ForwardModelTester fmt = new ForwardModelTester("game=LoveLetter", "nGames=2", "nPlayers=3");
     }
-//    @Test
-//    public void testPandemic() {
-//        ForwardModelTester fmt = new ForwardModelTester("game=Pandemic", "nGames=2", "nPlayers=3");
-//    }
     @Test
     public void testPoker() {
         ForwardModelTester fmt = new ForwardModelTester("game=Poker", "nGames=2", "nPlayers=3");

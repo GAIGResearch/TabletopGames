@@ -1,10 +1,10 @@
-package games.explodingkittens;
+package games.explodingkittensOLD;
 
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.optimisation.TunableParameters;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 public class ExplodingKittensHeuristic extends TunableParameters implements IStateHeuristic {
 

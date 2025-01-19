@@ -1,18 +1,18 @@
-package games.explodingkittens.actions;
+package games.explodingkittensOLD.actions;
 
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittensTurnOrder;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.ExplodingKittensTurnOrder;
+import games.explodingkittensOLD.ExplodingKittensGameState;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Favor;
+import static games.explodingkittensOLD.ExplodingKittensGameState.ExplodingKittensGamePhase.Favor;
 
 public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
     final int target;

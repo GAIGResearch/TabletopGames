@@ -1,17 +1,17 @@
-package games.explodingkittens.actions;
+package games.explodingkittensOLD.actions;
 
 import core.actions.AbstractAction;
 import core.AbstractGameState;
 import core.actions.DrawCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.ExplodingKittensParameters;
-import games.explodingkittens.cards.ExplodingKittensCard;
+import games.explodingkittensOLD.ExplodingKittensGameState;
+import games.explodingkittensOLD.ExplodingKittensParameters;
+import games.explodingkittensOLD.cards.ExplodingKittensCard;
 
 import java.util.Arrays;
 
-import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture;
+import static games.explodingkittensOLD.ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture;
 
 public class SeeTheFuture extends DrawCard implements IsNopeable, IPrintable {
 
