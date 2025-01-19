@@ -67,7 +67,7 @@ public class AlphaBetaPruningTests {
         MaxNSearchPlayer player1 = new MaxNSearchPlayer(paramsOne);
         player1.setForwardModel(forwardModel);
 
-        // create a MaxNSearchPlayer with alphaBetaPruning set to true
+        // create a MaxNSearchPlayer with iterativeDeepening set to false
         MaxNSearchParameters paramsTwo = new MaxNSearchParameters();
         paramsOne.iterativeDeepening = false;
         paramsTwo.budget = 1000;

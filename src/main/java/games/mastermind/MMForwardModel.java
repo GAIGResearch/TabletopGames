@@ -84,7 +84,7 @@ public class MMForwardModel extends StandardForwardModel {
         boolean gameEnd = true;
 
         for (int i=0; i<mmp.boardWidth; i++) {
-            if (gameState.guessBoard.getElement(i,gameState.activeRow) != gameState.answerCode.get(i)) {
+            if (!gameState.guessBoard.getElement(i,gameState.activeRow).getTokenType().equals(gameState.answerCode.get(i).getTokenType())) {
                 win = false;
                 gameEnd = false;
                 break;

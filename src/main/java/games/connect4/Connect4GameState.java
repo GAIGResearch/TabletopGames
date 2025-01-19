@@ -1,15 +1,12 @@
 package games.connect4;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import utilities.Pair;
 
@@ -44,7 +41,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(gridBoard);
             addAll(Connect4Constants.playerMapping);
         }};
