@@ -25,7 +25,7 @@ public class SaboteurGameState extends AbstractGameState
     PartialObservableGridBoard<PathCard> gridBoard;
     Deck<SaboteurCard> nuggetDeck;
 
-    List<Vector2D> pathCardOptions;
+    Set<Vector2D> pathCardOptions;
     int centerOfGrid;
 
     int nOfMiners;
@@ -36,7 +36,7 @@ public class SaboteurGameState extends AbstractGameState
         super(parameters, nPlayers);
         playerDecks = new ArrayList<>();
         toolDeck = new ArrayList<>();
-        pathCardOptions = new ArrayList<>();
+        pathCardOptions = new HashSet<>();
         playerNuggetDecks = new ArrayList<>();
     }
 
@@ -78,7 +78,7 @@ public class SaboteurGameState extends AbstractGameState
         }
         copy.goalDeck = goalDeck.copy();
 
-        copy.pathCardOptions = new ArrayList<>();
+        copy.pathCardOptions = new HashSet<>();
         for(Vector2D pathCardOption : pathCardOptions)
         {
             copy.pathCardOptions.add(pathCardOption.copy());
@@ -215,7 +215,7 @@ public class SaboteurGameState extends AbstractGameState
         return playerNuggetDecks;
     }
 
-    public List<Vector2D> getPathCardOptions() {
+    public Set<Vector2D> getPathCardOptions() {
         return pathCardOptions;
     }
 
