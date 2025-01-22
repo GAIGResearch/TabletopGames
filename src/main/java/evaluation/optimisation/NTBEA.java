@@ -146,6 +146,9 @@ public class NTBEA {
         // After all runs are complete, if tournamentGames are specified, then we allow all the
         // winners from each iteration to play in a tournament and pick the winner of this tournament
         if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
+            if (params.verbose) {
+                System.out.println("Starting a tournament of "+params.tournamentGames+" playouts.");
+            }
             if (!elites.isEmpty()) {
                 // first of all we add the elites into winnerSettings, and winnersPerRun
                 // i.e. we effectively add an extra 'run' for each elite

@@ -17,7 +17,7 @@ public class CQMCTSPlayer extends AbstractPlayer {
     }
 
     public CQMCTSPlayer(long seed) {
-        super(new CQMCTSParams(), "Basic MCTS");
+        super(new CQMCTSParams(), "Conquest MCTS");
         // for clarity we create a new set of parameters here, but we could just use the default parameters
         parameters.setRandomSeed(seed);
         rnd = new Random(seed);
@@ -45,7 +45,7 @@ public class CQMCTSPlayer extends AbstractPlayer {
 
     @Override
     public String toString() {
-        return "BasicMCTS";
+        return "CQ MCTS player";
     }
 
     /**
@@ -56,6 +56,10 @@ public class CQMCTSPlayer extends AbstractPlayer {
     void createRoot(AbstractGameState gameState) {
         if (root == null)
             root = new CQTreeNode(this, null, gameState, rnd);
+        else if (!root.getState().equals(gameState)) {
+            System.out.println("Node state not equal to given game state!");
+            root = new CQTreeNode(this, null, gameState, rnd);
+        }
     }
 
     @Override
@@ -65,9 +69,15 @@ public class CQMCTSPlayer extends AbstractPlayer {
             root.mctsSearch(getParameters().flexibleBudget);
         }
         AbstractAction best = root.greedy();
+        if (best == null) {
+            System.out.println("No best action... what?");
+        }
         if (best instanceof EndTurn && root.children.size() > 1) {
             // Ending turn has been deemed the best turn, but what if applying a command improves things?
             // re-evaluate for one more budget allocation to be sure
+            System.out.println("Checking other moves instead of ending turn");
+            root.depth = 0;
+            root.parent = null;
             root.mctsSearch(false);
         }
         best = root.greedy();

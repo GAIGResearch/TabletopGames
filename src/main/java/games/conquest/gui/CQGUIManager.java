@@ -15,6 +15,7 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -262,11 +263,11 @@ public class CQGUIManager extends AbstractGUIManager {
             if (!highlight.isEmpty()) {
                 Rectangle r = highlight.get(0);
                 Troop troop = cqgs.getTroopByRect(r);
-                if (troop != null) {
-                    cqgs.highlight = troop.getLocation();
-                }
                 showTroopInfo(cqgs, r); // show highlighted troop
-                cqgs.highlight = cqgs.getLocationByRect(r);
+                if (player instanceof HumanGUIPlayer) {
+                    // If watching a playout by AI agents, don't affect the gamestate (this would affect .equals())
+                    cqgs.highlight = cqgs.getLocationByRect(r);
+                }
                 if (boardView.doubleClick != null) {
                     // Something got double-clicked; activate the primary action in this phase
                     for (ActionButton button : actionButtons) {

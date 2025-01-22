@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 
-// TODO: implement actionHeuristic?
-
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
  * in the Forward Model or actions modifying the state of the game.</p>
@@ -356,6 +354,9 @@ public class CQGameState extends AbstractGameState {
             troop.step(getCurrentPlayer());
         }
         int nextPlayer = getCurrentPlayer() ^ 1;
+        if (getTroops(nextPlayer).size() == 1) {
+            getTroops(nextPlayer).iterator().next().removeChastise();
+        }
         for (Troop troop : getTroops(nextPlayer)) {
             if (troop.hasMoved())
                 System.out.println("Troop was not stepped correctly, somehow...");
@@ -541,8 +542,8 @@ public class CQGameState extends AbstractGameState {
         int points = 0;
         for (Command cmd : allCommands) {
             if (cmd.getCooldown() != cmd.getCommandType().cooldown) continue;
-            // Command was used this turn. Don't account for the point cost until next turn
-            points += cmd.getCost();
+            // Command was used this turn. Don't account for the point cost as much until next turn
+            points += cmd.getCost() / 3;
         }
         return points;
     }
@@ -566,7 +567,10 @@ public class CQGameState extends AbstractGameState {
         int totalCooldown = 0;
         int currentCooldown = 0;
         for (Command cmd : allCommands) {
-            currentCooldown += cmd.getCooldown();
+//            if (cmd.getCooldown() != cmd.getCommandType().cooldown || getCurrentPlayer() != playerId) {
+                // No heuristic cost during the turn of applying a command, to allow MCTS to explore further
+                currentCooldown += cmd.getCooldown();
+//            }
             totalCooldown += cmd.getCommandType().cooldown;
         }
         double cooldownFraction = currentCooldown / (double) totalCooldown;
@@ -599,7 +603,7 @@ public class CQGameState extends AbstractGameState {
             return false;
         // Compare hashmaps and other subobjects:
         if (!(
-                cqgs.highlight.equals(highlight) &&
+                Objects.equals(cqgs.highlight, highlight) && // may be null so needs Object.equals
                 Arrays.deepEquals(cqgs.cells, cells) &&
                 cqgs.troops.equals(troops) &&
                 cqgs.locationToTroopMap.equals(locationToTroopMap) &&

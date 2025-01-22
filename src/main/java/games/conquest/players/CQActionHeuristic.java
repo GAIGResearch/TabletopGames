@@ -8,7 +8,12 @@ import games.conquest.CQGameState;
 import games.conquest.actions.ApplyCommand;
 import games.conquest.actions.AttackTroop;
 import games.conquest.actions.EndTurn;
+import games.conquest.actions.MoveTroop;
+import games.conquest.components.Cell;
+import games.conquest.components.CommandType;
+import games.conquest.components.Troop;
 import utilities.Pair;
+import utilities.Vector2D;
 
 import java.util.List;
 import java.util.Map;
@@ -33,8 +38,22 @@ public class CQActionHeuristic implements IActionHeuristic {
         } else if (action instanceof EndTurn) {
             // First explore what happens if you end your turn, as a baseline to compare to applying commands later
             return 0.61;
+        } else if (action instanceof MoveTroop && false) {
+            Cell target = cqgs.getCell(((MoveTroop) action).getHighlight());
+            int minDistance = 999999;
+            for (Troop troop : cqgs.getTroops(cqgs.getCurrentPlayer() ^ 1)) {
+                int d = target.getChebyshev(troop.getLocation());
+                if (d < minDistance) {
+                    minDistance = d;
+                    if (minDistance <= cqgs.getSelectedTroop().getRange()) {
+                        // if we can move into attack range of an enemy troop, prioritize
+                        return 0.9;
+                    }
+                }
+            }
+            return 0.7;
         } else {
-            // SelectTroop or MoveTroop action
+            // SelectTroop, no specific troops gets prioritized
             return 0.7;
         }
     }

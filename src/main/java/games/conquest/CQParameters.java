@@ -34,11 +34,13 @@ public class CQParameters extends TunableParameters {
     public static final String dataPath = "data/conquest/";
     public Setup p0TroopSetup;
     public Setup p1TroopSetup;
+    boolean testSetup = false;
 
     // All of the following pre-made setups are taken from the RuneScape Wiki's strategy guide accessed in 2024.
     // The names used are those used in said strategy guide: https://runescape.wiki/w/Conquest/Strategies?oldid=35427217
     // The placement of each of the troops, unless provided in the strategy guide, is done based on the strategy description
     public enum Setup {
+        Test("C", BattleCry, Charge, Chastise),
         Default("    S A F  F M S\n" +
                    "     H K    C H",
                    BattleCry, Charge, Chastise),
@@ -155,6 +157,7 @@ public class CQParameters extends TunableParameters {
 
     public CQParameters() {
         List<Setup> setups = Arrays.asList(
+            Setup.Test,
             Setup.Default,
             Setup.Rush,
             Setup.AntiRush,
@@ -187,10 +190,17 @@ public class CQParameters extends TunableParameters {
             Setup.IAmWarrior,
             Setup.HalberderPure
         );
-        p0TroopSetup = Setup.Default;
-        p1TroopSetup = Setup.Default;
-        addTunableParameter("p0TroopSetup", Setup.Default, setups);
-        addTunableParameter("p1TroopSetup", Setup.Default, setups);
+        if (testSetup) {
+            p0TroopSetup = Setup.Test;
+            p1TroopSetup = Setup.Test;
+            addTunableParameter("p0TroopSetup", Setup.Test, setups);
+            addTunableParameter("p1TroopSetup", Setup.Test, setups);
+        } else {
+            p0TroopSetup = Setup.Default;
+            p1TroopSetup = Setup.Default;
+            addTunableParameter("p0TroopSetup", Setup.Default, setups);
+            addTunableParameter("p1TroopSetup", Setup.Default, setups);
+        }
     }
 
     @Override

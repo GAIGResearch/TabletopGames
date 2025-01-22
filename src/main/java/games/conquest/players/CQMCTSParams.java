@@ -9,21 +9,21 @@ import players.basicMCTS.BasicMCTSPlayer;
 import java.util.Arrays;
 
 public class CQMCTSParams extends PlayerParameters {
-    public double K = Math.sqrt(2);
-    public int maxTreeDepth = 100; // effectively no limit
+    public double K = 1.4;
+    public int maxTreeDepth = 15;
     public double epsilon = 1e-6;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public boolean flexibleBudget = true;
-    public int rolloutLength = 0;
+    public int rolloutLength = 10;
 
     public CQMCTSParams() {
         super();
-        addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
-        addTunableParameter("maxTreeDepth", 100, Arrays.asList(1, 3, 10, 30, 100));
+        addTunableParameter("K", 1.4, Arrays.asList(0.0, 0.001, 0.1, 0.5, 1.0, 1.4));
+        addTunableParameter("maxTreeDepth", 15, Arrays.asList(15, 20, 25));
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("flexibleBudget", true);
-        addTunableParameter("rolloutLength", 0);
+        addTunableParameter("rolloutLength", 10, Arrays.asList(0, 5, 10, 15));
     }
 
     @Override

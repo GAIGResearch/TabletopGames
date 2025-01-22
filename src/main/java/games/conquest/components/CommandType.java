@@ -12,15 +12,16 @@ import java.util.Collections;
 import java.util.List;
 
 public enum CommandType {
-    BattleCry("Battle Cry", 75, 5, Arrays.asList(MovementPhase, RallyPhase), false, 200, 200, 1),
-    Stoicism("Stoicism", 75, 5, Arrays.asList(MovementPhase, RallyPhase), false, 400, 0, 1),
-    Regenerate("Regenerate", 150, 4, Arrays.asList(MovementPhase, RallyPhase)),
-    Bombard("Bombard", 200, 2, MovementPhase, true, -100, 0, 1),
-    WindsOfFate("Winds of Fate", 150, 2, null),
+    // TODO: All commands should be limited to just Combat phase or Rally Phase. Only charge doesn't need Rally.
+    BattleCry("Battle Cry", 75, 5, Arrays.asList(CombatPhase, RallyPhase), false, 200, 200, 1),
+    Stoicism("Stoicism", 75, 5, Arrays.asList(CombatPhase, RallyPhase), false, 400, 0, 1),
+    Regenerate("Regenerate", 150, 4, Arrays.asList(CombatPhase, RallyPhase)),
+    Bombard("Bombard", 200, 2, Arrays.asList(CombatPhase, RallyPhase), true, -100, 0, 1),
+    WindsOfFate("Winds of Fate", 150, 2, Arrays.asList(MovementPhase, CombatPhase, RallyPhase)),
     Charge("Charge", 75, 5, MovementPhase, false, 0, 0, 2),
-    Chastise("Chastise", 50, 3, Arrays.asList(MovementPhase, RallyPhase), true, 0, 0, 0),
-    Vigilance("Vigilance", 50, 3, Arrays.asList(MovementPhase, RallyPhase)),
-    ShieldWall("Shield Wall", 50, 5, Arrays.asList(MovementPhase, RallyPhase));
+    Chastise("Chastise", 50, 3, Arrays.asList(CombatPhase, RallyPhase), true, 0, 0, 0),
+    Vigilance("Vigilance", 50, 3, Arrays.asList(CombatPhase, RallyPhase)),
+    ShieldWall("Shield Wall", 50, 5, Arrays.asList(CombatPhase, RallyPhase));
 
     public final int cost;
     public final int cooldown;

@@ -2,32 +2,27 @@ package games.conquest.players;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IActionHeuristic;
-import games.conquest.actions.ApplyCommand;
 import games.conquest.actions.EndTurn;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static players.PlayerConstants.*;
 import static utilities.Utils.noise;
 
 /**
- * This class is a more lightweight version of BasicTreeNode which doesn't save the full state,
- * but only keeps track of the gameState's hashCode. This saves heap memory, and makes it easier to
- * match up multiple paths to reach the same node.
+ * This class keeps track of the gameStates in order to resolve multiple paths to the same game state.
  */
 public class CQTreeNode {
     boolean debug = false;
 
     CQTreeNode root;
-    HashMap<CQTreeNode, AbstractAction> parents;
+//    HashMap<CQTreeNode, AbstractAction> parents;
     CQTreeNode parent = null; // The specific parent node used to access this node in a MCTS run
     Map<AbstractAction, CQTreeNode> children = new HashMap<>();
-    Map<AbstractAction, Integer> childVisits = new HashMap();
+//    Map<AbstractAction, Integer> childVisits = new HashMap();
     int nVisits = 0;
     double totValue = 0.0;
     CQActionHeuristic heuristic = new CQActionHeuristic();
@@ -35,11 +30,11 @@ public class CQTreeNode {
     final int playerId;
 
     private int fmCallsCount;
-    final int depth;
+    int depth;
     private AbstractGameState state;
 
     // for root node: save a list of all states and their nodes
-    Map<Integer, CQTreeNode> stateNodeMap = null;
+//    Map<AbstractGameState, CQTreeNode> stateNodeMap = null;
 
     private CQMCTSPlayer player;
     private Random rnd;
@@ -55,14 +50,14 @@ public class CQTreeNode {
         if (parent == null) {
             root = this;
             depth = 0;
-            stateNodeMap = new HashMap<>();
-            parents = null;
+//            stateNodeMap = new HashMap<>();
+//            parents = null;
         } else {
             root = parent.root;
             depth = parent.depth + 1;
-            parents = new HashMap<>();
+//            parents = new HashMap<>();
         }
-        root.stateNodeMap.put(gameState.hashCode(), this);
+//        root.stateNodeMap.put(gameState, this);
     }
 
     /**
@@ -77,7 +72,7 @@ public class CQTreeNode {
             if (debug) {
                 System.out.println(next);
             }
-            if (next == null) { // TODO: Niet selectedAction gebruiken
+            if (next == null) {
                 return true;
             }
             node = node.children.get(next);
@@ -172,7 +167,7 @@ public class CQTreeNode {
             // Get the next node up
             CQTreeNode nextN = n.parent;
             // leave an increment for the child node we just came from
-            nextN.childVisits.merge(n.parents.get(nextN), 1, Integer::sum);
+//            nextN.childVisits.merge(n.parents.get(nextN), 1, Integer::sum);
             // Move to the next level
 //            if (nextN.nVisits + 1 != nextN.childVisits.get(n.parents.get(nextN))) {
 //                System.out.println("Mismatch... weird?");
@@ -218,6 +213,7 @@ public class CQTreeNode {
      * @return the selected action using UCB
      */
     private AbstractAction ucb() {
+        // TODO: Does this prioritize the best option enough?
         // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
@@ -225,9 +221,10 @@ public class CQTreeNode {
 
         for (AbstractAction action : children.keySet()) {
             CQTreeNode child = children.get(action);
-            if (child == null)
+            if (child == null) {
+                System.out.println(action);
                 throw new AssertionError("Should not be here");
-            else if (bestAction == null)
+            } else if (bestAction == null)
                 bestAction = action;
 
             // Find child value
@@ -247,7 +244,7 @@ public class CQTreeNode {
             uctValue += explorationTerm;
 
             // Apply small noise to break ties randomly
-            uctValue = noise(uctValue,params.epsilon, player.getRnd().nextDouble());
+            uctValue = noise(uctValue, params.epsilon, player.getRnd().nextDouble());
 
             // Assign value
             if (uctValue > bestValue) {
@@ -283,6 +280,7 @@ public class CQTreeNode {
      *
      * @return - value of rollout.
      */
+    //TODO: Check if working properly
     private double rollOut() {
         int rolloutDepth = 0; // counting from end of tree
 
@@ -291,6 +289,9 @@ public class CQTreeNode {
         if (player.getParameters().rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
                 AbstractAction next = randomAction(rolloutState);
+                if (debug) {
+                    System.out.println("Selecting action: " + next);
+                }
                 advance(rolloutState, next);
                 rolloutDepth++;
             }
@@ -336,6 +337,7 @@ public class CQTreeNode {
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.state.isNotTerminal() && cur.depth < player.getParameters().maxTreeDepth) {
             if (!cur.unexpandedActions().isEmpty()) {
+                // TODO: Somehow some actions are evaluated BEFORE _all_ actions are expanded. Check how this is possible.
                 // We have an unexpanded action
                 cur = cur.expand();
                 break;
@@ -355,6 +357,9 @@ public class CQTreeNode {
             for (AbstractAction action : player.getForwardModel().computeAvailableActions(state, player.getParameters().actionSpace)) {
                 children.put(action, null); // mark a new node to be expanded
             }
+    }
+    public AbstractGameState getState() {
+        return state;
     }
 
     /**
@@ -382,20 +387,23 @@ public class CQTreeNode {
         // we first copy the action so that the one stored in the node will not have any state changes
         AbstractGameState nextState = state.copy();
 
-        int nextHash = advance(nextState, chosen.copy());
+        advance(nextState, chosen.copy());
         if (chosen instanceof EndTurn && nextState.getCurrentPlayer() == state.getCurrentPlayer()) {
             System.out.println("Current player == next player, after end turn");
             System.out.println(state + " / " + nextState);
         }
+        CQTreeNode tn = new CQTreeNode(player, this, nextState, rnd);
         // First attempt to look up this hash in the list of previously seen states.
         // If we have encountered it before, we'll just re-use it here
-        CQTreeNode tn = root.stateNodeMap.get(nextHash);
-        if (tn == null) {
-            // In most situations tn==null, so we haven't encountered it; so create a new node.
-            tn = new CQTreeNode(player, this, nextState, rnd);
-        }
+//        CQTreeNode tn = root.stateNodeMap.get(nextState); // check if the next state has been encountered before
+//        if (tn == null) {
+//            // In most situations tn==null, so we haven't encountered it; so create a new node.
+//            tn = new CQTreeNode(player, this, nextState, rnd);
+//        } else if (tn.state.getHistory() != null && !tn.state.getHistory().get(tn.state.getHistory().size()-1).equals(nextState.getHistory().get(nextState.getHistory().size() - 1))) {
+//            System.out.println("Hash match found: multiple routes to this node, with different action!");
+//        }
         // then keep track of the links back and forth
-        tn.parents.put(this, chosen);
+//        tn.parents.put(this, chosen);
         children.put(chosen, tn);
         tn.parent = this;
         return tn;
@@ -407,7 +415,7 @@ public class CQTreeNode {
      * @param gs  - current game state
      * @param act - action to apply
      */
-    private int advance(AbstractGameState gs, AbstractAction act) {
+    private void advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
         while (act instanceof EndTurn && playerId == gs.getCurrentPlayer()) {
             // sometimes it doesn't properly end the turn. Try ending the turn again I guess...
@@ -415,7 +423,6 @@ public class CQTreeNode {
 //            System.out.println("Corrected improperly ending turn.");
         }
         root.fmCallsCount++;
-        return gs.hashCode();
     }
 
     /**
@@ -449,6 +456,6 @@ public class CQTreeNode {
     }
 
     public String toString() {
-        return String.format("MTreeNode, visits: %d, totValue/visits: %f, states: %d", nVisits, totValue/nVisits, stateNodeMap == null ? 0 : stateNodeMap.size());
+        return String.format("MTreeNode, visits: %d, totValue/visits: %f", nVisits, totValue/nVisits);
     }
 }

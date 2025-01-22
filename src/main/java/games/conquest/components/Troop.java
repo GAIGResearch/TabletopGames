@@ -215,4 +215,16 @@ public class Troop extends Component {
             return cost;
         }
     }
+
+    /**
+     * Only called when the troop is the last troop remaining for a player,
+     * when starting their turn. Since it's not possible to chastise the last remaining
+     * troop, this gets undone whenever it happened before killing the second to last troop
+     * There will be no refund if this happens.
+     */
+    public void removeChastise() {
+        if (hasCommand(CommandType.Chastise)) {
+            appliedCommands.remove(CommandType.Chastise);
+        }
+    }
 }

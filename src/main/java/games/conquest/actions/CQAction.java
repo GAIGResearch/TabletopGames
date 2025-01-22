@@ -52,8 +52,8 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
         if (cmd.getCommandType() == CommandType.WindsOfFate) return cmd.getCommandType().equals(cmdType);
         else return cmp.equals(highlight) && cmd.getCommandType().equals(cmdType);
     }
-    public boolean checkHighlight(Vector2D cmp) {
-        return cmp.equals(highlight);
+    public Vector2D getHighlight() {
+        return highlight;
     }
 
     public abstract boolean canExecute(CQGameState cqgs);
@@ -66,7 +66,7 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
      */
     public boolean compareHighlight(Vector2D highlight, Command cmdHighlight) {
         if (this instanceof ApplyCommand) return this.checkHighlight(highlight, cmdHighlight);
-        else return this.checkHighlight(highlight);
+        else return highlight.equals(this.getHighlight());
     }
 
     /**
