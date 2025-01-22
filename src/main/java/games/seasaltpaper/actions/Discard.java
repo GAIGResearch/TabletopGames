@@ -9,6 +9,8 @@ import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.cards.HandManager;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
+import java.util.Objects;
+
 public class Discard extends AbstractAction implements IPrintable {
 
     final int playerID;
@@ -40,16 +42,18 @@ public class Discard extends AbstractAction implements IPrintable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj == this;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Discard discard = (Discard) o;
+        return playerID == discard.playerID && discardCardId == discard.discardCardId && discardPileId == discard.discardPileId;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(playerID, discardCardId, discardPileId);
     }
 
-    // TODO CANT DO "gameState.getComponentById(discardCardId).toString()" for some reason???
     @Override
     public String getString(AbstractGameState gameState) {
         return "Discard card " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();

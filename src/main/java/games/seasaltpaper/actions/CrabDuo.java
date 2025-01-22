@@ -11,6 +11,7 @@ import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class CrabDuo extends PlayDuo implements IExtendedSequence {
 
@@ -104,5 +105,19 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
     @Override
     public String getString(AbstractGameState gameState) {
         return "Crab Duo Action: Choose a discard pile to look at then draw a card from that pile";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        CrabDuo crabDuo = (CrabDuo) o;
+        return discardPileId == crabDuo.discardPileId && currentStep == crabDuo.currentStep;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), currentStep, discardPileId);
     }
 }

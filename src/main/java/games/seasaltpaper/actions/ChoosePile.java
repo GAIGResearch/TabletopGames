@@ -35,8 +35,11 @@ public class ChoosePile extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return this==obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChoosePile that = (ChoosePile) o;
+        return playerId == that.playerId && pileId == that.pileId;
     }
 
     @Override
@@ -48,4 +51,5 @@ public class ChoosePile extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         return "CHOOSE " + gameState.getComponentById(pileId).getComponentName();
     }
+
 }

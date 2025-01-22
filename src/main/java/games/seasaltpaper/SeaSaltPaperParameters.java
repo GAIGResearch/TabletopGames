@@ -16,8 +16,9 @@ import static games.seasaltpaper.cards.CardSuite.*;
 public class SeaSaltPaperParameters extends AbstractParameters {
 
     public String dataPath = "data/seasaltpaper/";
-    boolean individualVisibility = true;    // using individual card visibility for gameState copying
-    int discardPileCount = 2;
+    public boolean individualVisibility = true;    // using individual card visibility for gameState copying
+    public int discardPileCount = 2;
+    public int numberOfCardsDrawn = 2;
 
     int[] victoryCondition = new int[]{40, 35, 30};
 
@@ -112,6 +113,7 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         p.dataPath = dataPath;
         p.discardPileCount = discardPileCount;
         p.individualVisibility = individualVisibility;
+        p.numberOfCardsDrawn = numberOfCardsDrawn;
 
         p.victoryCondition = victoryCondition.clone();
         p.boatCollectorBonus = boatCollectorBonus.clone();
@@ -141,12 +143,12 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SeaSaltPaperParameters that = (SeaSaltPaperParameters) o;
-        return individualVisibility == that.individualVisibility && discardPileCount == that.discardPileCount && Objects.equals(dataPath, that.dataPath) && Arrays.equals(victoryCondition, that.victoryCondition) && Arrays.equals(boatCollectorBonus, that.boatCollectorBonus) && Arrays.equals(fishCollectorBonus, that.fishCollectorBonus) && Arrays.equals(shellCollectorBonus, that.shellCollectorBonus) && Arrays.equals(octopusCollectorBonus, that.octopusCollectorBonus) && Arrays.equals(penguinCollectorBonus, that.penguinCollectorBonus) && Arrays.equals(sailorCollectorBonus, that.sailorCollectorBonus) && Arrays.equals(sharkCollectorBonus, that.sharkCollectorBonus) && Objects.equals(collectorBonusDict, that.collectorBonusDict) && Objects.equals(duoBonusDict, that.duoBonusDict) && Objects.equals(multiplierDict, that.multiplierDict) && Objects.equals(cardsInit, that.cardsInit);
+        return numberOfCardsDrawn == that.numberOfCardsDrawn && individualVisibility == that.individualVisibility && discardPileCount == that.discardPileCount && Objects.equals(dataPath, that.dataPath) && Arrays.equals(victoryCondition, that.victoryCondition) && Arrays.equals(boatCollectorBonus, that.boatCollectorBonus) && Arrays.equals(fishCollectorBonus, that.fishCollectorBonus) && Arrays.equals(shellCollectorBonus, that.shellCollectorBonus) && Arrays.equals(octopusCollectorBonus, that.octopusCollectorBonus) && Arrays.equals(penguinCollectorBonus, that.penguinCollectorBonus) && Arrays.equals(sailorCollectorBonus, that.sailorCollectorBonus) && Arrays.equals(sharkCollectorBonus, that.sharkCollectorBonus) && Objects.equals(collectorBonusDict, that.collectorBonusDict) && Objects.equals(duoBonusDict, that.duoBonusDict) && Objects.equals(multiplierDict, that.multiplierDict) && Objects.equals(cardsInit, that.cardsInit);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), individualVisibility, dataPath, discardPileCount, collectorBonusDict, duoBonusDict, multiplierDict, cardsInit);
+        int result = Objects.hash(super.hashCode(), numberOfCardsDrawn, individualVisibility, dataPath, discardPileCount, collectorBonusDict, duoBonusDict, multiplierDict, cardsInit);
         result = 31 * result + Arrays.hashCode(victoryCondition);
         result = 31 * result + Arrays.hashCode(boatCollectorBonus);
         result = 31 * result + Arrays.hashCode(fishCollectorBonus);

@@ -8,6 +8,9 @@ import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.SeaSaltPaperParameters;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public abstract class PlayDuo extends AbstractAction {
 
     int playerId;
@@ -45,13 +48,18 @@ public abstract class PlayDuo extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj == this;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlayDuo playDuo = (PlayDuo) o;
+        return playerId == playDuo.playerId && Arrays.equals(cardsIdx, playDuo.cardsIdx);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int result = Objects.hash(playerId);
+        result = 31 * result + Arrays.hashCode(cardsIdx);
+        return result;
     }
 
     @Override

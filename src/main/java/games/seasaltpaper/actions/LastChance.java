@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class LastChance extends AbstractAction {
 
@@ -31,13 +32,16 @@ public class LastChance extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj == this;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LastChance that = (LastChance) o;
+        return playerId == that.playerId;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(playerId);
     }
 
     @Override

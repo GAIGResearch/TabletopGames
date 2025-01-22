@@ -829,7 +829,7 @@ public class Game {
         String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
-        long seed = Utils.getArg(args, "seed", 0);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
@@ -841,7 +841,7 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-        players.add(new BasicMCTSPlayer(seed));
+        players.add(new BasicMCTSPlayer());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
@@ -867,12 +867,13 @@ public class Game {
         String gameParams = null;
 
         /* Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+//        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
         /* Run multiple games */
-//        ArrayList<GameType> games = new ArrayList<>();
-//        games.add(Connect4);
-//        runMany(games, players, 100L, 5, false, false, null, turnPause);
+        int n = 100;
+        ArrayList<GameType> games = new ArrayList<>();
+        games.add(SeaSaltPaper);
+        runMany(games, players, 100L, n, false, true, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 

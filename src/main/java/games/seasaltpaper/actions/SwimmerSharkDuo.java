@@ -11,6 +11,7 @@ import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
 
@@ -74,5 +75,19 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
     @Override
     public String getString(AbstractGameState gameState) {
         return "Sailor-Shark Duo Actions: Pick a player then get a random card from their hand";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SwimmerSharkDuo that = (SwimmerSharkDuo) o;
+        return executed == that.executed;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), executed);
     }
 }

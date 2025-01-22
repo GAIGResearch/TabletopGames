@@ -16,6 +16,8 @@ public class SeaSaltPaperCard extends Card {
 
     // Individual visibility (overwrite PartialObservableDeck visibility)
     // Mostly for AI agents
+    // TODO IMPLEMENT THIS WITH PartialObservableDeck INDIVIDUAL COMPONENT VISIBILITY THEN REMOVE THIS
+    // OR SHOULD I???????
     protected boolean[] visibility = new boolean[GameType.SeaSaltPaper.getMaxPlayers()];
 
 

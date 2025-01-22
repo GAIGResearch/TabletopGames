@@ -3,6 +3,8 @@ package games.seasaltpaper.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
+import java.util.Objects;
+
 public class Stop extends AbstractAction {
 
     int playerId;
@@ -23,13 +25,16 @@ public class Stop extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return this == obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Stop stop = (Stop) o;
+        return playerId == stop.playerId;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(playerId);
     }
 
     @Override

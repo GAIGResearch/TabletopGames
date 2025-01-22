@@ -10,10 +10,12 @@ import games.GameType;
 import games.seasaltpaper.cards.HandManager;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
+import java.io.Serializable;
 import java.util.*;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-public class SeaSaltPaperGameState extends AbstractGameState implements IPrintable {
+public class SeaSaltPaperGameState extends AbstractGameState implements IPrintable{
 
     public static final int DISCARD_PILE_COUNT = 2; // TODO move this to parameter?
 
@@ -38,11 +40,9 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     TurnPhase currentPhase = TurnPhase.START;
 
-    //TODO: Make playerHands separate from played cards
     List<PartialObservableDeck<SeaSaltPaperCard>> playerHands;
     List<Deck<SeaSaltPaperCard>> playerDiscards;
 
-    // TODO make this partially observable (only top card visible) and for whoever playing ShellDuo
     Deck<SeaSaltPaperCard> discardPile1, discardPile2;  // TODO make this a list to generalize different number of discard piles
     Deck<SeaSaltPaperCard> drawPile;
 
@@ -151,7 +151,26 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     @Override
     protected double _getHeuristicScore(int playerId) {
+//        return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
+        return getLeadHeuristicScore(playerId);
+    }
+
+    private double _tempHeuristicScore(int playerId) {
         return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
+    }
+
+    private double getLeadHeuristicScore(int playerId) {
+        double[] scores = new double[getNPlayers()];
+        for (int i=0; i < getNPlayers(); i++) {
+//            scores[i] = _tempHeuristicScore(i);
+            scores[i] = HandManager.calculatePoint(this, i);
+        }
+        DoubleSummaryStatistics stat = Arrays.stream(scores).summaryStatistics();
+//        if (stat.getMax() > 20) {
+//            double a = scores[playerId] - max;
+//            a = a + 0;
+//        }
+        return scores[playerId] - stat.getMax();
     }
 
     @Override

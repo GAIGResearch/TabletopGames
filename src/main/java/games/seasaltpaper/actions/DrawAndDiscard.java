@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
@@ -15,7 +16,6 @@ import java.util.List;
 // Sequence of Draw 2 from draw pile then discard 1 to one of the discard piles
 public class DrawAndDiscard extends AbstractAction implements IExtendedSequence {
 
-    static final int NUMBER_OF_CARDS_DRAWN = 2; // TODO move this to parameter class
     enum Step {
         DRAW,
         DISCARD,
@@ -35,7 +35,8 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
     @Override
     public boolean execute(AbstractGameState gs) {
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
-        int n = Math.min(sspgs.getDrawPile().getSize(), NUMBER_OF_CARDS_DRAWN);
+        SeaSaltPaperParameters params = (SeaSaltPaperParameters) gs.getGameParameters();
+        int n = Math.min(sspgs.getDrawPile().getSize(), params.numberOfCardsDrawn);
         DrawMultiple drawMultiple = new DrawMultiple(n, playerId);
         if (!(drawMultiple.execute(gs))) {
             return false;

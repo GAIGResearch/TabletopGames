@@ -5,6 +5,9 @@ import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class DrawMultiple extends AbstractAction {
 
 //    boolean discard;
@@ -53,13 +56,18 @@ public class DrawMultiple extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return this == obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DrawMultiple that = (DrawMultiple) o;
+        return playerID == that.playerID && Arrays.equals(drawnCardsId, that.drawnCardsId);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int result = Objects.hash(playerID);
+        result = 31 * result + Arrays.hashCode(drawnCardsId);
+        return result;
     }
 
     @Override
