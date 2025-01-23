@@ -62,10 +62,10 @@ public class RootGUIManager extends AbstractGUIManager {
 
             JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
             for (int i = 0; i < nPlayers; i++) {
-                if (!humanPlayerId.isEmpty() && humanPlayerId.contains(i)) {
+                if (!humanPlayerIds.isEmpty() && humanPlayerIds.contains(i)) {
                     humanId = i;
                 } else {
-                    Iterator<Integer> iterator = humanPlayerId.iterator();
+                    Iterator<Integer> iterator = humanPlayerIds.iterator();
                     if (iterator.hasNext()) {
                         humanId = iterator.next();
                     }
@@ -184,7 +184,7 @@ public class RootGUIManager extends AbstractGUIManager {
             mapPanel.repaint();
             if (gameState.getCurrentPlayer() != activePlayer) {
                 activePlayer = gameState.getCurrentPlayer();
-                if (humanPlayerId.contains(activePlayer)) {
+                if (humanPlayerIds.contains(activePlayer)) {
                     humanId = activePlayer;
                 }
                 switch (activePlayer) {
@@ -205,7 +205,7 @@ public class RootGUIManager extends AbstractGUIManager {
                 switch (i) {
                     case 0:
                         catPlayerView.update(state);
-                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerId.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerIds.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                             catPlayerView.playerHand.setFront(true);
                             //catPlayerView.playerHand.setFocusable(true);
                         } else {
@@ -221,7 +221,7 @@ public class RootGUIManager extends AbstractGUIManager {
                         break;
                     case 1:
                         eyriePlayerView.update(state);
-                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerId.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerIds.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                             eyriePlayerView.playerHand.setFront(true);
                             //eyriePlayerView.playerHand.setFocusable(true);
                         } else {
@@ -237,7 +237,7 @@ public class RootGUIManager extends AbstractGUIManager {
                         break;
                     case 2:
                         woodlandPlayerView.update(state);
-                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerId.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerIds.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                             woodlandPlayerView.playerHand.setFront(true);
                             woodlandPlayerView.playerHand.setFocusable(true);
                         } else {
@@ -253,7 +253,7 @@ public class RootGUIManager extends AbstractGUIManager {
                         break;
                     case 3:
                         vagabondPlayerView.update(state);
-                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerId.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+                        if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer || humanPlayerIds.contains(i) || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                             vagabondPlayerView.playerHand.setFront(true);
                             vagabondPlayerView.playerHand.setFocusable(true);
                         } else {
@@ -302,7 +302,7 @@ public class RootGUIManager extends AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel((width / 3 - 10) * 2, height, humanPlayerId);
+        createActionHistoryPanel((width / 3 - 10) * 2, height, humanPlayerIds);
         wrapper.add(historyContainer);
         return wrapper;
     }

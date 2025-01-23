@@ -248,7 +248,7 @@ public class SaboteurGUIManager extends AbstractGUIManager {
             // Update decks and visibility
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || humanPlayerId.contains(i)
+                        || humanPlayerIds.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(front);
 
