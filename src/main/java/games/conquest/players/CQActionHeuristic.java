@@ -27,18 +27,24 @@ public class CQActionHeuristic implements IActionHeuristic {
             return 1.0;
         } else if (action instanceof ApplyCommand) {
             ApplyCommand ac = (ApplyCommand) action;
-            // When evaluating a turn, evaluate using commands last
-            if (ac.getCmdType().enemy) {
-                return 0.6; // TODO: some conditional to check proximity to friendly troop
-            } else if (ac.targetsTroop(cqgs.getSelectedTroop())) {
+            if (ac.getCmdType().equals(CommandType.Charge)) {
                 return 0.7;
             } else {
-                return 0.6;
+                return 0.0;
             }
+            // When evaluating a turn, evaluate using commands last
+//            if (ac.getCmdType().enemy) {
+//                return 0.6; // TODO: some conditional to check proximity to friendly troop
+//            } else if (ac.targetsTroop(cqgs.getSelectedTroop())) {
+//                return 0.7;
+//            } else {
+//                return 0.6;
+//            }
         } else if (action instanceof EndTurn) {
             // First explore what happens if you end your turn, as a baseline to compare to applying commands later
             return 0.61;
-        } else if (action instanceof MoveTroop && false) {
+        } else if (action instanceof MoveTroop && cqgs.getSelectedTroop().hasCommand(CommandType.Charge)) {
+            // If charge is applied, only consider moves that allow the troop to attack.
             Cell target = cqgs.getCell(((MoveTroop) action).getHighlight());
             int minDistance = 999999;
             for (Troop troop : cqgs.getTroops(cqgs.getCurrentPlayer() ^ 1)) {
@@ -51,11 +57,15 @@ public class CQActionHeuristic implements IActionHeuristic {
                     }
                 }
             }
-            return 0.7;
+            return 0.0;
         } else {
             // SelectTroop, no specific troops gets prioritized
             return 0.7;
         }
+    }
+
+    public double evaluateCommand(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
+        return 0.0;
     }
 
     public AbstractAction bestAction(List<AbstractAction> actions, AbstractGameState gameState) {

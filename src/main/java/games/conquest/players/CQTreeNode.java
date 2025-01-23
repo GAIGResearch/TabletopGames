@@ -8,6 +8,7 @@ import utilities.ElapsedCpuTimer;
 
 import java.util.*;
 
+import static games.conquest.CQGameState.CQGamePhase;
 import static java.util.stream.Collectors.toList;
 import static players.PlayerConstants.*;
 import static utilities.Utils.noise;
@@ -81,6 +82,54 @@ public class CQTreeNode {
         return false;
     }
 
+    /**
+     * Performs MCTS search, but only focuses on whether or not to apply commands.
+     * This is to reduce the search space drastically.
+     */
+    void checkCommandActivation() {
+        if (state.getGamePhase().equals(CQGamePhase.SelectionPhase) || state.getGamePhase().equals(CQGamePhase.MovementPhase)) {
+            return; // Commands can't get activated in these phases
+        }
+        CQMCTSParams params = player.getParameters();
+        boolean stop = false;
+
+        double avgTimeTaken;
+        double acumTimeTaken = 0;
+        long remaining;
+        int remainingLimit = params.breakMS;
+        ElapsedCpuTimer elapsedTimer = new ElapsedCpuTimer();
+        int budget = params.budget;
+        if (params.budgetType == BUDGET_TIME) {
+            elapsedTimer.setMaxTimeMillis(params.budget);
+        }
+        root.fmCallsCount = 0;
+        int numIters = 0;
+        while (!stop) {
+            ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
+            CQTreeNode selected = treePolicy(true);
+            double delta = selected.rollOut();
+            selected.backUp(delta);
+            numIters++;
+            PlayerConstants budgetType = params.budgetType;
+            switch (budgetType) {
+                case BUDGET_TIME -> {
+                    // Time budget
+                    acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
+                    avgTimeTaken = acumTimeTaken / numIters;
+                    remaining = elapsedTimer.remainingTimeMillis();
+                    stop = remaining <= 2 * avgTimeTaken || remaining <= remainingLimit;
+                }
+                case BUDGET_ITERATIONS ->
+                    // Iteration budget
+                        stop = numIters >= budget;
+                case BUDGET_FM_CALLS -> {
+                    // FM calls budget
+                    stop = root.fmCallsCount > budget;
+                }
+            }
+        }
+    }
+
     void mctsSearch() {
         mctsSearch(true);
     }
@@ -88,7 +137,6 @@ public class CQTreeNode {
      * Performs full MCTS search, using the defined budget limits.
      */
     void mctsSearch(boolean flexibleBudget) {
-        // TODO: Use commands instead of avoiding conflict
         CQMCTSParams params = player.getParameters();
 
         // Variables for tracking time budget
@@ -222,8 +270,9 @@ public class CQTreeNode {
         for (AbstractAction action : children.keySet()) {
             CQTreeNode child = children.get(action);
             if (child == null) {
-                System.out.println(action);
-                throw new AssertionError("Should not be here");
+//                System.out.println(action);
+//                throw new AssertionError("Should not be here");
+                continue; // Evaluation of an action was skipped to trim the action tree.
             } else if (bestAction == null)
                 bestAction = action;
 
@@ -325,21 +374,23 @@ public class CQTreeNode {
     }
 
     /*========= The following functions were taken from BasicTreeNode directly ========*/
+    private CQTreeNode treePolicy() {
+        return treePolicy(false);
+    }
     /**
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.
      * - A new child of this node is added to the tree.
-     *
+     * @param includeAllActions whether to consider actions that have an actionHeuristic score of 0.0
      * @return - new node added to the tree.
      */
-    private CQTreeNode treePolicy() {
+    private CQTreeNode treePolicy(boolean includeAllActions) {
         CQTreeNode cur = this;
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.state.isNotTerminal() && cur.depth < player.getParameters().maxTreeDepth) {
-            if (!cur.unexpandedActions().isEmpty()) {
-                // TODO: Somehow some actions are evaluated BEFORE _all_ actions are expanded. Check how this is possible.
+            if (!cur.unexpandedActions(includeAllActions).isEmpty()) {
                 // We have an unexpanded action
-                cur = cur.expand();
+                cur = cur.expand(includeAllActions);
                 break;
             } else {
                 // Move to next child given by UCT function
@@ -366,7 +417,10 @@ public class CQTreeNode {
      * @return A list of the unexpanded Actions from this State
      */
     private List<AbstractAction> unexpandedActions() {
-        return children.keySet().stream().filter(a -> children.get(a) == null).collect(toList());
+        return unexpandedActions(false);
+    }
+    private List<AbstractAction> unexpandedActions(boolean includeAllActions) {
+        return children.keySet().stream().filter(a -> children.get(a) == null && (includeAllActions || heuristic.evaluateAction(a, state) > 0.0)).collect(toList());
     }
 
     /**
@@ -374,11 +428,11 @@ public class CQTreeNode {
      *
      * @return - new child node.
      */
-    private CQTreeNode expand() {
+    private CQTreeNode expand(boolean includeAllActions) {
         // Find random child not already created
 //        Random r = new Random(player.getParameters().getRandomSeed());
         // pick a random unchosen action
-        List<AbstractAction> notChosen = unexpandedActions();
+        List<AbstractAction> notChosen = unexpandedActions(includeAllActions);
         AbstractAction chosen = heuristic.bestAction(notChosen, state);
 //        AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
         selectedAction = chosen; // keep track of most recently selected action

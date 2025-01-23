@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import games.conquest.CQGameState;
 import games.conquest.actions.EndTurn;
 
 import java.util.List;
@@ -67,18 +68,18 @@ public class CQMCTSPlayer extends AbstractPlayer {
         createRoot(gameState); // if root doesn't exist right now, create it
         if (root.depth == 0) {
             root.mctsSearch(getParameters().flexibleBudget);
+        } else if (root.children.size() > 1 && (
+                gameState.getGamePhase().equals(CQGameState.CQGamePhase.CombatPhase) ||
+                gameState.getGamePhase().equals(CQGameState.CQGamePhase.RallyPhase)
+        )) {
+            root.depth = 0;
+            root.parent = null;
+            System.out.println("Checking whether or not to apply a command");
+            root.checkCommandActivation();
         }
         AbstractAction best = root.greedy();
         if (best == null) {
             System.out.println("No best action... what?");
-        }
-        if (best instanceof EndTurn && root.children.size() > 1) {
-            // Ending turn has been deemed the best turn, but what if applying a command improves things?
-            // re-evaluate for one more budget allocation to be sure
-            System.out.println("Checking other moves instead of ending turn");
-            root.depth = 0;
-            root.parent = null;
-            root.mctsSearch(false);
         }
         best = root.greedy();
         if (best == null) {
