@@ -34,7 +34,7 @@ public abstract class DominionAction extends AbstractAction {
             System.out.println(gs);
             throw new AssertionError("Attempting to play an action out of turn : " + this);
         }
-        if (!dummyAction && state.actionsLeft() < 1) {
+        if (!dummyAction && state.getActionsLeft() < 1) {
             System.out.println(gs);
             throw new AssertionError("Insufficient actions to play action card " + this);
         }

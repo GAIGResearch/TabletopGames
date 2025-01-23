@@ -322,7 +322,7 @@ public class PokerGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(pgs);
                 if (i == gameState.getCurrentPlayer() && coreParameters.alwaysDisplayCurrentPlayer
-                        || humanPlayerId.contains(i)
+                        || humanPlayerIds.contains(i)
                         || coreParameters.alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);

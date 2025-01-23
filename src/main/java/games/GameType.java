@@ -84,6 +84,10 @@ import games.root.RootForwardModel;
 import games.root.RootGameState;
 import games.root.RootParameters;
 import games.root.gui.RootGUIManager;
+import games.saboteur.SaboteurForwardModel;
+import games.saboteur.SaboteurGameParameters;
+import games.saboteur.SaboteurGameState;
+import games.saboteur.gui.SaboteurGUIManager;
 import games.stratego.StrategoForwardModel;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
@@ -121,10 +125,13 @@ import gametemplate.GTGameState;
 import gametemplate.GTParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.*;
+import llm.DocumentSummariser;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -273,7 +280,11 @@ public enum GameType {
             ToadGameState.class, ToadForwardModel.class, ToadParameters.class, ToadGUIManager.class),
     Root(2, 4, Arrays.asList(Strategy,Wargame), Arrays.asList(ActionPoints, ActionQueue,
             ActionRetrieval, AreaMajority, AreaMovement, DiceRolling, HandManagement, MultiUseCards, Negotiation,
-            PointToPointMovement, Race, SuddenDeathEnding, TakeThat, VariablePlayerPowers, VariableSetup), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class);
+            PointToPointMovement, Race, SuddenDeathEnding, TakeThat, VariablePlayerPowers, VariableSetup), RootGameState.class, RootForwardModel.class, RootParameters.class, RootGUIManager.class),
+    Saboteur(3, 10,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(TakeThat, VariablePlayerPowers),
+            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -312,6 +323,40 @@ public enum GameType {
         this(minPlayers, maxPlayers, categories, mechanics, gameStateClass, forwardModelClass, parameterClass, guiManagerClass, null);
     }
 
+    public String loadRulebook() {
+        String pdfFilePath = "data/" + this.name().toLowerCase() + "/rulebook.pdf";
+        String ruleSummaryPath = "data/" + this.name().toLowerCase() + "/ruleSummary.txt";
+        // The first time we process the rulebook we create rule and strategy summaries for use
+        // with LLM-created heuristics (etc.)
+
+        File ruleSummaryFile = new File(ruleSummaryPath);
+        if (ruleSummaryFile.exists()) {
+            try {
+                Scanner scanner = new Scanner(ruleSummaryFile);
+                StringBuilder sb = new StringBuilder();
+                while (scanner.hasNextLine()) {
+                    sb.append(scanner.nextLine()).append("\n");
+                }
+                return sb.toString();
+            } catch (FileNotFoundException e) {
+                throw new AssertionError("File exists but could not be read: " + ruleSummaryPath);
+            }
+        }
+
+        DocumentSummariser summariser = new DocumentSummariser(pdfFilePath);
+        String rulesText = summariser.processText("game rules and strategy", 500);
+        // Then write this to file
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(ruleSummaryPath));
+            writer.write(rulesText);
+            writer.close();
+        } catch (IOException e) {
+            throw new AssertionError("Error writing rule summary file: " + ruleSummaryPath);
+        }
+
+        return rulesText;
+    }
+
     // Getters
     public int getMinPlayers() {
         return minPlayers;
@@ -331,6 +376,22 @@ public enum GameType {
 
     public String getDataPath() {
         return dataPath;
+    }
+
+    public Class<? extends AbstractGameState> getGameStateClass() {
+        return gameStateClass;
+    }
+
+    public Class<? extends AbstractForwardModel> getForwardModelClass() {
+        return forwardModelClass;
+    }
+
+    public Class<? extends AbstractGUIManager> getGuiManagerClass() {
+        return guiManagerClass;
+    }
+
+    public Class<? extends AbstractParameters> getParameterClass() {
+        return parameterClass;
     }
 
     public AbstractGameState createGameState(AbstractParameters params, int nPlayers) {
@@ -399,7 +460,6 @@ public enum GameType {
             for (int i = 0; i < game.getPlayers().size(); i++) {
                 if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
                     human.add(i);
-                    break;
                 }
             }
         }

@@ -6,7 +6,10 @@ import org.junit.Test;
 
 public class ForwardModelTestsWithMCTS {
 
-
+    @Test
+    public void testSaboteur() {
+        new ForwardModelTester("game=Saboteur", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Saboteur.json");
+    }
     @Test
     public void testRoot() {
         ForwardModelTester fmt = new ForwardModelTester("game=Root", "nGames=5", "nPlayers=4", "agent=json\\players\\mcts.json");
@@ -21,14 +24,14 @@ public class ForwardModelTestsWithMCTS {
     }
     @Test
     public void testCatan() {
-        new ForwardModelTester("game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Catan.json");
+        new ForwardModelTester("game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\catan\\Catan_LearnedHeuristic.json");
     }
 
     @Test
     public void testCatanNoTrading() {
         CatanParameters cp = new CatanParameters();
         cp.setParameterValue("tradingAllowed", false);
-        new ForwardModelTester(cp, "game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Catan.json");
+        new ForwardModelTester(cp, "game=Catan", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\catan\\Catan_LearnedHeuristic.json");
     }
     @Test
     public void testColtExpress() {
@@ -53,7 +56,7 @@ public class ForwardModelTestsWithMCTS {
     }
     @Test
     public void testExplodingKittens() {
-         new ForwardModelTester("game=ExplodingKittens", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\ExplodingKittens.json");
+         new ForwardModelTester("game=ExplodingKittens", "nGames=3", "nPlayers=3", "agent=json\\players\\gameSpecific\\ExplodingKittens.json");
     }
     @Test
     public void testLoveLetter() {

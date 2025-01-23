@@ -77,7 +77,7 @@ public class MMGUIManager extends AbstractGUIManager {
             for (int i = 0; i < actions.size(); i++) {
                 SetGridValueAction<Token> action = (SetGridValueAction<Token>) actions.get(i);
                 actionButtons[i].setVisible(true);
-                actionButtons[i].setButtonAction(action, action.getValue().getTokenType());
+                actionButtons[i].setButtonAction(action, action.getValue(gameState).getTokenType());
             }
         }
     }

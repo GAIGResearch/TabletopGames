@@ -1,0 +1,31 @@
+**"Love Letter" Game Summary for Developer Implementation:**
+
+**Objective:**
+- Be the last player standing or have the highest-value card when the deck runs out.
+
+**Player Count:**
+- 2-6 players (Classic version: 2-4 players)
+
+**Gameplay:**
+- Players draw and play one card per turn, each with unique effects.
+- Effects can eliminate players, trade hands, peek at cards, or grant temporary immunity.
+- The round ends when the deck is empty or one player remains.
+
+**Special Cards:**
+- **Princess & Guard:** Immediately eliminate players.
+- **Handmaid:** Provides temporary immunity.
+- **Countess:** Must be played if King or Prince is in hand.
+- **Spy:** Grants a favor token at round's end if played or discarded.
+
+**Strategy:**
+- Pay attention to played/discarded cards and other players' hands.
+- Manage your hand carefully, considering forced play conditions (Countess, Princess).
+- Use cards like Chancellor to draw and optimize your hand.
+- Protect yourself with Handmaid, eliminate low-card opponents with Baron, and bluff with Spy.
+
+**Winning:**
+- Win a set number of rounds to claim victory.
+
+**Classic Version:**
+- Excludes certain cards from the setup.
+- Supports 2-4 players.

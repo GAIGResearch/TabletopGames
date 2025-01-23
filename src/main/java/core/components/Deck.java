@@ -19,8 +19,8 @@ import static core.CoreConstants.VisibilityMode;
  * A deck is defined as a "group of components". Examples of decks are:
  * * A hand of components
  * * A deck to draw from
- * * components played on the player's area
- * * Discomponent pile
+ * * Components played on the player's area
+ * * Discard pile
  */
 public class Deck<T extends Component> extends Component implements IComponentContainer<T>, Iterable<T> {
 

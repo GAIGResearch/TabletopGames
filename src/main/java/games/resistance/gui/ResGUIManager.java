@@ -162,7 +162,7 @@ public class ResGUIManager extends AbstractGUIManager {
                     //playerHands[i].setFocusable(true);
                 } else {
                     if (i == gameState.getCurrentPlayer()
-                            || humanPlayerId.contains(i)) {
+                            || humanPlayerIds.contains(i)) {
                         playerHands[i].playerHandView.setFront(true);
                         playerHands[i].setFocusable(true);
                     } else {
@@ -207,7 +207,7 @@ public class ResGUIManager extends AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width / 2 - 10, height, humanPlayerId);
+        createActionHistoryPanel(width / 2 - 10, height, humanPlayerIds);
         wrapper.add(historyContainer);
 
 //        historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
