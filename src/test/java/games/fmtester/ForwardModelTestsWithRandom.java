@@ -86,7 +86,11 @@ public class ForwardModelTestsWithRandom {
 
     @Test
     public void testSevenWonders() {
-        ForwardModelTester fmt = new ForwardModelTester("game=Wonders7", "nGames=20", "nPlayers=3");
+        new ForwardModelTester("game=Wonders7", "nGames=2", "nPlayers=3");
+        new ForwardModelTester("game=Wonders7", "nGames=2", "nPlayers=4");
+        new ForwardModelTester("game=Wonders7", "nGames=2", "nPlayers=5");
+        new ForwardModelTester("game=Wonders7", "nGames=2", "nPlayers=6");
+        new ForwardModelTester("game=Wonders7", "nGames=2", "nPlayers=7");
     }
 
     @Test
