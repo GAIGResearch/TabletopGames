@@ -77,8 +77,9 @@ public class ClaimRoute extends AbstractAction {
                 amountToRemove--;
             }
         }
-
-
+        System.out.println("player train cars before " + tgs.getTrainCars(playerID));
+        tgs.deductTrainCars(playerID, costOfRoute);
+        System.out.println("player train cars after  " + tgs.getTrainCars(playerID));
         Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
         edge.setProperty(routeClaimedProp );
 

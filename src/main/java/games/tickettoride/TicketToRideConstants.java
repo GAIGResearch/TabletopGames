@@ -12,6 +12,7 @@ public class TicketToRideConstants {
     public final static int ticketToRideBoardHash = Hash.GetInstance().hash("ticketToRideBoard");
     public final static int trainCardDeckHash = Hash.GetInstance().hash("trainCardDeck");
     public final static int playerDeckDiscardHash = Hash.GetInstance().hash("Player Deck Discard");
+    public final static int trainCarsHash = Hash.GetInstance().hash("trainCars");
 
     public final static int destinationHash = Hash.GetInstance().hash("destination");
 

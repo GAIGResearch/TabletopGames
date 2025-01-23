@@ -3,6 +3,7 @@ package games.tickettoride;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.interfaces.IGamePhase;
 import games.GameType;
 import games.pandemic.PandemicGameState;
 import org.apache.hadoop.yarn.state.Graph;
@@ -32,6 +33,14 @@ public class  TicketToRideGameState extends AbstractGameState {
     GraphBoardWithEdges world;
 
     protected int[] scores;
+    protected int[] trainCars;
+
+    public enum TicketToRideGamePhase  implements IGamePhase {
+        NormalGameRound,
+        FinalRound
+    }
+
+    public int currentFinalRoundTurn = 0; // Used to make sure every player has one turn in final round, should be equal to amount of players by the end of game
 
     List<Map<TicketToRideParameters.TrainCar, Counter>> playerTrainCars;
     HashMap<TicketToRideParameters.TrainCar, Counter> trainCarPool;
@@ -102,6 +111,7 @@ public class  TicketToRideGameState extends AbstractGameState {
         copy.tempDeck = tempDeck.copy();
         copy.world = world.copy();
         copy.scores = scores;
+        copy.currentFinalRoundTurn = currentFinalRoundTurn;
         return copy;
     }
 
@@ -139,6 +149,27 @@ public class  TicketToRideGameState extends AbstractGameState {
         }
     }
 
+    public void setTrainCars(int playerId, int defaultTrainCarAmount) {
+        if (playerId < trainCars.length) {
+            trainCars[playerId] = defaultTrainCarAmount;
+        }
+    }
+    public int getTrainCars(int playerId) {
+        return trainCars[playerId];
+    }
+    public int[] getTrainCars() {
+        return trainCars;
+    }
+
+    public void deductTrainCars(int playerID, int numberOfTrainCars) { //train cars only reduce
+        if (playerID < trainCars.length) {
+            trainCars[playerID] -= numberOfTrainCars;
+        }
+    }
+    public int  getCurrentFinalRoundTurn() { return currentFinalRoundTurn;}
+
+    public void setCurrentFinalRoundTurn(int newCurrentFinalRoundTurn) { currentFinalRoundTurn = newCurrentFinalRoundTurn;}
+
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
@@ -168,7 +199,8 @@ public class  TicketToRideGameState extends AbstractGameState {
         scores = null;
 //        tempDeck = null;
         world = null;
-//        quietNight = false;
+        trainCars = null;
+        currentFinalRoundTurn = 0;
 //        nCardsDrawn = 0;
 //        researchStationLocations = new ArrayList<>();
     }
@@ -191,23 +223,7 @@ public class  TicketToRideGameState extends AbstractGameState {
 
     }
 
-//    public boolean checkCost(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
-//        for (Map.Entry<TicketToRideParameters.Resource, Integer> e: cost.entrySet()) {
-//            if (playerResources.get(playerId).get(e.getKey()).getValue() < cost.get(e.getKey())) return false;
-//        }
-//        return true;
-//    }
-//    public boolean checkCost(CatanParameters.Resource resource, int nRequired, int playerId) {
-//        return playerResources.get(playerId).get(resource).getValue() >= nRequired;
-//    }
-//
-//    public boolean spendResourcesIfPossible(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
-//        if (!checkCost(cost, playerId)) return false;
-//        for (Map.Entry<CatanParameters.Resource, Integer> e: cost.entrySet()) {
-//            playerResources.get(playerId).get(e.getKey()).decrement(e.getValue());
-//        }
-//        return true;
-//    }
+
 
 
 

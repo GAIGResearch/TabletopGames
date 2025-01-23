@@ -56,10 +56,12 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         state.tempDeck = new Deck<>("Temp Deck", VISIBLE_TO_ALL);
         state.areas = new HashMap<>();
         state.scores = new int[state.getNPlayers()];
+        state.trainCars = new int[state.getNPlayers()];
         AbstractGameData _data = new AbstractGameData();
         _data.load(tp.getDataPath());
 
         for (int i = 0; i < state.getNPlayers(); i++) {
+            state.setTrainCars(i,2); //default amount of train cars(35) per player, used to dictate end of game when <= 2
             Area playerArea = new Area(i, "Player Area");
             //Player Train Card hand setup
             Deck<Card> playerTrainCardHand = new Deck<>("Player Train Card Hand", VISIBLE_TO_ALL);
@@ -107,6 +109,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             //System.out.println("Setup: player " + i + " has " + playerTrainCardHandDeck);
         }
 
+        state.setGamePhase(TicketToRideGameState.TicketToRideGamePhase.NormalGameRound);
 
         state.setFirstPlayer(0);
 
@@ -138,8 +141,6 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             actions.add(new ClaimRoute(routesAvailableToBuy.get(0),playerId, colorOfRoute, trainCardsRequired));
         }
 
-
-
         return actions;
     }
 
@@ -150,9 +151,26 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         TicketToRideGameState gs = (TicketToRideGameState) currentState;
         TicketToRideParameters params = (TicketToRideParameters) gs.getGameParameters();
 
+        int playerId = currentState.getCurrentPlayer();
+        int currentTrainCars = gs.getTrainCars(playerId);
+
+        TicketToRideGameState.TicketToRideGamePhase gamePhase = (TicketToRideGameState.TicketToRideGamePhase) gs.getGamePhase();
+        if (currentTrainCars <= 2 && gamePhase != TicketToRideGameState.TicketToRideGamePhase.FinalRound){ //trigger final round
+            gs.setGamePhase(TicketToRideGameState.TicketToRideGamePhase.FinalRound);
+            System.out.println("NOW IN FINAL ROUND: player " + playerId + " with train cars: " + currentTrainCars );
+        } else if (gamePhase == TicketToRideGameState.TicketToRideGamePhase.FinalRound) { //already in final round
+            gs.setCurrentFinalRoundTurn(gs.getCurrentFinalRoundTurn() + 1);
+            System.out.println("Final round for player " + gs.getCurrentPlayer());
+            if (gs.getCurrentFinalRoundTurn() == gs.getNPlayers()){ //all final turns have been taken
+                System.out.println("GAME ENDED");
+
+                endGame(gs);
+
+            }
+        }
+
+
         endPlayerTurn(gs);
-
-
 
     }
 
