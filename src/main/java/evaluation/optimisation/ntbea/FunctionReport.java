@@ -42,7 +42,6 @@ public class FunctionReport {
                 config = parseConfig(json, Usage.ParameterSearch);
             } catch (FileNotFoundException ignored) {
                 throw new AssertionError("Config file not found : " + setupFile);
-                //    parseConfig(runGames, args);
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -75,7 +74,7 @@ public class FunctionReport {
             searchFramework.runTrial(evaluator, params.iterationsPerRun);
 
             if (params.verbose)
-                logResults(landscapeModel, params);
+                landscapeModel.logResults(params);
 
             int[] thisWinnerSettings = landscapeModel.getBestSampled();
             valuesFound[currentIteration] = evaluator.actualBaseValue(thisWinnerSettings);
@@ -87,47 +86,5 @@ public class FunctionReport {
         System.out.printf("Function: %20s Max: %.3f, Mean: %.3f, Min: %.3f, SD: %.3f%n",
                 function.getClass().getSimpleName(), summary.max(),
                 summary.mean(), summary.min(), summary.sd());
-    }
-
-
-    private static void logResults(NTupleSystem landscapeModel, NTBEAParameters params) {
-
-        System.out.println("Current best sampled point (using mean estimate): " +
-                Arrays.toString(landscapeModel.getBestSampled()) +
-                String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestSampled())));
-
-        String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, params.searchSpace.nDims())
-                .map(size -> landscapeModel.getTuples().stream()
-                        .filter(t -> t.tuple.length == size)
-                        .mapToInt(it -> it.ntMap.size())
-                        .sum()
-                ).toArray());
-
-        System.out.println("Tuples explored by size: " + tuplesExploredBySize);
-        System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
-
-        IntStream.range(0, params.searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
-                .mapToObj(i -> new Pair<>(params.searchSpace.name(i), landscapeModel.getTuples().get(i)))
-                .forEach(nameTuplePair ->
-                        nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
-                            StatSummary v = nameTuplePair.b.ntMap.get(k);
-                            System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
-                        })
-                );
-
-        System.out.println("\nSummary of 10 most tried full-tuple statistics:");
-        landscapeModel.getTuples().stream()
-                .filter(t -> t.tuple.length == params.searchSpace.nDims())
-                .forEach(t -> t.ntMap.keySet().stream()
-                        .map(k -> new Pair<>(k, t.ntMap.get(k)))
-                        .sorted(Comparator.comparing(p -> -p.b.n()))
-                        .limit(10)
-                        .forEach(item ->
-                                System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
-                                        item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
-                        )
-                );
-
-
     }
 }

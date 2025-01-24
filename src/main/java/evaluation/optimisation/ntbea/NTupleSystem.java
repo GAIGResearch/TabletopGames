@@ -1,8 +1,11 @@
 package evaluation.optimisation.ntbea;
 
+import evaluation.optimisation.NTBEAParameters;
+import utilities.Pair;
 import utilities.StatSummary;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class NTupleSystem implements LandscapeModel {
 
@@ -172,6 +175,44 @@ public class NTupleSystem implements LandscapeModel {
 
     public List<int[]> getSampledPoints() {
         return sampledPoints;
+    }
+
+    public void logResults(NTBEAParameters params) {
+        System.out.println("Current best sampled point (using mean estimate): " +
+                Arrays.toString(getBestSampled()) +
+                String.format(", %.3g", getMeanEstimate(getBestSampled())));
+
+        String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, params.searchSpace.nDims())
+                .map(size -> getTuples().stream()
+                        .filter(t -> t.tuple.length == size)
+                        .mapToInt(it -> it.ntMap.size())
+                        .sum()
+                ).toArray());
+
+        System.out.println("Tuples explored by size: " + tuplesExploredBySize);
+        System.out.printf("Summary of 1-tuple statistics after %d samples:%n", numberOfSamples());
+
+        IntStream.range(0, params.searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
+                .mapToObj(i -> new Pair<>(params.searchSpace.name(i), getTuples().get(i)))
+                .forEach(nameTuplePair ->
+                        nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
+                            StatSummary v = nameTuplePair.b.ntMap.get(k);
+                            System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
+                        })
+                );
+
+        System.out.println("\nSummary of 10 most tried full-tuple statistics:");
+        getTuples().stream()
+                .filter(t -> t.tuple.length == params.searchSpace.nDims())
+                .forEach(t -> t.ntMap.keySet().stream()
+                        .map(k -> new Pair<>(k, t.ntMap.get(k)))
+                        .sorted(Comparator.comparing(p -> -p.b.n()))
+                        .limit(10)
+                        .forEach(item ->
+                                System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
+                                        item.a, item.b.n(), item.b.mean(), item.b.stdErr(), getMeanEstimate(item.a.v))
+                        )
+                );
     }
 }
 

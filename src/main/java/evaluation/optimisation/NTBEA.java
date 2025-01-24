@@ -264,7 +264,7 @@ public class NTBEA {
         if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
             return new Pair<>(itp.instantiate(bestResult.b), bestResult.b);
         }
-        return new Pair<>(searchSpace, bestResult.b);
+        return new Pair<>(null, bestResult.b);
     }
 
     protected void runTrials() {
@@ -278,7 +278,7 @@ public class NTBEA {
         runTrials();
 
         if (params.verbose)
-            logResults();
+            landscapeModel.logResults(params);
 
         int[] thisWinnerSettings = landscapeModel.getBestSampled();
 
@@ -294,7 +294,9 @@ public class NTBEA {
         Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(scoreOfBestAgent, thisWinnerSettings);
         if (params.verbose)
             printDetailsOfRun(resultToReport);
-        logDetailsOfRun(resultToReport);
+        if (!params.logFile.isEmpty()) {
+            logSummary(resultToReport, params);
+        }
         if (resultToReport.a.a > bestResult.a.a)
             bestResult = resultToReport;
     }
@@ -317,49 +319,6 @@ public class NTBEA {
 
         return new Pair<>(avg, stdErr);
     }
-
-
-    private void logResults() {
-
-        System.out.println("Current best sampled point (using mean estimate): " +
-                Arrays.toString(landscapeModel.getBestSampled()) +
-                String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestSampled())));
-
-        String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, params.searchSpace.nDims())
-                .map(size -> landscapeModel.getTuples().stream()
-                        .filter(t -> t.tuple.length == size)
-                        .mapToInt(it -> it.ntMap.size())
-                        .sum()
-                ).toArray());
-
-        System.out.println("Tuples explored by size: " + tuplesExploredBySize);
-        System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
-
-        IntStream.range(0, params.searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
-                .mapToObj(i -> new Pair<>(params.searchSpace.name(i), landscapeModel.getTuples().get(i)))
-                .forEach(nameTuplePair ->
-                        nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
-                            StatSummary v = nameTuplePair.b.ntMap.get(k);
-                            System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
-                        })
-                );
-
-        System.out.println("\nSummary of 10 most tried full-tuple statistics:");
-        landscapeModel.getTuples().stream()
-                .filter(t -> t.tuple.length == params.searchSpace.nDims())
-                .forEach(t -> t.ntMap.keySet().stream()
-                        .map(k -> new Pair<>(k, t.ntMap.get(k)))
-                        .sorted(Comparator.comparing(p -> -p.b.n()))
-                        .limit(10)
-                        .forEach(item ->
-                                System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
-                                        item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
-                        )
-                );
-
-
-    }
-
     /**
      * This just prints out some useful info on the NTBEA results. It lists the full underlying recommended
      * parameter settings, and the estimated mean score of these (with std error).
@@ -379,13 +338,7 @@ public class NTBEA {
                         .collect(joining(" ")));
     }
 
-    protected void logDetailsOfRun(Pair<Pair<Double, Double>, int[]> data) {
-        if (!params.logFile.isEmpty()) {
-            logSummary(data, params);
-        }
-    }
-
-    private static void logSummary(Pair<Pair<Double, Double>, int[]> data, NTBEAParameters params) {
+    public static void logSummary(Pair<Pair<Double, Double>, int[]> data, NTBEAParameters params) {
         try {
             Utils.createDirectory(params.destDir);
             File log = new File(params.destDir.isEmpty() ? params.logFile : params.destDir + File.separator + params.logFile);

@@ -79,20 +79,20 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
 
     @Override
     public void _reset() {
-        iterationsPerRun = (int) getParameterValue("iterationsPerRun");
+        iterationsPerRun = (int) getParameterValue("iterations");
         repeats = (int) getParameterValue("repeats");
         budget = (int) getParameterValue("budget");
         evalGames = (int) getParameterValue("evalGames");
         kExplore = (double) getParameterValue("kExplore");
-        tournamentGames = (int) getParameterValue("tournamentGames");
-        neighbourhoodSize = (int) getParameterValue("neighbourhoodSize");
+        tournamentGames = (int) getParameterValue("matchups");
+        neighbourhoodSize = (int) getParameterValue("neighbourhood");
         opponentDescriptor = (String) getParameterValue("opponentDescriptor");
         seed = (int) getParameterValue("seed");
         evalMethod = (String) getParameterValue("evalMethod");
         useThreeTuples = (boolean) getParameterValue("useThreeTuples");
         useTwoTuples = (boolean) getParameterValue("useTwoTuples");
         useNTuples = (boolean) getParameterValue("useNTuples");
-        noiseMeanType = (double) getParameterValue("noiseMeanType");
+        noiseMeanType = (double) getParameterValue("noiseCombination");
         simpleRegret = (boolean) getParameterValue("simpleRegret");
         verbose = (boolean) getParameterValue("verbose");
         mode = (Mode) getParameterValue("mode");
@@ -104,20 +104,20 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     // Now we need to use args to provide the searchSpace and other non-tunable parameters
     public NTBEAParameters(Map<RunArg, Object> args) {
         this();
-        setParameterValue("iterationsPerRun", args.get(RunArg.iterations));
+        setParameterValue("iterations", args.get(RunArg.iterations));
         setParameterValue("repeats", args.get(RunArg.repeats));
         setParameterValue("budget", args.get(RunArg.budget));
         setParameterValue("evalGames", args.get(RunArg.evalGames));
         setParameterValue("kExplore", args.get(RunArg.kExplore));
-        setParameterValue("tournamentGames", args.get(RunArg.matchups));
-        setParameterValue("neighbourhoodSize", args.get(RunArg.neighbourhood));
+        setParameterValue("matchups", args.get(RunArg.matchups));
+        setParameterValue("neighbourhood", args.get(RunArg.neighbourhood));
         setParameterValue("opponentDescriptor", args.get(RunArg.opponent));
         setParameterValue("seed", args.get(RunArg.seed));
         setParameterValue("evalMethod", args.get(RunArg.evalMethod));
         setParameterValue("useThreeTuples", args.get(RunArg.useThreeTuples));
         setParameterValue("useTwoTuples", args.get(RunArg.useTwoTuples));
         setParameterValue("useNTuples", args.get(RunArg.useNTuples));
-        setParameterValue("noiseMeanType", args.get(RunArg.noiseCombination));
+        setParameterValue("noiseCombination", args.get(RunArg.noiseCombination));
         setParameterValue("simpleRegret", args.get(RunArg.simpleRegret));
         setParameterValue("verbose", args.get(RunArg.verbose));
         setParameterValue("mode", Mode.valueOf(args.get(RunArg.NTBEAMode).toString()));

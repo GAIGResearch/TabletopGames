@@ -2,6 +2,7 @@ package evaluation.optimisation.ntbea;
 
 import core.Game;
 import evaluation.RunArg;
+import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -45,11 +46,6 @@ public class MetaNTBEA {
         config.put(game, "TicTacToe");
         NTBEAParameters params = new NTBEAParameters(config);
 
-
-   //     params.searchSpace = new FunctionSearchSpace((Integer) config.get(discretisation),  params.function);
-  //      FunctionEvaluator evaluator = new FunctionEvaluator(params.function, params.searchSpace);
-        // TODO: The searchspace used by the evaluator (and params) is for the function to be optimised (not for this outer loop over NTBEA settings)
-
         NTBEAEvaluator evaluator = new NTBEAEvaluator((NTBEAFunction) config.get(function),
                 (int) config.get(discretisation),
                 params.searchSpace,
@@ -67,7 +63,8 @@ public class MetaNTBEA {
 
         NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
 
-        double[] valuesFound = new double[params.repeats];
+        double bestValue = Double.NEGATIVE_INFINITY;
+        int[] bestSettings = new int[params.searchSpace.nDims()];
 
         for (int currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             landscapeModel.reset();
@@ -76,58 +73,30 @@ public class MetaNTBEA {
             searchFramework.runTrial(evaluator, params.iterationsPerRun);
 
             if (params.verbose)
-                logResults(landscapeModel, params);
+                landscapeModel.logResults(params);
 
-            int[] thisWinnerSettings = landscapeModel.getBestSampled();
+            // we now use evalGames to get a better estimate of the value
+            double[] results = IntStream.range(0, params.evalGames)
+                    .mapToDouble(answer -> evaluator.evaluate(landscapeModel.getBestSampled())).toArray();
+
+            double avg = Arrays.stream(results).average().orElse(0.0);
+            double stdErr = Math.sqrt(Arrays.stream(results)
+                    .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
+
+            Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(new Pair<>(avg, stdErr), landscapeModel.getBestSampled());
+            NTBEA.logSummary(resultToReport, params);
+
+            if (avg > bestValue) {
+                bestValue = avg;
+                System.arraycopy(landscapeModel.getBestSampled(), 0, bestSettings, 0, bestSettings.length);
+            }
         }
 
-        // Now print out details
-        StatSummary summary = new StatSummary();
-        summary.add(valuesFound);
-        System.out.printf("Function: %20s Max: %.3f, Mean: %.3f, Min: %.3f, SD: %.3f%n",
-                function.getClass().getSimpleName(), summary.max(),
-                summary.mean(), summary.min(), summary.sd());
+        // print out final best settings
+        System.out.println("Best settings found: " + Arrays.toString(bestSettings));
+        for (int i = 0; i < bestSettings.length; i++) {
+            System.out.println(params.searchSpace.name(i) + " : " + params.searchSpace.value(i, bestSettings[i]));
+        }
     }
 
-
-    private static void logResults(NTupleSystem landscapeModel, NTBEAParameters params) {
-
-        System.out.println("Current best sampled point (using mean estimate): " +
-                Arrays.toString(landscapeModel.getBestSampled()) +
-                String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestSampled())));
-
-        String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, params.searchSpace.nDims())
-                .map(size -> landscapeModel.getTuples().stream()
-                        .filter(t -> t.tuple.length == size)
-                        .mapToInt(it -> it.ntMap.size())
-                        .sum()
-                ).toArray());
-
-        System.out.println("Tuples explored by size: " + tuplesExploredBySize);
-        System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
-
-        IntStream.range(0, params.searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
-                .mapToObj(i -> new Pair<>(params.searchSpace.name(i), landscapeModel.getTuples().get(i)))
-                .forEach(nameTuplePair ->
-                        nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
-                            StatSummary v = nameTuplePair.b.ntMap.get(k);
-                            System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
-                        })
-                );
-
-        System.out.println("\nSummary of 10 most tried full-tuple statistics:");
-        landscapeModel.getTuples().stream()
-                .filter(t -> t.tuple.length == params.searchSpace.nDims())
-                .forEach(t -> t.ntMap.keySet().stream()
-                        .map(k -> new Pair<>(k, t.ntMap.get(k)))
-                        .sorted(Comparator.comparing(p -> -p.b.n()))
-                        .limit(10)
-                        .forEach(item ->
-                                System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
-                                        item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
-                        )
-                );
-
-
-    }
 }

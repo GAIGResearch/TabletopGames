@@ -17,7 +17,6 @@ import static evaluation.optimisation.NTBEAParameters.Mode.StableNTBEA;
 
 public class NTBEAEvaluator implements SolutionEvaluator {
 
-    Random rnd = new Random();
     final ITPSearchSpace<NTBEAParameters> searchSpace;
     final NTBEAFunction fun;
     final int discretisationLevel;
@@ -58,8 +57,11 @@ public class NTBEAEvaluator implements SolutionEvaluator {
      //   NTBEAParameters params = searchSpace.instantiate(settings);
         // We now set up iterations based on the budget
         params.setParameterValue("iterationsPerRun", params.budget / params.repeats - params.evalGames);
+        if (params.iterationsPerRun <= 0)
+            throw new AssertionError("Budget too low for NTBEA");
         params.setParameterValue("tournamentGames", 0);
         params.searchSpace = new FunctionSearchSpace(discretisationLevel, fun);
+        params.logFile = "";
         NTBEA ntbea = new NTBEA(params, fun, discretisationLevel);
 
         Pair<Object, int[]> finalRecommendation = ntbea.run();
