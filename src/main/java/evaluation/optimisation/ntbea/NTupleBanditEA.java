@@ -92,7 +92,7 @@ public class NTupleBanditEA {
             }
 
             if (settingToTryNext.length == 0)
-                throw new AssertionError("No option found?");
+                settingToTryNext = p;
             p = settingToTryNext;
         }
     }

@@ -40,15 +40,16 @@ public class NTBEA {
     List<int[]> winnerSettings = new ArrayList<>();
     List<int[]> elites = new ArrayList<>();
     Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
-    GameEvaluator evaluator;
+    SolutionEvaluator evaluator;
     GameType game;
+    NTBEAFunction function;
     int nPlayers;
+    int discretisationLevel;
     int currentIteration = 0;
     IStateHeuristic stateHeuristic;
     IGameHeuristic gameHeuristic;
 
-    public NTBEA(NTBEAParameters parameters, GameType game, int nPlayers) {
-        // Now initialise the other bits and pieces needed for the NTBEA package
+    protected NTBEA(NTBEAParameters parameters) {
         this.params = parameters;
         landscapeModel = new NTupleSystem(params.searchSpace, params.kExplore);
         landscapeModel.use3Tuple = params.useThreeTuples;
@@ -59,6 +60,19 @@ public class NTBEA {
         landscapeModel.addTuples();
 
         searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
+    }
+
+    public NTBEA(NTBEAParameters parameters, NTBEAFunction function, int discretisationLevel) {
+        this(parameters);
+        this.function = function;
+        this.discretisationLevel = discretisationLevel;
+
+        evaluator = new FunctionEvaluator(function, landscapeModel.getSearchSpace());
+    }
+
+    public NTBEA(NTBEAParameters parameters, GameType game, int nPlayers) {
+        // Now initialise the other bits and pieces needed for the NTBEA package
+        this(parameters);
         this.game = game;
         this.nPlayers = nPlayers;
         // Set up opponents
@@ -109,7 +123,11 @@ public class NTBEA {
     }
 
     public void setOpponents(List<AbstractPlayer> opponents) {
-        evaluator.opponents = opponents;
+        if (evaluator instanceof GameEvaluator gameEvaluator) {
+            gameEvaluator.opponents = opponents;
+        } else {
+            throw new AssertionError("Cannot set opponents for a non-game evaluator");
+        }
     }
 
     public void addElite(int[] settings) {
@@ -137,8 +155,10 @@ public class NTBEA {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
-            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
-                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
+            if (params.searchSpace instanceof ITPSearchSpace<?>) {
+                writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
+                        params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
+            }
         }
 
         // After all runs are complete, if tournamentGames are specified, then we allow all the
@@ -237,9 +257,14 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
-        writeAgentJSON(bestResult.b,
-                params.destDir + File.separator + "Recommended_Final.json");
-        return new Pair<>(((ITPSearchSpace<?>) params.searchSpace).instantiate(bestResult.b), bestResult.b);
+        if (params.searchSpace instanceof ITPSearchSpace<?>) {
+            writeAgentJSON(bestResult.b,
+                    params.destDir + File.separator + "Recommended_Final.json");
+        }
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            return new Pair<>(itp.instantiate(bestResult.b), bestResult.b);
+        }
+        return new Pair<>(searchSpace, bestResult.b);
     }
 
     protected void runTrials() {
@@ -262,7 +287,9 @@ public class NTBEA {
                 ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestSampled()), 0.0)
                 : evaluateWinner(thisWinnerSettings);
 
-        winnersPerRun.add(((ITPSearchSpace<?>) params.searchSpace).instantiate(thisWinnerSettings));
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            winnersPerRun.add(itp.instantiate(thisWinnerSettings));
+        }
         winnerSettings.add(thisWinnerSettings);
         Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(scoreOfBestAgent, thisWinnerSettings);
         if (params.verbose)
@@ -374,7 +401,7 @@ public class NTBEA {
             // then write the output
             String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
             String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                    .map(p -> valueToString(p.a, p.b, ((ITPSearchSpace<?>) params.searchSpace)))
+                    .map(p -> valueToString(p.a, p.b, params.searchSpace))
                     .collect(joining("\t"));
             writer.write(firstPart + values + "\n");
             writer.flush();
@@ -386,7 +413,7 @@ public class NTBEA {
         }
     }
 
-    private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace<?> ss) {
+    private static String valueToString(int paramIndex, int valueIndex, SearchSpace ss) {
         Object value = ss.value(paramIndex, valueIndex);
         String valueString = value.toString();
         if (value instanceof Integer) {

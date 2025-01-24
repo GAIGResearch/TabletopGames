@@ -5,7 +5,6 @@ import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

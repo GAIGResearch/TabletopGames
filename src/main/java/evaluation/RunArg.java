@@ -1,9 +1,12 @@
 package evaluation;
 
+import evaluation.optimisation.ntbea.TestFunction001;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.JSONUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -74,6 +77,9 @@ public enum RunArg {
             "\t Specifying all|-name1|-name2... will run all games except for name1, name2...",
             "all",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
+    function("The name of the function to be used for the NTBEA process.",
+            new TestFunction001(),
+            new Usage[]{Usage.ParameterSearch}),
     gameParams("(Optional) A JSON file from which the game parameters will be initialised.",
             "",
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
@@ -132,6 +138,9 @@ public enum RunArg {
     nPlayers("The number of players in each game. Overrides playerRange.",
             -1,
             new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
+    discretisation("The number of discretisation levels to use in NTBEAFunctions. Default is 10.",
+            10,
+            new Usage[]{Usage.ParameterSearch}),
     neighbourhood("The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) ",
             50,
             new Usage[]{Usage.ParameterSearch}),
@@ -238,9 +247,10 @@ public enum RunArg {
         value = json.getOrDefault(name(), defaultValue);
         if (value instanceof Long) {
             value = ((Long) value).intValue();
-        }
-        if (this == listener) {
+        } else if (this == listener) {
             value = new ArrayList<>(Arrays.asList(((String) value).split("\\|")));
+        } else if (value instanceof JSONObject jsonObj) {
+            value = JSONUtils.loadClassFromJSON(jsonObj);
         }
         return value;
     }

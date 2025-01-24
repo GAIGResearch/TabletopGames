@@ -3,7 +3,11 @@ package evaluation.optimisation.ntbea;
 import core.AbstractPlayer;
 import core.Game;
 import evaluation.optimisation.ITPSearchSpace;
+import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
+import org.json.simple.JSONObject;
+import utilities.JSONUtils;
+import utilities.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,11 +20,15 @@ public class NTBEAEvaluator implements SolutionEvaluator {
     Random rnd = new Random();
     final ITPSearchSpace<NTBEAParameters> searchSpace;
     final NTBEAFunction fun;
+    final int discretisationLevel;
+    final NTBEAParameters parameters;
     boolean debug = false;
 
-    public NTBEAEvaluator(NTBEAFunction fun, ITPSearchSpace<NTBEAParameters>  searchSpace) {
+    public NTBEAEvaluator(NTBEAFunction fun, int discretisationLevel, SearchSpace searchSpace, NTBEAParameters parameters) {
         this.fun = fun;
-        this.searchSpace = searchSpace;
+        this.searchSpace = (ITPSearchSpace<NTBEAParameters>) searchSpace;
+        this.discretisationLevel = discretisationLevel;
+        this.parameters = parameters;
     }
 
     @Override
@@ -38,21 +46,31 @@ public class NTBEAEvaluator implements SolutionEvaluator {
      * always be for function evaluation for time reasons).
      */
     public double evaluate(int[] settings) {
-        // TODO: Run NTBEA to get a final best setting
         if (debug)
             System.out.printf("Starting evaluation of %s at %tT%n",
                     Arrays.toString(settings), System.currentTimeMillis());
 
+        // searchSpace.instantiate returns an NTBEA object, not an NTBEAParameters object
+        // what we can do here is run through the settings, and set up the NTBEAParameters that we want
+        JSONObject json = searchSpace.getAgentJSON(settings);
+        NTBEAParameters params = JSONUtils.loadClassFromJSON(json);
 
+     //   NTBEAParameters params = searchSpace.instantiate(settings);
+        // We now set up iterations based on the budget
+        params.setParameterValue("iterationsPerRun", params.budget / params.repeats - params.evalGames);
+        params.setParameterValue("tournamentGames", 0);
+        params.searchSpace = new FunctionSearchSpace(discretisationLevel, fun);
+        NTBEA ntbea = new NTBEA(params, fun, discretisationLevel);
 
-        // TODO: Then find the actual value of the function at this setting
-        // we now convert settings into the relevant values to feed to the function
-//        double[] settings = new double[fun.dimension()];
-//        for (int i = 0; i < settings.length; i++) {
-//            settings[i] = (double) searchSpace.value(i, input[i]);
-//        }
-//        return fun.functionValue(settings);
-        return 0;
+        Pair<Object, int[]> finalRecommendation = ntbea.run();
+
+        // Then find the actual value of the function at this setting
+        int[] functionSettings = finalRecommendation.b;
+        double[] f = new double[fun.dimension()];
+        for (int i = 0; i < functionSettings.length; i++) {
+            f[i] = (double) params.searchSpace.value(i, functionSettings[i]);
+        }
+        return fun.functionValue(f);
     }
 
     @Override

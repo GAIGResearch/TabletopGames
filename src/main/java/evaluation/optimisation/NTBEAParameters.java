@@ -3,7 +3,9 @@ package evaluation.optimisation;
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 import evaluation.RunArg;
+import evaluation.optimisation.ntbea.NTBEAFunction;
 import evaluation.optimisation.ntbea.SearchSpace;
+import evaluation.optimisation.ntbea.TestFunction001;
 import games.GameType;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
@@ -34,7 +36,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public int tournamentGames;
     public int neighbourhoodSize;
     public String opponentDescriptor;
-    public long seed;
+    public int seed;
     public String evalMethod;
     public boolean useThreeTuples;
     public boolean useTwoTuples;
@@ -64,7 +66,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         addTunableParameter("tournamentGames", 1000);
         addTunableParameter("neighbourhoodSize", 50);
         addTunableParameter("opponentDescriptor", "random");
-        addTunableParameter("seed", System.currentTimeMillis());
+        addTunableParameter("seed", (int) System.currentTimeMillis());
         addTunableParameter("evalMethod", "Win");
         addTunableParameter("useThreeTuples", false);
         addTunableParameter("useTwoTuples", true);
@@ -85,7 +87,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         tournamentGames = (int) getParameterValue("tournamentGames");
         neighbourhoodSize = (int) getParameterValue("neighbourhoodSize");
         opponentDescriptor = (String) getParameterValue("opponentDescriptor");
-        seed = (long) getParameterValue("seed");
+        seed = (int) getParameterValue("seed");
         evalMethod = (String) getParameterValue("evalMethod");
         useThreeTuples = (boolean) getParameterValue("useThreeTuples");
         useTwoTuples = (boolean) getParameterValue("useTwoTuples");
@@ -199,6 +201,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
 
     @Override
     public NTBEA instantiate() {
+        // TODO: this actually depends on whether we using a game or a function as the trial basis
         return new NTBEA(this, gameType, nPlayers);
     }
 

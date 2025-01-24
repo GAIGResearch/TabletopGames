@@ -1,32 +1,26 @@
 package evaluation.optimisation.ntbea;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.interfaces.IGameHeuristic;
+import core.Game;
 import evaluation.RunArg;
-import evaluation.optimisation.*;
-import games.GameType;
+import evaluation.optimisation.NTBEAParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import players.PlayerFactory;
-import players.heuristics.OrdinalPosition;
-import players.heuristics.PureScoreHeuristic;
-import players.heuristics.WinOnlyHeuristic;
-import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.StatSummary;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import static evaluation.RunArg.*;
 
-public class FunctionReport {
+public class MetaNTBEA {
 
     public static void main(String[] args) {
         // Config
@@ -48,11 +42,18 @@ public class FunctionReport {
             }
         }
 
-        config.put(searchSpace, "functionTest");
         config.put(game, "TicTacToe");
         NTBEAParameters params = new NTBEAParameters(config);
-        params.searchSpace = new FunctionSearchSpace((Integer) config.get(discretisation),  (NTBEAFunction) config.get(function));
-        FunctionEvaluator evaluator = new FunctionEvaluator((NTBEAFunction) config.get(function), params.searchSpace);
+
+
+   //     params.searchSpace = new FunctionSearchSpace((Integer) config.get(discretisation),  params.function);
+  //      FunctionEvaluator evaluator = new FunctionEvaluator(params.function, params.searchSpace);
+        // TODO: The searchspace used by the evaluator (and params) is for the function to be optimised (not for this outer loop over NTBEA settings)
+
+        NTBEAEvaluator evaluator = new NTBEAEvaluator((NTBEAFunction) config.get(function),
+                (int) config.get(discretisation),
+                params.searchSpace,
+                params);
 
         params.printSearchSpaceDetails();
 
@@ -78,7 +79,6 @@ public class FunctionReport {
                 logResults(landscapeModel, params);
 
             int[] thisWinnerSettings = landscapeModel.getBestSampled();
-            valuesFound[currentIteration] = evaluator.actualBaseValue(thisWinnerSettings);
         }
 
         // Now print out details
