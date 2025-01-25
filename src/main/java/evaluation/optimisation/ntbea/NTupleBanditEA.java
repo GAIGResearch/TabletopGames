@@ -45,7 +45,7 @@ public class NTupleBanditEA {
         if (nNeighbours < 5) nNeighbours = 5;
 
         // then each time around the loop try the following
-        // create a neighbourhood set of points and pick the best one that combines it's exploitation and evaluation scores
+        // create a neighbourhood set of points and pick the best one that combines its exploitation and evaluation scores
 
         int[] p = SearchSpaceUtil.randomPoint(searchSpace);
 

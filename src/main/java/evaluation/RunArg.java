@@ -210,6 +210,11 @@ public enum RunArg {
             "a value approaching infinity is equivalent to a Max function.",
             1.0,
             new Usage[]{Usage.ParameterSearch}),
+    quantile("The target quantile for NTBEA evaluation overall. The default (-1) will use the mean\n" +
+            "of the evalGame results. A value of 50 will use the median, and 10 the figure below which 10% of the results lie.\n" +
+            "This only makes sense if evalGames is greater than 0, and for an evalMethod that is score-based.",
+            -1,
+            new Usage[]{Usage.ParameterSearch}),
     verbose("If true, then the result of each game is reported. Default is false.",
             false,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch});

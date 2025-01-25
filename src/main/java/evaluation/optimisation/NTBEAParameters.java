@@ -45,6 +45,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public boolean simpleRegret;
     public boolean verbose;
     public Mode mode;
+    public int quantile = -1;
 
     // and those that are not (so must be included separately in copy etc)
     public boolean tuningGame = false;
@@ -58,23 +59,24 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public int nPlayers;
 
     public NTBEAParameters() {
-        addTunableParameter("iterationsPerRun", 1000);
+        addTunableParameter("iterations", 1000);
         addTunableParameter("repeats", 5);
         addTunableParameter("budget", 50);
         addTunableParameter("evalGames", -1);
         addTunableParameter("kExplore", 1.0);
-        addTunableParameter("tournamentGames", 1000);
-        addTunableParameter("neighbourhoodSize", 50);
+        addTunableParameter("matchups", 1000);
+        addTunableParameter("neighbourhood", 50);
         addTunableParameter("opponentDescriptor", "random");
         addTunableParameter("seed", (int) System.currentTimeMillis());
         addTunableParameter("evalMethod", "Win");
         addTunableParameter("useThreeTuples", false);
         addTunableParameter("useTwoTuples", true);
         addTunableParameter("useNTuples", false);
-        addTunableParameter("noiseMeanType", 1.0);
+        addTunableParameter("noiseCombination", 1.0);
         addTunableParameter("simpleRegret", false);
         addTunableParameter("verbose", false);
         addTunableParameter("mode", Mode.NTBEA);
+        addTunableParameter("quantile", -1);
     }
 
     @Override
@@ -96,6 +98,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         simpleRegret = (boolean) getParameterValue("simpleRegret");
         verbose = (boolean) getParameterValue("verbose");
         mode = (Mode) getParameterValue("mode");
+        quantile = (int) getParameterValue("quantile");
 
         if (evalGames == -1) evalGames = iterationsPerRun / 5;
 
@@ -121,6 +124,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         setParameterValue("simpleRegret", args.get(RunArg.simpleRegret));
         setParameterValue("verbose", args.get(RunArg.verbose));
         setParameterValue("mode", Mode.valueOf(args.get(RunArg.NTBEAMode).toString()));
+        setParameterValue("quantile", args.get(RunArg.quantile));
 
         configure(args);
     }

@@ -78,16 +78,19 @@ public class MetaNTBEA {
             // we now use evalGames to get a better estimate of the value
             double[] results = IntStream.range(0, params.evalGames)
                     .mapToDouble(answer -> evaluator.evaluate(landscapeModel.getBestSampled())).toArray();
+            Arrays.sort(results);
 
             double avg = Arrays.stream(results).average().orElse(0.0);
-            double stdErr = Math.sqrt(Arrays.stream(results)
-                    .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
+            double quantileValue = results[(int) (results.length * params.quantile / 100.0)];
+            double stdErr = Math.sqrt(Arrays.stream(results).map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
+            Pair<Pair<Double, Double>, int[]> resultToReport = (params.quantile > 0) ?
+                    new Pair<>(new Pair<>(quantileValue, avg), landscapeModel.getBestSampled()) :
+                    new Pair<>(new Pair<>(avg, stdErr), landscapeModel.getBestSampled());
 
-            Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(new Pair<>(avg, stdErr), landscapeModel.getBestSampled());
             NTBEA.logSummary(resultToReport, params);
 
-            if (avg > bestValue) {
-                bestValue = avg;
+            if (resultToReport.a.a > bestValue) {
+                bestValue = resultToReport.a.a;
                 System.arraycopy(landscapeModel.getBestSampled(), 0, bestSettings, 0, bestSettings.length);
             }
         }

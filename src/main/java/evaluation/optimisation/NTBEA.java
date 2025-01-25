@@ -252,6 +252,7 @@ public class NTBEA {
                 }
             }
         }
+        // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
         if (params.verbose) {
             System.out.println("\nFinal Recommendation: ");
             // we don't log the final run to file to avoid duplication
@@ -312,12 +313,14 @@ public class NTBEA {
 
         double[] results = IntStream.range(0, params.evalGames)
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
-
+        Arrays.sort(results);
         double avg = Arrays.stream(results).average().orElse(0.0);
-        double stdErr = Math.sqrt(Arrays.stream(results)
-                .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
-
-        return new Pair<>(avg, stdErr);
+        double quantileValue = results[(int) (results.length * params.quantile / 100.0)];
+        double stdErr = Math.sqrt(Arrays.stream(results).map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
+        Pair<Double, Double> resultToReport = (params.quantile > 0) ?
+                new Pair<>(quantileValue, avg) :
+                new Pair<>(avg, stdErr);
+        return resultToReport;
     }
     /**
      * This just prints out some useful info on the NTBEA results. It lists the full underlying recommended
@@ -347,11 +350,10 @@ public class NTBEA {
             // if logFile does not yet exist, write a header line first
             if (!fileExists) {
                 List<String> headers = new ArrayList<>();
-                headers.addAll(Arrays.asList("estimated value", "standard error"));
+                headers.addAll(Arrays.asList("Estimate", "Other"));
                 headers.addAll(IntStream.range(0, params.searchSpace.nDims()).mapToObj(params.searchSpace::name).toList());
                 writer.write(String.join("\t", headers) + "\n");
             }
-            // then write the output
             String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
             String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
                     .map(p -> valueToString(p.a, p.b, params.searchSpace))

@@ -275,6 +275,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      */
     @Override
     public void setParameterValue(String parameterName, Object value) {
+    //    System.out.println("Setting " + parameterName + " to " + value);
         if (parameterName.split(Pattern.quote(".")).length > 1) {
             // in this case we pass on to the subParam (as well as updating here)
             String[] split = parameterName.split(Pattern.quote("."));
