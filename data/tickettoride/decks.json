@@ -19,6 +19,51 @@
         "color": ["Color", "Blue"]
       }
     ]
+  },
+  {
+    "name": [
+      "String",
+      "DestinationTickets"
+    ],
+    "visibility": "VISIBLE_TO_ALL",
+    "cards": [
+      {
+        "name": ["String","1"],
+        "points": ["Integer", 15],
+        "location1": ["String","LOS ANGELES"],
+        "location2": ["String","SAN FRANCISCO"]
+      },
+      {
+        "name": ["String","2"],
+        "points": ["Integer", 30],
+        "location1": ["String","LOS ANGELES"],
+        "location2": ["String","SALT LAKE CITY"]
+      },
+      {
+        "name": ["String","3"],
+        "points": ["Integer", 32],
+        "location1": ["String","LOS ANGELES"],
+        "location2": ["String","SALT LAKE CITY"]
+      },
+      {
+        "name": ["String","4"],
+        "points": ["Integer", 33],
+        "location1": ["String","LOS ANGELES"],
+        "location2": ["String","SALT LAKE CITY"]
+      },
+      {
+        "name": ["String","5"],
+        "points": ["Integer", 34],
+        "location1": ["String","LOS ANGELES"],
+        "location2": ["String","SALT LAKE CITY"]
+      },
+      {
+        "name": ["String","6"],
+        "points": ["Integer", 34],
+        "location1": ["String","HELENA"],
+        "location2": ["String","LOS ANGELES"]
+      }
+    ]
   }
 
 ]

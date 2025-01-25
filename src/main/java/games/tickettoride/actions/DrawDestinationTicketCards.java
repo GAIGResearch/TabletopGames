@@ -2,21 +2,15 @@ package games.tickettoride.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DrawCard;
+import core.components.Area;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
-import core.components.Edge;
-import core.properties.Property;
-import core.properties.PropertyBoolean;
-import core.properties.PropertyColor;
-import core.properties.PropertyInt;
-import games.catan.CatanGameState;
-import games.catan.CatanParameters;
+import games.tickettoride.TicketToRideConstants;
 import games.tickettoride.TicketToRideGameState;
 import games.tickettoride.TicketToRideParameters;
-import utilities.Hash;
 
-import static core.CoreConstants.colorHash;
 import static core.CoreConstants.playerHandHash;
 
 /**
@@ -35,22 +29,14 @@ import static core.CoreConstants.playerHandHash;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class ClaimRoute extends AbstractAction {
+public class DrawDestinationTicketCards extends AbstractAction {
 
 
-    public final Edge edge;
     public final int playerID;
-    public final String colorOfRoute;
-    public final int costOfRoute;
 
 
-
-    public ClaimRoute(Edge edge, int playerID, String colorOfRoute, int costOfRoute) {
-        this.edge = edge;
+    public DrawDestinationTicketCards(int playerID) {
         this.playerID = playerID;
-        this.colorOfRoute = colorOfRoute;
-        this.costOfRoute = costOfRoute;
-
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -60,43 +46,22 @@ public class ClaimRoute extends AbstractAction {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
+        System.out.println("PLAYER " + playerID + " DRAWING DESTINATION CARDS" );
+
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
-        int amountToRemove = costOfRoute;
 
-        System.out.println("PLAYER " + playerID + " CLAIMING ROUTE" );
-        System.out.println("route properties before : " + edge.getProperties());
-        Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
+        Area gameArea = tgs.getArea(-1);
+        Deck<Card> destinationCardDeck = (Deck<Card>) gameArea.getComponent(TicketToRideConstants.destinationCardDeckHash);
 
-        System.out.println("player hand before " + playerTrainCardHandDeck);
+        Deck<Card> playerDestinationCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,TicketToRideConstants.playerDestinationHandHash);
 
-        for(int i = 0; i < playerTrainCardHandDeck.getSize() && amountToRemove > 0; i ++){
-            Card currentCard = playerTrainCardHandDeck.get(i);
-            if (currentCard.toString().equals(colorOfRoute)){
-                playerTrainCardHandDeck.remove(i);
-                i--;
-                amountToRemove--;
-            }
-        }
-        System.out.println("player train cars before " + tgs.getTrainCars(playerID));
-        tgs.deductTrainCars(playerID, costOfRoute);
-        System.out.println("player train cars after  " + tgs.getTrainCars(playerID));
+        System.out.println( playerID + " has these destination ticket cards before drawing: " + playerDestinationCardHandDeck);
 
-        Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
-        edge.setProperty(routeClaimedProp);
-
-        Property claimedByPlayerProp = new PropertyInt("claimedByPlayer", (Integer) playerID);
-        edge.setProperty(claimedByPlayerProp);
+        new DrawCard(destinationCardDeck.getComponentID(), playerDestinationCardHandDeck.getComponentID()).execute(tgs);
 
 
-        System.out.println(tgs.getGameScore(playerID) + " points before");
-        tgs.addScore(playerID, tp.getPointsPerRoute(costOfRoute));
-        System.out.println("Claim route of color: " + colorOfRoute + " and size of " + costOfRoute);
-        System.out.println(tgs.getGameScore(playerID) + " points after");
-        System.out.println("player hand after " + playerTrainCardHandDeck);
-
-        System.out.println("route properties after : " + edge.getProperties());
-
+        System.out.println( playerID + " now has these destination ticket cards after drawing: "  + playerDestinationCardHandDeck);
         return true;
     }
 
@@ -107,7 +72,7 @@ public class ClaimRoute extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public ClaimRoute copy() {
+    public DrawDestinationTicketCards copy() {
         // TODO: copy non-final variables appropriately
         return this;
     }
@@ -115,7 +80,7 @@ public class ClaimRoute extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof ClaimRoute;
+        return obj instanceof DrawDestinationTicketCards;
     }
 
     @Override

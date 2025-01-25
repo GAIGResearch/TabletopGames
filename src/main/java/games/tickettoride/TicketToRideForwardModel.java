@@ -6,10 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.*;
-import core.properties.Property;
-import core.properties.PropertyBoolean;
-import core.properties.PropertyInt;
-import core.properties.PropertyString;
+import core.properties.*;
 
 import java.util.*;
 
@@ -19,6 +16,7 @@ import static core.CoreConstants.playerHandHash;
 import static games.tickettoride.TicketToRideConstants.*;
 
 import games.tickettoride.actions.ClaimRoute;
+import games.tickettoride.actions.DrawDestinationTicketCards;
 import games.tickettoride.actions.DrawTrainCards;
 import utilities.Hash;
 
@@ -61,12 +59,17 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         _data.load(tp.getDataPath());
 
         for (int i = 0; i < state.getNPlayers(); i++) {
-            state.setTrainCars(i,2); //default amount of train cars(35) per player, used to dictate end of game when <= 2
+            state.setTrainCars(i,tp.nInitialTrainCars); //default amount of train cars(35) per player, used to dictate end of game when <= 2
             Area playerArea = new Area(i, "Player Area");
             //Player Train Card hand setup
             Deck<Card> playerTrainCardHand = new Deck<>("Player Train Card Hand", VISIBLE_TO_ALL);
             playerTrainCardHand.setOwnerId(i);
             playerArea.putComponent(playerHandHash, playerTrainCardHand);
+
+            //Destination card hand setup
+            Deck<Card> playerDestinationCardHand = new Deck<>("Player Destination Card Hand", VISIBLE_TO_ALL);
+            playerDestinationCardHand.setOwnerId(i);
+            playerArea.putComponent(playerDestinationHandHash, playerDestinationCardHand);
 
             //System.out.println("Setup: made deck for player " + i + " has " + playerTrainCardHand);
 
@@ -91,9 +94,15 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         }
 
+        Deck<Card> destinationCardDeck = new Deck<>("Destination Card Deck", HIDDEN_TO_ALL);
+        Deck<Card> destinationCardTypes = _data.findDeck("DestinationTickets");
+        destinationCardDeck = destinationCardTypes;
 
         trainCardDeck.shuffle(firstState.getRnd());
+        destinationCardDeck.shuffle(firstState.getRnd());
+
         gameArea.putComponent(TicketToRideConstants.trainCardDeckHash, trainCardDeck);
+        gameArea.putComponent(TicketToRideConstants.destinationCardDeckHash, destinationCardDeck);
 
         state.addComponents();
 
@@ -102,16 +111,48 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = state.getArea(i);
             Deck<Card> playerTrainCardHandDeck = (Deck<Card>) playerArea.getComponent(playerHandHash);
+            Deck<Card> playerDestinationCardHandDeck = (Deck<Card>) playerArea.getComponent(TicketToRideConstants.playerDestinationHandHash);
             for (int j = 0; j < tp.nInitialTrainCards; j++) {
                 new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(state);
             }
+            for (int j = 0; j < tp.nInitialDestinationCards; j++) {
+                new DrawCard(destinationCardDeck.getComponentID(), playerDestinationCardHandDeck.getComponentID()).execute(state);
+            }
 
-            //System.out.println("Setup: player " + i + " has " + playerTrainCardHandDeck);
+            System.out.println("Setup: player " + i + " has destination card " + playerDestinationCardHandDeck.peek().getProperty(pointsHash));
+            System.out.println("Setup: player " + i + " has " + playerTrainCardHandDeck);
         }
 
         state.setGamePhase(TicketToRideGameState.TicketToRideGamePhase.NormalGameRound);
 
+
+        //test graph works
+        System.out.println("SETUP , TESTING IF BIDIRECTIONAL");
+
+        GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
+
+        HashSet<Edge> boardEdges = (HashSet<Edge>) world.getBoardEdges();
+
+        Collection<BoardNodeWithEdges> boardNodes = (Collection<BoardNodeWithEdges>) world.getBoardNodes();
+        int nodesHashKey = Hash.GetInstance().hash("nodes");
+
+
+        for ( BoardNodeWithEdges b : boardNodes) {
+            Map<Edge, BoardNodeWithEdges> boardNodeMapping = b.getNeighbourEdgeMapping();
+            System.out.println("Current BoardNode: " + b.getComponentName());
+
+            for (Map.Entry<Edge, BoardNodeWithEdges> entry : boardNodeMapping.entrySet()) {
+                Edge edge = entry.getKey();
+                Property nodeProp = edge.getProperty(nodesHashKey);
+                BoardNodeWithEdges neighbourNode = entry.getValue();
+
+
+                System.out.println("NODE PROP for current edge: "+ nodeProp);
+            }
+        }
         state.setFirstPlayer(0);
+
+
 
 
 
@@ -131,9 +172,10 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         int playerId = tg.getCurrentPlayer();
         //System.out.println(playerId + " in compute action");
         actions.add(new DrawTrainCards(playerId));
+        actions.add(new DrawDestinationTicketCards(playerId));
 
         List<Edge> routesAvailableToBuy = checkRoutesAvailable(gameState);
-        if (routesAvailableToBuy.size() > 1) {
+        if (routesAvailableToBuy.size() >= 1) {
             Property trainCardsRequiredProp = routesAvailableToBuy.get(0).getProperty(trainCardsRequiredHashKey);
             Property colorProp = routesAvailableToBuy.get(0).getProperty(colorHashKey);
             int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
@@ -154,6 +196,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         int playerId = currentState.getCurrentPlayer();
         int currentTrainCars = gs.getTrainCars(playerId);
 
+
         TicketToRideGameState.TicketToRideGamePhase gamePhase = (TicketToRideGameState.TicketToRideGamePhase) gs.getGamePhase();
         if (currentTrainCars <= 2 && gamePhase != TicketToRideGameState.TicketToRideGamePhase.FinalRound){ //trigger final round
             gs.setGamePhase(TicketToRideGameState.TicketToRideGamePhase.FinalRound);
@@ -163,6 +206,9 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             System.out.println("Final round for player " + gs.getCurrentPlayer());
             if (gs.getCurrentFinalRoundTurn() == gs.getNPlayers()){ //all final turns have been taken
                 System.out.println("GAME ENDED");
+                System.out.println("Edge info: ");
+
+                calculateDestinationCardPoints(gs);
 
                 endGame(gs);
 
@@ -181,47 +227,76 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         Area gameArea = tg.getArea(-1);
         GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
 
+        HashSet<Edge> boardEdges = (HashSet<Edge>) world.getBoardEdges();
+
         Collection<BoardNodeWithEdges> boardNodes = (Collection<BoardNodeWithEdges>) world.getBoardNodes();
 
         System.out.println(boardNodes.size());
 
         int routeClaimedHashKey = Hash.GetInstance().hash("routeClaimed");
+        int nodesHashKey = Hash.GetInstance().hash("nodes");
+        //goes through boardEdges list approach to find free edges - potentially faster
+        for (Edge edge : boardEdges) {
+            System.out.println("IN FOR LOOP: "+ edge.getProperties());
+            HashMap<Integer, Property> allProps = edge.getProperties();
+            Property nodeProp = edge.getProperty(nodesHashKey);
 
-        for ( BoardNodeWithEdges b : boardNodes){
-            Map<Edge, BoardNodeWithEdges> boardNodeMapping = b.getNeighbourEdgeMapping();
-            System.out.println("Current BoardNode: " + b.getComponentName());
+            String nodes = Arrays.toString(((PropertyStringArray) nodeProp).getValues());
 
+            System.out.println("Edge has nodes: " +  nodes);
 
-            for (Map.Entry<Edge, BoardNodeWithEdges> entry : boardNodeMapping.entrySet()) {
-                Edge edge = entry.getKey();
-                BoardNodeWithEdges neighbourNode = entry.getValue();
+            Property routeClaimedProp = edge.getProperty(routeClaimedHashKey);
+            if (routeClaimedProp instanceof PropertyBoolean) {
+                boolean routeClaimed = ((PropertyBoolean) routeClaimedProp).value;
 
-                System.out.println("Edge between " + b.getComponentName() + " and " + neighbourNode.getComponentName());
-
-                Property routeClaimedProp = edge.getProperty(routeClaimedHashKey);
-
-                HashMap<Integer, Property> allProps = edge.getProperties();
-
-                if (routeClaimedProp instanceof PropertyBoolean) {
-                    boolean routeClaimed = ((PropertyBoolean) routeClaimedProp).value;
-
-                    if (routeClaimed) {
-                        System.out.println("This route is already claimed.");
-
-                    } else {
-                        boolean canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
-                        if (canAffordRoute){
-                            routesAvailableToBuy.add(edge);
-                        }
-                        System.out.println("This route is available.");
+                if (routeClaimed) {
+                    System.out.println("This route is already claimed.");
+                } else {
+                    boolean canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
+                    if (canAffordRoute){
+                        routesAvailableToBuy.add(edge);
                     }
                 }
             }
 
         }
 
-        return routesAvailableToBuy;
 
+//        //goes through board node with edges approach to find free edges
+//        for ( BoardNodeWithEdges b : boardNodes){
+//            Map<Edge, BoardNodeWithEdges> boardNodeMapping = b.getNeighbourEdgeMapping();
+//            System.out.println("Current BoardNode: " + b.getComponentName());
+//
+//
+//            for (Map.Entry<Edge, BoardNodeWithEdges> entry : boardNodeMapping.entrySet()) {
+//                Edge edge = entry.getKey();
+//                BoardNodeWithEdges neighbourNode = entry.getValue();
+//
+//                System.out.println("Edge between " + b.getComponentName() + " and " + neighbourNode.getComponentName());
+//
+//                Property routeClaimedProp = edge.getProperty(routeClaimedHashKey);
+//
+//                HashMap<Integer, Property> allProps = edge.getProperties();
+//
+//                if (routeClaimedProp instanceof PropertyBoolean) {
+//                    boolean routeClaimed = ((PropertyBoolean) routeClaimedProp).value;
+//
+//                    if (routeClaimed) {
+//                        System.out.println("This route is already claimed.");
+//
+//                    } else {
+//                        boolean canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
+//                        if (canAffordRoute){
+//                            routesAvailableToBuy.add(edge);
+//                        }
+//                        System.out.println("This route is available.");
+//                    }
+//                }
+//            }
+//
+//        }
+
+        return routesAvailableToBuy;
     }
 
     boolean checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
@@ -268,5 +343,111 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         return trainCardCount;
     }
 
+    void calculateDestinationCardPoints(AbstractGameState gameState) {
 
+
+        TicketToRideGameState tgs = (TicketToRideGameState) gameState;
+        TicketToRideParameters tp = (TicketToRideParameters) gameState.getGameParameters();
+
+        int numOfPlayers = tgs.getNPlayers() - 1;
+
+        Area gameArea = tgs.getArea(-1);
+        Deck<Card> destinationCardDeck = (Deck<Card>) gameArea.getComponent(TicketToRideConstants.destinationCardDeckHash);
+
+
+        GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
+
+        Collection<BoardNodeWithEdges> boardNodes = (Collection<BoardNodeWithEdges>) world.getBoardNodes();
+        HashSet<Edge> boardEdges = (HashSet<Edge>) world.getBoardEdges();
+
+        for (int currentPlayer = 0; currentPlayer <= numOfPlayers; currentPlayer++) {
+            int scoreToAddOrSubtract = 0;  //based on if players completed or didnt complete destination ticket cards
+
+            Deck<Card> playerDestinationCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(currentPlayer,TicketToRideConstants.playerDestinationHandHash);
+            Map<String, List<String>> graphForSearch = getSearchGraph(boardEdges, currentPlayer);
+            System.out.println("search graph:  "+ graphForSearch + " for player  " + currentPlayer);
+
+            for (Card currentCard : playerDestinationCardHandDeck) {
+                String location1 = String.valueOf(currentCard.getProperty(location1Hash));
+                String location2 = String.valueOf(currentCard.getProperty(location2Hash));
+                boolean isConnected = checkIfConnectedCity(graphForSearch,location1,location2);
+                System.out.println("IN FOR LOOP for cards "+ location1 + " " + location2 + " isConnected: " + isConnected);
+                int pointsOnDestinationCard = ((PropertyInt)(currentCard.getProperty(pointsHash))).value;
+                if (isConnected){
+                    scoreToAddOrSubtract = scoreToAddOrSubtract + pointsOnDestinationCard;
+                    System.out.println("adding due to connected: " +  pointsOnDestinationCard);
+                } else {
+                    scoreToAddOrSubtract = scoreToAddOrSubtract - pointsOnDestinationCard; //not connected reduce score
+                    System.out.println("subtracting due to unconnected: " +  -pointsOnDestinationCard);
+                }
+            }
+            System.out.println("total points due to destination ticket cards " + scoreToAddOrSubtract);
+            tgs.addScore(currentPlayer, scoreToAddOrSubtract);
+
+        }
+
+
+        System.out.println(boardEdges.size() + " board edges size");
+        System.out.println(" all  board edges" + boardEdges );
+        for (Edge edge : boardEdges) {
+            System.out.println("FINISHED GAME EDGE: "+ edge.getProperties());
+        }
+
+
+
+    }
+
+    public Map<String, List<String>> getSearchGraph(HashSet<Edge> edges, int playerId) {
+        Map<String, List<String>> searchGraph = new HashMap<>();
+
+        for (Edge currentEdge : edges) {
+
+            boolean routeClaimed = ((PropertyBoolean)(currentEdge.getProperty(routeClaimedHash))).value;
+            //System.out.println(routeClaimed +" route claimed in getsearch");
+            int claimedBy =  ((PropertyInt)(currentEdge.getProperty(claimedByHash))).value;
+
+            if (routeClaimed && claimedBy == playerId) {
+
+                Property nodeProp = currentEdge.getProperty(nodesHash);
+                String[] nodes = ((PropertyStringArray) nodeProp).getValues();
+
+                System.out.println("Edge has nodes om getsearch: " + Arrays.toString(nodes));
+
+                String node1 = nodes[0];
+                String node2 = nodes[1];
+
+                searchGraph.putIfAbsent(node1, new ArrayList<>());
+                searchGraph.putIfAbsent(node2, new ArrayList<>());
+                searchGraph.get(node1).add(node2);
+                searchGraph.get(node2).add(node1);
+            }
+        }
+
+        return searchGraph;
+    }
+
+    public boolean checkIfConnectedCity(Map<String, List<String>> searchGraph, String location1, String location2) {
+        Set<String> locationsVisited = new HashSet<>();
+        return graphSearch(searchGraph, location1, location2, locationsVisited);
+    }
+
+    private boolean graphSearch(Map<String, List<String>> searchGraph, String currentLocation, String target, Set<String> locationsVisited) {
+        if (currentLocation.equals(target)) {
+            return true;
+        }
+        if (locationsVisited.contains(currentLocation)){
+            return false;
+        }
+
+        locationsVisited.add(currentLocation);
+
+        List<String> adjacentLocations = searchGraph.getOrDefault(currentLocation, new ArrayList<>());
+        for (String currentAdjacentLocation : adjacentLocations) {
+            if (graphSearch(searchGraph, currentAdjacentLocation, target, locationsVisited)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

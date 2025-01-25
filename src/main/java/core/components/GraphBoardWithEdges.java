@@ -20,29 +20,35 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
     // List of nodes in the board graph, mapping component ID to object reference
     protected Map<Integer, BoardNodeWithEdges> boardNodes;
+    protected HashSet<Edge> boardEdges; //all edges
 
     public GraphBoardWithEdges(String name)
     {
         super(CoreConstants.ComponentType.BOARD, name);
         boardNodes = new HashMap<>();
+        boardEdges = new HashSet<>();
     }
 
     public GraphBoardWithEdges()
     {
         super(CoreConstants.ComponentType.BOARD);
         boardNodes = new HashMap<>();
+        boardEdges = new HashSet<Edge>();
+
     }
 
     protected GraphBoardWithEdges(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
         boardNodes = new HashMap<>();
+        boardEdges = new HashSet<Edge>();
     }
 
     GraphBoardWithEdges(int ID)
     {
         super(CoreConstants.ComponentType.BOARD, ID);
         boardNodes = new HashMap<>();
+        boardEdges = new HashSet<Edge>();
     }
 
     /**
@@ -53,6 +59,8 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public GraphBoardWithEdges copy()
     {
         GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
+        b.boardEdges = new HashSet<Edge>();
+        b.boardEdges = this.boardEdges;
         HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>();
         HashMap<Integer, Edge> edgeCopies = new HashMap<>();
         // Copy board nodes
@@ -79,6 +87,9 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
         // Copy properties
         copyComponentTo(b);
+
+        //copy boardedges?
+
         return b;
     }
 
@@ -87,6 +98,10 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
      */
     public Collection<BoardNodeWithEdges> getBoardNodes() {
         return boardNodes.values();
+    }
+    public HashSet<Edge> getBoardEdges() {
+        System.out.println("In board edges getBoardEdges: " +  boardEdges);
+        return boardEdges;
     }
 
     /**
@@ -222,7 +237,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
         System.out.println("Edge list: " + edgeList);
         System.out.println("Edge list size: " + edgeList.size());
 
-        // Step 2: Load edges
+        // Load edges
         for (Object edgeObj : edgeList) {
             JSONObject currentEdge = (JSONObject) edgeObj;
 
@@ -244,7 +259,9 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
             if (node1 != null && node2 != null) {
                 node1.addNeighbour(node2, edge); //add to neighbourEdgeMapping
+                System.out.println("GOing to put edge in board edges now: "+ edge.getProperties());
 
+                boardEdges.add(edge);
             }
 
         }

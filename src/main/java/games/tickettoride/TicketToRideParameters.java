@@ -31,6 +31,8 @@ public class TicketToRideParameters extends AbstractParameters {
     String dataPath;
 
     int nInitialTrainCards = 5;
+    int nInitialDestinationCards = 1;
+    int nInitialTrainCars = 7;
 
 
 
