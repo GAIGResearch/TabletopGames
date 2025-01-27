@@ -36,6 +36,7 @@ import games.connect4.gui.Connect4GUIManager;
 import games.conquest.*;
 import games.conquest.gui.CQGUIManager;
 import games.diamant.*;
+import games.dominion.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUIManager;
