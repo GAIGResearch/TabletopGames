@@ -3,7 +3,7 @@ package games.loveletter.actions.deep;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.cards.LoveLetterCard;
+import games.loveletter.cards.CardType;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
 public class DeepKingAction extends PlayCardDeep {
 
     public DeepKingAction(int cardIdx, int playerID) {
-        super(LoveLetterCard.CardType.King, cardIdx, playerID);
+        super(CardType.King, cardIdx, playerID);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class DeepKingAction extends PlayCardDeep {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         assert cardType != null;
-        return cardType.getFlatActions((LoveLetterGameState) state, cardIdx, playerID, false);
+        return cardType.flatActions((LoveLetterGameState) state, cardIdx, playerID, false);
     }
 
     @Override

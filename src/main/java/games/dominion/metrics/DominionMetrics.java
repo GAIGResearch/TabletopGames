@@ -113,9 +113,9 @@ public class DominionMetrics implements IMetricsCollection {
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             DominionGameState state = (DominionGameState)e.state;
-            records.put("Money", state.availableSpend(e.playerID));
-            records.put("Actions", state.actionsLeft());
-            records.put("Buys", state.buysLeft());
+            records.put("Money", state.getAvailableSpend(e.playerID));
+            records.put("Actions", state.getActionsLeft());
+            records.put("Buys", state.getBuysLeft());
             return true;
         }
 

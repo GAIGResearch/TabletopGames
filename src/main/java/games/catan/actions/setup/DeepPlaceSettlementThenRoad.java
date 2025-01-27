@@ -47,7 +47,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
         Building settlement = gs.getBuilding(tile, vertex);
         Edge edgeObj = gs.getRoad(settlement, tile, edge);
         if (edgeObj.getOwnerId() == -1) {
-            actions.add(new BuildRoad(x, y, edge, player, true));
+            actions.add(new BuildRoad(x, y, edge, player, true, edgeObj.getComponentID()));
             for (int k = 0; k < coords.length; k++) {
                 int[] neighbour = coords[k];
                 int v = (vertex + 2*(k+1)) % HEX_SIDES;
@@ -55,7 +55,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
                 CatanTile nTile = board[neighbour[0]][neighbour[1]];
                 edgeObj = gs.getRoad(nTile, v, edge);
                 if (edgeObj != null && edgeObj.getOwnerId() == -1) {
-                    actions.add(new BuildRoad(neighbour[0], neighbour[1], edge, player, true));
+                    actions.add(new BuildRoad(neighbour[0], neighbour[1], edge, player, true, edgeObj.getComponentID()));
                 }
             }
         }

@@ -45,12 +45,21 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     LinkedList<Compartment> trainCompartments;
     // The round cards
     PartialObservableDeck<RoundCard> rounds;
+    Random playerHandRnd;
+
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        int playerSeed = ((ColtExpressParameters) gameParameters).playerHandShuffleSeed;
+        playerHandRnd = playerSeed == -1 ? rnd : new Random(playerSeed);
     }
     @Override
     protected TurnOrder _createTurnOrder(int nPlayers) {
@@ -78,6 +87,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         ColtExpressGameState copy = new ColtExpressGameState(gameParameters.copy(), getNPlayers());
 
+        ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
         // These are always visible
         copy.bulletsLeft = bulletsLeft.clone();
         copy.playerCharacters = new HashMap<>(playerCharacters);
@@ -102,6 +112,8 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         for (Compartment d : trainCompartments) {
             copy.trainCompartments.add((Compartment) d.copy());
         }
+        // we always reset the player hand shuffle seed (the main rnd is covered in the parent copy)
+        copy.playerHandRnd = new Random(redeterminisationRnd.nextLong());
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
@@ -196,7 +208,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
             for (int i = 0; i < rounds.getSize(); i++) {
                 if (!rounds.isComponentVisible(i, playerId)) {
                     if (i == rounds.getSize() - 1) { // last card, so use an End Round Card
-                        copy.rounds.setComponent(i, getRandomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
+                        copy.rounds.setComponent(i, randomEndRoundCard((ColtExpressParameters) getGameParameters(), null));
                     } else {
                         copy.rounds.setComponent(i, getRandomRoundCard((ColtExpressParameters) getGameParameters(), i, exclusionList));
                         exclusionList.add(copy.rounds.get(i));
@@ -213,6 +225,10 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return new ColtExpressHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * The score that playerID would have if the game ended immediately.
+     * This includes the value of all loot, and the possible bonus shooter reward.
+     */
     @Override
     public double getGameScore(int playerId) {
         double retValue = getLoot(playerId).sumInt(Loot::getValue);
@@ -329,6 +345,10 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
 
             playerDeck.add(playerHand);
             playerHand.clear();
+            // This is the basic variant, in which all cards are reshuffled into the deck for each round
+            // The expert variant which maintains a separate discard pile that is only shuffled to
+            // become the draw deck when the latter is empty is not currently implemented
+            playerDeck.shuffle(playerHandRnd);
 
             for (int i = 0; i < ((ColtExpressParameters) getGameParameters()).nCardsInHand; i++) {
                 playerHand.add(playerDeck.draw());
@@ -341,7 +361,6 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         }
     }
 
-    // Getters, setters
     public LinkedList<Compartment> getTrainCompartments() {
         return trainCompartments;
     }
@@ -350,10 +369,17 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return playerLoot.get(playerID);
     }
 
+    /**
+     * The Deck of played cards that will be executed in order in the execution phase
+     * Only some of these are visible.
+     */
     public PartialObservableDeck<ColtExpressCard> getPlannedActions() {
         return plannedActions;
     }
 
+    /**
+     * The draw decks of each player (a List in playerID order)
+     */
     public List<Deck<ColtExpressCard>> getPlayerDecks() {
         return playerDecks;
     }
@@ -362,14 +388,24 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return rounds;
     }
 
+    /**
+     * A mapping of playerID to the character they are playing
+     */
     public HashMap<Integer, CharacterType> getPlayerCharacters() {
         return playerCharacters;
     }
 
+    /**
+     * The hands of each player (a List in playerID order)
+     * Only a player's own hand is visible
+     */
     public List<Deck<ColtExpressCard>> getPlayerHandCards() {
         return playerHandCards;
     }
 
+    /**
+     * An array of the number of bullets each player has remaining
+     */
     public int[] getBulletsLeft() {
         return bulletsLeft;
     }
@@ -435,13 +471,13 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
      * Helper getter methods for round card composition.
      */
 
-    RoundCard getRandomEndRoundCard(ColtExpressParameters cep, Random overrideRnd) {
+    RoundCard randomEndRoundCard(ColtExpressParameters cep, Random overrideRnd) {
         int nEndCards = cep.endRoundCards.length;
         int choice = overrideRnd == null ? rnd.nextInt(nEndCards) : overrideRnd.nextInt(nEndCards);
         return getEndRoundCard(cep, choice);
     }
 
-    RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
+    private RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
         if (idx >= 0 && idx < cep.endRoundCards.length) {
             RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
             RoundEvent event = cep.endRoundCards[idx].getEndCardEvent();
@@ -450,7 +486,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         return null;
     }
 
-    RoundCard getRandomRoundCard(ColtExpressParameters cep, int i, List<RoundCard> exclusionList) {
+    private RoundCard getRandomRoundCard(ColtExpressParameters cep, int i, List<RoundCard> exclusionList) {
         List<String> namesToExclude = exclusionList.stream().map(RoundCard::getComponentName).collect(toList());
         List<ColtExpressTypes.RegularRoundCard> availableTypes = Arrays.stream(cep.roundCards)
                 .filter(rc -> !namesToExclude.contains(rc.name())).collect(toList());

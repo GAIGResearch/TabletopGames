@@ -7,7 +7,7 @@ import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.PlayCard;
-import games.loveletter.cards.LoveLetterCard;
+import games.loveletter.cards.CardType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
     private Step step;
 
     public DeepGuardAction(int cardIdx, int playerID) {
-        super(LoveLetterCard.CardType.Guard, cardIdx, playerID);
+        super(CardType.Guard, cardIdx, playerID);
         step = Step.TargetPlayer;
         targetPlayer = -1;
     }
@@ -61,7 +61,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
             if (cardActions.size() == 0) cardActions.add(new ChoosePlayer(-1));
         } else {
             // Complete actions
-            cardActions.addAll(LoveLetterCard.CardType.Guard.getFlatActions(gs, new PlayCard(cardIdx, playerID, false, targetPlayer)));
+            cardActions.addAll(CardType.Guard.flatActions(gs, new PlayCard(cardIdx, playerID, false, targetPlayer)));
         }
         return cardActions;
     }

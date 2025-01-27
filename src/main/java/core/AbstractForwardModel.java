@@ -15,6 +15,7 @@ import static core.CoreConstants.GameResult.*;
 public abstract class AbstractForwardModel {
 
     public ActionTreeNode root;
+    public List<ActionTreeNode> leaves;
 
     // Decorator modify (restrict) the actions available to the player.
     // This enables the Forward Model to be passed to the decision algorithm (e.g. MCTS), and ensure that any

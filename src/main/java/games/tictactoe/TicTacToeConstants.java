@@ -5,7 +5,7 @@ import core.components.Token;
 import java.util.ArrayList;
 
 public class TicTacToeConstants {
-    public static final ArrayList<Token> playerMapping = new ArrayList<Token>() {{
+    public static final ArrayList<Token> playerMapping = new ArrayList<>() {{
         add(new Token("x"));
         add(new Token("o"));
     }};

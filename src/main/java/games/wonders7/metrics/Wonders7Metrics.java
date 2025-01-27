@@ -43,7 +43,7 @@ public class Wonders7Metrics implements IMetricsCollection {
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             Wonders7GameState state = (Wonders7GameState) e.state;
             for (int i = 0; i < state.getNPlayers(); i++) {
-                records.put("Player " + i +  " Board", state.getPlayerWonderBoard(i).type.name());
+                records.put("Player " + i +  " Board", state.getPlayerWonderBoard(i).wonderType().name());
             }
             return true;
         }
