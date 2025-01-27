@@ -265,7 +265,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
         long timeTaken = System.nanoTime() - currentTimeNano;
 
         root.mctsSearch(timeTaken / 1000000);
-        System.out.println(root);
 
         if (getParameters().actionHeuristic instanceof ITreeProcessor)
             ((ITreeProcessor) getParameters().actionHeuristic).process(root);

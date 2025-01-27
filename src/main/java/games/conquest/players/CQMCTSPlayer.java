@@ -10,6 +10,8 @@ import games.conquest.actions.EndTurn;
 import java.util.List;
 import java.util.Random;
 
+import static core.CoreConstants.GameResult.GAME_ONGOING;
+
 public class CQMCTSPlayer extends AbstractPlayer {
     CQTreeNode root = null;
 
@@ -18,7 +20,10 @@ public class CQMCTSPlayer extends AbstractPlayer {
     }
 
     public CQMCTSPlayer(long seed) {
-        super(new CQMCTSParams(), "Conquest MCTS");
+        this(seed, "Conquest MCTS");
+    }
+    public CQMCTSPlayer(long seed, String name) {
+        super(new CQMCTSParams(), name);
         // for clarity we create a new set of parameters here, but we could just use the default parameters
         parameters.setRandomSeed(seed);
         rnd = new Random(seed);
@@ -46,7 +51,7 @@ public class CQMCTSPlayer extends AbstractPlayer {
 
     @Override
     public String toString() {
-        return "CQ MCTS player";
+        return super.toString();
     }
 
     /**
@@ -74,14 +79,9 @@ public class CQMCTSPlayer extends AbstractPlayer {
         )) {
             root.depth = 0;
             root.parent = null;
-            System.out.println("Checking whether or not to apply a command");
             root.checkCommandActivation();
         }
         AbstractAction best = root.greedy();
-        if (best == null) {
-            System.out.println("No best action... what?");
-        }
-        best = root.greedy();
         if (best == null) {
             System.out.println("No best action... what?");
         }
@@ -92,7 +92,7 @@ public class CQMCTSPlayer extends AbstractPlayer {
             // Skip forward until we reach a point where multiple actions can be taken.
             root = root.children.values().iterator().next();
         }
-        if (root != null && this.getPlayerID() != root.playerId) {
+        if (root != null && (this.getPlayerID() != root.playerId || !root.getState().getGameStatus().equals(GAME_ONGOING))) {
             root = null;
         }
         if (!possibleActions.contains(best)) {

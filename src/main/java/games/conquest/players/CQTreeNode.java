@@ -196,7 +196,7 @@ public class CQTreeNode {
                     budget += params.budget;
                 }
                 stop = false;
-                System.out.println("Increased budget to " + budget);
+//                System.out.println("Increased budget to " + budget);
             }
         }
     }

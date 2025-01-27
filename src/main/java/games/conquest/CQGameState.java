@@ -399,6 +399,29 @@ public class CQGameState extends AbstractGameState {
     }
 
     /**
+     * Computes whether or not the currently selected troop is able to attack
+     * any enemy troops from a given location.
+     * @param source The cell to scan from
+     * @return true if the selected troop is able to attack something, false otherwise
+     */
+    public boolean canAttackEnemy(Vector2D source) {
+        Troop troop = getSelectedTroop();
+        if (troop == null) return false; // no troop selected
+        Cell cell = getCell(source);
+        int minDistance = 999999;
+        for (Troop target : getTroops(getCurrentPlayer() ^ 1)) {
+            int d = cell.getChebyshev(target.getLocation());
+            if (d < minDistance) {
+                minDistance = d;
+                if (minDistance < troop.getRange()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Calculate the distance between two points, given some game state.
      *
      * @param from The cell from which to calculate
@@ -538,6 +561,7 @@ public class CQGameState extends AbstractGameState {
      * @return the number of points to be 'awarded back' to the heuristic score for this turn
      */
     private int commandLeniency(int playerId) {
+        if (playerId < 10) return 0;
         List<Command> allCommands = getCommands(playerId).getVisibleComponents(playerId);
         int points = 0;
         for (Command cmd : allCommands) {
@@ -567,21 +591,21 @@ public class CQGameState extends AbstractGameState {
         int totalCooldown = 0;
         int currentCooldown = 0;
         for (Command cmd : allCommands) {
-//            if (cmd.getCooldown() != cmd.getCommandType().cooldown || getCurrentPlayer() != playerId) {
+            if (cmd.getCooldown() != cmd.getCommandType().cooldown || getCurrentPlayer() != playerId) {
                 // No heuristic cost during the turn of applying a command, to allow MCTS to explore further
                 currentCooldown += cmd.getCooldown();
-//            }
+            }
             totalCooldown += cmd.getCommandType().cooldown;
         }
         double cooldownFraction = currentCooldown / (double) totalCooldown;
         // Low points is bad, some points is good, more points is slightly better
         int points = getCommandPoints(playerId) + commandLeniency(playerId);
         double expPoints = 1 - Math.exp(-points / 25.0);
-        if (commandLeniency(playerId) > 0) {
-//            System.out.println("Point / leniency: " + getCommandPoints(playerId) + ", " + commandLeniency(playerId) + " -> " + expPoints + "... " + cooldownFraction);
-        }
         // to the final score, add points, subtract cooldowns
         runningScore += (expPoints - cooldownFraction / 2.0);
+        if (getGamePhase().equals(CQGamePhase.CombatPhase) && canAttackEnemy(getSelectedTroop().getLocation())) {
+            runningScore += 0.05; // Small bonus when able to attack an enemy, promoting more aggressive plays.
+        }
         return runningScore > 0 ? runningScore / 3 : runningScore / 2;
     }
 

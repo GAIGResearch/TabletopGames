@@ -28,7 +28,7 @@ public class CQActionHeuristic implements IActionHeuristic {
         } else if (action instanceof ApplyCommand) {
             ApplyCommand ac = (ApplyCommand) action;
             if (ac.getCmdType().equals(CommandType.Charge)) {
-                return 0.7;
+                return 0.9;
             } else {
                 return 0.0;
             }
@@ -45,17 +45,8 @@ public class CQActionHeuristic implements IActionHeuristic {
             return 0.61;
         } else if (action instanceof MoveTroop && cqgs.getSelectedTroop().hasCommand(CommandType.Charge)) {
             // If charge is applied, only consider moves that allow the troop to attack.
-            Cell target = cqgs.getCell(((MoveTroop) action).getHighlight());
-            int minDistance = 999999;
-            for (Troop troop : cqgs.getTroops(cqgs.getCurrentPlayer() ^ 1)) {
-                int d = target.getChebyshev(troop.getLocation());
-                if (d < minDistance) {
-                    minDistance = d;
-                    if (minDistance <= cqgs.getSelectedTroop().getRange()) {
-                        // if we can move into attack range of an enemy troop, prioritize
-                        return 0.9;
-                    }
-                }
+            if (cqgs.canAttackEnemy(((MoveTroop) action).getHighlight())) {
+                return 0.9;
             }
             return 0.0;
         } else {
