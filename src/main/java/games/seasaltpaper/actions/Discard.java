@@ -37,7 +37,7 @@ public class Discard extends AbstractAction implements IPrintable {
     }
 
     @Override
-    public AbstractAction copy() {
+    public Discard copy() {
         return this;
     }
 

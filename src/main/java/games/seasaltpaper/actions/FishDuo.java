@@ -1,6 +1,7 @@
 package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
@@ -22,6 +23,11 @@ public class FishDuo extends PlayDuo {
         card.setVisible(playerId, true);
         sspgs.getPlayerHands().get(playerId).add(card);
         return true;
+    }
+
+    @Override
+    public FishDuo copy() {
+        return this;
     }
 
     @Override

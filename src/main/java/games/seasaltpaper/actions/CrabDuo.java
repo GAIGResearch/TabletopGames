@@ -29,6 +29,12 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
         super(playerId, cardsIdx);
     }
 
+    private CrabDuo(int playerId, int[] cardsIdx, Step currentStep, int discardPileId) {
+        super(playerId, cardsIdx);
+        this.currentStep = currentStep;
+        this.discardPileId = discardPileId;
+    }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         SeaSaltPaperGameState sspg = (SeaSaltPaperGameState) gs;
@@ -100,7 +106,9 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
     }
 
     @Override
-    public CrabDuo copy() { return this; }
+    public CrabDuo copy() {
+        return new CrabDuo(playerId, cardsIdx, currentStep, discardPileId);
+    }
 
     @Override
     public String getString(AbstractGameState gameState) {

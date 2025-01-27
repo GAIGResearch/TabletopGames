@@ -1,6 +1,7 @@
 package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
 
 public class BoatDuo extends PlayDuo {
@@ -16,6 +17,12 @@ public class BoatDuo extends PlayDuo {
         sspg.resetTurn();
         return true;
     }
+
+    @Override
+    public BoatDuo copy() {
+        return this;
+    }
+
 
     @Override
     public String getString(AbstractGameState gameState) {

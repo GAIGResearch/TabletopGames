@@ -9,8 +9,9 @@ import games.seasaltpaper.SeaSaltPaperParameters;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
+import java.util.Objects;
 
 
 // Sequence of Draw 2 from draw pile then discard 1 to one of the discard piles
@@ -108,17 +109,27 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
     @Override
     public DrawAndDiscard copy() {
-        return this;
+        DrawAndDiscard c = new DrawAndDiscard(playerId);
+        if (drawnCardsId != null) {
+            c.drawnCardsId = drawnCardsId.clone();
+        }
+        c.currentStep = currentStep;
+        return c;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return this == obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DrawAndDiscard that = (DrawAndDiscard) o;
+        return playerId == that.playerId && Arrays.equals(drawnCardsId, that.drawnCardsId) && currentStep == that.currentStep;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        int result = Objects.hash(playerId, currentStep);
+        result = 31 * result + Arrays.hashCode(drawnCardsId);
+        return result;
     }
 
     @Override

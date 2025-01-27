@@ -43,7 +43,7 @@ public abstract class PlayDuo extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public PlayDuo copy() {
         return this;
     }
 

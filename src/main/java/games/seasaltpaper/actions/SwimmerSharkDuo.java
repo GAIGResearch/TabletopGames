@@ -70,7 +70,11 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
     }
 
     @Override
-    public SwimmerSharkDuo copy() { return this; }
+    public SwimmerSharkDuo copy() {
+        SwimmerSharkDuo c = new SwimmerSharkDuo(playerId, cardsIdx);
+        c.executed = executed;
+        return c;
+    }
 
     @Override
     public String getString(AbstractGameState gameState) {

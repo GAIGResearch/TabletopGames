@@ -20,7 +20,7 @@ public class Stop extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public Stop copy() {
         return this;
     }
 
