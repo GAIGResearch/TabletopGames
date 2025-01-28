@@ -932,7 +932,12 @@ public class SingleTreeNode {
             return true;
         int currentActor = rollerState.getTurnOwner();
         int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * rollerState.getNPlayers() : params.rolloutLength;
-        if (root.actionsInRollout.size() >= maxRollout) {
+        int rolloutDepth = switch (params.rolloutIncrementType) {
+            case TICK -> root.actionsInRollout.size();
+            case TURN -> rollerState.getTurnCounter() - root.state.getTurnCounter();
+            case ROUND -> rollerState.getRoundCounter() - root.state.getRoundCounter();
+        };
+        if (rolloutDepth >= maxRollout) {
             return switch (params.rolloutTermination) {
                 case DEFAULT -> true;
                 case END_ACTION -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
