@@ -39,8 +39,9 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
                 continue;
             }
             int targetHandId = sspgs.getPlayerHands().get(i).getComponentID();
-            int fromIndex = sspgs.getRnd().nextInt(sspgs.getPlayerHands().get(i).getSize()); // randomly choose a card from the target
-            actions.add(new DrawCard(targetHandId, playerHandId, fromIndex));
+//            int fromIndex = sspgs.getRnd().nextInt(sspgs.getPlayerHands().get(i).getSize()); // randomly choose a card from the target
+//            actions.add(new DrawCard(targetHandId, playerHandId, fromIndex));
+            actions.add(new DrawRandom(targetHandId, playerHandId));
         }
         if (actions.isEmpty()) {
 //            actions.add(new DoNothing());
@@ -78,7 +79,7 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Sailor-Shark Duo Actions: Pick a player then get a random card from their hand";
+        return "Swimmer-Shark Duo Actions: Pick a player then get a random card from their hand";
     }
 
     @Override

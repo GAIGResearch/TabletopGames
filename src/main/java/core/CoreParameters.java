@@ -9,7 +9,7 @@ import java.util.Objects;
 public class CoreParameters extends TunableParameters {
     public boolean verbose = false;
     public boolean recordEventHistory = true;  // include in history text game events
-    public boolean partialObservable = false;
+    public boolean partialObservable = true;
     public boolean competitionMode = false;
     public boolean disqualifyPlayerOnIllegalActionPlayed = false;
     public boolean disqualifyPlayerOnTimeout = false;
