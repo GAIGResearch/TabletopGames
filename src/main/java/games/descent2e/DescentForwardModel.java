@@ -50,7 +50,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         int nActionsPerFigure = descentParameters.nActionsPerFigure;
         dgs.data.load(descentParameters.getDataPath());
         dgs.initData = false;
-        dgs.addAllComponents();
+        dgs.addComponents();
         DescentGameData _data = dgs.getData();
 
         // Set up dice pools

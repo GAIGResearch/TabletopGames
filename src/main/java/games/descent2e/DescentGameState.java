@@ -477,4 +477,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         super.addListener(listener);
         listeners.add(listener);
     }
+
+    void addComponents()
+    {
+        super.addAllComponents();
+    }
 }

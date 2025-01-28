@@ -88,7 +88,7 @@ public class TileBuildFM extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        currentState.addAllComponents();
+        //currentState.addAllComponents();
 
         if(action instanceof SetGridValueAction)
         {

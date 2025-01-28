@@ -156,7 +156,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         List<AbstractAction> retVal = new ArrayList<>();
         // TODO: This feels incredibly hacky, but for whatever reason, it just works.
         if (state.getHistory().size() == 0) return null;
-        AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1);
+        AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1).b;
         if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase)
         {
             // If the Reroll option is available, even if the player chooses not to take it, the Game is expecting

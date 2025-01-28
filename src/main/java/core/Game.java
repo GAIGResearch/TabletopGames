@@ -357,9 +357,7 @@ public class Game {
      * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
      */
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
-        //newRandomSeed = 2068526905;
-        //newRandomSeed = 441330015;
-        System.out.println("Game Seed: " + newRandomSeed);
+        if (debug) System.out.println("Game Seed: " + newRandomSeed);
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
         if (players.size() == gameState.getNPlayers()) {
@@ -542,16 +540,16 @@ public class Game {
             if (gameState.getHistory().size() > 1) {
                 lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
             }
-            System.out.println("---\nActions in progress:");
-            for (IExtendedSequence action: actionsInProgress)
-            {
-                System.out.println(action);
-            }
-            System.out.println("---\nRecent History:");
-            List<AbstractAction> history = gameState.getHistory();
-            for (int i = Math.max(0, history.size() - 10); i < history.size(); i++)
-            {
-                System.out.println(history.get(i));
+            if (debug) {
+                System.out.println("---\nActions in progress:");
+                for (IExtendedSequence action : actionsInProgress) {
+                    System.out.println(action);
+                }
+                System.out.println("---\nRecent History:");
+                List<Pair<Integer, AbstractAction>> history = gameState.getHistory();
+                for (int i = Math.max(0, history.size() - 10); i < history.size(); i++) {
+                    System.out.println(history.get(i));
+                }
             }
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
