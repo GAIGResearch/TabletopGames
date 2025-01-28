@@ -12,6 +12,7 @@ import games.dominion.cards.CardType;
 import games.tictactoe.TicTacToeForwardModel;
 import org.junit.Before;
 import org.junit.Test;
+import org.netlib.lapack.Dgetrf;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 
@@ -54,7 +55,9 @@ public class TreeReuseTests {
     }
 
     public void initialiseDominion() {
-        playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
+        playerOne = paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA
+                ? new TestMCTSPlayer(paramsOne, OMATreeNode::new)
+                : new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
         playerOne.rolloutTest = false;
         playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
         playerTwo.rolloutTest = false;
@@ -121,6 +124,13 @@ public class TreeReuseTests {
         runGame();
     }
 
+    @Test
+    public void treeReusedWithOMA() {
+        paramsOne.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA;
+        initialiseDominion();
+        runGame();
+    }
+
 
     private SingleTreeNode descendTree(SingleTreeNode startingNode, int[] actingPlayers, List<AbstractAction> actions) {
         if (actingPlayers.length != actions.size() + 1)
@@ -155,14 +165,20 @@ public class TreeReuseTests {
             boolean oneAction = fm.computeAvailableActions(state).size() == 1;
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
-            STNWithTestInstrumentation newRoot = (STNWithTestInstrumentation) (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
-            if (currentPlayer == 0 && !oneAction) {
-                if (newRoot != null) {
-                    assertEquals(preActionCopy.getGamePhase(), newRoot.state.getGamePhase());
-                    // we also want to check if we have a whole load of ESTATE purchases
-                    if (preActionCopy instanceof DominionGameState dgs) {
-                        int ESTATE_Visits = newRoot.getActionStats(new BuyCard(CardType.ESTATE, 0)) == null ? 0
-                                : newRoot.getActionStats(new BuyCard(CardType.ESTATE, 0)).validVisits;
+            SingleTreeNode newRoot = (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
+
+            if (currentPlayer < 2 && newRoot != null) {
+                assertEquals(currentPlayer, newRoot.decisionPlayer);
+                SingleTreeNode topRoot = (currentPlayer == 0 ? playerOne.getRoot() : playerTwo.getRoot());
+                assertEquals(currentPlayer, topRoot.decisionPlayer);
+            }
+            if (currentPlayer == 0 && !oneAction && newRoot != null) {
+                assertEquals(preActionCopy.getGamePhase(), newRoot.state.getGamePhase());
+                // we also want to check if we have a whole load of ESTATE purchases
+                if (preActionCopy instanceof DominionGameState dgs) {
+                    if (newRoot instanceof STNWithTestInstrumentation STN) {
+                        int ESTATE_Visits = STN.getActionStats(new BuyCard(CardType.ESTATE, 0)) == null ? 0
+                                : STN.getActionStats(new BuyCard(CardType.ESTATE, 0)).validVisits;
                         int ESTATES_available = dgs.getCardsIncludedInGame().get(CardType.ESTATE);
                         if (ESTATES_available == 0)
                             assertTrue(ESTATE_Visits <= oldVisits);
@@ -184,6 +200,7 @@ public class TreeReuseTests {
                 nextActingPlayers.clear();
                 nextActingPlayers.add(state.getCurrentPlayer());
             }
+
             if (currentPlayer == 0 || !selfOnlyTree)
                 actionsTakenSinceLastPlayerZeroDecision.add(nextAction);
             if (state.getCurrentPlayer() == 0 || !selfOnlyTree)

@@ -27,15 +27,13 @@ import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static games.GameType.*;
 
 
 public class Game {
@@ -541,6 +539,7 @@ public class Game {
             if (gameState.getHistory().size() > 1) {
                 lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
             }
+            forwardModel.computeAvailableActions(gameState);
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
@@ -574,10 +573,14 @@ public class Game {
                 if (debug)
                     System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
+                if (!observedActions.contains(action)) {
+                    throw new AssertionError("Action played that was not in the list of available actions: " + action);
+                }
+
                 if (debug)
                     System.out.printf("Game: %2d Tick: %3d\t%s%n", gameState.getGameID(), getTick(), action.getString(gameState));
 
-                agentTime += (System.nanoTime() - s);
+                agentTime = (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -825,7 +828,6 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-//        String gameType = Utils.getArg(args, "game", "Uno");
         String gameType = Utils.getArg(args, "game", "SeaSaltPaper");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
@@ -859,7 +861,9 @@ public class Game {
 
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 
@@ -872,7 +876,7 @@ public class Game {
         /* Run multiple games */
         int n = 100;
         ArrayList<GameType> games = new ArrayList<>();
-        games.add(SeaSaltPaper);
+        games.add(GameType.SeaSaltPaper);
         runMany(games, players, 100L, n, false, true, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }

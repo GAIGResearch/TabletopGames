@@ -5,13 +5,14 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IStateFeatureVector;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static games.loveletter.cards.LoveLetterCard.CardType.*;
+import static games.loveletter.cards.CardType.*;
 
 /**
  * A set of features designed to tie in exactly with those used in LoveLetterHeuristic
@@ -31,7 +32,7 @@ public class LLStateFeaturesReduced implements IStateFeatureVector {
 
         double cardValues = 0;
 
-        Set<LoveLetterCard.CardType> cardTypes = new HashSet<>();
+        Set<CardType> cardTypes = new HashSet<>();
         for (LoveLetterCard card : llgs.getPlayerHandCards().get(playerId).getComponents()) {
             cardValues += card.cardType.getValue();
             cardTypes.add(card.cardType);

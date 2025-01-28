@@ -60,7 +60,7 @@ public class ResForwardModel extends StandardForwardModel {
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             boolean[] visible = new boolean[firstState.getNPlayers()];
             visible[i] = false;
-            PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", visible);
+            PartialObservableDeck<ResPlayerCards> playerCards = new PartialObservableDeck<>("Player Cards", i, visible);
             if (spies.get(i)) {
                 ResPlayerCards idCard = new ResPlayerCards(ResPlayerCards.CardType.SPY);
                 idCard.setOwnerId(i);
@@ -256,9 +256,7 @@ public class ResForwardModel extends StandardForwardModel {
             resgs.historicTeams.add(new ArrayList<>(resgs.finalTeamChoice));
             resgs.noVotesPerMission.add(occurrenceCount);
         }
-
     }
-
 
     @Override
     protected void endGame(AbstractGameState gs) {
@@ -271,7 +269,6 @@ public class ResForwardModel extends StandardForwardModel {
     public void changeLeader(ResGameState resgs) {
         resgs.leaderID = (resgs.leaderID + 1) % resgs.getNPlayers();
     }
-
 
     public static List<Boolean> randomiseSpies(int spies, ResGameState state, int playerID, Random rnd) {
         // We want to randomly assign the number of spies across the total number of players

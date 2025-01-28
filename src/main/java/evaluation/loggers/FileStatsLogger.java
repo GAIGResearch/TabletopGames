@@ -3,6 +3,7 @@ package evaluation.loggers;
 import core.interfaces.IStatisticLogger;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
+import utilities.Utils;
 
 import java.io.*;
 import java.util.*;
@@ -17,8 +18,8 @@ public class FileStatsLogger implements IStatisticLogger {
 
     private String fileName;
     private String actionName;
-    private boolean append;
-    private String delimiter;
+    private final boolean append;
+    private final String delimiter;
     private FileWriter writer;
     public String doubleFormat = "%.3g";
     public String intFormat = "%d";
@@ -46,7 +47,6 @@ public class FileStatsLogger implements IStatisticLogger {
                 headerNeeded = false;
             writer = new FileWriter(fileName, append);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new AssertionError("Problem opening file " + fileName + " : " + e.getMessage());
         }
     }
@@ -55,6 +55,14 @@ public class FileStatsLogger implements IStatisticLogger {
         this(fileName, "\t", true);
     }
 
+
+    public void setOutPutDirectory(String... nestedDirectories) {
+        if (writer != null) {
+            throw new AssertionError("Cannot set output directory after initialisation");
+        }
+        String folder = Utils.createDirectory(nestedDirectories);
+        this.fileName = folder + File.separator + this.fileName;
+    }
     /**
      * Use to register a set of data in one go. It is not possible to add new keys after the first call
      * of record(Map). Data linked to new, previously unseen keys will be ignored (and logged to console)
@@ -130,7 +138,6 @@ public class FileStatsLogger implements IStatisticLogger {
                 writer.write(outputLine);
             }
         } catch (IOException e) {
-            e.printStackTrace();
             throw new AssertionError("Problem writing to file " + writer.toString() + " : " + e.getMessage());
         }
     }
@@ -138,14 +145,6 @@ public class FileStatsLogger implements IStatisticLogger {
     @Override
     public void record(String key, Object datum) {
         //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
-    }
-
-    public void flush() {
-        try {
-            writer.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**

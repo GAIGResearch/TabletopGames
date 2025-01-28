@@ -28,7 +28,7 @@ public class MultiTreeNode extends SingleTreeNode {
     MCTSPlayer mctsPlayer;
 
     public MultiTreeNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        this.decisionPlayer = state.getCurrentPlayer();
+        this.decisionPlayer = player.getPlayerID();
         this.params = player.getParameters();
         this.forwardModel = player.getForwardModel();
         if (params.information == MCTSEnums.Information.Closed_Loop)
@@ -76,6 +76,7 @@ public class MultiTreeNode extends SingleTreeNode {
         System.arraycopy(roots, 0, currentLocation, 0, currentLocation.length);
 
         actionsInTree = new ArrayList<>();
+        currentNodeTrajectory = new ArrayList<>();
         actionsInRollout = new ArrayList<>();
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
@@ -118,6 +119,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (debug)
                     System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
                 advanceState(currentState, chosen, false);
+                currentNodeTrajectory.add(currentNode);
 
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
@@ -137,13 +139,16 @@ public class MultiTreeNode extends SingleTreeNode {
                 // for each player-specific sub-tree we filter these to just their actions
                 if (p != currentLocation[p].decisionPlayer)
                     throw new AssertionError("We should only be backing up for the decision player");
-                int finalP = p;
-                currentLocation[p].root.actionsInTree = actionsInTree.stream()
-                        .filter(a -> a.a == finalP)
-                        .collect(Collectors.toList());
-//                singleTreeNode.root.actionsInRollout = actionsInRollout.stream()
-//                        .filter(a -> a.a == singleTreeNode.decisionPlayer)
-//                        .collect(Collectors.toList());
+
+                currentLocation[p].root.actionsInTree = new ArrayList<>();
+                currentLocation[p].root.currentNodeTrajectory = new ArrayList<>();
+                for (int i = 0; i < actionsInTree.size(); i++) {
+                    if (actionsInTree.get(i).a == p) {
+                        currentLocation[p].root.actionsInTree.add(actionsInTree.get(i));
+                        if (i < currentNodeTrajectory.size())
+                            currentLocation[p].root.currentNodeTrajectory.add(currentNodeTrajectory.get(i));
+                    }
+                }
                 currentLocation[p].backUp(finalValues);
             }
         }
@@ -178,6 +183,10 @@ public class MultiTreeNode extends SingleTreeNode {
 
     public SingleTreeNode getRoot(int player) {
         return roots[player];
+    }
+
+    public void resetRoot(int player) {
+        roots[player] = null;
     }
 
 }

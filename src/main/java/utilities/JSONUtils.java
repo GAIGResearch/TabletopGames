@@ -1,5 +1,6 @@
 package utilities;
 
+import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -59,6 +60,16 @@ public class JSONUtils {
                 return (T) Enum.valueOf(enumClass, val);
             }
             Class<T> outputClass = (Class<T>) Class.forName(cl);
+            if (TunableParameters.class.isAssignableFrom(outputClass)) {
+                // in this case we do not look for the Constructor arguments, as
+                // the parameters are defined directly as name-value pairs in JSON
+                // But first we check for any args, and log an error if they exist
+                if (json.containsKey("args"))
+                    throw new AssertionError("TunableParameters should not have args in JSON : " + json.toJSONString());
+                T t = outputClass.getConstructor().newInstance();
+                TunableParameters.loadFromJSON((TunableParameters) t, json);
+                return t;
+            }
             JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
             Class<?>[] argClasses = new Class[argArray.size()];
             Object[] args = new Object[argArray.size()];
@@ -115,7 +126,7 @@ public class JSONUtils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-       //     System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+            //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
@@ -327,6 +338,52 @@ public class JSONUtils {
             e.printStackTrace();
             throw new AssertionError("Problem reading from file " + filename);
         }
+    }
+
+    public static String prettyPrint(JSONObject json, int tabDepth) {
+        StringBuilder sb = new StringBuilder("{\n");
+        Object[] keys = json.keySet().toArray();
+        for (int keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+            String keyName = keys[keyIndex].toString();
+            Object value = json.get(keyName);
+            sb.append("\t".repeat(Math.max(0, tabDepth)));
+            sb.append("\"").append(keyName).append("\"").append(" : ");
+            if (value instanceof JSONObject subJSON) {
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
+            } else if (value instanceof JSONArray array) {
+                sb.append("[\n");
+                tabDepth++;
+                for (int index = 0; index < array.size(); index++) {
+                    Object v = array.get(index);
+                    sb.append("\t".repeat(Math.max(0, tabDepth)));
+                    if (v instanceof JSONObject subJSON) {
+                        sb.append(prettyPrint(subJSON, tabDepth + 1));
+                    } else if (v instanceof String) {
+                        sb.append("\"").append(v).append("\"");
+                    } else if (v instanceof Long || v instanceof Integer ||
+                            v instanceof Double || v instanceof Boolean) {
+                        sb.append(v);
+                    }
+                    if (index < array.size() - 1)
+                        sb.append(",").append("\n");
+                }
+                sb.append("\t".repeat(Math.max(0, tabDepth - 1))).append("]");
+                tabDepth--;
+            } else if (value instanceof String) {
+                sb.append("\"").append(value).append("\"");
+            } else if (value instanceof Long || value instanceof Integer ||
+                    value instanceof Double || value instanceof Boolean) {
+                sb.append(value);
+            } else {
+                throw new AssertionError("Unexpected value type in prettyPrint : " + value);
+            }
+            if (keyIndex < keys.length - 1)
+                sb.append(",");
+            sb.append("\n");
+        }
+        sb.append("\t".repeat(Math.max(0, tabDepth - 1)));
+        sb.append("}");
+        return sb.toString();
     }
 
     @SuppressWarnings("unchecked")

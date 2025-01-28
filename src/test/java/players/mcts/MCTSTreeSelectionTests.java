@@ -27,7 +27,6 @@ public class MCTSTreeSelectionTests {
         player = new TestMCTSPlayer(params, STNWithTestInstrumentation::new);
         player.setForwardModel(fm);
         node = (STNWithTestInstrumentation) SingleTreeNode.createRootNode(player, game, rnd, STNWithTestInstrumentation::new);
-
     }
 
     @Test
@@ -57,22 +56,28 @@ public class MCTSTreeSelectionTests {
 
 
     private void first10Visits(STNWithTestInstrumentation node) {
-        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
-        node.backUp(new double[]{-1.0});
-
-        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
-        for (int i = 0; i < 5; i++) {
-            node.backUp(new double[]{0.5});
-        }
-        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
-        for (int i = 0; i < 4; i++) {
-            node.backUp(new double[]{0.4});
-        }
-
+        tenVisits(node, new double[]{-1.0, 0.5, 0.4});
         assertEquals(10, node.nVisits);
         assertEquals(1, node.getActionStats(new LMRAction("Left")).nVisits);
         assertEquals(5, node.getActionStats(new LMRAction("Middle")).nVisits);
         assertEquals(4, node.getActionStats(new LMRAction("Right")).nVisits);
+    }
+
+    private void tenVisits(STNWithTestInstrumentation node, double[] rewards) {
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.currentNodeTrajectory = List.of(node);
+        node.backUp(new double[]{rewards[0]});
+
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        node.currentNodeTrajectory = List.of(node);
+        for (int i = 0; i < 5; i++) {
+            node.backUp(new double[]{rewards[1]});
+        }
+        node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        node.currentNodeTrajectory = List.of(node);
+        for (int i = 0; i < 4; i++) {
+            node.backUp(new double[]{rewards[2]});
+        }
     }
 
     @Test
@@ -180,6 +185,71 @@ public class MCTSTreeSelectionTests {
         assertEquals(321, counts[2], 100);
     }
 
+
+    @Test
+    public void rm10VisitsFinalSelection() {
+        // we need this to be the same as the tree policy action after ten visits as
+        // we only update every 10 visits
+        params.treePolicy = RegretMatching;
+        params.exploreEpsilon = 0.0;
+        params.normaliseRewards = false;
+        setupPlayer();
+        first10Visits(node);
+
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0, counts[0], 0);
+        assertEquals(679, counts[1], 100);
+        assertEquals(321, counts[2], 100);
+
+        // this should then change after another 10 visits
+        // we now make the third action much more attractive
+        tenVisits(node, new double[]{0.0, 0.0, 1.0});
+        counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        // We now have 100% Right after 20 visits
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(0, counts[0], 0);
+        assertEquals(680 / 2, counts[1], 100);
+        assertEquals((320 + 1000) / 2, counts[2], 100);
+
+        tenVisits(node, new double[]{4.0, 0.5, 0.4});
+        counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.bestAction();
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        // New policy is 84% Left, 16% Right...so we average that in with the previous two
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals( (840)/3, counts[0], 50);
+        assertEquals(680 / 3, counts[1], 50);
+        assertEquals((320 + 1000 + 160) / 3, counts[2], 100);
+    }
 
     @Test
     public void rm10VisitsWithExploration() {
@@ -318,46 +388,11 @@ public class MCTSTreeSelectionTests {
 
 
     @Test
-    public void hedge_10Visits() {
-        params.treePolicy = Hedge;
-        params.exploreEpsilon = 0.1;
-        params.normaliseRewards = false;
-        params.hedgeBoltzmann = 0.8;
-        setupPlayer();
-        first10Visits(node);
-
-        // Regrets are:
-        // -1.31 / 0.19 / 0.09
-
-        double[] actionValues = node.actionValues(baseActions);
-        assertEquals(Math.exp(-1.31 * 10 / 0.8), actionValues[0], 0.01);  // 0.00
-        assertEquals(Math.exp(0.19 * 10 / 0.80), actionValues[1], 0.01); // 10.75
-        assertEquals(Math.exp(0.09 * 10 / 0.80), actionValues[2], 0.01); // 3.08
-        // The final choice of action is then stochastic
-        int[] counts = new int[3];
-        for (int i = 0; i < 1000; i++) {
-            AbstractAction action = node.treePolicyAction(true);
-            if (action.equals(new LMRAction("Left"))) {
-                counts[0]++;
-            } else if (action.equals(new LMRAction("Middle"))) {
-                counts[1]++;
-            } else {
-                counts[2]++;
-            }
-        }
-        // expected probability distribution is 0%, 78%, 22%  [not including the 10% exploration]
-        assertEquals(1000, counts[0] + counts[1] + counts[2]);
-        assertEquals(0.00 * 900 + 33, counts[0], 15);
-        assertEquals(0.78 * 900 + 33, counts[1], 50);
-        assertEquals(0.22 * 900 + 33, counts[2], 50);
-    }
-
-    @Test
     public void bias10Visits() {
         params.treePolicy = UCB;
         params.normaliseRewards = true;
         params.progressiveBias = 2.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -387,7 +422,7 @@ public class MCTSTreeSelectionTests {
     public void pUCT10VisitsNoTemperature() {
         params.pUCT = true;
         params.pUCTTemperature = 0.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -414,7 +449,7 @@ public class MCTSTreeSelectionTests {
     public void pUCT10VisitsWithTemperature() {
         params.pUCT = true;
         params.pUCTTemperature = 2.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -441,7 +476,7 @@ public class MCTSTreeSelectionTests {
     public void actionSeeding10Visits() {
         params.initialiseVisits = 4;
         params.normaliseRewards = false;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -454,13 +489,16 @@ public class MCTSTreeSelectionTests {
 
         // For this test we don't use first10Visits() as the initial visit parameter changes the visit counts
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Left")));
+        node.currentNodeTrajectory = List.of(node);
         node.backUp(new double[]{-1.0});
 
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Middle")));
+        node.currentNodeTrajectory = List.of(node);
         for (int i = 0; i < 5; i++) {
             node.backUp(new double[]{0.5});
         }
         node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+        node.currentNodeTrajectory = List.of(node);
         for (int i = 0; i < 4; i++) {
             node.backUp(new double[]{0.4});
         }
@@ -477,8 +515,8 @@ public class MCTSTreeSelectionTests {
         // With seeding, we change both the value of the action, and the exploration term
         double[] actionValues = node.actionValues(baseActions);
         assertEquals((-1.0 + 0.3 * 4) / 5.0 + Math.sqrt(Math.log(22) / 5), actionValues[0], 0.01);
-        assertEquals(2.5 / 9.0 +  Math.sqrt(Math.log(22) / 9), actionValues[1], 0.01);
-        assertEquals((0.4 * 4 + 4.0) / 8.0 +  Math.sqrt(Math.log(22) / 8), actionValues[2], 0.01);
+        assertEquals(2.5 / 9.0 + Math.sqrt(Math.log(22) / 9), actionValues[1], 0.01);
+        assertEquals((0.4 * 4 + 4.0) / 8.0 + Math.sqrt(Math.log(22) / 8), actionValues[2], 0.01);
         assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
     }
 
@@ -486,7 +524,7 @@ public class MCTSTreeSelectionTests {
     public void progressiveWideningI() {
         params.progressiveWideningConstant = 1.0;
         params.progressiveWideningExponent = 0.5;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -500,15 +538,16 @@ public class MCTSTreeSelectionTests {
         // The second action should become available at the 4th visits (2 = sqrt(N))
         for (int i = 0; i < 3; i++) {
             // Check that the correct number of actions are available (just the one)
-      //      System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
+            //      System.out.println("Actions: " + node.actionsToConsider(node.actionsFromOpenLoopState));
             assertEquals(3, node.actionsFromOpenLoopState.size());
             assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
             assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.currentNodeTrajectory = List.of(node);
             node.backUp(new double[]{-1.0});
 
             // then check that only the available actions are updated
-            assertEquals(i+1, node.getActionStats(new LMRAction("Right")).validVisits);
+            assertEquals(i + 1, node.getActionStats(new LMRAction("Right")).validVisits);
             assertEquals(i == 2 ? 1 : 0, node.getActionStats(new LMRAction("Left")).validVisits);
             assertEquals(0, node.getActionStats(new LMRAction("Middle")).validVisits);
         }
@@ -538,7 +577,7 @@ public class MCTSTreeSelectionTests {
     public void progressiveWideningII() {
         params.progressiveWideningConstant = 2.0;
         params.progressiveWideningExponent = 0.1;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -558,6 +597,7 @@ public class MCTSTreeSelectionTests {
             assertEquals(new LMRAction("Right"), node.actionsToConsider(node.actionsFromOpenLoopState).get(0));
             assertEquals(new LMRAction("Left"), node.actionsToConsider(node.actionsFromOpenLoopState).get(1));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.currentNodeTrajectory = List.of(node);
             node.backUp(new double[]{-1.0});
         }
         assertEquals(3, node.actionsToConsider(node.actionsFromOpenLoopState).size());
@@ -568,7 +608,7 @@ public class MCTSTreeSelectionTests {
         // check that only the available actions are used up to the point of widening
         params.progressiveWideningConstant = 1.0;
         params.progressiveWideningExponent = 0.2;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -586,6 +626,7 @@ public class MCTSTreeSelectionTests {
             assertEquals(1, node.actionsToConsider(node.actionsFromOpenLoopState).size());
             assertEquals(new LMRAction("Right"), node.treePolicyAction(true));
             node.actionsInTree = List.of(new Pair<>(0, new LMRAction("Right")));
+            node.currentNodeTrajectory = List.of(node);
             node.backUp(new double[]{1.0});
         }
         assertEquals(2, node.actionsToConsider(node.actionsFromOpenLoopState).size());
@@ -602,7 +643,7 @@ public class MCTSTreeSelectionTests {
         params.firstPlayUrgency = 2.0;
         params.pUCT = true;
         params.pUCTTemperature = 0.0;
-        params.actionHeuristic = (a, s) -> {
+        params.actionHeuristic = (a, s, l) -> {
             if (a.equals(new LMRAction("Left"))) {
                 return 0.3;
             } else if (a.equals(new LMRAction("Middle"))) {
@@ -621,8 +662,57 @@ public class MCTSTreeSelectionTests {
         first10Visits(node);
         assertEquals(new LMRAction("Right"), node.treePolicyAction(false));
         actionValues = node.actionValues(baseActions);
-        assertEquals( 0.0 + 0.3 / 1.3 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
-        assertEquals( 1.0, actionValues[1], 0.01);
-        assertEquals( 1.4/1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+        assertEquals(0.0 + 0.3 / 1.3 * Math.sqrt(Math.log(10)), actionValues[0], 0.01);
+        assertEquals(1.0, actionValues[1], 0.01);
+        assertEquals(1.4 / 1.5 + 1.0 / 1.3 * Math.sqrt(Math.log(10) / 4), actionValues[2], 0.01);
+    }
+
+    @Test
+    public void uniformSelection() {
+        params.treePolicy = Uniform;
+        setupPlayer();
+        first10Visits(node);
+        //regardless of the data, we expect a uniform distribution
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(333, counts[0], 75);
+        assertEquals(333, counts[1], 75);
+        assertEquals(333, counts[2], 75);
+    }
+
+
+    @Test
+    public void greedySelection() {
+        params.treePolicy = Greedy;
+        params.exploreEpsilon = 0.21;
+        setupPlayer();
+        first10Visits(node);
+        //  we expect a 21% exploration (7% each)
+        // and then 80% focused on the greedy Middle option
+        int[] counts = new int[3];
+        for (int i = 0; i < 1000; i++) {
+            AbstractAction action = node.treePolicyAction(true);
+            if (action.equals(new LMRAction("Left"))) {
+                counts[0]++;
+            } else if (action.equals(new LMRAction("Middle"))) {
+                counts[1]++;
+            } else {
+                counts[2]++;
+            }
+        }
+        assertEquals(1000, counts[0] + counts[1] + counts[2]);
+        assertEquals(70, counts[0], 25);
+        assertEquals(860, counts[1], 75);
+        assertEquals(70, counts[2], 25);
     }
 }

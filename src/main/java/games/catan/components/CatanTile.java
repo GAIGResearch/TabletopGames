@@ -28,7 +28,9 @@ public class CatanTile extends BoardNode {
     public final int x;
     public final int y;
 
-    int[] verticesBoardNodeIDs, edgeIDs;  // ID of board node mapping to each vertex on this tile
+    private final static Integer minusOne = -1;
+
+    Integer[] verticesBoardNodeIDs, edgeIDs;  // ID of board node mapping to each vertex on this tile
     TileType tileType;
     int number;
     boolean robber;
@@ -37,10 +39,10 @@ public class CatanTile extends BoardNode {
         super(HEX_SIDES, "");
         this.x = x;
         this.y = y;
-        verticesBoardNodeIDs = new int[HEX_SIDES];
-        edgeIDs = new int[HEX_SIDES];
-        Arrays.fill(verticesBoardNodeIDs, -1);
-        Arrays.fill(edgeIDs, -1);
+        verticesBoardNodeIDs = new Integer[HEX_SIDES];
+        edgeIDs = new Integer[HEX_SIDES];
+        Arrays.fill(verticesBoardNodeIDs, minusOne);
+        Arrays.fill(edgeIDs, minusOne);
         robber = false;
     }
 
@@ -48,19 +50,10 @@ public class CatanTile extends BoardNode {
         super(HEX_SIDES, "", componentId);
         this.x = x;
         this.y = y;
-        verticesBoardNodeIDs = new int[HEX_SIDES];
-        edgeIDs = new int[HEX_SIDES];
-        Arrays.fill(verticesBoardNodeIDs, -1);
-        Arrays.fill(edgeIDs, -1);
-        robber = false;
-    }
-
-    public CatanTile(int x, int y, int[] verticesBoardNodeIDs, int[] edgeIDs) {
-        super(HEX_SIDES, "");
-        this.x = x;
-        this.y = y;
-        this.verticesBoardNodeIDs = verticesBoardNodeIDs;
-        this.edgeIDs = edgeIDs;
+        verticesBoardNodeIDs = new Integer[HEX_SIDES];
+        edgeIDs = new Integer[HEX_SIDES];
+        Arrays.fill(verticesBoardNodeIDs, minusOne);
+        Arrays.fill(edgeIDs, minusOne);
         robber = false;
     }
 
@@ -111,7 +104,7 @@ public class CatanTile extends BoardNode {
         this.number = number;
     }
 
-    public int[] getVerticesBoardNodeIDs() {
+    public Integer[] getVerticesBoardNodeIDs() {
         return verticesBoardNodeIDs;
     }
 
@@ -119,7 +112,7 @@ public class CatanTile extends BoardNode {
         verticesBoardNodeIDs[vertex] = id;
     }
 
-    public int[] getEdgeIDs() {
+    public Integer[] getEdgeIDs() {
         return edgeIDs;
     }
 
@@ -242,6 +235,6 @@ public class CatanTile extends BoardNode {
 
     @Override
     public String toString() {
-        return tileType + " " + number + " at (" + x + ";" + y + ")" + (robber? " [R]" : "");
+        return tileType + " " + number + " at (" + x + ";" + y + ")" + (robber ? " [R]" : "");
     }
 }

@@ -226,7 +226,7 @@ public class DataTableSaw implements IDataLogger {
         // Add data from all the metrics to each of the columns, row by row, checking for values being equal in colStep to account for missing values in some of the columns
         for (int id: gameIDs) {
             if (!indexingColumnIsGameID) {
-                for (int idx = 0; idx < maxIndex; idx++) {
+                for (int idx = 0; idx <= maxIndex; idx++) {
                     filterAndRecordData(metricTables, allColumnNames, id, indexingColumnName, idx);
                 }
             } else {

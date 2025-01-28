@@ -38,6 +38,10 @@ public class TestMCTSPlayer extends MCTSPlayer {
         this.debug = debug;
     }
 
+    public SingleTreeNode getRoot() {
+        return root;
+    }
+
     public SingleTreeNode getRoot(int player) {
         if (root instanceof MultiTreeNode)
             return ((MultiTreeNode) root).getRoot(player);
@@ -50,6 +54,10 @@ public class TestMCTSPlayer extends MCTSPlayer {
             root = new MTNRollout(this, gameState, rnd);
         else
             super.createRootNode(gameState);
+    }
+
+    public boolean wasRemoved(Object key) {
+        return ((MCGSNode) root).keysTorRemove.contains(key);
     }
 
 }

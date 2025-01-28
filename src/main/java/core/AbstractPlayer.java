@@ -9,7 +9,7 @@ import java.util.*;
 
 public abstract class AbstractPlayer {
 
-    // ID of this player, assigned by the game
+    // ID of this player, assigned by the game - this is intentionally package-private. Do not change it!
     int playerID;
     String name;
     protected Random rnd = new Random(System.currentTimeMillis());
@@ -48,27 +48,20 @@ public abstract class AbstractPlayer {
      * First of all this applies any decorators to the list of possible actions.
      * Then we choose one (delegating to the _getAction() implemented by the AbstractPlayer subclass)
      * Then we apply any decorators to the chosen action.
-     *
-     * @param gameState
-     * @param observedActions
-     * @return
      */
     public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> observedActions) {
         for (IPlayerDecorator decorator : decorators) {
             observedActions = decorator.actionFilter(gameState, observedActions);
         }
-        AbstractAction action;
-        switch (observedActions.size()) {
-            case 0:
-                throw new AssertionError("No actions available for player " + this);
-            case 1:
-                action = observedActions.get(0);
-                break;
-            default:
+        AbstractAction action = switch (observedActions.size()) {
+            case 0 -> throw new AssertionError("No actions available for player " + this);
+            case 1 -> observedActions.get(0);
+            default -> {
                 // we then use our Random for any random choices
                 gameState.rnd = this.rnd;
-                action = _getAction(gameState, observedActions);
-        }
+                yield _getAction(gameState, observedActions);
+            }
+        };
         for (IPlayerDecorator decorator : decorators) {
             decorator.recordDecision(gameState, action);
         }
@@ -93,10 +86,9 @@ public abstract class AbstractPlayer {
         // TODO: We currently have no way of specifying a Decorator to only apply
         // TODO: to the 'top-level' of getAction(), without also being used in the search algorithm.
         // This could be useful if we want to take random actions at the top level (but not in search)
-        if (decorators.isEmpty()) {
-            this.forwardModel = model;
-        } else {
-            this.forwardModel = new DecoratedForwardModel(model, new ArrayList<>(decorators), playerID);
+        this.forwardModel = model;
+        for (IPlayerDecorator decorator : decorators) {
+            model.addPlayerDecorator(decorator);
         }
     }
     /**

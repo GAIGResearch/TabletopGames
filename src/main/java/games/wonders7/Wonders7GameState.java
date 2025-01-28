@@ -12,11 +12,13 @@ import games.wonders7.cards.Wonder7Board;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static games.wonders7.Wonders7Constants.Resource.*;
+import static games.wonders7.cards.Wonder7Card.CardType.*;
 
 public class Wonders7GameState extends AbstractGameState {
 
     int currentAge; // int from 1,2,3 of current age
-    List<HashMap<Wonders7Constants.Resource, Integer>> playerResources; // Each player's full resource counts
+    List<EnumMap<Wonders7Constants.Resource, Integer>> playerResources; // Each player's full resource counts
     List<Deck<Wonder7Card>> playerHands; // Player Hands
     List<Deck<Wonder7Card>> playedCards; // Player used cards
     Deck<Wonder7Card> ageDeck; // The 'draw deck' for the Age
@@ -35,7 +37,7 @@ public class Wonders7GameState extends AbstractGameState {
         // Each player starts off with no resources
         playerResources = new ArrayList<>(); // New arraylist , containing different hashmaps for each player
         for (int i = 0; i < getNPlayers(); i++) {
-            playerResources.add(new HashMap<>());
+            playerResources.add(new EnumMap<>(Wonders7Constants.Resource.class)); // Adds a new hashmap for each player
         }
     }
 
@@ -80,8 +82,8 @@ public class Wonders7GameState extends AbstractGameState {
                 copy.turnActions[i] = turnActions[i].copy();
         }
 
-        for (HashMap<Wonders7Constants.Resource, Integer> map : playerResources) {
-            copy.playerResources.add(new HashMap<>(map));
+        for (Map<Wonders7Constants.Resource, Integer> map : playerResources) {
+            copy.playerResources.add(new EnumMap<>(map));
         }
         for (Deck<Wonder7Card> deck : playerHands) {
             copy.playerHands.add(deck.copy());
@@ -97,21 +99,26 @@ public class Wonders7GameState extends AbstractGameState {
         copy.currentAge = currentAge;
         copy.direction = direction;
         copy.wonderBoardDeck = wonderBoardDeck.copy();
-        copy.cardRnd = new Random(redeterminisationRnd.nextInt());
+        copy.cardRnd = new Random(redeterminisationRnd.nextLong());
 
-        // TODO: This does not keep the known information!!!
         if (getCoreGameParameters().partialObservable && playerId != -1) {
-            // Player does not know the other players hands and discard pile (except for next players hand)
-            // All the cards of other players and discard pile are shuffled
+            // Seven Wonders does not use PartialObservableDecks
+            // However a player knows the cards in the hands of players now holding hands that the player used to have
+            // (there is one exception to this, in that any card used to build a wonder from the hand of cards is not known)
+            // (we ignore this exception for now; as this is a small effect compared to know cards other players mostly have)
+
+
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    copy.ageDeck.add(copy.playerHands.get(i)); // Groups other players cards (except for next players hand) into the ageDeck (along with any cards that were not in the game at that age)
+                if (!isHandKnownTo(playerId, i)) {
+                    copy.ageDeck.add(copy.playerHands.get(i));
+                    // Groups other players cards (except for next players hand) into the ageDeck
+                    // (along with any cards that were not in the game at that age)
                 }
             }
             copy.ageDeck.add(copy.discardPile); // Groups the discard pile into the ageDeck
             copy.ageDeck.shuffle(redeterminisationRnd); // Shuffle all the cards
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
+                if (!isHandKnownTo(playerId, i)) {
                     Deck<Wonder7Card> hand = copy.playerHands.get(i);
                     int nCards = hand.getSize();
                     hand.clear();  // Empties the accurate player hands, except for the next players hand
@@ -134,6 +141,30 @@ public class Wonders7GameState extends AbstractGameState {
         return copy;
     }
 
+    /**
+     * we do know the contents of the hands of players up to T to our left or right, where T
+     * is the number of cards we have played.
+     *
+     * @param playerId   - id of player whose vision we're checking
+     * @param opponentId - id of opponent owning the hand of cards we're checking vision of
+     * @return - true if player has seen the opponent's hand of cards, false otherwise
+     */
+    public boolean isHandKnownTo(int playerId, int opponentId) {
+        if (playerId == opponentId) return true;  // always know your own hand
+        Wonders7GameParameters params = (Wonders7GameParameters) gameParameters;
+        // a player knows a number of other hands equal to the number of cards they have played
+        int handsKnown = params.nWonderCardsPerPlayer - playerHands.get(playerId).getSize();
+
+        // 'Left' means we pass to lower numbered players, 'Right' means we pass to higher numbered players
+        int opponentSpacesToLeft = (playerId - opponentId + getNPlayers()) % getNPlayers();
+        int opponentSpacesToRight = (opponentId - playerId + getNPlayers()) % getNPlayers();
+
+        if (direction == 1) {  // this passes to lower numbered players
+            return handsKnown >= opponentSpacesToLeft;
+        } else  // this passes to higher numbered players
+            return handsKnown >= opponentSpacesToRight;
+    }
+
     @Override
     public double _getHeuristicScore(int playerId) {
         // Implement a rough-and-ready heuristic (or a very sophisticated one)
@@ -144,44 +175,70 @@ public class Wonders7GameState extends AbstractGameState {
         return new Wonders7Heuristic().evaluateState(this, playerId);
     }
 
+    protected void updateEndOfAgeMilitaryVPs() {
+        for (int player = 0; player < nPlayers; player++) {
+            int nextplayer = (player + 1) % getNPlayers();
+            if (playerResources.get(player).get(Shield) > playerResources.get(nextplayer).get(Shield)) {
+                // IF PLAYER WINS
+                playerResources.get(player).put(Victory, playerResources.get(player).get(Victory) + (2 * currentAge - 1)); // 2N-1 POINTS FOR PLAYER i
+                playerResources.get(nextplayer).put(Victory, playerResources.get(nextplayer).get(Victory) - 1); // -1 FOR THE PLAYER i+1
+            } else if (playerResources.get(player).get(Shield) < playerResources.get(nextplayer).get(Shield)) { // IF PLAYER i+1 WINS
+                playerResources.get(player).put(Victory, playerResources.get(player).get(Victory) - 1);// -1 POINT FOR THE PLAYER i
+                playerResources.get(nextplayer).put(Victory, playerResources.get(nextplayer).get(Victory) + (2 * currentAge - 1));// 2N-1 POINTS FOR PLAYER i+1
+            }
+        }
+    }
+
     @Override
     public double getGameScore(int playerId) {
         // return the players score for the current game state.
-        // This may not apply for all games
-        List<HashMap<Wonders7Constants.Resource, Integer>> playerResourcesCopy = new ArrayList<>();
-        for (HashMap<Wonders7Constants.Resource, Integer> map : playerResources) {
-            playerResourcesCopy.add(new HashMap<>(map));
-        }
-        // Evaluate military conflicts
-        int nextplayer = (playerId + 1) % getNPlayers();
-        if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)) { // IF PLAYER i WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory) + (2 * currentAge - 1)); // 2N-1 POINTS FOR PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory) - 1); // -1 FOR THE PLAYER i+1
-        } else if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)) { // IF PLAYER i+1 WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory) - 1);// -1 POINT FOR THE PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory, playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory) + (2 * currentAge - 1));// 2N-1 POINTS FOR PLAYER i+1
-        }
-
-        int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
+        // this just looks at current VP (including science based on evaluation now)
+        int vp = playerResources.get(playerId).get(Victory);
         // Treasury
-        vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
+        vp += playerResources.get(playerId).get(Wonders7Constants.Resource.Coin) / 3;
         // Scientific
-        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog), 2);
-        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass), 2);
-        vp += (int) Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet), 2);
-        // Sets of different science symbols
-        vp += 7 * Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog), playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass)), playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet));
+        vp += getSciencePoints(playerId);
 
-        playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, vp);
-        return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
+        // then consider the endgame effects of cards
+        for (Wonder7Card card : playedCards.get(playerId)) {
+            vp += card.endGameVP(this, playerId);
+        }
+        return vp;
     }
 
+    public int getSciencePoints(int player) {
+        int wild = playerResources.get(player).get(ScienceWild);
+        int cog = playerResources.get(player).get(Cog);
+        int compass = playerResources.get(player).get(Compass);
+        int tablet = playerResources.get(player).get(Tablet);
 
-    public int cardsOfType(Wonder7Card.Type type) {
-        Deck<Wonder7Card> allCards;
-        allCards = new Deck<>("temp", VISIBLE_TO_ALL);
-        for (int i = 0; i < getNPlayers(); i++) allCards.add(getPlayedCards(i));
-        return (int) allCards.stream().filter(c -> c.getCardType() == type).count();
+        return sciencePoints(cog, compass, tablet, wild);
+    }
+
+    private int sciencePoints(int cog, int compass, int tablet, int wild) {
+        if (wild == 0)
+            return cog * cog + compass * compass + tablet * tablet + 7 * Math.min(Math.min(cog, compass), tablet);
+
+        // otherwise we recursively consider all possible allocations of the wild
+        int maxPoints = 0;
+        for (int i = 0; i <= 3; i++) {
+            int points = sciencePoints(
+                    cog + (i == 0 ? 1 : 0),
+                    compass + (i == 1 ? 1 : 0),
+                    tablet + (i == 2 ? 1 : 0),
+                    wild - 1);
+            if (points > maxPoints)
+                maxPoints = points;
+        }
+        return maxPoints;
+    }
+
+    public int cardsOfType(Wonder7Card.Type type, int player) {
+        return (int) playedCards.get(player).getComponents().stream().filter(c -> c.type == type).count();
+    }
+
+    public Wonders7GameParameters getParams() {
+        return (Wonders7GameParameters) gameParameters;
     }
 
     public int getCurrentAge() {
@@ -200,15 +257,16 @@ public class Wonders7GameState extends AbstractGameState {
         return playerHands;
     }
 
-    public Deck<Wonder7Card> getPlayedCards(int index) {
-        return playedCards.get(index);
-    } // Get player 'played' cards
+    // Cards played to the specified player's tableau
+    public Deck<Wonder7Card> getPlayedCards(int playerId) {
+        return playedCards.get(playerId);
+    }
 
     public Deck<Wonder7Card> getDiscardPile() {
         return discardPile;
     }
 
-    public AbstractAction getTurnAction(int index) {
+    AbstractAction getTurnAction(int index) {
         return turnActions[index];
     }
 
@@ -216,23 +274,65 @@ public class Wonders7GameState extends AbstractGameState {
         turnActions[index] = action;
     }
 
-    public Wonder7Board getPlayerWonderBoard(int index) {
-        return playerWonderBoard[index];
+    public Wonder7Board getPlayerWonderBoard(int playerId) {
+        return playerWonderBoard[playerId];
     }
 
-    public void setPlayerWonderBoard(int index, Wonder7Board wonder) {
-        playerWonderBoard[index] = wonder;
+    public void setPlayerWonderBoard(int playerId, Wonder7Board wonder) {
+        playerWonderBoard[playerId] = wonder;
+    }
+
+    public Wonder7Card findCardIn(Deck<Wonder7Card> deck, Wonder7Card.CardType cardType) {
+        Wonder7Card card = null;
+        for (Wonder7Card cardSearch : deck.getComponents()) { // Goes through each card in the deck
+            if (cardType == cardSearch.cardType) { // If cardName is the one searching for (being played)
+                card = cardSearch;
+                break;
+            }
+        }
+
+        if (card == null) {
+            throw new AssertionError("Card not found in deck");
+        }
+        return card;
+    }
+
+    public Wonder7Card findCardInHand(int player, Wonder7Card.CardType cardType) {
+        return findCardIn(playerHands.get(player), cardType);
+    }
+    public Wonder7Card findCardInDiscard(Wonder7Card.CardType cardType) {
+        return findCardIn(discardPile, cardType);
     }
 
 
-    public List<HashMap<Wonders7Constants.Resource, Integer>> getAllPlayerResources() {
-        return playerResources;
-    } // Return all player's resources hashmap
+    // A summary Map of all the resources a player has from their played cards and Wonder Board
+    public Map<Wonders7Constants.Resource, Integer> getPlayerResources(int playerId) {
+        return playerResources.get(playerId);
+    } // Return players resource map
 
-    public HashMap<Wonders7Constants.Resource, Integer> getPlayerResources(int index) {
-        return playerResources.get(index);
-    } // Return players resource hashmap
+    /**
+     * This returns the cost for buyer to acquire resource from seller
+     * This does not check to see if the resource is available, only the cost
+     */
+    public int costOfResource(Wonders7Constants.Resource resource, int buyer, int seller) {
+        // For the moment we'll hardcode the Marketplace and TradingPost functionality here (it is not used elsewhere)
+        // In the future this can be replaced with a more general mechanism
+        if (resource.isRare()) {
+            if (playedCards.get(buyer).stream().anyMatch(c -> c.cardType == Marketplace)) {
+                return getParams().nCostDiscountedResource;
+            }
+        } else if (resource.isBasic()) {
+            if (seller == (buyer - 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardType == EastTradingPost)) {
+                return getParams().nCostDiscountedResource;
+            }
+            if (seller == (buyer + 1 + nPlayers) % nPlayers && playedCards.get(buyer).stream().anyMatch(c -> c.cardType == WestTradingPost)) {
+                return getParams().nCostDiscountedResource;
+            }
+        }
+        return getParams().nCostNeighbourResource;
+    }
 
+    // The number of Resources of the specified type a player has
     public int getResource(int player, Wonders7Constants.Resource resource) {
         return playerResources.get(player).get(resource);
     }
@@ -254,7 +354,7 @@ public class Wonders7GameState extends AbstractGameState {
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), currentAge, playerResources, playerHands, playedCards, ageDeck, discardPile, wonderBoardDeck, direction);
         result = 31 * result + Arrays.hashCode(playerWonderBoard);
-        result = 31 * result + Arrays.hashCode(turnActions);
+        result = 31 * 31 * result + Arrays.hashCode(turnActions);
         return result;
     }
 

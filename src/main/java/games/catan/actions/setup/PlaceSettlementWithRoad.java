@@ -30,10 +30,11 @@ public class PlaceSettlementWithRoad extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BuildSettlement buildSettlement  = new BuildSettlement(x,y,vertex,player,true);
-        BuildRoad buildRoad = new BuildRoad(x,y,edge,player,true);
-        CatanParameters cp = (CatanParameters) gs.getGameParameters();
         CatanGameState cgs = ((CatanGameState)gs);
+        BuildSettlement buildSettlement  = new BuildSettlement(x,y,vertex,player,true);
+        int edgeID = cgs.getBoard()[x][y].getEdgeIDs()[edge];
+        BuildRoad buildRoad = new BuildRoad(x,y,edge,player,true, edgeID);
+        CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
         if (buildSettlement.execute(gs) && buildRoad.execute(gs)){
             // players get the resources in the second round after the settlements they placed

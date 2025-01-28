@@ -29,12 +29,15 @@ public class RandomPlayer extends AbstractPlayer {
     }
 
     @Override
-    public String toString() {
-        return "Random";
+    public RandomPlayer copy() {
+        RandomPlayer retValue = new RandomPlayer(new Random(rnd.nextInt()));
+        retValue.decorators = decorators;
+        retValue.setName(this.toString());
+        return retValue;
     }
 
     @Override
-    public RandomPlayer copy() {
-        return new RandomPlayer(new Random(rnd.nextInt()));
+    public boolean equals(Object obj) {
+        return obj instanceof RandomPlayer;
     }
 }

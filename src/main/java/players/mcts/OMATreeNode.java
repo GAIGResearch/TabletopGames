@@ -40,6 +40,12 @@ public class OMATreeNode extends SingleTreeNode {
     // grandchildren.
     final Map<AbstractAction, Map<AbstractAction, OMAStats>> OMAChildren = new HashMap<>();
 
+
+    @Override
+    public void rootify(SingleTreeNode template, AbstractGameState state) {
+        super.rootify(template, state);
+        this.OMAParent = Optional.empty();
+    }
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
      *
@@ -60,7 +66,7 @@ public class OMATreeNode extends SingleTreeNode {
             int finalPlayer = player;
             List<AbstractAction> selfActionsOnly = root.actionsInTree.stream()
                     .filter(p -> p.a == finalPlayer).map(p -> p.b)
-                    .collect(toList());
+                    .toList();
             List<OMATreeNode> nodes = new ArrayList<>();
             OMATreeNode currentNode = this;
             do {
