@@ -1,5 +1,7 @@
 package games.seasaltpaper;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
@@ -14,7 +16,10 @@ import games.seasaltpaper.cards.*;
 import games.seasaltpaper.SeaSaltPaperGameState.TurnPhase;
 import utilities.Pair;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+import com.google.gson.Gson;
 
 import static core.CoreConstants.*;
 
@@ -41,6 +46,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         sspgs.protectedHands = new boolean[sspgs.getNPlayers()];
         //sspgs.playerCurrentDuoPoints = new int[sspgs.getNPlayers()];
         // Set up first round
+//        SeaSaltPaperGameState.GameCount++;
         setupRound(sspgs);
     }
 
@@ -240,8 +246,25 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
             int nextPlayer = (sspgs.getCurrentPlayer() + 1) % sspgs.getNPlayers();
             endPlayerTurn(sspgs, nextPlayer);
             sspgs.currentPhase = sspgs.currentPhase.next();
+            if (sspgs.saveState)
+            {
+                gameStateToJson(sspgs);
+            }
         }
+    }
 
+    private void gameStateToJson(SeaSaltPaperGameState gs) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//        Gson gson = new Gson();
+        SeaSaltPaperParameters params = (SeaSaltPaperParameters) gs.getGameParameters();
+        SSPGameStateContainer gsContainer = new SSPGameStateContainer(gs);
+        String fileName = "ssp-" + gs.getGameID() + "-" + gs.getRoundCounter() + "-" + gs.getTurnCounter() + ".json";
+        String fileDir = params.dataPath + "/gameStateTest/";
+        try (FileWriter f = new FileWriter(fileDir + fileName)) {
+            gson.toJson(gsContainer, f);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

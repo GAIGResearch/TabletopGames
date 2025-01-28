@@ -19,6 +19,11 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     public static final int DISCARD_PILE_COUNT = 2; // TODO move this to parameter?
 
+//    public static int GameCount = 0;
+//
+//    public final int gameID;
+    public transient boolean saveState = false;
+
     public enum TurnPhase {
         START,
         DRAW,
@@ -57,9 +62,17 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     //final int winScore;
 
-    public SeaSaltPaperGameState(AbstractParameters gameParameters, int nPlayers) { super(gameParameters, nPlayers); }
+    public SeaSaltPaperGameState(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
+//        gameID = SeaSaltPaperGameState.GameCount;
+    }
 
-    @Override
+//    private SeaSaltPaperGameState(AbstractParameters gameParameters, int nPlayers, int gameID) {
+//        super(gameParameters, nPlayers);
+//        this.gameID = gameID;
+//    }
+
+        @Override
     protected GameType _getGameType() { return GameType.SeaSaltPaper; }
 
     @Override
@@ -77,6 +90,9 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     protected AbstractGameState _copy(int playerId) {
         SeaSaltPaperGameState gsCopy = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) gameParameters;
+
+//        gsCopy.saveState = playerId < 0 && saveState; // Copy saveState if playerId < 0, else false
+        gsCopy.saveState = false;
 
         gsCopy.drawPile = drawPile.copy();
         gsCopy.discardPile1 = discardPile1.copy();
@@ -151,9 +167,9 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-//        return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
+        return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
 //        return HandManager.calculatePoint(this, playerId);
-        return getLeadHeuristicScore(playerId);
+//        return getLeadHeuristicScore(playerId);
     }
 
     private double _tempHeuristicScore(int playerId) {
