@@ -161,6 +161,7 @@ public class MultiAttack extends RangedAttack {
         for (int defendingFigure : defendingFigures)
         {
             Figure target = (Figure) dgs.getComponentById(defendingFigure);
+            if (target == null) return false;
             if(!inRange(f.getPosition(), target.getPosition(), MAX_RANGE)) return false;
             if(!hasLineOfSight(dgs, f.getPosition(), target.getPosition())) return false;
         }
