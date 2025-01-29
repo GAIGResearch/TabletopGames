@@ -84,7 +84,7 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(jain, reduce);
+        return Objects.hash(super.hashCode(), jain, reduce);
     }
 
     @Override

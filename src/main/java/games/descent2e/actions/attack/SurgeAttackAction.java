@@ -85,6 +85,6 @@ public class SurgeAttackAction extends DescentAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(figureSource, surge.ordinal()) - 492209;
+        return Objects.hash(super.hashCode(), figureSource, surge.ordinal()) - 492209;
     }
 }

@@ -57,7 +57,7 @@ public class RemoveCondition extends DescentAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(f, condition);
+        return Objects.hash(super.hashCode(), f, condition);
     }
 
     @Override

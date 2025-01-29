@@ -203,7 +203,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
 
     @Override
     public int hashCode() {
-        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure,
+        return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure,
                 defendingPlayer, phase.ordinal(), interruptPlayer);
     }
 

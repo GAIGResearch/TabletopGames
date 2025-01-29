@@ -77,7 +77,7 @@ public class TombleCopyDefence extends DescentAction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(tomble, ally);
+        return Objects.hash(super.hashCode(), tomble, ally);
     }
 
     @Override

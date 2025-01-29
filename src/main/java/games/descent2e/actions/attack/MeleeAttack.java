@@ -448,7 +448,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, pierce,
+        return Objects.hash(super.hashCode(), attackingFigure, attackingPlayer, defendingFigure, pierce,
                 extraRange, isDiseasing, isImmobilizing, isPoisoning, isStunning, extraDamage, extraDefence, mending, fatigueHeal,
                 surgesUsed, defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend, damage, range, skip, reduced, result);
     }
