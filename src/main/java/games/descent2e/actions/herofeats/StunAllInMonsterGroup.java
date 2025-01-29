@@ -79,14 +79,14 @@ public class StunAllInMonsterGroup extends DescentAction {
     public boolean equals(Object obj) {
         if (obj instanceof StunAllInMonsterGroup) {
             StunAllInMonsterGroup other = (StunAllInMonsterGroup) obj;
-            return other.monsters == monsters && other.monsterName == monsterName && other.range == range;
+            return monsters.equals(other.monsters) && monsterName.equals(monsterName) && other.range == range;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(monsters, monsterName, range);
+        return Objects.hash(super.hashCode(), monsters, monsterName, range);
     }
 
     @Override
