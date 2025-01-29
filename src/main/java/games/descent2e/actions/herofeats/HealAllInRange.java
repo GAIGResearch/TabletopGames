@@ -15,7 +15,6 @@ import java.util.Objects;
 
 public class HealAllInRange extends DescentAction {
 
-    // TODO: Allow customised ranges
     int range;
     int healthRecovered = 0;
     int heroesHealed = 0;
