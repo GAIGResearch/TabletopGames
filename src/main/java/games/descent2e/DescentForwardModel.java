@@ -318,13 +318,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // Turn ends for figure if they executed the number of actions available and have no more actions available,
         List<AbstractAction> actions = _computeAvailableActions(dgs);
         actions.remove(new EndTurn());
-        Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum() && actions.isEmpty();
+        boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum() && actions.isEmpty();
 
         // have no more movement points available,
-        Boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
+        boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
 
         // and, for Heroes only, cannot spend any more Fatigue for movement points
-        Boolean noMoreFatigueMovement = true;
+        boolean noMoreFatigueMovement = true;
         if (actingFigure instanceof Hero) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 noMoreFatigueMovement = false;
