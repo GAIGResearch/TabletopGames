@@ -12,6 +12,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static core.CoreConstants.colorHash;
 import static core.CoreConstants.playerHandHash;
 import static games.tickettoride.TicketToRideConstants.*;
 
@@ -174,13 +175,23 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         actions.add(new DrawTrainCards(playerId));
         actions.add(new DrawDestinationTicketCards(playerId));
 
-        List<Edge> routesAvailableToBuy = checkRoutesAvailable(gameState);
-        if (routesAvailableToBuy.size() >= 1) {
-            Property trainCardsRequiredProp = routesAvailableToBuy.get(0).getProperty(trainCardsRequiredHashKey);
-            Property colorProp = routesAvailableToBuy.get(0).getProperty(colorHashKey);
+        HashMap<Edge, Integer> routesAvailableToBuy = (HashMap<Edge, Integer>) checkRoutesAvailable(gameState); //key of edges, index of which color to buy
+        if (!routesAvailableToBuy.isEmpty()) {
+            Edge currentEdge = routesAvailableToBuy.keySet().iterator().next();
+
+            Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
             int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
-            String colorOfRoute = ((PropertyString) colorProp).value;
-            actions.add(new ClaimRoute(routesAvailableToBuy.get(0),playerId, colorOfRoute, trainCardsRequired));
+
+            int indexOfColor = routesAvailableToBuy.get(currentEdge);
+            Property colorProp = currentEdge.getProperty(colorHashKey);
+
+            String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
+
+            String colorOfRoute = colorsOfRoute[indexOfColor];
+            System.out.println(colorOfRoute + " is the colors");
+
+
+            actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexOfColor));
         }
 
         return actions;
@@ -220,9 +231,9 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
     }
 
-    List<Edge> checkRoutesAvailable(AbstractGameState gameState) {
+    HashMap<Edge, Integer> checkRoutesAvailable(AbstractGameState gameState) {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
-        List<Edge> routesAvailableToBuy = new ArrayList<>();
+        HashMap<Edge, Integer>  routesAvailableToBuy = new HashMap<Edge, Integer>();
 
         Area gameArea = tg.getArea(-1);
         GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
@@ -252,9 +263,9 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 if (routeClaimed) {
                     System.out.println("This route is already claimed.");
                 } else {
-                    boolean canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
-                    if (canAffordRoute){
-                        routesAvailableToBuy.add(edge);
+                    int canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
+                    if (canAffordRoute != -1){
+                        routesAvailableToBuy.put(edge, canAffordRoute);
                     }
                 }
             }
@@ -298,37 +309,48 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         return routesAvailableToBuy;
     }
-
-    boolean checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
+    //return the index of color (in edges array) that they can afford. If can't afford any, return -1
+    int checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
-        int trainCardsRequiredHashKey = Hash.GetInstance().hash("trainCardsRequired");
-        int colorHashKey = Hash.GetInstance().hash("color");
+
+
+        Property colorProp = edge.getProperty(colorHash);
+
+
         Area gameArea = tg.getArea(-1);
 
 
-        Property trainCardsRequiredProp = edge.getProperty(trainCardsRequiredHashKey);
-        Property colorProp = edge.getProperty(colorHashKey);
+        Property trainCardsRequiredProp = edge.getProperty(trainCardsRequiredHash);
+
+
         if (trainCardsRequiredProp instanceof PropertyInt) {
+
             int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
             int playerID = tg.getCurrentPlayer();
             Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tg.getComponentActingPlayer(playerID,playerHandHash);
 
+            System.out.println("In check can afford, needs # of train cards"  + trainCardsRequired );
+
             Map<String, Integer>  playerTrainCards = this.getTrainCarAmounts(playerTrainCardHandDeck);
-            if (colorProp instanceof PropertyString) {
-                String colorOfRoute = ((PropertyString) colorProp).value;
-                int numberOfRequiredColor = playerTrainCards.getOrDefault(colorOfRoute, 0);
-                System.out.println("Train Cards Required: " + trainCardsRequired);
-                System.out.println("Player has Train Cards: " + numberOfRequiredColor);
-                if (numberOfRequiredColor >= trainCardsRequired) {
-                    System.out.println("Player ID " + playerID + " can buy this route");
-                    return true;
-                } else {
-                    System.out.println("Player ID " + playerID + " cant buy this route");
-                    return false;
+            if (colorProp instanceof PropertyStringArray) {
+                String[] colorsOfRoute = (((PropertyStringArray) colorProp).getValues());
+                System.out.println("colors of route: "  + colorsOfRoute );
+                System.out.println("color of route: "  + colorsOfRoute[0] );
+                for (int i = 0; i < colorsOfRoute.length; i++){
+                    int numberOfRequiredColor = playerTrainCards.getOrDefault(colorsOfRoute[i], 0);
+                    System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
+                    System.out.println("Player has Train Cards: " + numberOfRequiredColor);
+                    if (numberOfRequiredColor >= trainCardsRequired) {
+                        System.out.println("Player ID " + playerID + " can buy this route");
+                        return i;
+                    } else {
+                        System.out.println("Player ID " + playerID + " cant buy this route");
+                    }
                 }
+
             }
         }
-        return  false;
+        return -1;
     }
 
     Map<String, Integer> getTrainCarAmounts(Deck trainCards){
@@ -404,9 +426,25 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
             boolean routeClaimed = ((PropertyBoolean)(currentEdge.getProperty(routeClaimedHash))).value;
             //System.out.println(routeClaimed +" route claimed in getsearch");
-            int claimedBy =  ((PropertyInt)(currentEdge.getProperty(claimedByHash))).value;
 
-            if (routeClaimed && claimedBy == playerId) {
+            PropertyInt claimedByRoute1Prop =  (PropertyInt)(currentEdge.getProperty(claimedByPlayerRoute1Hash));
+            PropertyInt claimedByRoute2Prop =  (PropertyInt)(currentEdge.getProperty(claimedByPlayerRoute2Hash));
+
+
+            // some edges have 2 different routes (colors), so either can be null
+            int claimedByRoute1 = -1;
+            int claimedByRoute2 = -1;
+
+            if (claimedByRoute1Prop != null) {
+                claimedByRoute1 = claimedByRoute1Prop.value;
+            }
+
+            if (claimedByRoute2Prop != null) {
+                claimedByRoute2 = claimedByRoute2Prop.value;
+            }
+
+
+            if ((routeClaimed && claimedByRoute1 == playerId) || (routeClaimed && claimedByRoute2 == playerId))  {
 
                 Property nodeProp = currentEdge.getProperty(nodesHash);
                 String[] nodes = ((PropertyStringArray) nodeProp).getValues();
@@ -441,6 +479,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         locationsVisited.add(currentLocation);
 
+        //Go through the adjacent locations of current location
         List<String> adjacentLocations = searchGraph.getOrDefault(currentLocation, new ArrayList<>());
         for (String currentAdjacentLocation : adjacentLocations) {
             if (graphSearch(searchGraph, currentAdjacentLocation, target, locationsVisited)) {

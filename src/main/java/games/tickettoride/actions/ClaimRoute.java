@@ -42,14 +42,16 @@ public class ClaimRoute extends AbstractAction {
     public final int playerID;
     public final String colorOfRoute;
     public final int costOfRoute;
+    public final int indexOfColor;
 
 
 
-    public ClaimRoute(Edge edge, int playerID, String colorOfRoute, int costOfRoute) {
+    public ClaimRoute(Edge edge, int playerID, String colorOfRoute, int costOfRoute, int indexOfColor) {
         this.edge = edge;
         this.playerID = playerID;
         this.colorOfRoute = colorOfRoute;
         this.costOfRoute = costOfRoute;
+        this.indexOfColor = indexOfColor;
 
     }
     /**
@@ -85,8 +87,14 @@ public class ClaimRoute extends AbstractAction {
         Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
         edge.setProperty(routeClaimedProp);
 
-        Property claimedByPlayerProp = new PropertyInt("claimedByPlayer", (Integer) playerID);
-        edge.setProperty(claimedByPlayerProp);
+        //Needed to differentiate which route they used (if theres 2 diff colours on same route)
+        if (indexOfColor == 0){
+            Property claimedByPlayerProp = new PropertyInt("claimedByPlayerRoute1", (Integer) playerID);
+            edge.setProperty(claimedByPlayerProp);
+        } else if (indexOfColor == 1) {
+            Property claimedByPlayerProp = new PropertyInt("claimedByPlayerRoute2", (Integer) playerID);
+            edge.setProperty(claimedByPlayerProp);
+        }
 
 
         System.out.println(tgs.getGameScore(playerID) + " points before");

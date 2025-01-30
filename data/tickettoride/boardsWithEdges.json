@@ -38,31 +38,34 @@
     "edges": [
       {
         "nodes": ["String[]", ["LOS ANGELES", "SAN FRANCISCO"]],
-        "color": ["String", "Red"],
+        "color": ["String[]", ["Red", "Green"]],
         "trainCardsRequired": ["Integer", 3],
-        "claimedByPlayer": ["Integer", -1],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
 
       },
       {
         "nodes": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
-        "color": ["String", "Green"],
+        "color": ["String[]", ["Blue", "Green"]],
         "trainCardsRequired": ["Integer", 4],
-        "claimedByPlayer": ["Integer", -1],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
         "nodes": ["String[]", ["SAN FRANCISCO", "SALT LAKE CITY"]],
-        "color": ["String", "Blue"],
+        "color": ["String[]", ["Blue", "Red"]],
         "trainCardsRequired": ["Integer", 1],
-        "claimedByPlayer": ["Integer", -1],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
         "nodes": ["String[]", ["HELENA", "SALT LAKE CITY"]],
-        "color": ["String", "Blue"],
+        "color": ["String[]", ["Blue"]],
         "trainCardsRequired": ["Integer", 2],
-        "claimedByPlayer": ["Integer", -1],
+        "claimedByPlayerRoute1": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       }
     ]
