@@ -27,6 +27,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
     int[] drawnCardsId;
     Step currentStep = Step.DRAW;
 
+
     public DrawAndDiscard(int playerId)
     {
         this.playerId = playerId;
@@ -134,6 +135,8 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Draw 2 from the DrawPile then discard 1 to one of the discard pile.";
+        SeaSaltPaperParameters params = (SeaSaltPaperParameters) gameState.getGameParameters();
+        int n = params.numberOfCardsDrawn;
+        return "Draw " + n + " from the DrawPile then discard 1 to one of the discard pile.";
     }
 }

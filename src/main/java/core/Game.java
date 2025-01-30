@@ -16,6 +16,8 @@ import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSEnums;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.mcts.MCTSPlayer;
 import players.rhea.RHEAPlayer;
@@ -844,10 +846,20 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new HumanGUIPlayer(ac));
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+
+        MCTSParams params = new MCTSParams();
+//        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
+        params.maxTreeDepth = 10;
+//        params.reuseTree = true;
+//        params.normaliseRewards = false;
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;
@@ -875,7 +887,7 @@ public class Game {
 
         /* Run multiple games */
         long t = System.currentTimeMillis();
-        int n = 1000;
+        int n = 100;
         ArrayList<GameType> games = new ArrayList<>();
         games.add(GameType.SeaSaltPaper);
         runMany(games, players, 100L, n, false, true, null, turnPause);

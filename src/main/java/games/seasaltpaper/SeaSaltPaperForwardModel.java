@@ -132,10 +132,18 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         // Victory condition reached, end the game
         if (max >= param.victoryCondition[gs.getNPlayers() - 2]) {
             endGame(gs); // TODO implement 4 Mermaid insta win
+            if (gs.saveState)
+            {
+                gameStateToJson(gs);
+            }
         }
         else {
             int nextPlayer = (gs.getCurrentPlayer() + 1) % gs.getNPlayers();
             endRound(gs, nextPlayer);
+            if (gs.saveState)
+            {
+                gameStateToJson(gs);
+            }
             setupRound(gs);
         }
     }
@@ -246,7 +254,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
             int nextPlayer = (sspgs.getCurrentPlayer() + 1) % sspgs.getNPlayers();
             endPlayerTurn(sspgs, nextPlayer);
             sspgs.currentPhase = sspgs.currentPhase.next();
-            if (sspgs.saveState)
+            if (sspgs.saveState && (sspgs.getTurnCounter() % sspgs.saveCycle == 0))
             {
                 gameStateToJson(sspgs);
             }
@@ -259,7 +267,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) gs.getGameParameters();
         SSPGameStateContainer gsContainer = new SSPGameStateContainer(gs);
         String fileName = "ssp-" + gs.getGameID() + "-" + gs.getRoundCounter() + "-" + gs.getTurnCounter() + ".json";
-        String fileDir = params.dataPath + "/gameStateTest/";
+        String fileDir = params.dataPath + "/gameStates/";
         try (FileWriter f = new FileWriter(fileDir + fileName)) {
             gson.toJson(gsContainer, f);
         } catch (IOException e) {

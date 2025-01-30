@@ -72,6 +72,10 @@ public class DrawMultiple extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Draw " + drawnCardsId.length + " cards from draw pile.";
+        StringBuilder cardsStr = new StringBuilder();
+        for (int id : drawnCardsId) {
+            cardsStr.append(gameState.getComponentById(id).toString()).append(" ");
+        }
+        return "Draw " + cardsStr + " cards from draw pile.";
     }
 }

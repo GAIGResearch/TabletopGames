@@ -22,7 +22,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 //    public static int GameCount = 0;
 //
 //    public final int gameID;
-    public transient boolean saveState = false;
+    public transient boolean saveState = true;
+    public transient int saveCycle = 4;
 
     public enum TurnPhase {
         START,
@@ -91,8 +92,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
         SeaSaltPaperGameState gsCopy = new SeaSaltPaperGameState(gameParameters.copy(), getNPlayers());
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) gameParameters;
 
-//        gsCopy.saveState = playerId < 0 && saveState; // Copy saveState if playerId < 0, else false
-        gsCopy.saveState = false;
+        gsCopy.saveState = playerId < 0 && saveState; // Copy saveState if playerId < 0, else false
+//        gsCopy.saveState = false;
 
         gsCopy.drawPile = drawPile.copy();
         gsCopy.discardPile1 = discardPile1.copy();
