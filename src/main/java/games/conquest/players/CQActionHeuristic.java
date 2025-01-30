@@ -19,13 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 public class CQActionHeuristic implements IActionHeuristic {
-    // TODO: Implement RandomSearch, based on with or without actionHeuristic
-    // -> which depth
-    // -> depth in terms of moves vs full turns
-    // -> budget total
-    // -> action heuristic
-    // TODO: Keep track of budget for MCTSPlayer
-
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         CQGameState cqgs = (CQGameState) state;

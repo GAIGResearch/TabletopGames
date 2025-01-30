@@ -33,6 +33,7 @@ public class CQTreeNode {
     private int fmCallsCount;
     int depth;
     private AbstractGameState state;
+    public int totalBudgetUsed = 0;
 
     // for root node: save a list of all states and their nodes
 //    Map<AbstractGameState, CQTreeNode> stateNodeMap = null;
@@ -128,6 +129,7 @@ public class CQTreeNode {
                 }
             }
         }
+        root.totalBudgetUsed += budget;
     }
 
     void mctsSearch() {
@@ -192,6 +194,8 @@ public class CQTreeNode {
                 if (params.budgetType == BUDGET_TIME) {
                     elapsedTimer.reset();
                     elapsedTimer.setMaxTimeMillis(params.budget);
+                    // Since this uses a timer, we need to keep track of the budget increases as we increase it
+                    root.totalBudgetUsed += budget;
                 } else {
                     budget += params.budget;
                 }
@@ -199,6 +203,8 @@ public class CQTreeNode {
 //                System.out.println("Increased budget to " + budget);
             }
         }
+        // After the full run, keep track of the total budget used, in case that's needed
+        root.totalBudgetUsed += budget;
     }
 
     /**

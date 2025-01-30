@@ -214,6 +214,9 @@ public class CQGameState extends AbstractGameState {
      * @return the full list of actions available at the current point in the game.
      */
     public List<AbstractAction> getAvailableActions() {
+        if (turnCounter % 2 != getCurrentPlayer()) {
+            System.out.println("Not supposed to be my turn...");
+        }
         int uid = getCurrentPlayer();
         CQGamePhase phase = (CQGamePhase) getGamePhase();
         List<AbstractAction> actions = new ArrayList<>();
@@ -244,6 +247,10 @@ public class CQGameState extends AbstractGameState {
             }
         }
         if (phase.equals(CQGamePhase.SelectionPhase)) {
+            for (Troop troop : getTroops(getCurrentPlayer())) {
+                if (troop.hasMoved() && !troop.hasCommand(CommandType.Chastise))
+                    System.out.println("Troop was not stepped correctly, somehow...");
+            }
             for (Troop t : getTroops(uid)) {
                 SelectTroop sel = new SelectTroop(uid, t.getLocation(), hash);
                 if (canPerformAction(sel, false))

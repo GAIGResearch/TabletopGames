@@ -2,15 +2,18 @@
   "class": "players.mcts.MCTSParams",
   "maxTreeDepth": 1,
   "rolloutLength": 8,
+  "rolloutIncrementType": "TURN",
   "rolloutTermination": "END_TURN",
   "treePolicy": "Uniform",
-  "actionHeuristic": "games.conquest.players.CQRandomSearchHeuristic",
+  "actionHeuristic": {
+    "class": "games.conquest.players.CQRandomSearchHeuristic"
+  },
   "rolloutPolicyParams": {
     "class": "players.simple.BoltzmannActionParams",
     "actionHeuristic": {
       "class": "games.conquest.players.CQRandomSearchHeuristic"
     }
   },
-  "budget": 5000,
-  "budgetType": "BUDGET_TIME"
+  "budget": 10000,
+  "budgetType": "BUDGET_FM_CALLS"
 }

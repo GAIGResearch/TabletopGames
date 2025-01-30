@@ -832,9 +832,9 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-//        players.add(PlayerFactory.createPlayers("json/players/gameSpecific/Conquest_fullturn.json").get(0));
+        players.add(PlayerFactory.createPlayers("json/players/gameSpecific/Conquest_fullturn.json").get(0));
         players.add(PlayerFactory.createPlayers("json/players/gameSpecific/Conquest_RandomSearch.json").get(0));
-        players.add(PlayerFactory.createPlayers("json/players/gameSpecific/Conquest_RandomSearch.json").get(0));
+//        players.add(PlayerFactory.createPlayers("json/players/gameSpecific/Conquest_RandomSearch.json").get(0));
 //        players.add(new MCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new HumanGUIPlayer(ac));

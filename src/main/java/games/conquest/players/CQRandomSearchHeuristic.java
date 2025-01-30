@@ -13,12 +13,6 @@ import games.conquest.components.CommandType;
 import java.util.List;
 
 public class CQRandomSearchHeuristic implements IActionHeuristic {
-    // TODO: Implement RandomSearch, based on with or without actionHeuristic
-    // -> which depth
-    // -> depth in terms of moves vs full turns
-    // -> budget total
-    // -> action heuristic
-
     @Override
     public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         CQGameState cqgs = (CQGameState) state;
