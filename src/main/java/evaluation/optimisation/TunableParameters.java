@@ -219,6 +219,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         currentValues.put(name, defaultValue);
     }
 
+
     public <T> void addTunableParameter(String name, Class<? extends T> parameterClass, T defaultValue, List<T> allSettings) {
         if (!parameterNames.contains(name)) parameterNames.add(name);
         defaultValues.put(name, defaultValue);
@@ -226,6 +227,11 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         possibleValues.put(name, new ArrayList<>(allSettings));
         currentValues.put(name, defaultValue);
     }
+
+    public <T> void addTunableParameter(String name, Class<? extends T> parameterClass, T defaultValue) {
+        addTunableParameter(name, parameterClass, defaultValue, Collections.singletonList(defaultValue));
+    }
+
 
 
     public <T> void addTunableParameter(String name, Class<T> classType) {

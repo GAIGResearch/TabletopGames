@@ -168,6 +168,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
                 // We then initialise the ITPSearchSpace with this ITP and the JSON details
                 searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new AssertionError(e.getClass() + " : " + e.getMessage() + "\nError loading ITunableParameters class in " + searchSpaceFile);
             }
         }

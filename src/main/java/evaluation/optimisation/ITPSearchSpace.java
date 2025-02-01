@@ -18,7 +18,12 @@ import static java.util.stream.Collectors.toMap;
  * This is a wrapper around ITunableParameters<T> (the TAG standard) to implement the AgentSearchSpace
  * interface used by the NTBEA library.
  */
+
+
 public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
+
+    record ParameterSettings(String name, Class<?> clazz, List<Object> values) {
+    }
 
     static boolean debug = false;
     ITunableParameters<T> itp;
@@ -32,12 +37,14 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
     public ITPSearchSpace(ITunableParameters<T> tunableParameters) {
         itp = tunableParameters;
         List<String> parameterNames = itp.getParameterNames();
+        List<Class<?>> parameterClasses = new ArrayList<>();
         List<List<Object>> allPossibleValues = new ArrayList<>();
         for (String name : parameterNames) {
             List<Object> possibleValues = itp.getPossibleValues(name);
+            parameterClasses.add(itp.getParameterTypes().get(name));
             allPossibleValues.add(possibleValues);
         }
-        super.initialise(parameterNames, allPossibleValues);
+        super.initialise(parameterNames, parameterClasses, allPossibleValues);
     }
 
     /**
@@ -66,43 +73,17 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
     public ITPSearchSpace(ITunableParameters<T> tunableParameters, JSONObject json) {
         itp = tunableParameters;
-        Map<String, Class<?>> parameterTypes = allParameterTypesWithRecursion(json);
+        List<ParameterSettings> parameterTypes = extractRecursiveParameters("", json, itp);
         List<List<Object>> allPossibleValues = new ArrayList<>();
+        List<Class<?>> parameterClasses = new ArrayList<>();
         List<String> parameterNames = new ArrayList<>();
-        for (String nameAndValues : parameterTypes.keySet()) {
+        for (ParameterSettings settings : parameterTypes) {
             // Now get possible values from JSON
-            Class<?> clazz = parameterTypes.get(nameAndValues);
-            String[] firstSplit = nameAndValues.split("=");
-            if (firstSplit.length != 2)
-                throw new AssertionError("Unexpected format of nameAndValues " + nameAndValues);
-            String name = firstSplit[0];
-            String[] values = firstSplit[1].split(", ");
-
-            List<Object> possibleValues = new ArrayList<>();
-            for (String v : values) {
-                String strValue = v.trim();
-                if (clazz.isEnum()) {
-                    Class<? extends Enum> enumCl = (Class<? extends Enum>) clazz;
-                    possibleValues.add(Enum.valueOf(enumCl, strValue));
-                } else if (clazz == Double.class || clazz == double.class) {
-                    possibleValues.add(Double.valueOf(strValue));
-                } else if (clazz == Integer.class || clazz == int.class) {
-                    possibleValues.add(Integer.valueOf(strValue));
-                } else if (clazz == Long.class || clazz == long.class) {
-                    possibleValues.add(Long.valueOf(strValue).intValue());
-                } else if (clazz == Boolean.class || clazz == boolean.class) {
-                    possibleValues.add(Boolean.valueOf(strValue));
-                } else if (clazz == String.class) {
-                    possibleValues.add(strValue);
-                } else {
-                    throw new AssertionError("Unsupported Clazz in Parameter Tuning " + clazz);
-                }
-            }
-
-            allPossibleValues.add(possibleValues);
-            parameterNames.add(name);
+            parameterClasses.add(settings.clazz);
+            allPossibleValues.add(settings.values);
+            parameterNames.add(settings.name);
         }
-        super.initialise(parameterNames, allPossibleValues);
+        super.initialise(parameterNames, parameterClasses, allPossibleValues);
         if (tunableParameters instanceof TunableParameters tp) {
             tp.setRawJSON(json);
         }
@@ -118,8 +99,8 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
  * // TODO: This was mandated by old library usage. Can now be refactored to avoid need
  * // to split on ",", and hence allow arbitrary classes as tunable moieties.
  */
-    private static List<Pair<String, Class<?>>> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters itp) {
-        List<Pair<String, Class<?>>> retValue = new ArrayList<>();
+    private static List<ParameterSettings> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters<?> itp) {
+        List<ParameterSettings> retValue = new ArrayList<>();
         for (Object baseKey : json.keySet()) {
             if (baseKey instanceof String) {
                 if (itp.getParameterNames().contains(baseKey)) {
@@ -143,11 +124,45 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
                     } else if (data instanceof JSONArray arr) {
                         // we have a set of options for this parameter
-                        String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
-                                "\n";
+                        // TODO: We need to instantiate the JSONArray arr into List<?> values (should be instances of clazz)
+                        // although possibly only is the array is off JSONObjects
+                        Class<?> clazz = itp.getParameterTypes().get(key);
+                        List<Object> values = arr.stream().map(o -> {
+                            if (o instanceof JSONObject localJSON) {
+                                try {
+                                    return JSONUtils.loadClassFromJSON(localJSON);
+                                } catch (Exception e) {
+                                    throw new AssertionError(e.getMessage() + " problem instantiating from  " + localJSON);
+                                }
+                            } else {
+                                return o;
+                            }
+                        }).toList();
                         if (debug)
-                            System.out.println(baseKey + " : adding " + results);
-                        retValue.add(new Pair<>(results, itp.getDefaultParameterValue((String) baseKey).getClass()));
+                            System.out.println(baseKey + " : adding " + arr);
+                        if (clazz.isEnum()) {
+                            Class<? extends Enum> enumCl = (Class<? extends Enum>) clazz;
+                            values = arr.stream().map(o -> Enum.valueOf(enumCl, (String) o)).toList();
+                        }
+//                        for (Object v : values) {
+//                            if (clazz.isEnum()) {
+//                                Class<? extends Enum> enumCl = (Class<? extends Enum>) clazz;
+//                                possibleValues.add(Enum.valueOf(enumCl, v));
+//                            } else if (clazz == Double.class || clazz == double.class) {
+//                                possibleValues.add(Double.valueOf(strValue));
+//                            } else if (clazz == Integer.class || clazz == int.class) {
+//                                possibleValues.add(Integer.valueOf(strValue));
+//                            } else if (clazz == Long.class || clazz == long.class) {
+//                                possibleValues.add(Long.valueOf(strValue).intValue());
+//                            } else if (clazz == Boolean.class || clazz == boolean.class) {
+//                                possibleValues.add(Boolean.valueOf(strValue));
+//                            } else if (clazz == String.class) {
+//                                possibleValues.add(strValue);
+//                            } else {
+//                                throw new AssertionError("Unsupported Clazz in Parameter Tuning " + clazz);
+//                            }
+//                        }
+                        retValue.add(new ParameterSettings(key, clazz, values));
                     } else {
                         // this defines a default we should be using in itp
                         if (data == null)
@@ -163,13 +178,6 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             }
         }
         return retValue;
-    }
-
-    protected Map<String, Class<?>> allParameterTypesWithRecursion(JSONObject json) {
-        return extractRecursiveParameters("", json, itp).stream()
-                .collect(
-                        toMap(p -> p.a, p -> p.b)
-                );
     }
 
     @Override

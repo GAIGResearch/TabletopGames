@@ -139,7 +139,6 @@ public class NTBEA {
     public void writeAgentJSON(int[] settings, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
             JSONObject json = ((ITPSearchSpace<?>) params.searchSpace).getAgentJSON(settings);
-            json.put("budget", params.budget);
             writer.write(JSONUtils.prettyPrint(json, 1));
         } catch (IOException e) {
             throw new AssertionError("Error writing agent settings to file " + fileName);
@@ -258,11 +257,9 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
-        if (params.searchSpace instanceof ITPSearchSpace<?>) {
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
             writeAgentJSON(bestResult.b,
                     params.destDir + File.separator + "Recommended_Final.json");
-        }
-        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
             return new Pair<>(itp.instantiate(bestResult.b), bestResult.b);
         }
         return new Pair<>(null, bestResult.b);
