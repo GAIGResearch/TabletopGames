@@ -1,4 +1,4 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
 
 public class Hartmann extends NTBEAFunction {
 

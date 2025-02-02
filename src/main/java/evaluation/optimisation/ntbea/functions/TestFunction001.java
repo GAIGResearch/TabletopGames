@@ -1,4 +1,4 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
 
 public class TestFunction001 extends NTBEAFunction {
     private static final double PI = Math.PI;

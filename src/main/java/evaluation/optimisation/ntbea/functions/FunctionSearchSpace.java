@@ -1,4 +1,6 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
+
+import evaluation.optimisation.ntbea.SearchSpace;
 
 /**
  * This avoids the need to set up a json definition file. It takes two parameters:

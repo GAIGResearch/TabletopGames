@@ -1,19 +1,15 @@
 package evaluation.optimisation.ntbea;
 
-import core.AbstractPlayer;
-import core.Game;
 import evaluation.optimisation.ITPSearchSpace;
 import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
+import evaluation.optimisation.ntbea.functions.FunctionSearchSpace;
+import evaluation.optimisation.ntbea.functions.NTBEAFunction;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
-import static evaluation.optimisation.NTBEAParameters.Mode.StableNTBEA;
 
 public class NTBEAEvaluator implements SolutionEvaluator {
 

@@ -1,4 +1,7 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
+
+import evaluation.optimisation.ntbea.SearchSpace;
+import evaluation.optimisation.ntbea.SolutionEvaluator;
 
 import java.util.Random;
 

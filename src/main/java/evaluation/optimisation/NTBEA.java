@@ -6,6 +6,8 @@ import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
+import evaluation.optimisation.ntbea.functions.FunctionEvaluator;
+import evaluation.optimisation.ntbea.functions.NTBEAFunction;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import evaluation.optimisation.ntbea.*;
@@ -16,7 +18,6 @@ import players.heuristics.PureScoreHeuristic;
 import players.heuristics.WinOnlyHeuristic;
 import utilities.JSONUtils;
 import utilities.Pair;
-import utilities.StatSummary;
 import utilities.Utils;
 
 import java.io.File;

@@ -1,8 +1,6 @@
 package evaluation;
 
-import evaluation.optimisation.ntbea.TestFunction001;
-import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
-import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
+import evaluation.optimisation.ntbea.functions.TestFunction001;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -14,7 +12,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;
 

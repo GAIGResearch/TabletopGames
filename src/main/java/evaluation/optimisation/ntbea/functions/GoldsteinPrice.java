@@ -1,4 +1,4 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
 
 import static java.lang.Math.max;
 

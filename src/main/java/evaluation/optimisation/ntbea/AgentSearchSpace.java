@@ -1,6 +1,5 @@
 package evaluation.optimisation.ntbea;
 
-import core.LLMTest;
 import evaluation.optimisation.ITPSearchSpace;
 
 import java.util.*;

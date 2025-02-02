@@ -1,21 +1,21 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
 
-import core.Game;
 import evaluation.RunArg;
 import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
+import evaluation.optimisation.ntbea.NTBEAEvaluator;
+import evaluation.optimisation.ntbea.NTupleBanditEA;
+import evaluation.optimisation.ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Pair;
-import utilities.StatSummary;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.IntStream;
 

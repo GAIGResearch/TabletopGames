@@ -1,28 +1,18 @@
-package evaluation.optimisation.ntbea;
+package evaluation.optimisation.ntbea.functions;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.interfaces.IGameHeuristic;
 import evaluation.RunArg;
 import evaluation.optimisation.*;
-import games.GameType;
+import evaluation.optimisation.ntbea.NTupleBanditEA;
+import evaluation.optimisation.ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import players.PlayerFactory;
-import players.heuristics.OrdinalPosition;
-import players.heuristics.PureScoreHeuristic;
-import players.heuristics.WinOnlyHeuristic;
-import utilities.JSONUtils;
-import utilities.Pair;
 import utilities.StatSummary;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static evaluation.RunArg.*;
 
