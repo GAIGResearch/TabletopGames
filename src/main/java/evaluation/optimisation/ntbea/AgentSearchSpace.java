@@ -1,30 +1,34 @@
 package evaluation.optimisation.ntbea;
 
 import core.LLMTest;
+import evaluation.optimisation.ITPSearchSpace;
 
 import java.util.*;
 
 public abstract class AgentSearchSpace<T> implements SearchSpace {
 
     protected List<String> searchDimensions;
-    protected List<Class<?>> dimensionTypes;
+    protected List<? extends Class<?>> dimensionTypes;
     protected List<List<Object>> values;
 
-    public void initialise(List<String> names, List<Class<?>> clazzList, List<List<Object>> possibleSettings) {
-        searchDimensions = names;
-        dimensionTypes = new ArrayList<>();
+    public void initialise(List<ITPSearchSpace.ParameterSettings> parameterDetails) {
+        searchDimensions = parameterDetails.stream().map(ITPSearchSpace.ParameterSettings::name).toList();
+        dimensionTypes = parameterDetails.stream().map(ITPSearchSpace.ParameterSettings::clazz).toList();
         values = new ArrayList<>();
-        for (int i = 0; i < names.size(); i++) {
-            Class<?> clazz = clazzList.get(i);
+        for (int i = 0; i < searchDimensions.size(); i++) {
+            Class<?> clazz = dimensionTypes.get(i);
             List<Object> s = new ArrayList<>();
-            for (int j = 0; j < possibleSettings.get(i).size(); j++) {
-                Object setting = possibleSettings.get(i).get(j);
+            for (int j = 0; j < parameterDetails.get(i).values().size(); j++) {
+                Object setting = parameterDetails.get(i).values().get(j);
                 if (setting.getClass() == Long.class || setting.getClass() == long.class) {
                     setting = ((Number) setting).intValue();
                 }
+                if (clazz == Double.class || clazz == double.class) {
+                    setting = ((Number) setting).doubleValue();
+                }
                 if (!(clazz.isAssignableFrom(setting.getClass()))) {
                     throw new IllegalArgumentException("Unable to assign " + setting +
-                            " to class " + clazz + " for " + names.get(i));
+                            " to class " + clazz + " for " + searchDimensions.get(i));
                 }
                 s.add(setting);
             }

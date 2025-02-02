@@ -3,19 +3,24 @@ package evaluation;
 import core.AbstractPlayer;
 import evaluation.optimisation.ITPSearchSpace;
 import games.puertorico.PuertoRicoActionHeuristic001;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import players.heuristics.CoarseTunableHeuristic;
+import players.heuristics.OrdinalPosition;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.simple.BoltzmannActionParams;
 import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
+import utilities.JSONUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static players.PlayerConstants.BUDGET_TIME;
@@ -163,7 +168,7 @@ public class TunableParametersTest {
         params.setParameterValue("rolloutPolicyParams", bap);
         params.setParameterValue("maxTreeDepth", 67);
 
-        JSONObject json = params.instanceToJSON(false);
+        JSONObject json = params.instanceToJSON(false, Collections.emptyMap());
         assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
 
         MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
@@ -187,7 +192,7 @@ public class TunableParametersTest {
         params.setParameterValue("maxTreeDepth", 67);
         params.setParameterValue("budgetType", BUDGET_TIME);
 
-        JSONObject json = params.instanceToJSON(true);
+        JSONObject json = params.instanceToJSON(true, Collections.emptyMap());
 
         MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
         assertTrue(params.allParametersAndValuesEqual(noChange));
@@ -201,5 +206,18 @@ public class TunableParametersTest {
 
         MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
         assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
+    }
+
+    @Test
+    public void toJSONWithParameterisedJSONObject() {
+        JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        params.setRawJSON(json);
+        JSONObject secondHeuristic = (JSONObject) ((JSONArray) json.get("heuristic")).get(1);
+        params.setParameterValue("rolloutPolicyParams", bap);
+        params.setParameterValue("maxTreeDepth", 67);
+        params.setParameterValue("budgetType", BUDGET_TIME);
+        params.setParameterValue("heuristic", new OrdinalPosition());   // just needs to be non-default; the actual value is irrelevant
+        JSONObject asJSON = params.instanceToJSON(true, Map.of("heuristic", 1));
+        assertEquals(asJSON.get("heuristic"), secondHeuristic);
     }
 }

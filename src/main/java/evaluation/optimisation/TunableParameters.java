@@ -2,6 +2,7 @@ package evaluation.optimisation;
 
 import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import utilities.JSONUtils;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * A sub-class of AbstractParameters that implements the ITunableParameters interface
@@ -394,7 +396,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     }
 
     @Override
-    public JSONObject instanceToJSON(boolean excludeDefaults) {
+    public JSONObject instanceToJSON(boolean excludeDefaults, Map<String, Integer> settings) {
         // this is very similar to getJSONDescription(), but only
         // considers the current Parameter settings
         // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
@@ -412,7 +414,11 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                     continue;
                 }
                 if (value instanceof ITunableParameters tp) {
-                    value = tp.instanceToJSON(excludeDefaults);
+                    // settings need to have namespace adapted (remove the top level)
+                    Map<String, Integer> subSettings = settings.entrySet().stream()
+                            .filter(e -> e.getKey().contains("."))
+                            .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
+                    value = tp.instanceToJSON(excludeDefaults, subSettings);
                 } else if (value instanceof Enum) {
                     value = value.toString();
                 } else if (!(value instanceof Integer || value instanceof Long ||
@@ -424,7 +430,10 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                             continue; // in this case we have the default, so no need to pull in
                         throw new AssertionError("No rawJSON available to extract value for " + name);
                     }
-                    value = rawJSON.get(name);
+                    Object rawValue = rawJSON.get(name);
+                    if (rawValue instanceof JSONArray arr) {
+                        value = arr.get(settings.get(name));
+                    }
                 }
                 retValue.put(name, value);
             }

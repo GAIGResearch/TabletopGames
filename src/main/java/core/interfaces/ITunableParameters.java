@@ -79,7 +79,7 @@ public interface ITunableParameters<T> {
      * This is designed to be used for saving the current settings to a file for later instantiation
      * with fromJSON
      */
-    JSONObject instanceToJSON(boolean excludeDefaultValues);
+    JSONObject instanceToJSON(boolean excludeDefaultValues, Map<String, Integer> settings);
 
     /**
      * Retrieves the default values of all parameters (as per original game).
