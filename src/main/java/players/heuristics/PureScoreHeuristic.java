@@ -26,4 +26,9 @@ public class PureScoreHeuristic implements IStateHeuristic {
     public double maxValue() {
         return Double.POSITIVE_INFINITY;
     }
+
+    @Override
+    public String toString() {
+        return "PureScoreHeuristic";
+    }
 }

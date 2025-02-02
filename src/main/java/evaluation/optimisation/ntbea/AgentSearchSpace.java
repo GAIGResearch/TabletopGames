@@ -19,15 +19,10 @@ public abstract class AgentSearchSpace<T> implements SearchSpace {
             List<Object> s = new ArrayList<>();
             for (int j = 0; j < possibleSettings.get(i).size(); j++) {
                 Object setting = possibleSettings.get(i).get(j);
-                if (clazz == Double.class || clazz == double.class) {
-                    s.add(setting);
-                } else if (clazz == Integer.class || clazz == int.class) {
-                    s.add(setting);
-                } else if (clazz == Long.class || clazz == long.class) {
-                    s.add(((Number) setting).intValue());
-                } else if (clazz == Boolean.class || clazz == boolean.class) {
-                    s.add(setting);
-                } else if (!(clazz.isAssignableFrom(setting.getClass()))) {
+                if (setting.getClass() == Long.class || setting.getClass() == long.class) {
+                    setting = ((Number) setting).intValue();
+                }
+                if (!(clazz.isAssignableFrom(setting.getClass()))) {
                     throw new IllegalArgumentException("Unable to assign " + setting +
                             " to class " + clazz + " for " + names.get(i));
                 }
