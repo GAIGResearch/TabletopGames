@@ -236,24 +236,23 @@ public class RoundRobinTournament extends AbstractTournament {
     public void createAndRunMatchUps() {
         ExecutorService executor = nThreads > 1 ? Executors.newFixedThreadPool(nThreads) : null;
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
+        List<Integer> matchup = new ArrayList<>(nTeams);
         switch (tournamentMode) {
             case FIXED:
                 // we add the agents to the matchUp in the order they are in the list
                 // we always run the same fixed set of agents, so ignore the input matchup
-                matchUp.clear();
                 for (int i = 0; i < agents.size(); i++) {
-                    matchUp.add(i);
+                    matchup.add(i);
                 }
-                evaluateMatchUp(matchUp, gamesPerMatchup, gameSeeds);
+                evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds);
                 break;
             case RANDOM:
                 // In the RANDOM case we use a new seed for each game
                 PermutationCycler idStream = new PermutationCycler(agents.size(), seedRnd, nTeams);
                 for (int i = 0; i < totalGameBudget; i++) {
-                    List<Integer> matchup = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
                         matchup.add(idStream.getAsInt());
-                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(i)));
+                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(i)), executor);
                 }
                 break;
             case ONE_VS_ALL:
@@ -264,7 +263,6 @@ public class RoundRobinTournament extends AbstractTournament {
                     // we put the focus player at each position (p) in turn
                     if (agentOrder.size() == 1) {
                         // to reduce variance in this case we can use the same set of seeds for each case
-                        List<Integer> matchup = new ArrayList<>(nTeams);
                         for (int j = 0; j < nTeams; j++) {
                             if (j == p)
                                 matchup.add(0); // focus player
@@ -278,7 +276,6 @@ public class RoundRobinTournament extends AbstractTournament {
                     } else {
                         for (int m = 0; m < this.totalGameBudget / nTeams; m++) {
                             Collections.shuffle(agentOrder, seedRnd);
-                            List<Integer> matchup = new ArrayList<>(nTeams);
                             for (int j = 0; j < nTeams; j++) {
                                 if (j == p)
                                     matchup.add(0); // focus player
@@ -297,8 +294,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
                 generateMatchUps(matchups, new ArrayList<>(), nTeams);
 
-                for (List<Integer> matchup : matchups) {
-                    evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds, executor);
+                for (List<Integer> matchUp : matchups) {
+                    evaluateMatchUp(matchUp, gamesPerMatchup, gameSeeds, executor);
                 }
         }
         if (executor != null) {
@@ -367,13 +364,8 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.printf("Evaluate %s at %tT%n", agentIDsInThisGame.toString(), System.currentTimeMillis());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
 
-<<<<<<< HEAD
         // If we are in self-play mode or multithreading, we need to create a copy of the player to avoid them sharing the same state
         // If not in self-play mode then this is unnecessary, as the same agent will never be in the same game twice
-        for (int agentID : agentIDsInThisGame)
-            matchUpPlayers.add(tournamentMode == EXHAUSTIVE_SELF_PLAY || nThreads > 1 ? this.agents.get(agentID).copy() : this.agents.get(agentID));
-=======
-        // create a copy of the player to avoid them sharing the same state
         for (int agentID : agentIDsInThisGame)
             matchUpPlayers.add(this.agents.get(agentID).copy());
 
@@ -385,7 +377,6 @@ public class RoundRobinTournament extends AbstractTournament {
             sb.setCharAt(sb.length() - 1, ']');
             System.out.println(sb);
         }
->>>>>>> master
 
         // TODO : Not sure this is the ideal place for this...ask Raluca
         Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());

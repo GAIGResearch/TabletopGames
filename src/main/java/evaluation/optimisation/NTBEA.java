@@ -280,12 +280,23 @@ public class NTBEA {
             // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
             if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
                 // The elite agent is always the last one (and if the elite won fair and square, then we skip this
-                double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
-                double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
+                double eliteMean;
+                double eliteErr;
+                boolean winnerBeatsEliteBySignificantMargin;
+                // For Ordinal we want the lowest ordinal; for Win rate high is good
+                if (params.evalMethod.equals("Ordinal")) {
+                    eliteMean = tournament.getOrdinalRank(winnersPerRun.size() - 1);
+                    eliteErr = tournament.getOrdinalStdErr(winnersPerRun.size() - 1);
+                    winnerBeatsEliteBySignificantMargin = eliteMean - 2 * eliteErr > bestResult.a.a;
+                } else {
+                    eliteMean = tournament.getWinRate(winnersPerRun.size() - 1);
+                    eliteErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                    winnerBeatsEliteBySignificantMargin = eliteMean + 2 * eliteErr < bestResult.a.a;
+                }
+                if (!winnerBeatsEliteBySignificantMargin) {
                     if (params.verbose)
-                        System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
-                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
+                        System.out.printf("Elite agent won with %.2f +/- %.2f versus challenger at %.2f, so we are sticking with it%n", eliteMean, eliteErr, bestResult.a.a);
+                    bestResult = new Pair<>(new Pair<>(eliteMean, eliteErr), elites.get(0));
                 }
             }
         }
@@ -452,4 +463,5 @@ public class NTBEA {
         }
         return valueString;
     }
+
 }
