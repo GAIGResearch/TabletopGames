@@ -1,9 +1,0 @@
-{
-  "class" : "games.conquest.players.FullTurnMCTSPlayer",
-  "budgetType": "BUDGET_TIME",
-  "budget": 100000,
-  "searchDepth": 1,
-  "searchUnit": "TURN",
-  "heuristic": {"class" : "players.heuristics.GameDefaultHeuristic"},
-  "paranoid": true
-}

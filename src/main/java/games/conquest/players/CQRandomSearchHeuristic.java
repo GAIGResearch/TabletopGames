@@ -37,7 +37,7 @@ public class CQRandomSearchHeuristic implements IActionHeuristic {
             }
             return 0.0;
         } else {
-            // SelectTroop, no specific troops gets prioritized
+            // SelectTroop or MoveTroop, no specific troops gets prioritized
             return 0.5;
         }
     }
