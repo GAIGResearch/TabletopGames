@@ -1,20 +1,16 @@
 package evaluation.optimisation;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
-import evaluation.tournaments.AbstractTournament;
 import evaluation.tournaments.RoundRobinTournament;
-import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
-import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -28,6 +24,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.IntToDoubleFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -136,106 +135,55 @@ public class NTBEA {
      * @return
      */
     public Pair<Object, int[]> run() {
-
-        for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
-            runIteration();
-            writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
-                    params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
+        ExecutorService executor = params.nThreads > 1 ? Executors.newFixedThreadPool(Math.min(params.nThreads, params.repeats)) : null;
+        // if we're multithreading, we don't want to have different threads interfering with eachother
+        List<NTBEA> clones = new ArrayList<>();
+        if (executor == null) {
+            // no multithreading, so list of clones consists only of the current object
+            clones.add(this);
         }
 
-        // After all runs are complete, if tournamentGames are specified, then we allow all the
-        // winners from each iteration to play in a tournament and pick the winner of this tournament
-        if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
-            if (params.verbose) {
-                System.out.println("Starting a tournament of "+params.tournamentGames+" playouts.");
-            }
-            if (!elites.isEmpty()) {
-                // first of all we add the elites into winnerSettings, and winnersPerRun
-                // i.e. we effectively add an extra 'run' for each elite
-                for (int[] elite : elites) {
-                    winnerSettings.add(elite);
-                    winnersPerRun.add(params.searchSpace.getAgent(elite));
-                }
-            }
-
-            List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
-            for (int i = 0; i < players.size(); i++) {
-                players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
-            }
-            // Given we have N players in each game, and a total of M agents (the number of NTBEA iterations), we
-            // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
-            // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
-            // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
-            //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
-            int nTeams = params.byTeam ? game.createGameInstance(nPlayers, params.gameParams).getGameState().getNTeams() : nPlayers;
-            if (players.size() < nTeams) {
-                System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
-                        "check the repeats options is at least equal to the number of players.");
+        // Only this loop is parallelized, since the rest is just analysis, or initializing a tournament (which is
+        // on its own already parallelized)
+        for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
+            NTBEA clone = executor == null ? this : this.copy();
+            if (executor != null) {
+                clone.currentIteration = currentIteration; // for correct reporting
+                // run in parallel if allowed
+                executor.submit(clone::runIteration);
+                clones.add(clone);
             } else {
-                Map<RunArg, Object> config = new HashMap<>();
-                config.put(matchups, params.tournamentGames);
-                if (players.size() < nPlayers) {
-                    // if we don't have enough players to fill the game, then we will need to use self-play
-                    config.put(RunArg.mode, "exhaustiveSP");
-                } else {
-                    config.put(RunArg.mode, "exhaustive");
-                }
-                config.put(byTeam, true);
-                config.put(RunArg.distinctRandomSeeds, 0);
-                config.put(RunArg.budget, params.budget);
-                config.put(RunArg.verbose, false);
-                config.put(RunArg.destDir, params.destDir);
-                RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
-                createListeners().forEach(tournament::addListener);
-                tournament.run();
-                // create a new list of results in descending order of score
-                IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
-                List<Integer> agentsInOrder = IntStream.range(0, players.size())
-                        .boxed()
-                        .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
-                        .collect(Collectors.toList());
-                Collections.reverse(agentsInOrder);
-                params.logFile = "RRT_" + params.logFile;
-                for (int index : agentsInOrder) {
-                    if (params.verbose)
-                        System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
-                                tournament.getWinRate(index), tournament.getWinStdErr(index),
-                                tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
-                    Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
-                    if (params.evalMethod.equals("Ordinal"))
-                        resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
-
-                    logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
-                }
-                params.logFile = params.logFile.substring(4);
-                bestResult = params.evalMethod.equals("Ordinal") ?
-                        new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
-                        new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
-
-                // We then want to check the win rate against the elite agent (if one was provided)
-                // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
-                if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
-                    // The elite agent is always the last one (and if the elite won fair and square, then we skip this
-                    double eliteMean;
-                    double eliteErr;
-                    boolean winnerBeatsEliteBySignificantMargin;
-                    // For Ordinal we want the lowest ordinal; for Win rate high is good
-                    if (params.evalMethod.equals("Ordinal")) {
-                        eliteMean = tournament.getOrdinalRank(winnersPerRun.size() - 1);
-                        eliteErr= tournament.getOrdinalStdErr(winnersPerRun.size() - 1);
-                        winnerBeatsEliteBySignificantMargin = eliteMean - 2 * eliteErr > bestResult.a.a;
-                    } else {
-                        eliteMean = tournament.getWinRate(winnersPerRun.size() - 1);
-                        eliteErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                        winnerBeatsEliteBySignificantMargin = eliteMean + 2 * eliteErr < bestResult.a.a;
-                    }
-                    if (!winnerBeatsEliteBySignificantMargin) {
-                        if (params.verbose)
-                            System.out.printf("Elite agent won with %.2f +/- %.2f versus challenger at %.2f, so we are sticking with it%n", eliteMean, eliteErr, bestResult.a.a);
-                        bestResult = new Pair<>(new Pair<>(eliteMean, eliteErr), elites.get(0));
-                    }
-                }
+                clone.runIteration();
             }
+        }
+
+        if (executor != null) {
+            executor.shutdown();
+            try {
+                // Wait for all tasks to complete; no timeout (infty hours) because this normally also has no timeout
+                if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS)) {
+                    executor.shutdownNow(); // Force shutdown if tasks are hanging
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow(); // Restore interrupted status and shutdown
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        // After all runs are complete, do some cleaning up and logging
+        for (NTBEA clone : clones) {
+            writeAgentJSON(clone.winnerSettings.get(clone.winnerSettings.size() - 1),
+                    params.destDir + File.separator + "Recommended_" + clone.currentIteration + ".json");
+        }
+        if (clones.size() > 1 || clones.get(0) != this) {
+            // aggregate all data from all clones
+            collectCloneResults(clones);
+        }
+
+        // If tournamentGames are specified, then we allow all the winners from each iteration
+        // to play in a tournament and pick the winner of this tournament
+        if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
+            activateTournament();
         }
         if (params.verbose) {
             System.out.println("\nFinal Recommendation: ");
@@ -245,6 +193,105 @@ public class NTBEA {
         writeAgentJSON(bestResult.b,
                 params.destDir + File.separator + "Recommended_Final.json");
         return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
+    }
+
+    /**
+     * Gathers all data from all parallel threads, which have their data stored in a clone of this object
+     * This ensures all metrics from these clones are incorporated into this object's data
+     * @param clones the list of clones that have run in separate threads
+     */
+    protected void collectCloneResults(List<NTBEA> clones) {
+        for (NTBEA clone : clones) {
+            this.elites.addAll(clone.elites);
+            this.winnersPerRun.addAll(clone.winnersPerRun);
+            this.winnerSettings.addAll(clone.winnerSettings);
+            if (clone.bestResult.a.a > this.bestResult.a.a) {
+                bestResult = clone.bestResult;
+            }
+        }
+    }
+
+    protected void activateTournament() {
+        if (params.verbose) {
+            System.out.println("Starting a tournament of "+params.tournamentGames+" playouts.");
+        }
+        if (!elites.isEmpty()) {
+            // first of all we add the elites into winnerSettings, and winnersPerRun
+            // i.e. we effectively add an extra 'run' for each elite
+            for (int[] elite : elites) {
+                winnerSettings.add(elite);
+                winnersPerRun.add(params.searchSpace.getAgent(elite));
+            }
+        }
+
+        List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
+        }
+        // Given we have N players in each game, and a total of M agents (the number of NTBEA iterations), we
+        // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
+        // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
+        // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
+        //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
+        int nTeams = params.byTeam ? game.createGameInstance(nPlayers, params.gameParams).getGameState().getNTeams() : nPlayers;
+        if (players.size() < nTeams) {
+            System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +
+                               "check the repeats options is at least equal to the number of players.");
+        } else {
+            Map<RunArg, Object> config = new HashMap<>();
+            config.put(matchups, params.tournamentGames);
+            if (players.size() < nPlayers) {
+                // if we don't have enough players to fill the game, then we will need to use self-play
+                config.put(RunArg.mode, "exhaustiveSP");
+            } else {
+                config.put(RunArg.mode, "exhaustive");
+            }
+            config.put(byTeam, true);
+            config.put(RunArg.distinctRandomSeeds, 0);
+            config.put(RunArg.budget, params.budget);
+            config.put(RunArg.verbose, params.verbose);
+            config.put(RunArg.destDir, params.destDir);
+            config.put(RunArg.nThreads, params.nThreads);
+            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, params.gameParams, config);
+            createListeners().forEach(tournament::addListener);
+            tournament.run();
+            // create a new list of results in descending order of score
+            IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
+            List<Integer> agentsInOrder = IntStream.range(0, players.size())
+                    .boxed()
+                    .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
+                    .collect(Collectors.toList());
+            Collections.reverse(agentsInOrder);
+            params.logFile = "RRT_" + params.logFile;
+            for (int index : agentsInOrder) {
+                if (params.verbose)
+                    System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
+                            tournament.getWinRate(index), tournament.getWinStdErr(index),
+                            tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
+                if (params.evalMethod.equals("Ordinal"))
+                    resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+
+                logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
+            }
+            params.logFile = params.logFile.substring(4);
+            bestResult = params.evalMethod.equals("Ordinal") ?
+                    new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
+                    new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
+
+            // We then want to check the win rate against the elite agent (if one was provided)
+            // we only regard an agent as better, if it beats the elite agent by at least 2 sd (so, c. 95%) confidence
+            if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
+                // The elite agent is always the last one (and if the elite won fair and square, then we skip this
+                double eliteWinRate = tournament.getWinRate(winnersPerRun.size() - 1);
+                double eliteStdErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
+                if (eliteWinRate + 2 * eliteStdErr > bestResult.a.a) {
+                    if (params.verbose)
+                        System.out.printf("Elite agent won with %.3f +/- %.3f versus challenger at %.3f, so we are sticking with it%n", eliteWinRate, eliteStdErr, bestResult.a.a);
+                    bestResult = new Pair<>(new Pair<>(eliteWinRate, eliteStdErr), elites.get(0));
+                }
+            }
+        }
     }
 
     protected void runTrials() {
@@ -394,6 +441,10 @@ public class NTBEA {
         }
     }
 
+    public NTBEA copy() {
+        return new NTBEA(params, game, nPlayers);
+    }
+
     private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace ss) {
         Object value = ss.value(paramIndex, valueIndex);
         String valueString = value.toString();
@@ -404,5 +455,4 @@ public class NTBEA {
         }
         return valueString;
     }
-
 }

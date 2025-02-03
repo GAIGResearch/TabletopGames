@@ -43,6 +43,7 @@ public class NTBEAParameters {
     public ITPSearchSpace searchSpace;
     public AbstractParameters gameParams;
     public boolean byTeam;
+    public int nThreads;
 
     public NTBEAParameters(Map<RunArg, Object> args) {
         this(args, Function.identity());
@@ -67,6 +68,7 @@ public class NTBEAParameters {
         GameType game = GameType.valueOf(args.get(RunArg.game).toString());
         gameParams = args.get(RunArg.gameParams).equals("") ? null :
                 AbstractParameters.createFromFile(game, (String) args.get(RunArg.gameParams));
+        nThreads = (int) args.get(RunArg.nThreads);
 
         mode = Mode.valueOf((String) args.get(RunArg.NTBEAMode));
         logFile = "NTBEA.log";

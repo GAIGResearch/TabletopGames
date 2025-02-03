@@ -51,7 +51,7 @@ public class ActionFeatureListener extends FeatureListener {
 
 
     @Override
-    public double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+    protected double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         // We put phi in first, and then psi
         double[] retValue = new double[psiFn.names().length + phiFn.names().length];
         double[] phi = cachedPhi == null ?
@@ -63,13 +63,13 @@ public class ActionFeatureListener extends FeatureListener {
         return retValue;
     }
 
-    protected void processStateWithTargets(AbstractGameState state, AbstractAction action, Map<String, Map<AbstractAction, Double>> targets) {
+    protected synchronized void processStateWithTargets(AbstractGameState state, AbstractAction action, Map<String, Map<AbstractAction, Double>> targets) {
         actionValues = targets;
         processState(state, action);
     }
 
     @Override
-    public void processState(AbstractGameState state, AbstractAction action) {
+    public synchronized void processState(AbstractGameState state, AbstractAction action) {
         // we override this from FeatureListener, because we want to record the feature vector for each action
         if (action == null) return; // we do not record data for the GAME_OVER event
         cachedPhi = null;
@@ -109,7 +109,7 @@ public class ActionFeatureListener extends FeatureListener {
 
 
     @Override
-    public String injectAgentAttributes(String raw) {
+    public synchronized String injectAgentAttributes(String raw) {
         return raw.replaceAll(Pattern.quote("*PSI*"), psiFn.getClass().getCanonicalName())
                 .replaceAll(Pattern.quote("*PHI*"), phiFn != null ? phiFn.getClass().getCanonicalName() : "NONE");
     }
