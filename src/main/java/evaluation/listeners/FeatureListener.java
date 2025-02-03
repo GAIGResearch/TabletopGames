@@ -66,15 +66,10 @@ public abstract class FeatureListener implements IGameListener {
     protected void writeDataWithStandardHeaders(AbstractGameState state) {
         int totP = state.getNPlayers();
         double[] finalScores = IntStream.range(0, totP).mapToDouble(state::getGameScore).toArray();
-        double[] winLoss = Arrays.stream(state.getPlayerResults()).mapToDouble(r -> {
-            switch (r) {
-                case WIN_GAME:
-                    return 1.0;
-                case DRAW_GAME:
-                    return 0.5;
-                default:
-                    return 0.0;
-            }
+        double[] winLoss = Arrays.stream(state.getPlayerResults()).mapToDouble(r -> switch (r) {
+            case WIN_GAME -> 1.0;
+            case DRAW_GAME -> 0.5;
+            default -> 0.0;
         }).toArray();
         double[] ordinal = IntStream.range(0, totP).mapToDouble(state::getOrdinalPosition).toArray();
         double finalRound = state.getRoundCounter();
@@ -100,6 +95,11 @@ public abstract class FeatureListener implements IGameListener {
             data.put("Win", winLoss[record.player]);
             data.put("Ordinal", ordinal[record.player]);
             data.put("FinalScore", finalScores[record.player]);
+            double bestOtherScore = IntStream.range(0, totP)
+                    .filter(p -> p != record.player)
+                    .mapToDouble(i -> finalScores[i])
+                    .max().orElse(0);
+            data.put("FinalScoreAdv", finalScores[record.player] - bestOtherScore);
             logger.record(data);
         }
         logger.processDataAndNotFinish();

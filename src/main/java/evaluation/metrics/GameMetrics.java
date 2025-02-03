@@ -119,7 +119,6 @@ public class GameMetrics implements IMetricsCollection {
         }
     }
 
-
     public static class PlayerType extends AbstractMetric {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {

@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -306,10 +306,10 @@ public abstract class AbstractGameState {
         s.turnCounter = turnCounter;
         s.turnOwner = turnOwner;
         s.firstPlayer = firstPlayer;
-        // If we are copying from a player's perspective, then we branch the RNG so that the master copy
+        // We always branch the RNG on a copy() so that the master RNG
         // is not called an arbitrary number of times. This is to ensure that all shuffles in the main game are
         // the same if we start with the same seed
-        s.rnd = playerId == -1 ? rnd : new Random(System.currentTimeMillis());
+        s.rnd = new Random(redeterminisationRnd.nextLong());
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -647,4 +647,20 @@ public abstract class AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }
+
+    public boolean isGameOver()
+    {
+        return gameStatus.equals(GAME_END);
+    }
+
+    public int getWinner()
+    {
+        if(gameStatus.equals(GAME_END)){
+            for(int playerId = 0; playerId < nPlayers; playerId++)
+                if(playerResults[playerId] == WIN_GAME)
+                    return playerId;
+        }
+        return -1;
+    }
+
 }

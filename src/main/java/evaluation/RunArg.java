@@ -2,8 +2,13 @@ package evaluation;
 
 import org.apache.hadoop.yarn.webapp.hamlet.HamletSpec;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -103,7 +108,7 @@ public enum RunArg {
             "\tFor NTBEA this will be used as a final tournament between the recommended agents from each run.",
             1,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
-    mode("exhaustive|exhaustiveSP|random|sequential\n" +
+    mode("exhaustive|exhaustiveSP|random|sequential|fixed\n" +
             "\t 'exhaustive' will iterate exhaustively through every possible permutation: \n" +
             "\t every possible player in every possible position, and run an equal number of games'\n" +
             "\t for each. This can be unworkable for a given matchup budget for a large number of players.\n" +
@@ -112,6 +117,8 @@ public enum RunArg {
             "\t the same number of games in total. (Unless the number of agents is less than the number of players, \n" +
             "\t in which case self-play will be allowed.)\n" +
             "\t 'sequential' will run tournaments on a ONE_VS_ALL basis between each pair of agents.\n" +
+            "\t 'fixed' will run a fixed tournament, where the same agents occupy the same position for all games.\n" +
+            "\t In this mode the playerDirectory must contain exactly one json file for each position. These will be sorted alphabetically.\n" +
             "\t If a focusPlayer is provided, then 'mode' is ignored.",
             "random",
             new Usage[]{Usage.RunGames}),
@@ -235,9 +242,35 @@ public enum RunArg {
     public static Map<RunArg, Object> parseConfig(String[] args, List<Usage> usages, boolean checkUnknownArgs) {
         if (checkUnknownArgs)
             checkUnknownArgs(args, usages);
-        return Arrays.stream(RunArg.values())
+        Map<RunArg, Object> commandLineArgs = Arrays.stream(RunArg.values())
                 .filter(arg -> usages.stream().anyMatch(arg::isUsedIn))
                 .collect(toMap(arg -> arg, arg -> arg.parse(args)));
+        // then as a second stage we unpack any arguments specified in the config file
+        String setupFile = commandLineArgs.getOrDefault(RunArg.config, "").toString();
+        if (!setupFile.isEmpty()) {
+            // Read from file in addition (any values on the command line override the file contents)
+            try {
+                FileReader reader = new FileReader(setupFile);
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(reader);
+                Map<RunArg, Object> configFileArgs = parseConfig(json, usages);
+                for (RunArg key : configFileArgs.keySet()) {
+                    // we check if the key is already in the command line arguments (we check args directly as
+                    // parseConfig populates all the Map with the default value if not present in the array)
+                    if (Arrays.stream(args).noneMatch(s -> s.startsWith(key.name()))) {
+                        commandLineArgs.put(key, configFileArgs.get(key));
+                    } else {
+                        System.out.println("Using command line value for " + key + " of " + commandLineArgs.get(key));
+                    }
+                }
+            } catch (FileNotFoundException ignored) {
+                throw new AssertionError("Config file not found : " + setupFile);
+                //    parseConfig(runGames, args);
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return commandLineArgs;
     }
 
     public static void checkUnknownArgs(String[] args, List<Usage> usages) {

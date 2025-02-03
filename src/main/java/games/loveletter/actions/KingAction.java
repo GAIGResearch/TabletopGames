@@ -5,6 +5,7 @@ import core.CoreConstants.VisibilityMode;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.CardType;
 import games.loveletter.cards.LoveLetterCard;
 
 
@@ -14,7 +15,7 @@ import games.loveletter.cards.LoveLetterCard;
 public class KingAction extends PlayCard implements IPrintable {
 
     public KingAction(int cardidx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.King, cardidx, playerID, opponentID, null, null, canExecuteEffect, discard);
+        super(CardType.King, cardidx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override

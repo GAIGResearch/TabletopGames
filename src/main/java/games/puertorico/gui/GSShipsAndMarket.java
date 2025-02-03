@@ -100,7 +100,7 @@ public class GSShipsAndMarket extends JComponent implements IScreenHighlight {
             Pair<Integer, Integer> shipSize = drawShip((Graphics2D) g, ship, startX, pad);
             shipToRectMap.put(new Rectangle(startX, pad, shipSize.a, shipSize.b), s);
 
-            if (gs.getCurrentRole() == PuertoRicoConstants.Role.CAPTAIN && gui.getHumanPlayerId().contains(currentPlayer)) {
+            if (gs.getCurrentRole() == PuertoRicoConstants.Role.CAPTAIN && gui.getHumanPlayerIds().contains(currentPlayer)) {
                 PuertoRicoConstants.Crop selectedCrop = gui.playerBoards[currentPlayer].cropClicked;
                 boolean playerHasMatchingCargo = false;
                 boolean playerHasUniqueCargo = false;

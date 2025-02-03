@@ -18,7 +18,7 @@ import players.python.PythonAgent;
 import players.simple.RandomPlayer;
 import utilities.ActionTreeNode;
 
-import games.explodingkittens.*;
+import games.explodingkittensOLD.*;
 
 
 import java.util.ArrayList;
