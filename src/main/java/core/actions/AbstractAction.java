@@ -51,7 +51,7 @@ public abstract class AbstractAction implements IPrintable {
      * The GUI formally supports multiple players viewing a game. This in practice is only going to be used
      * for games with (near) perfect information. For games that actually implement hidden information in
      * a move (Resistance, Hanabi, Sushi Go, etc), we will only need the game actions to implement
-     * getString(AbstractGameState, int). This is a helper method to make this downstream imnplementation
+     * getString(AbstractGameState, int). This is a helper method to make this downstream implementation
      * easier without trying to puzzle out what it means to have multiple players viewing a game with hidden information.
      *
      * @param gs

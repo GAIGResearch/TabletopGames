@@ -1,0 +1,21 @@
+{
+        "budgetType" : "BUDGET_TIME",
+        "rolloutTermination" : "END_ROUND",
+        "rolloutLength" : 3,
+        "opponentTreePolicy" : "SelfOnly",
+        "heuristic" : {
+                "class" : "games.catan.MultiStageHeuristic",
+                "base" : "json/players/gameSpecific/Catan/Catan_SP06_R30.json",
+                "opening" : "json/players/gameSpecific/Catan/Catan_Early_SP06_R3.json",
+                "early" : "json/players/gameSpecific/Catan/Catan_Mid_SP06_R30.json",
+                "late" : "json/players/gameSpecific/Catan/Catan_Late_SP06_R30.json"
+        },
+        "K" : 1.0,
+        "treePolicy" : "UCB",
+        "FPU" : 10.0,
+        "reuseTree" : true,
+        "backupPolicy" : "MaxMC",
+        "maxBackupThreshold" : 30,
+        "class" : "players.mcts.MCTSParams",
+        "budget" : 40
+}

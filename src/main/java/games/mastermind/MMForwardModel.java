@@ -29,7 +29,7 @@ public class MMForwardModel extends StandardForwardModel {
         MMGameState mmgs = (MMGameState) gameState;
         ArrayList<AbstractAction> availableActions = new ArrayList<>();
         for (Token colour : MMConstants.guessColours) {
-            availableActions.add(new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), mmgs.activeCol, mmgs.activeRow, colour));
+            availableActions.add(new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), mmgs.activeCol, mmgs.activeRow, colour.getComponentID()));
         }
         return availableActions;
     }
@@ -84,7 +84,7 @@ public class MMForwardModel extends StandardForwardModel {
         boolean gameEnd = true;
 
         for (int i=0; i<mmp.boardWidth; i++) {
-            if (gameState.guessBoard.getElement(i,gameState.activeRow) != gameState.answerCode.get(i)) {
+            if (!gameState.guessBoard.getElement(i,gameState.activeRow).getTokenType().equals(gameState.answerCode.get(i).getTokenType())) {
                 win = false;
                 gameEnd = false;
                 break;

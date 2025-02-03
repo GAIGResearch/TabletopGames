@@ -16,25 +16,17 @@ import players.basicMCTS.BasicMCTSPlayer;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSPlayer;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCParams;
-import players.rmhc.RMHCPlayer;
-import players.simple.FirstActionPlayer;
-import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static games.GameType.*;
 
 
 public class Game {
@@ -477,6 +469,7 @@ public class Game {
             if (gameState.getHistory().size() > 1) {
                 lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1).b;
             }
+            forwardModel.computeAvailableActions(gameState);
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
@@ -779,7 +772,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Pandemic");
+        String gameType = Utils.getArg(args, "game", "Saboteur");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -802,7 +795,9 @@ public class Game {
 
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 

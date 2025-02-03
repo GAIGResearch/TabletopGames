@@ -411,7 +411,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         return wrapper;
     }
 
-    private String resourcePrint(HashMap<CatanParameters.Resource, Counter> resourcePool, CatanParameters cp) {
+    private String resourcePrint(Map<CatanParameters.Resource, Counter> resourcePool, CatanParameters cp) {
         StringBuilder s = new StringBuilder();
         for (CatanParameters.Resource res: resourcePool.keySet()) {
             if (res == CatanParameters.Resource.WILD) continue;

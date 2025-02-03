@@ -5,14 +5,14 @@ import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static evaluation.RunArg.game;
-import static evaluation.RunArg.parseConfig;
+import static evaluation.RunArg.*;
 import static utilities.Utils.getArg;
 
 public class ParameterSearch {
@@ -77,8 +77,5 @@ public class ParameterSearch {
                 multiNTBEA.run();
                 break;
         }
-
     }
-
-
 }

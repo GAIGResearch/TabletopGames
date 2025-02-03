@@ -1,6 +1,8 @@
 package games.mastermind;
 
-import core.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.PartialObservableDeck;
@@ -11,7 +13,6 @@ import org.junit.Test;
 import players.simple.RandomPlayer;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
@@ -83,7 +84,7 @@ public class TestMastermind {
         PartialObservableDeck<Token> answerCode = new PartialObservableDeck<Token>("Answer Code", 0, new boolean[]{false});
 
         for (int i=0; i<4; i++) {
-            forwardModel.next(mmgs, new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), i, 0, MMConstants.guessColours.get(Character.getNumericValue(guess.charAt(i)))));
+            forwardModel.next(mmgs, new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), i, 0, MMConstants.guessColours.get(Character.getNumericValue(guess.charAt(i))).getComponentID()));
             answerCode.add(MMConstants.guessColours.get(Character.getNumericValue(answerString.charAt(3-i))));
         }
 

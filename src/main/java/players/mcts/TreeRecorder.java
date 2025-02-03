@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
+import static utilities.Utils.createDirectory;
 
 public class TreeRecorder {
     public int visitThreshold = 1;
@@ -132,7 +133,7 @@ public class TreeRecorder {
     public String getRecordId(String folder_name) {
         File directory = new File(folder_name);
         if (!directory.exists()){
-            directory.mkdir();
+            createDirectory(folder_name);
             return folder_name + "/record_0.csv";
         }
 

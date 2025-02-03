@@ -58,16 +58,20 @@ public class ToadFeatures001 implements IStateFeatureVector {
         }
         features[12] = state.getTieBreaker(playerID) == null ? 0 : state.getTieBreaker(playerID).value;
         for (int i = 0; i < state.getDiscards(playerID).getSize(); i++) {
-            features[13] += state.getDiscards(playerID).get(i).value * Math.pow(31, i);
+            features[13] += state.getDiscards(playerID).get(i).value  * multiplier(i) - 1;
         }
         for (int i = 0; i < state.getDiscards(1 - playerID).getSize(); i++) {
-            features[14] += state.getDiscards(1 - playerID).get(i).value * Math.pow(31, i);
+            features[14] += state.getDiscards(1 - playerID).get(i).value  * multiplier(i) - 1;
         }
         features[15] = state.getRoundCounter() == 1 ? 1 : 0;
         features[16] = state.getBattlesWon(0, playerID) > state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
         features[17] = state.getBattlesWon(0, playerID) < state.getBattlesWon(0, 1 - playerID) ? 1 : 0;
 
         return features;
+    }
+
+    private double multiplier(int i) {
+        return Math.pow(8, i+1);
     }
 
 }

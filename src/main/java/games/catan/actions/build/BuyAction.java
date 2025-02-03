@@ -36,7 +36,6 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         if (type == BuyType.Settlement) return CatanActionFactory.getBuySettlementActions((CatanGameState) state, playerID);
-        else if (type == BuyType.City) return CatanActionFactory.getBuyCityActions((CatanGameState) state, playerID);
         else if (type == BuyType.Road) return CatanActionFactory.getBuyRoadActions((CatanGameState) state, playerID, false);
         return new ArrayList<>();
     }
