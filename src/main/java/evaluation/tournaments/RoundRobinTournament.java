@@ -367,12 +367,6 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.printf("Evaluate %s at %tT%n", agentIDsInThisGame.toString(), System.currentTimeMillis());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
 
-<<<<<<< HEAD
-        // If we are in self-play mode or multithreading, we need to create a copy of the player to avoid them sharing the same state
-        // If not in self-play mode then this is unnecessary, as the same agent will never be in the same game twice
-        for (int agentID : agentIDsInThisGame)
-            matchUpPlayers.add(tournamentMode == EXHAUSTIVE_SELF_PLAY || nThreads > 1 ? this.agents.get(agentID).copy() : this.agents.get(agentID));
-=======
         // create a copy of the player to avoid them sharing the same state
         for (int agentID : agentIDsInThisGame)
             matchUpPlayers.add(this.agents.get(agentID).copy());
@@ -385,7 +379,6 @@ public class RoundRobinTournament extends AbstractTournament {
             sb.setCharAt(sb.length() - 1, ']');
             System.out.println(sb);
         }
->>>>>>> master
 
         // TODO : Not sure this is the ideal place for this...ask Raluca
         Set<String> agentNames = agents.stream().map(AbstractPlayer::toString).collect(Collectors.toSet());
