@@ -6,7 +6,7 @@
   "heuristic": {
     "class": "players.heuristics.WinOnlyHeuristic"
   },
-  "K": [0.5, 1.0, 1.4],
+  "K": 1.0,
   "exploreEpsilon": 0.1,
   "treePolicy": "UCB",
   "MAST": "Both",
