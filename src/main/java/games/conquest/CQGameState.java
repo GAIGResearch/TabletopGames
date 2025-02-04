@@ -618,8 +618,9 @@ public class CQGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return _getHeuristicScore(playerId) * 1000;
+//        return _getHeuristicScore(playerId) * 1000;
 //        return getTotalTroopCost(getTroops(playerId));
+        return playerResults[playerId].value;
     }
 
     @Override

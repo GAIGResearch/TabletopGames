@@ -30,14 +30,18 @@ public class CQRandomSearchHeuristic implements IActionHeuristic {
             }
         } else if (action instanceof EndTurn) {
             return 0.5;
-        } else if (action instanceof MoveTroop && cqgs.getSelectedTroop().hasCommand(CommandType.Charge)) {
+        } else if (action instanceof MoveTroop) {
             // If charge is applied, only consider moves that allow the troop to attack.
             if (cqgs.canAttackEnemy(((MoveTroop) action).getHighlight())) {
                 return 1.0;
+            } else if (cqgs.getSelectedTroop().hasCommand(CommandType.Charge)) {
+                // No point in using charge but then not attack a troop.
+                return 0.0;
+            } else {
+                return 0.5;
             }
-            return 0.0;
         } else {
-            // SelectTroop or MoveTroop, no specific troops gets prioritized
+            // SelectTroop, no specific troops gets prioritized
             return 0.5;
         }
     }

@@ -17,5 +17,6 @@
     }
   },
   "budget": 3000,
-  "budgetType": "BUDGET_FM_CALLS"
+  "budgetType": "BUDGET_FM_CALLS",
+  "reuseTree": [true, false]
 }
