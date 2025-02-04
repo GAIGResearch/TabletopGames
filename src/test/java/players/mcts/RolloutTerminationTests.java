@@ -19,7 +19,7 @@ public class RolloutTerminationTests {
             GameType.LoveLetter,
             GameType.Dominion,
             GameType.Virus,
-    //        GameType.Poker,
+            GameType.Poker,
     //        GameType.Catan,
             GameType.ColtExpress,
             GameType.CantStop,

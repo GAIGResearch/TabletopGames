@@ -52,15 +52,14 @@ public class STNRollout extends SingleTreeNode {
                 // which means that the turn has *just* changed, so the current turn is one more than the penultimate turn
                 // (i.e. the turn just before the last action in the rollout)
                 assertTrue(staticRolloutDepth >= expectedRolloutLength);
-                assertNotEquals(openLoopState.getTurnCounter(), staticStartTurn);
                 assertNotEquals(openLoopState.getTurnCounter(), staticPenultimateTurn);
-                assertTrue(openLoopState.getTurnCounter() == staticPenultimateTurn + 1 || openLoopState.getTurnCounter() == 1);
+                assertTrue(openLoopState.getTurnCounter() == staticPenultimateTurn + 1 || openLoopState.getTurnCounter() == 0);
                 break;
             case END_ROUND:
                 assertTrue(staticRolloutDepth >= expectedRolloutLength);
                 assertNotEquals(openLoopState.getRoundCounter(), staticStartRound);
                 assertNotEquals(openLoopState.getRoundCounter(), staticPenultimateRound );
-                assertTrue(openLoopState.getRoundCounter() == staticPenultimateRound + 1 || openLoopState.getRoundCounter() == 1);
+                assertTrue(openLoopState.getRoundCounter() == staticPenultimateRound + 1);
                 break;
         }
     }

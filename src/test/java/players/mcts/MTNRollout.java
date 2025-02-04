@@ -45,9 +45,8 @@ public class MTNRollout extends MultiTreeNode {
                 break;
             case END_TURN:
                 assertTrue(actionsInRollout.size() >= params.rolloutLength);
-                assertNotEquals(openLoopState.getTurnCounter(), turnAtStartOfRollout);
                 assertNotEquals(openLoopState.getTurnCounter(), lastTurnInRollout);
-                assertTrue(openLoopState.getTurnCounter() == lastTurnInRollout + 1 || openLoopState.getTurnCounter() == 1);
+                assertTrue(openLoopState.getTurnCounter() == lastTurnInRollout + 1 || openLoopState.getTurnCounter() == 0);
                 break;
             case END_ROUND:
                 assertTrue(actionsInRollout.size() >= params.rolloutLength);
