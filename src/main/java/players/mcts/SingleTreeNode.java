@@ -939,8 +939,8 @@ public class SingleTreeNode {
                 case DEFAULT -> true;
                 case END_ACTION -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
                 case START_ACTION -> lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
-                case END_TURN -> rollerState.getTurnCounter() != turnAtStartOfRollout;
-                case END_ROUND -> rollerState.getRoundCounter() != roundAtStartOfRollout;
+                case END_TURN -> rollerState.getTurnCounter() != lastTurnInRollout;
+                case END_ROUND -> rollerState.getRoundCounter() != lastRoundInRollout;
             };
         }
         return false;
