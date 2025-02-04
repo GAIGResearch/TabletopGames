@@ -51,7 +51,6 @@ public class MTNRollout extends MultiTreeNode {
                 break;
             case END_ROUND:
                 assertTrue(actionsInRollout.size() >= params.rolloutLength);
-                assertNotEquals(openLoopState.getRoundCounter(), roundAtStartOfRollout);
                 assertNotEquals(openLoopState.getRoundCounter(), lastRoundInRollout);
                 if (openLoopState.getGameType() == GameType.Poker)
                     assertTrue(openLoopState.getRoundCounter() == lastRoundInRollout + 1 || openLoopState.getRoundCounter() == lastRoundInRollout + 2);

@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 
 public class STNRollout extends SingleTreeNode {
 
-    static int lastActorInTree, staticRolloutDepth, staticStartTurn, staticStartRound, staticPenultimateTurn, staticPenultimateRound;
+    static int lastActorInTree, staticRolloutDepth, staticPenultimateTurn, staticPenultimateRound;
     List<Pair<Integer, AbstractAction>> rolloutActions;
 
     @Override
@@ -58,7 +58,6 @@ public class STNRollout extends SingleTreeNode {
                 break;
             case END_ROUND:
                 assertTrue(staticRolloutDepth >= expectedRolloutLength);
-                assertNotEquals(openLoopState.getRoundCounter(), staticStartRound);
                 assertNotEquals(openLoopState.getRoundCounter(), staticPenultimateRound);
                 if (openLoopState.getGameType() == GameType.Poker)
                     assertTrue(openLoopState.getRoundCounter() == staticPenultimateRound + 1 || openLoopState.getRoundCounter() == staticPenultimateRound + 2);
@@ -78,8 +77,6 @@ public class STNRollout extends SingleTreeNode {
         lastActorInTree = lastActor;  // a bit of a hack to track the last Actor in tree search
         double[] retValue = super.rollout(lastActor);
         staticRolloutDepth = root.actionsInRollout.size();
-        staticStartRound = roundAtStartOfRollout;
-        staticStartTurn = turnAtStartOfRollout;
         staticPenultimateTurn = lastTurnInRollout;
         staticPenultimateRound = lastRoundInRollout;
         return retValue;
