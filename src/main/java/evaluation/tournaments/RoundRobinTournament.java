@@ -295,7 +295,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 generateMatchUps(matchups, new ArrayList<>(), nTeams);
 
                 for (List<Integer> matchUp : matchups) {
-                    evaluateMatchUp(matchup, gamesPerMatchup, gameSeeds, executor);
+                    evaluateMatchUp(matchUp , gamesPerMatchup, gameSeeds, executor);
                 }
         }
         if (executor != null) {
