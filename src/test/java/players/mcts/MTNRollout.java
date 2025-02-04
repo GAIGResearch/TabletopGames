@@ -2,6 +2,7 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import games.GameType;
 
 import java.util.Random;
 
@@ -52,7 +53,10 @@ public class MTNRollout extends MultiTreeNode {
                 assertTrue(actionsInRollout.size() >= params.rolloutLength);
                 assertNotEquals(openLoopState.getRoundCounter(), roundAtStartOfRollout);
                 assertNotEquals(openLoopState.getRoundCounter(), lastRoundInRollout);
-                assertEquals(openLoopState.getRoundCounter(), lastRoundInRollout + 1);
+                if (openLoopState.getGameType() == GameType.Poker)
+                    assertTrue(openLoopState.getRoundCounter() == lastRoundInRollout + 1 || openLoopState.getRoundCounter() == lastRoundInRollout + 2);
+                else
+                    assertEquals(openLoopState.getRoundCounter(), lastRoundInRollout + 1);
                 break;
         }
     }

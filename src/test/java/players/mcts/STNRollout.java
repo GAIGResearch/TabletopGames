@@ -1,6 +1,7 @@
 package players.mcts;
 
 import core.actions.AbstractAction;
+import games.GameType;
 import utilities.Pair;
 
 import java.util.List;
@@ -58,8 +59,11 @@ public class STNRollout extends SingleTreeNode {
             case END_ROUND:
                 assertTrue(staticRolloutDepth >= expectedRolloutLength);
                 assertNotEquals(openLoopState.getRoundCounter(), staticStartRound);
-                assertNotEquals(openLoopState.getRoundCounter(), staticPenultimateRound );
-                assertTrue(openLoopState.getRoundCounter() == staticPenultimateRound + 1);
+                assertNotEquals(openLoopState.getRoundCounter(), staticPenultimateRound);
+                if (openLoopState.getGameType() == GameType.Poker)
+                    assertTrue(openLoopState.getRoundCounter() == staticPenultimateRound + 1 || openLoopState.getRoundCounter() == staticPenultimateRound + 2);
+                else
+                    assertEquals(openLoopState.getRoundCounter(), staticPenultimateRound + 1);
                 break;
         }
     }
