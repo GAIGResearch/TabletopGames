@@ -555,6 +555,8 @@ public class SingleTreeNode {
     protected void advanceState(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // we execute a copy(), because this can change the action, so we then don't find the node later!
         if (inRollout) {
+            lastTurnInRollout = gs.getTurnCounter();
+            lastRoundInRollout = gs.getRoundCounter();
             lastActorInRollout = gs.getCurrentPlayer();
             root.actionsInRollout.add(new Pair<>(lastActorInRollout, act));
         } else {
@@ -587,6 +589,8 @@ public class SingleTreeNode {
             if (inRollout) {
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
                 lastActorInRollout = gs.getCurrentPlayer();
+                lastRoundInRollout = gs.getRoundCounter();
+                lastTurnInRollout = gs.getTurnCounter();
             }
             forwardModel.next(gs, action);
             root.fmCallsCount++;
@@ -883,6 +887,8 @@ public class SingleTreeNode {
      */
     protected double[] rollout(int lastActor) {
         lastActorInRollout = lastActor;
+        lastRoundInRollout = openLoopState.getRoundCounter();
+        lastTurnInRollout = openLoopState.getTurnCounter();
         roundAtStartOfRollout = openLoopState.getRoundCounter();
         turnAtStartOfRollout = openLoopState.getTurnCounter();
 
@@ -906,9 +912,6 @@ public class SingleTreeNode {
                 }
                 AbstractPlayer agent = rolloutState.getCurrentPlayer() == root.decisionPlayer ? params.getRolloutStrategy() : params.getOpponentModel();
                 next = agent.getAction(rolloutState, availableActions);
-                lastActorInRollout = rolloutState.getCurrentPlayer();
-                lastTurnInRollout = rolloutState.getTurnCounter();
-                lastRoundInRollout = rolloutState.getRoundCounter();
                 advanceState(rolloutState, next, true);
             }
         }

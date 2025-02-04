@@ -18,12 +18,12 @@ public class RolloutTerminationTests {
     GameType[] gamesToTest = {
             GameType.LoveLetter,
             GameType.Dominion,
-    //        GameType.Virus,
-            GameType.Poker,
+            GameType.Virus,
+    //        GameType.Poker,
     //        GameType.Catan,
             GameType.ColtExpress,
             GameType.CantStop,
-     //       GameType.Diamant,
+            GameType.Diamant,
             GameType.SushiGo
     };
 

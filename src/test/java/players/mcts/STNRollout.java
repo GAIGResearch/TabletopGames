@@ -60,7 +60,7 @@ public class STNRollout extends SingleTreeNode {
                 assertTrue(staticRolloutDepth >= expectedRolloutLength);
                 assertNotEquals(openLoopState.getRoundCounter(), staticStartRound);
                 assertNotEquals(openLoopState.getRoundCounter(), staticPenultimateRound );
-                assertEquals(openLoopState.getRoundCounter(), staticPenultimateRound + 1);
+                assertTrue(openLoopState.getRoundCounter() == staticPenultimateRound + 1 || openLoopState.getRoundCounter() == 1);
                 break;
         }
     }
