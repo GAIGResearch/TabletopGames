@@ -31,7 +31,7 @@ public class TicketToRideBoardView extends JComponent {
     private int height;
 
     TicketToRideGameState gameState;
-    double scale = 0.85;
+    double scale = 0.4;
 
     int cardWidth = (int)(scale * TicketToRideCardView.cardWidth);
     int cardHeight = (int)(scale * TicketToRideCardView.cardHeight);
@@ -179,7 +179,9 @@ public class TicketToRideBoardView extends JComponent {
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.black);
+        System.out.println( "calling draw board in paintComponent");
         drawBoard(g2);
+
         if (highlights.size() > 0) {
             Stroke s = g2.getStroke();
             g2.setStroke(new BasicStroke(strokeWidth));
@@ -261,6 +263,7 @@ public class TicketToRideBoardView extends JComponent {
             g.drawString("Player Train Card Deck", (int)playerDeckLocation.getX() + panX, panY + (int)playerDeckLocation.getY() - fontSize);
 
 
+            System.out.println( "DRAW BOARD");
         }
 
     }
@@ -270,6 +273,8 @@ public class TicketToRideBoardView extends JComponent {
         g.drawImage(img, x, y, (int) (w*scale), (int) (h*scale), null);
     }
 
-
+    public HashMap<String, Rectangle> getHighlights() {
+        return highlights;
+    }
 
 }

@@ -91,8 +91,7 @@ public class DrawDestinationTicketCards extends AbstractAction {
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Drew Destination Ticket Cards";
     }
 
     /**

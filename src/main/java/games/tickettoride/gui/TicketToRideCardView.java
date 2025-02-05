@@ -13,19 +13,21 @@ import utilities.Utils;
 
 
 import java.awt.*;
-import static games.tickettoride.TicketToRideConstants.destinationHash;
 
 
 import static core.CoreConstants.colorHash;
 import static core.CoreConstants.nameHash;
+import static games.tickettoride.TicketToRideConstants.*;
 
 public class TicketToRideCardView extends CardView {
     private Image background, secondaryBG;
     private boolean usingSecondary;
 
     public static int offset = 10;
-    public static final int cardWidth = 110;
-    public static final int cardHeight = 80;
+    public static final int cardWidth = 160;
+    public static final int cardHeight = 90;
+
+
 
     public TicketToRideCardView(Card c) {
         super(c);
@@ -40,36 +42,44 @@ public class TicketToRideCardView extends CardView {
 
         String dataPath = "data/tickettoride/img/";
         if (c != null) {
-            Property colorOfCard = c.getProperty(Hash.GetInstance().hash("cardColor"));
-            if (colorOfCard != null) { //train car card
-                background = ImageIO.GetInstance().getImage(dataPath + "trainCard" + colorOfCard + "Bg.png");
-            } else { // destination card
-                background = ImageIO.GetInstance().getImage(dataPath + "destinationcardbg.png");
+            Property location1Test = c.getProperty(location1Hash);
+            if (location1Test != null) { //train car card
+                this.background = ImageIO.GetInstance().getImage(dataPath + "destinationCardBg.png");
+                System.out.println("this.background: " + this.background);
+                String location1 = String.valueOf(c.getProperty(location1Hash));
+                String location2 = String.valueOf(c.getProperty(location2Hash));
+                System.out.println("card tool tip : " + location1 + " to " + location2);
+                tooltip = location1 + " to " + location2;
             }
         }
 
+        if (!tooltip.equals("")) {
+            setToolTipText(tooltip);
+        }
     }
 
     private static Image findBackground(Card c) {
         String dataPath = "data/tickettoride/img/";
         Image background = null;
+        System.out.println("fIND BACKGROUND");
         if (c != null) {
-            Property colorOfCard = c.getProperty(Hash.GetInstance().hash("cardColor"));
-            if (colorOfCard != null) { //train car card
-                background = ImageIO.GetInstance().getImage(dataPath + "trainCard" + colorOfCard + "Bg.png");
+            Property location1Test = c.getProperty(location1Hash);
+            if (location1Test != null) { //train car card
+                background = ImageIO.GetInstance().getImage(dataPath + "destinationCardBg.png");
             }
-            else { // destination card
-                background = ImageIO.GetInstance().getImage(dataPath + "destinationcardbg.png");
-            }
+
         }
         return background;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        System.out.println("IN PAINT COMPONENT");
         if (usingSecondary) {
+            System.out.println("IN PAINT COMPONEN USING SECONDT");
             drawCard((Graphics2D) g, (Card) component, secondaryBG, 0, 0, width, height);
         } else {
+            System.out.println("IN PAINT COMPONEN MAIN");
             drawCard((Graphics2D) g, (Card) component, background, 0, 0, width, height);
         }
     }
@@ -79,42 +89,34 @@ public class TicketToRideCardView extends CardView {
     }
 
     public static void drawCard(Graphics2D g, Card card, Image background, int x, int y, int width, int height) {
+        System.out.println("draw card many parameters");
         // Draw card background
         if (background == null) {
             background = findBackground(card);
+
         }
         if (background != null) {
+            System.out.println("background is not null" + background);
             int w = background.getWidth(null);
             int h = background.getHeight(null);
             double scaleW = width*1.0/w;
             double scaleH = height*1.0/h;
             g.drawImage(background, x, y, (int) (w*scaleW), (int) (h*scaleH), null);
-        } else {
-            if (card == null || card.getProperty(Hash.GetInstance().hash("action")) == null) {
-                g.setColor(Color.lightGray);
-                g.fillRect(x, y, width - 1, height - 1);
-                g.setColor(Color.black);
-            }
         }
+//        else {
+//            if (card == null || card.getProperty(Hash.GetInstance().hash("action")) == null) {
+//                g.setColor(Color.lightGray);
+//                g.fillRect(x, y, width - 1, height - 1);
+//                g.setColor(Color.black);
+//            }
+//        }
 
         if (card != null) {
-            Property name = card.getProperty(nameHash);
-            boolean destination = false;
-            if (card.getProperty(destinationHash) != null) {
-                // Event card
-                destination = true;
-            }
-            PropertyColor col = (PropertyColor)card.getProperty(colorHash);
-            if (col != null) {
-                Color c = Utils.stringToColor(col.valueStr);
-                if (c != null && background == null) {
-                    g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 50));
-                    g.fillRoundRect(x, y, width, height, 25, 25);
-                    g.setColor(Color.black);
-                    g.drawRoundRect(x, y, width, height, 25, 25);
-                }
-                g.setColor(c);
-            }
+
+            String location1 = String.valueOf(card.getProperty(location1Hash));
+            String location2 = String.valueOf(card.getProperty(location2Hash));
+            String points = String.valueOf(card.getProperty(pointsHash));
+
             Stroke st = g.getStroke();
             g.setStroke(new BasicStroke(2));
             x += offset;
@@ -126,28 +128,33 @@ public class TicketToRideCardView extends CardView {
 
             g.setColor(Color.black);
 
+
             int w = (width * 2 - offset) / g.getFont().getSize();
             String wrapped =
-                    WordWrap.from(((PropertyString) name).value)
+                    WordWrap.from(location1 + " to " + location2 )
                             .maxWidth(w)
                             .insertHyphens(true) // true is the default
                             .wrap();
             String[] wraps = wrapped.split("\n");
+
+
             int size = g.getFont().getSize();
 
             int i = 0;
-            if (destination) {
-                Font f = g.getFont();
-                g.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
-                g.drawString("~ Destination ~", x + 10, y + 17);
-                g.setFont(f);
-                i = 1;
-            }
+            Font f = g.getFont();
+            g.setFont(new Font(f.getName(), Font.BOLD, f.getSize()));
+            g.drawString("Points: " +  points, x + 10, y + 17);
+            g.setFont(f);
+            i = 1;
 
+            Font fontForDescription = g.getFont();
+            g.setFont(new Font(fontForDescription.getName(), Font.PLAIN , 10));
             for (String s : wraps) {
                 g.drawString(s, x + 10, y + i * size + 20);
                 i++;
             }
+
+
         }
     }
 

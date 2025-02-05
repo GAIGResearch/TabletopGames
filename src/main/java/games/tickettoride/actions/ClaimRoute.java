@@ -6,10 +6,7 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.components.Edge;
-import core.properties.Property;
-import core.properties.PropertyBoolean;
-import core.properties.PropertyColor;
-import core.properties.PropertyInt;
+import core.properties.*;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.tickettoride.TicketToRideGameState;
@@ -18,6 +15,7 @@ import utilities.Hash;
 
 import static core.CoreConstants.colorHash;
 import static core.CoreConstants.playerHandHash;
+import static games.tickettoride.TicketToRideConstants.*;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -134,8 +132,9 @@ public class ClaimRoute extends AbstractAction {
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        Property nodeProp = edge.getProperty(nodesHash);
+        String[] nodes = ((PropertyStringArray) nodeProp).getValues();
+        return "Claimed route between " + nodes[0] + " and " + nodes[1] ;
     }
 
     /**
