@@ -15,12 +15,12 @@ public class NTupleSystem implements LandscapeModel {
     List<NTuple> tuples = new ArrayList<>();
 
     public boolean use1Tuple = true;
-    public boolean use2Tuple = true;
-    public boolean use3Tuple = false;
-    public boolean useNTuple = true;
+    public boolean use2Tuple;
+    public boolean use3Tuple;
+    public boolean useNTuple;
 
-    public double generalisedMeanCoefficient = 1.0;
-    public boolean simpleRegret = false;
+    public double generalisedMeanCoefficient;
+    public boolean simpleRegret;
 
     int minTupleSize = 1;
 
@@ -30,6 +30,7 @@ public class NTupleSystem implements LandscapeModel {
     public NTupleSystem(NTBEAParameters params) {
         searchSpace = params.searchSpace;
         kExplore = params.kExplore;
+        use2Tuple = params.useTwoTuples;
         use3Tuple = params.useThreeTuples;
         useNTuple = params.useNTuples;
         simpleRegret = params.simpleRegret;

@@ -52,7 +52,7 @@ public class NTBEAEvaluator implements SolutionEvaluator {
 
      //   NTBEAParameters params = searchSpace.instantiate(settings);
         // We now set up iterations based on the budget
-        params.setParameterValue("iterations", params.budget / params.repeats - params.evalGames);
+        params.setParameterValue("iterations", params.budget / params.repeats / params.evaluationsPerTrial - params.evalGames);
         if (params.iterationsPerRun <= 0)
             throw new AssertionError("Budget too low for NTBEA");
         params.setParameterValue("matchups", 0);

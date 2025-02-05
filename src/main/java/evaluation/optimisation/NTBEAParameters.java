@@ -76,7 +76,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         addTunableParameter("verbose", false);
         addTunableParameter("mode", Mode.NTBEA);
         addTunableParameter("quantile", -1);
-        addTunableParameter("evaluationsPerTrial", 1);
+        addTunableParameter("evalsPerTrial", 1);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         verbose = (boolean) getParameterValue("verbose");
         mode = (Mode) getParameterValue("mode");
         quantile = (int) getParameterValue("quantile");
-        evaluationsPerTrial = (int) getParameterValue("evaluationsPerTrial");
+        evaluationsPerTrial = (int) getParameterValue("evalsPerTrial");
 
         if (evalGames == -1) evalGames = iterationsPerRun / 5;
     }
@@ -125,7 +125,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         setParameterValue("verbose", args.get(RunArg.verbose));
         setParameterValue("mode", Mode.valueOf(args.get(RunArg.NTBEAMode).toString()));
         setParameterValue("quantile", args.get(RunArg.quantile));
-        setParameterValue("evaluationsPerTrial", args.get(RunArg.evalsPerTrial));
+        setParameterValue("evalsPerTrial", args.get(RunArg.evalsPerTrial));
 
         configure(args);
     }
