@@ -52,15 +52,8 @@ public class NTBEA {
 
     protected NTBEA(NTBEAParameters parameters) {
         this.params = parameters;
-        landscapeModel = new NTupleSystem(params.searchSpace, params.kExplore);
-        landscapeModel.use3Tuple = params.useThreeTuples;
-        landscapeModel.use2Tuple = params.useTwoTuples;
-        landscapeModel.useNTuple = params.useNTuples;
-        landscapeModel.simpleRegret = params.simpleRegret;
-        landscapeModel.generalisedMeanCoefficient = params.noiseMeanType;
-        landscapeModel.addTuples();
-
-        searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
+        landscapeModel = new NTupleSystem(params);
+        searchFramework = new NTupleBanditEA(landscapeModel, params);
     }
 
     public NTBEA(NTBEAParameters parameters, NTBEAFunction function, int discretisationLevel) {

@@ -54,14 +54,9 @@ public class MetaNTBEA {
         params.printSearchSpaceDetails();
 
 // Now initialise the other bits and pieces needed for the NTBEA package
-        NTupleSystem landscapeModel = new NTupleSystem(params.searchSpace, params.kExplore);
-        landscapeModel.use3Tuple = params.useThreeTuples;
-        landscapeModel.useNTuple = params.useNTuples;
-        landscapeModel.simpleRegret = params.simpleRegret;
-        landscapeModel.generalisedMeanCoefficient = params.noiseMeanType;
-        landscapeModel.addTuples();
+        NTupleSystem landscapeModel = new NTupleSystem(params);
 
-        NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
+        NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, params);
 
         double bestValue = Double.NEGATIVE_INFINITY;
         int[] bestSettings = new int[params.searchSpace.nDims()];

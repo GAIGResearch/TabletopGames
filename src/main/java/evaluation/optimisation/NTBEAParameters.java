@@ -44,6 +44,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public boolean verbose;
     public Mode mode;
     public int quantile = -1;
+    public int evaluationsPerTrial = 1;
 
     // and those that are not (so must be included separately in copy etc)
     public boolean tuningGame = false;
@@ -75,6 +76,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         addTunableParameter("verbose", false);
         addTunableParameter("mode", Mode.NTBEA);
         addTunableParameter("quantile", -1);
+        addTunableParameter("evaluationsPerTrial", 1);
     }
 
     @Override
@@ -97,9 +99,9 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         verbose = (boolean) getParameterValue("verbose");
         mode = (Mode) getParameterValue("mode");
         quantile = (int) getParameterValue("quantile");
+        evaluationsPerTrial = (int) getParameterValue("evaluationsPerTrial");
 
         if (evalGames == -1) evalGames = iterationsPerRun / 5;
-
     }
 
     // Now we need to use args to provide the searchSpace and other non-tunable parameters
@@ -123,6 +125,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         setParameterValue("verbose", args.get(RunArg.verbose));
         setParameterValue("mode", Mode.valueOf(args.get(RunArg.NTBEAMode).toString()));
         setParameterValue("quantile", args.get(RunArg.quantile));
+        setParameterValue("evaluationsPerTrial", args.get(RunArg.evalsPerTrial));
 
         configure(args);
     }
@@ -204,7 +207,6 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
 
     @Override
     public NTBEA instantiate() {
-        // TODO: this actually depends on whether we using a game or a function as the trial basis
         return new NTBEA(this, gameType, nPlayers);
     }
 

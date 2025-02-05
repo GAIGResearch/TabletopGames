@@ -46,14 +46,8 @@ public class FunctionReport {
         params.printSearchSpaceDetails();
 
 // Now initialise the other bits and pieces needed for the NTBEA package
-        NTupleSystem landscapeModel = new NTupleSystem(params.searchSpace, params.kExplore);
-        landscapeModel.use3Tuple = params.useThreeTuples;
-        landscapeModel.useNTuple = params.useNTuples;
-        landscapeModel.simpleRegret = params.simpleRegret;
-        landscapeModel.generalisedMeanCoefficient = params.noiseMeanType;
-        landscapeModel.addTuples();
-
-        NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, params.neighbourhoodSize);
+        NTupleSystem landscapeModel = new NTupleSystem(params);
+        NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, params);
 
         double[] valuesFound = new double[params.repeats];
 

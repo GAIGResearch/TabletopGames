@@ -58,6 +58,9 @@ public enum RunArg {
             "\tThe json-format file is needed if non-default settings for the IGameHeuristic are used.",
             "Win",
             new Usage[]{Usage.ParameterSearch}),
+    evalsPerTrial("The number of games to run per NTBEA trial (default is 1)",
+            1,
+            new Usage[]{Usage.ParameterSearch}),
     finalPercent("The proportion of the tuningBudget used to determine the best agent across each iteration. \n" +
             "\t The remainder is divided amongst the iterations.\n",
             0.5,

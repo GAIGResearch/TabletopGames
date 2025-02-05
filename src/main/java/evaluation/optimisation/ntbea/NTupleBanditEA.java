@@ -1,5 +1,6 @@
 package evaluation.optimisation.ntbea;
 
+import evaluation.optimisation.NTBEAParameters;
 import utilities.StatSummary;
 
 import java.util.Arrays;
@@ -16,12 +17,12 @@ public class NTupleBanditEA {
     // the number of neighbours to explore around the current point each time
     // they are only explored IN THE FITNESS LANDSCAPE MODEL, not by sampling the fitness function
     int nNeighbours;
+    int nSamples = 1;
 
-    public int nSamples = 1;
-
-    public NTupleBanditEA(LandscapeModel model, int nNeighbours) {
+    public NTupleBanditEA(LandscapeModel model, NTBEAParameters params) {
         landscapeModel = model;
-        this.nNeighbours = nNeighbours;
+        this.nNeighbours = params.neighbourhoodSize;
+        this.nSamples = params.evaluationsPerTrial;
     }
 
     StatSummary fitness(SolutionEvaluator evaluator, int[] sol) {

@@ -27,9 +27,14 @@ public class NTupleSystem implements LandscapeModel {
     final SearchSpace searchSpace;
     final double kExplore;
 
-    public NTupleSystem(SearchSpace space, double kExplore) {
-        searchSpace = space;
-        this.kExplore = kExplore;
+    public NTupleSystem(NTBEAParameters params) {
+        searchSpace = params.searchSpace;
+        kExplore = params.kExplore;
+        use3Tuple = params.useThreeTuples;
+        useNTuple = params.useNTuples;
+        simpleRegret = params.simpleRegret;
+        generalisedMeanCoefficient = params.noiseMeanType;
+        addTuples();
     }
 
     @Override
