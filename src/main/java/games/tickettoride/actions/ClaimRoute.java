@@ -134,7 +134,7 @@ public class ClaimRoute extends AbstractAction {
     public String toString() {
         Property nodeProp = edge.getProperty(nodesHash);
         String[] nodes = ((PropertyStringArray) nodeProp).getValues();
-        return "Claimed route between " + nodes[0] + " and " + nodes[1] ;
+        return "Claimed route between " + nodes[0] + " and " + nodes[1] + " of color: " + colorOfRoute + " and size of " + costOfRoute ;
     }
 
     /**

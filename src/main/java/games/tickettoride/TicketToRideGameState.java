@@ -112,6 +112,7 @@ public class  TicketToRideGameState extends AbstractGameState {
         copy.world = world.copy();
         copy.scores = scores;
         copy.currentFinalRoundTurn = currentFinalRoundTurn;
+        copy.trainCars = trainCars;
         return copy;
     }
 
@@ -155,7 +156,14 @@ public class  TicketToRideGameState extends AbstractGameState {
         }
     }
     public int getTrainCars(int playerId) {
-        return trainCars[playerId];
+        System.out.println("in get train cars");
+        if (trainCars != null) {
+            System.out.println("not null " + trainCars[playerId]);
+            return trainCars[playerId];
+        } else {
+            System.out.println("null");
+            return 0;
+        }
     }
     public int[] getTrainCars() {
         return trainCars;

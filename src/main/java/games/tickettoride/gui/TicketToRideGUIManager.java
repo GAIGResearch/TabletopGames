@@ -191,15 +191,18 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
 
 
 
-            String[] txts = new String[TicketToRideConstants.cardColors.length / 2 + 1];
+            String[] playerCountInfo = new String[TicketToRideConstants.cardColors.length / 2 + 1];
+            playerCountInfo[playerCountInfo.length - 1] = "Train cars: " + this.gameState.getTrainCars(i);
             int idx = -1;
             for (int c = 0; c < TicketToRideConstants.cardColors.length; c++) {
                 if (c % 2 == 0) idx++;
-                if (txts[idx] == null) txts[idx] = "";
-                txts[idx] += TicketToRideConstants.cardColors[c] + ": " + colourCount[c] + "; ";
+                if (playerCountInfo[idx] == null) playerCountInfo[idx] = "";
+                playerCountInfo[idx] += TicketToRideConstants.cardColors[c] + ": " + colourCount[c] + "; ";
             }
-            for (int c = 0; c < txts.length; c++) {
-                playerHandCardCounts[i][c].setText(txts[c]);
+
+
+            for (int c = 0; c < playerCountInfo.length; c++) {
+                playerHandCardCounts[i][c].setText(playerCountInfo[c]);
             }
 
 
@@ -268,17 +271,17 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
             wrapInfo.setPreferredSize(new Dimension(cardWidth, (int)(cardHeight*1.5)+offset));
             wrapInfo.setLayout(new BoxLayout(wrapInfo, BoxLayout.Y_AXIS));
 
-            String[] txts = new String[TicketToRideConstants.cardColors.length/2+1];
-            txts[txts.length-1] = "event: 0";
+            String[] playerCountInfo = new String[TicketToRideConstants.cardColors.length/2+1];
+            playerCountInfo[playerCountInfo.length-1] = "Train cars: ";
             int idx = -1;
             for (int c = 0; c < TicketToRideConstants.cardColors.length; c++) {
                 if (c % 2 == 0) idx++;
-                if (txts[idx] == null) txts[idx] = "";
-                txts[idx] += TicketToRideConstants.cardColors[c] + ": 0; ";
+                if (playerCountInfo[idx] == null) playerCountInfo[idx] = "";
+                playerCountInfo[idx] += TicketToRideConstants.cardColors[c] + ": 0; ";
             }
-            JLabel[] counts = new JLabel[txts.length];
-            for (int c = 0; c < txts.length; c++) {
-                counts[c] = new JLabel(txts[c]);
+            JLabel[] counts = new JLabel[playerCountInfo.length];
+            for (int c = 0; c < playerCountInfo.length; c++) {
+                counts[c] = new JLabel(playerCountInfo[c]);
                 wrapInfo.add(counts[c]);
             }
             playerHandCardCounts[i] = counts;
@@ -355,7 +358,6 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
 
     private TicketToRideCardView getCardView(int player, Card c, int cardIdx) {
         TicketToRideCardView cv2 = new TicketToRideCardView(c);
-        System.out.println(cv2 + " new card view");
         cv2.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -381,11 +383,11 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
     }
 
     public void clearHighlights() {
-        playerHighlights.clear();
-        for (int i = 0; i < playerCards.length; i++) {
-            handCardHighlights[i].clear();
-        }
-        boardView.getHighlights().clear();
+//        playerHighlights.clear();
+//        for (int i = 0; i < playerCards.length; i++) {
+//            handCardHighlights[i].clear();
+//        }
+//        boardView.getHighlights().clear();
     }
 
 

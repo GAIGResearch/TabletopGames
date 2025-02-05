@@ -177,21 +177,29 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         HashMap<Edge, Integer> routesAvailableToBuy = (HashMap<Edge, Integer>) checkRoutesAvailable(gameState); //key of edges, index of which color to buy
         if (!routesAvailableToBuy.isEmpty()) {
-            Edge currentEdge = routesAvailableToBuy.keySet().iterator().next();
 
-            Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
-            int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
-
-            int indexOfColor = routesAvailableToBuy.get(currentEdge);
-            Property colorProp = currentEdge.getProperty(colorHashKey);
-
-            String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
-
-            String colorOfRoute = colorsOfRoute[indexOfColor];
-            System.out.println(colorOfRoute + " is the colors");
+            for (Map.Entry<Edge, Integer> currentRoute : routesAvailableToBuy.entrySet()) { //add every route available to list of actions
+                System.out.println("In for loop");
+                Edge currentEdge = currentRoute.getKey();
 
 
-            actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexOfColor));
+                Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
+                int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
+
+                int indexOfColor = routesAvailableToBuy.get(currentEdge);
+                Property colorProp = currentEdge.getProperty(colorHashKey);
+
+                String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
+
+                String colorOfRoute = colorsOfRoute[indexOfColor];
+                System.out.println(colorOfRoute + " is the colors");
+
+                System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
+
+
+                actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexOfColor));
+            }
+
         }
 
         return actions;
@@ -312,6 +320,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
     //return the index of color (in edges array) that they can afford. If can't afford any, return -1
     int checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
+
 
 
         Property colorProp = edge.getProperty(colorHash);
