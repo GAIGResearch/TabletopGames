@@ -846,20 +846,20 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new HumanGUIPlayer(ac));
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
+        players.add(new BasicMCTSPlayer());
 
-        MCTSParams params = new MCTSParams();
-//        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
-        params.maxTreeDepth = 10;
+//        MCTSParams params = new MCTSParams();
+////        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
+//        params.maxTreeDepth = 10;
 //        params.reuseTree = true;
 //        params.normaliseRewards = false;
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;
@@ -887,12 +887,11 @@ public class Game {
 
         /* Run multiple games */
         long t = System.currentTimeMillis();
-        int n = 100;
+        int n = 1000;
         ArrayList<GameType> games = new ArrayList<>();
         games.add(GameType.SeaSaltPaper);
         runMany(games, players, 100L, n, false, true, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
         System.out.println("FISNIHED RUNNING IN " + (System.currentTimeMillis() - t)/1000 + " SECONDS");
     }
-
 }
