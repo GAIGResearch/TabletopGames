@@ -13,8 +13,8 @@ import java.util.Objects;
 
 public abstract class PlayDuo extends AbstractAction {
 
-    int playerId;
-    int[] cardsIdx;
+    final int playerId;
+    final int[] cardsIdx;
 
     public PlayDuo(int playerId, int[] cardsIdx) {
         this.playerId = playerId;
@@ -27,12 +27,6 @@ public abstract class PlayDuo extends AbstractAction {
         PartialObservableDeck<SeaSaltPaperCard> playerHand = sspgs.getPlayerHands().get(playerId);
         Deck<SeaSaltPaperCard> playerDiscard = sspgs.getPlayerDiscards().get(playerId);
 
-//        // make the duo cards visible
-//        boolean[] visibility = new boolean[sspg.getNPlayers()];
-//        Arrays.fill(visibility, true);
-//        playerHand.setVisibilityOfComponent(cardsIdx[0], visibility);
-//        playerHand.setVisibilityOfComponent(cardsIdx[1], visibility);
-
         // discard duo cards and put them into playerDiscard
         SeaSaltPaperCard[] duoCards = {playerHand.peek(cardsIdx[0]), playerHand.peek(cardsIdx[1])};
         playerHand.remove(duoCards[0]); playerHand.remove(duoCards[1]);
@@ -40,11 +34,6 @@ public abstract class PlayDuo extends AbstractAction {
         SeaSaltPaperParameters params = (SeaSaltPaperParameters) sspgs.getGameParameters();
         sspgs.playerPlayedDuoPoints[playerId] += params.duoBonusDict.get(duoCards[0].getCardSuite());
         return true;
-    }
-
-    @Override
-    public PlayDuo copy() {
-        return this;
     }
 
     @Override

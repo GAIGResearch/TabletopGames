@@ -1,17 +1,14 @@
 package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 public class LastChance extends AbstractAction {
 
-    int playerId;
-
+    final int playerId;
 
     public LastChance(int playerId) {
         this.playerId = playerId;
@@ -21,13 +18,11 @@ public class LastChance extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
         sspgs.setLastChance(playerId);
-//        // Reveal playerId hand
-//        sspgs.getPlayerHands().get(playerId).setVisibility(CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         return true;
     }
 
     @Override
-    public AbstractAction copy() {
+    public LastChance copy() {
         return this;
     }
 
@@ -46,6 +41,6 @@ public class LastChance extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + playerId + " declares \"LAST CHANCE!\"";
+        return "Player " + playerId + ": \"LAST CHANCE!\"";
     }
 }

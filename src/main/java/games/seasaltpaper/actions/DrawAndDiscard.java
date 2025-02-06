@@ -2,11 +2,8 @@ package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
-import games.seasaltpaper.SeaSaltPaperParameters;
-import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,25 +17,25 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
     enum Step {
         DRAW,
         DISCARD,
-        DONE;
+        DONE
     }
 
-    final int playerId;
-    int[] drawnCardsId;
+    final int playerId, howManyDraw, howManyDiscard;
+
     Step currentStep = Step.DRAW;
+    int[] drawnCardsId;
 
-
-    public DrawAndDiscard(int playerId)
+    public DrawAndDiscard(int playerId, int howManyDraw, int howManyDiscard)
     {
         this.playerId = playerId;
-//        drawnCardsId = new int[NUMBER_OF_CARDS_DRAWN];
+        this.howManyDraw = howManyDraw;
+        this.howManyDiscard = howManyDiscard;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gs;
-        SeaSaltPaperParameters params = (SeaSaltPaperParameters) gs.getGameParameters();
-        int n = Math.min(sspgs.getDrawPile().getSize(), params.numberOfCardsDrawn);
+        int n = Math.min(sspgs.getDrawPile().getSize(), howManyDraw);
         DrawMultiple drawMultiple = new DrawMultiple(n, playerId);
         if (!(drawMultiple.execute(gs))) {
             return false;
@@ -66,9 +63,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
             List<Integer> discardPiles = new ArrayList<>();
             // TODO Make this more general for any number of discard piles
             if (sspgs.getDiscardPile2().getSize() == 0 && sspgs.getDiscardPile1().getSize() == 0) {
-//                System.out.println("BOTH DISCARD PILES ARE EMPTY!!!!");
                 discardPiles.add(sspgs.getDiscardPile1().getComponentID());
-//                discardPiles.add(sspgs.getDiscardPile2().getComponentID());
             }
             else if (sspgs.getDiscardPile1().getSize() == 0) {
                 discardPiles.add(sspgs.getDiscardPile1().getComponentID());
@@ -110,7 +105,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
     @Override
     public DrawAndDiscard copy() {
-        DrawAndDiscard c = new DrawAndDiscard(playerId);
+        DrawAndDiscard c = new DrawAndDiscard(playerId, howManyDraw, howManyDiscard);
         if (drawnCardsId != null) {
             c.drawnCardsId = drawnCardsId.clone();
         }
@@ -123,20 +118,23 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DrawAndDiscard that = (DrawAndDiscard) o;
-        return playerId == that.playerId && Arrays.equals(drawnCardsId, that.drawnCardsId) && currentStep == that.currentStep;
+        return playerId == that.playerId && Arrays.equals(drawnCardsId, that.drawnCardsId) && currentStep == that.currentStep && howManyDraw == that.howManyDraw && howManyDiscard == that.howManyDiscard;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(playerId, currentStep);
+        int result = Objects.hash(playerId, currentStep, howManyDraw, howManyDiscard);
         result = 31 * result + Arrays.hashCode(drawnCardsId);
         return result;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        SeaSaltPaperParameters params = (SeaSaltPaperParameters) gameState.getGameParameters();
-        int n = params.numberOfCardsDrawn;
-        return "Draw " + n + " from the DrawPile then discard 1 to one of the discard pile.";
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Draw " + howManyDraw + " from deck and discard " + howManyDiscard;
     }
 }

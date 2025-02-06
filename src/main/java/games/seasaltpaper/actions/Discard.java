@@ -6,7 +6,6 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.seasaltpaper.SeaSaltPaperGameState;
-import games.seasaltpaper.cards.HandManager;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.Objects;
@@ -55,8 +54,7 @@ public class Discard extends AbstractAction implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Discard card " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();
-//        return "Discard card " + discardCardId + " to pile " + gameState.getComponentById(discardPileId).getComponentName();
+        return "Discard " + gameState.getComponentById(discardCardId).toString() + " to " + gameState.getComponentById(discardPileId).getComponentName();
     }
 
     @Override

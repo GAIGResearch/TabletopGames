@@ -3,11 +3,9 @@ package games.seasaltpaper.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
-import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
 import games.seasaltpaper.cards.HandManager;
-import games.seasaltpaper.cards.SeaSaltPaperCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +37,9 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
                 continue;
             }
             int targetHandId = sspgs.getPlayerHands().get(i).getComponentID();
-//            int fromIndex = sspgs.getRnd().nextInt(sspgs.getPlayerHands().get(i).getSize()); // randomly choose a card from the target
-//            actions.add(new DrawCard(targetHandId, playerHandId, fromIndex));
             actions.add(new DrawRandom(targetHandId, playerHandId));
         }
         if (actions.isEmpty()) {
-//            actions.add(new DoNothing());
-//            System.out.println("NO VALID TARGET FOR SWIMMERSHARK!!"); // SHOULD NEVER GET HERE
             throw new RuntimeException("NO VALID TARGET FOR SWIMMERSHARK!! SHOULD ALREADY BE CHECKED!!");
         }
         return actions;
@@ -72,14 +66,19 @@ public class SwimmerSharkDuo extends PlayDuo implements IExtendedSequence {
 
     @Override
     public SwimmerSharkDuo copy() {
-        SwimmerSharkDuo c = new SwimmerSharkDuo(playerId, cardsIdx);
+        SwimmerSharkDuo c = new SwimmerSharkDuo(playerId, cardsIdx.clone());
         c.executed = executed;
         return c;
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "Swimmer-Shark Duo Actions: Pick a player then get a random card from their hand";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return "Swimmer-Shark Duo";
     }
 
     @Override

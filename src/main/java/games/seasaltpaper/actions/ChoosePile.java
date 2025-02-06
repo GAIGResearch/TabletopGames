@@ -2,18 +2,12 @@ package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Deck;
-import games.seasaltpaper.SeaSaltPaperGameState;
-import games.seasaltpaper.cards.HandManager;
-import games.seasaltpaper.cards.SeaSaltPaperCard;
 
-import java.util.List;
 import java.util.Objects;
 
 public class ChoosePile extends AbstractAction {
 
     public final int playerId;
-
     public final int pileId;
 
     ChoosePile(int pileId, int playerId) {
@@ -23,14 +17,11 @@ public class ChoosePile extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // make the entire pile visible to the playerId
-        Deck<SeaSaltPaperCard> chosenPile = (Deck<SeaSaltPaperCard>) gs.getComponentById(pileId);
-//        HandManager.setDeckVisibility(chosenPile, List.of(playerId), true);
         return true;
     }
 
     @Override
-    public AbstractAction copy() {
+    public ChoosePile copy() {
         return this;
     }
 
@@ -49,7 +40,11 @@ public class ChoosePile extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "CHOOSE " + gameState.getComponentById(pileId).getComponentName();
+        return "Choose " + gameState.getComponentById(pileId).getComponentName();
     }
 
+    @Override
+    public String toString() {
+        return "Choose pile " + pileId;
+    }
 }
