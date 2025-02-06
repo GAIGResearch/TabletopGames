@@ -20,7 +20,6 @@ public class FishDuo extends PlayDuo {
 //            return false;
         }
         SeaSaltPaperCard card = sspgs.getDrawPile().draw();
-        card.setVisible(playerId, true);
         sspgs.getPlayerHands().get(playerId).add(card);
         return true;
     }

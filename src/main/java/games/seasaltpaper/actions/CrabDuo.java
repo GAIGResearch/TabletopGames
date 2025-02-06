@@ -86,10 +86,6 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
         else if (currentStep == Step.CHOOSE_CARD) {
             if (action instanceof DrawCard d) {
                 HandManager.handleAfterDrawDeckVisibility(d, state, playerId);
-                Deck<SeaSaltPaperCard> discardPile = (Deck<SeaSaltPaperCard>) state.getComponentById(discardPileId);
-                if (discardPile.getSize() > 0) {
-                    discardPile.get(0).setVisible(true); // Re-set the top card visible for everyone
-                }
             }
             currentStep = Step.DONE;
         }

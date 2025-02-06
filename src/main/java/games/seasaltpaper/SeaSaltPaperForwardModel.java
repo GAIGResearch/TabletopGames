@@ -68,11 +68,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         if (sspgs.playerHands.isEmpty()) {
             for (int i = 0; i < sspgs.getNPlayers(); i++) {
                 boolean[] visible = new boolean[sspgs.getNPlayers()];
-                if (sspgs.getCoreGameParameters().partialObservable) {  // if partialObservable then only the owner sees it
-                    visible[i] = true;
-                } else {
-                    Arrays.fill(visible, true);
-                }
+                visible[i] = true;
                 PartialObservableDeck<SeaSaltPaperCard> playerHand = new PartialObservableDeck<SeaSaltPaperCard>("playerHand"+i, i, visible);
                 sspgs.playerHands.add(playerHand);
 
@@ -84,8 +80,6 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         // Set-up discard piles
         sspgs.discardPile1.add(sspgs.drawPile.draw());
         sspgs.discardPile2.add(sspgs.drawPile.draw());
-        sspgs.discardPile1.get(0).setVisible(true);
-        sspgs.discardPile2.get(0).setVisible(true);
 
         // Reset player status
         for (int i = 0; i < sspgs.getNPlayers(); i++) {

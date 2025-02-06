@@ -25,7 +25,7 @@ public class ChoosePile extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         // make the entire pile visible to the playerId
         Deck<SeaSaltPaperCard> chosenPile = (Deck<SeaSaltPaperCard>) gs.getComponentById(pileId);
-        HandManager.setDeckVisibility(chosenPile, List.of(playerId), true);
+//        HandManager.setDeckVisibility(chosenPile, List.of(playerId), true);
         return true;
     }
 

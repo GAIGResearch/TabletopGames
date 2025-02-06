@@ -32,7 +32,6 @@ public class Discard extends AbstractAction implements IPrintable {
         PartialObservableDeck<SeaSaltPaperCard> playerHand = sspgs.getPlayerHands().get(playerID);
         playerHand.remove(discardCard);
         discardPile.add(discardCard);
-        discardCard.setVisible(true); // set discard card visible to everyone
         return true;
     }
 

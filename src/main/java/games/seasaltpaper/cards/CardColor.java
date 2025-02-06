@@ -13,8 +13,8 @@ public enum CardColor
     PURPLE(new Color(186, 115, 250)),
     PINK(new Color(255, 105, 239)),
     GREY(new Color(185, 185, 185)),
-    BLACK(new Color(0,0,0)),
-    WHITE(new Color(255, 255, 255));
+    BLACK(new Color(74, 70, 70)),
+    WHITE(new Color(241, 235, 235));
 
     private final Color color;
 

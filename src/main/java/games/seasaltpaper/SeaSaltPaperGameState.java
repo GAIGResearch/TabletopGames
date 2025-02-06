@@ -17,12 +17,7 @@ import java.util.function.Supplier;
 
 public class SeaSaltPaperGameState extends AbstractGameState implements IPrintable{
 
-    public static final int DISCARD_PILE_COUNT = 2; // TODO move this to parameter?
-
-//    public static int GameCount = 0;
-//
-//    public final int gameID;
-    public transient boolean saveState = true;
+    public transient boolean saveState = false;  // todo: this crashes if true unless some other files exist
     public transient int saveCycle = 4;
 
     public enum TurnPhase {
@@ -117,12 +112,11 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
                     ArrayList<SeaSaltPaperCard> shuffledCards = new ArrayList<>(); // Cards to be removed from playerHands and redeterminized
                     for (int j=0; j < playerHands.get(i).getSize(); j++) {
                         SeaSaltPaperCard cardCopy = gsCopy.playerHands.get(i).get(j);
-                        SeaSaltPaperCard cardOriginal = playerHands.get(i).get(j);
-                        if (!cardOriginal.isVisible(playerId)) { // if card not visible to playerId
+                        if (!playerHands.get(i).isComponentVisible(j, playerId)) { // if card not visible to playerId
                             shuffledCards.add(cardCopy);
                         }
                         else {
-                            cardCopy.copyVisibility(cardOriginal); // copy visibility
+                            gsCopy.playerHands.get(i).setVisibilityOfComponent(j, i, true);
                         }
                     }
                     for (SeaSaltPaperCard c : shuffledCards) {
@@ -135,8 +129,8 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
                     if (i == playerId) { continue; }
                     while (gsCopy.playerHands.get(i).getSize() < playerHands.get(i).getSize()) {
                         SeaSaltPaperCard c = gsCopy.drawPile.draw();
-                        c.setVisible(i, true); // Set the card visible to the owner
                         gsCopy.playerHands.get(i).add(c);
+                        gsCopy.playerHands.get(i).setVisibilityOfComponent(0,i,true); // Set the card visible to the owner
                     }
                 }
             }

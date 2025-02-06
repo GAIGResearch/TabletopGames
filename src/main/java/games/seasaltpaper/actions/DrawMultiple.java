@@ -43,7 +43,6 @@ public class DrawMultiple extends AbstractAction {
 //                return false;
             }
             SeaSaltPaperCard drawnCard = sspgs.getDrawPile().draw();
-            drawnCard.setVisible(playerID, true);
             sspgs.getPlayerHands().get(playerID).add(drawnCard);
             drawnCardsId[i] = drawnCard.getComponentID();
         }
