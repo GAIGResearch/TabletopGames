@@ -1,6 +1,7 @@
 package games.seasaltpaper.gui;
 
 import core.components.Deck;
+import games.seasaltpaper.cards.CardColor;
 import games.seasaltpaper.cards.CardType;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
 import games.sushigo.cards.SGCard;
@@ -16,15 +17,16 @@ import java.util.Arrays;
 
 public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
 
-    final String dataPath = "data/seasaltpaper/";
+    final String dataPath;
     BufferedImage backOfCard;
 
     public SSPDeckView(int player, Deck<SeaSaltPaperCard> d, boolean visible, String dataPath, Rectangle rect) {
         super(player, d, visible, SSPGUIManager.cardWidth, SSPGUIManager.cardHeight, rect);
+        this.dataPath = dataPath;
 
-        //TODO make a proper card back image
+        // TODO make a proper card back image
         // Generate card back
-        backOfCard = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        backOfCard = new BufferedImage(SSPGUIManager.cardWidth, SSPGUIManager.cardHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = backOfCard.createGraphics();
         // Set background color
         g.setColor(new Color(94, 92, 92));
@@ -42,32 +44,37 @@ public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
 
     @Override
     public void drawComponent(Graphics2D g, Rectangle rect, SeaSaltPaperCard card, boolean front) {
-        Image cardFace = getCardImage(card);
+        Image cardFace = getCardImage(card, rect);
         int fontSize = g.getFont().getSize();
         CardView.drawCard(g, new Rectangle(rect.x, rect.y, rect.width, rect.height-fontSize), card, cardFace, backOfCard, front);
-//        if (front) {
-//            g.drawString(card.toString(), rect.x + 2, (int) (rect.y + rect.height - fontSize * 1.5));
-//        }
     }
 
-    private Image getCardImage(SeaSaltPaperCard card)
+    private Image getCardImage(SeaSaltPaperCard card, Rectangle rect)
     {
-        BufferedImage cardFront = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage cardFront = new BufferedImage(SSPGUIManager.cardWidth, SSPGUIManager.cardHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = cardFront.createGraphics();
 
         // Set background color
         Color cardColor = card.getCardColor().getColor();
         g.setColor(cardColor);
-        g.fillRect(0, 0, cardFront.getWidth(), cardFront.getHeight());
+        g.fillRect(0, 0, rect.width, rect.height);
 
-        // TODO Change suiteIcon and text color to white if cardColor==BLACK
         // Draw suite icon
         String suiteName = card.getCardSuite().name().toLowerCase();
-        Image iconSuite = ImageIO.GetInstance().getImage(dataPath + suiteName + ".png");
-        g.drawImage(iconSuite.getScaledInstance(width/2, height/2, Image.SCALE_DEFAULT), width/4, width/4, null);
+        BufferedImage iconSuite;
+
+        // Change suiteIcon color to white
+        // and text color to white if cardColor==BLACK
+        if (card.getCardColor() == CardColor.BLACK) {
+            g.setColor(Color.white);
+            iconSuite = (BufferedImage) ImageIO.GetInstance().getImage(dataPath + suiteName + ".png", Color.black, Color.white);
+        } else {
+            iconSuite = (BufferedImage) ImageIO.GetInstance().getImage(dataPath + suiteName + ".png");
+            g.setColor(Color.black);
+        }
+        g.drawImage(iconSuite.getScaledInstance(SSPGUIManager.cardWidth/2, SSPGUIManager.cardHeight/2, Image.SCALE_DEFAULT), SSPGUIManager.cardWidth/4, SSPGUIManager.cardHeight/4, null);
 
         // Draw text info
-        g.setColor(Color.BLACK);
         g.setFont(new Font( "SansSerif", Font.BOLD, 12 ));
 
         if (card.getCardType() == CardType.COLLECTOR) {
@@ -87,7 +94,7 @@ public class SSPDeckView extends DeckView<SeaSaltPaperCard> {
         // Draw outline
         g.setStroke(new BasicStroke(5));
         g.setColor(Color.BLACK);
-        g.drawRect(0, 0, cardFront.getWidth(), cardFront.getHeight());
+        g.drawRect(0, 0, rect.width, rect.height);
 
         g.dispose();
 

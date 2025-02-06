@@ -18,11 +18,10 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
     enum Step {
         CHOOSE_PILE,
         CHOOSE_CARD,
-        DONE;
+        DONE
     }
 
     private Step currentStep;
-
     private int discardPileId;
 
     public CrabDuo(int playerId, int[] cardsIdx) {
@@ -39,9 +38,7 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
     public boolean execute(AbstractGameState gs) {
         SeaSaltPaperGameState sspg = (SeaSaltPaperGameState) gs;
         if (sspg.getDiscardPile1().getSize() == 0 && sspg.getDiscardPile2().getSize() == 0) {
-//            System.out.println("BOTH PILES GONE BRUH"); // SHOULD NEVER REACH HERE, ALREADY CHECKED WHEN GENERATED
             throw new RuntimeException("BOTH PILES GONE BRUH! SHOULD ALREADY BE CHECKED!!");
-//            return false;
         }
         currentStep = Step.CHOOSE_PILE;
         gs.setActionInProgress(this);
@@ -86,10 +83,6 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
         else if (currentStep == Step.CHOOSE_CARD) {
             if (action instanceof DrawCard d) {
                 HandManager.handleAfterDrawDeckVisibility(d, state, playerId);
-                Deck<SeaSaltPaperCard> discardPile = (Deck<SeaSaltPaperCard>) state.getComponentById(discardPileId);
-                if (discardPile.getSize() > 0) {
-                    discardPile.get(0).setVisible(true); // Re-set the top card visible for everyone
-                }
             }
             currentStep = Step.DONE;
         }
@@ -107,11 +100,16 @@ public class CrabDuo extends PlayDuo implements IExtendedSequence {
 
     @Override
     public CrabDuo copy() {
-        return new CrabDuo(playerId, cardsIdx, currentStep, discardPileId);
+        return new CrabDuo(playerId, cardsIdx.clone(), currentStep, discardPileId);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return "Crab Duo";
+    }
+
+    @Override
+    public String toString() {
         return "Crab Duo Action: Choose a discard pile to look at then draw a card from that pile";
     }
 

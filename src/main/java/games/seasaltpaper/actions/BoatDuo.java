@@ -1,7 +1,6 @@
 package games.seasaltpaper.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.seasaltpaper.SeaSaltPaperGameState;
 
 public class BoatDuo extends PlayDuo {
@@ -20,12 +19,16 @@ public class BoatDuo extends PlayDuo {
 
     @Override
     public BoatDuo copy() {
-        return this;
+        return new BoatDuo(playerId, cardsIdx.clone());
     }
 
+    @Override
+    public String toString() {
+        return "Boat Duo Action: Immediately take another turn";
+    }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Boat Duo Action: Immediately take another turn";
+        return "Boat Duo";
     }
 }

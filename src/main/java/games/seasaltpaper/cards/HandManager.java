@@ -192,15 +192,6 @@ public class HandManager {
         return score;
     }
 
-    // Turn deck invisible for the targets
-    public static void setDeckVisibility(Deck<SeaSaltPaperCard> deck, List<Integer> targets, boolean visible) {
-        for (int i=0; i < deck.getSize(); i++) {
-            for (int playerId : targets) {
-                deck.get(i).setVisible(playerId, visible);
-            }
-        }
-    }
-
     // After a draw action
     // Turn deckFrom invisible to everyone but the playerId and the target
     // Turn drawn card visible to the playerId
@@ -213,10 +204,10 @@ public class HandManager {
                 targets.add(i);
             }
         }
-        HandManager.setDeckVisibility(deckFrom, targets, false);
+//        HandManager.setDeckVisibility(deckFrom, targets, false);
         // Turn the drawn card visible for playerId
-        SeaSaltPaperCard c = (SeaSaltPaperCard) d.getCard(gs);
-        c.setVisible(playerId, true);
+//        SeaSaltPaperCard c = (SeaSaltPaperCard) d.getCard(gs);
+//        c.setVisible(playerId, true);
     }
 
 }

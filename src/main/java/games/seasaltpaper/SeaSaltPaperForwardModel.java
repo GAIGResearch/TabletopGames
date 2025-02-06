@@ -5,13 +5,9 @@ import com.google.gson.GsonBuilder;
 import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.seasaltpaper.actions.DrawAndDiscard;
-import games.seasaltpaper.actions.LastChance;
-import games.seasaltpaper.actions.PlayDuo;
-import games.seasaltpaper.actions.Stop;
+import games.seasaltpaper.actions.*;
 import games.seasaltpaper.cards.*;
 import games.seasaltpaper.SeaSaltPaperGameState.TurnPhase;
 import utilities.Pair;
@@ -68,11 +64,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         if (sspgs.playerHands.isEmpty()) {
             for (int i = 0; i < sspgs.getNPlayers(); i++) {
                 boolean[] visible = new boolean[sspgs.getNPlayers()];
-                if (sspgs.getCoreGameParameters().partialObservable) {  // if partialObservable then only the owner sees it
-                    visible[i] = true;
-                } else {
-                    Arrays.fill(visible, true);
-                }
+                visible[i] = true;
                 PartialObservableDeck<SeaSaltPaperCard> playerHand = new PartialObservableDeck<SeaSaltPaperCard>("playerHand"+i, i, visible);
                 sspgs.playerHands.add(playerHand);
 
@@ -84,8 +76,6 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
         // Set-up discard piles
         sspgs.discardPile1.add(sspgs.drawPile.draw());
         sspgs.discardPile2.add(sspgs.drawPile.draw());
-        sspgs.discardPile1.get(0).setVisible(true);
-        sspgs.discardPile2.get(0).setVisible(true);
 
         // Reset player status
         for (int i = 0; i < sspgs.getNPlayers(); i++) {
@@ -194,14 +184,15 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 int currentPlayerHandId = sspgs.playerHands.get(sspgs.getCurrentPlayer()).getComponentID();
                 // Draw from discard pile
                 if (sspgs.discardPile1.getSize() != 0) {
-                    actions.add(new DrawCard(sspgs.discardPile1.getComponentID(), currentPlayerHandId));
+                    actions.add(new SSPDrawCard(sspgs.discardPile1.getComponentID(), currentPlayerHandId));
                 }
                 if (sspgs.discardPile2.getSize() != 0) {
-                    actions.add(new DrawCard(sspgs.discardPile2.getComponentID(), currentPlayerHandId));
+                    actions.add(new SSPDrawCard(sspgs.discardPile2.getComponentID(), currentPlayerHandId));
                 }
                 // Draw 2 from draw pile, then discard 1 to one of the discard pile
+                SeaSaltPaperParameters params = (SeaSaltPaperParameters) sspgs.getGameParameters();
                 if (sspgs.getDrawPile().getSize() > 0) {
-                    actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer()));
+                    actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer(), params.numberOfCardsDrawn, 1));
                 }
                 if (actions.isEmpty()) {
                     actions.add(new DoNothing());

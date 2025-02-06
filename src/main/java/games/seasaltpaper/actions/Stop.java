@@ -7,8 +7,7 @@ import java.util.Objects;
 
 public class Stop extends AbstractAction {
 
-    int playerId;
-
+    final int playerId;
 
     public Stop(int playerId) {
         this.playerId = playerId;
@@ -39,6 +38,6 @@ public class Stop extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Player " + playerId + " declares \"STOP!\"";
+        return "Player " + playerId + ": \"STOP!\"";
     }
 }

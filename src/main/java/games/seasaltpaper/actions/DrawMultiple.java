@@ -10,18 +10,14 @@ import java.util.Objects;
 
 public class DrawMultiple extends AbstractAction {
 
-//    boolean discard;
-//    int playerIdFrom;
-//    int  playerIdTo;
-//
-//    int deckIdFrom;
+    final int playerID, count;
 
     int[] drawnCardsId;
-    int playerID;
 
     public DrawMultiple(int count, int playerID) {
        this.drawnCardsId = new int[count];
        this.playerID = playerID;
+       this.count = count;
     }
 
     public int[] getDrawnCardsId() {
@@ -29,7 +25,7 @@ public class DrawMultiple extends AbstractAction {
     }
 
     public int getDrawCount() {
-        return drawnCardsId.length;
+        return count;
     }
 
     @Override
@@ -43,7 +39,6 @@ public class DrawMultiple extends AbstractAction {
 //                return false;
             }
             SeaSaltPaperCard drawnCard = sspgs.getDrawPile().draw();
-            drawnCard.setVisible(playerID, true);
             sspgs.getPlayerHands().get(playerID).add(drawnCard);
             drawnCardsId[i] = drawnCard.getComponentID();
         }
@@ -51,8 +46,10 @@ public class DrawMultiple extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return this;
+    public DrawMultiple copy() {
+        DrawMultiple drawMultiple = new DrawMultiple(count, playerID);
+        drawMultiple.drawnCardsId = Arrays.copyOf(drawnCardsId, drawnCardsId.length);
+        return drawMultiple;
     }
 
     @Override
@@ -60,22 +57,29 @@ public class DrawMultiple extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DrawMultiple that = (DrawMultiple) o;
-        return playerID == that.playerID && Arrays.equals(drawnCardsId, that.drawnCardsId);
+        return playerID == that.playerID && Arrays.equals(drawnCardsId, that.drawnCardsId) && count == that.count;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(playerID);
+        int result = Objects.hash(playerID, count);
         result = 31 * result + Arrays.hashCode(drawnCardsId);
         return result;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        StringBuilder cardsStr = new StringBuilder();
-        for (int id : drawnCardsId) {
-            cardsStr.append(gameState.getComponentById(id).toString()).append(" ");
-        }
-        return "Draw " + cardsStr + " cards from draw pile.";
+        if (drawnCardsId[0] != 0) {
+            StringBuilder cardsStr = new StringBuilder();
+            for (int id : drawnCardsId) {
+                cardsStr.append(gameState.getComponentById(id).toString()).append(" ");
+            }
+            return "Drawn " + count + ": " + cardsStr;
+        } return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Draw " + count;
     }
 }
