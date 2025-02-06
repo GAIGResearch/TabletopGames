@@ -236,9 +236,9 @@ public class RoundRobinTournament extends AbstractTournament {
     public void createAndRunMatchUps() {
         ExecutorService executor = nThreads > 1 ? Executors.newFixedThreadPool(nThreads) : null;
         int nTeams = byTeam ? game.getGameState().getNTeams() : nPlayers;
-        List<Integer> matchup = new ArrayList<>(nTeams);
         switch (tournamentMode) {
             case FIXED:
+                List<Integer> matchup = new ArrayList<>(nTeams);
                 // we add the agents to the matchUp in the order they are in the list
                 // we always run the same fixed set of agents, so ignore the input matchup
                 for (int i = 0; i < agents.size(); i++) {
@@ -250,9 +250,10 @@ public class RoundRobinTournament extends AbstractTournament {
                 // In the RANDOM case we use a new seed for each game
                 PermutationCycler idStream = new PermutationCycler(agents.size(), seedRnd, nTeams);
                 for (int i = 0; i < totalGameBudget; i++) {
+                    List<Integer> matchUp = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
-                        matchup.add(idStream.getAsInt());
-                    evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(i)), executor);
+                        matchUp.add(idStream.getAsInt());
+                    evaluateMatchUp(matchUp, 1, Collections.singletonList(gameSeeds.get(i)), executor);
                 }
                 break;
             case ONE_VS_ALL:
@@ -263,27 +264,29 @@ public class RoundRobinTournament extends AbstractTournament {
                     // we put the focus player at each position (p) in turn
                     if (agentOrder.size() == 1) {
                         // to reduce variance in this case we can use the same set of seeds for each case
+                        List<Integer> matchUp = new ArrayList<>(nTeams);
                         for (int j = 0; j < nTeams; j++) {
                             if (j == p)
-                                matchup.add(0); // focus player
+                                matchUp.add(0); // focus player
                             else {
-                                matchup.add(agentOrder.get(0));
+                                matchUp.add(agentOrder.get(0));
                             }
                         }
                         // We split the total budget equally across the possible positions the focus player can be in
                         // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
-                        evaluateMatchUp(matchup, totalGameBudget / nTeams, gameSeeds, executor);
+                        evaluateMatchUp(matchUp, totalGameBudget / nTeams, gameSeeds, executor);
                     } else {
                         for (int m = 0; m < this.totalGameBudget / nTeams; m++) {
                             Collections.shuffle(agentOrder, seedRnd);
+                            List<Integer> matchUp = new ArrayList<>(nTeams);
                             for (int j = 0; j < nTeams; j++) {
                                 if (j == p)
-                                    matchup.add(0); // focus player
+                                    matchUp.add(0); // focus player
                                 else {
-                                    matchup.add(agentOrder.get(j % agentOrder.size()));
+                                    matchUp.add(agentOrder.get(j % agentOrder.size()));
                                 }
                             }
-                            evaluateMatchUp(matchup, 1, Collections.singletonList(gameSeeds.get(m)), executor);
+                            evaluateMatchUp(matchUp, 1, Collections.singletonList(gameSeeds.get(m)), executor);
                         }
                     }
                 }
