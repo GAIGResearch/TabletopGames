@@ -331,10 +331,7 @@ public class CQGameState extends AbstractGameState {
     public void gainCommandPoints(int uid, int points) {
         assert points >= 0;
         spendCommandPoints(uid, -points);
-        if (getTroops(uid ^ 1).isEmpty()) {
-            // Game is over.
-            setGameStatus(CoreConstants.GameResult.WIN_GAME);
-        }
+        checkWin();
     }
 
     public boolean spendCommandPoints(int uid, int points) {
@@ -355,6 +352,7 @@ public class CQGameState extends AbstractGameState {
     }
 
     public void endTurn() {
+        if (checkWin()) return; // game has ended, and checkWin() has finished it
         setGamePhase(CQGamePhase.SelectionPhase);
         selectedTroop = -1;
         for (Troop troop : getTroops(-1)) {
@@ -403,6 +401,19 @@ public class CQGameState extends AbstractGameState {
 
     public int getDistance(Vector2D from, Vector2D to) {
         return getDistance(getCell(from), getCell(to));
+    }
+
+    public boolean checkWin() {
+        int win = -1;
+        if (getTroops(0).isEmpty()) {
+            win = 1;
+        } else if (getTroops(1).isEmpty()) {
+            win = 0;
+        } else return false;
+        setPlayerResult(CoreConstants.GameResult.WIN_GAME, win);
+        setPlayerResult(CoreConstants.GameResult.LOSE_GAME, win ^ 1);
+        setGameStatus(CoreConstants.GameResult.GAME_END);
+        return true;
     }
 
     /**
