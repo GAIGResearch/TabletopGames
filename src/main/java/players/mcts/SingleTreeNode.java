@@ -44,7 +44,7 @@ public class SingleTreeNode {
     // variables to track rollout - these were originally local in rollout(); but
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
-    protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout;
+    protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout, turnAtStartOfRollout, roundAtStartOfRollout;
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
     Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
     Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
@@ -887,8 +887,10 @@ public class SingleTreeNode {
      */
     protected double[] rollout(int lastActor) {
         lastActorInRollout = lastActor;
-        lastRoundInRollout = openLoopState.getRoundCounter();
+        roundAtStartOfRollout = openLoopState.getRoundCounter();
+        turnAtStartOfRollout = openLoopState.getTurnCounter();
         lastTurnInRollout = openLoopState.getTurnCounter();
+        lastRoundInRollout = openLoopState.getRoundCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
