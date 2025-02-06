@@ -163,31 +163,6 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
     @Override
     protected double _getHeuristicScore(int playerId) {
         return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
-//        return HandManager.calculatePoint(this, playerId);
-//        return getLeadHeuristicScore(playerId);
-    }
-
-    private double _tempHeuristicScore(int playerId) {
-        return HandManager.calculatePoint(this, playerId) + playerTotalScores[playerId];
-    }
-
-    private double getLeadHeuristicScore(int playerId) {
-        double[] scores = new double[getNPlayers()];
-        double max = 0; // max score of every other players
-        for (int i=0; i < getNPlayers(); i++) {
-            scores[i] = _tempHeuristicScore(i);
-//            scores[i] = HandManager.calculatePoint(this, i);
-            if (i != playerId) {
-                if (scores[i] > max) {
-                    max = scores[i];
-                }
-            }
-        }
-        DoubleSummaryStatistics stat = Arrays.stream(scores).summaryStatistics();
-//        return (2 * scores[playerId]) - stat.getMax();
-//        return scores[playerId] - stat.getMax();
-//        return playerTotalScores[playerId] + (2*scores[playerId]) - stat.getMax();
-        return scores[playerId] - max;
     }
 
     @Override

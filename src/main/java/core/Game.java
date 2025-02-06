@@ -848,22 +848,22 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
-        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
+//        players.add(new BasicMCTSPlayer());
 
         MCTSParams params = new MCTSParams();
 //        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
 //        params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
 //        params.rolloutLength = 1;
         params.maxTreeDepth = 10;
-        params.heuristic = new LeadHeuristic();
+//        params.heuristic = new LeadHeuristic();
 //        params.reuseTree = true;
 //        params.normaliseRewards = false;
         players.add(new MCTSPlayer(params));
-//        players.add(new MCTSPlayer(params));
-//        players.add(new MCTSPlayer(params));
-//        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;
@@ -892,9 +892,15 @@ public class Game {
         /* Run multiple games */
         long t = System.currentTimeMillis();
         int n = 100;
+        long[] seeds = new long[n];
+        Random rnd = new Random(t);
+        for (int i = 0; i < n; i++) {
+            seeds[i] = rnd.nextInt();
+        }
         ArrayList<GameType> games = new ArrayList<>();
         games.add(GameType.SeaSaltPaper);
-        runMany(games, players, t, n, false, true, null, turnPause);
+//        runMany(games, players, 100L, n, false, true, null, turnPause);
+        runMany(games, players, n, seeds, null, false, null, 0);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
         System.out.println("FISNIHED RUNNING IN " + (System.currentTimeMillis() - t)/1000 + " SECONDS");
     }

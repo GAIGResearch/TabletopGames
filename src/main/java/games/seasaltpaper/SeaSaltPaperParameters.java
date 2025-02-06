@@ -16,7 +16,7 @@ import static games.seasaltpaper.cards.CardSuite.*;
 public class SeaSaltPaperParameters extends AbstractParameters {
 
     public String dataPath = "data/seasaltpaper/";
-    public boolean individualVisibility = true;    // using individual card visibility for gameState copying
+    public boolean individualVisibility = false;    // using individual card visibility for gameState copying
     public int discardPileCount = 2;
     public int numberOfCardsDrawn = 2;
 
