@@ -22,7 +22,7 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 //    public static int GameCount = 0;
 //
 //    public final int gameID;
-    public transient boolean saveState = true;
+    public transient boolean saveState = false;
     public transient int saveCycle = 4;
 
     public enum TurnPhase {
