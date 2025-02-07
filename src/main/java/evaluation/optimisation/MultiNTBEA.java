@@ -132,4 +132,8 @@ public class MultiNTBEA extends NTBEA {
         return retValue;
     }
 
+    @Override
+    public NTBEA copy() {
+        return new MultiNTBEA(params, game, nPlayers);
+    }
 }
