@@ -9,6 +9,7 @@
   "actionHeuristic": {
     "class": "games.conquest.players.CQRandomSearchHeuristic"
   },
+  "rolloutType": "PARAMS",
   "rolloutPolicyParams": {
     "class": "players.simple.BoltzmannActionParams",
     "actionHeuristic": {

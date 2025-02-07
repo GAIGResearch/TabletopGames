@@ -1,4 +1,4 @@
 {
-  "class" : "evaluation.heuristics.TargetGameLength",
-  "args" : ["TURNS", 50]
+  "class" : "evaluation.heuristics.TargetWinnerIndex",
+  "args" : [0]
 }

@@ -25,6 +25,10 @@ public class CQForwardModel extends StandardForwardModel {
     private int maxTroops;
     private int maxCommands;
 
+//    public CQForwardModel() {
+//        super();
+//    }
+
     /**
      * Initializes all variables in the given game state. Performs initial game setup according to game rules, e.g.:
      * <ul>
