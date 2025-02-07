@@ -842,10 +842,10 @@ public class Game {
 //        players.add(new MCTSPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new HumanConsolePlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
@@ -860,10 +860,10 @@ public class Game {
 //        params.heuristic = new LeadHeuristic();
 //        params.reuseTree = true;
 //        params.normaliseRewards = false;
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
-        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
+//        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;
@@ -891,15 +891,15 @@ public class Game {
 
         /* Run multiple games */
         long t = System.currentTimeMillis();
-        int n = 100;
-        long[] seeds = new long[n];
-        Random rnd = new Random(t);
-        for (int i = 0; i < n; i++) {
-            seeds[i] = rnd.nextInt();
-        }
+        int n = 1000;
         ArrayList<GameType> games = new ArrayList<>();
         games.add(GameType.SeaSaltPaper);
 //        runMany(games, players, 100L, n, false, true, null, turnPause);
+        long[] seeds = new long[n];
+        Random rnd = new Random();
+        for (int i = 0; i < n; i++) {
+            seeds[i] = rnd.nextInt();
+        }
         runMany(games, players, n, seeds, null, false, null, 0);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
         System.out.println("FISNIHED RUNNING IN " + (System.currentTimeMillis() - t)/1000 + " SECONDS");
