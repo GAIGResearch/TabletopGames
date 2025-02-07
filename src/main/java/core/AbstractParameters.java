@@ -155,7 +155,7 @@ public abstract class AbstractParameters {
      * Randomizes the set of parameters, if this is a class that implements the TunableParameters interface.
      */
     public void randomize() {
-        if (this instanceof ITunableParameters params) {
+        if (this instanceof ITunableParameters<?> params) {
             Random rnd = new Random(randomSeed);
             params.getParameterNames().forEach(name -> {
                         int nValues = params.getPossibleValues(name).size();

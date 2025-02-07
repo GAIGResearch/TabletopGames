@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.*;
 
 import static evaluation.RunArg.parseConfig;
-import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
 
 /**
  * This runs experiments to plot the skills ladder of a game.

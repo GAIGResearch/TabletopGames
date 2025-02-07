@@ -1,5 +1,6 @@
 package players.search;
 
+import core.AbstractPlayer;
 import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import players.PlayerParameters;
@@ -63,7 +64,7 @@ public class MaxNSearchParameters extends PlayerParameters {
     }
 
     @Override
-    public Object instantiate() {
+    public AbstractPlayer instantiate() {
         return new MaxNSearchPlayer(this);
     }
 
