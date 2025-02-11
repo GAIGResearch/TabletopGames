@@ -175,10 +175,10 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         actions.add(new DrawTrainCards(playerId));
         actions.add(new DrawDestinationTicketCards(playerId));
 
-        HashMap<Edge, Integer> routesAvailableToBuy = (HashMap<Edge, Integer>) checkRoutesAvailable(gameState); //key of edges, index of which color to buy
+        HashMap<Edge, List<Integer>> routesAvailableToBuy = (HashMap<Edge, List<Integer>>) checkRoutesAvailable(gameState); //key of edges, index of which color to buy
         if (!routesAvailableToBuy.isEmpty()) {
 
-            for (Map.Entry<Edge, Integer> currentRoute : routesAvailableToBuy.entrySet()) { //add every route available to list of actions
+            for (Map.Entry<Edge, List<Integer>> currentRoute : routesAvailableToBuy.entrySet()) { //add every route available to list of actions
                 System.out.println("In for loop");
                 Edge currentEdge = currentRoute.getKey();
 
@@ -186,18 +186,23 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
                 int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
 
-                int indexOfColor = routesAvailableToBuy.get(currentEdge);
+                List<Integer> indexsOfColors = routesAvailableToBuy.get(currentEdge);
                 Property colorProp = currentEdge.getProperty(colorHashKey);
-
                 String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
+                for (int i = 0; i < indexsOfColors.size(); i++){
+                    String colorOfRoute = colorsOfRoute[indexsOfColors.get(i)];
+                    System.out.println(colorOfRoute + " is the colors");
 
-                String colorOfRoute = colorsOfRoute[indexOfColor];
-                System.out.println(colorOfRoute + " is the colors");
+                    System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
 
-                System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
+                    actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, i));
+                }
 
 
-                actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexOfColor));
+
+
+
+
             }
 
         }
@@ -238,10 +243,10 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         endPlayerTurn(gs);
 
     }
-
-    HashMap<Edge, Integer> checkRoutesAvailable(AbstractGameState gameState) {
+    //return the edge and which integer of colour they can buy
+    HashMap<Edge, List<Integer>> checkRoutesAvailable(AbstractGameState gameState) {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
-        HashMap<Edge, Integer>  routesAvailableToBuy = new HashMap<Edge, Integer>();
+        HashMap<Edge, List<Integer>> routesAvailableToBuy = new HashMap<Edge, List<Integer>>();
 
         Area gameArea = tg.getArea(-1);
         GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
@@ -271,10 +276,19 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 if (routeClaimed) {
                     System.out.println("This route is already claimed.");
                 } else {
-                    int canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
-                    if (canAffordRoute != -1){
-                        routesAvailableToBuy.put(edge, canAffordRoute);
+                    boolean[] routesPlayerCanAfford = checkPlayerCanAffordRoute(tg, edge);
+
+                    boolean atleastOneAfforded = false;
+                    List<Integer> colorIndexesAvailable = new ArrayList<>();
+                    for (int i = 0; i < routesPlayerCanAfford.length; i++){ //allows the different colour options of 1 route
+                        if (routesPlayerCanAfford[i]){
+                            System.out.println("Route option is claimable " + i);
+                            colorIndexesAvailable.add(i);
+                            atleastOneAfforded = true;
+
+                        }
                     }
+                    routesAvailableToBuy.put(edge, colorIndexesAvailable);
                 }
             }
 
@@ -318,10 +332,12 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         return routesAvailableToBuy;
     }
     //return the index of color (in edges array) that they can afford. If can't afford any, return -1
-    int checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
+    boolean[] checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
 
-
+        boolean[] listOfAvailable = new boolean[2]; //holds indexes of colors they can afford. if both are false, then none
+        listOfAvailable[0] = false;
+        listOfAvailable[1] = false;
 
         Property colorProp = edge.getProperty(colorHash);
 
@@ -350,8 +366,8 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                     System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
                     System.out.println("Player has Train Cards: " + numberOfRequiredColor);
                     if (numberOfRequiredColor >= trainCardsRequired) {
-                        System.out.println("Player ID " + playerID + " can buy this route");
-                        return i;
+                        System.out.println("Player ID " + playerID + " can buy this route of choice " + i);
+                        listOfAvailable[i] = true;
                     } else {
                         System.out.println("Player ID " + playerID + " cant buy this route");
                     }
@@ -359,7 +375,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
             }
         }
-        return -1;
+        return listOfAvailable;
     }
 
     Map<String, Integer> getTrainCarAmounts(Deck trainCards){
