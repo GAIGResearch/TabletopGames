@@ -12,7 +12,7 @@ import games.root.actions.Pass;
 import games.root.actions.choosers.ChooseNumber;
 import games.root.actions.choosers.ChooseCardForSupporters;
 import games.root.actions.choosers.ChooseNode;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -190,25 +190,14 @@ public class March extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof March other) {
-            return playerID == other.playerID &&
-                    movesMade == other.movesMade &&
-                    stage == other.stage &&
-                    done == other.done &&
-                    amount == other.amount &&
-                    fromNodeID == other.fromNodeID &&
-                    toNodeID == other.toNodeID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof March march)) return false;
+        return playerID == march.playerID && fromNodeID == march.fromNodeID && toNodeID == march.toNodeID && done == march.done && amount == march.amount && movesMade == march.movesMade && stage == march.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("March", playerID, movesMade, done, stage);
+        return Objects.hash(playerID, stage, fromNodeID, toNodeID, done, amount, movesMade);
     }
 
     @Override

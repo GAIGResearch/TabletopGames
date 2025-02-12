@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.Objects;
 
@@ -64,6 +64,6 @@ public class Train extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
         RootCard card = (RootCard) gs.getComponentById(cardId);
-        return gs.getPlayerFaction(playerID).toString()  + " discards " + card.cardtype.toString() + " to train an officer";
+        return gs.getPlayerFaction(playerID).toString()  + " discards " + card.cardType.toString() + " to train an officer";
     }
 }

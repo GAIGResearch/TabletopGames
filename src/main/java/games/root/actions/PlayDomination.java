@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.Objects;
 
@@ -69,6 +69,6 @@ public class PlayDomination extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
         RootCard card = (RootCard) gs.getComponentById(cardId);
-        return gs.getPlayerFaction(playerID).toString() + " plays " + card.suit.toString() + " " + card.cardtype.toString();
+        return gs.getPlayerFaction(playerID).toString() + " plays " + card.suit.toString() + " " + card.cardType.toString();
     }
 }

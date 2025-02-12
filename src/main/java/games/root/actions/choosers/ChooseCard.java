@@ -3,7 +3,7 @@ package games.root.actions.choosers;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.root.RootGameState;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.Objects;
 
@@ -48,6 +48,6 @@ public class ChooseCard extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         RootGameState gs = (RootGameState) gameState;
         RootCard card = (RootCard) gs.getComponentById(cardId);
-        return gs.getPlayerFaction(playerID).toString() + " chooses " + card.suit.toString() + " card " + card.cardtype.toString();
+        return gs.getPlayerFaction(playerID).toString() + " chooses " + card.suit.toString() + " card " + card.cardType.toString();
     }
 }

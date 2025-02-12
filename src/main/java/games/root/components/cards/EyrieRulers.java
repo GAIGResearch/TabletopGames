@@ -1,4 +1,4 @@
-package games.root.cards;
+package games.root.components.cards;
 
 import core.components.Card;
 

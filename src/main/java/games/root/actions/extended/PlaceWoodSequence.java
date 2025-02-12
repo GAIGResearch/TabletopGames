@@ -108,17 +108,14 @@ public class PlaceWoodSequence extends AbstractAction implements IExtendedSequen
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof PlaceWoodSequence other){
-            return playerID == other.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof PlaceWoodSequence that)) return false;
+        return playerID == that.playerID && canPlaceEverywhere == that.canPlaceEverywhere && done == that.done && Objects.equals(locationIDs, that.locationIDs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("PlaceWoodSequence", playerID);
+        return Objects.hash(playerID, locationIDs, canPlaceEverywhere, done);
     }
 
     @Override

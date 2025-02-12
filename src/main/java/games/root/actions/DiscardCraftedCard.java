@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.root.RootGameState;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class DiscardCraftedCard extends AbstractAction {
             Deck<RootCard> playerCraftedCard = currentState.getPlayerCraftedCards(playerID);
             RootCard card = playerCraftedCard.pick(cardIdx);
             discardPile.add(card);
-            if (card.cardtype == RootCard.CardType.RoyalClaim){
+            if (card.cardType == RootCard.CardType.RoyalClaim){
                 //add score per clearing ruled
                 for (RootBoardNodeWithRootEdges node: currentState.getGameMap().getNonForrestBoardNodes()){
                     if (node.rulerID == playerID){

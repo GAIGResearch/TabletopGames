@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import evaluation.metrics.Event;
 import games.root.RootGameState;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ public class TakeRandomCard extends AbstractAction {
             if (targetHand.getSize() > 0){
                 int random = currentState.getRnd().nextInt(targetHand.getSize());
                 hand.add(targetHand.get(random), visibility);
-                currentState.logEvent(Event.GameEvent.GAME_EVENT, currentState.getPlayerFaction(playerID).toString() + " takes " + targetHand.get(random).suit.toString() + " card " + targetHand.get(random).cardtype.toString() + " from " + currentState.getPlayerFaction(targetPlayerID).toString());
+                currentState.logEvent(Event.GameEvent.GAME_EVENT, currentState.getPlayerFaction(playerID).toString() + " takes " + targetHand.get(random).suit.toString() + " card " + targetHand.get(random).cardType.toString() + " from " + currentState.getPlayerFaction(targetPlayerID).toString());
                 targetHand.remove(random);
                 return true;
             }

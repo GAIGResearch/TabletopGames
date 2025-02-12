@@ -7,7 +7,7 @@ import core.interfaces.IExtendedSequence;
 import games.root.RootGameState;
 import games.root.RootParameters;
 import games.root.actions.TakeFromDiscard;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.Item;
 
 import java.util.ArrayList;
@@ -74,17 +74,14 @@ public class VagabondDayLabour extends AbstractAction implements IExtendedSequen
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondDayLabour vd){
-            return playerID == vd.playerID && done == vd.done;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondDayLabour that)) return false;
+        return playerID == that.playerID && done == that.done;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("DayLabour", playerID, done);
+        return Objects.hash(playerID, done);
     }
 
     @Override

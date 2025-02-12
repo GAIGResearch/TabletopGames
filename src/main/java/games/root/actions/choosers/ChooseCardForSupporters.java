@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.ArrayList;
 import java.util.Objects;

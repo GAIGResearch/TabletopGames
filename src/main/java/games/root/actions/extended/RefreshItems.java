@@ -82,19 +82,14 @@ public class RefreshItems extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof RefreshItems other) {
-            return playerID == other.playerID && refreshedItems == other.refreshedItems && done == other.done;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof RefreshItems that)) return false;
+        return playerID == that.playerID && done == that.done && refreshedItems == that.refreshedItems;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("RefreshItems", playerID, refreshedItems, done);
+        return Objects.hash(playerID, done, refreshedItems);
     }
 
     @Override

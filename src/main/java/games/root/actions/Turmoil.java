@@ -5,8 +5,8 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.EyrieRulers;
-import games.root.cards.RootCard;
+import games.root.components.cards.EyrieRulers;
+import games.root.components.cards.RootCard;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -59,7 +59,7 @@ public class Turmoil extends AbstractAction {
                         if (decreePart.get(card).suit == RootParameters.ClearingTypes.Bird){
                             currentState.removeGameScorePlayer(playerID);
                         }
-                        if(decreePart.get(card).cardtype.equals(RootCard.CardType.Vizier)){
+                        if(decreePart.get(card).cardType.equals(RootCard.CardType.Vizier)){
                             currentState.getViziers().add(decreePart.get(card));
                             decreePart.remove(card);
                         }else{

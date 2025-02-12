@@ -1,42 +1,23 @@
-package games.root.cards;
+package games.root.components.cards;
 
-import core.components.Card;
 import games.root.RootParameters;
 import games.root.components.Item;
 
 import java.util.Objects;
 
-public class RootQuestCard extends Card {
+public class RootQuestCard extends RootCard {
 
-    public enum CardType{
-        Errand,
-        Escort,
-        ExpelBandits,
-        FendOffABear,
-        Fundraising,
-        GiveASpeech,
-        GuardDuty,
-        LogisticsHelp,
-        RepairAShed,
-    }
-
-    public final CardType cardType;
-    public final RootParameters.ClearingTypes suit;
     public Item.ItemType requirement1;
     public Item.ItemType requirement2;
 
     public RootQuestCard(CardType cardType, RootParameters.ClearingTypes clearingType) {
-        super(cardType.toString());
-        this.cardType = cardType;
-        suit = clearingType;
+        super(cardType, clearingType);
         requirement1 = getFirstItem(cardType);
         requirement2 = getSecondItem(cardType);
     }
 
     public RootQuestCard(CardType cardType, RootParameters.ClearingTypes clearingType, int componentID){
-        super(cardType.toString(), componentID);
-        this.cardType = cardType;
-        suit = clearingType;
+        super(cardType, clearingType, componentID);
         requirement1 = getFirstItem(cardType);
         requirement2 = getSecondItem(cardType);
     }
@@ -52,6 +33,7 @@ public class RootQuestCard extends Card {
             case Escort, LogisticsHelp -> Item.ItemType.boot;
             case GuardDuty, GiveASpeech, RepairAShed, FendOffABear -> Item.ItemType.torch;
             case ExpelBandits -> Item.ItemType.sword;
+            default -> throw new IllegalStateException("Unexpected value: " + cardType);
         };
     }
     private Item.ItemType getSecondItem(CardType cardType){
@@ -63,25 +45,19 @@ public class RootQuestCard extends Card {
             case RepairAShed -> Item.ItemType.hammer;
             case FendOffABear -> Item.ItemType.crossbow;
             case LogisticsHelp -> Item.ItemType.bag;
+            default -> throw new IllegalStateException("Unexpected value: " + cardType);
         };
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof RootQuestCard that)) return false;
         if (!super.equals(o)) return false;
-        RootQuestCard that = (RootQuestCard) o;
-        return cardType == that.cardType && suit == that.suit && requirement1 == that.requirement1 && requirement2 == that.requirement2;
+        return requirement1 == that.requirement1 && requirement2 == that.requirement2;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardType, suit, requirement1, requirement2);
-    }
-
-    @Override
-    public String toString(){
-        return cardType.name();
+        return Objects.hash(super.hashCode(), requirement1, requirement2);
     }
 }

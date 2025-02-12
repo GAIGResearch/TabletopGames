@@ -1,4 +1,4 @@
-package games.root.cards;
+package games.root.components.cards;
 
 import core.actions.AbstractAction;
 import core.components.Card;
@@ -48,7 +48,17 @@ public class RootCard extends Card {
         FavorOfTheFoxes,
         FoxfolkSteel,
         Anvil,
-        Vizier
+        Vizier,
+        // Quest cards
+        Errand,
+        Escort,
+        ExpelBandits,
+        FendOffABear,
+        Fundraising,
+        GiveASpeech,
+        GuardDuty,
+        LogisticsHelp,
+        RepairAShed,
     }
 
     public enum CraftingType{
@@ -58,38 +68,38 @@ public class RootCard extends Card {
         unCraftable
     }
 
-    public final CardType cardtype;
+    public final CardType cardType;
     public CraftingType craftingType;
     public final List<RootParameters.ClearingTypes> craftingCost;
     public final RootParameters.ClearingTypes suit;
 
     public RootCard(CardType cardType, RootParameters.ClearingTypes clearingType){
         super(cardType.toString());
-        this.cardtype = cardType;
+        this.cardType = cardType;
 
         this.suit = clearingType;
-        this.craftingCost = getCraftingCost(suit, cardtype);
+        this.craftingCost = getCraftingCost(suit, this.cardType);
     }
 
     protected RootCard(CardType cardType, RootParameters.ClearingTypes clearingType, int componentID){
         super(cardType.toString(), componentID);
-        this.cardtype = cardType;
+        this.cardType = cardType;
         this.suit = clearingType;
-        this.craftingCost = getCraftingCost(suit, cardtype);
+        this.craftingCost = getCraftingCost(suit, this.cardType);
     }
 
     @Override
     public RootCard copy(){
-        return new RootCard(cardtype, suit, componentID);
+        return new RootCard(cardType, suit, componentID);
     }
 
     @Override
     public String toString(){
-        return cardtype.name();
+        return cardType.name();
     }
 
     public Item.ItemType getCraftableItem(){
-        return switch (cardtype) {
+        return switch (cardType) {
             case ArmsTrader, FoxfolkSteel, Sword -> Item.ItemType.sword;
             case CrossBow -> Item.ItemType.crossbow;
             case Anvil -> Item.ItemType.hammer;
@@ -281,11 +291,11 @@ public class RootCard extends Card {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         RootCard rootCard = (RootCard) o;
-        return cardtype == rootCard.cardtype && craftingType == rootCard.craftingType && Objects.equals(craftingCost, rootCard.craftingCost) && suit == rootCard.suit;
+        return cardType == rootCard.cardType && craftingType == rootCard.craftingType && Objects.equals(craftingCost, rootCard.craftingCost) && suit == rootCard.suit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardtype, craftingType, craftingCost, suit);
+        return Objects.hash(super.hashCode(), cardType, craftingType, craftingCost, suit);
     }
 }

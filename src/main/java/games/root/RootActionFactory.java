@@ -7,9 +7,9 @@ import core.components.PartialObservableDeck;
 import games.root.actions.*;
 import games.root.actions.choosers.ChooseRuler;
 import games.root.actions.extended.*;
-import games.root.cards.EyrieRulers;
-import games.root.cards.RootCard;
-import games.root.cards.VagabondCharacter;
+import games.root.components.cards.EyrieRulers;
+import games.root.components.cards.RootCard;
+import games.root.components.cards.VagabondCharacter;
 import games.root.components.Item;
 import games.root.components.RootBoardNodeWithRootEdges;
 
@@ -157,7 +157,7 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
-            if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
+            if (crafted.get(i).cardType == RootCard.CardType.RoyalClaim){
                 actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
@@ -179,7 +179,7 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(currentState.getCurrentPlayer());
         for (int i = 0; i < hand.getSize(); i++){
-            if (hand.get(i).cardtype == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
+            if (hand.get(i).cardType == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
                 actions.add(new PlayDomination(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID()));
             }
         }
@@ -298,7 +298,7 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
-            if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
+            if (crafted.get(i).cardType == RootCard.CardType.RoyalClaim){
                 actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
@@ -345,7 +345,7 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(currentState.getCurrentPlayer());
         for (int i = 0; i < hand.getSize(); i++){
-            if (hand.get(i).cardtype == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
+            if (hand.get(i).cardType == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
                 actions.add(new PlayDomination(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID()));
             }
         }
@@ -519,7 +519,7 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
-            if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
+            if (crafted.get(i).cardType == RootCard.CardType.RoyalClaim){
                 actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }
@@ -581,7 +581,7 @@ public class RootActionFactory {
         //add all craft, Mobilize and Train actions + pass
         PartialObservableDeck<RootCard> hand = currentState.getPlayerHand(currentState.getCurrentPlayer());
         for (int i = 0; i < hand.getSize(); i++){
-            if (hand.get(i).cardtype == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
+            if (hand.get(i).cardType == RootCard.CardType.Dominance && currentState.getGameScore(currentState.getCurrentPlayer())>=10){
                 actions.add(new PlayDomination(currentState.getCurrentPlayer(), i, hand.get(i).getComponentID()));
             }
         }
@@ -718,7 +718,7 @@ public class RootActionFactory {
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> crafted = currentState.getPlayerCraftedCards(currentState.getCurrentPlayer());
         for (int i = 0; i < crafted.getSize(); i++){
-            if (crafted.get(i).cardtype == RootCard.CardType.RoyalClaim){
+            if (crafted.get(i).cardType == RootCard.CardType.RoyalClaim){
                 actions.add(new DiscardCraftedCard(currentState.getCurrentPlayer(), i, crafted.get(i).getComponentID()));
             }
         }

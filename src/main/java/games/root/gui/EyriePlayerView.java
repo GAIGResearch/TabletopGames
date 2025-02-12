@@ -3,7 +3,7 @@ package games.root.gui;
 import core.components.Deck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.Item;
 import utilities.ImageIO;
 
@@ -65,16 +65,16 @@ public class EyriePlayerView extends JComponent {
         DecreeBattle.clear();
         DecreeBuild.clear();
         for (int i = 0; i < decree.get(0).getSize(); i++){
-            DecreeRecruit.add(dataPath + decree.get(0).get(i).cardtype.toString() + decree.get(0).get(i).suit.toString() + ".png");
+            DecreeRecruit.add(dataPath + decree.get(0).get(i).cardType.toString() + decree.get(0).get(i).suit.toString() + ".png");
         }
         for (int i = 0; i < decree.get(1).getSize(); i++){
-            DecreeMove.add(dataPath + decree.get(1).get(i).cardtype.toString() + decree.get(1).get(i).suit.toString() + ".png");
+            DecreeMove.add(dataPath + decree.get(1).get(i).cardType.toString() + decree.get(1).get(i).suit.toString() + ".png");
         }
         for (int i = 0; i < decree.get(2).getSize(); i++){
-            DecreeBattle.add(dataPath + decree.get(2).get(i).cardtype.toString() + decree.get(2).get(i).suit.toString() + ".png");
+            DecreeBattle.add(dataPath + decree.get(2).get(i).cardType.toString() + decree.get(2).get(i).suit.toString() + ".png");
         }
         for (int i = 0; i < decree.get(3).getSize(); i++){
-            DecreeBuild.add(dataPath + decree.get(3).get(i).cardtype.toString().toLowerCase() + decree.get(3).get(i).suit.toString().toLowerCase() + ".png");
+            DecreeBuild.add(dataPath + decree.get(3).get(i).cardType.toString().toLowerCase() + decree.get(3).get(i).suit.toString().toLowerCase() + ".png");
         }
         craftedItems.clear();
         for (Item item: state.getPlayerCraftedItems(playerID)){

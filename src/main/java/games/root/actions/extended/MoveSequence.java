@@ -11,7 +11,7 @@ import games.root.actions.Move;
 import games.root.actions.Pass;
 import games.root.actions.choosers.ChooseNumber;
 import games.root.actions.choosers.ChooseCardForSupporters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -164,17 +164,14 @@ public class MoveSequence extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if(obj == this){return true;}
-        if (obj instanceof MoveSequence other){
-            return playerID == other.playerID && fromNodeID == other.fromNodeID && birdPlayed == other.birdPlayed;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof MoveSequence that)) return false;
+        return playerID == that.playerID && fromNodeID == that.fromNodeID && toNodeID == that.toNodeID && birdPlayed == that.birdPlayed && done == that.done && amount == that.amount && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("MoveSequence", playerID, fromNodeID);
+        return Objects.hash(playerID, fromNodeID, toNodeID, stage, birdPlayed, done, amount);
     }
 
     @Override

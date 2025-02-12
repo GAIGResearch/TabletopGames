@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import evaluation.metrics.Event;
 import games.root.RootGameState;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.Objects;
 

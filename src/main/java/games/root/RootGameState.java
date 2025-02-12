@@ -8,10 +8,10 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import evaluation.metrics.Event;
 import games.GameType;
-import games.root.cards.EyrieRulers;
-import games.root.cards.RootCard;
-import games.root.cards.RootQuestCard;
-import games.root.cards.VagabondCharacter;
+import games.root.components.cards.EyrieRulers;
+import games.root.components.cards.RootCard;
+import games.root.components.cards.RootQuestCard;
+import games.root.components.cards.VagabondCharacter;
 import games.root.components.Item;
 import games.root.components.RootBoardNodeWithRootEdges;
 import games.root.components.RootGraphBoard;
@@ -223,7 +223,7 @@ public class RootGameState extends AbstractGameState {
             copy.rulers = rulers.copy();
             copy.viziers = viziers.copy();
             if (activeRuler != null) {
-                copy.activeRuler = (EyrieRulers) activeRuler.copy();
+                copy.activeRuler = activeRuler.copy();
             }
             copy.roosts = roosts;
         }
@@ -282,7 +282,7 @@ public class RootGameState extends AbstractGameState {
             copy.aidNumbers = new HashMap<>() {
                 {
                     put(RootParameters.Factions.MarquiseDeCat, aidNumbers.get(RootParameters.Factions.MarquiseDeCat));
-                    put(RootParameters.Factions.EyrieDynasties, aidNumbers.get(RootParameters.Factions.MarquiseDeCat));
+                    put(RootParameters.Factions.EyrieDynasties, aidNumbers.get(RootParameters.Factions.EyrieDynasties));
                     put(RootParameters.Factions.WoodlandAlliance, aidNumbers.get(RootParameters.Factions.WoodlandAlliance));
                 }
             };
@@ -615,33 +615,13 @@ public class RootGameState extends AbstractGameState {
 
     @Override
     public boolean _equals(Object o) {
-        if (this == o) return true;
         if (!(o instanceof RootGameState that)) return false;
-        return playerSubGamePhase == that.playerSubGamePhase && actionsPlayed == that.actionsPlayed && playersSetUp == that.playersSetUp &&
-                Keep == that.Keep && CatWarriors == that.CatWarriors && Wood == that.Wood && Workshops == that.Workshops && Recruiters == that.Recruiters
-                && Sawmills == that.Sawmills && eyrieWarriors == that.eyrieWarriors && roosts == that.roosts && woodlandWarriors == that.woodlandWarriors
-                && foxBase == that.foxBase && rabbitBase == that.rabbitBase && mouseBase == that.mouseBase && sympathyTokens == that.sympathyTokens
-                && officers == that.officers && vagabond == that.vagabond && foxQuests == that.foxQuests && mouseQuests == that.mouseQuests &&
-                rabbitQuests == that.rabbitQuests && Objects.equals(gameMap, that.gameMap) && mapType == that.mapType &&
-                Arrays.equals(playerScores, that.playerScores) && Arrays.equals(playerVictoryConditions, that.playerVictoryConditions) &&
-                Objects.equals(playerFactions, that.playerFactions) && gamePhase == that.gamePhase && Objects.equals(playerDecks, that.playerDecks) &&
-                Objects.equals(playerCraftedCards, that.playerCraftedCards) && Objects.equals(craftedItems, that.craftedItems) &&
-                Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile) && Objects.equals(questDrawPile, that.questDrawPile)
-                && Objects.equals(activeQuests, that.activeQuests) && Objects.equals(craftableItems, that.craftableItems) && Objects.equals(ruinItems, that.ruinItems) && Objects.equals(startingItems, that.startingItems) && Objects.equals(eyrieDecree, that.eyrieDecree) && Objects.equals(playedSuits, that.playedSuits) && Objects.equals(rulers, that.rulers) && Objects.equals(viziers, that.viziers) && Objects.equals(activeRuler, that.activeRuler) && Objects.equals(supporters, that.supporters) && Objects.equals(vagabondCharacter, that.vagabondCharacter) && Objects.equals(satchel, that.satchel) && Objects.equals(teas, that.teas) && Objects.equals(coins, that.coins) && Objects.equals(bags, that.bags) && Objects.equals(relationships, that.relationships) && Objects.equals(aidNumbers, that.aidNumbers);
+        return playerSubGamePhase == that.playerSubGamePhase && actionsPlayed == that.actionsPlayed && playersSetUp == that.playersSetUp && Keep == that.Keep && CatWarriors == that.CatWarriors && Wood == that.Wood && Workshops == that.Workshops && Recruiters == that.Recruiters && Sawmills == that.Sawmills && eyrieWarriors == that.eyrieWarriors && roosts == that.roosts && woodlandWarriors == that.woodlandWarriors && foxBase == that.foxBase && rabbitBase == that.rabbitBase && mouseBase == that.mouseBase && sympathyTokens == that.sympathyTokens && officers == that.officers && vagabond == that.vagabond && foxQuests == that.foxQuests && mouseQuests == that.mouseQuests && rabbitQuests == that.rabbitQuests && Objects.equals(gameMap, that.gameMap) && mapType == that.mapType && Objects.deepEquals(playerScores, that.playerScores) && Objects.deepEquals(playerVictoryConditions, that.playerVictoryConditions) && Objects.equals(playerFactions, that.playerFactions) && gamePhase == that.gamePhase && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(playerCraftedCards, that.playerCraftedCards) && Objects.equals(craftedItems, that.craftedItems) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile) && Objects.equals(questDrawPile, that.questDrawPile) && Objects.equals(activeQuests, that.activeQuests) && Objects.equals(craftableItems, that.craftableItems) && Objects.equals(ruinItems, that.ruinItems) && Objects.equals(startingItems, that.startingItems) && Objects.equals(eyrieDecree, that.eyrieDecree) && Objects.equals(playedSuits, that.playedSuits) && Objects.equals(rulers, that.rulers) && Objects.equals(viziers, that.viziers) && Objects.equals(activeRuler, that.activeRuler) && Objects.equals(supporters, that.supporters) && Objects.equals(vagabondCharacter, that.vagabondCharacter) && Objects.equals(satchel, that.satchel) && Objects.equals(teas, that.teas) && Objects.equals(coins, that.coins) && Objects.equals(bags, that.bags) && Objects.equals(relationships, that.relationships) && Objects.equals(aidNumbers, that.aidNumbers);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameMap, mapType, playerSubGamePhase, actionsPlayed, playersSetUp, playerFactions,
-                gamePhase, playerDecks, playerCraftedCards, craftedItems, drawPile, discardPile, questDrawPile,
-                activeQuests, Keep, CatWarriors, Wood, Workshops,
-                Recruiters, Sawmills, eyrieWarriors, eyrieDecree, playedSuits, rulers, viziers, activeRuler, roosts,
-                woodlandWarriors, foxBase, rabbitBase, mouseBase, sympathyTokens, officers, supporters,
-                vagabondCharacter, vagabond, foxQuests, mouseQuests, rabbitQuests, satchel, teas, coins, bags, relationships,
-                aidNumbers, startingItems, craftableItems, ruinItems);
-        result = 31 * result + Arrays.hashCode(playerScores);
-        result = 31 * result + Arrays.hashCode(playerVictoryConditions);
-        return result;
+        return Objects.hash(gameMap, mapType, Arrays.hashCode(playerScores), Arrays.hashCode(playerVictoryConditions), playerSubGamePhase, actionsPlayed, playersSetUp, playerFactions, gamePhase, playerDecks, playerCraftedCards, craftedItems, drawPile, discardPile, questDrawPile, activeQuests, craftableItems, ruinItems, startingItems, Keep, CatWarriors, Wood, Workshops, Recruiters, Sawmills, eyrieWarriors, eyrieDecree, playedSuits, rulers, viziers, activeRuler, roosts, woodlandWarriors, foxBase, rabbitBase, mouseBase, sympathyTokens, officers, supporters, vagabondCharacter, vagabond, foxQuests, mouseQuests, rabbitQuests, satchel, teas, coins, bags, relationships, aidNumbers);
     }
 
     public RootGraphBoard getGameMap() {

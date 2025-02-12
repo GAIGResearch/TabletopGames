@@ -13,7 +13,7 @@ import games.root.actions.choosers.ChooseCard;
 import games.root.actions.choosers.ChooseCardForSupporters;
 import games.root.actions.choosers.ChooseNode;
 import games.root.actions.choosers.ChooseNumber;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.Item;
 import games.root.components.RootBoardNodeWithRootEdges;
 
@@ -157,14 +157,14 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         Deck<RootCard> attackerCraftedCards = gs.getPlayerCraftedCards(playerID);
         boolean isAmbushable = true;
         for (int e = 0; e < attackerCraftedCards.getSize(); e++ ){
-            if (attackerCraftedCards.get(e).cardtype == RootCard.CardType.ScoutingParty){
+            if (attackerCraftedCards.get(e).cardType == RootCard.CardType.ScoutingParty){
                 isAmbushable = false;
             }
         }
         RootBoardNodeWithRootEdges clearing = gs.getGameMap().getNodeByID(locationID);
         if (isAmbushable) {
             for (int i = 0; i < defenderHand.getSize(); i++) {
-                if (defenderHand.get(i).cardtype == RootCard.CardType.Ambush && (defenderHand.get(i).suit == clearing.getClearingType() || defenderHand.get(i).suit == RootParameters.ClearingTypes.Bird)) {
+                if (defenderHand.get(i).cardType == RootCard.CardType.Ambush && (defenderHand.get(i).suit == clearing.getClearingType() || defenderHand.get(i).suit == RootParameters.ClearingTypes.Bird)) {
                     PlayAmbush action = new PlayAmbush(targetPlayerID, i, defenderHand.get(i).getComponentID());
                     actions.add(action);
                 }
@@ -181,7 +181,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         Deck<RootCard> attackerHand = gs.getPlayerHand(playerID);
         RootBoardNodeWithRootEdges clearing = gs.getGameMap().getNodeByID(locationID);
         for (int i = 0 ; i < attackerHand.getSize(); i++){
-            if(attackerHand.get(i).cardtype == RootCard.CardType.Ambush && (attackerHand.get(i).suit == clearing.getClearingType() || attackerHand.get(i).suit == RootParameters.ClearingTypes.Bird)){
+            if(attackerHand.get(i).cardType == RootCard.CardType.Ambush && (attackerHand.get(i).suit == clearing.getClearingType() || attackerHand.get(i).suit == RootParameters.ClearingTypes.Bird)){
                 PlayAmbush action = new PlayAmbush(playerID, i, attackerHand.get(i).getComponentID());
                 actions.add(action);
             }
@@ -283,10 +283,10 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> craftedCardsAttacker = gs.getPlayerCraftedCards(playerID);
         for (int i = 0; i < craftedCardsAttacker.getSize(); i++){
-            if (craftedCardsAttacker.get(i).cardtype == RootCard.CardType.Armorers){
+            if (craftedCardsAttacker.get(i).cardType == RootCard.CardType.Armorers){
                 //ignore all rolled hits
                 actions.add(new DiscardCraftedCard(playerID, i, craftedCardsAttacker.get(i).getComponentID()));
-            } else if (craftedCardsAttacker.get(i).cardtype == RootCard.CardType.BrutalTactics){
+            } else if (craftedCardsAttacker.get(i).cardType == RootCard.CardType.BrutalTactics){
                 actions.add(new ChooseCard(playerID, i, craftedCardsAttacker.get(i).getComponentID()));
             }
         }
@@ -298,10 +298,10 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
         List<AbstractAction> actions = new ArrayList<>();
         Deck<RootCard> craftedCardsDefender = gs.getPlayerCraftedCards(targetPlayerID);
         for (int i = 0; i < craftedCardsDefender.getSize(); i++){
-            if (craftedCardsDefender.get(i).cardtype == RootCard.CardType.Armorers){
+            if (craftedCardsDefender.get(i).cardType == RootCard.CardType.Armorers){
                 //ignore all rolled hits
                 actions.add(new DiscardCraftedCard(playerID, i, craftedCardsDefender.get(i).getComponentID()));
-            } else if (craftedCardsDefender.get(i).cardtype == RootCard.CardType.Sappers) {
+            } else if (craftedCardsDefender.get(i).cardType == RootCard.CardType.Sappers) {
                 actions.add(new DiscardCraftedCard(playerID, i, craftedCardsDefender.get(i).getComponentID()));
             }
         }
@@ -425,7 +425,7 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     stage = Stage.optionalModifiersDefender;
                 } else if (action instanceof DiscardCraftedCard dc){
                     RootCard card = (RootCard) gs.getComponentById(dc.cardId);
-                    if (card.cardtype == RootCard.CardType.Armorers){
+                    if (card.cardType == RootCard.CardType.Armorers){
                         attackerDamage = 0;
                         lastStage = Stage.optionalModifiersAttacker;
                         stage = Stage.optionalModifiersDefender;
@@ -443,11 +443,11 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
                     stage = Stage.removePiecesAttacker;
                 } else if (action instanceof DiscardCraftedCard dc){
                     RootCard card = (RootCard) gs.getComponentById(dc.cardId);
-                    if (card.cardtype == RootCard.CardType.Armorers){
+                    if (card.cardType == RootCard.CardType.Armorers){
                         defenderDamage = 0;
                         lastStage = Stage.optionalModifiersAttacker;
                         stage = Stage.optionalModifiersDefender;
-                    } else if (card.cardtype == RootCard.CardType.Sappers) {
+                    } else if (card.cardType == RootCard.CardType.Sappers) {
                         attackerDamage ++;
                         lastStage = Stage.optionalModifiersAttacker;
                         stage = Stage.optionalModifiersDefender;
@@ -558,19 +558,14 @@ public class BattleAction extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof BattleAction ba) {
-            return playerID == ba.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof BattleAction that)) return false;
+        return playerID == that.playerID && done == that.done && playerDestroyedSympathyID == that.playerDestroyedSympathyID && locationID == that.locationID && targetPlayerID == that.targetPlayerID && attackerDamage == that.attackerDamage && defenderDamage == that.defenderDamage && lastStage == that.lastStage && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Battle action", playerID);
+        return Objects.hash(playerID, lastStage, stage, done, playerDestroyedSympathyID, locationID, targetPlayerID, attackerDamage, defenderDamage);
     }
 
     @Override

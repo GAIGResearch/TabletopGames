@@ -6,9 +6,9 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.*;
 import games.root.actions.EndTurn;
-import games.root.cards.EyrieRulers;
-import games.root.cards.RootCard;
-import games.root.cards.RootQuestCard;
+import games.root.components.cards.EyrieRulers;
+import games.root.components.cards.RootCard;
+import games.root.components.cards.RootQuestCard;
 import games.root.components.*;
 
 import java.util.*;

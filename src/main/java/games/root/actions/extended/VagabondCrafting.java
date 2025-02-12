@@ -8,7 +8,7 @@ import games.root.RootGameState;
 import games.root.RootParameters;
 import games.root.actions.*;
 import games.root.actions.choosers.ChooseCard;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -119,11 +119,11 @@ public class VagabondCrafting extends AbstractAction implements IExtendedSequenc
             if (action instanceof Discard d){
                 RootCard card = (RootCard) gs.getComponentById(d.cardId);
                 //resolve discard effect
-                if (card.cardtype == RootCard.CardType.FavorOfTheFoxes){
+                if (card.cardType == RootCard.CardType.FavorOfTheFoxes){
                     resolveFavorCard(gs);
-                } else if (card.cardtype == RootCard.CardType.FavorOfTheMice) {
+                } else if (card.cardType == RootCard.CardType.FavorOfTheMice) {
                     resolveFavorCard(gs);
-                } else if (card.cardtype == RootCard.CardType.FavorOfTheRabbits){
+                } else if (card.cardType == RootCard.CardType.FavorOfTheRabbits){
                     resolveFavorCard(gs);
                 }
             }
@@ -230,17 +230,14 @@ public class VagabondCrafting extends AbstractAction implements IExtendedSequenc
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondCrafting cs){
-            return playerID == cs.playerID && available.equals(cs.available) && stage == cs.stage && done == cs.done && cardId == cs.cardId && cardIdx == cs.cardIdx && craftingCost.equals(cs.craftingCost);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondCrafting that)) return false;
+        return playerID == that.playerID && done == that.done && cardId == that.cardId && cardIdx == that.cardIdx && Objects.equals(available, that.available) && Objects.equals(craftingCost, that.craftingCost) && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("VagabondCrafting", playerID);
+        return Objects.hash(playerID, available, craftingCost, stage, done, cardId, cardIdx);
     }
 
     @Override

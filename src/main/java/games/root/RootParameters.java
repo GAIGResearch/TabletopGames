@@ -3,10 +3,10 @@ package games.root;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import evaluation.optimisation.TunableParameters;
-import games.root.cards.EyrieRulers;
-import games.root.cards.RootCard;
-import games.root.cards.RootQuestCard;
-import games.root.cards.VagabondCharacter;
+import games.root.components.cards.EyrieRulers;
+import games.root.components.cards.RootCard;
+import games.root.components.cards.RootQuestCard;
+import games.root.components.cards.VagabondCharacter;
 import games.root.components.Item;
 
 import java.util.*;

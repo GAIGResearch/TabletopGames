@@ -1,7 +1,7 @@
 package games.root.gui;
 
 import core.components.Deck;
-import games.root.cards.RootQuestCard;
+import games.root.components.cards.RootQuestCard;
 import gui.views.CardView;
 import gui.views.DeckView;
 import utilities.ImageIO;

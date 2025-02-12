@@ -9,7 +9,7 @@ import games.root.RootParameters;
 import games.root.actions.Overwork;
 import games.root.actions.choosers.ChooseCard;
 import games.root.actions.choosers.ChooseNode;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -108,17 +108,14 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof OverworkSequence os){
-            return playerID == os.playerID && locationID == os.locationID && done== os.done && cardId == os.cardId && cardIdx == os.cardIdx && stage == os.stage;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof OverworkSequence that)) return false;
+        return playerID == that.playerID && locationID == that.locationID && done == that.done && cardIdx == that.cardIdx && cardId == that.cardId && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("OverworkSequence", playerID, done, locationID, stage);
+        return Objects.hash(playerID, locationID, done, stage, cardIdx, cardId);
     }
 
     @Override

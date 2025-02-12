@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.Objects;
@@ -159,6 +159,6 @@ public class Revolt extends AbstractAction {
         RootGameState gs = (RootGameState) gameState;
         RootCard card1 = (RootCard) gs.getComponentById(cardToDiscard1Id);
         RootCard card2 = (RootCard) gs.getComponentById(cardToDiscard2Id);
-        return gs.getPlayerFaction(playerID).toString()  + " revolts at " + gs.getGameMap().getNodeByID(locationID).identifier + " by discarding " + card1.cardtype.toString() + " and " + card2.cardtype.toString();
+        return gs.getPlayerFaction(playerID).toString()  + " revolts at " + gs.getGameMap().getNodeByID(locationID).identifier + " by discarding " + card1.cardType.toString() + " and " + card2.cardType.toString();
     }
 }

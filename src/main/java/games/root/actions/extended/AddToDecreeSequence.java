@@ -9,7 +9,7 @@ import games.root.RootParameters;
 import games.root.actions.AddToDecree;
 import games.root.actions.Pass;
 import games.root.actions.choosers.ChooseCard;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -113,9 +113,7 @@ public class AddToDecreeSequence extends AbstractAction implements IExtendedSequ
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AddToDecreeSequence that = (AddToDecreeSequence) o;
+        if (!(o instanceof AddToDecreeSequence that)) return false;
         return playerID == that.playerID && cardsAdded == that.cardsAdded && done == that.done && cardId == that.cardId && cardIdx == that.cardIdx && stage == that.stage;
     }
 

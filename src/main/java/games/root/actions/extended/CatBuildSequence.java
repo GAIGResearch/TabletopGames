@@ -137,17 +137,14 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof CatBuildSequence cb){
-            return playerID == cb.playerID && stage == cb.stage && cost == cb.cost && bt == cb.bt && done == cb.done && locationID == cb.locationID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof CatBuildSequence that)) return false;
+        return playerID == that.playerID && locationID == that.locationID && cost == that.cost && done == that.done && stage == that.stage && bt == that.bt;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("BuildSequence", playerID, stage, cost, bt, done, locationID);
+        return Objects.hash(playerID, stage, bt, locationID, cost, done);
     }
 
     @Override

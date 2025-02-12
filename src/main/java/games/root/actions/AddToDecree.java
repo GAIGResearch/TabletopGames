@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 
 import java.util.Objects;
 
@@ -65,6 +65,6 @@ public class AddToDecree extends AbstractAction {
         RootGameState gs = (RootGameState) gameState;
         RootParameters rp = (RootParameters) gameState.getGameParameters();
         RootCard card = (RootCard) gs.getComponentById(cardId);
-        return gs.getPlayerFaction(playerID).toString() + " adds " + card.suit + " card " + card.cardtype + " to the decree at " + rp.decreeInitializer.get(index).toString();
+        return gs.getPlayerFaction(playerID).toString() + " adds " + card.suit + " card " + card.cardType + " to the decree at " + rp.decreeInitializer.get(index).toString();
     }
 }

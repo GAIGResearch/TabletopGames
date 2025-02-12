@@ -106,17 +106,14 @@ public class CatRecruitSequence extends AbstractAction implements IExtendedSeque
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj instanceof CatRecruitSequence c){
-            return playerID == c.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof CatRecruitSequence that)) return false;
+        return playerID == that.playerID && canRecruitEverywhere == that.canRecruitEverywhere && done == that.done && Objects.equals(locationIDs, that.locationIDs);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("CatRecruitSequence", playerID, done, canRecruitEverywhere);
+        return Objects.hash(playerID, locationIDs, canRecruitEverywhere, done);
     }
 
     @Override

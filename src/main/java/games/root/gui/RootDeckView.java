@@ -1,7 +1,7 @@
 package games.root.gui;
 
 import core.components.Deck;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import gui.views.CardView;
 import gui.views.DeckView;
 import utilities.ImageIO;
@@ -32,7 +32,7 @@ public class RootDeckView extends DeckView<RootCard> {
 
     private Image getCardImage(RootCard card)
     {
-        String cardName = card.cardtype.name().toLowerCase();
+        String cardName = card.cardType.name().toLowerCase();
         String cardSuit = card.suit.name().toLowerCase();
         return ImageIO.GetInstance().getImage(dataPath + cardName + cardSuit + ".png");
     }

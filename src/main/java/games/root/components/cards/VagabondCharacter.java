@@ -1,8 +1,9 @@
-package games.root.cards;
+package games.root.components.cards;
 
 import core.components.Card;
 import games.root.components.Item;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,13 +24,19 @@ public class VagabondCharacter extends Card {
         this.startsWith = startsWith;
     }
 
+    public VagabondCharacter(CardType character, List<Item.ItemType> startsWith, int componentID){
+        super(character.toString(), componentID);
+        this.characterType = character;
+        this.startsWith = startsWith;
+    }
+
     public boolean startsWith(Item.ItemType itemType) {
         return startsWith.contains(itemType);
     }
 
     @Override
     public VagabondCharacter copy(){
-        return this;
+        return new VagabondCharacter(characterType, new ArrayList<>(startsWith), getComponentID());
     }
 
     @Override

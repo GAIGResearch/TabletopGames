@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import evaluation.metrics.Event;
 import games.root.RootGameState;
 import games.root.RootParameters;
-import games.root.cards.EyrieRulers;
+import games.root.components.cards.EyrieRulers;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.Objects;

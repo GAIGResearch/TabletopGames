@@ -10,7 +10,7 @@ import games.root.actions.ExhaustItem;
 import games.root.actions.GiveCard;
 import games.root.actions.TakeItem;
 import games.root.actions.choosers.ChooseNumber;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.Item;
 import games.root.components.RootBoardNodeWithRootEdges;
 
@@ -181,19 +181,14 @@ public class VagabondAid extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof VagabondAid va) {
-            return playerID == va.playerID && done == va.done && stage == va.stage;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondAid that)) return false;
+        return playerID == that.playerID && targetID == that.targetID && done == that.done && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Aid", playerID, targetID, stage, done);
+        return Objects.hash(playerID, stage, targetID, done);
     }
 
     @Override

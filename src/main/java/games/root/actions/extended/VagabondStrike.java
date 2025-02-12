@@ -10,7 +10,7 @@ import games.root.RootParameters;
 import games.root.actions.*;
 import games.root.actions.choosers.ChooseCardForSupporters;
 import games.root.actions.choosers.ChooseNumber;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.Item;
 import games.root.components.RootBoardNodeWithRootEdges;
 
@@ -285,19 +285,14 @@ public class VagabondStrike extends AbstractAction implements IExtendedSequence 
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj instanceof VagabondStrike ba) {
-            return playerID == ba.playerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondStrike that)) return false;
+        return playerID == that.playerID && done == that.done && locationID == that.locationID && targetPlayerID == that.targetPlayerID && defenderDamage == that.defenderDamage && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("VagabondStrike", playerID, targetPlayerID, locationID, stage, done);
+        return Objects.hash(playerID, stage, done, locationID, targetPlayerID, defenderDamage);
     }
 
     @Override

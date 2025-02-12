@@ -8,7 +8,7 @@ import games.root.RootGameState;
 import games.root.RootParameters;
 import games.root.actions.DiscardSupporter;
 import games.root.actions.PlaceSympathy;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -98,17 +98,14 @@ public class SpreadSympathy extends AbstractAction implements IExtendedSequence 
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj instanceof SpreadSympathy other) {
-            return playerID == other.playerID && locationID==other.locationID;
-
-        } else return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof SpreadSympathy that)) return false;
+        return playerID == that.playerID && locationID == that.locationID && discardedCards == that.discardedCards && toDiscard == that.toDiscard && executionComplete == that.executionComplete && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, locationID);
+        return Objects.hash(playerID, locationID, stage, discardedCards, toDiscard, executionComplete);
     }
 
     @Override

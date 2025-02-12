@@ -13,7 +13,7 @@ import games.root.actions.Discard;
 import games.root.actions.Pass;
 import games.root.actions.choosers.ChooseCard;
 import games.root.actions.choosers.ChooseCraftersToActivate;
-import games.root.cards.RootCard;
+import games.root.components.cards.RootCard;
 import games.root.components.RootBoardNodeWithRootEdges;
 
 import java.util.ArrayList;
@@ -128,13 +128,13 @@ public class CraftSequence extends AbstractAction implements IExtendedSequence {
             if (action instanceof Discard d){
                 RootCard card = (RootCard) gs.getComponentById(d.cardId);
                 //resolve discard effect
-                if (card.cardtype == RootCard.CardType.FavorOfTheFoxes){
+                if (card.cardType == RootCard.CardType.FavorOfTheFoxes){
                     gs.logEvent(Event.GameEvent.GAME_EVENT, "favor of the foxes used");
                     resolveFavorCard(gs, RootParameters.ClearingTypes.Fox);
-                } else if (card.cardtype == RootCard.CardType.FavorOfTheMice) {
+                } else if (card.cardType == RootCard.CardType.FavorOfTheMice) {
                     gs.logEvent(Event.GameEvent.GAME_EVENT, "favor of the mice used");
                     resolveFavorCard(gs, RootParameters.ClearingTypes.Mouse);
-                } else if (card.cardtype == RootCard.CardType.FavorOfTheRabbits){
+                } else if (card.cardType == RootCard.CardType.FavorOfTheRabbits){
                     gs.logEvent(Event.GameEvent.GAME_EVENT, "favor of the rabbits used");
                     resolveFavorCard(gs, RootParameters.ClearingTypes.Rabbit);
                 }
@@ -245,17 +245,14 @@ public class CraftSequence extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof CraftSequence cs){
-            return playerID == cs.playerID && available.equals(cs.available) && stage == cs.stage && done == cs.done && cardId == cs.cardId && cardIdx == cs.cardIdx && craftingCost.equals(cs.craftingCost);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof CraftSequence that)) return false;
+        return playerID == that.playerID && craftedCards == that.craftedCards && done == that.done && cardId == that.cardId && cardIdx == that.cardIdx && Objects.equals(available, that.available) && Objects.equals(craftingCost, that.craftingCost) && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("CraftSequence", playerID);
+        return Objects.hash(playerID, available, craftingCost, craftedCards, stage, done, cardId, cardIdx);
     }
 
     @Override

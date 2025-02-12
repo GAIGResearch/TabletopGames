@@ -105,17 +105,14 @@ public class VagabondHideout extends AbstractAction implements IExtendedSequence
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondHideout v){
-            return playerID == v.playerID && repaired == v.repaired && done == v.done;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondHideout that)) return false;
+        return playerID == that.playerID && repaired == that.repaired && done == that.done;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Hideout", playerID, done, repaired);
+        return Objects.hash(playerID, repaired, done);
     }
 
     @Override

@@ -9,7 +9,7 @@ import games.root.RootParameters;
 import games.root.actions.CompleteQuest;
 import games.root.actions.ExhaustItem;
 import games.root.actions.choosers.ChooseCard;
-import games.root.cards.RootQuestCard;
+import games.root.components.cards.RootQuestCard;
 import games.root.components.Item;
 
 import java.util.ArrayList;
@@ -181,17 +181,14 @@ public class VagabondQuestSequence extends AbstractAction implements IExtendedSe
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondQuestSequence v){
-            return playerID == v.playerID && stage == v.stage && cardId == v.cardId && cardIdx == v.cardIdx && done == v.done;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondQuestSequence that)) return false;
+        return playerID == that.playerID && cardIdx == that.cardIdx && cardId == that.cardId && done == that.done && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("VQuestSequence", playerID, stage, done);
+        return Objects.hash(playerID, stage, cardIdx, cardId, done);
     }
 
     @Override

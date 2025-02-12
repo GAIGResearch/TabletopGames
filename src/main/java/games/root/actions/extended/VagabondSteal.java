@@ -93,17 +93,14 @@ public class VagabondSteal extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this){return true;}
-        if (obj instanceof VagabondSteal vs){
-            return playerID == vs.playerID && targetID == vs.targetID && done == vs.done && stage == vs.stage;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (!(o instanceof VagabondSteal that)) return false;
+        return playerID == that.playerID && targetID == that.targetID && done == that.done && stage == that.stage;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash("Steal", playerID, targetID, done, stage);
+        return Objects.hash(playerID, targetID, done, stage);
     }
 
     @Override
