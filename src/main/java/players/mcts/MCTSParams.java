@@ -12,6 +12,7 @@ import utilities.JSONUtils;
 import java.util.Arrays;
 import java.util.Random;
 
+import static java.util.Collections.emptyList;
 import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
@@ -96,7 +97,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
@@ -112,7 +113,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
         addTunableParameter("FPU", 1000000000.0);
-        addTunableParameter("actionHeuristic",  IActionHeuristic.nullReturn);
+        addTunableParameter("actionHeuristic", IActionHeuristic.class,  IActionHeuristic.nullReturn);
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCT", false);
         addTunableParameter("pUCTTemperature", 0.0);
