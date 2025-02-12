@@ -34,6 +34,14 @@ public class MCTSEnums {
         // even if the best action was taken (this down-weights the actual observed reward from that iteration.)
     }
 
+    public enum RolloutIncrement {
+        TICK, TURN, ROUND
+        // Determine which event will trigger an increment on the rolloutDepth counter.
+        // For example, it can be set to TURN when the game's score is only affected by the last move made by a player,
+        // or ROUND when scores are only tallied at the end of a round.
+        // Useful when the number of moves made per turn or per round is not a fixed amount.
+    }
+
     public enum RolloutTermination {
         DEFAULT, END_ACTION, END_TURN, START_ACTION, END_ROUND
         // ???_ACTION refers to the acting player (regardless of Turn or Round)

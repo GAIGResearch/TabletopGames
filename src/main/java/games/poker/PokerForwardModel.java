@@ -97,7 +97,7 @@ public class PokerForwardModel extends StandardForwardModel {
         } else {
             new Bet(pgs.bigId, params.bigBlind).execute(pgs);
         }
-        // It is then possible that the round (and game) ends immediately
+        // It is then possible that the round ends immediately
         // if there are 2 players left, and one went AllIn on the blind
         if (pgs.isRoundOver()) {
             roundEnd(pgs);

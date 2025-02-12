@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class shuffleTests {
+public class ShuffleTests {
 
     Wonders7ForwardModel fm = new Wonders7ForwardModel();
     Wonders7GameParameters params;
@@ -86,7 +86,7 @@ public class shuffleTests {
         do {
             List<AbstractAction> availableActions = fm.computeAvailableActions(state);
             fm.next(state, availableActions.get(state.getRnd().nextInt(availableActions.size())));
-        } while (state.getRoundCounter() == 0 || state.getPlayerHand(0).getSize() == 7);
+        } while (state.getCurrentAge() == 1 || state.getPlayerHand(0).getSize() == 7);
         assertEquals(-1, state.getDirection());
         Wonders7GameState copy = (Wonders7GameState) state.copy(2);
         for (int i = 0; i < 4; i++) {
@@ -114,7 +114,7 @@ public class shuffleTests {
         do {
             List<AbstractAction> availableActions = fm.computeAvailableActions(state);
             fm.next(state, availableActions.get(state.getRnd().nextInt(availableActions.size())));
-        } while (state.getTurnCounter() < 12);
+        } while (state.getGameTick() < 12);
         Wonders7GameState copy = (Wonders7GameState) state.copy(2);
         for (int i = 0; i < 4; i++) {
             var hand = state.getPlayerHands().get(i);
@@ -145,7 +145,9 @@ public class shuffleTests {
             fm.next(copy, availableActionsCopy.get(copy.getRnd().nextInt(availableActionsCopy.size())));
         } while (copy.playerHands.get(2).getSize() == 7);
         // The turn counter is not reset (as it really should be on the copy...but this doesn't leak any information)
-        assertEquals(6, copy.getTurnCounter());
+        assertEquals(6, copy.getGameTick());
+        assertEquals(1, copy.getCurrentAge());
+        assertEquals(1, copy.getTurnCounter());
         for (int i = 0; i < 4; i++) {
             assertNull(copy.turnActions[i]);
             assertEquals(6, copy.getPlayerHands().get(i).getSize());
