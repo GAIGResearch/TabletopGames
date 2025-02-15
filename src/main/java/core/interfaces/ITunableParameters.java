@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 import java.util.*;
 
 
-public interface ITunableParameters {
+public interface ITunableParameters<T> {
 
     /**
      * Returns a list of IDs for all parameters
@@ -56,7 +56,7 @@ public interface ITunableParameters {
      * @return Returns Tuned Parameters corresponding to the current settings
      * (will use all defaults if setParameterValue has not been called at all)
      */
-    Object instantiate();
+    T instantiate();
 
     /**
      * @return A JSONString of these Tunable Parameters
@@ -71,7 +71,7 @@ public interface ITunableParameters {
      * (For that use a SearchSpace)
      * @param jsonObject
      */
-    ITunableParameters instanceFromJSON(JSONObject jsonObject);
+    ITunableParameters<T> instanceFromJSON(JSONObject jsonObject);
 
     /**
      *
@@ -79,7 +79,7 @@ public interface ITunableParameters {
      * This is designed to be used for saving the current settings to a file for later instantiation
      * with fromJSON
      */
-    JSONObject instanceToJSON(boolean excludeDefaultValues);
+    JSONObject instanceToJSON(boolean excludeDefaultValues, Map<String, Integer> settings);
 
     /**
      * Retrieves the default values of all parameters (as per original game).

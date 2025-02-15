@@ -1,20 +1,26 @@
 package evaluation;
 
+import core.AbstractPlayer;
 import evaluation.optimisation.ITPSearchSpace;
 import games.puertorico.PuertoRicoActionHeuristic001;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import players.heuristics.CoarseTunableHeuristic;
+import players.heuristics.OrdinalPosition;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.simple.BoltzmannActionParams;
 import players.simple.BoltzmannActionPlayer;
 import players.simple.RandomPlayer;
+import utilities.JSONUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static players.PlayerConstants.BUDGET_TIME;
@@ -104,22 +110,22 @@ public class TunableParametersTest {
     @Test
     public void loadSearchSpaceIncludesSubParams() {
         String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_MASTRollout.json";
-        ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
-        assertEquals(8, itp.getSearchKeys().size());
+        ITPSearchSpace<AbstractPlayer> itp = new ITPSearchSpace<>(params, searchSpace);
+        assertEquals(8, itp.getDimensions().size());
         int MASTBoltzmannIndex = itp.getIndexOf("MASTBoltzmann");
         int heuristicTypeIndex = itp.getIndexOf("heuristic.heuristicType");
         assertTrue(MASTBoltzmannIndex > -1);
         assertTrue(heuristicTypeIndex > -1);
-        assertEquals(5, itp.getSearchValues().get(MASTBoltzmannIndex).size());
-        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.getSearchValues().get(MASTBoltzmannIndex));
-        assertEquals(3, itp.getSearchValues().get(heuristicTypeIndex).size());
+        assertEquals(5, itp.allValues(MASTBoltzmannIndex).size());
+        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.allValues(MASTBoltzmannIndex));
+        assertEquals(3, itp.allValues(heuristicTypeIndex).size());
         List<CoarseTunableHeuristic.HeuristicType> expectedArray = Arrays.asList(WIN_ONLY, SCORE_PLUS, LEADER);
-        assertEquals(expectedArray, itp.getSearchValues().get(heuristicTypeIndex));
+        assertEquals(expectedArray, itp.allValues(heuristicTypeIndex));
 
         int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
         settings[heuristicTypeIndex] = 1;
         settings[MASTBoltzmannIndex] = 3;
-        MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
+        MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertEquals(10.0, params.MASTBoltzmann, 0.001);
         assertTrue(params.getHeuristic() instanceof  CoarseTunableHeuristic);
@@ -136,12 +142,12 @@ public class TunableParametersTest {
         // temperature should be
         int temperatureIndex = itp.getIndexOf("rolloutPolicyParams.temperature");
         assertTrue(temperatureIndex > -1);
-        assertEquals(5, itp.getSearchValues().get(temperatureIndex).size());
-        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.getSearchValues().get(temperatureIndex));
+        assertEquals(5, itp.allValues(temperatureIndex).size());
+        assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.allValues(temperatureIndex));
 
         int[] settings = new int[] {0, 0, 0, 0, 0};
 
-        MCTSPlayer agent = (MCTSPlayer) itp.getAgent(settings);
+        MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertTrue(params.getRolloutStrategy() instanceof  BoltzmannActionPlayer);
         BoltzmannActionPlayer rollout = (BoltzmannActionPlayer) params.getRolloutStrategy();
@@ -162,7 +168,7 @@ public class TunableParametersTest {
         params.setParameterValue("rolloutPolicyParams", bap);
         params.setParameterValue("maxTreeDepth", 67);
 
-        JSONObject json = params.instanceToJSON(false);
+        JSONObject json = params.instanceToJSON(false, Collections.emptyMap());
         assertEquals(0.56, params.getParameterValue("rolloutPolicyParams.temperature"));
 
         MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
@@ -186,7 +192,7 @@ public class TunableParametersTest {
         params.setParameterValue("maxTreeDepth", 67);
         params.setParameterValue("budgetType", BUDGET_TIME);
 
-        JSONObject json = params.instanceToJSON(true);
+        JSONObject json = params.instanceToJSON(true, Collections.emptyMap());
 
         MCTSParams noChange = (MCTSParams) params.instanceFromJSON(json);
         assertTrue(params.allParametersAndValuesEqual(noChange));
@@ -200,5 +206,18 @@ public class TunableParametersTest {
 
         MCTSParams fromJSON = (MCTSParams) params.instanceFromJSON(json);
         assertTrue(fromJSON.allParametersAndValuesEqual(noChange));
+    }
+
+    @Test
+    public void toJSONWithParameterisedJSONObject() {
+        JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        params.setRawJSON(json);
+        JSONObject secondHeuristic = (JSONObject) ((JSONArray) json.get("heuristic")).get(1);
+        params.setParameterValue("rolloutPolicyParams", bap);
+        params.setParameterValue("maxTreeDepth", 67);
+        params.setParameterValue("budgetType", BUDGET_TIME);
+        params.setParameterValue("heuristic", new OrdinalPosition());   // just needs to be non-default; the actual value is irrelevant
+        JSONObject asJSON = params.instanceToJSON(true, Map.of("heuristic", 1));
+        assertEquals(asJSON.get("heuristic"), secondHeuristic);
     }
 }
