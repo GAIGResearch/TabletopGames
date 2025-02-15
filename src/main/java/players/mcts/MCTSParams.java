@@ -16,6 +16,7 @@ import static java.util.Collections.emptyList;
 import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
+import static players.mcts.MCTSEnums.RolloutIncrement.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
@@ -39,6 +40,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
     public boolean paranoid = false;
+    public MCTSEnums.RolloutIncrement rolloutIncrementType = TICK;
     public MCTSEnums.Strategies rolloutType = RANDOM;
     public MCTSEnums.Strategies oppModelType = MCTSEnums.Strategies.DEFAULT;  // Default is to use the same as rolloutType
     public String rolloutClass, oppModelClass = "";
@@ -81,6 +83,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("rolloutLengthPerPlayer", false);
         addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100));
+        addTunableParameter("rolloutIncrementType", TICK, Arrays.asList(MCTSEnums.RolloutIncrement.values()));
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
@@ -130,6 +133,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutLength = (int) getParameterValue("rolloutLength");
         rolloutLengthPerPlayer = (boolean) getParameterValue("rolloutLengthPerPlayer");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
+        rolloutIncrementType = (MCTSEnums.RolloutIncrement) getParameterValue("rolloutIncrementType");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");

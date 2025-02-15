@@ -8,6 +8,7 @@ import games.GameType;
 public class Wonders7GameParameters extends TunableParameters {
     public int nWonderCardsPerPlayer = 7;
     public int nCostNeighbourResource = 2;
+    public int nCostDiscountedResource = 1;
     public int nCoinsDiscard = 3;
     public int startingCoins = 3;
 
@@ -19,6 +20,7 @@ public class Wonders7GameParameters extends TunableParameters {
     public Wonders7GameParameters() {
         addTunableParameter("nWonderCardsPerPlayer", 7);
         addTunableParameter("nCostNeighbourResource", 2);
+        addTunableParameter("nCostDiscountedResource", 1);
         addTunableParameter("nCoinsDiscard", 3);
         addTunableParameter("startingCoins", 3);
         addTunableParameter("wonderShuffleSeed", -1);
@@ -30,6 +32,7 @@ public class Wonders7GameParameters extends TunableParameters {
     public void _reset() {
         nWonderCardsPerPlayer = (int) getParameterValue("nWonderCardsPerPlayer");
         nCostNeighbourResource = (int) getParameterValue("nCostNeighbourResource");
+        nCostDiscountedResource = (int) getParameterValue("nCostDiscountedResource");
         nCoinsDiscard = (int) getParameterValue("nCoinsDiscard");
         startingCoins = (int) getParameterValue("startingCoins");
         wonderShuffleSeed = (int) getParameterValue("wonderShuffleSeed");

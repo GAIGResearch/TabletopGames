@@ -33,6 +33,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     protected List<Component> _getAllComponents() {
         return new ArrayList<>() {{
             add(gridBoard);
+            addAll(TicTacToeConstants.playerMapping);
         }};
     }
 
