@@ -31,7 +31,6 @@ public class RootGameState extends AbstractGameState {
     protected int actionsPlayed = 0;
     protected int playersSetUp = 0;
     protected List<RootParameters.Factions> playerFactions;
-    protected RootGamePhase gamePhase;
 
     /**
      * All game pieces
@@ -621,7 +620,12 @@ public class RootGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(gameMap, mapType, Arrays.hashCode(playerScores), Arrays.hashCode(playerVictoryConditions), playerSubGamePhase, actionsPlayed, playersSetUp, playerFactions, gamePhase, playerDecks, playerCraftedCards, craftedItems, drawPile, discardPile, questDrawPile, activeQuests, craftableItems, ruinItems, startingItems, Keep, CatWarriors, Wood, Workshops, Recruiters, Sawmills, eyrieWarriors, eyrieDecree, playedSuits, rulers, viziers, activeRuler, roosts, woodlandWarriors, foxBase, rabbitBase, mouseBase, sympathyTokens, officers, supporters, vagabondCharacter, vagabond, foxQuests, mouseQuests, rabbitQuests, satchel, teas, coins, bags, relationships, aidNumbers);
+        return Objects.hash(gameMap, mapType, Arrays.hashCode(playerScores),
+                Arrays.hashCode(playerVictoryConditions), playerSubGamePhase, actionsPlayed, playersSetUp, playerFactions, playerDecks,
+                playerCraftedCards, craftedItems, drawPile, discardPile, questDrawPile, activeQuests, craftableItems, ruinItems, startingItems, Keep,
+                CatWarriors, Wood, Workshops, Recruiters, Sawmills, eyrieWarriors, eyrieDecree, playedSuits, rulers, viziers, activeRuler, roosts,
+                woodlandWarriors, foxBase, rabbitBase, mouseBase, sympathyTokens, officers, supporters, vagabondCharacter, vagabond, foxQuests,
+                mouseQuests, rabbitQuests, satchel, teas, coins, bags, relationships, aidNumbers, super.hashCode());
     }
 
     public RootGraphBoard getGameMap() {
