@@ -364,7 +364,7 @@ public class Game {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 int team = gameState.getTeam(i);
                 AbstractPlayer player = players.get(team);
-                player.setForwardModel(this.forwardModel.copy());
+                player.setForwardModel(this.forwardModel);
                 this.players.add(player.copy());
             }
         } else
@@ -374,8 +374,7 @@ public class Game {
             for (AbstractPlayer player : this.players) {
                 // Give player their ID
                 player.playerID = id++;
-                // Create a FM copy for this player (different random seed)
-                player.setForwardModel(this.forwardModel.copy());
+                player.setForwardModel(this.forwardModel);
                 // Create initial state observation
                 AbstractGameState observation = gameState.copy(player.playerID);
                 // Allow player to initialize

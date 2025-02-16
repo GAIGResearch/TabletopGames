@@ -192,11 +192,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
     }
 
     @Override
-    protected AbstractForwardModel _copy() {
-        return new ExplodingKittensForwardModel();
-    }
-
-    @Override
     protected void endPlayerTurn(AbstractGameState state) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) state;
         ekgs.getTurnOrder().endPlayerTurn(ekgs);
