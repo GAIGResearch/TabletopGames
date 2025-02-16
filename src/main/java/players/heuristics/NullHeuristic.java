@@ -8,4 +8,9 @@ public class NullHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState state, int playerId) {
         return 0.0;
     }
+
+    @Override
+    public String toString() {
+        return "NullHeuristic";
+    }
 }
