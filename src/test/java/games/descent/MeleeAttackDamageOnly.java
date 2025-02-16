@@ -1,7 +1,6 @@
-package test.games.descent;
+package games.descent;
 
 import games.descent2e.DescentGameState;
-import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.DicePool;
 
 import java.util.Collections;

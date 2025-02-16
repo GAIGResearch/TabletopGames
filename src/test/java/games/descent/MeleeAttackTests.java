@@ -1,25 +1,20 @@
-package test.games.descent;
+package games.descent;
 
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.properties.PropertyInt;
 import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
-import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
-import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.EndTurn;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.*;
-import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.components.*;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Vector2D;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -408,10 +403,12 @@ public class MeleeAttackTests {
         attacker.setPosition(attackerPos);
         victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
+        System.out.println(attacker);
 
-        while (!state.getActingFigure().equals(attacker))
+        while (state.getActingFigure().getComponentID() != attacker.getComponentID())
         {
             new EndTurn().execute(state);
+            System.out.println(state.getActingFigure());
         }
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);

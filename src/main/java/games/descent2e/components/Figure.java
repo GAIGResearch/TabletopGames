@@ -59,7 +59,7 @@ public class Figure extends Token {
         }
     }
 
-    HashMap<Attribute, Counter> attributes;
+    Map<Attribute, Counter> attributes;
     Counter nActionsExecuted;
 
     // For big monsters, this is the anchor point. Their size and orientation can be used to find all spaces occupied by the figure
@@ -435,5 +435,11 @@ public class Figure extends Token {
                 nActionsExecuted, position, size, conditions, removedConditionThisTurn,
                 attributeTests, abilities, currentAttack, componentName,
                 hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted, actionsTaken);
+    }
+
+    @Override
+    public String toString() {
+        if (componentName != null) return componentName;
+        return this.getClass().getSimpleName();
     }
 }
