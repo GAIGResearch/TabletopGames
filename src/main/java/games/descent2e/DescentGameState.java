@@ -25,14 +25,9 @@ import static games.GameType.Descent2e;
 
 public class DescentGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
-    public enum DescentPhase implements IGamePhase {
-        ForceMove  // Used when a figure started a (possibly valid move action) and is currently overlapping a friendly figure
-    }
-
     DescentGameData data;
 
     // For reference only
-
     // Mapping from board node ID in board configuration to tile configuration
     Map<Integer, DescentGridBoard> tiles;
     // int corresponds to component ID of tile at that location in master board
@@ -40,9 +35,6 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
     Map<String, Map<Vector2D, Vector2D>> gridReferences;
     boolean initData;
-
-    // Important
-    Random rnd;
 
     Deck<Card> searchCards;
     DescentGridBoard masterBoard;
@@ -251,12 +243,11 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DescentGameState)) return false;
+        if (!(o instanceof DescentGameState that)) return false;
         if (!super.equals(o)) return false;
-        DescentGameState that = (DescentGameState) o;
         return initData == that.initData && overlordPlayer == that.overlordPlayer &&
                 Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) &&
-                Arrays.equals(tileReferences, that.tileReferences) &&
+                Arrays.deepEquals(tileReferences, that.tileReferences) &&
                 Objects.equals(gridReferences, that.gridReferences) &&
                 Objects.equals(searchCards, that.searchCards) &&
                 Objects.equals(masterBoard, that.masterBoard) &&
@@ -277,7 +268,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
                 monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest, defeatedFigures);
-        result = 31 * result + Arrays.hashCode(tileReferences);
+        result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
     }
 

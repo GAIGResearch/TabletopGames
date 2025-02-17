@@ -248,8 +248,8 @@ public class Hero extends Figure {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
-                equipSlotsAvailable, heroicFeatStr, heroicFeat, usedHeroAbility, featAvailable,
-                rested, defeated, heroAbility, abilityStr);
+                equipSlotsAvailable, heroicFeatStr, heroicFeat.ordinal(), usedHeroAbility, featAvailable,
+                rested, defeated, heroAbility.ordinal(), abilityStr);
     }
 
     @Override
