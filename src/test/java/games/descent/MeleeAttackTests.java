@@ -11,6 +11,7 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.*;
 import games.descent2e.actions.monsterfeats.Howl;
 import games.descent2e.components.*;
+import javassist.runtime.Desc;
 import org.junit.Before;
 import org.junit.Test;
 import utilities.Vector2D;
@@ -26,14 +27,15 @@ public class MeleeAttackTests {
 
     @Before
     public void setup() {
-        int seed = 234;
+        long seed = 234;
+        // a rather cruddy way of ensuring we get the right hero in the right place
         do {
-            seed += 1001;
+            seed++;
+            DescentParameters params = new DescentParameters();
+            params.setRandomSeed(seed);
             state = new DescentGameState(new DescentParameters(), 2);
             fm.setup(state);
-     //       System.out.println("Class: "  + state.getHeroes().get(0).getProperty("class"));
-        } while (state.getHeroes().get(0).getAbilities().stream()
-                .noneMatch(a -> a instanceof SurgeAttackAction && ((SurgeAttackAction)a).surge == Surge.STUN));
+        } while (!state.getHeroes().get(0).getName().equals("Hero: Avric Albright"));
     }
 
     @Test
@@ -45,7 +47,7 @@ public class MeleeAttackTests {
     public void attackRollsDoesDamage() {
         Figure actingFigure = state.getActingFigure();
         Figure victim = state.getMonsters().get(0).get(0);
-        List<DescentCard> weapons = ((Hero)actingFigure).getWeapons();
+        List<DescentCard> weapons = ((Hero) actingFigure).getWeapons();
 
         assertEquals(1, weapons.size());
 
@@ -204,7 +206,7 @@ public class MeleeAttackTests {
         for (int loop = 0; loop < 100; loop++) {
             MeleeAttack attack = new RangedAttack(actingFigure.getComponentID(), victim.getComponentID());
             attack.execute(state);
-    //        System.out.println(state.getAttackDicePool().toString());
+            //        System.out.println(state.getAttackDicePool().toString());
             assertTrue(state.getAttackDicePool().hasRolled());
             if (attack.attackMissed(state)) {
                 missed++;
@@ -253,7 +255,8 @@ public class MeleeAttackTests {
     @Test
     public void hasSurgeAbility() {
         Hero hero = state.getHeroes().get(0);
-        assertEquals(3, hero.getAbilities().size());
+        assertEquals("Hero: Avric Albright", hero.getName());
+        assertEquals(2, hero.getAbilities().size());
         for (Triggers da : hero.getAbilities().get(0).getTriggers())
             assertEquals(Triggers.SURGE_DECISION, da);
     }
@@ -357,9 +360,9 @@ public class MeleeAttackTests {
         victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
 
-        while (!state.getActingFigure().equals(attacker))
-        {
-            new EndTurn().execute(state);
+        while (!state.getActingFigure().equals(attacker)) {
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            fm.next(state, actions.get(0));
         }
         assertEquals(state.getActingFigure(), attacker);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
@@ -369,6 +372,8 @@ public class MeleeAttackTests {
         DicePool attackDice = attacker.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
             attackDice.roll(state.getRandom());
+        assertEquals(2, attackDice.getSize());
+        state.setAttackDicePool(DicePool.empty); // to clear previous settings
 
         MeleeAttack attack = new MeleeAttackDamageOnly(
                 attacker.getComponentID(), victim.getComponentID(), attackDice, null);
@@ -393,6 +398,7 @@ public class MeleeAttackTests {
         assertTrue(actions.stream().noneMatch(a -> a instanceof MeleeAttack));
         assertTrue(actions.stream().noneMatch(a -> a instanceof Howl));
     }
+
     @Test
     public void monsterOnlyUsesAbilityOnce() {
         Monster attacker = state.getMonsters().get(1).get(0);
@@ -403,11 +409,10 @@ public class MeleeAttackTests {
         attacker.setPosition(attackerPos);
         victim.setPosition(victimPos);
         ((Hero) victim).setAbility(HeroAbilities.HeroAbility.SurgeRecoverOneHeart);
-        System.out.println(attacker);
 
-        while (state.getActingFigure().getComponentID() != attacker.getComponentID())
-        {
-            new EndTurn().execute(state);
+        while (state.getActingFigure().getComponentID() != attacker.getComponentID()) {
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            fm.next(state, actions.get(0));
             System.out.println(state.getActingFigure());
         }
         assertEquals(state.getActingFigure(), attacker);
@@ -433,7 +438,7 @@ public class MeleeAttackTests {
         Figure victim = state.getMonsters().get(0).get(0);
         Vector2D victimPos = victim.getPosition();
         assertEquals(victim.getComponentID(), ((PropertyInt) state.getMasterBoard().getElement(victimPos).getProperty("players")).value);
-        List<DescentCard> weapons = ((Hero)actingFigure).getWeapons();
+        List<DescentCard> weapons = ((Hero) actingFigure).getWeapons();
 
         assertEquals(1, weapons.size());
 

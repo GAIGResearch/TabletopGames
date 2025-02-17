@@ -22,7 +22,7 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     int[] rerolls;
 
     public static DicePool constructDicePool(String... args) {
-        Map<DiceType, Integer> wip = new HashMap<>();
+        Map<DiceType, Integer> wip = new LinkedHashMap<>();
         for (String d : args) {
             DiceType dt = DiceType.valueOf(d.toUpperCase(Locale.ROOT));
             if (wip.containsKey(dt))
