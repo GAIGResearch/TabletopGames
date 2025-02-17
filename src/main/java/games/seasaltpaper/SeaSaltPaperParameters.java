@@ -21,6 +21,7 @@ public class SeaSaltPaperParameters extends AbstractParameters {
     public int numberOfCardsDrawn = 2;
 
     int[] victoryCondition = new int[]{40, 35, 30};
+    int roundStopCondition = 7;
 
     public HashMap<CardSuite, int[]> collectorBonusDict = new HashMap<>() {{
         put(BOAT, new int[]{});

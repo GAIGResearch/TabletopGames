@@ -842,10 +842,10 @@ public class Game {
 //        players.add(new MCTSPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new HumanConsolePlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new BasicMCTSPlayer());
 //        players.add(new BasicMCTSPlayer());
@@ -860,10 +860,10 @@ public class Game {
 //        params.heuristic = new LeadHeuristic();
 //        params.reuseTree = true;
 //        params.normaliseRewards = false;
-//        players.add(new MCTSPlayer(params));
-//        players.add(new MCTSPlayer(params));
-//        players.add(new MCTSPlayer(params));
-//        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
 
 //        RMHCParams params = new RMHCParams();
 //        params.horizon = 15;
@@ -891,7 +891,7 @@ public class Game {
 
         /* Run multiple games */
         long t = System.currentTimeMillis();
-        int n = 1000;
+        int n = 100;
         ArrayList<GameType> games = new ArrayList<>();
         games.add(GameType.SeaSaltPaper);
 //        runMany(games, players, 100L, n, false, true, null, turnPause);

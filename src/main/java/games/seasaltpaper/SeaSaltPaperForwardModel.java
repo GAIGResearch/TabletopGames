@@ -178,6 +178,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         //Test Placeholder
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) gameState;
+        SeaSaltPaperParameters params = (SeaSaltPaperParameters) sspgs.getGameParameters();
         List<AbstractAction> actions = new ArrayList<>();
         switch (sspgs.currentPhase) {
             case DRAW: //TODO check what happen if draw pile is empty
@@ -190,7 +191,6 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                     actions.add(new SSPDrawCard(sspgs.discardPile2.getComponentID(), currentPlayerHandId));
                 }
                 // Draw 2 from draw pile, then discard 1 to one of the discard pile
-                SeaSaltPaperParameters params = (SeaSaltPaperParameters) sspgs.getGameParameters();
                 if (sspgs.getDrawPile().getSize() > 0) {
                     actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer(), params.numberOfCardsDrawn, 1));
                 }
@@ -202,7 +202,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
 //                System.out.println("this is duo/stop phase");
                 actions.addAll(HandManager.generateDuoActions(sspgs, sspgs.getCurrentPlayer()));
                 actions.add(new DoNothing());
-                if (HandManager.calculatePoint(sspgs, sspgs.getCurrentPlayer()) >= 7 && sspgs.lastChance == -1) {
+                if (HandManager.calculatePoint(sspgs, sspgs.getCurrentPlayer()) >= params.roundStopCondition && sspgs.lastChance == -1) {
                     actions.add(new Stop(gameState.getCurrentPlayer()));
                     actions.add(new LastChance(gameState.getCurrentPlayer()));
                 }
