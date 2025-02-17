@@ -124,6 +124,13 @@ public class CQGameState extends AbstractGameState {
         return commandPoints[uid];
     }
 
+    public boolean hasChastisedTroop(int uid) {
+        for (Troop troop : getTroops(uid)) {
+            if (troop.hasCommand(CommandType.Chastise)) return true;
+        }
+        return false;
+    }
+
     public void setSelectedTroop(int selectedTroop) {
         assert gamePhase == CQGamePhase.SelectionPhase;
         this.selectedTroop = selectedTroop;
@@ -278,6 +285,18 @@ public class CQGameState extends AbstractGameState {
                     actions.add(atk);
                 }
             }
+        }
+        if (actions.isEmpty()) {
+            for (Troop t : getTroops(uid)) {
+                SelectTroop sel = new SelectTroop(uid, t.getLocation(), hash);
+                if (canPerformAction(sel, false))
+                    actions.add(sel);
+                else {
+                    System.out.println("Not able to perform action!");
+                    canPerformAction(sel, false);
+                }
+            }
+            return actions;
         }
         return actions;
     }

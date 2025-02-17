@@ -52,10 +52,17 @@ public class ApplyCommand extends CQAction {
             if (!cmd.getCommandType().phases.contains((CQGameState.CQGamePhase) cqgs.getGamePhase())) return false;
             Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
             if (target == null) return false; // only Winds of Fate can be applied without target.
+            if (target.hasCommand(cmd.getCommandType())) return false; // no repeat application of the same command on the same troop
             if ((target.getOwnerId() == cqgs.getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
             return switch (cmdType) {
                 // Game rules state that chastise can't be used on the last remaining troop:
-                case Chastise -> cqgs.getTroops(target.getOwnerId()).size() > 1;
+                case Chastise -> {
+                    // no chastising last non-chastised troop. If there are >2 troops, you can't chastise them all.
+                    // If there are 2 troops, you could use Winds of Fate to chastise both, but that's not allowed.
+                    // If there's 1 troop, chastise is never allowed.
+                    int s = cqgs.getTroops(target.getOwnerId()).size();
+                    yield s > 2 || (s == 2 && !cqgs.hasChastisedTroop(target.getOwnerId()));
+                }
 
                 // Only allow charging on the selected troop; others won't be able to move anyway
                 case Charge -> cqgs.getSelectedTroop() == target;
