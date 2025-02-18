@@ -10,21 +10,11 @@ import games.descent2e.components.Figure;
 import java.util.Objects;
 import java.util.Set;
 
-public class HowlTest extends AttributeTest {
+public class HowlTest extends AttributeTest<HowlTest> {
 
-    String attributeTestName;
     public HowlTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
-        super(testingFigure, attribute);
-        this.attributeTestName = "Howl (Willpower) Test";
-        super.setSourceFigure(sourceFigure);
-        super.setTestCount(testCount);
+        super(testingFigure, attribute, sourceFigure, testCount);
         attributeTestName = "Howl (Willpower) Test: " + sourceFigure + "-" + testCount;
-    }
-
-    @Override
-    public void announceTestDebug (DescentGameState dgs)
-    {
-        System.out.println(((Figure) dgs.getComponentById(super.getTestingFigure())).getName() + " must make a Howl Test!");
     }
 
     @Override
@@ -39,7 +29,7 @@ public class HowlTest extends AttributeTest {
 
     @Override
     public String toStringWithResult() {
-        return toString() + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; +1 Fatigue)");
+        return this + " - " + getTestingName() + " (" + (result ? "Passed)" : "Failed; +1 Fatigue)");
     }
 
     @Override
@@ -61,40 +51,19 @@ public class HowlTest extends AttributeTest {
         }
     }
 
-    public HowlTest copy()
-    {
-        HowlTest retVal = new HowlTest(this.getTestingFigure(), this.getAttribute(), this.getSourceFigure(), this.getTestCount());
-        retVal.testingPlayer = testingPlayer;
-        retVal.phase = phase;
-        retVal.interruptPlayer = interruptPlayer;
-        retVal.attributeValue = attributeValue;
-        retVal.attributeTestName = attributeTestName;
-        retVal.penaltyToAttribute = penaltyToAttribute;
-        retVal.penaltyToRoll = penaltyToRoll;
-        retVal.result = result;
-        retVal.setTestingName(this.getTestingName());
-        return retVal;
+    @Override
+    public HowlTest _copy() {
+        return new HowlTest(testingFigure, attribute, sourceFigure, testCount);
     }
 
     @Override
     public boolean equals(Object obj)
     {
-        if (obj instanceof HowlTest)
-        {
-            HowlTest other = (HowlTest) obj;
-            return this.getTestingFigure() == other.getTestingFigure() &&
-                    this.getAttribute() == other.getAttribute() &&
-                    this.getSourceFigure() == other.getSourceFigure() &&
-                    this.getTestCount() == other.getTestCount() &&
-                    this.attributeTestName.equals(other.getAttributeTestName()) &&
-                    super.equals(obj);
+        if (obj instanceof HowlTest ht) {
+            return super.equals(ht);
+        } else {
+            return false;
         }
-        return false;
-    }
-
-    public String getAttributeTestName()
-    {
-        return attributeTestName;
     }
 
     @Override
@@ -105,8 +74,4 @@ public class HowlTest extends AttributeTest {
         return !f.hasAttributeTest(this);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), attributeTestName);
-    }
 }

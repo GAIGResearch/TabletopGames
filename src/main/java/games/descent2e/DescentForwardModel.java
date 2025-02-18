@@ -97,8 +97,8 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // 5. Player setup phase interrupts, after which setup continues:
         // Players choose heroes & class
 
-        ArrayList<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
-        ArrayList<Integer> archetypes = new ArrayList<>();
+        List<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
+        List<Integer> archetypes = new ArrayList<>();
         for (int i = 0; i < Archetype.values().length; i++) {
             archetypes.add(i);
         }

@@ -159,7 +159,7 @@ public class DescentGameData extends AbstractGameData {
                 }
 
                 // Find starting locations for players, maps to a board
-                HashMap<String, ArrayList<Vector2D>> startingLocations = new HashMap<>();
+                Map<String, List<Vector2D>> startingLocations = new HashMap<>();
                 JSONArray ls = (JSONArray) obj.get("starting-locations");
                 if (ls != null) {
                     int i = 0;

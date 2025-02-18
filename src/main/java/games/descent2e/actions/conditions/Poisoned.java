@@ -12,16 +12,10 @@ import games.descent2e.components.Monster;
 
 import java.util.Objects;
 
-public class Poisoned extends AttributeTest {
+public class Poisoned extends AttributeTest<Poisoned> {
     public Poisoned(int testingFigure, Figure.Attribute attribute) {
-        super(testingFigure, attribute);
-        super.setSourceFigure(testingFigure);
-        super.setTestCount(0);
-    }
-
-    public void announceTestDebug (DescentGameState dgs)
-    {
-        System.out.println(((Figure) dgs.getComponentById(super.getTestingFigure())).getName() + " must make a Poisoned Test!");
+        super(testingFigure, attribute, testingFigure, 0);
+        attributeTestName = "Poisoned Test: " + testingFigure + "-" + 0;
     }
 
     @Override
@@ -72,6 +66,11 @@ public class Poisoned extends AttributeTest {
         Figure f = dgs.getActingFigure();
         // We can only make one Poisoned attribute test per turn - if we have already taken it, we can't make another attempt
         return f.hasCondition(DescentTypes.DescentCondition.Poison) && !f.hasAttributeTest(this) && f.getNActionsExecuted().isMinimum();
+    }
+
+    @Override
+    public Poisoned _copy() {
+        return new Poisoned(testingFigure, attribute);
     }
 
     @Override
