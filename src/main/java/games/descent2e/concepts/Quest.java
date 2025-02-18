@@ -9,19 +9,19 @@ import java.util.*;
 public class Quest {
 
     private String name;
-    private ArrayList<String[]> monsters;  // name, tile, bonus effects for each monster type
-    private ArrayList<DToken.DTokenDef> tokens;  // token, meaning, how many, where
-    private ArrayList<GameOverCondition> gameOverConditions;  // How does the game end?
+    private List<String[]> monsters;  // name, tile, bonus effects for each monster type
+    private List<DToken.DTokenDef> tokens;  // token, meaning, how many, where
+    private List<GameOverCondition> gameOverConditions;  // How does the game end?
 //    private ArrayList<DescentRule> rules;  // define these in code
 //    private int heroWinsMinSatisfied;
 //    private int overlordWinsMinSatisfied;
-    private ArrayList<DescentReward> overlordRewards;
-    private ArrayList<DescentReward> heroRewards;
-    private ArrayList<DescentReward> commonRewards;
-    private ArrayList<String> boards;
-    private HashMap<String, ArrayList<Vector2D>> startingLocations;
-    private ArrayList<Quest> nextMainQuests;
-    private ArrayList<Quest> nextSideQuests;
+    private List<DescentReward> overlordRewards;
+    private List<DescentReward> heroRewards;
+    private List<DescentReward> commonRewards;
+    private List<String> boards;
+    private Map<String, List<Vector2D>> startingLocations;
+    private List<Quest> nextMainQuests;
+    private List<Quest> nextSideQuests;
     private int act;
 
     public String getName() {
@@ -30,34 +30,34 @@ public class Quest {
     public void setName(String name) {
         this.name = name;
     }
-    public ArrayList<String> getBoards() {
+    public List<String> getBoards() {
         return boards;
     }
-    public void setBoards(ArrayList<String> boards) {
+    public void setBoards(List<String> boards) {
         this.boards = boards;
     }
-    public ArrayList<Quest> getNextMainQuests() {
+    public List<Quest> getNextMainQuests() {
         return nextMainQuests;
     }
-    public void setNextMainQuests(ArrayList<Quest> nextMainQuests) {
+    public void setNextMainQuests(List<Quest> nextMainQuests) {
         this.nextMainQuests = nextMainQuests;
     }
-    public ArrayList<Quest> getNextSideQuests() {
+    public List<Quest> getNextSideQuests() {
         return nextSideQuests;
     }
-    public void setNextSideQuests(ArrayList<Quest> nextSideQuests) {
+    public void setNextSideQuests(List<Quest> nextSideQuests) {
         this.nextSideQuests = nextSideQuests;
     }
-    public void setStartingLocations(HashMap<String, ArrayList<Vector2D>> startingLocations) {
+    public void setStartingLocations(Map<String, List<Vector2D>> startingLocations) {
         this.startingLocations = startingLocations;
     }
-    public HashMap<String, ArrayList<Vector2D>> getStartingLocations() {
+    public Map<String, List<Vector2D>> getStartingLocations() {
         return startingLocations;
     }
-    public void setMonsters(ArrayList<String[]> monsters) {
+    public void setMonsters(List<String[]> monsters) {
         this.monsters = monsters;
     }
-    public ArrayList<String[]> getMonsters() {
+    public List<String[]> getMonsters() {
         return monsters;
     }
     public void setAct(int act) {
@@ -66,40 +66,40 @@ public class Quest {
     public int getAct() {
         return act;
     }
-    public void setTokens(ArrayList<DToken.DTokenDef> tokens) {
+    public void setTokens(List<DToken.DTokenDef> tokens) {
         this.tokens = tokens;
     }
-    public ArrayList<DToken.DTokenDef> getTokens() {
+    public List<DToken.DTokenDef> getTokens() {
         return tokens;
     }
     public void setGameOverConditions(ArrayList<GameOverCondition> gameOverConditions) {
         this.gameOverConditions = gameOverConditions;
     }
-    public ArrayList<GameOverCondition> getGameOverConditions() {
+    public List<GameOverCondition> getGameOverConditions() {
         return gameOverConditions;
     }
 
-    public ArrayList<DescentReward> getCommonRewards() {
+    public List<DescentReward> getCommonRewards() {
         return commonRewards;
     }
 
-    public ArrayList<DescentReward> getHeroRewards() {
+    public List<DescentReward> getHeroRewards() {
         return heroRewards;
     }
 
-    public ArrayList<DescentReward> getOverlordRewards() {
+    public List<DescentReward> getOverlordRewards() {
         return overlordRewards;
     }
 
-    public void setCommonRewards(ArrayList<DescentReward> commonRewards) {
+    public void setCommonRewards(List<DescentReward> commonRewards) {
         this.commonRewards = commonRewards;
     }
 
-    public void setOverlordRewards(ArrayList<DescentReward> overlordRewards) {
+    public void setOverlordRewards(List<DescentReward> overlordRewards) {
         this.overlordRewards = overlordRewards;
     }
 
-    public void setHeroRewards(ArrayList<DescentReward> heroRewards) {
+    public void setHeroRewards(List<DescentReward> heroRewards) {
         this.heroRewards = heroRewards;
     }
 
@@ -108,7 +108,7 @@ public class Quest {
         if (boards != null) q.boards = new ArrayList<>(boards);
         if (startingLocations != null) {
             q.startingLocations = new HashMap<>();
-            for (Map.Entry<String, ArrayList<Vector2D>> e : startingLocations.entrySet()) {
+            for (Map.Entry<String, List<Vector2D>> e : startingLocations.entrySet()) {
                 q.startingLocations.put(e.getKey(), new ArrayList<>(e.getValue()));
             }
         }
@@ -189,6 +189,7 @@ public class Quest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, monsters, tokens, gameOverConditions, overlordRewards, heroRewards, commonRewards, boards, startingLocations, nextMainQuests, nextSideQuests, act);
+        return Objects.hash(name, monsters, tokens, gameOverConditions, overlordRewards, heroRewards,
+                commonRewards, boards, startingLocations, nextMainQuests, nextSideQuests, act);
     }
 }

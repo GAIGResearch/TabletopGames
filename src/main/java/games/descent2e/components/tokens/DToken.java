@@ -9,15 +9,12 @@ import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import utilities.Vector2D;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 
 // Important: ownerID is idx of hero in list of heroes in game state, NOT player IDX
 public class DToken extends Token {
-    ArrayList<TokenAction> effects;
-    HashMap<Figure.Attribute, Integer> attributeModifiers;
+    List<TokenAction> effects;
+    Map<Figure.Attribute, Integer> attributeModifiers;
     DescentTypes.DescentToken tokenType;
     Vector2D position;  // If null, not on map
 
@@ -69,19 +66,19 @@ public class DToken extends Token {
         }
     }
 
-    public void setEffects(ArrayList<TokenAction> effects) {
+    public void setEffects(List<TokenAction> effects) {
         this.effects = effects;
     }
 
-    public void setAttributeModifiers(HashMap<Figure.Attribute, Integer> attributeModifiers) {
+    public void setAttributeModifiers(Map<Figure.Attribute, Integer> attributeModifiers) {
         this.attributeModifiers = attributeModifiers;
     }
 
-    public ArrayList<TokenAction> getEffects() {
+    public List<TokenAction> getEffects() {
         return effects;
     }
 
-    public HashMap<Figure.Attribute, Integer> getAttributeModifiers() {
+    public Map<Figure.Attribute, Integer> getAttributeModifiers() {
         return attributeModifiers;
     }
 
@@ -111,23 +108,23 @@ public class DToken extends Token {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DToken)) return false;
+        if (!(o instanceof DToken dToken)) return false;
         if (!super.equals(o)) return false;
-        DToken dToken = (DToken) o;
-        return tokenType == dToken.tokenType && Objects.equals(position, dToken.position);
+        return tokenType == dToken.tokenType && Objects.equals(position, dToken.position) &&
+                Objects.equals(effects, dToken.effects) && Objects.equals(attributeModifiers, dToken.attributeModifiers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tokenType, position);
+        return Objects.hash(super.hashCode(), tokenType, position, effects, attributeModifiers);
     }
 
     public static class DTokenDef {
         DescentTypes.DescentToken tokenType;
         String setupHowMany;
         String[] locations;
-        ArrayList<TokenAction> effects;
-        HashMap<Figure.Attribute, Integer> attributeModifiers;
+        List<TokenAction> effects;
+        Map<Figure.Attribute, Integer> attributeModifiers;
         String altName;
 
         public DescentTypes.DescentToken getTokenType() {
@@ -158,21 +155,21 @@ public class DToken extends Token {
             this.attributeModifiers = attributeModifiers;
         }
 
-        public ArrayList<TokenAction> getEffects() {
+        public List<TokenAction> getEffects() {
             return effects;
         }
 
-        public ArrayList<TokenAction> getEffectsCopy() {
-            ArrayList<TokenAction> actions = new ArrayList<>();
+        public List<TokenAction> getEffectsCopy() {
+            List<TokenAction> actions = new ArrayList<>();
             for (TokenAction ta: effects) actions.add(ta.copy());
             return actions;
         }
 
-        public HashMap<Figure.Attribute, Integer> getAttributeModifiers() {
+        public Map<Figure.Attribute, Integer> getAttributeModifiers() {
             return attributeModifiers;
         }
 
-        public void setEffects(ArrayList<TokenAction> effects) {
+        public void setEffects(List<TokenAction> effects) {
             this.effects = effects;
         }
 
