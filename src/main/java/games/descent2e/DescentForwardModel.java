@@ -343,10 +343,19 @@ public class DescentForwardModel extends StandardForwardModel {
             // now check to see if we need to end the player turn
             dgs.logEvent(Event.GameEvent.GAME_EVENT, "End Turn: " + actingFigure.getName().replace("Hero: ", "") + "; " + actingFigure.getComponentID() + ";" + actingFigure.getPosition());
             if (actingFigure instanceof Hero) {
-                endPlayerTurn(dgs);  // we just move on to the next player
-                if (dgs.getTurnOwner() == dgs.overlordPlayer) {
+                dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
+                if (dgs.heroActingNext == 0) {
+                    // we have reached the overlord player
+                    endPlayerTurn(dgs, 0);  // we just move on to the next player
                     overlordCheckFatigue(dgs, true);
+                } else {
+                    // next hero
+                    actingFigure = dgs.heroes.get(dgs.heroActingNext);
+                    if (dgs.getTurnOwner() != actingFigure.getOwnerId()) {
+                        endPlayerTurn(dgs, actingFigure.getOwnerId()); // change player if the next hero is controlled by a different player
+                    }
                 }
+
             } else {
                 // we check to see if we need to end the overlord turn (and hence also the round)
                 int nextMonster = dgs.nextMonster();
@@ -368,6 +377,7 @@ public class DescentForwardModel extends StandardForwardModel {
                     dgs.overlord.resetRound();
                     dgs.monsterGroupActingNext = 0;
                     dgs.monsterActingNext = 0;
+                    dgs.heroActingNext = 0;
                     endRound(dgs, 1);
                 } else {
                     dgs.monsterActingNext = nextMonster;  // continue turn with the next monster

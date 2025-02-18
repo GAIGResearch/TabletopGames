@@ -53,6 +53,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // old Turn Order fields
     int monsterGroupActingNext;
     int monsterActingNext;
+    int heroActingNext;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -174,6 +175,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         }
         copy.monsterActingNext = monsterActingNext;
         copy.monsterGroupActingNext = monsterGroupActingNext;
+        copy.heroActingNext = heroActingNext;
         return copy;
     }
 
@@ -258,6 +260,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Objects.equals(currentQuest, that.currentQuest) &&
                 Objects.equals(defeatedFigures, that.defeatedFigures) &&
                 monsterActingNext == that.monsterActingNext &&
+                heroActingNext == that.heroActingNext &&
                 monsterGroupActingNext == that.monsterGroupActingNext;
     }
 
@@ -265,7 +268,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
                 masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, heroesSide,
-                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest, defeatedFigures);
+                monsters, monstersOriginal, monstersPerGroup, monsterGroups, overlordPlayer, tokens, currentQuest,
+                defeatedFigures, monsterActingNext, heroActingNext, monsterGroupActingNext);
         result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
     }
@@ -378,9 +382,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         // TODO Ensure monsterGroup deletes itself when empty
         if (getCurrentPlayer() != overlordPlayer) {
             // If hero player, get corresponding hero
-            actingFigure = getHeroes().stream()
-                    .filter(h -> h.getOwnerId() == getCurrentPlayer())
-                    .findFirst().orElseThrow(() -> new IllegalStateException("No hero found for player " + getCurrentPlayer()));
+            actingFigure = heroes.get(heroActingNext);
         } else {
             // Otherwise, monster is playing
             actingFigure = monsterGroup.get(monsterActingNext);
