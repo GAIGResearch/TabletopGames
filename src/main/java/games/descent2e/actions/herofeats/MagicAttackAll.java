@@ -85,6 +85,6 @@ public class MagicAttackAll extends DescentAction {
 
     @Override
     public int hashCode() {
-        return 112002;
+        return super.hashCode() + 112002;
     }
 }

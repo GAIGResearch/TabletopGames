@@ -303,7 +303,6 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     }
 
     public boolean equals(Object obj) {
-
         if (obj instanceof HeroicFeatExtraMovement) {
             HeroicFeatExtraMovement other = (HeroicFeatExtraMovement) obj;
             return other.heroID == heroID && other.allyID == allyID &&
@@ -315,6 +314,11 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                     other.skip == skip;
         }
         return false;
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), phase, heroPlayer, allyPlayer, interruptPlayer, heroID, allyID,
+                swapped, swapOption, oldHeroMovePoints, oldAllyMovePoints, oldHeroHasMoved, oldAllyHasMoved, skip);
     }
 
     @Override
@@ -336,11 +340,6 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     }
     public boolean getSwapOption() {
         return swapOption;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), phase, heroPlayer, allyPlayer, interruptPlayer, heroID, allyID, swapped, swapOption, oldHeroMovePoints, oldAllyMovePoints, oldHeroHasMoved, oldAllyHasMoved, skip);
     }
 
     public boolean getSkip()

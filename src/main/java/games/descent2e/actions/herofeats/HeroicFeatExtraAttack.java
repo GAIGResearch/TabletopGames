@@ -71,6 +71,11 @@ public class HeroicFeatExtraAttack extends FreeAttack {
     }
 
     @Override
+    public int hashCode() {
+        return super.hashCode() + 29;
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
         attackerName = gameState.getComponentById(attackingFigure).getComponentName();
         defenderName = gameState.getComponentById(defendingFigure).getComponentName();
@@ -95,8 +100,4 @@ public class HeroicFeatExtraAttack extends FreeAttack {
         return String.format("Heroic Feat: Free Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), HeroicFeatExtraAttack.class);
-    }
 }

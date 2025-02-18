@@ -63,10 +63,10 @@ public class SwapOrder extends DescentAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        SwapOrder swapOrder = (SwapOrder) o;
-        return first == swapOrder.first && second == swapOrder.second && swap == swapOrder.swap;
+        if (o instanceof SwapOrder that) {
+            return first == that.first && second == that.second && swap == that.swap && super.equals(o);
+        }
+        return false;
     }
 
     @Override

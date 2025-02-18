@@ -47,7 +47,7 @@ public class RemoveFromMap extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof RemoveFromMap;
+        return obj instanceof RemoveFromMap && super.equals(obj);
     }
 
     @Override
@@ -61,6 +61,6 @@ public class RemoveFromMap extends DescentAction {
 
     @Override
     public int hashCode() {
-        return 112011;
+        return super.hashCode() + 112011;
     }
 }

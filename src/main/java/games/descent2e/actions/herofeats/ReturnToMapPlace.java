@@ -42,7 +42,7 @@ public class ReturnToMapPlace extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ReturnToMapPlace;
+        return obj instanceof ReturnToMapPlace && super.equals(obj);
     }
 
     @Override
@@ -57,6 +57,6 @@ public class ReturnToMapPlace extends DescentAction {
 
     @Override
     public int hashCode() {
-        return 112003;
+        return super.hashCode() + 112003;
     }
 }

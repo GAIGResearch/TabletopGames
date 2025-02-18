@@ -53,10 +53,10 @@ public class ReturnToMapMove extends DescentAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        ReturnToMapMove that = (ReturnToMapMove) o;
-        return distance == that.distance;
+        if (o instanceof ReturnToMapMove that) {
+            return distance == that.distance && super.equals(that);
+        }
+        return false;
     }
 
     @Override

@@ -77,9 +77,8 @@ public class StunAllInMonsterGroup extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof StunAllInMonsterGroup) {
-            StunAllInMonsterGroup other = (StunAllInMonsterGroup) obj;
-            return monsters.equals(other.monsters) && monsterName.equals(monsterName) && other.range == range;
+        if (obj instanceof StunAllInMonsterGroup other) {
+            return monsters.equals(other.monsters) && other.monsterName.equals(monsterName) && other.range == range;
         }
         return false;
     }
