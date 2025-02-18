@@ -61,7 +61,7 @@ public class ApplyCommand extends CQAction {
                     // If there are 2 troops, you could use Winds of Fate to chastise both, but that's not allowed.
                     // If there's 1 troop, chastise is never allowed.
                     int s = cqgs.getTroops(target.getOwnerId()).size();
-                    yield s > 2 || (s == 2 && !cqgs.hasChastisedTroop(target.getOwnerId()));
+                    yield s > 2 || (s == 2 && cqgs.chastisedTroopCount(target.getOwnerId()) == 0);
                 }
 
                 // Only allow charging on the selected troop; others won't be able to move anyway

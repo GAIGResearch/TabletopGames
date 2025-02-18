@@ -124,11 +124,12 @@ public class CQGameState extends AbstractGameState {
         return commandPoints[uid];
     }
 
-    public boolean hasChastisedTroop(int uid) {
+    public int chastisedTroopCount(int uid) {
+        int c = 0;
         for (Troop troop : getTroops(uid)) {
-            if (troop.hasCommand(CommandType.Chastise)) return true;
+            if (troop.hasCommand(CommandType.Chastise)) c++;
         }
-        return false;
+        return c;
     }
 
     public void setSelectedTroop(int selectedTroop) {
@@ -255,8 +256,9 @@ public class CQGameState extends AbstractGameState {
         }
         if (phase.equals(CQGamePhase.SelectionPhase)) {
             for (Troop troop : getTroops(getCurrentPlayer())) {
-                if (troop.hasMoved() && !troop.hasCommand(CommandType.Chastise))
+                if (troop.hasMoved() && !troop.hasCommand(CommandType.Chastise)) {
                     System.out.println("Troop was not stepped correctly, somehow...");
+                }
             }
             for (Troop t : getTroops(uid)) {
                 SelectTroop sel = new SelectTroop(uid, t.getLocation(), hash);
@@ -370,6 +372,17 @@ public class CQGameState extends AbstractGameState {
         return true;
     }
 
+    /**
+     * Removes chastise from a random troop. Only used when all of a player's troops have had chastise applied to them,
+     * before the sile non-chastised troop is killed.
+     * @param uid Player to have a troop get chastise removed.
+     */
+    public void removeChastise(int uid) {
+        HashSet<Troop> troops = getTroops(uid);
+        Troop t = (Troop) troops.toArray()[(new Random()).nextInt(troops.size())];
+        t.removeChastise();
+    }
+
     public void endTurn() {
         if (checkWin()) return; // game has ended, and checkWin() has finished it
         setGamePhase(CQGamePhase.SelectionPhase);
@@ -378,8 +391,8 @@ public class CQGameState extends AbstractGameState {
             troop.step(getCurrentPlayer());
         }
         int nextPlayer = getCurrentPlayer() ^ 1;
-        if (getTroops(nextPlayer).size() == 1) {
-            getTroops(nextPlayer).iterator().next().removeChastise();
+        if (getTroops(nextPlayer).size() == chastisedTroopCount(nextPlayer)) {
+            removeChastise(nextPlayer);
         }
         for (Troop troop : getTroops(nextPlayer)) {
             if (troop.hasMoved())
