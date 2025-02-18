@@ -10,6 +10,7 @@ import utilities.Vector2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class Monster extends Figure {
 
@@ -22,7 +23,7 @@ public class Monster extends Figure {
         RIGHT(new Vector2D(0,-1));
 
         // If this is applied to figure's position anchor, then the returned position is the top-left corner of the figure
-        Vector2D anchorModifier;
+        final Vector2D anchorModifier;
         Direction(Vector2D anchorModifier) {
             this.anchorModifier = anchorModifier;
         }
@@ -44,6 +45,10 @@ public class Monster extends Figure {
 
     public Monster() {
         super("Monster", -1);
+    }
+
+    protected Monster(String name, int nActionsPossible) {
+        super(name, nActionsPossible);
     }
 
     protected Monster(String name, Counter actions, int ID) {
@@ -76,6 +81,11 @@ public class Monster extends Figure {
     @Override
     public Monster copy() {
         Monster copy = new Monster(componentName, nActionsExecuted.copy(), componentID);
+        copyComponentTo(copy);
+        return copy;
+    }
+
+    protected Monster copyComponentTo(Monster copy) {
         copy.orientation = orientation;
         copy.attackType = attackType;
         copy.lieutenant = lieutenant;
@@ -87,13 +97,7 @@ public class Monster extends Figure {
     }
 
     public Monster copyNewID() {
-        Monster copy = new Monster();
-        copy.orientation = orientation;
-        copy.attackType = attackType;
-        copy.lieutenant = lieutenant;
-        copy.surges = new ArrayList<>(surges);
-        copy.passives = new ArrayList<>(passives);
-        copy.actions = new ArrayList<>(actions);
+        Monster copy = new Monster(componentName, nActionsExecuted.getMaximum());
         super.copyComponentTo(copy);
         return copy;
     }
@@ -160,13 +164,11 @@ public class Monster extends Figure {
 
         // If there is a number in the Surge (such as a Range increment or Damage increase), we need to extract it
         String number = surge.replaceAll("[^\\d.]", "");
-        if (number == null)
-            number = "0";
 
         // For simplicity's sake, we are assuming that number never goes above 3
         // As no monster has a Surge with a value greater than 3 in the base game
         // Otherwise we will need to fix the Surges called
-        if (Integer.valueOf(number) > 3)
+        if (Integer.parseInt(number) > 3)
             number = "3";
 
         // Get rid of the unwanted characters in the string
@@ -275,5 +277,23 @@ public class Monster extends Figure {
     public AttackType getAttackType()
     {
         return attackType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Monster monster)) return false;
+        if (!super.equals(o)) return false;
+        return lieutenant == monster.lieutenant &&
+                orientation == monster.orientation &&
+                attackType == monster.attackType &&
+                surges.equals(monster.surges) &&
+                passives.equals(monster.passives) &&
+                actions.equals(monster.actions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), lieutenant, orientation.ordinal(), attackType, surges, passives, actions);
     }
 }
