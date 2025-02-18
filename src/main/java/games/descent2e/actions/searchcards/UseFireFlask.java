@@ -52,4 +52,14 @@ public class UseFireFlask extends DescentAction {
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Fire Flask"));
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof UseFireFlask && ((UseFireFlask) obj).enemyID == enemyID;
+    }
+
+    @Override
+    public int hashCode() {
+        return enemyID - 97984;
+    }
 }

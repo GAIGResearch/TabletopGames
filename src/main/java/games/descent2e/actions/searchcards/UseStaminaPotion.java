@@ -106,7 +106,17 @@ public class UseStaminaPotion extends DescentAction implements IExtendedSequence
         Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Stamina Potion"));
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof UseStaminaPotion other)) return false;
+        return toRestoreID == other.toRestoreID;
+    }
 
+    @Override
+    public int hashCode() {
+        return toRestoreID - 9867;
     }
 }

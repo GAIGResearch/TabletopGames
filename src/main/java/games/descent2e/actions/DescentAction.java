@@ -13,11 +13,7 @@ public abstract class DescentAction extends AbstractAction {
     final Set<Triggers> triggerPoints;
 
     public DescentAction(Triggers triggerPoint) {
-        this.triggerPoints = new HashSet<>();
-        this.triggerPoints.add(triggerPoint);
-    }
-    public DescentAction(Set<Triggers> triggerPoints) {
-        this.triggerPoints = triggerPoints;
+        this.triggerPoints = Set.of(triggerPoint);
     }
 
     @Override

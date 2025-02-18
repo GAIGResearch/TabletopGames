@@ -33,6 +33,16 @@ public class UseWardingTalisman extends DescentAction {
     }
 
     @Override
+    public boolean equals(Object o) {
+        return o instanceof UseWardingTalisman;
+    }
+
+    @Override
+    public int hashCode() {
+        return 34890;
+    }
+
+    @Override
     public boolean canExecute(DescentGameState dgs) {
         return false;
     }

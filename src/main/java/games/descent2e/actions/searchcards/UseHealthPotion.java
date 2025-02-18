@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static core.CoreConstants.playersHash;
+import static core.CoreConstants.sizeHash;
 import static utilities.Utils.getNeighbourhood;
 
 public class UseHealthPotion extends DescentAction implements IExtendedSequence {
@@ -106,5 +107,17 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
         Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Health Potion"));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof UseHealthPotion other)) return false;
+        return toHealID == other.toHealID;
+    }
+
+    @Override
+    public int hashCode() {
+        return toHealID - 789793 + 31;
     }
 }

@@ -17,6 +17,7 @@ import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static core.CoreConstants.playersHash;
 import static utilities.Utils.getNeighbourhood;
@@ -129,7 +130,9 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
 
     @Override
     public UseCurseDoll copy() {
-        return this;
+        UseCurseDoll retValue = new UseCurseDoll(toCureID, conditionToCure);
+        retValue.complete = complete;
+        return retValue;
     }
 
     @Override
@@ -139,5 +142,19 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
         Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Curse Doll"));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UseCurseDoll that)) return false;
+        return toCureID == that.toCureID &&
+                conditionToCure == that.conditionToCure &&
+                complete == that.complete;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(toCureID, conditionToCure, complete);
     }
 }
