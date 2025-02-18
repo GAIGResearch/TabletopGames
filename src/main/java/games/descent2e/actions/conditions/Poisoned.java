@@ -13,7 +13,6 @@ import games.descent2e.components.Monster;
 import java.util.Objects;
 
 public class Poisoned extends AttributeTest {
-    String attributeTestName = "Poisoned";
     public Poisoned(int testingFigure, Figure.Attribute attribute) {
         super(testingFigure, attribute);
         super.setSourceFigure(testingFigure);
@@ -77,15 +76,11 @@ public class Poisoned extends AttributeTest {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Poisoned poisoned = (Poisoned) o;
-        return Objects.equals(attributeTestName, poisoned.attributeTestName);
+        return super.equals(o) && o instanceof Poisoned;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), attributeTestName);
+        return super.hashCode() + 28092;
     }
 }
