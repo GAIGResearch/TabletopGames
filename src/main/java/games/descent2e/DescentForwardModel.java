@@ -1153,20 +1153,8 @@ public class DescentForwardModel extends StandardForwardModel {
         return sortedActions;
     }
 
-    /*
-    @Override
-    protected AbstractForwardModel __copy() {
-        return new DescentForwardModel();
-    }
-    */
-
     private boolean checkEndOfGame(DescentGameState dgs) {
         // TODO end of campaign / other phases
-        if (dgs.getRoundCounter() >= dgs.getGameParameters().getTimeoutRounds()) {
-            dgs.setGameStatus(GameResult.TIMEOUT);
-            return true;
-        }
-
         for (GameOverCondition condition : dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
@@ -1175,21 +1163,6 @@ public class DescentForwardModel extends StandardForwardModel {
                 } else {
                     dgs.setGameStatus(GameResult.LOSE_GAME);
                 }
-                //List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
-                //List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
-                //List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
-                //for (int i = 0; i < dgs.getNPlayers(); i++) {
-                // TODO Uncomment this when Rewards are fixed
-                    /*
-                    for (DescentReward dr: commonRewards) dr.applyReward(dgs, i);
-                    if (i == dgs.overlordPlayer) {
-                        for (DescentReward dr: overlordRewards) dr.applyReward(dgs, i);
-                    } else {
-                        for (DescentReward dr: heroRewards) dr.applyReward(dgs, i);
-                    }
-                    */
-                //}
-                // Quest is over, return true
                 return true;
             }
         }
@@ -1233,7 +1206,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 break;
 
             default:
-                System.out.println("Game ended in an unknown way!");
+                System.out.println("Game ended in an unknown way! + " + gameResult);
                 for (int i = 0; i < dgs.getNPlayers(); i++) {
                     dgs.setPlayerResult(GameResult.DRAW_GAME, i);
                 }

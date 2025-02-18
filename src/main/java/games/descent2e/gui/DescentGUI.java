@@ -4,7 +4,6 @@ import core.*;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
-import games.descent2e.DescentTurnOrder;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.Hero;
@@ -192,12 +191,11 @@ public class DescentGUI extends AbstractGUIManager {
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
-        DescentTurnOrder dto = (DescentTurnOrder)((AbstractGameStateWithTurnOrder)gameState).getTurnOrder();
         DescentGameState dgs = (DescentGameState)gameState;
         if (dgs.getCurrentPlayer() == dgs.getOverlordPlayer()) {
             actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
         } else {
-            actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName() + "(" +dto.getHeroFigureActingNext() + ")");
+            actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
         }
         currentQuestLabel.setText("Quest: " + dgs.getCurrentQuest().getName());
     }

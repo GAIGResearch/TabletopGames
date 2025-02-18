@@ -17,7 +17,6 @@ public class DoubleAttack extends MultiAttack {
 
     @Override
     public boolean execute(DescentGameState dgs) {
-        dgs.setActionInProgress(this);
         ((Hero) dgs.getActingFigure()).setFeatAvailable(false);
         super.execute(dgs);
         return true;

@@ -15,10 +15,10 @@ public class DescentParameters extends AbstractParameters {
     public DescentTypes.Campaign campaign = HeirsOfBlood;
 
     public int nActionsPerFigure = 2;
-    public HashMap<DiceType, Integer> reviveDice = new HashMap<DiceType, Integer>() {{
+    public HashMap<DiceType, Integer> reviveDice = new HashMap<>() {{
         put(RED, 2);
     }};
-    public HashMap<DiceType, Integer> healDice = new HashMap<DiceType, Integer>() {{
+    public HashMap<DiceType, Integer> healDice = new HashMap<>() {{
         put(RED, 1);
     }};
 
@@ -38,9 +38,8 @@ public class DescentParameters extends AbstractParameters {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DescentParameters)) return false;
+        if (!(o instanceof DescentParameters that)) return false;
         if (!super.equals(o)) return false;
-        DescentParameters that = (DescentParameters) o;
         return nActionsPerFigure == that.nActionsPerFigure &&
                 Objects.equals(dataPath, that.dataPath) &&
                 campaign == that.campaign;
