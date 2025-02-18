@@ -28,10 +28,8 @@ public class GreedyAction extends SearchAction {
     }
 
     @Override
-    public GreedyAction copy() {
-        GreedyAction sa = new GreedyAction();
-        sa.tokenID = tokenID;
-        return sa;
+    public GreedyAction _copy() {
+        return new GreedyAction();
     }
 
     @Override
@@ -68,7 +66,7 @@ public class GreedyAction extends SearchAction {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && o instanceof TokenAction;
+        return super.equals(o) && o instanceof GreedyAction;
     }
 
     @Override

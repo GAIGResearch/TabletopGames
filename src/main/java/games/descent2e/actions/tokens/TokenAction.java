@@ -5,8 +5,8 @@ import games.descent2e.actions.Triggers;
 
 import java.util.Objects;
 
-public abstract class TokenAction extends DescentAction {
-    int tokenID;  // TODO copy this in subclasses
+public abstract class TokenAction<A extends TokenAction<A>> extends DescentAction {
+    int tokenID;
 
     public TokenAction(int tokenID, Triggers triggerPoint) {
         super(triggerPoint);
@@ -20,14 +20,20 @@ public abstract class TokenAction extends DescentAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TokenAction)) return false;
-        TokenAction that = (TokenAction) o;
+        if (!(o instanceof TokenAction that)) return false;
         return tokenID == that.tokenID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tokenID);
+        return tokenID + 292;
     }
-    public abstract TokenAction copy();
+
+    public final A copy() {
+        A retValue =  _copy();
+        retValue.tokenID = tokenID;
+        return retValue;
+    }
+
+    public abstract A _copy();
 }

@@ -26,7 +26,7 @@ import static utilities.Utils.getNeighbourhood;
 /**
  * 2-step action to give acolyte token to an adjacent player. Player currently carrying the token chooses between adjacent players
  */
-public class TradeAcolyteAction extends TokenAction implements IExtendedSequence {
+public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implements IExtendedSequence {
     int receivingHeroIdx;
     boolean complete;
 
@@ -67,7 +67,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
                     }
                 }
             }
-            if (adjacentHeroes.size() > 0) {
+            if (!adjacentHeroes.isEmpty()) {
                 for (Hero h : adjacentHeroes) {
                     if (h.getComponentID() != heroIdx) {
                         // Check if adjacent
@@ -76,7 +76,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
                 }
             }
         }
-        if (actions.size() == 0) actions.add(new DoNothing());
+        if (actions.isEmpty()) actions.add(new DoNothing());
         return actions;
     }
 
@@ -97,7 +97,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     }
 
     @Override
-    public TradeAcolyteAction copy() {
+    public TradeAcolyteAction _copy() {
         TradeAcolyteAction taa = new TradeAcolyteAction(tokenID);
         taa.receivingHeroIdx = receivingHeroIdx;
         return taa;
@@ -133,10 +133,10 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TradeAcolyteAction that = (TradeAcolyteAction) o;
-        return receivingHeroIdx == that.receivingHeroIdx && complete == that.complete;
+        if (o instanceof TradeAcolyteAction that) {
+            return super.equals(that) && receivingHeroIdx == that.receivingHeroIdx && complete == that.complete;
+        }
+        return false;
     }
 
     @Override

@@ -27,7 +27,7 @@ import static utilities.Utils.getNeighbourhood;
  * TODO: effect does not cost action points and is automatically triggered at the end of the hero's turn
  * TODO: player choice which one to get if multiple options (currently first token found)
  */
-public class AcolyteAction extends TokenAction implements IExtendedSequence {
+public class AcolyteAction extends TokenAction<AcolyteAction> implements IExtendedSequence {
 
     int villagerID;
     boolean complete;
@@ -63,7 +63,7 @@ public class AcolyteAction extends TokenAction implements IExtendedSequence {
                     adjacentVillagers.add(token);
                 }
             }
-            if (adjacentVillagers.size() > 0) {
+            if (!adjacentVillagers.isEmpty()) {
                 for (DToken token : adjacentVillagers) {
                     AcolyteAction newAA = new AcolyteAction(tokenID, token.getComponentID());
                     if (newAA.canExecute(dgs)) actions.add(newAA);
@@ -93,15 +93,11 @@ public class AcolyteAction extends TokenAction implements IExtendedSequence {
     }
 
     @Override
-    public AcolyteAction copy() {
+    public AcolyteAction _copy() {
         AcolyteAction acolyteAction = new AcolyteAction(tokenID);
         acolyteAction.villagerID = villagerID;
+        acolyteAction.complete = complete;
         return acolyteAction;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), villagerID, complete);
     }
 
     @Override
@@ -138,6 +134,12 @@ public class AcolyteAction extends TokenAction implements IExtendedSequence {
     public boolean equals(Object o) {
         return super.equals(o) && o instanceof AcolyteAction && ((AcolyteAction) o).villagerID == villagerID && complete == ((AcolyteAction) o).complete;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), villagerID, complete);
+    }
+
 
     @Override
     public String getString(AbstractGameState gameState) {

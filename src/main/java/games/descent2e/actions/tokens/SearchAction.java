@@ -21,16 +21,14 @@ import static utilities.Utils.getNeighbourhood;
 /**
  * Draw random search card and add to player
  */
-public class SearchAction extends TokenAction {
+public class SearchAction extends TokenAction<SearchAction> {
     public SearchAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
-    public SearchAction copy() {
-        SearchAction sa = new SearchAction();
-        sa.tokenID = tokenID;
-        return sa;
+    public SearchAction _copy() {
+        return new SearchAction();
     }
 
     @Override
@@ -52,7 +50,7 @@ public class SearchAction extends TokenAction {
 
     @Override
     public boolean equals(Object o) {
-        return super.equals(o) && o instanceof TokenAction;
+        return super.equals(o) && o instanceof SearchAction;
     }
 
     @Override
