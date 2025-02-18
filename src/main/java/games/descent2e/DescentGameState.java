@@ -1,13 +1,10 @@
 package games.descent2e;
 
-import core.AbstractGameStateWithTurnOrder;
+import core.AbstractGameState;
 import core.AbstractParameters;
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.*;
-import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.descent2e.actions.DescentAction;
@@ -23,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static games.GameType.Descent2e;
 
-public class DescentGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class DescentGameState extends AbstractGameState implements IPrintable {
 
     DescentGameData data;
 
@@ -53,6 +50,10 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     Quest currentQuest;
     List<Pair<String, String>> defeatedFigures;
 
+    // old Turn Order fields
+    int monsterGroupActingNext;
+    int monsterActingNext;
+
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -75,11 +76,6 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         monsterGroups = new ArrayList<>();
         defeatedFigures = new ArrayList<>();
         rnd = new Random(gameParameters.getRandomSeed());
-    }
-
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new DescentTurnOrder(nPlayers);
     }
 
     @Override
@@ -108,7 +104,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         }
         components.add(searchCards);
         components.addAll(heroes);
-        for (Hero hero: heroes) {
+        for (Hero hero : heroes) {
             components.addAll(hero.getSkills().getComponents());
             components.addAll(hero.getHandEquipment().getComponents());
             components.add(hero.getArmor());
@@ -123,7 +119,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.data = data.copy();
         copy.tiles = new HashMap<>();
@@ -176,6 +172,8 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         for (Pair<String, String> p : defeatedFigures) {
             copy.defeatedFigures.add(new Pair<>(p.a, p.b));
         }
+        copy.monsterActingNext = monsterActingNext;
+        copy.monsterGroupActingNext = monsterGroupActingNext;
         return copy;
     }
 
@@ -199,8 +197,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
         String questName = getCurrentQuest().getName();
         double isOverlord = playerId == overlordPlayer ? -1.0 : 1.0;
 
-        switch (questName)
-        {
+        switch (questName) {
             case "Acolyte of Saradyn":
                 // What the Heroes need to win
                 int barghestsDefeated = monstersOriginal.get(1).size() - monsters.get(1).size();
@@ -208,8 +205,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 // What the Overlord needs to win
                 int overlordFatigue = overlord.getAttributeValue(Figure.Attribute.Fatigue);
                 int heroesDefeated = 0;
-                for (Hero h : getHeroes())
-                {
+                for (Hero h : getHeroes()) {
                     if (h.isDefeated())
                         heroesDefeated++;
                 }
@@ -260,7 +256,9 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
                 Objects.equals(monstersPerGroup, that.monstersPerGroup) &&
                 Objects.equals(monsterGroups, that.monsterGroups) &&
                 Objects.equals(currentQuest, that.currentQuest) &&
-                Objects.equals(defeatedFigures, that.defeatedFigures);
+                Objects.equals(defeatedFigures, that.defeatedFigures) &&
+                monsterActingNext == that.monsterActingNext &&
+                monsterGroupActingNext == that.monsterGroupActingNext;
     }
 
     @Override
@@ -274,7 +272,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     @Override
     public int[] hashCodeArray() {
-        return new int[] {
+        return new int[]{
                 data.hashCode(),
                 tiles.hashCode(),
                 gridReferences.hashCode(),
@@ -310,7 +308,8 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     public List<Hero> getHeroes() {
         return heroes;
     }
-    public Hero getHeroByName (String name) {
+
+    public Hero getHeroByName(String name) {
         for (Hero h : heroes) {
             if (h.getName().contains(name)) {
                 return h;
@@ -322,21 +321,39 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     public DicePool getAttackDicePool() {
         return attackDicePool;
     }
-    public DicePool getDefenceDicePool() {return defenceDicePool;}
-    public DicePool getAttributeDicePool() {return attributeDicePool;}
-    public void setAttackDicePool(DicePool pool) {attackDicePool = pool;}
-    public void setDefenceDicePool(DicePool pool) {defenceDicePool = pool;}
-    public void setAttributeDicePool(DicePool pool) {attributeDicePool = pool;}
+
+    public DicePool getDefenceDicePool() {
+        return defenceDicePool;
+    }
+
+    public DicePool getAttributeDicePool() {
+        return attributeDicePool;
+    }
+
+    public void setAttackDicePool(DicePool pool) {
+        attackDicePool = pool;
+    }
+
+    public void setDefenceDicePool(DicePool pool) {
+        defenceDicePool = pool;
+    }
+
+    public void setAttributeDicePool(DicePool pool) {
+        attributeDicePool = pool;
+    }
 
     public List<List<Monster>> getMonsters() {
         return monsters;
     }
+
     public List<List<Monster>> getOriginalMonsters() {
         return monstersOriginal;
     }
+
     public List<Integer> getMonstersPerGroup() {
         return monstersPerGroup;
     }
+
     public List<String> getMonsterGroups() {
         return monsterGroups;
     }
@@ -354,33 +371,28 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
      */
     public Figure getActingFigure() {
         // Find current monster group + monster playing
-        int monsterGroupIdx = ((DescentTurnOrder) getTurnOrder()).monsterGroupActingNext;
-        List<Monster> monsterGroup = getMonsters().get(monsterGroupIdx);
-        int nextMonster = ((DescentTurnOrder) getTurnOrder()).monsterActingNext;
+        List<Monster> monsterGroup = getMonsters().get(monsterGroupActingNext);
 
         // Find currently acting figure (hero or monster)
         Figure actingFigure;
         // TODO Ensure monsterGroup deletes itself when empty
-        if (getCurrentPlayer() != overlordPlayer || monsterGroup.isEmpty()) {
+        if (getCurrentPlayer() != overlordPlayer) {
             // If hero player, get corresponding hero
-            actingFigure = getHeroes().get(((DescentTurnOrder)getTurnOrder()).heroFigureActingNext);
+            actingFigure = getHeroes().stream()
+                    .filter(h -> h.getOwnerId() == getCurrentPlayer())
+                    .findFirst().orElseThrow(() -> new IllegalStateException("No hero found for player " + getCurrentPlayer()));
         } else {
             // Otherwise, monster is playing
-            actingFigure = monsterGroup.get(nextMonster);
+            actingFigure = monsterGroup.get(monsterActingNext);
         }
         return actingFigure;
     }
 
-    public int getTeam(int player)
-    {
+    public int getTeam(int player) {
         if (player == overlordPlayer)
             return 1;
         else
             return 0;
-    }
-
-    public int getActingPlayer() {
-        return getActingFigure().getOwnerId();
     }
 
     public int getOverlordPlayer() {
@@ -389,6 +401,38 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
     public Figure getOverlord() {
         return overlord;
+    }
+
+
+    public int nextMonster() {
+        do {
+            int groupSize = getMonsters().get(monsterGroupActingNext).size();
+            // Only looks for the next monster in the group as long as the group is not empty
+            if (groupSize == 0) {
+                // all dead
+                monsterGroupActingNext = nextMonsterGroup();
+                monsterActingNext = -1;
+            } else if (monsterActingNext == groupSize - 1) {
+                // finished with this group
+                monsterGroupActingNext = nextMonsterGroup();
+                monsterActingNext = -1;
+            } else {
+                return (groupSize + monsterActingNext + 1) % groupSize;
+            }
+        } while (monsterGroupActingNext > -1);
+        return -1;
+    }
+
+    public int nextMonsterGroup() {
+        int nMonsters = getMonsters().size();
+        // Only looks for the next monster group as long as there are still groups in play
+        if (nMonsters == 0) {
+            return -1;  // no more monsters
+        } else if (monsterGroupActingNext == nMonsters - 1) {
+            return -1;  // no more monsters
+        } else {
+            return (nMonsters + monsterGroupActingNext + 1) % nMonsters;
+        }
     }
 
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
@@ -432,6 +476,7 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     public Quest getCurrentQuest() {
         return currentQuest;
     }
+
     public void addDefeatedFigure(Figure target, int index1, Figure attacker, int index2) {
         String defeated = target.getName();
         defeated += " (" + target.getComponentID() + ");" + index1;
@@ -450,9 +495,11 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
 
         defeatedFigures.add(new Pair<>(defeated, defeatedBy));
     }
+
     public List<Pair<String, String>> getDefeatedFigures() {
         return defeatedFigures;
     }
+
     public void clearDefeatedFigures() {
         defeatedFigures.clear();
     }
@@ -463,14 +510,12 @@ public class DescentGameState extends AbstractGameStateWithTurnOrder implements 
     }
 
     @Override
-    public void addListener(IGameListener listener)
-    {
+    public void addListener(IGameListener listener) {
         super.addListener(listener);
         listeners.add(listener);
     }
 
-    void addComponents()
-    {
+    void addComponents() {
         super.addAllComponents();
     }
 }

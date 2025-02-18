@@ -1,7 +1,6 @@
 package games.descent2e.actions;
 
 import core.AbstractGameState;
-import evaluation.metrics.Event;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.abilities.HeroAbilities;
@@ -9,11 +8,9 @@ import games.descent2e.components.Figure;
 
 import games.descent2e.components.Hero;
 
-public class EndTurn extends DescentAction{
+public class EndFigureTurn extends DescentAction{
 
-    public static boolean turnEnded = false;
-
-    public EndTurn() {
+    public EndFigureTurn() {
         super(Triggers.ACTION_POINT_SPEND);
     }
 
@@ -38,9 +35,8 @@ public class EndTurn extends DescentAction{
     // Performs all the End Of Turn cleanup for a given Figure
     // This ensures that the same events happen regardless of whether the EndTurn action is taken
     // Or the game forces a figure to end their turn because they can't do anything else
-    public static void endOfTurn (DescentGameState dgs, Figure f)
+    public void endOfTurn (DescentGameState dgs, Figure f)
     {
-        turnEnded = true;
         f.addActionTaken("End Turn");
         //System.out.println("End turn for " + f.getName() + " (" + f.getComponentID() + ") - [" + f.getPosition() + "]");
         //collision(dgs);
@@ -73,7 +69,7 @@ public class EndTurn extends DescentAction{
         f.setRemovedConditionThisTurn(false);
         f.setUsedExtraAction(false);
 
-        //dgs.getTurnOrder().endPlayerTurn(dgs);
+
     }
 
     @Override
