@@ -80,13 +80,18 @@ public class FreeAttack extends RangedAttack{
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof FreeAttack) {
-            FreeAttack other = (FreeAttack) obj;
+        if (obj instanceof FreeAttack other) {
             if (other.isMelee == this.isMelee)
                 return super.equals(obj);
         }
         return false;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), isMelee);
+    }
+
 
     @Override
     public String getString(AbstractGameState gameState) {
@@ -112,12 +117,6 @@ public class FreeAttack extends RangedAttack{
         if (isMelee) return String.format("Free Melee Attack by %d on %d", attackingFigure, defendingFigure);
         return String.format("Free Ranged Attack by %d on %d", attackingFigure, defendingFigure);
     }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), isMelee);
-    }
-
 
     public FreeAttack copy() {
         FreeAttack retValue = new FreeAttack(attackingFigure, defendingFigure, isMelee);

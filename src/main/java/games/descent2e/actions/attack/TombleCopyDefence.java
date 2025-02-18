@@ -19,7 +19,6 @@ import java.util.Objects;
 public class TombleCopyDefence extends DescentAction {
 
     // Tomble Burrowell Hero Ability
-    String heroName = "Tomble Burrowell";
     int tomble, ally;
     public TombleCopyDefence(int hero, int ally) {
         super(Triggers.ROLL_OTHER_DICE);
@@ -54,8 +53,7 @@ public class TombleCopyDefence extends DescentAction {
             // By adding our chosen ally's Defence Dice to Tomble's Pool, it should always be larger than the current Defence Pool
             // Once the new dice have been added, the current Pool should be identical to the merged Pool
             // Therefore any further attempts will always return false
-            List<DescentDice> myDice = new ArrayList<>();
-            myDice.addAll(dgs.getDefenceDicePool().getComponents());
+            List<DescentDice> myDice = new ArrayList<>(dgs.getDefenceDicePool().getComponents());
 
             List<DescentDice> mergedDice = new ArrayList<>();
             mergedDice.addAll(tomble.getDefenceDice().getComponents());
@@ -68,8 +66,7 @@ public class TombleCopyDefence extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TombleCopyDefence) {
-            TombleCopyDefence other = (TombleCopyDefence) obj;
+        if (obj instanceof TombleCopyDefence other) {
             return other.tomble == tomble && other.ally == ally;
         }
         return false;

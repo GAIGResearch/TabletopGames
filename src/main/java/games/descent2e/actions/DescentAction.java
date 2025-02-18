@@ -39,8 +39,7 @@ public abstract class DescentAction extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DescentAction)) return false;
-        DescentAction that = (DescentAction) o;
+        if (!(o instanceof DescentAction that)) return false;
         return Objects.equals(triggerPoints, that.triggerPoints);
     }
 

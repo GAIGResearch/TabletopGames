@@ -515,8 +515,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     public String toStringWithResult()
     {
-        String retVal = toString() + " - " + result;
-        return retVal;
+        return toString() + " - " + result;
     }
 
     public void registerSurge(Surge surge) {

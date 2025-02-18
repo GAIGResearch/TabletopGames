@@ -6,7 +6,6 @@ import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 // This monster cannot spend surges on abilities unless it is within 3 spaces of any master monster or a lieutenant.
 public class Cowardly {
@@ -17,12 +16,10 @@ public class Cowardly {
 
         // We need to check if this monster is near any master or lieutenant monster
         // We flatten the list for ease of processing, as we don't care what type of monster it is
-        List<Monster> monsters = dgs.getMonsters().stream().flatMap(List::stream).collect(Collectors.toList());
-        for (Monster m : monsters)
-        {
+        List<Monster> monsters = dgs.getMonsters().stream().flatMap(List::stream).toList();
+        for (Monster m : monsters) {
             // We can ignore any minion monster, we only check for master monsters or lieutenants
-            if (m.getName().contains("master") || m.isLieutenant())
-            {
+            if (m.getName().contains("master") || m.isLieutenant()) {
                 Vector2D other = m.getPosition();
                 if (Math.abs(position.getX() - other.getX()) <= range && Math.abs(position.getY() - other.getY()) <= range) {
                     nearMasterOrLieutenant = true;
@@ -35,5 +32,15 @@ public class Cowardly {
             System.out.println("This monster is too cowardly to make a surge!");
         }*/
         return nearMasterOrLieutenant;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
+    }
+    @Override
+    public int hashCode() {
+        return -23402;
     }
 }

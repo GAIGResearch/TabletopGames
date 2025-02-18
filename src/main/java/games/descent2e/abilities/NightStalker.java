@@ -37,4 +37,14 @@ public class NightStalker {
             //System.out.println("Night Stalker is active! " + defender.getComponentName() + " gains 1 " + getNightStalkerDicePool().getComponents().get(0).getColour() + " die against this attack!");
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
+    }
+    @Override
+    public int hashCode() {
+        return -2201402;
+    }
 }

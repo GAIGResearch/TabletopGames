@@ -155,7 +155,7 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         // This is where the call for the Attribute Tests would go
         List<AbstractAction> retVal = new ArrayList<>();
         // TODO: This feels incredibly hacky, but for whatever reason, it just works.
-        if (state.getHistory().size() == 0) return null;
+        if (state.getHistory().isEmpty()) return null;
         AbstractAction lastAction = state.getHistory().get(state.getHistory().size() - 1).b;
         if (lastAction instanceof RerollAttributeTest || lastAction instanceof EndCurrentPhase)
         {
@@ -199,6 +199,19 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         retVal.defendingPlayer = defendingPlayer;
         retVal.interruptPlayer = interruptPlayer;
         retVal.phase = phase;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TriggerAttributeTest that)) return false;
+        if (!super.equals(o)) return false;
+        return attackingFigure == that.attackingFigure &&
+                attackingPlayer == that.attackingPlayer &&
+                defendingFigure == that.defendingFigure &&
+                defendingPlayer == that.defendingPlayer &&
+                interruptPlayer == that.interruptPlayer &&
+                phase == that.phase;
     }
 
     @Override

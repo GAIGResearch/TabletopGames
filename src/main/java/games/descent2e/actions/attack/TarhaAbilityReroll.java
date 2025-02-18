@@ -52,8 +52,7 @@ public class TarhaAbilityReroll extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TarhaAbilityReroll) {
-            TarhaAbilityReroll other = (TarhaAbilityReroll) obj;
+        if (obj instanceof TarhaAbilityReroll other) {
             return other.dice == dice;
         }
         return false;

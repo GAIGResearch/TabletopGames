@@ -11,8 +11,6 @@ import java.util.Objects;
 
 public class JainTurnDamageIntoFatigue extends DescentAction {
 
-    // Jain Fairwood Hero Ability
-    String heroName = "Jain Fairwood";
     int jain;
     int reduce;
     public JainTurnDamageIntoFatigue(int hero, int reduce) {
@@ -75,8 +73,7 @@ public class JainTurnDamageIntoFatigue extends DescentAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof JainTurnDamageIntoFatigue) {
-            JainTurnDamageIntoFatigue other = (JainTurnDamageIntoFatigue) obj;
+        if (obj instanceof JainTurnDamageIntoFatigue other) {
             return other.jain == jain && other.reduce == reduce;
         }
         return false;
