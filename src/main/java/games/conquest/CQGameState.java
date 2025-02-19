@@ -10,10 +10,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.conquest.actions.*;
-import games.conquest.components.Cell;
-import games.conquest.components.Command;
-import games.conquest.components.CommandType;
-import games.conquest.components.Troop;
+import games.conquest.components.*;
 import org.jetbrains.annotations.NotNull;
 import utilities.Vector2D;
 
@@ -34,6 +31,7 @@ import static gui.AbstractGUIManager.defaultItemSize;
  */
 public class CQGameState extends AbstractGameState {
     public enum CQGamePhase implements IGamePhase {
+        SetupPhase,
         SelectionPhase,
         MovementPhase,
         CombatPhase,
@@ -56,6 +54,63 @@ public class CQGameState extends AbstractGameState {
      */
     public CQGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+    }
+
+    /*======= GAME SETUP =======*/
+    public void setupCommands(HashSet<CommandType> commands, int uid) {
+        boolean[] visibility = new boolean[] {uid==0, uid==1};
+        for (CommandType cmd : commands) {
+            if (chosenCommands[uid].getSize() < ((CQParameters) getGameParameters()).maxCommands) {
+                chosenCommands[uid].add(new Command(cmd, uid), visibility);
+            }
+        }
+    }
+    /**
+     * Use a string to set up troops on individual positions.
+     * The string should consist of up to 3 lines containing at most 20 characters.
+     * The lines represent front-to-back order, from left to right.
+     * An empty line indicates no troops on that line.
+     * Entering a single line will place the troops as far to the front as possible.
+     */
+    public void setupTroopsFromString(String str, int uid) {
+        CQParameters cqp = (CQParameters) getGameParameters();
+        String[] lines = str.split("\n", -1);
+        assert(lines.length <= cqp.nSetupRows);
+        assert(Arrays.stream(lines).mapToInt(String::length).max().orElse(0) <= cqp.gridWidth); // lines[i].length() <= cqp.gridWidth for all i
+        Troop unit;
+        int nTroops = 0; // keep track of troops for this owner
+        for (int j = 0; j < lines.length; j++) {
+            for (int i = 0; i < cqp.gridWidth; i++) {
+                if (lines[j].length() <= i) break;
+                char ch = lines[j].charAt(i);
+                unit = switch (ch) {
+                    case ' ' -> null;
+                    case 'S' -> new Troop(TroopType.Scout, uid);
+                    case 'F' -> new Troop(TroopType.FootSoldier, uid);
+                    case 'H' -> new Troop(TroopType.Halberdier, uid);
+                    case 'A' -> new Troop(TroopType.Archer, uid);
+                    case 'M' -> new Troop(TroopType.Mage, uid);
+                    case 'K' -> new Troop(TroopType.Knight, uid);
+                    case 'C' -> new Troop(TroopType.Champion, uid);
+                    default -> throw new IllegalStateException("Unexpected value: " + ch);
+                };
+                if (unit == null) continue;
+                else nTroops++;
+                troops.add(unit);
+                int x,y;
+                if (uid == 0) {
+                    x = i;
+                    // move troops forward as much as possible, when fewer than 3 lines are provided.
+                    y = cqp.nSetupRows - lines.length + j;
+                } else {
+                    x = cqp.gridWidth-1 - i;
+                    // move troops forward as much as possible, when fewer than 3 lines are provided.
+                    y = cqp.gridHeight-1 - (cqp.nSetupRows - lines.length + j);
+                }
+                addTroop(unit, new Vector2D(x, y));
+                if (nTroops >= cqp.maxTroops) return;
+            }
+        }
     }
 
     /*======= SIMPLE GETTERS AND SETTERS =======*/
@@ -228,6 +283,11 @@ public class CQGameState extends AbstractGameState {
         int uid = getCurrentPlayer();
         CQGamePhase phase = (CQGamePhase) getGamePhase();
         List<AbstractAction> actions = new ArrayList<>();
+        if (phase.equals(CQGamePhase.SetupPhase)) {
+            for (CQParameters.Setup setup : ((CQParameters) getGameParameters()).setups)
+                if (!setup.equals(CQParameters.Setup.Test) && !setup.equals(CQParameters.Setup.Empty))
+                    actions.add(new ApplySetup(setup));
+        }
         if (!phase.equals(CQGamePhase.SelectionPhase))
             actions.add(new EndTurn());
         int hash = this.hashCode();
@@ -257,7 +317,8 @@ public class CQGameState extends AbstractGameState {
         if (phase.equals(CQGamePhase.SelectionPhase)) {
             for (Troop troop : getTroops(getCurrentPlayer())) {
                 if (troop.hasMoved() && !troop.hasCommand(CommandType.Chastise)) {
-                    System.out.println("Troop was not stepped correctly, somehow...");
+                    System.out.println("Troop "+troop+" was not stepped correctly, somehow...");
+                    System.out.println(troop);
                 }
             }
             for (Troop t : getTroops(uid)) {
@@ -269,7 +330,7 @@ public class CQGameState extends AbstractGameState {
             assert currentTroop != null;
             Vector2D pos = currentTroop.getLocation();
             int range = currentTroop.getMovement();
-            if (!currentTroop.hasMoved()) // TODO: If the player is the gui player, it's nice to let them move multiple times.
+            if (!currentTroop.hasMoved())
                 for (int i = Math.max(0, pos.getX() - range); i <= Math.min(gridBoard.getWidth(), pos.getX() + range); i++) {
                     for (int j = Math.max(0, pos.getY() - range); j <= Math.min(gridBoard.getHeight(), pos.getY() + range); j++) {
                         MoveTroop mov = new MoveTroop(uid, new Vector2D(i, j), hash);
@@ -385,7 +446,13 @@ public class CQGameState extends AbstractGameState {
 
     public void endTurn() {
         if (checkWin()) return; // game has ended, and checkWin() has finished it
-        setGamePhase(CQGamePhase.SelectionPhase);
+        if (getCurrentPlayer() == getFirstPlayer() && gamePhase.equals(CQGamePhase.SetupPhase)) {
+            // Setup phase was completed by starting player, but not by the 2nd player
+            setGamePhase(CQGamePhase.SetupPhase);
+            return;
+        } else {
+            setGamePhase(CQGamePhase.SelectionPhase);
+        }
         selectedTroop = -1;
         for (Troop troop : getTroops(-1)) {
             troop.step(getCurrentPlayer());
@@ -436,6 +503,7 @@ public class CQGameState extends AbstractGameState {
     }
 
     public boolean checkWin() {
+        if (gamePhase.equals(CQGamePhase.SetupPhase)) return false;
         int win = -1;
         if (getTroops(0).isEmpty()) {
             win = 1;
@@ -634,6 +702,7 @@ public class CQGameState extends AbstractGameState {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
+        if (gamePhase.equals(CQGamePhase.SetupPhase)) return 0.0;
         // compare living troop scores for both players;
         double runningScore = getTroopHealthMetric(playerId) - getTroopHealthMetric(playerId ^ 1);
         // Commands are useful when not on cooldown; punish having commands on cooldown, but by less than the reward of a dead troop.

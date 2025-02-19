@@ -32,9 +32,10 @@ public class CQParameters extends TunableParameters {
     public final int maxCommands = 4;
     public final int nSetupRows = 3; // setup allowed in first 3 rows only
     public static final String dataPath = "data/conquest/";
+    List<Setup> setups;
     public Setup p0TroopSetup;
     public Setup p1TroopSetup;
-    boolean testSetup = false;
+    boolean testSetup = true;
 
     // All of the following pre-made setups are taken from the RuneScape Wiki's strategy guide accessed in 2024.
     // The names used are those used in said strategy guide: https://runescape.wiki/w/Conquest/Strategies?oldid=35427217
@@ -137,7 +138,8 @@ public class CQParameters extends TunableParameters {
                       Charge, Stoicism, Regenerate, BattleCry),
         HalberderPure("       H  H  H\n" +
                          "    H S H H H S H",
-                         Charge, BattleCry, Chastise, Stoicism);
+                         Charge, BattleCry, Chastise, Stoicism),
+        Empty(""); // Used when needing the player to set up troops in their first turn.
 
         public final String troops;
         public final HashSet<CommandType> commands;
@@ -153,10 +155,14 @@ public class CQParameters extends TunableParameters {
             this.troops = tr;
             this.commands = new HashSet<>(Set.of(c1, c2));
         }
+        Setup(String tr) {
+            this.troops = tr;
+            this.commands = new HashSet<>();
+        }
     }
 
     public CQParameters() {
-        List<Setup> setups = Arrays.asList(
+        setups = Arrays.asList(
             Setup.Test,
             Setup.Default,
             Setup.Rush,
@@ -191,10 +197,10 @@ public class CQParameters extends TunableParameters {
             Setup.HalberderPure
         );
         if (testSetup) {
-            p0TroopSetup = Setup.Test;
-            p1TroopSetup = Setup.Test;
-            addTunableParameter("p0TroopSetup", Setup.Test, setups);
-            addTunableParameter("p1TroopSetup", Setup.Test, setups);
+            p0TroopSetup = Setup.Empty;
+            p1TroopSetup = Setup.Empty;
+            addTunableParameter("p0TroopSetup", Setup.Empty, setups);
+            addTunableParameter("p1TroopSetup", Setup.Empty, setups);
         } else {
             p0TroopSetup = Setup.Default;
             p1TroopSetup = Setup.Default;
