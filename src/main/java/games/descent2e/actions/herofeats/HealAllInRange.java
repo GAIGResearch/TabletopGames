@@ -28,7 +28,7 @@ public class HealAllInRange extends DescentAction {
         Figure f = dgs.getActingFigure();
 
         // Health recovery: roll 2 red dice
-        DicePool.revive.roll(dgs.getRandom());
+        DicePool.revive.roll(dgs.getRnd());
         healthRecovered = DicePool.revive.getDamage();
         List<Hero> heroesInRange = HeroesInRange(dgs);
         if (heroesInRange != null) {

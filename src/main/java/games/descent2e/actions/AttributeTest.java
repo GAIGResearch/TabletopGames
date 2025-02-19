@@ -189,7 +189,7 @@ public abstract class AttributeTest<A extends AttributeTest<A>> extends DescentA
 
         dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
 
-        dgs.getAttributeDicePool().roll(dgs.getRandom());
+        dgs.getAttributeDicePool().roll(dgs.getRnd());
 
         testResult(dgs);
     }

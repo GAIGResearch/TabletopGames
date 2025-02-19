@@ -1177,14 +1177,12 @@ public class DescentForwardModel extends StandardForwardModel {
 
         switch (gameResult) {
             case TIMEOUT:
-                System.out.println("Timeout! The game ends in a draw.");
                 for (int i = 0; i < dgs.getNPlayers(); i++) {
                     dgs.setPlayerResult(GameResult.TIMEOUT, i);
                 }
                 break;
 
             case WIN_GAME:
-                System.out.println("Victory! The Heroes win!");
                 for (int i = 0; i < dgs.getNPlayers(); i++) {
                     if (i == dgs.getOverlordPlayer()) {
                         dgs.setPlayerResult(GameResult.LOSE_GAME, i);
@@ -1195,7 +1193,6 @@ public class DescentForwardModel extends StandardForwardModel {
                 break;
 
             case LOSE_GAME:
-                System.out.println("Defeat! The Overlord wins!");
                 for (int i = 0; i < dgs.getNPlayers(); i++) {
                     if (i != dgs.getOverlordPlayer()) {
                         dgs.setPlayerResult(GameResult.LOSE_GAME, i);

@@ -241,11 +241,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     protected void defenceRoll(DescentGameState state) {
-        state.getDefenceDicePool().roll(state.getRandom());
+        state.getDefenceDicePool().roll(state.getRnd());
     }
 
     protected void damageRoll(DescentGameState state) {
-        state.getAttackDicePool().roll(state.getRandom());
+        state.getAttackDicePool().roll(state.getRnd());
     }
 
     protected void getWeaponBonuses(DescentGameState state, int figure, boolean hero, boolean isAttacker)

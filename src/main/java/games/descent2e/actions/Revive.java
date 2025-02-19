@@ -34,7 +34,7 @@ public class Revive extends DescentAction{
         Hero hero = (Hero) gs.getComponentById(heroID);
         hero.setDefeated(gs,false);
         // Health recovery: roll 2 red dice
-        DicePool.revive.roll(gs.getRandom());
+        DicePool.revive.roll(gs.getRnd());
         hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
         gs.getActingFigure().getNActionsExecuted().increment();
         gs.getActingFigure().addActionTaken(toString());

@@ -69,7 +69,7 @@ public class Heal extends DescentAction {
         Figure target = (Figure) dgs.getComponentById(targetID);
 
         // Health recovery: roll 1 red die
-        DicePool.heal.roll(dgs.getRandom());
+        DicePool.heal.roll(dgs.getRnd());
 
         healthRecovered = DicePool.heal.getDamage();
 

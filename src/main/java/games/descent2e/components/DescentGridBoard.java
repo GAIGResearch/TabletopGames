@@ -480,8 +480,7 @@ public class DescentGridBoard extends Component implements IComponentContainer<B
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof DescentGridBoard) {
-            DescentGridBoard other = (DescentGridBoard) o;
+        if (o instanceof DescentGridBoard other) {
             return componentID == other.componentID && Arrays.equals(flattenGrid(), other.flattenGrid());
         }
         return false;

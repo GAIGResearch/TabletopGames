@@ -101,6 +101,14 @@ public class DescentDice extends Component {
         return damage;
     }
 
+    public int getShielding() {
+        return shielding;
+    }
+
+    public DiceType getColour() {
+        return colour;
+    }
+
     @Override
     public DescentDice copy() {
         DescentDice  copy = new DescentDice(this.componentID);
@@ -113,19 +121,26 @@ public class DescentDice extends Component {
         copy.range = this.range;
         copy.sides = new HashMap<>();
         for (Map.Entry<Integer, Map<String, Integer>> i: sides.entrySet()) {
-            HashMap<String, Integer> m = new HashMap<>();
-            m.putAll(i.getValue());
+            Map<String, Integer> m = new HashMap<>(i.getValue());
             copy.sides.put(i.getKey(), m);
         }
         copyComponentTo(copy);
         return copy;
     }
 
-    public int getShielding() {
-        return shielding;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof DescentDice) {
+            DescentDice dice = (DescentDice) obj;
+            return dice.colour == this.colour && dice.result == this.result && dice.damage == this.damage &&
+                    dice.surge == this.surge && dice.range == this.range && dice.shielding == this.shielding &&
+                    dice.nSides == this.nSides && dice.sides.equals(this.sides);
+        }
+        return false;
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(colour, result, damage, surge, range, shielding, nSides, sides);
     }
 
-    public DiceType getColour() {
-        return colour;
-    }
 }

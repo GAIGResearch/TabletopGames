@@ -526,7 +526,7 @@ public class DescentHelper {
         DicePool roll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
             put(type, 1);
         }});
-        roll.roll((dgs.getRandom()));
+        roll.roll((dgs.getRnd()));
         return roll.getDice(0).getFace();
     }
 

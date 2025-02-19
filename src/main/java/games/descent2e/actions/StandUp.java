@@ -29,7 +29,7 @@ public class StandUp extends DescentAction{
         Hero hero = (Hero) gs.getActingFigure();
         hero.setDefeated(gs,false);
         // Health recovery: roll 2 red dice
-        DicePool.revive.roll(gs.getRandom());
+        DicePool.revive.roll(gs.getRnd());
         hero.setAttribute(Figure.Attribute.Health, DicePool.revive.getDamage());
         hero.getNActionsExecuted().setToMax();   // Only thing they can do this turn
         hero.setUsedExtraAction(true);

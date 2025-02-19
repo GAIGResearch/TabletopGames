@@ -179,10 +179,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return copy;
     }
 
-    public Random getRandom() {
-        return rnd;
-    }
-
     @Override
     protected double _getHeuristicScore(int playerId) {
         return new DescentHeuristic().evaluateState(this, playerId);

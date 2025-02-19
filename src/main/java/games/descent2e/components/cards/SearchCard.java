@@ -75,9 +75,8 @@ public class SearchCard extends Card {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SearchCard)) return false;
+        if (!(o instanceof SearchCard that)) return false;
         if (!super.equals(o)) return false;
-        SearchCard that = (SearchCard) o;
         return value == that.value && Objects.equals(itemType, that.itemType);
     }
 

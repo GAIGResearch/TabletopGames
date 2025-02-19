@@ -112,7 +112,7 @@ public class HeroAbilities {
             DicePool reroll = DicePool.constructDicePool(new HashMap<DiceType, Integer>() {{
                 put(type, 1);
             }});
-            reroll.roll((dgs.getRandom()));
+            reroll.roll((dgs.getRnd()));
 
             //System.out.println("Old Result: " + face + " (Range: " + dice.getRange() + ", Surge: " + dice.getSurge() + ", Damage: " + dice.getDamage() +")");
             face = reroll.getDice(0).getFace();
