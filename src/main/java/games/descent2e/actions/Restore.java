@@ -41,15 +41,15 @@ public class Restore extends DescentAction{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Restore restore1 = (Restore) o;
-        return restore == restore1.restore;
+        if (o instanceof Restore r) {
+            return restore == r.restore;
+        } else {
+            return false;
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), restore);
+        return 2893 + restore * 31;
     }
 }

@@ -46,7 +46,10 @@ public class RollDie extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof RollDie;
+        if (obj instanceof RollDie rd) {
+            return desiredDice.equals(rd.desiredDice);
+        }
+        return false;
     }
 
     @Override

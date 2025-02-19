@@ -7,7 +7,7 @@ import games.descent2e.components.Figure;
 
 public class StopMove extends DescentAction{
 
-    int f;
+    final int f;
     public StopMove(int f) {
         super(Triggers.ANYTIME);
         this.f = f;
@@ -28,7 +28,12 @@ public class StopMove extends DescentAction{
 
     @Override
     public DescentAction copy() {
-        return new StopMove(f);
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof StopMove sm && sm.f == this.f);
     }
 
     @Override
