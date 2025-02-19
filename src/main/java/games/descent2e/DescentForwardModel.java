@@ -91,6 +91,7 @@ public class DescentForwardModel extends StandardForwardModel {
         dgs.setFirstPlayer(1);
         dgs.monsterGroupActingNext = 0;
         dgs.monsterActingNext = 0;
+        dgs.heroActingNext = 0;
 
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
 
@@ -323,6 +324,13 @@ public class DescentForwardModel extends StandardForwardModel {
                     // we have reached the overlord player
                     endPlayerTurn(dgs, 0);  // we just move on to the next player
                     overlordCheckFatigue(dgs, true);
+                    // reset all monsters for acting
+                    dgs.monsterActingNext = -1;
+                    dgs.monsterGroupActingNext = 0;
+                    dgs.monsterActingNext = dgs.nextMonster();
+                    if (dgs.monsterActingNext == -1) {
+                        throw new AssertionError("No monsters to activate - game should be over");
+                    }
                 } else {
                     // next hero
                     actingFigure = dgs.heroes.get(dgs.heroActingNext);
@@ -341,11 +349,11 @@ public class DescentForwardModel extends StandardForwardModel {
                     checkReinforcements(dgs);
 
                     // Reset figures for the next round
-                    for (Figure f: dgs.getHeroes()) {
+                    for (Figure f : dgs.getHeroes()) {
                         f.resetRound();
                     }
-                    for (List<Monster> mList: dgs.getMonsters()) {
-                        for (Monster m: mList) {
+                    for (List<Monster> mList : dgs.getMonsters()) {
+                        for (Monster m : mList) {
                             m.resetRound();
                         }
                     }
@@ -353,6 +361,9 @@ public class DescentForwardModel extends StandardForwardModel {
                     dgs.monsterGroupActingNext = 0;
                     dgs.monsterActingNext = 0;
                     dgs.heroActingNext = 0;
+                    while (dgs.getHeroes().get(dgs.heroActingNext).isDefeated() && dgs.heroActingNext < dgs.getHeroes().size()) {
+                        dgs.heroActingNext = (dgs.heroActingNext + 1) % dgs.heroes.size();
+                    }
                     endRound(dgs, 1);
                 } else {
                     dgs.monsterActingNext = nextMonster;  // continue turn with the next monster
@@ -409,8 +420,7 @@ public class DescentForwardModel extends StandardForwardModel {
     }
 
 
-    private void checkReinforcements(DescentGameState dgs)
-    {
+    private void checkReinforcements(DescentGameState dgs) {
         // TODO
 
         String questName = dgs.getCurrentQuest().getName();
@@ -425,14 +435,12 @@ public class DescentForwardModel extends StandardForwardModel {
         // Check for within board piece 9A's range
         String tile = "";
 
-        switch(questName) {
+        switch (questName) {
             case "Acolyte of Saradyn":
                 monsterName = "Goblin Archer";
                 i = getMonsterGroupIndex(monsters, monsterName);
-                if (i >= 0)
-                {
-                    if (dgs.getMonsters().get(i).size() < maxMonsters.get(i))
-                    {
+                if (i >= 0) {
+                    if (dgs.getMonsters().get(i).size() < maxMonsters.get(i)) {
                         canSpawn = true;
                         tile = "4A";
                         noToSpawn = Math.min(maxMonsters.get(i) - dgs.getMonsters().get(i).size(), 2);
@@ -444,13 +452,13 @@ public class DescentForwardModel extends StandardForwardModel {
                 break;
         }
 
-        if (canSpawn)
-        {
+        if (canSpawn) {
             //System.out.println("Spawning " + noToSpawn + " " + monsterName + "s");
             List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
             spawnReinforcements(dgs, i, noToSpawn, tileCoords);
         }
     }
+
     private int getMonsterGroupIndex(List<String> monsters, String monsterName) {
         int i = 0;
         for (String monster : monsters) {
@@ -462,8 +470,7 @@ public class DescentForwardModel extends StandardForwardModel {
         return -1;
     }
 
-    private void spawnReinforcements(DescentGameState dgs, int index, int noToSpawn, List<Vector2D> tileCoords)
-    {
+    private void spawnReinforcements(DescentGameState dgs, int index, int noToSpawn, List<Vector2D> tileCoords) {
         boolean masterExists = false;     // Checks if a Master monster originally spawned
         boolean canSpawnMaster = true;    // Checks if the Master monster is dead
         boolean minionExists = false;     // Checks if a Minion monster originally spawned
@@ -475,28 +482,23 @@ public class DescentForwardModel extends StandardForwardModel {
         Random rnd = dgs.getRnd();
         List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
         List<Monster> monsters = dgs.getMonsters().get(index);
-        for (Monster monster : monstersOriginal)
-        {
+        for (Monster monster : monstersOriginal) {
             // If the original set of monsters contains a Master, we should spawn a Master
-            if (monster.getName().contains("master"))
-            {
+            if (monster.getName().contains("master")) {
                 masterExists = true;
             }
             // Likewise, if the original set of monsters contains a Minion, we should spawn a Minion
-            if (monster.getName().contains("minion"))
-            {
+            if (monster.getName().contains("minion")) {
                 minionExists = true;
             }
 
             // No use checking the rest of the list if we know we can legally spawn both
-            if(masterExists && minionExists)
+            if (masterExists && minionExists)
                 break;
         }
-        for (Monster monster : monsters)
-        {
+        for (Monster monster : monsters) {
             // If the alive Monsters contain a Master, we cannot spawn a Master
-            if (monster.getName().contains("master"))
-            {
+            if (monster.getName().contains("master")) {
                 canSpawnMaster = false;
                 break;
             }
@@ -506,8 +508,7 @@ public class DescentForwardModel extends StandardForwardModel {
         //System.out.println("Can spawn master: " + canSpawnMaster);
         //System.out.println("Minion exists: " + minionExists);
 
-        for (int k = 0; k < noToSpawn; k++)
-        {
+        for (int k = 0; k < noToSpawn; k++) {
             // If the Master exists, it is always the first Monster on the list
             // The only time we do not look at the first Monster on the list is
             // if we can only spawn a Minion when a Master exists
@@ -515,8 +516,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
             // If the Master is alive, we cannot spawn a Master
             // So we spawn a Minion instead
-            if (masterExists && !canSpawnMaster)
-            {
+            if (masterExists && !canSpawnMaster) {
                 indexToSpawn = DescentHelper.getFirstMissingIndex(monsters);
             }
 
@@ -526,7 +526,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
 
             // TODO: copied straight from DescentForwardModel's spawning
-            String size = ((PropertyString)monster.getProperty(sizeHash)).value;
+            String size = ((PropertyString) monster.getProperty(sizeHash)).value;
             int w = Integer.parseInt(size.split("x")[0]);
             int h = Integer.parseInt(size.split("x")[1]);
             monster.setSize(w, h);
@@ -536,7 +536,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 tileCoords.remove(option);
                 BoardNode position = dgs.masterBoard.getElement(option.getX(), option.getY());
                 if (position.getComponentName().equals("plain") &&
-                        ((PropertyInt)position.getProperty(playersHash)).value == -1) {
+                        ((PropertyInt) position.getProperty(playersHash)).value == -1) {
                     //if (position.getComponentName().equals("plain") && !Move.checkCollision(dgs, monster, option)) {
                     // TODO: some monsters want to spawn in lava/water.
                     // This can be top-left corner, check if the other tiles are valid too
@@ -548,7 +548,7 @@ public class DescentForwardModel extends StandardForwardModel {
                             BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
                             if (tile == null || !tile.getComponentName().equals("plain") ||
                                     !tileCoords.contains(thisTile) ||
-                                    ((PropertyInt)tile.getProperty(playersHash)).value != -1) {
+                                    ((PropertyInt) tile.getProperty(playersHash)).value != -1) {
                                 canPlace = false;
                             }
                         }
@@ -564,8 +564,7 @@ public class DescentForwardModel extends StandardForwardModel {
                         if (canSpawnMaster) {
                             dgs.monsters.get(index).add(indexToSpawn, monster);
                             canSpawnMaster = false;
-                        }
-                        else {
+                        } else {
                             dgs.monsters.get(index).add(indexToSpawn, monster);
                         }
                         //System.out.println("Spawned " + monster.getName() + " at " + option.getX() + ", " + option.getY());
@@ -577,14 +576,12 @@ public class DescentForwardModel extends StandardForwardModel {
         }
     }
 
-    private void overlordCheckFatigue(DescentGameState dgs, boolean startOfTurn)
-    {
+    private void overlordCheckFatigue(DescentGameState dgs, boolean startOfTurn) {
         int changeFatigueBy = 0;
 
         String questName = dgs.getCurrentQuest().getName();
 
-        switch(questName)
-        {
+        switch (questName) {
             case "Acolyte of Saradyn":
                 changeFatigueBy = fatigueCheckForAcolyteOfSaradyn(dgs);
                 break;
@@ -592,7 +589,7 @@ public class DescentForwardModel extends StandardForwardModel {
             case "Rellegar's Rest":
                 // Encounter 1
                 // We only check at the start of the Overlord's turns here
-                if(startOfTurn)
+                if (startOfTurn)
                     changeFatigueBy = 1;
                 break;
 
@@ -612,36 +609,29 @@ public class DescentForwardModel extends StandardForwardModel {
         }
 
         // We only need to change the Overlord's Fatigue if we have met the conditions to increase or decrease
-        if (changeFatigueBy > 0)
-        {
+        if (changeFatigueBy > 0) {
             overlordIncreaseFatigue(dgs, changeFatigueBy);
-        }
-        else if (changeFatigueBy < 0)
-        {
+        } else if (changeFatigueBy < 0) {
             overlordDecreaseFatigue(dgs, Math.abs(changeFatigueBy));
         }
     }
 
-    private void overlordIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)
-    {
+    private void overlordIncreaseFatigue(DescentGameState dgs, int increaseFatigueBy) {
         dgs.overlord.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
         //System.out.println("Overlord's Fatigue increased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
-    private void overlordDecreaseFatigue (DescentGameState dgs, int decreaseFatigueBy)
-    {
+    private void overlordDecreaseFatigue(DescentGameState dgs, int decreaseFatigueBy) {
         dgs.overlord.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
         //System.out.println("Overlord's Fatigue decreased to: " + dgs.overlord.getAttribute(Figure.Attribute.Fatigue));
     }
 
-    private void heroesSideIncreaseFatigue (DescentGameState dgs, int increaseFatigueBy)
-    {
+    private void heroesSideIncreaseFatigue(DescentGameState dgs, int increaseFatigueBy) {
         dgs.heroesSide.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
         System.out.println("Heroes' Side Fatigue increased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
     }
 
-    private void heroesSideDecreaseFatigue (DescentGameState dgs, int decreaseFatigueBy)
-    {
+    private void heroesSideDecreaseFatigue(DescentGameState dgs, int decreaseFatigueBy) {
         dgs.heroesSide.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
         System.out.println("Heroes' Side Fatigue decreased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
     }
@@ -649,8 +639,7 @@ public class DescentForwardModel extends StandardForwardModel {
     // TODO This is just the check for the first quest
     // I'm putting it here for now, but once more quests are implemented we should put it into its own contained class
     // To avoid cluttering this class
-    private int fatigueCheckForAcolyteOfSaradyn(DescentGameState dgs)
-    {
+    private int fatigueCheckForAcolyteOfSaradyn(DescentGameState dgs) {
         boolean changeFatigue = false;
         int changeFatigueBy = 0;
 
@@ -659,21 +648,16 @@ public class DescentForwardModel extends StandardForwardModel {
         List<Vector2D> tileCoords = new ArrayList<>(dgs.gridReferences.get(tile).keySet());
 
         List<List<Monster>> monsters = dgs.getMonsters();
-        for (List<Monster> mList: monsters)
-        {
+        for (List<Monster> mList : monsters) {
 
-            if(changeFatigue)
-            {
+            if (changeFatigue) {
                 break;
             }
 
-            for (Monster m : mList)
-            {
-                if (m.getName().contains("Goblin Archer"))
-                {
+            for (Monster m : mList) {
+                if (m.getName().contains("Goblin Archer")) {
                     Vector2D position = m.getPosition();
-                    if (tileCoords.contains(position))
-                    {
+                    if (tileCoords.contains(position)) {
                         changeFatigue = true;
                         changeFatigueBy = 1;
                         break;
