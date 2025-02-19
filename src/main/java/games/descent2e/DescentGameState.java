@@ -76,7 +76,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         monstersPerGroup = new ArrayList<>();
         monsterGroups = new ArrayList<>();
         defeatedFigures = new ArrayList<>();
-        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -381,6 +380,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             actingFigure = heroes.get(heroActingNext);
         } else {
             // Otherwise, monster is playing
+            if (monsterActingNext >= monsters.size()) {
+                throw new AssertionError("Monster group index out of bounds");
+            }
             actingFigure = monsterGroup.get(monsterActingNext);
         }
         return actingFigure;

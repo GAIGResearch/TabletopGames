@@ -105,7 +105,7 @@ public class DescentForwardModel extends StandardForwardModel {
         for (int i = 0; i < Archetype.values().length; i++) {
             archetypes.add(i);
         }
-        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
+        Random rnd = dgs.getRnd();
         dgs.heroes = new ArrayList<>();
         for (int i = 1; i < Math.max(3, dgs.getNPlayers()); i++) {
             // Choose random archetype from those remaining
@@ -220,7 +220,6 @@ public class DescentForwardModel extends StandardForwardModel {
         createMonsters(dgs, firstQuest, _data, rnd, nActionsPerFigure);
 
         // Set up tokens
-        Random r = new Random(dgs.getGameParameters().getRandomSeed());
         dgs.tokens = new ArrayList<>();
         for (DToken.DTokenDef def : firstQuest.getTokens()) {
             int n = (def.getSetupHowMany().equalsIgnoreCase("nHeroes") ? dgs.getHeroes().size() : Integer.parseInt(def.getSetupHowMany()));
@@ -247,8 +246,8 @@ public class DescentForwardModel extends StandardForwardModel {
                     tileName = null;
                 } else if (!tileName.equalsIgnoreCase("player")) {
                     // Find random location on tile
-                    int idx = r.nextInt(dgs.gridReferences.get(tileName).size());
-                    while (previousKeys.contains(idx)) idx = r.nextInt(dgs.gridReferences.get(tileName).size());
+                    int idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
+                    while (previousKeys.contains(idx)) idx = rnd.nextInt(dgs.gridReferences.get(tileName).size());
                     int k = 0;
                     for (Vector2D key : dgs.gridReferences.get(tileName).keySet()) {
                         if (k == idx) {
@@ -269,7 +268,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 token.setAttributeModifiers(def.getAttributeModifiers());
                 if (location == null) {
                     // Make a hero owner of it TODO: players choose?
-                    int idx = r.nextInt(dgs.getHeroes().size() - 1);
+                    int idx = rnd.nextInt(dgs.getHeroes().size() - 1);
                     token.setOwnerId(dgs.getHeroes().get(idx).getComponentID(), dgs);
                 }
                 token.setComponentName(def.getAltName());
@@ -284,7 +283,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
         // Shuffle search cards deck
         dgs.searchCards = _data.searchCards;
-        dgs.searchCards.shuffle(r);
+        dgs.searchCards.shuffle(rnd);
 
         // Announce all figures in play, including their stats and starting positions
         // Primarily for debug purposes
@@ -314,30 +313,6 @@ public class DescentForwardModel extends StandardForwardModel {
 
         if (checkEndOfGame(dgs))
             return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
-
-        // TODO: may still be able to play cards/skills/free effects - just add more Booleans into the if check when more are added
-        // Turn ends for figure if they executed the number of actions available and have no more actions available,
-//        List<AbstractAction> actions = _computeAvailableActions(dgs);
-//        actions.remove(new EndTurn());
-        //       boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum() && actions.isEmpty();
-
-        // have no more movement points available,
-        //       boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
-
-//        // and, for Heroes only, cannot spend any more Fatigue for movement points
-//        boolean noMoreFatigueMovement = true;
-//        if (actingFigure instanceof Hero) {
-//            if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-//                noMoreFatigueMovement = false;
-//            }
-//
-//            // We also need to check a special case for Grisban's Hero Ability after resting
-//            if (((Hero) actingFigure).getAbility().equals(HeroAbilities.HeroAbility.HealCondition))
-//                noMoreActions = noMoreActions && !(HeroAbilities.grisbanCanAct(dgs, (Hero) actingFigure));
-//        }
-//
-//        if (!(action instanceof EndTurn) && noMoreActions && noMoreMovement && noMoreFatigueMovement) {
-        //           new EndTurn().execute(dgs);
 
         if (action instanceof EndFigureTurn) {
             // now check to see if we need to end the player turn
@@ -497,8 +472,7 @@ public class DescentForwardModel extends StandardForwardModel {
         // We assume that we can always spawn a Minion
         // As we will just return if we do not have enough monsters to spawn otherwise
 
-        Random rnd = new Random(dgs.getGameParameters().getRandomSeed() + dgs.getTurnCounter());
-        //Random rnd = new Random();
+        Random rnd = dgs.getRnd();
         List<Monster> monstersOriginal = dgs.getOriginalMonsters().get(index);
         List<Monster> monsters = dgs.getMonsters().get(index);
         for (Monster monster : monstersOriginal)

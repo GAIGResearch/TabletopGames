@@ -52,7 +52,7 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = actingFigure.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
         MeleeAttack attack = new MeleeAttackOverride(
@@ -86,7 +86,7 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = attacker.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
         MeleeAttack attack = new MeleeAttackDamageOnly(
@@ -121,12 +121,12 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = actingFigure.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
 
         // Ensure we always roll a shield
         DicePool defenceDice = victim.getDefenceDice().copy();
         while (defenceDice.getShields() <= 0)
-            defenceDice.roll(state.getRandom());
+            defenceDice.roll(state.getRnd());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
         MeleeAttack attack = new MeleeAttackOverride(
@@ -161,12 +161,12 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = actingFigure.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
 
         // Ensure we always roll a shield
         DicePool defenceDice = victim.getDefenceDice().copy();
         while (defenceDice.getShields() <= 0)
-            defenceDice.roll(state.getRandom());
+            defenceDice.roll(state.getRnd());
 
         MeleeAttack attack = new MeleeAttackOverride(
                 actingFigure.getComponentID(), victim.getComponentID(), attackDice, defenceDice);
@@ -286,7 +286,7 @@ public class MeleeAttackTests {
 
     private DicePool fixBlueAndYellowDice(int blueFace, int yellowFace) {
         DicePool retValue = DicePool.constructDicePool("BLUE", "YELLOW");
-        retValue.roll(state.getRandom());
+        retValue.roll(state.getRnd());
         retValue.setFace(0, blueFace);
         retValue.setFace(1, yellowFace);
         return retValue;
@@ -369,7 +369,7 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = attacker.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
         assertEquals(2, attackDice.getSize());
         state.setAttackDicePool(DicePool.empty); // to clear previous settings
 
@@ -443,10 +443,10 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = actingFigure.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
 
         DicePool defenceDice = victim.getDefenceDice().copy();
-        defenceDice.roll(state.getRandom());
+        defenceDice.roll(state.getRnd());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
         MeleeAttack attack = new MeleeAttackOverride(
@@ -485,10 +485,10 @@ public class MeleeAttackTests {
         // Force the dice to roll a result that goes all the way to the end without interruptions
         DicePool attackDice = attacker.getAttackDice().copy();
         while (attackDice.getRange() <= 0 || attackDice.getDamage() <= 0)
-            attackDice.roll(state.getRandom());
+            attackDice.roll(state.getRnd());
 
         DicePool defenceDice = victim.getDefenceDice().copy();
-        defenceDice.roll(state.getRandom());
+        defenceDice.roll(state.getRnd());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
         MeleeAttack attack = new MeleeAttackOverride(
