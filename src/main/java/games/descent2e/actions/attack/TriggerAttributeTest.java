@@ -21,7 +21,7 @@ import static games.descent2e.actions.attack.TriggerAttributeTest.GetAttributeTe
 public class TriggerAttributeTest extends DescentAction implements IExtendedSequence {
 
     enum Interrupters {
-        USER, TARGET, OTHERS, ALL
+        TARGET
     }
 
     public enum GetAttributeTests {
@@ -101,20 +101,12 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         if (phase.interrupt == null || phase.interrupters == null) return false;
         // first we see if the interruptPlayer is one who may interrupt
         switch (phase.interrupters) {
-            case USER:
-                if (interruptPlayer != attackingPlayer)
-                    return false;
-                break;
             case TARGET:
                 if (interruptPlayer != defendingPlayer)
                     return false;
                 break;
-            case OTHERS:
-                if (interruptPlayer == attackingPlayer)
-                    return false;
-                break;
-            case ALL:
-                // always fine
+            default:
+                return false;
         }
         // second we see if they can interrupt (i.e. have a relevant card/ability)
         return !_computeAvailableActions(state).isEmpty();

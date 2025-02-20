@@ -26,7 +26,7 @@ import static games.descent2e.actions.herofeats.DoubleMoveAttack.Interrupters.*;
 public class DoubleMoveAttack extends DescentAction implements IExtendedSequence {
 
     enum Interrupters {
-        HERO, OTHERS, ALL
+        HERO
     }
 
     public enum DoubleMoveAttackPhase {
@@ -76,6 +76,8 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         if (phase.interrupt == null)
             throw new AssertionError("Should not be reachable");
         DescentGameState dgs = (DescentGameState) state;
+        if (interruptPlayer == dgs.getOverlordPlayer())
+            return new ArrayList<>();  // Overlord cannot interrupt
         List<AbstractAction> retVal = new ArrayList<>();
         List<AbstractAction> moveActions;
         List<RangedAttack> attacks = new ArrayList<>();;
@@ -181,17 +183,11 @@ public class DoubleMoveAttack extends DescentAction implements IExtendedSequence
         if (skip) return false;
         if (phase.interrupt == null || phase.interrupters == null) return false;
         // first we see if the interruptPlayer is one who may interrupt
-        switch (phase.interrupters) {
-            case HERO:
-                if (interruptPlayer != heroPlayer)
-                    return false;
-                break;
-            case OTHERS:
-                if (interruptPlayer == heroPlayer)
-                    return false;
-                break;
-            case ALL:
-                // always fine
+        if (phase.interrupters == Interrupters.HERO) {
+            if (interruptPlayer == state.getOverlordPlayer())
+                return false;
+            if (interruptPlayer != heroPlayer)
+                return false;
         }
         // second we see if they can interrupt (i.e. have a relevant card/ability)
         return !_computeAvailableActions(state).isEmpty();

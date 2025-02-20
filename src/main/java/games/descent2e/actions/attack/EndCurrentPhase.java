@@ -19,20 +19,16 @@ public class EndCurrentPhase extends AbstractAction {
         IExtendedSequence action = Objects.requireNonNull(gs.currentActionInProgress());
         if (action instanceof MeleeAttack) {
             ((MeleeAttack) action).setSkip(true);
-            //System.out.println("Skipping current phase");
         }
         if (action instanceof AttributeTest) {
             ((AttributeTest) action).setSkip(true);
-            //System.out.println("Skipping current phase");
         }
         if (action instanceof DoubleMoveAttack) {
             ((DoubleMoveAttack) action).setSkip(true);
-            //System.out.println("Skipping current phase");
         }
 
         if (action instanceof HeroicFeatExtraMovement) {
             ((HeroicFeatExtraMovement) action).setSkip(true);
-            //System.out.println("Skipping current phase");
         }
 
         ((DescentGameState) gs).getActingFigure().addActionTaken(toString());

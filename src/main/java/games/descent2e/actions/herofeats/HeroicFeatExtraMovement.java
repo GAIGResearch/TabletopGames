@@ -26,7 +26,7 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
     // Syndrael Heroic Feat
 
     enum Interrupters {
-        HERO, ALLY, OTHERS, ALL
+        HERO, ALLY
     }
 
     public enum ExtraMovePhase {
@@ -212,6 +212,8 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
         if (skip) return false;
         if (phase.interrupt == null || phase.interrupters == null) return false;
         // first we see if the interruptPlayer is one who may interrupt
+        if (interruptPlayer == state.getOverlordPlayer())
+            return false;
         switch (phase.interrupters) {
             case HERO:
                 if (interruptPlayer != heroPlayer)
@@ -221,12 +223,6 @@ public class HeroicFeatExtraMovement extends DescentAction implements IExtendedS
                 if (interruptPlayer != allyPlayer)
                     return false;
                 break;
-            case OTHERS:
-                if (interruptPlayer == heroPlayer)
-                    return false;
-                break;
-            case ALL:
-                // always fine
         }
         // second we see if they can interrupt (i.e. have a relevant card/ability)
         return !_computeAvailableActions(state).isEmpty();
