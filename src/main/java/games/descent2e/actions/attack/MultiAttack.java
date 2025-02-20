@@ -21,7 +21,6 @@ import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
  */
 public class MultiAttack extends RangedAttack {
 
-    int defendingFigure;
     public List<Integer> defendingFigures;
     int index;
 
@@ -202,7 +201,6 @@ public class MultiAttack extends RangedAttack {
     }
 
     public void copyComponentTo(MultiAttack target) {
-        target.defendingFigure = defendingFigure;
         target.index = index;
         super.copyComponentTo(target);
     }
