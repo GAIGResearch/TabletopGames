@@ -9,6 +9,7 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
+import games.pandemic.PandemicForwardModel;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -353,33 +354,39 @@ public class Game {
     public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
         gameState.reset(newRandomSeed);
         forwardModel.abstractSetup(gameState);
+
+        // set forward models for all players
+        for (AbstractPlayer player : players) {
+            if (forwardModel instanceof PandemicForwardModel pfm)
+                player.setForwardModel(pfm.copy());
+            else
+                player.setForwardModel(this.forwardModel);
+        }
+
         if (players.size() == gameState.getNPlayers()) {
             this.players = players;
         } else if (players.isEmpty()) {
             // keep existing players
-        } else if (players.size() == gameState.nTeams){
+        } else if (players.size() == gameState.nTeams) {
             this.players = new ArrayList<>();
             // In this case we use (copies of) each agent for all players on the team
             // loop over each player; find out what team they are in; and add an agent copy
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 int team = gameState.getTeam(i);
                 AbstractPlayer player = players.get(team);
-                player.setForwardModel(this.forwardModel.copy());
                 this.players.add(player.copy());
             }
         } else
             throw new IllegalArgumentException("PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
+
         int id = 0;
         if (this.players != null)
             for (AbstractPlayer player : this.players) {
                 // Give player their ID
                 player.playerID = id++;
-                // Create a FM copy for this player (different random seed)
-                player.setForwardModel(this.forwardModel.copy());
                 // Create initial state observation
                 AbstractGameState observation = gameState.copy(player.playerID);
                 // Allow player to initialize
-
                 player.initializePlayer(observation);
             }
         int gameID = idFountain.incrementAndGet();

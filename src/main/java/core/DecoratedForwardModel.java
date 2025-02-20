@@ -49,11 +49,6 @@ public class DecoratedForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel _copy() {
-        return wrappedFM._copy();
-    }
-
-    @Override
     protected void endPlayerTurn(AbstractGameState state) {
         wrappedFM.endPlayerTurn(state);
     }

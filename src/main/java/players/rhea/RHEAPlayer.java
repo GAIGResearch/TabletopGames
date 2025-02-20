@@ -132,7 +132,7 @@ public class RHEAPlayer extends AbstractPlayer implements IAnyTimePlayer {
         RHEAParams newParams = (RHEAParams) parameters.copy();
         newParams.setRandomSeed(rnd.nextInt());
         RHEAPlayer retValue = new RHEAPlayer(newParams, toString());
-        retValue.setForwardModel(getForwardModel().copy());
+        retValue.setForwardModel(getForwardModel());
         return retValue;
     }
 
