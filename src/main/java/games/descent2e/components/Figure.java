@@ -347,14 +347,14 @@ public class Figure extends Token {
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
         copyTo.removedConditionThisTurn = removedConditionThisTurn;
-        copyTo.attributeTests = new ArrayList<>();
         if (attributeTests != null) {
+            copyTo.attributeTests = new ArrayList<>();
             for (AttributeTest test : attributeTests) {
                 copyTo.attributeTests.add(test.copy());
             }
         }
-        copyTo.abilities = new ArrayList<>();
         if (abilities != null) {
+            copyTo.abilities = new ArrayList<>();
             for (DescentAction ability : abilities) {
                 copyTo.abilities.add(ability.copy());
             }
@@ -412,29 +412,15 @@ public class Figure extends Token {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Figure)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Figure figure = (Figure) o;
-        return Objects.equals(tokenType, figure.tokenType) &&
-                Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) &&
-                Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) &&
-                Objects.equals(position, figure.position) && Objects.equals(size, figure.size) &&
-                Objects.equals(conditions, figure.conditions) && Objects.equals(removedConditionThisTurn, figure.removedConditionThisTurn) &&
-                Objects.equals(attributeTests, figure.attributeTests) && Objects.equals(abilities, figure.abilities) &&
-                Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(componentName, figure.componentName) &&
-                Objects.equals(hasMoved, figure.hasMoved) && Objects.equals(hasRerolled, figure.hasRerolled) && Objects.equals(hasAttacked, figure.hasAttacked) &&
-                Objects.equals(isOffMap, figure.isOffMap) && Objects.equals(canIgnoreEnemies, figure.canIgnoreEnemies) &&
-                Objects.equals(extraAction, figure.extraAction) && Objects.equals(exhausted, figure.exhausted) &&
-                Objects.equals(actionsTaken, figure.actionsTaken);
+        return removedConditionThisTurn == figure.removedConditionThisTurn && hasMoved == figure.hasMoved && hasAttacked == figure.hasAttacked && hasRerolled == figure.hasRerolled && isOffMap == figure.isOffMap && canIgnoreEnemies == figure.canIgnoreEnemies && extraAction == figure.extraAction && Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(attributeTests, figure.attributeTests) && Objects.equals(abilities, figure.abilities) && Objects.equals(currentAttack, figure.currentAttack) && Objects.equals(exhausted, figure.exhausted) && Objects.equals(actionsTaken, figure.actionsTaken);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tokenType, attackDice, defenceDice, attributes,
-                nActionsExecuted, position, size, conditions, removedConditionThisTurn,
-                attributeTests, abilities, currentAttack, componentName,
-                hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted, actionsTaken);
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, removedConditionThisTurn, attributeTests, abilities, currentAttack, hasMoved, hasAttacked, hasRerolled, isOffMap, canIgnoreEnemies, extraAction, exhausted, actionsTaken);
     }
 
     @Override

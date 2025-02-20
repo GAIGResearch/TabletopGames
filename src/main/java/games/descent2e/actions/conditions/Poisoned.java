@@ -12,7 +12,7 @@ import games.descent2e.components.Monster;
 
 import java.util.Objects;
 
-public class Poisoned extends AttributeTest<Poisoned> {
+public class Poisoned extends AttributeTest {
     public Poisoned(int testingFigure, Figure.Attribute attribute) {
         super(testingFigure, attribute, testingFigure, 0);
         attributeTestName = "Poisoned Test: " + testingFigure + "-" + 0;

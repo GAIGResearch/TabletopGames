@@ -9,7 +9,7 @@ import games.descent2e.components.Figure;
 
 import java.util.Objects;
 
-public class Diseased extends AttributeTest<Diseased> {
+public class Diseased extends AttributeTest {
 
     public Diseased(int testingFigure, Figure.Attribute attribute) {
         super(testingFigure, attribute, testingFigure, 0);

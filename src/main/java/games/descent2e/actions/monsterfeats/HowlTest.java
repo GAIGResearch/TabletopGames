@@ -10,7 +10,7 @@ import games.descent2e.components.Figure;
 import java.util.Objects;
 import java.util.Set;
 
-public class HowlTest extends AttributeTest<HowlTest> {
+public class HowlTest extends AttributeTest {
 
     public HowlTest(int testingFigure, Figure.Attribute attribute, int sourceFigure, int testCount) {
         super(testingFigure, attribute, sourceFigure, testCount);

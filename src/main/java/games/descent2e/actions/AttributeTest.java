@@ -5,12 +5,10 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.attack.EndCurrentPhase;
-import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
-import javassist.runtime.Desc;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,7 +17,7 @@ import static games.descent2e.actions.AttributeTest.TestPhase.*;
 import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.AttributeTest.Interrupters.*;
 
-public abstract class AttributeTest<A extends AttributeTest<A>> extends DescentAction implements IExtendedSequence {
+public abstract class AttributeTest extends DescentAction implements IExtendedSequence {
 
     public enum Interrupters {
         TESTER, OTHERS, ALL
@@ -244,11 +242,11 @@ public abstract class AttributeTest<A extends AttributeTest<A>> extends DescentA
     }
 
     // returns a copy of the action
-    public abstract A _copy();
+    public abstract AttributeTest _copy();
 
     @Override
-    public A copy() {
-        A retValue = _copy();
+    public AttributeTest copy() {
+        AttributeTest retValue = _copy();
         retValue.testCount = testCount;
         retValue.testingPlayer = testingPlayer;
         retValue.phase = phase;
@@ -370,7 +368,7 @@ public abstract class AttributeTest<A extends AttributeTest<A>> extends DescentA
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!super.equals(o)) return false;
-        AttributeTest<?> that = (AttributeTest<?>) o;
+        AttributeTest that = (AttributeTest) o;
         return testingFigure == that.testingFigure && testingPlayer == that.testingPlayer &&
                 testCount == that.testCount && sourceFigure == that.sourceFigure &&
                 interruptPlayer == that.interruptPlayer && attributeValue == that.attributeValue &&
