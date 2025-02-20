@@ -1,10 +1,10 @@
 package games.saboteur.components;
 
-import core.components.Card;
+import core.components.BoardNode;
 
 import java.util.Objects;
 
-public class SaboteurCard extends Card
+public class SaboteurCard extends BoardNode
 {
 
     public enum SaboteurCardType
@@ -27,7 +27,7 @@ public class SaboteurCard extends Card
 
     protected SaboteurCard (SaboteurCardType type, int componentID)
     {
-        super(type.name(), componentID);
+        super(-1, type.name(), componentID);
         this.type = type;
         this.nOfNuggets = 0;
     }

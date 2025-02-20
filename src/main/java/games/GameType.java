@@ -33,6 +33,11 @@ import games.connect4.Connect4ForwardModel;
 import games.connect4.Connect4GameParameters;
 import games.connect4.Connect4GameState;
 import games.connect4.gui.Connect4GUIManager;
+import games.descent2e.DescentForwardModel;
+import games.descent2e.DescentGameState;
+import games.descent2e.DescentParameters;
+import games.descent2e.gui.DescentGUI;
+import games.diamant.*;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
@@ -246,6 +251,10 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+    Descent2e(2,5,
+            new ArrayList<>(),
+            new ArrayList<>(),
+            DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class),
     MonopolyDeal(2, 5,
             Arrays.asList(Strategy, Cards, Economic),
             Arrays.asList(SetCollection, HandManagement, TakeThat),

@@ -7,18 +7,18 @@ import java.awt.*;
 
 import static gui.GUI.defaultItemSize;
 
-public class GridBoardView<T extends Component> extends ComponentView {
+public class GridBoardView extends ComponentView {
 
-    public GridBoardView(GridBoard<T> gridBoard) {
+    public GridBoardView(GridBoard gridBoard) {
         super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<?>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
     }
 
-    public static <T extends Component> void drawGridBoard(Graphics2D g, GridBoard<T> gridBoard, int x, int y) {
+    public static void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -37,7 +37,7 @@ public class GridBoardView<T extends Component> extends ComponentView {
         }
     }
 
-    public static <T extends Component> void drawGridBoard(Graphics2D g, GridBoard<T> gridBoard, Rectangle rect) {
+    public static void drawGridBoard(Graphics2D g, GridBoard gridBoard, Rectangle rect) {
         // Draw background
         g.setColor(Color.lightGray);
         g.fillRect(rect.x, rect.y, rect.width-1, rect.height-1);

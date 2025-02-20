@@ -1,13 +1,8 @@
 package core.components;
 
-import games.saboteur.components.PathCard;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
-public class PartialObservableGridBoard<T extends Component> extends GridBoard<T>
+public class PartialObservableGridBoard extends GridBoard
 {
     //visibility of Board for each player
     private boolean[] gridBoardVisibility;
@@ -56,7 +51,7 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         Arrays.fill(gridBoardVisibility, defaultValue);
     }
 
-    private PartialObservableGridBoard(Component[][] grid, boolean[] gridBoardVisibility, List<boolean[][]> elementVisibility, int componentID)
+    private PartialObservableGridBoard(BoardNode[][] grid, boolean[] gridBoardVisibility, List<boolean[][]> elementVisibility, int componentID)
     {
         super(grid, componentID);
         this.gridBoardVisibility = gridBoardVisibility.clone();
@@ -127,25 +122,38 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
 //endregion
 //--------------------------------------------------------------------------------------------------//
     @Override
-    public PartialObservableGridBoard<T> copy()
+    public PartialObservableGridBoard copy()
     {
-        Component[][] gridCopy = new Component[getHeight()][getWidth()];
+        BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
+        Map<Integer, BoardNode> nodeCopies = new HashMap<>();
         for (int i = 0; i < getHeight(); i++) {
             for (int j = 0; j < getWidth(); j++) {
-                if (getGridValues()[i][j] == null) {
-                    gridCopy[i][j] = null;
-                    continue;
+                if (getGridValues()[i][j] != null) {
+                    gridCopy[i][j] = new BoardNode(getGridValues()[i][j]);
+                    getGridValues()[i][j].copyComponentTo(gridCopy[i][j]);
+                    nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
                 }
-                gridCopy[i][j] = getGridValues()[i][j].copy();
             }
         }
-        PartialObservableGridBoard<T> copy = new PartialObservableGridBoard<>(gridCopy, gridBoardVisibility, elementVisibility, componentID);
+        for (int i = 0; i < getHeight(); i++) {
+            for (int j = 0; j < getWidth(); j++) {
+                if (getGridValues()[i][j] != null) {
+                    for (Map.Entry<BoardNode, Double> neighbour : getGridValues()[i][j].getNeighbours().entrySet()) {
+                        gridCopy[i][j].addNeighbourWithCost(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
+                    }
+                    for (Map.Entry<BoardNode, Integer> neighbour : getGridValues()[i][j].getNeighbourSideMapping().entrySet()) {
+                        gridCopy[i][j].addNeighbourOnSide(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
+                    }
+                }
+            }
+        }
+        PartialObservableGridBoard copy = new PartialObservableGridBoard(gridCopy, gridBoardVisibility, elementVisibility, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
-    public PartialObservableGridBoard<T> emptyCopy() {
-        PartialObservableGridBoard<T> g = new PartialObservableGridBoard<>(getWidth(), getHeight(), elementVisibility.size(), true, componentID);
+    public PartialObservableGridBoard emptyCopy() {
+        PartialObservableGridBoard g = new PartialObservableGridBoard(getWidth(), getHeight(), elementVisibility.size(), true, componentID);
         copyComponentTo(g);
         return g;
     }
@@ -162,10 +170,10 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
         {
             for(int k = 0; k < getWidth(); k++)
             {
-                PathCard pathCard = (PathCard) getElement(k, j);
+                BoardNode pathCard = getElement(k, j);
                 if(pathCard != null)
                 {
-                    sb.append(pathCard.getString());
+                    sb.append(pathCard);
                 }
                 else
                 {
@@ -193,10 +201,10 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
                     sb.append("X");
                     continue;
                 }
-                PathCard pathCard = (PathCard) getElement(k, j);
+                BoardNode pathCard = getElement(k, j);
                 if(pathCard != null)
                 {
-                    sb.append(pathCard.getString());
+                    sb.append(pathCard);
                 }
                 else
                 {
@@ -211,7 +219,7 @@ public class PartialObservableGridBoard<T extends Component> extends GridBoard<T
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PartialObservableGridBoard<?> that)) return false;
+        if (!(o instanceof PartialObservableGridBoard that)) return false;
         if (!super.equals(o)) return false;
         return Arrays.equals(gridBoardVisibility, that.gridBoardVisibility) && Objects.equals(elementVisibility, that.elementVisibility);
     }

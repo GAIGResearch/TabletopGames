@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.PartialObservableDeck;
 import core.components.Token;
 import games.GameType;
@@ -43,15 +44,15 @@ public class TestMastermind {
             List<AbstractAction> actions = forwardModel.computeAvailableActions(mmgs);
             forwardModel.next(mmgs, actions.get(0));
             if (i != mmp.boardWidth-1) {
-                assertEquals(mmgs.resultBoard.getElement(0,0).getTokenType(), MMConstants.emptyPeg);
-                assertEquals(mmgs.resultBoard.getElement(1,0).getTokenType(), MMConstants.emptyPeg);
-                assertEquals(mmgs.resultBoard.getElement(2,0).getTokenType(), MMConstants.emptyPeg);
-                assertEquals(mmgs.resultBoard.getElement(3,0).getTokenType(), MMConstants.emptyPeg);
+                assertEquals(mmgs.resultBoard.getElement(0,0).getComponentName(), MMConstants.emptyPeg);
+                assertEquals(mmgs.resultBoard.getElement(1,0).getComponentName(), MMConstants.emptyPeg);
+                assertEquals(mmgs.resultBoard.getElement(2,0).getComponentName(), MMConstants.emptyPeg);
+                assertEquals(mmgs.resultBoard.getElement(3,0).getComponentName(), MMConstants.emptyPeg);
             } else {
-                assertNotEquals(mmgs.resultBoard.getElement(0,0).getTokenType(), MMConstants.emptyPeg);
-                assertNotEquals(mmgs.resultBoard.getElement(1,0).getTokenType(), MMConstants.emptyPeg);
-                assertNotEquals(mmgs.resultBoard.getElement(2,0).getTokenType(), MMConstants.emptyPeg);
-                assertNotEquals(mmgs.resultBoard.getElement(3,0).getTokenType(), MMConstants.emptyPeg);
+                assertNotEquals(mmgs.resultBoard.getElement(0,0).getComponentName(), MMConstants.emptyPeg);
+                assertNotEquals(mmgs.resultBoard.getElement(1,0).getComponentName(), MMConstants.emptyPeg);
+                assertNotEquals(mmgs.resultBoard.getElement(2,0).getComponentName(), MMConstants.emptyPeg);
+                assertNotEquals(mmgs.resultBoard.getElement(3,0).getComponentName(), MMConstants.emptyPeg);
             }
         }
     }
@@ -81,10 +82,10 @@ public class TestMastermind {
 
     private boolean _testCorrectResult(String guess, String answerString, String expectedResult) {
         MMGameState mmgs = (MMGameState) mastermind.getGameState();
-        PartialObservableDeck<Token> answerCode = new PartialObservableDeck<Token>("Answer Code", 0, new boolean[]{false});
+        PartialObservableDeck<BoardNode> answerCode = new PartialObservableDeck<>("Answer Code", 0, new boolean[]{false});
 
         for (int i=0; i<4; i++) {
-            forwardModel.next(mmgs, new SetGridValueAction<>(mmgs.guessBoard.getComponentID(), i, 0, MMConstants.guessColours.get(Character.getNumericValue(guess.charAt(i))).getComponentID()));
+            forwardModel.next(mmgs, new SetGridValueAction(mmgs.guessBoard.getComponentID(), i, 0, MMConstants.guessColours.get(Character.getNumericValue(guess.charAt(i))).getComponentID()));
             answerCode.add(MMConstants.guessColours.get(Character.getNumericValue(answerString.charAt(3-i))));
         }
 

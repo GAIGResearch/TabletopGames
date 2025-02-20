@@ -31,7 +31,7 @@ public class BattleloreGUI extends AbstractGUIManager {
 
 
         JPanel infoPanel = createGameStateInfoPanel("Battlelore", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);

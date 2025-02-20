@@ -34,7 +34,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
         int hexWidth = gameParams.hexWidth;
 
         //Game Area Initialization
-        gameState.gameBoard = new GridBoard<>(hexWidth, hexHeight);
+        gameState.gameBoard = new GridBoard(hexWidth, hexHeight);
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
         gameState.playerScores = new int[gameState.getNPlayers()];
@@ -85,25 +85,25 @@ public class BattleloreForwardModel extends StandardForwardModel {
     }
 
     private void PutLearningScenarioUnits(BattleloreGameState gameState) {
-        gameState.gameBoard.getElement(1, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
-        gameState.gameBoard.getElement(3, 1).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
-        gameState.gameBoard.getElement(3, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
-        gameState.gameBoard.getElement(3, 3).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
-        gameState.gameBoard.getElement(5, 3).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
-        gameState.gameBoard.getElement(7, 3).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
-        gameState.gameBoard.getElement(7, 1).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
-        gameState.gameBoard.getElement(8, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
-        gameState.gameBoard.getElement(10, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
+        gameState.AddUnit(1, 2, gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
+        gameState.AddUnit(3, 1,gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
+        gameState.AddUnit(3, 2,gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
+        gameState.AddUnit(3, 3,gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
+        gameState.AddUnit(5, 3,gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
+        gameState.AddUnit(7, 3,gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
+        gameState.AddUnit(7, 1,gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
+        gameState.AddUnit(8, 2,gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
+        gameState.AddUnit(10, 2,gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
 
-        gameState.gameBoard.getElement(1, 6).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
-        gameState.gameBoard.getElement(3, 7).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
-        gameState.gameBoard.getElement(3, 5).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
-        gameState.gameBoard.getElement(3, 6).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
-        gameState.gameBoard.getElement(5, 5).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
-        gameState.gameBoard.getElement(7, 5).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
-        gameState.gameBoard.getElement(7, 7).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
-        gameState.gameBoard.getElement(8, 6).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
-        gameState.gameBoard.getElement(10, 6).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
+        gameState.AddUnit(1, 6,gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
+        gameState.AddUnit(3, 7,gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
+        gameState.AddUnit(3, 5,gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
+        gameState.AddUnit(3, 6,gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
+        gameState.AddUnit(5, 5,gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
+        gameState.AddUnit(7, 5,gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
+        gameState.AddUnit(7, 7,gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
+        gameState.AddUnit(8, 6,gameState.GetUnitFromType(BattleloreGameState.UnitType.CitadelGuard));
+        gameState.AddUnit(10, 6,gameState.GetUnitFromType(BattleloreGameState.UnitType.YeomanArcher));
     }
 
     @Override
@@ -178,7 +178,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
-                MapTile tile = gameState.gameBoard.getElement(x, y);
+                MapTile tile = (MapTile) gameState.gameBoard.getElement(x, y);
                 Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
                 if (tile != null && tile.GetUnits() != null && tile.GetUnits().size() > 0 && tile.IsInArea(area)) {

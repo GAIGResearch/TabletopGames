@@ -540,7 +540,7 @@ public abstract class AbstractGameState {
                     retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case VISIBLE_TO_OWNER:
-                    if (((Component) container).getOwnerId() != player)
+                   if (((Component) container).getOwnerId() != player)
                         retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case TOP_VISIBLE_TO_ALL:
@@ -646,6 +646,38 @@ public abstract class AbstractGameState {
         result = 31 * result + Objects.hash(tick, nPlayers, roundCounter, turnCounter, turnOwner, firstPlayer);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
+    }
+
+    /**
+     * HashCodeArray compiles all necessary hash codes for each individual game state.
+     * Override as necessary for each game state.
+     *          This is used for the ForwardModelTester for checking that the game state is correctly copied
+     *          for games such as Descent, which have a lot of changing pieces and hash codes each state to manage.
+     *          This allows us to see what hasn't been copied over between states.
+     */
+    public int[] hashCodeArray() {
+        return new int[0];
+    }
+
+    /**
+     * SuperHashCodeArray compiles all necessary hash codes about the game itself.
+     * This is used for the ForwardModelTester for checking that the game state is correctly copied,
+     *          and should generally not require overriding.
+     */
+    public final int[] superHashCodeArray() {
+        return new int[] {
+                Objects.hash(gameParameters),
+                Objects.hash(gameStatus),
+                Objects.hash(gamePhase),
+                Objects.hash(actionsInProgress),
+                Objects.hash(tick),
+                Objects.hash(nPlayers),
+                Objects.hash(roundCounter),
+                Objects.hash(turnCounter),
+                Objects.hash(turnOwner),
+                Objects.hash(firstPlayer),
+                Arrays.hashCode(playerResults)
+        };
     }
 
     public boolean isGameOver()

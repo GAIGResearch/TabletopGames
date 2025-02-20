@@ -1,15 +1,11 @@
-package games.terraformingmars.gui;
+package utilities;
 
 import org.davidmoten.text.utils.WordWrap;
-import utilities.ImageIO;
-import utilities.Vector2D;
 
 import java.awt.*;
 import java.awt.font.TextLayout;
 
-public class Utils {
-
-    public final static Color[] playerColors = new Color[]{new Color(203, 161, 26), Color.red, Color.pink, Color.green, Color.cyan};
+public class GUIUtils {
 
     public static void drawShadowString(Graphics2D g, String text, int x, int y) {
         drawShadowString(g, text, x, y, null, null);
@@ -18,12 +14,12 @@ public class Utils {
     public static void drawShadowString(Graphics2D g, String text, int x, int y, Color color, Color shadow) {
         TextLayout textLayout = new TextLayout(text, g.getFont(), g.getFontRenderContext());
 
-        if (shadow == null) shadow = TMGUI.bgColor;
+//        if (shadow == null) shadow = TMGUI.bgColor;
 
         g.setPaint(shadow);
         textLayout.draw(g, x + 2, y + 2);
 
-        if (color == null) color = TMGUI.fontColor;  // white default
+//        if (color == null) color = TMGUI.fontColor;  // white default
         g.setPaint(color);
         textLayout.draw(g, x, y);
     }
