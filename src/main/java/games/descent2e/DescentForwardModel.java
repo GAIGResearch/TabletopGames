@@ -280,6 +280,8 @@ public class DescentForwardModel extends StandardForwardModel {
         dgs.attackDicePool = new DicePool(Collections.emptyList());
         dgs.defenceDicePool = new DicePool(Collections.emptyList());
 
+        dgs.defeatedFigures = new ArrayList<>();
+
         // Shuffle search cards deck
         dgs.searchCards = _data.searchCards;
         dgs.searchCards.shuffle(rnd);
