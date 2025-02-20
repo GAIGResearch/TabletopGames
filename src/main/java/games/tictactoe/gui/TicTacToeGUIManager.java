@@ -6,7 +6,6 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import gui.IScreenHighlight;
@@ -65,11 +64,10 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
 
-            int start = actions.size();
-            if (highlight.size() > 0) {
+            if (!highlight.isEmpty()) {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
-                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
+                    SetGridValueAction action = (SetGridValueAction) abstractAction;
                     if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
                         actionButtons[0].setButtonAction(action, "Play " + TicTacToeConstants.playerMapping.get(player.getPlayerID()));

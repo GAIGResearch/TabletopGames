@@ -7,7 +7,6 @@ import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Hero;
 import games.descent2e.components.DescentCard;
 import games.descent2e.components.cards.SearchCard;
@@ -38,7 +37,7 @@ public class SearchAction extends TokenAction<SearchAction> {
         // Can only execute if player adjacent to search token
         Hero hero = (Hero) gs.getActingFigure();
         Vector2D loc = hero.getPosition();
-        DescentGridBoard board = gs.getMasterBoard();
+        GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
         for (DToken token: gs.getTokens()) {
             if (token.getDescentTokenType() == DescentTypes.DescentToken.Search && neighbours.contains(token.getPosition())) {

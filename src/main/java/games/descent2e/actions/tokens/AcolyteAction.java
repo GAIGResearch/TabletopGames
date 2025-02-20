@@ -7,7 +7,6 @@ import core.components.GridBoard;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
-import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
@@ -17,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import static games.descent2e.actions.Triggers.ACTION_POINT_SPEND;
 import static games.descent2e.actions.Triggers.END_TURN;
 import static utilities.Utils.getNeighbourhood;
 
@@ -55,7 +53,7 @@ public class AcolyteAction extends TokenAction<AcolyteAction> implements IExtend
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             HashSet<DToken> adjacentVillagers = new HashSet<>();
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            DescentGridBoard board = dgs.getMasterBoard();
+            GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             neighbours.add(loc);
             for (DToken token : dgs.getTokens()) {
@@ -112,7 +110,7 @@ public class AcolyteAction extends TokenAction<AcolyteAction> implements IExtend
             if (lastAction.contains("Escort Wounded Clergy at")) return false;  // Already escorted one this turn
             if (lastAction.contains("Skipped Escorting Wounded Clergy")) return false;  // Already skipped this turn
             Vector2D loc = hero.getPosition();
-            DescentGridBoard board = dgs.getMasterBoard();
+            GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             neighbours.add(loc);
             if (villagerID != 0) {
@@ -159,7 +157,7 @@ public class AcolyteAction extends TokenAction<AcolyteAction> implements IExtend
                 return true;
             }
             Vector2D loc = hero.getPosition();
-            DescentGridBoard board = dgs.getMasterBoard();
+            GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             neighbours.add(loc);
             DToken token = (DToken) dgs.getComponentById(villagerID);

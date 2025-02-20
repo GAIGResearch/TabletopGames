@@ -26,7 +26,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     // For reference only
     // Mapping from board node ID in board configuration to tile configuration
-    Map<Integer, DescentGridBoard> tiles;
+    Map<Integer, GridBoard> tiles;
     // int corresponds to component ID of tile at that location in master board
     int[][] tileReferences;
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
@@ -34,7 +34,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     boolean initData;
 
     Deck<Card> searchCards;
-    DescentGridBoard masterBoard;
+    GridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
     DicePool attributeDicePool;
@@ -123,7 +123,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.data = data.copy();
         copy.tiles = new HashMap<>();
-        for (Map.Entry<Integer, DescentGridBoard> e : tiles.entrySet()) {
+        for (Map.Entry<Integer, GridBoard> e : tiles.entrySet()) {
             copy.tiles.put(e.getKey(), e.getValue().copy());
         }
         copy.masterBoard = masterBoard.copy();
@@ -300,7 +300,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return data;
     }
 
-    public DescentGridBoard getMasterBoard() {
+    public GridBoard getMasterBoard() {
         return masterBoard;
     }
 
@@ -468,7 +468,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return gridReferences;
     }
 
-    public Map<Integer, DescentGridBoard> getTiles() {
+    public Map<Integer, GridBoard> getTiles() {
         return tiles;
     }
 

@@ -3,7 +3,6 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
-import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.cards.SearchCard;
@@ -23,11 +22,10 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-import static core.components.Component.parseComponent;
 import static games.descent2e.DescentConstants.archetypeHash;
 
 public class DescentGameData extends AbstractGameData {
-    List<DescentGridBoard> tiles;
+    List<GridBoard> tiles;
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
@@ -62,8 +60,8 @@ public class DescentGameData extends AbstractGameData {
     }
 
     @Override
-    public DescentGridBoard findGridBoard(String name) {
-        for (DescentGridBoard gb: tiles) {
+    public GridBoard findGridBoard(String name) {
+        for (GridBoard gb: tiles) {
             if (gb.getComponentName().equalsIgnoreCase(name)) {
                 return gb;
             }
@@ -366,7 +364,7 @@ public class DescentGameData extends AbstractGameData {
     public DescentGameData copy() {
         DescentGameData copy = new DescentGameData();
         copy.tiles = new ArrayList<>();
-        for (DescentGridBoard gb: tiles) {
+        for (GridBoard gb: tiles) {
             copy.tiles.add(gb.copy());
         }
         copy.boardConfigurations = new ArrayList<>();

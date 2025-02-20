@@ -9,7 +9,6 @@ import core.interfaces.IExtendedSequence;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
@@ -53,7 +52,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             HashSet<Hero> adjacentHeroes = new HashSet<>();
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            DescentGridBoard board = dgs.getMasterBoard();
+            GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());
@@ -112,7 +111,7 @@ public class TradeAcolyteAction extends TokenAction<TradeAcolyteAction> implemen
         int heroIdx = acolyte.getOwnerId();
         if (heroIdx == dgs.getActingFigure().getComponentID()) {
             Vector2D loc = ((Hero) dgs.getComponentById(heroIdx)).getPosition();
-            DescentGridBoard board = dgs.getMasterBoard();
+            GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());

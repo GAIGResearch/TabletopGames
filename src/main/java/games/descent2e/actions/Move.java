@@ -7,14 +7,10 @@ import core.components.GridBoard;
 import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
-import games.descent2e.DescentHelper;
 import games.descent2e.DescentTypes;
-import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
-import javassist.runtime.Desc;
-import org.jetbrains.annotations.NotNull;
 import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
@@ -258,7 +254,7 @@ public class Move extends AbstractAction {
 
         List<Vector2D> possibilities = new ArrayList<>();
         // Otherwise, we need to find the nearest adjacent space that is empty
-        DescentGridBoard board = dgs.getMasterBoard();
+        GridBoard board = dgs.getMasterBoard();
         List<Vector2D> checked = new ArrayList<>();
         List<Vector2D> toCheck = new ArrayList<>();
         toCheck.add(position);

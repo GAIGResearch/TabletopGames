@@ -21,6 +21,20 @@ public class BoardNode extends Component {
         this.neighbourSideMapping = new HashMap<>();
     }
 
+    public BoardNode(String name) {
+        super(CoreConstants.ComponentType.BOARD_NODE, name);
+        this.maxNeighbours = -1;
+        this.neighbours = new HashMap<>();
+        this.neighbourSideMapping = new HashMap<>();
+    }
+
+    public BoardNode(BoardNode other) {
+        super(CoreConstants.ComponentType.BOARD_NODE, other.componentName, other.componentID);
+        this.maxNeighbours = other.maxNeighbours;
+        this.neighbours = new HashMap<>();
+        this.neighbourSideMapping = new HashMap<>();
+    }
+
     public BoardNode() {
         this(-1, "");
     }
@@ -100,10 +114,10 @@ public class BoardNode extends Component {
      */
     @Override
     public BoardNode copy() {
-        BoardNode bn = new BoardNode(maxNeighbours, componentName, componentID);
-        copyComponentTo(bn);
-        return bn;
+        // WARNING: DO not copy this directly, the GraphBoard/GridBoard copies it to correctly assign neighbour references!
+        return null;
     }
+
     @Override
     public void copyComponentTo(Component copyTo) {
         if (!(copyTo instanceof BoardNode))

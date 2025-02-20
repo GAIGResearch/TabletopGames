@@ -11,7 +11,6 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.DescentCard;
-import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import utilities.Vector2D;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static core.CoreConstants.playersHash;
-import static core.CoreConstants.sizeHash;
 import static utilities.Utils.getNeighbourhood;
 
 public class UseHealthPotion extends DescentAction implements IExtendedSequence {
@@ -64,7 +62,7 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
         // Get Neighbours
         if (executer.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
             Vector2D loc = executer.getPosition();
-            DescentGridBoard board = dgs.getMasterBoard();
+            GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
             for (Vector2D n : neighbours) {
                 BoardNode bn = board.getElement(n.getX(), n.getY());

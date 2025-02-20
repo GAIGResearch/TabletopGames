@@ -3,7 +3,6 @@ import core.AbstractGameState;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import core.properties.PropertyVector2D;
-import games.descent2e.components.DescentGridBoard;
 
 import java.util.*;
 
@@ -18,7 +17,7 @@ public class Pathfinder {
      * Graph to be used for the path finding.
      * TODO: This could become a GraphBoard at some point.
      */
-    private DescentGridBoard graph;
+    private GridBoard graph;
 
     /**
      * Cache of shortest path from node i to the others
@@ -35,7 +34,7 @@ public class Pathfinder {
      * Constructor of the pathfinder.
      * @param g Graph of the game.
      */
-    public Pathfinder(DescentGridBoard g)
+    public Pathfinder(GridBoard g)
     {
         graph = g;
         shortestPaths = new TreeMap<>();

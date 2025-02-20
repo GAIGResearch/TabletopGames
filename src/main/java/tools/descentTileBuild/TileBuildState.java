@@ -2,11 +2,9 @@ package tools.descentTileBuild;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 import games.GameType;
-import games.descent2e.components.DescentGridBoard;
 import utilities.Pathfinder;
 
 import java.util.ArrayList;
@@ -15,7 +13,7 @@ import java.util.Objects;
 
 public class TileBuildState extends AbstractGameState {
 
-    DescentGridBoard tile;
+    GridBoard tile;
 
     Pathfinder pathfinder;
 
@@ -35,7 +33,7 @@ public class TileBuildState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>() {{
+        return new ArrayList<>() {{
             add(tile);
         }};
     }
@@ -65,9 +63,8 @@ public class TileBuildState extends AbstractGameState {
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TileBuildState)) return false;
+        if (!(o instanceof TileBuildState that)) return false;
         if (!super.equals(o)) return false;
-        TileBuildState that = (TileBuildState) o;
         return Objects.equals(tile, that.tile);
     }
 

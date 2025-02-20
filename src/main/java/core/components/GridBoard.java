@@ -4,7 +4,6 @@ import core.CoreConstants;
 import core.interfaces.IComponentContainer;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
-import games.descent2e.components.DescentGridBoard;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,14 +22,13 @@ import static utilities.Utils.getNeighbourhood;
 /**
  * GridBoard is a 2D grid of Components. It can be used to represent a board in a game, a map, or any other 2D grid.
  * Each cell on the grid can contain a Component of any type.
- * @param <T>
  */
-public class GridBoard<T extends Component> extends Component implements IComponentContainer<T> {
+public class GridBoard extends Component implements IComponentContainer<BoardNode> {
 
     private int width;  // Width of the board
     private int height;  // Height of the board
 
-    private Component[][] grid;  // 2D grid representation of this board
+    private BoardNode[][] grid;  // 2D grid representation of this board
 
     protected GridBoard() {
         super(CoreConstants.ComponentType.BOARD);
@@ -40,23 +38,23 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         super(CoreConstants.ComponentType.BOARD);
         this.width = width;
         this.height = height;
-        this.grid = new Component[height][width];
+        this.grid = new BoardNode[height][width];
     }
 
-    public GridBoard(int width, int height, T defaultValue) {
+    public GridBoard(int width, int height, BoardNode defaultValue) {
         this(width, height);
         for (int y = 0; y < height; y++)
             Arrays.fill(grid[y], defaultValue);
     }
 
-    public GridBoard(Component[][] grid) {
+    public GridBoard(BoardNode[][] grid) {
         super(CoreConstants.ComponentType.BOARD);
         this.width = grid[0].length;
         this.height = grid.length;
         this.grid = grid;
     }
 
-    protected GridBoard(Component[][] grid, int ID) {
+    protected GridBoard(BoardNode[][] grid, int ID) {
         super(CoreConstants.ComponentType.BOARD, ID);
         this.width = grid[0].length;
         this.height = grid.length;
@@ -67,10 +65,10 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         super(CoreConstants.ComponentType.BOARD, ID);
         this.width = width;
         this.height = height;
-        this.grid = new Component[height][width];
+        this.grid = new BoardNode[height][width];
     }
 
-    public GridBoard(GridBoard<T> orig) {
+    public GridBoard(GridBoard orig) {
         super(CoreConstants.ComponentType.BOARD);
         this.width = orig.getWidth();
         this.height = orig.getHeight();
@@ -128,7 +126,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         this.width = width;
         this.height = height;
 
-        Component[][] grid = new Component[height][width];
+        BoardNode[][] grid = new BoardNode[height][width];
         for (int i = 0; i < h; i++) {
             if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i + offsetY], offsetX, w);
         }
@@ -143,7 +141,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      * @param value - new value for this element.
      * @return - true if coordinates in bounds, false otherwise (and function fails).
      */
-    public boolean setElement(int x, int y, T value) {
+    public boolean setElement(int x, int y, BoardNode value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             grid[y][x] = value;
             return true;
@@ -151,7 +149,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
             return false;
     }
 
-    public boolean setElement(Vector2D pos, T value){
+    public boolean setElement(Vector2D pos, BoardNode value){
         return setElement(pos.getX(), pos.getY(), value);
     }
 
@@ -162,13 +160,13 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      * @param y - y coordinate in the grid.
      * @return - element at (x,y) in the grid.
      */
-    public T getElement(int x, int y) {
+    public BoardNode getElement(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height)
-            return (T)grid[y][x];
+            return grid[y][x];
         return null;
     }
 
-    public T getElement(Vector2D pos) {
+    public BoardNode getElement(Vector2D pos) {
         return getElement(pos.getX(), pos.getY());
     }
 
@@ -177,11 +175,11 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      *
      * @return - 2D grid.
      */
-    public Component[][] getGridValues() {
+    public BoardNode[][] getGridValues() {
         return grid;
     }
 
-    public List<Vector2D> getEmptyCells(T defaultElement) {
+    public List<Vector2D> getEmptyCells(BoardNode defaultElement) {
         List<Vector2D> emptyCells = new ArrayList<>();
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
@@ -193,27 +191,14 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         return emptyCells;
     }
 
-    // TODO: This is a hack, fix it
-    public BoardNode[][] convertToBoardNode (Component[][] grid) {
-        int height = grid.length;
-        int width = grid[0].length;
-        BoardNode[][] boardNodes = new BoardNode[height][width];
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j< width; j++) {
-                boardNodes[i][j] = (BoardNode) grid[i][j];
-            }
-        }
-        return boardNodes;
-    }
-
     /**
      * Returns a new grid, copy of this one, with given orientation.
      *
      * @param orientation - int orientation, how many times it should be rotated clockwise
      * @return - new grid with the same elements and correct orientation.
      */
-    public Component[][] rotate(int orientation) {
-        GridBoard<T> copy = copy();
+    public BoardNode[][] rotate(int orientation) {
+        GridBoard copy = copy();
         orientation %= 4;  // Maximum 4 sides to a grid
         for (int i = 0; i < orientation; i++) {
             copy.grid = rotateClockWise(copy.grid);
@@ -227,10 +212,10 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      * @param original - original grid to rotate
      * @return rotated grid
      */
-    private Component[][] rotateClockWise(Component[][] original) {
+    private BoardNode[][] rotateClockWise(BoardNode[][] original) {
         final int M = original.length;
         final int N = original[0].length;
-        Component[][] grid = new Component[N][M];
+        BoardNode[][] grid = new BoardNode[N][M];
         for (int r = 0; r < M; r++) {
             for (int c = 0; c < N; c++) {
                 grid[c][M - 1 - r] = original[r][c];
@@ -244,9 +229,9 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      *
      * @return 1D flattened grid
      */
-    public Component[] flattenGrid() {
+    public BoardNode[] flattenGrid() {
         int length = getHeight() * getWidth();
-        Component[] array = new Component[length];
+        BoardNode[] array = new BoardNode[length];
         for (int i = 0; i < getHeight(); i++) {
             System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
         }
@@ -254,34 +239,66 @@ public class GridBoard<T extends Component> extends Component implements ICompon
     }
 
     @Override
-    public GridBoard<T> copy() {
-        Component[][] gridCopy = new Component[getHeight()][getWidth()];
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                if (grid[i][j] != null)
-                    gridCopy[i][j] = grid[i][j].copy();
-            }
-        }
-        GridBoard<T> g = new GridBoard<>(gridCopy, componentID);
-        copyComponentTo(g);
-        return g;
-    }
-
-    public GridBoard<T> copyNewID() {
+    public GridBoard copy() {
         BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
+        Map<Integer, BoardNode> nodeCopies = new HashMap<>();
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                gridCopy[i][j] = new BoardNode(-1, "");
-                if (grid[i][j] != null) grid[i][j].copyComponentTo(gridCopy[i][j]);
+                if (grid[i][j] != null) {
+                    gridCopy[i][j] = new BoardNode(grid[i][j]);
+                    grid[i][j].copyComponentTo(gridCopy[i][j]);
+                    nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
+                }
             }
         }
-        GridBoard<T> g = new GridBoard<T>(gridCopy);
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (grid[i][j] != null) {
+                    for (Map.Entry<BoardNode, Double> neighbour : grid[i][j].getNeighbours().entrySet()) {
+                        gridCopy[i][j].addNeighbourWithCost(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
+                    }
+                    for (Map.Entry<BoardNode, Integer> neighbour : grid[i][j].getNeighbourSideMapping().entrySet()) {
+                        gridCopy[i][j].addNeighbourOnSide(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
+                    }
+                }
+            }
+        }
+        GridBoard g = new GridBoard(gridCopy, componentID);
         copyComponentTo(g);
         return g;
     }
 
-    public GridBoard<T> emptyCopy() {
-        GridBoard<T> g = new GridBoard<>(getWidth(), getHeight(), componentID);
+    public GridBoard copyNewID() {
+        BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
+        Map<Integer, BoardNode> nodeCopies = new HashMap<>();
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (grid[i][j] != null) {
+                    gridCopy[i][j] = new BoardNode(grid[i][j]);
+                    grid[i][j].copyComponentTo(gridCopy[i][j]);
+                    nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
+                }
+            }
+        }
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (grid[i][j] != null) {
+                    for (Map.Entry<BoardNode, Double> neighbour : grid[i][j].getNeighbours().entrySet()) {
+                        gridCopy[i][j].addNeighbourWithCost(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
+                    }
+                    for (Map.Entry<BoardNode, Integer> neighbour : grid[i][j].getNeighbourSideMapping().entrySet()) {
+                        gridCopy[i][j].addNeighbourOnSide(nodeCopies.get(neighbour.getKey().componentID), neighbour.getValue());
+                    }
+                }
+            }
+        }
+        GridBoard g = new GridBoard(gridCopy);
+        copyComponentTo(g);
+        return g;
+    }
+
+    public GridBoard emptyCopy() {
+        GridBoard g = new GridBoard(getWidth(), getHeight(), componentID);
         copyComponentTo(g);
         return g;
     }
@@ -291,7 +308,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         String s = "";
         for (int y = 0; y < getHeight(); y++) {
             for (int x = 0; x < getWidth(); x++) {
-                T t = getElement(x, y);
+                BoardNode t = getElement(x, y);
                 if (t != null) s += t + " ";
             }
             s += "\n";
@@ -305,15 +322,15 @@ public class GridBoard<T extends Component> extends Component implements ICompon
      * @param filename - path to file.
      * @return - List of Board objects.
      */
-    public static List<DescentGridBoard> loadBoards(String filename) {
+    public static List<GridBoard> loadBoards(String filename) {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<DescentGridBoard> gridBoards = new ArrayList<>();
+        ArrayList<GridBoard> gridBoards = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for (Object o : data) {
-                DescentGridBoard newGridBoard = new DescentGridBoard();
+                GridBoard newGridBoard = new GridBoard();
                 newGridBoard.loadBoard((JSONObject) o);
                 gridBoards.add(newGridBoard);
             }
@@ -341,7 +358,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
             properties.put(imgHash, new PropertyString((String) board.get("img")));
         }
 
-        this.grid = new Component[height][width];
+        this.grid = new BoardNode[height][width];
 
         JSONArray grids = (JSONArray) board.get("grid");
         int y = 0;
@@ -355,9 +372,9 @@ public class GridBoard<T extends Component> extends Component implements ICompon
                         // TODO FIX THIS
                         if (o1 instanceof String) {
                             BoardNode bn = new BoardNode(-1, (String) o1);
-                            setElement(x, y, (T) bn);
+                            setElement(x, y, bn);
                         }
-                        else setElement(x, y, (T) o1);
+                        else setElement(x, y, (BoardNode) o1);
                         x++;
                     }
                     y++;
@@ -369,9 +386,9 @@ public class GridBoard<T extends Component> extends Component implements ICompon
                     // TODO FIX THIS
                     if (o1 instanceof String) {
                         BoardNode bn = new BoardNode(-1, (String) o1);
-                        setElement(x, y, (T) bn);
+                        setElement(x, y, bn);
                     }
-                    else setElement(x, y, (T) o1);
+                    else setElement(x, y, (BoardNode) o1);
                     x++;
                 }
                 y++;
@@ -468,8 +485,7 @@ public class GridBoard<T extends Component> extends Component implements ICompon
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof GridBoard) {
-            GridBoard<?> other = (GridBoard<?>) o;
+        if (o instanceof GridBoard other) {
             return componentID == other.componentID && Arrays.equals(flattenGrid(), other.flattenGrid());
         }
         return false;
@@ -481,8 +497,8 @@ public class GridBoard<T extends Component> extends Component implements ICompon
     }
 
     @Override
-    public List<T> getComponents() {
-        return Arrays.stream(flattenGrid()).map( component -> (T) component).collect(Collectors.toList());
+    public List<BoardNode> getComponents() {
+        return Arrays.stream(flattenGrid()).collect(Collectors.toList());
     }
 
     @Override

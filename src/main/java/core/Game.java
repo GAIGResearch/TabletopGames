@@ -851,6 +851,8 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new BasicMCTSPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
 
         RMHCParams params = new RMHCParams();
         params.horizon = 15;
@@ -858,26 +860,10 @@ public class Game {
         params.heuristic = AbstractGameState::getHeuristicScore;
 //        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
 //        players.add(rmhcPlayer);
-//        players.add(rmhcPlayer);
-//        players.add(rmhcPlayer);
 
 //        MCTSParams mcts_params = new MCTSParams();
 //        players.add(new MCTSPlayer(mcts_params));
-//        players.add(new MCTSPlayer(mcts_params));
-//        players.add(new MCTSPlayer(mcts_params));
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
-//        players.add(new BasicMCTSPlayer());
 
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
-
-//        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));

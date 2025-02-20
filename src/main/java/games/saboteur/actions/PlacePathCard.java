@@ -10,7 +10,7 @@ import utilities.Vector2D;
 
 import java.util.Objects;
 
-public class PlacePathCard extends SetGridValueAction<PathCard>
+public class PlacePathCard extends SetGridValueAction
 {
     private final boolean rotated;
 

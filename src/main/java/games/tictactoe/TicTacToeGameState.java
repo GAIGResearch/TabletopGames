@@ -2,23 +2,21 @@ package games.tictactoe;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
-import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.interfaces.IStateFeatureJSON;
 import games.GameType;
-import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState {
 
-    GridBoard<Token> gridBoard;
+    GridBoard gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
@@ -52,7 +50,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     /**
      * For TicTacToe this returns 0 unless the game is over. In which case 1 is a win, 0.5 is a draw and 0 is a loss.
      *
-     * @param playerId
+     * @param playerId - ID of player whose score we're curious about
      * @return - double, score of current state
      */
     @Override
@@ -64,15 +62,14 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
      * This returns the player id of the token at the given position. Or -1 if this is empty.
      */
     public int getPlayerAt(int x, int y) {
-        Token token = gridBoard.getElement(x, y);
+        BoardNode token = gridBoard.getElement(x, y);
         return token == null ? -1 : token.getOwnerId();
     }
 
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TicTacToeGameState)) return false;
-        TicTacToeGameState that = (TicTacToeGameState) o;
+        if (!(o instanceof TicTacToeGameState that)) return false;
         return Objects.equals(gridBoard, that.gridBoard);
     }
 
@@ -90,7 +87,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    public GridBoard<Token> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 

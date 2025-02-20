@@ -9,7 +9,6 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
-import games.descent2e.components.DescentGridBoard;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
@@ -20,7 +19,6 @@ import utilities.ImageIO;
 import utilities.Pair;
 import utilities.Vector2D;
 
-import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -36,7 +34,7 @@ import static utilities.Utils.*;
 
 public class DescentGridBoardView extends ComponentView implements IScreenHighlight {
 
-    public static HashMap<String, Color> colorMap = new HashMap<String, Color>() {{
+    public static HashMap<String, Color> colorMap = new HashMap<>() {{
         put("null", Color.black);
         put(null, Color.black);
         put("edge", Color.black);
@@ -73,7 +71,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
     boolean debugDrawGridReferences = false;
     boolean debugDrawTileReferences = false;
 
-    public DescentGridBoardView(DescentGridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
+    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
         super(gridBoard, width, height);
         this.gameState = gameState;
         this.offset = offset;
@@ -191,7 +189,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
                         e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
             }
         } else {
-            drawGridBoardWithGraphConnectivity(g, (DescentGridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
+            drawGridBoardWithGraphConnectivity(g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
         }
 
         // Draw tokens
@@ -346,7 +344,7 @@ public class DescentGridBoardView extends ComponentView implements IScreenHighli
         }
     }
 
-    public void drawGridBoardWithGraphConnectivity(Graphics2D g, DescentGridBoard gridBoard, int x, int y,
+    public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
                                                    Map<String, Map<Vector2D,Vector2D>> gridReferences,
                                                    int[][] tileReferences) {
         // Draw cells

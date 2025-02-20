@@ -15,8 +15,6 @@ import games.descent2e.actions.items.RerollAttributeTest;
 import games.descent2e.actions.monsterfeats.MonsterAbilities;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
-import tech.tablesaw.plotly.components.Grid;
-import utilities.Hash;
 import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -601,7 +599,7 @@ public class DescentHelper {
         // Used to find the shortest path between two points
         // Used for the Heroes/Monsters to find the shortest path to their target enemy
 
-        DescentGridBoard board = dgs.getMasterBoard();
+        GridBoard board = dgs.getMasterBoard();
 
         // Ensure that both start and end points are valid
         if (board.getElement(start) == null || board.getElement(end) == null)
@@ -646,7 +644,7 @@ public class DescentHelper {
     }
 
     // Check whether given cell(row,col) is a valid cell or not
-    static boolean checkValid(int row, int col, DescentGridBoard board)
+    static boolean checkValid(int row, int col, GridBoard board)
     {
         return ((row >= 0) && (row < board.getWidth()) && (col >= 0) && (col < board.getHeight()));
     }
