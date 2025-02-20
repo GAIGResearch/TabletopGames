@@ -584,13 +584,13 @@ public class DescentHelper {
         }
 
         // If there are collisions, announce every instance of them
-        if(collision)
-        {
-            for (Pair<Pair<Hero, Monster>, Vector2D> c : collisions)
-            {
-                System.out.println("Collision between " + c.a.a.getComponentName() + " and " + c.a.b.getComponentName() + " at " + c.b);
-            }
-        }
+//        if(collision)
+//        {
+//            for (Pair<Pair<Hero, Monster>, Vector2D> c : collisions)
+//            {
+//                System.out.println("Collision between " + c.a.a.getComponentName() + " and " + c.a.b.getComponentName() + " at " + c.b);
+//            }
+//        }
         return collision;
     }
 
@@ -665,7 +665,7 @@ public class DescentHelper {
         if (figureId != -1) {
             Figure f = (Figure) dgs.getComponentById(figureId);
             if (counter > (f.getSize().a * f.getSize().b)) {
-                System.out.println("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
+//                System.out.println("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
                 throw new AssertionError("Figure " + figureId + " has more nodes than their size allows: " + counter + " > " + (f.getSize().a * f.getSize().b) + " at " + coords);
             }
         }

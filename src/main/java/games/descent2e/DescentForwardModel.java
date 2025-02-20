@@ -286,7 +286,7 @@ public class DescentForwardModel extends StandardForwardModel {
 
         // Announce all figures in play, including their stats and starting positions
         // Primarily for debug purposes
-        boolean announce = true;
+        boolean announce = false;
         if (announce) {
             for (Hero hero : dgs.heroes) {
                 System.out.println(hero.getComponentName().replace("Hero: ", "") + " - " + hero.getProperty("archetype") + " (" + hero.getProperty("class") + ") - " +
@@ -297,10 +297,10 @@ public class DescentForwardModel extends StandardForwardModel {
                     System.out.println(monster.getComponentName() + " - " + monster.getAttributeValue(Health) + " HP - " + monster.getPosition().toString());
                 }
             }
-        }
 
-        // Ready to start playing!
-        System.out.println("Game begin!");
+            // Ready to start playing!
+            System.out.println("Game begin!");
+        }
     }
 
     @Override
@@ -626,12 +626,12 @@ public class DescentForwardModel extends StandardForwardModel {
 
     private void heroesSideIncreaseFatigue(DescentGameState dgs, int increaseFatigueBy) {
         dgs.heroesSide.incrementAttribute(Figure.Attribute.Fatigue, increaseFatigueBy);
-        System.out.println("Heroes' Side Fatigue increased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
+//        System.out.println("Heroes' Side Fatigue increased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
     }
 
     private void heroesSideDecreaseFatigue(DescentGameState dgs, int decreaseFatigueBy) {
         dgs.heroesSide.decrementAttribute(Figure.Attribute.Fatigue, decreaseFatigueBy);
-        System.out.println("Heroes' Side Fatigue decreased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
+//        System.out.println("Heroes' Side Fatigue decreased to: " + dgs.heroesSide.getAttribute(Figure.Attribute.Fatigue));
     }
 
     // TODO This is just the check for the first quest
@@ -1159,7 +1159,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 break;
 
             default:
-                System.out.println("Game ended in an unknown way! + " + gameResult);
+//                System.out.println("Game ended in an unknown way! + " + gameResult);
                 for (int i = 0; i < dgs.getNPlayers(); i++) {
                     dgs.setPlayerResult(GameResult.DRAW_GAME, i);
                 }
@@ -1268,7 +1268,7 @@ public class DescentForwardModel extends StandardForwardModel {
                 }
             }
         } else {
-            System.out.println("Tiles for the map not found");
+//            System.out.println("Tiles for the map not found");
         }
 
 
