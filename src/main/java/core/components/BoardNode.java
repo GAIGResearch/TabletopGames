@@ -28,11 +28,13 @@ public class BoardNode extends Component {
         this.neighbourSideMapping = new HashMap<>();
     }
 
+    // Copy constructor of properties (incl. other component ID)
     public BoardNode(BoardNode other) {
         super(CoreConstants.ComponentType.BOARD_NODE, other.componentName, other.componentID);
         this.maxNeighbours = other.maxNeighbours;
         this.neighbours = new HashMap<>();
         this.neighbourSideMapping = new HashMap<>();
+        other.copyComponentTo(this);
     }
 
     public BoardNode() {

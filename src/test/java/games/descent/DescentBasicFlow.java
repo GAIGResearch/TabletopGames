@@ -16,7 +16,7 @@ import java.util.Random;
 import static games.descent2e.DescentHelper.figureDeath;
 import static org.junit.Assert.*;
 
-public class BasicFlow {
+public class DescentBasicFlow {
 
     DescentGameState state;
     DescentForwardModel fm = new DescentForwardModel();

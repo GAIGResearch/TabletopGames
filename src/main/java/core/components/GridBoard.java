@@ -246,7 +246,6 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             for (int j = 0; j < width; j++) {
                 if (grid[i][j] != null) {
                     gridCopy[i][j] = new BoardNode(grid[i][j]);
-                    grid[i][j].copyComponentTo(gridCopy[i][j]);
                     nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
                 }
             }
@@ -275,7 +274,6 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             for (int j = 0; j < width; j++) {
                 if (grid[i][j] != null) {
                     gridCopy[i][j] = new BoardNode(grid[i][j]);
-                    grid[i][j].copyComponentTo(gridCopy[i][j]);
                     nodeCopies.put(gridCopy[i][j].componentID, gridCopy[i][j]);
                 }
             }
