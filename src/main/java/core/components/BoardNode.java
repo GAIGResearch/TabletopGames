@@ -117,7 +117,7 @@ public class BoardNode extends Component {
     @Override
     public BoardNode copy() {
         // WARNING: DO not copy this directly, the GraphBoard/GridBoard copies it to correctly assign neighbour references!
-        return null;
+        return new BoardNode(this);
     }
 
     @Override
