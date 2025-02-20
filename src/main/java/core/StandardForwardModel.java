@@ -148,14 +148,4 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
     public final void endRound(AbstractGameState gs) {
         endRound(gs, gs.firstPlayer);
     }
-
-    /**
-     * A Forward Model should be stateless - and hence have no need to implement a _copy() method
-     *
-     * @return this
-     */
-    @Override
-    public final StandardForwardModel _copy() {
-        return this;
-    }
 }
