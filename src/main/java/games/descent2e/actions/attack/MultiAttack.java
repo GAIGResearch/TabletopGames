@@ -185,12 +185,12 @@ public class MultiAttack extends RangedAttack {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         MultiAttack that = (MultiAttack) o;
-        return defendingFigure == that.defendingFigure && index == that.index && Objects.equals(defendingFigures, that.defendingFigures);
+        return index == that.index && Objects.equals(defendingFigures, that.defendingFigures);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), defendingFigure, defendingFigures, index);
+        return Objects.hash(super.hashCode(), defendingFigures, index);
     }
 
     @Override
