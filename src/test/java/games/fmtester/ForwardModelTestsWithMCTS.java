@@ -6,7 +6,14 @@ import org.junit.Test;
 
 public class ForwardModelTestsWithMCTS {
 
-
+    @Test
+    public void testSaboteur() {
+        new ForwardModelTester("game=Saboteur", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\Saboteur.json");
+    }
+    @Test
+    public void testRoot() {
+        ForwardModelTester fmt = new ForwardModelTester("game=Root", "nGames=5", "nPlayers=4", "agent=json\\players\\mcts.json");
+    }
     @Test
     public void testBattleLore() {
         new ForwardModelTester("game=Battlelore", "nGames=1", "nPlayers=2", "agent=json\\players\\gameSpecific\\Battlelore.json");
@@ -54,7 +61,7 @@ public class ForwardModelTestsWithMCTS {
     }
     @Test
     public void testExplodingKittens() {
-         new ForwardModelTester("game=ExplodingKittens", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\ExplodingKittens.json");
+         new ForwardModelTester("game=ExplodingKittens", "nGames=3", "nPlayers=3", "agent=json\\players\\gameSpecific\\ExplodingKittens.json");
     }
     @Test
     public void testLoveLetter() {
@@ -93,7 +100,11 @@ public class ForwardModelTestsWithMCTS {
 
     @Test
     public void testSevenWonders() {
-       new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=4", "agent=json\\players\\gameSpecific\\SushiGo.json");
+       new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=3", "agent=json\\players\\gameSpecific\\SushiGo.json");
+        new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=4", "agent=json\\players\\gameSpecific\\SushiGo.json");
+        new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=5", "agent=json\\players\\gameSpecific\\SushiGo.json");
+        new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=6", "agent=json\\players\\gameSpecific\\SushiGo.json");
+        new ForwardModelTester("game=Wonders7", "nGames=1", "nPlayers=7", "agent=json\\players\\gameSpecific\\SushiGo.json");
     }
 
     @Test

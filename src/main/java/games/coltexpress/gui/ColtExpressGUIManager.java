@@ -236,7 +236,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             // Update decks and visibility
             ColtExpressGameState cegs = (ColtExpressGameState)gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
-                playerHands[i].update((ColtExpressGameState) gameState, humanPlayerId);
+                playerHands[i].update((ColtExpressGameState) gameState, humanPlayerIds);
 
                 // Highlight active player
                 if (i == gameState.getCurrentPlayer()) {
@@ -250,7 +250,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             plannedActions.updateComponent(cegs.getPlannedActions());
             int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer ||
                     gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID():
-                    humanPlayerId.contains(player.getPlayerID())? player.getPlayerID():-1) : -1;
+                    humanPlayerIds.contains(player.getPlayerID())? player.getPlayerID():-1) : -1;
             plannedActions.informActivePlayer(activePlayer);
 
             // Show planned actions from the first played

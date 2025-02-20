@@ -25,11 +25,11 @@ import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -551,6 +551,7 @@ public class Game {
                     System.out.println(history.get(i));
                 }
             }
+            forwardModel.computeAvailableActions(gameState);
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
@@ -847,6 +848,9 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new BasicMCTSPlayer());
 
         RMHCParams params = new RMHCParams();
         params.horizon = 15;
@@ -874,16 +878,11 @@ public class Game {
 //        players.add(new OSLAPlayer());
 
 //        players.add(new RMHCPlayer());
-//        players.add(new RMHCPlayer());
-//        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));
         players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
 
         /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;

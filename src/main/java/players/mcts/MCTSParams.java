@@ -12,9 +12,11 @@ import utilities.JSONUtils;
 import java.util.Arrays;
 import java.util.Random;
 
+import static java.util.Collections.emptyList;
 import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
+import static players.mcts.MCTSEnums.RolloutIncrement.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.SIMPLE;
 import static players.mcts.MCTSEnums.Strategies.*;
@@ -38,6 +40,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
     public boolean paranoid = false;
+    public MCTSEnums.RolloutIncrement rolloutIncrementType = TICK;
     public MCTSEnums.Strategies rolloutType = RANDOM;
     public MCTSEnums.Strategies oppModelType = MCTSEnums.Strategies.DEFAULT;  // Default is to use the same as rolloutType
     public String rolloutClass, oppModelClass = "";
@@ -80,6 +83,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("rolloutLengthPerPlayer", false);
         addTunableParameter("maxTreeDepth", 1000, Arrays.asList(1, 3, 10, 30, 100));
+        addTunableParameter("rolloutIncrementType", TICK, Arrays.asList(MCTSEnums.RolloutIncrement.values()));
         addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
@@ -93,7 +97,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
         addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", IStateHeuristic.class, AbstractGameState::getHeuristicScore);
         addTunableParameter("MAST", None, Arrays.asList(MCTSEnums.MASTType.values()));
         addTunableParameter("MASTGamma", 0.0, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("useMASTAsActionHeuristic", false);
@@ -109,7 +113,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
         addTunableParameter("FPU", 1000000000.0);
-        addTunableParameter("actionHeuristic",  IActionHeuristic.nullReturn);
+        addTunableParameter("actionHeuristic", IActionHeuristic.class,  IActionHeuristic.nullReturn);
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCT", false);
         addTunableParameter("pUCTTemperature", 0.0);
@@ -129,6 +133,7 @@ public class MCTSParams extends PlayerParameters {
         rolloutLength = (int) getParameterValue("rolloutLength");
         rolloutLengthPerPlayer = (boolean) getParameterValue("rolloutLengthPerPlayer");
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
+        rolloutIncrementType = (MCTSEnums.RolloutIncrement) getParameterValue("rolloutIncrementType");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");

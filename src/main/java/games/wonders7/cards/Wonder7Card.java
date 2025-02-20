@@ -2,14 +2,19 @@ package games.wonders7.cards;
 
 import core.components.Card;
 import games.wonders7.Wonders7Constants;
-import games.wonders7.Wonders7GameParameters;
+import games.wonders7.Wonders7Constants.*;
 import games.wonders7.Wonders7GameState;
+import org.jetbrains.annotations.NotNull;
+import utilities.Pair;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static games.wonders7.Wonders7Constants.Resource.Coin;
+import static games.wonders7.Wonders7Constants.Resource.*;
+import static games.wonders7.cards.Wonder7Board.Wonder.TheStatueOfZeusInOlympia;
+import static games.wonders7.cards.Wonder7Card.Type.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 public class Wonder7Card extends Card {
 
@@ -23,79 +28,342 @@ public class Wonder7Card extends Card {
         Guilds
     }
 
+    public enum CardType {
+        LumberYard, StonePit, ClayPool, OreVein, TreeFarm, Excavation, ClayPit, TimberYard, ForestCave, Mine, Sawmill, Quarry, Brickyard, Foundry,
+        Loom, Glassworks, Press,
+        Workshop, Scriptorium, Apothecary, Dispensary, Laboratory, Library, School, Observatory, University, Academy, Study, Lodge,
+        Baths, Altar, Theatre, Pawnshop, Statue, Aqueduct, Courthouse, Temple, TownHall, Senate, Pantheon, Palace, Gardens,
+        Tavern, EastTradingPost, WestTradingPost, Marketplace, Caravansery, Forum, Ludus, ChamberOfCommerce, Arena, Vineyard, Bazaar, Haven, Lighthouse,
+        Stockade, Barracks, GuardTower, Walls, TrainingGround, Stables, ArcheryRange, SiegeWorkshop, Fortifications, Arsenal, Circus, Castrum,
+        WorkersGuild, CraftsmenGuild, MagistratesGuild, TradersGuild, SpiesGuild, PhilosophersGuild, ShipownersGuild, BuildersGuild, DecoratorsGuild, ScientistsGuild
+
+
+    }
+
     public final Type type;  // Different type of cards, brown cards, grey cards...)
-    public final String cardName; // Name of card
-    public final Map<Wonders7Constants.Resource, Long> constructionCost; // The resources required to construct structure
-    public final Map<Wonders7Constants.Resource, Long> resourcesProduced; // Resources the card creates
-    //public final HashMap<Wonder7Card, Integer> prerequisite; // THE STRUCTURES REQUIRED TO BUILD CARD FOR FREE
-    public final String prerequisiteCard;
+    public final CardType cardType; // Name of card
+    public final Map<Resource, Integer> constructionCost; // The resources required to construct structure
+    public final Map<Resource, Integer> resourcesProduced; // Resources the card creates
+    public final List<CardType> prerequisiteCard;
+    protected List<CardEffect> instantEffects = emptyList();
+    protected List<CardEffect> endGameEffects = emptyList();
 
-    // A normal card with construction cost, produces resources
-    public Wonder7Card(String name, Type type,
-                       Map<Wonders7Constants.Resource, Long> constructionCost,
-                       Map<Wonders7Constants.Resource, Long> resourcesProduced) {
-        super(name);
-        this.cardName = name;
+    public static Wonder7Card factory(CardType cardType) {
+        switch (cardType) {
+            case LumberYard:
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Wood, 1));
+            case StonePit:
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Stone, 1));
+            case ClayPool:
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Clay, 1));
+            case OreVein:
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Ore, 1));
+            case TreeFarm:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Clay, 1));
+            case Excavation:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone_Clay, 1));
+            case ClayPit:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Ore_Clay, 1));
+            case TimberYard:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Stone, 1));
+            case ForestCave:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Ore, 1));
+            case Mine:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone_Ore, 1));
+            case Sawmill:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood, 2));
+            case Quarry:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone, 2));
+            case Brickyard:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Clay, 2));
+            case Foundry:
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Ore, 2));
+            case Loom:
+                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Textile, 1));
+            case Glassworks:
+                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Glass, 1));
+            case Press:
+                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Papyrus, 1));
+            case Pawnshop, Baths, Altar, Theatre:
+                return new Wonder7Card(cardType, CivilianStructures, emptyMap(), Map.of(Victory, 3));
+            case Statue:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Ore, 2, Wood, 1), Map.of(Victory, 4),
+                        List.of(CardType.Pawnshop));
+            case Aqueduct:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Stone, 3), Map.of(Victory, 5),
+                        List.of(CardType.Baths));
+            case Courthouse:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Clay, 2, Textile, 1), Map.of(Victory, 4),
+                        List.of(CardType.Scriptorium));
+            case Temple:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Wood, 1, Clay, 1, Glass, 1), Map.of(Victory, 4));
+            case TownHall:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Stone, 2, Ore, 1, Glass, 1), Map.of(Victory, 6));
+            case Senate:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Wood, 2, Stone, 1, Ore, 1), Map.of(Victory, 6),
+                        List.of(CardType.Library));
+            case Gardens:
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Clay, 2, Wood, 1), Map.of(Victory, 5),
+                        List.of(CardType.Theatre));
+            case Pantheon:
+                return new Wonder7Card(cardType, CivilianStructures,
+                        Map.of(Clay, 2, Ore, 1, Glass, 1, Papyrus, 1, Textile, 1),
+                        Map.of(Victory, 7), List.of(CardType.Altar));
+            case Palace:
+                return new Wonder7Card(cardType, CivilianStructures,
+                        Map.of(Wood, 1, Stone, 1, Clay, 1, Ore, 1, Glass, 1, Papyrus, 1, Textile, 1),
+                        Map.of(Victory, 8));
+            case Tavern:
+                return new Wonder7Card(cardType, CommercialStructures, emptyMap(), Map.of(Coin, 5));
+            case EastTradingPost, WestTradingPost, Marketplace:
+                return new Wonder7Card(cardType, CommercialStructures, emptyMap(), emptyMap());
+            case Caravansery:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Wood, 2), Map.of(BasicWild, 1),
+                        List.of(CardType.Marketplace));
+            case Forum:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2), Map.of(RareWild, 1),
+                        List.of(CardType.EastTradingPost, CardType.WestTradingPost));
+            case Bazaar:
+                return new Wonder7Card(cardType, CommercialStructures, emptyMap(), emptyMap(),
+                        List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, true)),
+                        emptyList(), emptyList());
+            case Vineyard:
+                return new Wonder7Card(cardType, CommercialStructures, emptyMap(), emptyMap(),
+                        List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, true)),
+                        emptyList(), emptyList());
+            case Lighthouse:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Glass, 1, Stone, 1), emptyMap(),
+                        List.of(new GainResourceEffect(Coin, CommercialStructures, 1, true, false)),
+                        List.of(new GainResourceEffect(Victory, CommercialStructures, 1, true, false)),
+                        List.of(CardType.Caravansery));
+            case Haven:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2), emptyMap(),
+                        List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, false)),
+                        List.of(new GainResourceEffect(Victory, RawMaterials, 1, true, false)),
+                        List.of(CardType.Forum));
+            case Ludus:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Stone, 1, Ore, 1), emptyMap(),
+                        List.of(new GainResourceEffect(Coin, MilitaryStructures, 3, true, false)),
+                        List.of(new GainResourceEffect(Victory, MilitaryStructures, 1, true, false)),
+                        emptyList());
+            case ChamberOfCommerce:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2, Papyrus, 1), emptyMap(),
+                        List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, false)),
+                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, 2, true, false)),
+                        emptyList());
+            case Arena:
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Stone, 2, Ore, 1), emptyMap(),
+                        List.of(new GainResourceEffect(Coin,
+                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1) * 3)),
+                        List.of(new GainResourceEffect(Victory,
+                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1))),
+                        List.of(CardType.Dispensary));
+            case Stockade, Barracks, GuardTower:
+                return new Wonder7Card(cardType, MilitaryStructures, emptyMap(), Map.of(Shield, 1));
+            case Walls:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Stone, 3), Map.of(Shield, 2));
+            case Stables:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Clay, 1, Wood, 1, Ore, 1),
+                        Map.of(Shield, 2), List.of(CardType.Apothecary));
+            case ArcheryRange:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Wood, 2, Ore, 1),
+                        Map.of(Shield, 2), List.of(CardType.Workshop));
+            case TrainingGround:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Ore, 2, Wood, 1),
+                        Map.of(Shield, 2));
+            case Castrum:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Clay, 2, Wood, 1, Papyrus, 1),
+                        Map.of(Shield, 3));
+            case Fortifications:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Ore, 3, Clay, 1),
+                        Map.of(Shield, 3), List.of(CardType.Walls));
+            case Arsenal:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Wood, 2, Ore, 1, Textile, 1),
+                        Map.of(Shield, 3));
+            case Circus:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Stone, 3, Ore, 1),
+                        Map.of(Shield, 3), List.of(CardType.TrainingGround));
+            case SiegeWorkshop:
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Clay, 3, Wood, 1),
+                        Map.of(Shield, 3), List.of(CardType.Laboratory));
+            case Apothecary:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Textile, 1), Map.of(Compass, 1));
+            case Workshop:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Glass, 1), Map.of(Cog, 1));
+            case Scriptorium:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Papyrus, 1), Map.of(Tablet, 1));
+            case Dispensary:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Ore, 2, Glass, 1), Map.of(Compass, 1),
+                        List.of(CardType.Apothecary));
+            case Laboratory:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Clay, 2, Papyrus, 1), Map.of(Cog, 1),
+                        List.of(CardType.Workshop));
+            case Library:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Stone, 2, Textile, 1), Map.of(Tablet, 1),
+                        List.of(CardType.Scriptorium));
+            case School:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 1, Papyrus, 1), Map.of(Tablet, 1));
+            case Observatory:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Ore, 2, Glass, 1, Textile, 1), Map.of(Cog, 1),
+                        List.of(CardType.Laboratory));
+            case University:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 2, Glass, 1, Papyrus, 1), Map.of(Tablet, 1),
+                        List.of(CardType.Library));
+            case Academy:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Stone, 3, Glass, 1), Map.of(Compass, 1),
+                        List.of(CardType.School));
+            case Study:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 1, Papyrus, 1, Textile, 1), Map.of(Cog, 1),
+                        List.of(CardType.School));
+            case Lodge:
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Clay, 2, Papyrus, 1, Textile, 1), Map.of(Compass, 1),
+                        List.of(CardType.Dispensary));
+            case WorkersGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Clay, 1, Stone, 1, Wood, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, RawMaterials, 1, false, true)), emptyList());
+            case CraftsmenGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Stone, 2),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, 2, false, true)), emptyList());
+            case MagistratesGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Wood, 3, Stone, 1, Textile, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, CivilianStructures, 1, false, true)), emptyList());
+            case TradersGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Clay, 1, Glass, 1, Papyrus, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, CommercialStructures, 1, false, true)), emptyList());
+            case SpiesGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Clay, 2, Glass, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, MilitaryStructures, 1, false, true)), emptyList());
+            case PhilosophersGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Clay, 3, Papyrus, 1, Textile, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, ScientificStructures, 1, false, true)), emptyList());
+            case ShipownersGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Wood, 3, Glass, 1, Papyrus, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, 1, true, false),
+                                new GainResourceEffect(Victory, RawMaterials, 1, true, false),
+                                new GainResourceEffect(Victory, Guilds, 1, true, false)), emptyList());
+            case BuildersGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Stone, 3, Clay, 2, Glass, 1),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory,
+                                (state, player) -> {
+                                    int retValue = 0;
+                                    for (int i = -1; i <= 1; i++) {
+                                        retValue += state.getPlayerWonderBoard((player + i + state.getNPlayers()) % state.getNPlayers()).wonderStage - 1;
+                                    }
+                                    return retValue;
+                                })
+                        ), emptyList());
+            case DecoratorsGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Stone, 2, Glass, 2),
+                        emptyMap(), emptyList(),
+                        List.of(new GainResourceEffect(Victory,
+                                (state, player) -> {
+                                    int totalStagesOfWonder = state.getPlayerWonderBoard(player).totalWonderStages;
+                                    int stagesBuilt = state.getPlayerWonderBoard(player).wonderStage - 1;
+                                    return (stagesBuilt == totalStagesOfWonder) ? 7 : 0;
+                                })), emptyList());
+            case ScientistsGuild:
+                return new Wonder7Card(cardType, Guilds, Map.of(Wood, 2, Ore, 2, Papyrus, 1),
+                        Map.of(ScienceWild, 1));
+            default:
+                throw new AssertionError("Unknown card type: " + cardType);
+        }
+    }
+
+    // A card with a card effect (either instantaneous, or end of game VP)
+    public Wonder7Card(CardType cardType, Type type,
+                       Map<Wonders7Constants.Resource, Integer> constructionCost,
+                       Map<Wonders7Constants.Resource, Integer> resourcesProduced,
+                       List<CardEffect> instantEffects,
+                       List<CardEffect> endGameEffects,
+                       List<CardType> prerequisiteCard) {
+        super(cardType.name());
+        this.cardType = cardType;
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = "";
+        this.instantEffects = instantEffects;
+        this.endGameEffects = endGameEffects;
+        this.prerequisiteCard = prerequisiteCard;
     }
 
-    // Card has prerequisite cards
-    public Wonder7Card(String name, Type type,
-                       Map<Wonders7Constants.Resource, Long> constructionCost,
-                       Map<Wonders7Constants.Resource, Long> resourcesProduced, String prerequisiteCard) {
-        super(name);
-        this.cardName = name;
+    public Wonder7Card(CardType cardType, Type type,
+                       Map<Wonders7Constants.Resource, Integer> constructionCost,
+                       Map<Wonders7Constants.Resource, Integer> resourcesProduced) {
+        this(cardType, type, constructionCost, resourcesProduced, emptyList(), emptyList(), emptyList());
+    }
+
+    public Wonder7Card(CardType cardType, Type type,
+                       Map<Wonders7Constants.Resource, Integer> constructionCost,
+                       Map<Wonders7Constants.Resource, Integer> resourcesProduced,
+                       List<CardType> prerequisiteCard) {
+        this(cardType, type, constructionCost, resourcesProduced, emptyList(), emptyList(), prerequisiteCard);
+    }
+
+
+    protected Wonder7Card(CardType cardType, Type type,
+                          Map<Resource, Integer> constructionCost,
+                          Map<Resource, Integer> resourcesProduced,
+                          List<CardType> prerequisiteCard,
+                          List<CardEffect> instantEffects,
+                          List<CardEffect> endGameEffects,
+                          int componentID) {
+        super(cardType.name(), componentID);
+        this.cardType = cardType;
         this.type = type;
         this.constructionCost = constructionCost;
         this.resourcesProduced = resourcesProduced;
         this.prerequisiteCard = prerequisiteCard;
+        this.instantEffects = instantEffects;
+        this.endGameEffects = endGameEffects;
     }
 
-    // A free card (no construction cost)
-    public Wonder7Card(String name, Type type, Map<Wonders7Constants.Resource, Long> resourcesProduced) {
-        super(name);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = new HashMap<>(); // Card costs nothing
-        this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = "";
+    public int getNProduced(Resource resource) {
+        return resourcesProduced.get(resource);
     }
 
-    protected Wonder7Card(String name, Type type,
-                          Map<Wonders7Constants.Resource, Long> constructionCost,
-                          Map<Wonders7Constants.Resource, Long> resourcesProduced, String prerequisiteCard, int componentID) {
-        super(name, componentID);
-        this.cardName = name;
-        this.type = type;
-        this.constructionCost = constructionCost;
-        this.resourcesProduced = resourcesProduced;
-        this.prerequisiteCard = prerequisiteCard;
+    public void applyInstantCardEffects(Wonders7GameState state, int playerId) {
+        for (CardEffect e : instantEffects) {
+            e.apply(state, playerId);
+        }
     }
 
-    public int getNProduced(Wonders7Constants.Resource resource) {
-        return resourcesProduced.get(resource).intValue();
-    }
-
-    public int getNCost(Wonders7Constants.Resource resource) {
-        return constructionCost.get(resource).intValue();
+    public int endGameVP(Wonders7GameState state, int playerId) {
+        int vp = 0;
+        for (CardEffect e : endGameEffects) {
+            if (e instanceof GainResourceEffect gre) {
+                if (gre.resource == Resource.Victory)
+                    vp += gre.gain(state, playerId);
+            }
+        }
+        return vp;
     }
 
     @Override
     public String toString() {
         String cost = mapToStr(constructionCost);
         String makes = mapToStr(resourcesProduced);
-        return "{" + cardName +
+        return "{" + cardType +
                 "(" + type + ")" +
-                (!cost.equals("") ? ":cost=" + cost : ",free") +
-                (!makes.equals("") ? ",makes=" + makes : "") + "}  ";
+                (!cost.isEmpty() ? ":cost=" + cost : ",free") +
+                (!makes.isEmpty() ? ",makes=" + makes : "") + "}  ";
     }
 
-    private String mapToStr(Map<Wonders7Constants.Resource, Long> m) {
+    private String mapToStr(Map<Resource, Integer> m) {
+        return getString(m);
+    }
+
+    @NotNull
+    public static String getString(Map<Resource, Integer> m) {
         StringBuilder s = new StringBuilder();
-        for (Map.Entry<Wonders7Constants.Resource, Long> e : m.entrySet()) {
+        for (Map.Entry<Resource, Integer> e : m.entrySet()) {
             if (e.getValue() > 0) s.append(e.getValue()).append(" ").append(e.getKey()).append(",");
         }
         s.append("]");
@@ -106,7 +374,25 @@ public class Wonder7Card extends Card {
     public boolean isFree(int player, Wonders7GameState wgs) {
         // Checks if the player has prerequisite cards and can play for free
         for (Wonder7Card card : wgs.getPlayedCards(player).getComponents()) {
-            if (prerequisiteCard.equals(card.cardName)) {
+            if (prerequisiteCard.contains(card.cardType)) {
+                return true;
+            }
+        }
+        Wonder7Board wonder = wgs.getPlayerWonderBoard(player);
+        if (wonder.wonderType() == TheStatueOfZeusInOlympia  && wonder.getSide() == 0 && wonder.wonderStage > 2) {
+            // if this is the first card of the type, then it is buildable for free
+            if (wgs.getPlayedCards(player).getComponents().stream().noneMatch(c -> c.type == type))
+                return true;
+        }
+        // then check for Olympia night side (first slot means first card is free)
+        if (wonder.wonderType() == TheStatueOfZeusInOlympia && wonder.getSide() == 1 && wonder.wonderStage > 1) {
+            if (wgs.getPlayerHand(player).getSize() == 7) {
+                return true;
+            }
+        }
+        // and second slot means last card is free
+        if (wonder.wonderType() == TheStatueOfZeusInOlympia && wonder.getSide() == 1 && wonder.wonderStage > 2) {
+            if (wgs.getPlayerHand(player).getSize() == 2) {
                 return true;
             }
         }
@@ -115,7 +401,7 @@ public class Wonder7Card extends Card {
 
     public boolean isAlreadyPlayed(int player, Wonders7GameState wgs) {
         for (Wonder7Card card : wgs.getPlayedCards(player).getComponents()) {
-            if (Objects.equals(card.cardName, cardName)) {
+            if (cardType == card.cardType) {
                 // Player already has an identical structure, can't play another
                 return true;
             }
@@ -123,71 +409,182 @@ public class Wonder7Card extends Card {
         return false;
     }
 
-    // Checks if the player can play the card, several conditions must be met
-    public boolean isPlayable(int player, Wonders7GameState wgs) {
-        if (isAlreadyPlayed(player, wgs))
-            return false; // If player already has an identical structure (can't play another
-        if (isFree(player, wgs)) return true; // If player can play for free (has prerequisite card
-
-        Wonders7GameParameters params = (Wonders7GameParameters) wgs.getGameParameters();
+    /**
+     * Returns a list of all possible build options (trade sources) for the player
+     * An empty List<List<TradeSource>> means the player cannot play the card
+     * A list that contains an empty List<TradeSource> means the player can play the card for free
+     * <p>
+     * This includes the player's own composite resources (at a cost of zero).
+     */
+    public List<List<TradeSource>> buildOptions(int player, Wonders7GameState wgs) {
 
         // Collects the resources player does not have
-        HashMap<Wonders7Constants.Resource, Long> neededResources = new HashMap<>();
-        for (Wonders7Constants.Resource resource : constructionCost.keySet()) { // Goes through every resource the player needs
+        List<Resource> remainingRequirements = new ArrayList<>();
+        for (Resource resource : constructionCost.keySet()) { // Goes through every resource the player needs
             if ((wgs.getPlayerResources(player).get(resource)) < constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
                 if (resource == Coin)
-                    return false; // If player can't afford the card (not enough coins)
-                neededResources.put(resource, constructionCost.get(resource) - wgs.getPlayerResources(player).get(resource));
+                    return emptyList(); // If player can't afford the card (not enough coins)
+                for (int i = 0; i < constructionCost.get(resource) - wgs.getPlayerResources(player).get(resource); i++)
+                    remainingRequirements.add(resource);
             }
         }
-        if (neededResources.isEmpty()) return true; // If player can afford the card (no resources needed)
+        if (remainingRequirements.isEmpty())
+            return List.of(emptyList()); // If player can afford the card (no resources needed)
+        // at this point we have paid anything for which we have the direct resources
+        // Now we consider composite resources and purchase options from neighbours
 
-        // Calculates the cost of resources
-        int coinCost = constructionCost.getOrDefault(Coin, 0L).intValue();
-        int resourceCost = params.nCostNeighbourResource;
-        for (Wonders7Constants.Resource resource : neededResources.keySet())
-            coinCost += (int) (resourceCost * neededResources.get(resource)); // For each unit of the resource needed
-        if (coinCost > wgs.getPlayerResources(player).get(Coin) )
-            return false; // If player can't pay the neighbours for the resources needed
+        // we include this in a single algorithm to allow for recursive analysis of all trading options
+        // our composite resources have a cost of zero, so will always be allocated first.
 
-        HashMap<Wonders7Constants.Resource, Integer> neighbourLResources = wgs.getPlayerResources((wgs.getNPlayers() + player - 1) % wgs.getNPlayers()); // Resources available to the neighbour on left
-        HashMap<Wonders7Constants.Resource, Integer> neighbourRResources = wgs.getPlayerResources((player + 1) % wgs.getNPlayers()); // Resources available to the neighbour on right
-
-        // Calculates combined resources of neighbour and player
-        for (Wonders7Constants.Resource resource : constructionCost.keySet()) { // Goes through every resource provided by the neighbour
-            int combined = wgs.getPlayerResources(player).get(resource)
-                    + neighbourLResources.get(resource)
-                    + neighbourRResources.get(resource);
-            if (combined < constructionCost.get(resource))
-                return false; // Player can't afford card with bought resources
+        List<TradeSource> compositeSources = new ArrayList<>();
+        for (Resource resource : wgs.getPlayerResources(player).keySet()) {
+            if (resource.isComposite()) {
+                for (int i = 0; i < wgs.getPlayerResources(player).get(resource); i++)
+                    compositeSources.add(new TradeSource(resource, 0, -1));
+            }
         }
 
-        return true;
+        // get neighbour resources (that would help satisfy our requirements)
+        int leftNeighbour = (wgs.getNPlayers() + player - 1) % wgs.getNPlayers();
+        int rightNeighbour = (player + 1) % wgs.getNPlayers();
+        List<TradeSource> leftNeighbourHas = extractNeighbourTradeOptions(player, wgs, remainingRequirements, leftNeighbour);
+        List<TradeSource> rightNeighbourHas = extractNeighbourTradeOptions(player, wgs, remainingRequirements, rightNeighbour);
+
+        // Now amalgamate these three sets of possibilities
+        List<TradeSource> tradeSources = new ArrayList<>(compositeSources);
+        tradeSources.addAll(leftNeighbourHas);
+        tradeSources.addAll(rightNeighbourHas);
+
+        // sort in increasing order of cost, with composite resources after non-composite
+        tradeSources.sort(Comparator.comparingInt(TradeSource::cost).thenComparingInt(ts -> ts.resource().isComposite() ? 1 : 0));
+
+        // now we go through the trade sources in increasing order of cost, and buy the resources we need
+        // a composite resource is applied to all possible requirements...which branches the search so that all possibilities are considered
+
+        List<TradingOption> allPossibleOptions = getTradingOptions(
+                new TradingOption(emptyList(),
+                        remainingRequirements,
+                        tradeSources,
+                        wgs.getPlayerResources(player).get(Coin) - constructionCost.getOrDefault(Coin, 0)));
+
+        if (allPossibleOptions.isEmpty()) {
+            return emptyList();  // no way to satisfy the requirements
+        }
+        return allPossibleOptions.stream().map(to -> to.plannedPurchases).collect(Collectors.toList());
+    }
+
+    /**
+     * This method checks if the player can play the card.
+     * Further, if they can play the card it returns the additional costs they have to pay
+     * to other players to acquire their resources
+     * This is a List<TradeSource> (TradeSource is a record with fields Resource, cost, fromPlayer) defined in Wonders7Constants
+     */
+    public Pair<Boolean, List<TradeSource>> isPlayable(int player, Wonders7GameState wgs) {
+        if (isAlreadyPlayed(player, wgs))
+            return new Pair<>(false, emptyList()); // If player already has an identical structure (can't play another
+        if (isFree(player, wgs))
+            return new Pair<>(true, emptyList()); // If player can play for free (has prerequisite card
+
+        List<List<TradeSource>> allPossibleOptions = buildOptions(player, wgs);
+
+        if (allPossibleOptions.isEmpty())
+            return new Pair<>(false, emptyList()); // If player can't afford the card (not enough coins)
+
+        // Now find the cheapest option
+        List<TradeSource> cheapestOption = allPossibleOptions.stream()
+                .min(Comparator.comparingInt(ts -> ts.stream().mapToInt(TradeSource::cost).sum()))
+                .orElse(emptyList());
+
+        // then remove the resources with a cost of zero
+        return new Pair<>(true, cheapestOption.stream().filter(ts -> ts.cost() > 0).collect(Collectors.toList()));
+    }
+
+    private List<TradeSource> extractNeighbourTradeOptions(int player, Wonders7GameState wgs, List<Resource> neededResources,
+                                                           int neighbour) {
+        List<TradeSource> tradeSources = new ArrayList<>();
+        for (Resource resource : wgs.getPlayerResources(neighbour).keySet()) {
+            if (!resource.isTradeable()) continue; // ignore Coins, Victory etc. symbols
+            // is this relevant to us?
+            if (neededResources.stream().anyMatch(resource::includes)) {
+                for (int i = 0; i < wgs.getPlayerResources(neighbour).get(resource); i++)
+                    tradeSources.add(new TradeSource(resource, wgs.costOfResource(resource, player, neighbour), neighbour));
+            }
+        }
+        return tradeSources;
+    }
+
+    // helper record for recursive analysis of all trading options
+    record TradingOption(List<TradeSource> plannedPurchases, List<Resource> remainingRequirements,
+                         List<TradeSource> tradeSources, int coinsLeft) {
+    }
+
+    private List<TradingOption> getTradingOptions(TradingOption current) {
+        // We loop over the remaining tradeSources until we find one that can satisfy a requirement.
+        // If it can satisfy a unique requirement, we add it to the plannedPurchases,
+        // remove the requirement from the remainingRequirements and keep looping.
+        List<TradeSource> usedTradeSources = new ArrayList<>(current.plannedPurchases);
+        List<TradeSource> remainingTradeSources = new ArrayList<>(current.tradeSources);
+        List<Resource> remainingRequirements = new ArrayList<>(current.remainingRequirements);
+        int coinsLeft = current.coinsLeft;
+        for (TradeSource tradeSource : current.tradeSources) {
+            if (tradeSource.cost() > coinsLeft) {
+                // we have run out of money, so this branch is invalid
+                return emptyList();
+            }
+            Set<Resource> matchingRequirements = remainingRequirements.stream()
+                    .filter(tradeSource.resource()::includes)
+                    .collect(Collectors.toSet());
+            if (matchingRequirements.isEmpty()) {
+                // this trade source is not relevant, we remove it and do not branch
+                remainingTradeSources.remove(tradeSource);
+            } else if (matchingRequirements.size() > 1) {
+                // we can use this resource to satisfy multiple requirements
+                // so we branch
+                List<TradingOption> allOptions = new ArrayList<>();
+                for (Resource requirement : matchingRequirements) {
+                    List<TradeSource> newPlannedPurchases = new ArrayList<>(usedTradeSources);
+                    newPlannedPurchases.add(tradeSource);
+                    List<Resource> newRemainingRequirements = new ArrayList<>(remainingRequirements);
+                    newRemainingRequirements.remove(requirement);
+                    List<TradeSource> newTradeSources = new ArrayList<>(remainingTradeSources);
+                    newTradeSources.remove(tradeSource);
+                    List<TradingOption> newOptions = getTradingOptions(
+                            new TradingOption(newPlannedPurchases, newRemainingRequirements, newTradeSources, coinsLeft - tradeSource.cost()));
+                    allOptions.addAll(newOptions);
+                }
+                return allOptions;
+            } else {
+                // we can use this resource to satisfy a single requirement, so no branching required
+                usedTradeSources.add(tradeSource);
+                remainingTradeSources.remove(tradeSource);
+                remainingRequirements.remove(matchingRequirements.iterator().next());
+                coinsLeft -= tradeSource.cost();
+                if (remainingRequirements.isEmpty()) {
+                    // we have satisfied all requirements, so this is a valid option
+                    return List.of(new TradingOption(usedTradeSources, remainingRequirements, remainingTradeSources, coinsLeft));
+                }
+            }
+        }
+        // if we get here, we have exhausted all trade sources without meeting requirements, so this branch is invalid
+        return emptyList();
     }
 
     @Override
     public Card copy() {
-        return new Wonder7Card(cardName, type, constructionCost, resourcesProduced, prerequisiteCard, componentID);
+        return new Wonder7Card(cardType, type, constructionCost, resourcesProduced, prerequisiteCard, instantEffects, endGameEffects, componentID);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof Wonder7Card) {
-            Wonder7Card card = (Wonder7Card) o;
-            return super.equals(o) && card.cardName.equals(cardName) &&
-                    card.type == type;
+        if (o instanceof Wonder7Card card) {
+            return cardType == card.cardType && super.equals(o);
         }
         return false;
     }
 
-    public Type getCardType() {
-        return type;
-    }
-
-
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), cardName);
+        return Objects.hash(super.hashCode(), cardType.ordinal());
     }
 }
 

@@ -19,4 +19,9 @@ public class WinOnlyHeuristic implements IStateHeuristic {
     public double maxValue() {
         return 1.0;
     }
+
+    @Override
+    public String toString() {
+        return "WinOnlyHeuristic";
+    }
 }
