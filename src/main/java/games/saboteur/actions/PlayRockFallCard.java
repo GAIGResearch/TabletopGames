@@ -5,11 +5,10 @@ import core.actions.SetGridValueAction;
 import core.components.Deck;
 import games.saboteur.SaboteurGameState;
 import games.saboteur.components.ActionCard;
-import games.saboteur.components.PathCard;
 import games.saboteur.components.SaboteurCard;
 
 
-public class PlayRockFallCard extends SetGridValueAction<PathCard>
+public class PlayRockFallCard extends SetGridValueAction
 {
     public PlayRockFallCard(int gridBoard, int x, int y) {
         super(gridBoard, x, y, -1);

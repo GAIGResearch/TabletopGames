@@ -22,7 +22,7 @@ public class SaboteurGameState extends AbstractGameState
     Deck<SaboteurCard> drawDeck;
     Deck<SaboteurCard> discardDeck;
     Deck<SaboteurCard> goalDeck;
-    PartialObservableGridBoard<PathCard> gridBoard;
+    PartialObservableGridBoard gridBoard;
     Deck<SaboteurCard> nuggetDeck;
 
     Set<Vector2D> pathCardOptions;
@@ -97,7 +97,7 @@ public class SaboteurGameState extends AbstractGameState
         copy.gridBoard = gridBoard.emptyCopy();
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                PathCard c = gridBoard.getElement(j, i);
+                PathCard c = (PathCard) gridBoard.getElement(j, i);
                 if (c == null) continue;
                 copy.gridBoard.setElement(j, i, c.copy());
                 for (int p = 0; p < nPlayers; p++) {
@@ -146,10 +146,10 @@ public class SaboteurGameState extends AbstractGameState
             // Goals on board, shuffle those unseen by current player
             for (int i = 0; i < gridBoard.getHeight(); i++) {
                 for (int j = 0; j < gridBoard.getWidth(); j++) {
-                    PathCard c = gridBoard.getElement(j, i);
+                    PathCard c = (PathCard) gridBoard.getElement(j, i);
                     if (c == null || c.type != PathCard.PathCardType.Goal) continue;
                     if (!copy.gridBoard.getElementVisibility(j, i, playerId)) {
-                        copy.goalDeck.add(copy.gridBoard.getElement(j, i));
+                        copy.goalDeck.add((SaboteurCard) copy.gridBoard.getElement(j, i));
                     }
                 }
             }
@@ -157,10 +157,10 @@ public class SaboteurGameState extends AbstractGameState
                 copy.goalDeck.shuffle(rnd);
                 for (int i = 0; i < gridBoard.getHeight(); i++) {
                     for (int j = 0; j < gridBoard.getWidth(); j++) {
-                        PathCard c = gridBoard.getElement(j, i);
+                        PathCard c = (PathCard) gridBoard.getElement(j, i);
                         if (c == null || c.type != PathCard.PathCardType.Goal) continue;
                         if (!copy.gridBoard.getElementVisibility(j, i, playerId)) {
-                            copy.gridBoard.setElement(j, i, (PathCard) copy.goalDeck.pick(0));
+                            copy.gridBoard.setElement(j, i, copy.goalDeck.pick(0));
                         }
                     }
                 }
@@ -254,7 +254,7 @@ public class SaboteurGameState extends AbstractGameState
         return false;
     }
 
-    public PartialObservableGridBoard<PathCard> getGridBoard() {
+    public PartialObservableGridBoard getGridBoard() {
         return gridBoard;
     }
 

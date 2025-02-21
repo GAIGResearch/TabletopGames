@@ -68,7 +68,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
         gs.discardCards = new Deck<>("Discard", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Load info from expansions (includes base)
-        gs.board = new GridBoard<>(params.boardSize, params.boardSize);
+        gs.board = new GridBoard(params.boardSize, params.boardSize);
         gs.extraTiles = new HashSet<>();
         gs.bonuses = new HashSet<>();
         gs.milestones = new HashSet<>();
@@ -210,7 +210,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                 boolean placed = false;
                 while (!placed) {
                     Vector2D v = neighbours.get(gs.getRnd().nextInt(neighbours.size()));
-                    TMMapTile mtn = gs.board.getElement(v.getX(), v.getY());
+                    TMMapTile mtn = (TMMapTile) gs.board.getElement(v.getX(), v.getY());
                     if (mtn != null && mtn.getOwnerId() == -1 && mtn.getTileType() == TMTypes.MapTileType.Ground) {
                         mtn.setTilePlaced(TMTypes.Tile.Greenery, gs);
                         placed = true;

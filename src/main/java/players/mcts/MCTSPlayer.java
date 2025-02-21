@@ -311,7 +311,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
     public MCTSPlayer copy() {
         MCTSPlayer retValue = new MCTSPlayer((MCTSParams) getParameters().copy(), toString());
         if (getForwardModel() != null)
-            retValue.setForwardModel(getForwardModel().copy());
+            retValue.setForwardModel(getForwardModel());
         return retValue;
     }
 
