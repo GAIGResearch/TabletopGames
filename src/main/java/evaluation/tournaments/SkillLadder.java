@@ -129,10 +129,12 @@ public class SkillLadder {
                 int otherBudget = (int) (Math.pow(timeBudgetMultiplier, agentIndex) * startingTimeBudget);
                 if (newBudget == startGridBudget && otherBudget < startMinorGridBudget) // we fast forward to where we want to start the minor grid
                     continue;
-                List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1).a, allAgents.get(agentIndex).a);
+                List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1).a.copy(), allAgents.get(agentIndex).a.copy());
+                ((IAnyTimePlayer) agents.get(0)).setBudget(newBudget);
+                ((IAnyTimePlayer) agents.get(0)).setBudget(otherBudget);
 
                 long startTime = System.currentTimeMillis();
-                RoundRobinTournament RRT = runRoundRobinTournament(agents, newBudget, matchups, listenerClasses,
+                RoundRobinTournament RRT = runRoundRobinTournament(agents, 0, matchups, listenerClasses,
                         gameType, nPlayers, params, "onevsall",
                         destDir + File.separator + (runAgainstAllAgents ? "Budget_" + newBudget + "_vs_" + otherBudget : "Budget_" + newBudget));
                 long endTime = System.currentTimeMillis();
@@ -185,7 +187,7 @@ public class SkillLadder {
             // then write JSON of winner
             int winnerIndex = RRT.getWinnerIndex();
             ntbea.writeAgentJSON(uniqueAgents.get(winnerIndex).b, destDir + File.separator +
-                    gameType.name() + "_" + nPlayers + "P_" + String.format("%4d", newBudget) + "ms.json");
+                    gameType.name() + "_" + nPlayers + "P_" + String.format("%04d", newBudget) + "ms.json");
         }
 
     }
