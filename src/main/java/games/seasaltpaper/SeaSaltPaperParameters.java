@@ -22,17 +22,19 @@ public class SeaSaltPaperParameters extends AbstractParameters {
 
     int[] victoryCondition = new int[]{40, 35, 30};
     int roundStopCondition = 7;
-
-    public HashMap<CardSuite, int[]> collectorBonusDict = new HashMap<>() {{
-        put(BOAT, new int[]{});
-        put(FISH, new int[]{});
-        put(CRAB, new int[]{});
-        put(SWIMMER, new int[]{});
-        put(SHARK, new int[]{});
-        put(SHELL, new int[]{0, 2, 4, 6, 8, 10});
-        put(OCTOPUS, new int[]{0, 3, 6, 9, 12});
-        put(PENGUIN, new int[]{1, 3, 5});
-        put(SAILOR, new int[]{0, 5});
+    
+    // CollectorBonus = (base, increment)
+    // collector score = base + increment * (count - 1)
+    public HashMap<CardSuite, Pair<Integer, Integer>> collectorBonusDict = new HashMap<>() {{
+        put(BOAT, new Pair<>(0, 0));
+        put(FISH, new Pair<>(0, 0));
+        put(CRAB, new Pair<>(0, 0));
+        put(SWIMMER, new Pair<>(0, 0));
+        put(SHARK, new Pair<>(0, 0));
+        put(SHELL, new Pair<>(0, 2));
+        put(OCTOPUS, new Pair<>(0, 3));
+        put(PENGUIN, new Pair<>(1, 2));
+        put(SAILOR, new Pair<>(0, 5));
     }};
 
     public HashMap<CardSuite, Integer> duoBonusDict = new HashMap<>() {{

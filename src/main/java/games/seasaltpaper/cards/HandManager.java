@@ -11,6 +11,7 @@ import games.seasaltpaper.actions.BoatDuo;
 import games.seasaltpaper.actions.FishDuo;
 import games.seasaltpaper.actions.SwimmerSharkDuo;
 import games.seasaltpaper.actions.CrabDuo;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -86,10 +87,10 @@ public class HandManager {
     public static int calculatePoint(SeaSaltPaperGameState gs, int playerID) {
         PartialObservableDeck<SeaSaltPaperCard> playerHand = gs.getPlayerHands().get(playerID);
         Deck<SeaSaltPaperCard> playerDiscard = gs.getPlayerDiscards().get(playerID);
-        Map<CardSuite, Integer> collectorDict = new HashMap<>();
-        Map<CardSuite, Integer> multiplierDict = new HashMap<>();
-        Map<CardSuite, Integer> duoDict = new HashMap<>();
-        Map<CardSuite, Integer> suiteDict = new HashMap<>();
+        Map<CardSuite, Integer> collectorCount = new HashMap<>();
+        Map<CardSuite, Integer> multiplierCount = new HashMap<>();
+        Map<CardSuite, Integer> duoCount = new HashMap<>();
+        Map<CardSuite, Integer> suiteCount = new HashMap<>();
         int mermaidCount = 0;
 
         // Iterate through player hand
@@ -99,17 +100,17 @@ public class HandManager {
             CardType type = c.getCardType();
 
             if (type != CardType.MULTIPLIER) {  // Don't count multiplier card into overall suite count
-                suiteDict.put(suite, suiteDict.getOrDefault(suite, 0) + 1);
+                suiteCount.put(suite, suiteCount.getOrDefault(suite, 0) + 1);
             }
             else {
-                multiplierDict.put(suite, multiplierDict.getOrDefault(suite, 0) + 1);
+                multiplierCount.put(suite, multiplierCount.getOrDefault(suite, 0) + 1);
             }
 
             if (type == CardType.COLLECTOR) {
-                collectorDict.put(suite, collectorDict.getOrDefault(suite, 0) + 1);
+                collectorCount.put(suite, collectorCount.getOrDefault(suite, 0) + 1);
             }
             else if (type == CardType.DUO) {
-                duoDict.put(suite, duoDict.getOrDefault(suite, 0) + 1);
+                duoCount.put(suite, duoCount.getOrDefault(suite, 0) + 1);
             }
 
             if (suite==CardSuite.MERMAID) {mermaidCount++;}
@@ -118,20 +119,21 @@ public class HandManager {
         // Iterate playerDiscard
         for (int i=0; i<playerDiscard.getSize(); i++) {
             CardSuite suite = playerDiscard.get(i).getCardSuite();
-            suiteDict.put(suite, suiteDict.getOrDefault(suite, 0) + 1);
+            suiteCount.put(suite, suiteCount.getOrDefault(suite, 0) + 1);
         }
 
         int score = 0;
         SeaSaltPaperParameters param = (SeaSaltPaperParameters) gs.getGameParameters();
 
         // Calculate Collection score
-        for (CardSuite suite : collectorDict.keySet()) {
-            score += param.collectorBonusDict.get(suite)[collectorDict.get(suite) - 1];
+        for (CardSuite suite : collectorCount.keySet()) {
+            Pair<Integer, Integer> baseIncrementPair = param.collectorBonusDict.get(suite);
+            score += baseIncrementPair.a + baseIncrementPair.b*(collectorCount.get(suite) - 1);
         }
         //Calculate Multiplier score
-        for (CardSuite suite : multiplierDict.keySet()) {
-            if (suiteDict.containsKey(suite)) {
-                score += param.multiplierDict.get(suite) * suiteDict.get(suite);
+        for (CardSuite suite : multiplierCount.keySet()) {
+            if (suiteCount.containsKey(suite)) {
+                score += param.multiplierDict.get(suite) * suiteCount.get(suite);
             }
         }
         //Calculate Mermaid score
@@ -143,14 +145,14 @@ public class HandManager {
 
         //Calculate Duo points
         // Duo cards in hand (not played)
-        for (CardSuite suite : duoDict.keySet()) {
+        for (CardSuite suite : duoCount.keySet()) {
             if (suite == CardSuite.SHARK) { continue; }
             int pair;
             if (suite == CardSuite.SWIMMER) {
-                pair = Math.min(duoDict.get(CardSuite.SWIMMER), duoDict.getOrDefault(CardSuite.SHARK, 0));
+                pair = Math.min(duoCount.get(CardSuite.SWIMMER), duoCount.getOrDefault(CardSuite.SHARK, 0));
             }
             else {
-                pair = duoDict.get(suite) / 2;
+                pair = duoCount.get(suite) / 2;
             }
             score += pair * param.duoBonusDict.get(suite);
         }
