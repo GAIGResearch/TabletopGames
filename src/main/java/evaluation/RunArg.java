@@ -57,7 +57,7 @@ public enum RunArg {
             "\tmust be provided, or the a json-format file that provides the requisite details. \n" +
             "\tThe json-format file is needed if non-default settings for the IGameHeuristic are used.",
             "Win",
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
     evalsPerTrial("The number of games to run per NTBEA trial (default is 1)",
             1,
             new Usage[]{Usage.ParameterSearch}),

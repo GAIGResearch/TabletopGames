@@ -133,6 +133,8 @@ public class NTBEA {
     public void writeAgentJSON(int[] settings, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
             JSONObject json = ((ITPSearchSpace<?>) params.searchSpace).getAgentJSON(settings);
+            if (params.budget > 0)
+                json.put("budget", params.budget);
             writer.write(JSONUtils.prettyPrint(json, 1));
         } catch (IOException e) {
             throw new AssertionError("Error writing agent settings to file " + fileName);
@@ -230,7 +232,7 @@ public class NTBEA {
                     // For Ordinal we want the lowest ordinal; for Win rate high is good
                     if (params.evalMethod.equals("Ordinal")) {
                         eliteMean = tournament.getOrdinalRank(winnersPerRun.size() - 1);
-                        eliteErr= tournament.getOrdinalStdErr(winnersPerRun.size() - 1);
+                        eliteErr = tournament.getOrdinalStdErr(winnersPerRun.size() - 1);
                         winnerBeatsEliteBySignificantMargin = eliteMean - 2 * eliteErr > bestResult.a.a;
                     } else {
                         eliteMean = tournament.getWinRate(winnersPerRun.size() - 1);
@@ -313,6 +315,7 @@ public class NTBEA {
                 new Pair<>(avg, stdErr);
         return resultToReport;
     }
+
     /**
      * This just prints out some useful info on the NTBEA results. It lists the full underlying recommended
      * parameter settings, and the estimated mean score of these (with std error).

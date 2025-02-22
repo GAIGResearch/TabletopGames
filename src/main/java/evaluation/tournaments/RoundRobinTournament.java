@@ -31,7 +31,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected List<IGameListener> listeners = new ArrayList<>();
     private boolean verbose;
     public boolean alphaRankDetails = true;
-    double[] pointsPerPlayer, winsPerPlayer;
+    double[] pointsPerPlayer, winsPerPlayer, scorePerPlayer;
     int[] nGamesPlayed;
     int[][] nGamesPlayedPerOpponent;
     int[][] winsPerPlayerPerOpponent;
@@ -48,6 +48,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected boolean randomGameParams;
     public String name;
     public boolean byTeam;
+    protected String evalMethod;
 
     protected long randomSeed;
     List<Integer> gameSeeds = new ArrayList<>();
@@ -81,6 +82,7 @@ public class RoundRobinTournament extends AbstractTournament {
         if (tournamentMode == FIXED && this.agents.size() != playersPerGame) {
             throw new IllegalArgumentException("In FIXED mode, the number of agents must match the number of players per game.");
         }
+        this.evalMethod = (String) config.getOrDefault(RunArg.evalMethod, "Win");
 
         this.allAgentIds = new LinkedList<>();
         for (int i = 0; i < this.agents.size(); i++)
@@ -98,6 +100,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         this.pointsPerPlayer = new double[agents.size()];
         this.pointsPerPlayerSquared = new double[agents.size()];
+        this.scorePerPlayer = new double[agents.size()];
         this.winsPerPlayer = new double[agents.size()];
         this.nGamesPlayed = new int[agents.size()];
         this.nGamesPlayedPerOpponent = new int[agents.size()][];
@@ -211,11 +214,15 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public int getWinnerIndex() {
-        if (finalWinRanking == null || finalWinRanking.isEmpty())
+        Map<Integer, Pair<Double, Double>> ranking = switch(evalMethod) {
+            case "Ordinal", "Score" -> finalOrdinalRanking;
+            default -> finalWinRanking;
+        };
+        if (ranking == null || ranking.isEmpty())
             throw new UnsupportedOperationException("Cannot get winner before results have been calculated");
 
         // The winner is the first key in finalRanking
-        for (Integer key : finalWinRanking.keySet()) {
+        for (Integer key : ranking.keySet()) {
             return key;
         }
         throw new AssertionError("Should not be reachable");
@@ -416,6 +423,8 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
 
+        scorePerPlayer[j] += game.getGameState().getGameScore(player);
+
         if (results[player] == GameResult.WIN_GAME) {
             pointsPerPlayer[j] += 1;
             winsPerPlayer[j] += 1;
@@ -498,6 +507,10 @@ public class RoundRobinTournament extends AbstractTournament {
                     agents.get(i), 100.0 * winsPerPlayer[i] / nGamesPlayed[i], nGamesPlayed[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
+            str = String.format("%s got a mean score of %.2f.\n", agents.get(i), scorePerPlayer[i] / nGamesPlayed[i]);
+            if (toFile) dataDump.add(str);
+            if (verbose) System.out.print(str);
+
 
             for (int j = 0; j < this.agents.size(); j++) {
                 if (i != j) {
@@ -562,7 +575,8 @@ public class RoundRobinTournament extends AbstractTournament {
                 File resultsFile = new File(this.resultsFile);
                 if (!resultsFile.exists()) {
                     File dir = resultsFile.getParentFile();
-                    dir.mkdirs();
+                    if (dir != null && !dir.exists())
+                        dir.mkdirs();
                 }
                 FileWriter writer = new FileWriter(resultsFile, true);
                 for (String line : dataDump)
@@ -746,7 +760,7 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public double getWinStdErr(int agentID) {
-        return finalWinRanking.get(agentID) == null ? 0.0 :  finalWinRanking.get(agentID).b;
+        return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).b;
     }
 
     public double getOrdinalRank(int agentID) {
@@ -764,6 +778,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public int getNumberOfAgents() {
         return agents.size();
     }
+
     public int[] getNGamesPlayed() {
         return nGamesPlayed;
     }
