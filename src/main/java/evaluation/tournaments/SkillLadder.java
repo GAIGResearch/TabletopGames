@@ -131,7 +131,7 @@ public class SkillLadder {
                     continue;
                 List<AbstractPlayer> agents = Arrays.asList(allAgents.get(i + 1).a.copy(), allAgents.get(agentIndex).a.copy());
                 ((IAnyTimePlayer) agents.get(0)).setBudget(newBudget);
-                ((IAnyTimePlayer) agents.get(0)).setBudget(otherBudget);
+                ((IAnyTimePlayer) agents.get(1)).setBudget(otherBudget);
 
                 long startTime = System.currentTimeMillis();
                 RoundRobinTournament RRT = runRoundRobinTournament(agents, 0, matchups, listenerClasses,
