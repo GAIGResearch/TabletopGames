@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.seasaltpaper.SeaSaltPaperGameState;
+import games.seasaltpaper.SeaSaltPaperParameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,10 +55,7 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         List<AbstractAction> actions = new ArrayList<>();
         SeaSaltPaperGameState sspgs = (SeaSaltPaperGameState) state;
-        if (currentStep == Step.DRAW) { // TODO move this to execute()
-            //actions.add(new DrawMultiple(NUMBER_OF_CARDS_DRAWN, playerId));
-        }
-        else if (currentStep == Step.DISCARD)
+        if (currentStep == Step.DISCARD)
         {
             boolean emptyDiscardPile = false;
             List<Integer> discardPiles = new ArrayList<>();
@@ -80,6 +78,10 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
             // Actions for discarding each card into each pile
             for (int cardID : drawnCardsId) {
+                if (cardID == -1) {
+//                    assert false;
+                    continue;
+                }
                 for (int pileID: discardPiles) {
                     actions.add(new Discard(cardID, pileID, playerId));
                 }
@@ -95,8 +97,24 @@ public class DrawAndDiscard extends AbstractAction implements IExtendedSequence 
 
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
-        if (currentStep == Step.DISCARD) {
+        // Discard howManyDiscard cards
+        if (howManyDiscard == 0) {
             currentStep = Step.DONE;
+        }
+        else if (currentStep == Step.DISCARD) {
+            Discard d = (Discard) action;
+            int discardCount = 0;
+            for (int i = 0; i < drawnCardsId.length; i++) {
+                if (drawnCardsId[i] == d.discardCardId) {
+                    drawnCardsId[i] = -1;
+                }
+                if (drawnCardsId[i] == -1) {
+                    discardCount += 1;
+                }
+            }
+            if (discardCount == howManyDiscard || discardCount == drawnCardsId.length) {
+                currentStep = Step.DONE;
+            }
         }
     }
 

@@ -15,7 +15,6 @@ import utilities.Pair;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import com.google.gson.Gson;
 
 import static core.CoreConstants.*;
 
@@ -192,7 +191,7 @@ public class SeaSaltPaperForwardModel extends StandardForwardModel {
                 }
                 // Draw 2 from draw pile, then discard 1 to one of the discard pile
                 if (sspgs.getDrawPile().getSize() > 0) {
-                    actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer(), params.numberOfCardsDrawn, 1));
+                    actions.add(new DrawAndDiscard(sspgs.getCurrentPlayer(), params.numberOfCardsDraw, params.numberOfCardsDiscard));
                 }
                 if (actions.isEmpty()) {
                     actions.add(new DoNothing());
