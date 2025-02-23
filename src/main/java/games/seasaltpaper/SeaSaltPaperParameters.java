@@ -19,7 +19,7 @@ public class SeaSaltPaperParameters extends AbstractParameters {
     public boolean individualVisibility = false;    // using individual card visibility for gameState copying
     public int discardPileCount = 2;
     public int numberOfCardsDraw = 2;
-    public int numberOfCardsDiscard = 0;
+    public int numberOfCardsDiscard = 1;
 
     int[] victoryCondition = new int[]{40, 35, 30};
     int roundStopCondition = 7;
