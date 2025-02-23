@@ -140,7 +140,7 @@ public class SkillLadder {
                 long endTime = System.currentTimeMillis();
 
                 System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
-                        (int) config.get(RunArg.matchups), (endTime - startTime) / 60000,
+                        matchups, (endTime - startTime) / 60000,
                         newBudget,
                         RRT.getWinRate(0) * 100, RRT.getWinStdErr(0) * 100 * 2,
                         RRT.getOrdinalRank(0), RRT.getOrdinalStdErr(0) * 2,
@@ -179,7 +179,11 @@ public class SkillLadder {
                 }
             }
 
-            RoundRobinTournament RRT = runRoundRobinTournament(agents, newBudget, matchups * nPlayers,
+            // number of games in the final tournament for each budget is the largest of:
+            // - matchups * nPlayers, or
+            // - the number of games run to judge relative performance at each budget between the repeat winners
+            int gamesToRun = Math.max(matchups * nPlayers, (int) ((int) config.get(RunArg.tuningBudget) * (double) config.get(RunArg.finalPercent)));
+            RoundRobinTournament RRT = runRoundRobinTournament(agents, newBudget, gamesToRun,
                     listenerClasses, gameType, nPlayers, params,
                     agents.size() >= nPlayers ? "exhaustive" : "exhaustiveSP",
                     destDir + File.separator + "Final_Budget_" + newBudget);
