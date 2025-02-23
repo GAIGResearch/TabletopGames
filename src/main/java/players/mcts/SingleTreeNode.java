@@ -652,7 +652,7 @@ public class SingleTreeNode {
                     }
                     yield bestAction;
                 }
-                case RegretMatching, EXP3 -> {
+                case RegretMatching, EXP3, NoAveragingRM -> {
                     // check exploration first
                     if (explore && rnd.nextDouble() < params.exploreEpsilon) {
                         yield availableActions.get(rnd.nextInt(availableActions.size()));
@@ -713,7 +713,7 @@ public class SingleTreeNode {
                 case Uniform -> 1.0;
                 case Greedy -> getFullValue(action);
                 case UCB, AlphaGo, UCB_Tuned -> ucbValue(action);
-                case RegretMatching -> rmValue(action);
+                case RegretMatching, NoAveragingRM -> rmValue(action);
                 case EXP3 -> exp3Value(action);
             };
         }
