@@ -10,6 +10,8 @@ import core.interfaces.IGamePhase;
 import core.properties.PropertyColor;
 import games.tickettoride.TicketToRideConstants;
 import games.tickettoride.TicketToRideGameState;
+
+
 import static games.tickettoride.gui.TicketToRideCardView.*;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -105,6 +107,10 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
         parent.add(side, BorderLayout.EAST);
         parent.add(boardView, BorderLayout.CENTER);
 
+        Dimension boardSize = boardView.getPreferredSize();
+        parent.setPreferredSize(new Dimension((int)(boardSize.getWidth() + panelWidth),
+                Math.max((int)boardSize.getHeight(),
+                        defaultInfoPanelHeight*2+nPlayers*cardHeight+nPlayers*offset*4) + defaultItemSize + offset));
 
 
         parent.revalidate();

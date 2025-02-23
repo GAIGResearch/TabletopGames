@@ -12,27 +12,27 @@
     [
       {
         "name": ["String","LOS ANGELES"],
-        "color": ["Color","blue"],
+        "color": ["Color","Blue"],
         "neighbours": ["String[]",["SAN FRANCISCO", "SALT LAKE CITY"]],
-        "coordinates": ["Vector2D",[117, 379]]
+        "coordinates": ["Vector2D",[117, 800]]
       },
       {
         "name": ["String","SAN FRANCISCO"],
         "color": ["Color","Blue"],
         "neighbours": ["String[]",["LOS ANGELES", "SALT LAKE CITY"]],
-        "coordinates": ["Vector2D",[100, 295]]
+        "coordinates": ["Vector2D",[100, 730]]
       },
       {
         "name": ["String","SALT LAKE CITY"],
         "color": ["Color","Blue"],
         "neighbours": ["String[]",["LOS ANGELES", "SAN FRANCISCO"]],
-        "coordinates": ["Vector2D",[100, 295]]
+        "coordinates": ["Vector2D",[150, 660]]
       },
       {
         "name": ["String","HELENA"],
         "color": ["Color","Blue"],
         "neighbours": ["String[]",["SALT LAKE CITY"]],
-        "coordinates": ["Vector2D",[100, 295]]
+        "coordinates": ["Vector2D",[200, 600]]
       }
     ],
     "edges": [

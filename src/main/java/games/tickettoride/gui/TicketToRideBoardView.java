@@ -31,7 +31,7 @@ public class TicketToRideBoardView extends JComponent {
     private int height;
 
     TicketToRideGameState gameState;
-    double scale = 0.4;
+    double scale = 0.7;
 
     int cardWidth = (int)(scale * TicketToRideCardView.cardWidth);
     int cardHeight = (int)(scale * TicketToRideCardView.cardHeight);
@@ -65,7 +65,7 @@ public class TicketToRideBoardView extends JComponent {
         System.out.println( dataPath +  " data path");
 
         // Background and card backs
-        background = ImageIO.GetInstance().getImage(dataPath + "ticketToRideBg.png");
+        background = ImageIO.GetInstance().getImage(dataPath + "ticketToRideBg3.png");
         cardBackInf = ImageIO.GetInstance().getImage(dataPath + "trainCardBlueBg.png");
         cardBackPD = ImageIO.GetInstance().getImage(dataPath + "trainCardRedBg.png");
 
@@ -207,61 +207,57 @@ public class TicketToRideBoardView extends JComponent {
         drawImage(g, background, panX, panY);
 
         // Draw nodes
-        Collection<BoardNodeWithEdges> bList = graphBoard.getBoardNodes();
-        for (BoardNodeWithEdges b : bList) {
-            Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
-            Vector2D pos = new Vector2D((int) (poss.getX() * scale) + panX, (int) (poss.getY() * scale) + panY);
-            PropertyBoolean edge = ((PropertyBoolean) b.getProperty(edgeHash));
 
-            HashSet<BoardNodeWithEdges> neighbours = (HashSet<BoardNodeWithEdges>) b.getNeighbours();
-            for (BoardNodeWithEdges b2 : neighbours) {
-                Vector2D poss2 = ((PropertyVector2D) b2.getProperty(coordinateHash)).values;
-                Vector2D pos2 = new Vector2D((int) (poss2.getX() * scale) + panX, (int) (poss2.getY() * scale) + panY);
-                PropertyBoolean edge2 = ((PropertyBoolean) b2.getProperty(edgeHash));
-
-                if (edge != null && edge.value && edge2 != null && edge2.value) {
-                    // Two edge nodes connected check if on opposite sides, draw connection as if b2 on the other side of map
-                    if (pos2.getX() < width / 2 && pos.getX() > width / 2 || pos2.getX() > width / 2 && pos.getX() < width / 2) {
-                        if (pos2.getX() > pos.getX()) pos2.setX(pos2.getX() - width);
-                        else pos2.setX(width + pos2.getX());
-                    }
-                }
-                g.setColor(Color.white);
-                g.drawLine(pos.getX(), pos.getY(), pos2.getX(), pos2.getY());
-            }
-
-            g.setColor(Color.black);
-
+        Collection<BoardNodeWithEdges> boardNodeList = graphBoard.getBoardNodes();
+        Map<String, BoardNodeWithEdges> locationNameToNode = new HashMap<>();
+        for (BoardNodeWithEdges b : boardNodeList) { //location names to acess the actual node
+            locationNameToNode.put( String.valueOf(b.getProperty(nameHash)), b);
         }
 
-        for (BoardNodeWithEdges b : bList) {
-            String name = ((PropertyString) b.getProperty(nameHash)).value;
-            Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
+        Collection<Edge> edgeList = graphBoard.getBoardEdges();
+
+        //draw lines between locations
+        for (Edge currentEdge : edgeList) {
+
+            Property nodeProp = currentEdge.getProperty(nodesHash);
+            String[] nodeNames = ((PropertyStringArray) nodeProp).getValues();
+
+            //get nodes
+            BoardNodeWithEdges node1 = locationNameToNode.get(nodeNames[0]);
+            BoardNodeWithEdges node2 = locationNameToNode.get(nodeNames[1]);
+
+            Vector2D pos1Value = ((PropertyVector2D) node1.getProperty(coordinateHash)).values;
+            Vector2D pos2Value = ((PropertyVector2D) node2.getProperty(coordinateHash)).values;
+
+            Vector2D pos1 = new Vector2D((int) (pos1Value.getX() * scale) + panX, (int) (pos1Value.getY() * scale) + panY);
+            Vector2D pos2 = new Vector2D((int) (pos2Value.getX() * scale) + panX, (int) (pos2Value.getY() * scale) + panY);
+
+
+            boolean routeClaimed  = ((PropertyBoolean)currentEdge.getProperty(routeClaimedHash)).value;
+            if (routeClaimed){
+                g.setColor(Color.RED);
+            } else {
+                g.setColor(Color.GREEN);
+            }
+
+            g.drawLine(pos1.getX(), pos1.getY(), pos2.getX(), pos2.getY());
+            g.setColor(Color.black);
+        }
+
+        //draw locations
+        for (BoardNodeWithEdges currentNode : boardNodeList) {
+            String name = ((PropertyString) currentNode.getProperty(nameHash)).value;
+            Vector2D poss = ((PropertyVector2D) currentNode.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int) (poss.getX() * scale) + panX, (int) (poss.getY() * scale) + panY);
 
 
-            g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(colorHash)).valueStr));
+            g.setColor(Utils.stringToColor(((PropertyColor) currentNode.getProperty(colorHash)).valueStr));
             g.fillOval(pos.getX() - nodeSize / 2, pos.getY() - nodeSize / 2, nodeSize, nodeSize);
-
-
 
             Stroke s = g.getStroke();
             g.setStroke(s);
             g.setColor(Color.black);
-
-
-            // Decks
-            Deck<Card> playerDiscardDeck = (Deck<Card>) gameState.getComponent(TicketToRideConstants.playerDeckDiscardHash);
-            if (playerDiscardDeck != null) {
-                Card cP = playerDiscardDeck.peek();
-                drawCard(g, cP, null, new Rectangle(playerDiscardDeckLocation.x + panX, playerDiscardDeckLocation.y + panY, playerDiscardDeckLocation.width, playerDiscardDeckLocation.height));
-            }
-
-            g.drawString("Player Discard Deck", (int) playerDiscardDeckLocation.getX() + panX, (int) playerDiscardDeckLocation.getY() - fontSize + panY);
-
-            drawDeck(g, (Deck<Card>) gameState.getComponent(trainCardDeckHash), null, cardBackPD, new Rectangle(playerDeckLocation.x + panX, playerDeckLocation.y + panY, playerDeckLocation.width, playerDeckLocation.height), false);
-            g.drawString("Player Train Card Deck", (int)playerDeckLocation.getX() + panX, panY + (int)playerDeckLocation.getY() - fontSize);
-
+            g.drawString(name, pos.getX(), pos.getY() - nodeSize/2 );
 
             System.out.println( "DRAW BOARD");
         }
@@ -275,6 +271,10 @@ public class TicketToRideBoardView extends JComponent {
 
     public HashMap<String, Rectangle> getHighlights() {
         return highlights;
+    }
+
+    public Dimension getPreferredSize() {
+        return new Dimension(width, height);
     }
 
 }
