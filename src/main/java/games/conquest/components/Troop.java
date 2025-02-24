@@ -227,4 +227,9 @@ public class Troop extends Component {
             appliedCommands.remove(CommandType.Chastise);
         }
     }
+
+    @Override
+    public String toString() {
+        return troopType.troopName + " " + location;
+    }
 }

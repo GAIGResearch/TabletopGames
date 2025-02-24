@@ -3,6 +3,7 @@ package games.conquest.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
+import evaluation.metrics.Event;
 import games.conquest.CQGameState;
 import games.conquest.components.CommandType;
 import games.conquest.components.Troop;
@@ -58,30 +59,26 @@ public class AttackTroop extends CQAction {
         int dmg = selected.getDamage(),
             counterDmg = target.getDamage();
         boolean vigilance = counterAttack && target.hasCommand(CommandType.Vigilance);
-        int reward;
-        if (vigilance) {
-            // Vigilance is applied and the target is within range; counterattack first
-            reward = selected.damage(counterDmg);
-        } else {
-            // No Vigilance, or outside the target's range
-            reward = target.damage(dmg);
-        }
-        cqgs.gainCommandPoints(vigilance ? playerId ^ 1 : playerId, reward);
-        if (reward > 0) {
+        // Vigilance is applied and the target is within range; counterattack first
+        if (damage(cqgs, vigilance ? selected : target, vigilance ? counterDmg : dmg)) {
+            // Target troop was killed; no counterattack possible, end execution.
             cqgs.setGamePhase(CQGameState.CQGamePhase.RallyPhase);
-            return true; // no counterattack possible, end execution
+            return true;
         }
         // Counterattack, as the troop survived
-        if (vigilance) {
-            // we applied vigilance before, so now my own troop gets to strike
-            reward = target.damage(dmg);
-        } else if (counterAttack) {
-            // no vigilance, but within range to counterattack afterward
-            reward = selected.damage(counterDmg);
-        }
-        cqgs.gainCommandPoints(vigilance ? playerId : playerId ^ 1, reward);
+        damage(cqgs, vigilance ? target : selected, vigilance ? dmg : counterDmg);
         cqgs.setGamePhase(CQGameState.CQGamePhase.RallyPhase);
         return gs.setActionInProgress(this);
+    }
+
+    private boolean damage(CQGameState cqgs, Troop target, int dmg) {
+        int reward = target.damage(dmg);
+        if (reward > 0) {
+            cqgs.gainCommandPoints(target.getOwnerId() ^ 1, reward);
+            cqgs.logEvent(Event.GameEvent.GAME_EVENT, "Killed troop: " + target);
+            return true;
+        }
+        return false;
     }
 
     /**

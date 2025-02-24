@@ -679,7 +679,7 @@ public class CQGameState extends AbstractGameState {
      * @return the number of points to be 'awarded back' to the heuristic score for this turn
      */
     private int commandLeniency(int playerId) {
-        if (playerId < 10) return 0;
+//        if (playerId < 10) return 0; // temporary (?) disable
         List<Command> allCommands = getCommands(playerId).getVisibleComponents(playerId);
         int points = 0;
         for (Command cmd : allCommands) {
