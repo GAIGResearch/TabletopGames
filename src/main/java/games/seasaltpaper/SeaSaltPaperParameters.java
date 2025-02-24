@@ -21,7 +21,7 @@ public class SeaSaltPaperParameters extends AbstractParameters {
     public int numberOfCardsDraw = 2;
     public int numberOfCardsDiscard = 1;
 
-    int[] victoryCondition = new int[]{40, 35, 30};
+    public int[] victoryCondition = new int[]{40, 35, 30}; // for 2, 3, 4 players
     int roundStopCondition = 7;
 
     // CollectorBonus = (base, increment)

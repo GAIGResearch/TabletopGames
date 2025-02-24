@@ -182,7 +182,6 @@ public class SeaSaltPaperGameState extends AbstractGameState implements IPrintab
 
     @Override
     public int hashCode() {
-//        int result = 0;
         int result = Objects.hash(super.hashCode(), currentPhase, lastChance, playerHands, playerDiscards, discardPile1, discardPile2, drawPile);
         result = 31 * result + Arrays.hashCode(protectedHands);
         result = 31 * result + Arrays.hashCode(playerTotalScores);

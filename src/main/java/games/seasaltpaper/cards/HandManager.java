@@ -139,7 +139,7 @@ public class HandManager {
         //Calculate Mermaid score
         if (mermaidCount >= 4) {
             return 999; // Instant Win
-            // TODO implement this properly as its own event
+            // TODO implement this properly as its own event (or not)
         }
         score += calculateColorBonus(gs, playerID, mermaidCount);
 
