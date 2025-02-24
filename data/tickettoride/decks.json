@@ -7,16 +7,40 @@
     "visibility": "VISIBLE_TO_ALL",
     "cards": [
       {
-        "name": ["String","Red"],
+        "name": ["String", "Red"],
         "color": ["Color", "Red"]
       },
       {
-        "name": ["String","Green"],
+        "name": ["String", "Green"],
         "color": ["Color", "Green"]
       },
       {
-        "name": ["String","Blue"],
+        "name": ["String", "Blue"],
         "color": ["Color", "Blue"]
+      },
+      {
+        "name": ["String", "Yellow"],
+        "color": ["Color", "Yellow"]
+      },
+      {
+        "name": ["String", "Orange"],
+        "color": ["Color", "Orange"]
+      },
+      {
+        "name": ["String", "Pink"],
+        "color": ["Color", "Pink"]
+      },
+      {
+        "name": ["String", "Black"],
+        "color": ["Color", "Black"]
+      },
+      {
+        "name": ["String", "White"],
+        "color": ["Color", "White"]
+      },
+      {
+        "name": ["String", "Locomotive"],
+        "color": ["Color", "Locomotive"]
       }
     ]
   },

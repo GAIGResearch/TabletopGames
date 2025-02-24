@@ -85,16 +85,13 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
         nPlayers = gameState.getNPlayers();
         this.gameState = (TicketToRideGameState) game.getGameState();
 
-        System.out.println(this.game + "GAME STATE");
 
         boardView = new TicketToRideBoardView(gameState);
 
-        System.out.println(boardView + "BOARD VIEW");
 
         gameTurnStep = new JLabel();
 
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
-        System.out.println(  gameStateInfo + "GAME STATE INFO");
         JPanel playerAreas = createPlayerAreas();
         JComponent actionPanel = createActionPanel(new IScreenHighlight[]{ this}, 259, 80, this::bufferReset);
         JPanel side = new JPanel();
@@ -117,7 +114,6 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
         parent.setVisible(true);
         parent.repaint();
 
-        System.out.println("IN GUI MANAGER");
 
 
 
@@ -175,23 +171,21 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
             for (int j = 0; j < numOfDestinationCards; j++) {
                 Card currentCard = playerDestinationCardHand.peek(j);
                 if (j < playerHands[i].size()) { //already rendered
-                    System.out.println("already rendered");
                     playerHands[i].get(j).updateComponent(currentCard);
                     playerHands[i].get(j).setVisible(true);
                 } else if( currentCard.getProperty(TicketToRideConstants.location1Hash) != null){ //only draw destination cards
-                    System.out.println("Destination card getcardview " + currentCard.getProperties());
                     getCardView(i, currentCard, j);
 
                 }
 
             }
 
-            System.out.println("playerHands size:  " + playerHands[i].size() + " for player " + i) ;
+            //System.out.println("playerHands size:  " + playerHands[i].size() + " for player " + i) ;
 
             for (int j = numOfDestinationCards; j < playerHands[i].size(); j++) {
                 playerHands[i].get(j).updateComponent(null);
                 playerHands[i].get(j).setVisible(j == 0);
-                System.out.println("current destination card " + playerHands[i].get(j));
+              //  System.out.println("current destination card " + playerHands[i].get(j));
 //                playerHands[i].get(j).repaint();
             }
 
@@ -377,7 +371,7 @@ public class TicketToRideGUIManager extends AbstractGUIManager implements IScree
             }
         });
         cv2.setVisible(c != null);
-        System.out.println("putting in card view for player " + player +" cv: " +  cv2   );
+        //System.out.println("putting in card view for player " + player +" cv: " +  cv2   );
         playerHands[player].add(cv2);
         return cv2;
     }

@@ -128,7 +128,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
 
         //test graph works
-        System.out.println("SETUP , TESTING IF BIDIRECTIONAL");
+        /*System.out.println("SETUP , TESTING IF BIDIRECTIONAL");*/
 
         GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
 
@@ -140,15 +140,15 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         for ( BoardNodeWithEdges b : boardNodes) {
             Map<Edge, BoardNodeWithEdges> boardNodeMapping = b.getNeighbourEdgeMapping();
-            System.out.println("Current BoardNode: " + b.getComponentName());
-
+            /*System.out.println("Current BoardNode: " + b.getComponentName());
+*/
             for (Map.Entry<Edge, BoardNodeWithEdges> entry : boardNodeMapping.entrySet()) {
                 Edge edge = entry.getKey();
                 Property nodeProp = edge.getProperty(nodesHashKey);
                 BoardNodeWithEdges neighbourNode = entry.getValue();
 
 
-                System.out.println("NODE PROP for current edge: "+ nodeProp);
+//                System.out.println("NODE PROP for current edge: "+ nodeProp);
             }
         }
         state.setFirstPlayer(0);
@@ -171,15 +171,24 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         List<AbstractAction> actions = new ArrayList<>();
         int playerId = tg.getCurrentPlayer();
+        Deck<Card> playerTrainCardDeck = (Deck<Card>) tg.getComponent(trainCardDeckHash);
+        Deck<Card> playerDestinationCardDeck = (Deck<Card>) tg.getComponent(destinationCardDeckHash);
+
+        if (playerTrainCardDeck.getSize() > 2){
+            actions.add(new DrawTrainCards(playerId));
+        }
+        if (playerDestinationCardDeck.getSize() > 1){
+            actions.add(new DrawDestinationTicketCards(playerId));
+        }
+
         //System.out.println(playerId + " in compute action");
-        actions.add(new DrawTrainCards(playerId));
-        actions.add(new DrawDestinationTicketCards(playerId));
+
 
         HashMap<Edge, List<Integer>> routesAvailableToBuy = (HashMap<Edge, List<Integer>>) checkRoutesAvailable(gameState); //key of edges, index of which color to buy
         if (!routesAvailableToBuy.isEmpty()) {
 
             for (Map.Entry<Edge, List<Integer>> currentRoute : routesAvailableToBuy.entrySet()) { //add every route available to list of actions
-                System.out.println("In for loop");
+
                 Edge currentEdge = currentRoute.getKey();
 
 
@@ -191,9 +200,9 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
                 for (int i = 0; i < indexsOfColors.size(); i++){
                     String colorOfRoute = colorsOfRoute[indexsOfColors.get(i)];
-                    System.out.println(colorOfRoute + " is the colors");
-
-                    System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
+//                    System.out.println(colorOfRoute + " is the colors");
+//
+//                    System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
 
                     actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, i));
                 }
@@ -261,7 +270,6 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         int nodesHashKey = Hash.GetInstance().hash("nodes");
         //goes through boardEdges list approach to find free edges - potentially faster
         for (Edge edge : boardEdges) {
-            System.out.println("IN FOR LOOP: "+ edge.getProperties());
             HashMap<Integer, Property> allProps = edge.getProperties();
             Property nodeProp = edge.getProperty(nodesHashKey);
 
@@ -341,6 +349,14 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         Property colorProp = edge.getProperty(colorHash);
 
+        Property claimedByPlayerRoute1Prop = edge.getProperty(claimedByPlayerRoute1Hash);
+        Property claimedByPlayerRoute2Prop = edge.getProperty(claimedByPlayerRoute2Hash);
+
+        int claimedByPlayerRoute1 = ((PropertyInt) claimedByPlayerRoute1Prop).value;
+        int claimedByPlayerRoute2 = -2;
+        if (claimedByPlayerRoute2Prop != null) { //if one track route, this would not exist
+            claimedByPlayerRoute2 = ((PropertyInt) claimedByPlayerRoute2Prop).value;
+        }
 
         Area gameArea = tg.getArea(-1);
 
@@ -354,31 +370,60 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             int playerID = tg.getCurrentPlayer();
             Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tg.getComponentActingPlayer(playerID,playerHandHash);
 
-            System.out.println("In check can afford, needs # of train cards"  + trainCardsRequired );
 
-            Map<String, Integer>  playerTrainCards = this.getTrainCarAmounts(playerTrainCardHandDeck);
+            System.out.println("In check can afford, needs # of train cards "  + trainCardsRequired );
+
+            Map<String, Integer>  playerTrainCards = this.getTrainCarCardAmounts(playerTrainCardHandDeck);
+            int currentAmountOfLocomotivesInHand = playerTrainCards.getOrDefault("Locomotive",0);
             if (colorProp instanceof PropertyStringArray) {
                 String[] colorsOfRoute = (((PropertyStringArray) colorProp).getValues());
                 System.out.println("colors of route: "  + colorsOfRoute );
                 System.out.println("color of route: "  + colorsOfRoute[0] );
-                for (int i = 0; i < colorsOfRoute.length; i++){
-                    int numberOfRequiredColor = playerTrainCards.getOrDefault(colorsOfRoute[i], 0);
-                    System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
-                    System.out.println("Player has Train Cards: " + numberOfRequiredColor);
-                    if (numberOfRequiredColor >= trainCardsRequired) {
-                        System.out.println("Player ID " + playerID + " can buy this route of choice " + i);
-                        listOfAvailable[i] = true;
-                    } else {
-                        System.out.println("Player ID " + playerID + " cant buy this route");
+
+                if (colorsOfRoute[0].equals("Gray")){ //gray route claimable by any colour, so check every colour
+
+                    for (String color : playerTrainCards.keySet()) {
+
+                        int colorCount = playerTrainCards.get(color);
+
+                        if ((colorCount + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
+                            System.out.println("Gray route affordable " + color);
+                            if (claimedByPlayerRoute1 == -1) {
+                                listOfAvailable[0] = true;
+                                System.out.println("Gray route route 1 able");
+                            }
+                            if (claimedByPlayerRoute2Prop != null){
+                                if (claimedByPlayerRoute2 == -1) {
+                                    listOfAvailable[1] = true;
+                                    System.out.println("Gray route route 2 able");
+                                }
+                            }
+                        }
+                    }
+                } else {
+
+                    for (int i = 0; i < colorsOfRoute.length; i++){ //
+                        int numberOfRequiredColor = playerTrainCards.getOrDefault(colorsOfRoute[i], 0);
+                        System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
+                        System.out.println("Player has Train Cards: " + numberOfRequiredColor);
+                        if ((numberOfRequiredColor + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
+                            System.out.println("Player ID " + playerID + " can buy this route of choice " + i);
+                            listOfAvailable[i] = true;
+                        } else {
+                            System.out.println("Player ID " + playerID + " cant buy this route");
+                        }
                     }
                 }
+
+
 
             }
         }
         return listOfAvailable;
     }
 
-    Map<String, Integer> getTrainCarAmounts(Deck trainCards){
+    // Gives map of colours and the amount a player has of it
+    Map<String, Integer> getTrainCarCardAmounts(Deck trainCards){
 
         Map<String, Integer> trainCardCount = new HashMap<>();
 
@@ -412,20 +457,20 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
             Deck<Card> playerDestinationCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(currentPlayer,TicketToRideConstants.playerDestinationHandHash);
             Map<String, List<String>> graphForSearch = getSearchGraph(boardEdges, currentPlayer);
-            System.out.println("search graph:  "+ graphForSearch + " for player  " + currentPlayer);
+            //System.out.println("search graph:  "+ graphForSearch + " for player  " + currentPlayer);
 
             for (Card currentCard : playerDestinationCardHandDeck) {
                 String location1 = String.valueOf(currentCard.getProperty(location1Hash));
                 String location2 = String.valueOf(currentCard.getProperty(location2Hash));
                 boolean isConnected = checkIfConnectedCity(graphForSearch,location1,location2);
-                System.out.println("IN FOR LOOP for cards "+ location1 + " " + location2 + " isConnected: " + isConnected);
+                //System.out.println("IN FOR LOOP for cards "+ location1 + " " + location2 + " isConnected: " + isConnected);
                 int pointsOnDestinationCard = ((PropertyInt)(currentCard.getProperty(pointsHash))).value;
                 if (isConnected){
                     scoreToAddOrSubtract = scoreToAddOrSubtract + pointsOnDestinationCard;
-                    System.out.println("adding due to connected: " +  pointsOnDestinationCard);
+                    //System.out.println("adding due to connected: " +  pointsOnDestinationCard);
                 } else {
                     scoreToAddOrSubtract = scoreToAddOrSubtract - pointsOnDestinationCard; //not connected reduce score
-                    System.out.println("subtracting due to unconnected: " +  -pointsOnDestinationCard);
+                    //System.out.println("subtracting due to unconnected: " +  -pointsOnDestinationCard);
                 }
             }
             System.out.println("total points due to destination ticket cards " + scoreToAddOrSubtract);

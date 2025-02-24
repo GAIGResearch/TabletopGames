@@ -259,7 +259,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
             if (node1 != null && node2 != null) {
                 node1.addNeighbour(node2, edge); //add to neighbourEdgeMapping
-                System.out.println("GOing to put edge in board edges now: "+ edge.getProperties());
+                //System.out.println("GOing to put edge in board edges now: "+ edge.getProperties());
 
                 boardEdges.add(edge);
             }

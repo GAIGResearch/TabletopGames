@@ -156,12 +156,10 @@ public class  TicketToRideGameState extends AbstractGameState {
         }
     }
     public int getTrainCars(int playerId) {
-        System.out.println("in get train cars");
         if (trainCars != null) {
-            System.out.println("not null " + trainCars[playerId]);
             return trainCars[playerId];
         } else {
-            System.out.println("null");
+            System.out.println("null train cars");
             return 0;
         }
     }

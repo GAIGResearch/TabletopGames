@@ -11,60 +11,478 @@
     "nodes" :
     [
       {
-        "name": ["String","LOS ANGELES"],
-        "color": ["Color","Blue"],
-        "neighbours": ["String[]",["SAN FRANCISCO", "SALT LAKE CITY"]],
-        "coordinates": ["Vector2D",[117, 800]]
+        "name": ["String", "VANCOUVER"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SEATTLE", "CALGARY"]],
+        "coordinates": ["Vector2D", [85, 200]]
       },
       {
-        "name": ["String","SAN FRANCISCO"],
-        "color": ["Color","Blue"],
-        "neighbours": ["String[]",["LOS ANGELES", "SALT LAKE CITY"]],
-        "coordinates": ["Vector2D",[100, 730]]
+        "name": ["String", "SEATTLE"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["VANCOUVER", "PORTLAND", "HELENA", "CALGARY"]],
+        "coordinates": ["Vector2D", [90, 250]]
       },
       {
-        "name": ["String","SALT LAKE CITY"],
-        "color": ["Color","Blue"],
-        "neighbours": ["String[]",["LOS ANGELES", "SAN FRANCISCO"]],
-        "coordinates": ["Vector2D",[150, 660]]
+        "name": ["String", "PORTLAND"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SEATTLE", "SAN FRANCISCO", "SALT LAKE CITY"]],
+        "coordinates": ["Vector2D", [80, 300]]
       },
       {
-        "name": ["String","HELENA"],
-        "color": ["Color","Blue"],
-        "neighbours": ["String[]",["SALT LAKE CITY"]],
-        "coordinates": ["Vector2D",[200, 600]]
+        "name": ["String", "SAN FRANCISCO"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["PORTLAND", "LOS ANGELES", "SALT LAKE CITY"]],
+        "coordinates": ["Vector2D", [100, 500]]
+      },
+      {
+        "name": ["String", "LOS ANGELES"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SAN FRANCISCO", "LAS VEGAS", "PHOENIX", "EL PASO"]],
+        "coordinates": ["Vector2D", [117, 700]]
+      },
+      {
+        "name": ["String", "LAS VEGAS"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
+        "coordinates": ["Vector2D", [200, 600]]
+      },
+      {
+        "name": ["String", "SALT LAKE CITY"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SAN FRANCISCO", "PORTLAND", "LAS VEGAS", "DENVER", "HELENA"]],
+        "coordinates": ["Vector2D", [250, 420]]
+      },
+      {
+        "name": ["String", "HELENA"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SEATTLE", "SALT LAKE CITY", "DENVER", "WINNIPEG", "OMAHA", "CALGARY"]],
+        "coordinates": ["Vector2D", [320, 380]]
+      },
+      {
+        "name": ["String", "CALGARY"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["VANCOUVER", "SEATTLE", "HELENA", "WINNIPEG"]],
+        "coordinates": ["Vector2D", [300, 250]]
+      },
+      {
+        "name": ["String", "WINNIPEG"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["CALGARY", "HELENA", "DULUTH", "SAULT ST. MARIE"]],
+        "coordinates": ["Vector2D", [450, 300]]
+      },
+      {
+        "name": ["String", "DULUTH"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["WINNIPEG", "OMAHA", "CHICAGO", "TORONTO", "SAULT ST. MARIE"]],
+        "coordinates": ["Vector2D", [550, 350]]
+      },
+      {
+        "name": ["String", "OMAHA"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["HELENA", "DULUTH", "DENVER", "KANSAS CITY", "CHICAGO"]],
+        "coordinates": ["Vector2D", [500, 450]]
+      },
+      {
+        "name": ["String", "DENVER"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SALT LAKE CITY", "HELENA", "OMAHA", "KANSAS CITY", "OKLAHOMA CITY", "SANTA FE", "PHOENIX"]],
+        "coordinates": ["Vector2D", [360, 640]]
+      },
+      {
+        "name": ["String", "KANSAS CITY"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["OMAHA", "DENVER", "OKLAHOMA CITY", "SAINT LOUIS"]],
+        "coordinates": ["Vector2D", [550, 550]]
+      },
+      {
+        "name": ["String", "OKLAHOMA CITY"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["DENVER", "KANSAS CITY", "SANTA FE", "DALLAS", "LITTLE ROCK"]],
+        "coordinates": ["Vector2D", [600, 650]]
+      },
+      {
+        "name": ["String", "SANTA FE"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["DENVER", "OKLAHOMA CITY", "PHOENIX", "EL PASO"]],
+        "coordinates": ["Vector2D", [400, 700]]
+      },
+      {
+        "name": ["String", "PHOENIX"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["LOS ANGELES", "SANTA FE", "DENVER", "EL PASO"]],
+        "coordinates": ["Vector2D", [300, 750]]
+      },
+      {
+        "name": ["String", "EL PASO"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["LOS ANGELES", "PHOENIX", "SANTA FE", "DALLAS", "HOUSTON"]],
+        "coordinates": ["Vector2D", [400, 800]]
+      },
+      {
+        "name": ["String", "DALLAS"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["EL PASO", "OKLAHOMA CITY", "HOUSTON", "LITTLE ROCK"]],
+        "coordinates": ["Vector2D", [600, 750]]
+      },
+      {
+        "name": ["String", "HOUSTON"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["EL PASO", "DALLAS", "NEW ORLEANS"]],
+        "coordinates": ["Vector2D", [650, 800]]
+      },
+      {
+        "name": ["String", "NEW ORLEANS"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["HOUSTON", "ATLANTA", "MIAMI", "LITTLE ROCK"]],
+        "coordinates": ["Vector2D", [750, 750]]
+      },
+      {
+        "name": ["String", "LITTLE ROCK"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["OKLAHOMA CITY", "DALLAS", "NEW ORLEANS", "NASHVILLE", "SAINT LOUIS"]],
+        "coordinates": ["Vector2D", [700, 650]]
+      },
+      {
+        "name": ["String", "SAINT LOUIS"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["KANSAS CITY", "LITTLE ROCK", "CHICAGO", "PITTSBURGH", "NASHVILLE"]],
+        "coordinates": ["Vector2D", [650, 550]]
+      },
+      {
+        "name": ["String", "CHICAGO"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["DULUTH", "OMAHA", "SAINT LOUIS", "PITTSBURGH", "TORONTO"]],
+        "coordinates": ["Vector2D", [550, 500]]
+      },
+      {
+        "name": ["String", "PITTSBURGH"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["SAINT LOUIS", "CHICAGO", "TORONTO", "NEW YORK", "WASHINGTON", "RALEIGH"]],
+        "coordinates": ["Vector2D", [750, 450]]
+      },
+      {
+        "name": ["String", "TORONTO"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["DULUTH", "CHICAGO", "PITTSBURGH", "MONTREAL"]],
+        "coordinates": ["Vector2D", [800, 400]]
+      },
+      {
+        "name": ["String", "MONTREAL"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["TORONTO", "BOSTON", "NEW YORK"]],
+        "coordinates": ["Vector2D", [850, 350]]
+      },
+      {
+        "name": ["String", "BOSTON"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["MONTREAL", "NEW YORK"]],
+        "coordinates": ["Vector2D", [900, 300]]
+      },
+      {
+        "name": ["String", "NEW YORK"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["MONTREAL", "BOSTON", "PITTSBURGH", "WASHINGTON"]],
+        "coordinates": ["Vector2D", [900, 400]]
+      },
+      {
+        "name": ["String", "WASHINGTON"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["NEW YORK", "PITTSBURGH", "RALEIGH"]],
+        "coordinates": ["Vector2D", [850, 450]]
+      },
+      {
+        "name": ["String", "RALEIGH"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["WASHINGTON", "PITTSBURGH", "ATLANTA", "CHARLESTON"]],
+        "coordinates": ["Vector2D", [800, 550]]
+      },
+      {
+        "name": ["String", "ATLANTA"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["RALEIGH", "CHARLESTON", "NEW ORLEANS", "NASHVILLE"]],
+        "coordinates": ["Vector2D", [750, 650]]
+      },
+      {
+        "name": ["String", "CHARLESTON"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["RALEIGH", "ATLANTA", "MIAMI"]],
+        "coordinates": ["Vector2D", [850, 700]]
+      },
+      {
+        "name": ["String", "MIAMI"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["CHARLESTON", "NEW ORLEANS"]],
+        "coordinates": ["Vector2D", [950, 800]]
+      },
+      {
+        "name": ["String", "NASHVILLE"],
+        "color": ["Color", "Blue"],
+        "neighbours": ["String[]", ["ATLANTA", "LITTLE ROCK", "SAINT LOUIS", "RALEIGH"]],
+        "coordinates": ["Vector2D", [700, 600]]
       }
     ],
     "edges": [
       {
-        "nodes": ["String[]", ["LOS ANGELES", "SAN FRANCISCO"]],
-        "color": ["String[]", ["Red", "Green"]],
+        "nodes": ["String[]", ["VANCOUVER", "SEATTLE"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 1],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["SEATTLE", "PORTLAND"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 1],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["PORTLAND", "SAN FRANCISCO"]],
+        "color": ["String[]", ["Green", "Pink"]],
+        "trainCardsRequired": ["Integer", 5],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["SAN FRANCISCO", "LOS ANGELES"]],
+        "color": ["String[]", ["Yellow", "Pink"]],
         "trainCardsRequired": ["Integer", 3],
         "claimedByPlayerRoute1": ["Integer", -1],
         "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
-
       },
       {
-        "nodes": ["String[]", ["LOS ANGELES", "SALT LAKE CITY"]],
-        "color": ["String[]", ["Blue", "Green"]],
+        "nodes": ["String[]", ["LOS ANGELES", "LAS VEGAS"]],
+        "color": ["String[]", ["Orange"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["LAS VEGAS", "SALT LAKE CITY"]],
+        "color": ["String[]", ["Orange"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["SALT LAKE CITY", "DENVER"]],
+        "color": ["String[]", ["Red", "Yellow"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["DENVER", "KANSAS CITY"]],
+        "color": ["String[]", ["Black", "Orange"]],
         "trainCardsRequired": ["Integer", 4],
         "claimedByPlayerRoute1": ["Integer", -1],
         "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
-        "nodes": ["String[]", ["SAN FRANCISCO", "SALT LAKE CITY"]],
-        "color": ["String[]", ["Blue", "Red"]],
-        "trainCardsRequired": ["Integer", 1],
+        "nodes": ["String[]", ["KANSAS CITY", "SAINT LOUIS"]],
+        "color": ["String[]", ["Blue", "Pink"]],
+        "trainCardsRequired": ["Integer", 2],
         "claimedByPlayerRoute1": ["Integer", -1],
         "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
-        "nodes": ["String[]", ["HELENA", "SALT LAKE CITY"]],
-        "color": ["String[]", ["Blue"]],
+        "nodes": ["String[]", ["SAINT LOUIS", "CHICAGO"]],
+        "color": ["String[]", ["Green", "White"]],
         "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["CHICAGO", "PITTSBURGH"]],
+        "color": ["String[]", ["Orange", "Black"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["PITTSBURGH", "NEW YORK"]],
+        "color": ["String[]", ["Green", "White"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["NEW YORK", "BOSTON"]],
+        "color": ["String[]", ["Yellow", "Red"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["BOSTON", "MONTREAL"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["MONTREAL", "TORONTO"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["TORONTO", "CHICAGO"]],
+        "color": ["String[]", ["White"]],
+        "trainCardsRequired": ["Integer", 4],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["CHICAGO", "DULUTH"]],
+        "color": ["String[]", ["Red"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["DULUTH", "WINNIPEG"]],
+        "color": ["String[]", ["Black"]],
+        "trainCardsRequired": ["Integer", 4],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["WINNIPEG", "CALGARY"]],
+        "color": ["String[]", ["White"]],
+        "trainCardsRequired": ["Integer", 6],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["CALGARY", "VANCOUVER"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["SEATTLE", "HELENA"]],
+        "color": ["String[]", ["Yellow"]],
+        "trainCardsRequired": ["Integer", 6],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["HELENA", "DENVER"]],
+        "color": ["String[]", ["Green"]],
+        "trainCardsRequired": ["Integer", 4],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["DENVER", "PHOENIX"]],
+        "color": ["String[]", ["White"]],
+        "trainCardsRequired": ["Integer", 5],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["PHOENIX", "EL PASO"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 3],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["EL PASO", "DALLAS"]],
+        "color": ["String[]", ["Red"]],
+        "trainCardsRequired": ["Integer", 4],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["DALLAS", "HOUSTON"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 1],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["HOUSTON", "NEW ORLEANS"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["NEW ORLEANS", "ATLANTA"]],
+        "color": ["String[]", ["Yellow", "Orange"]],
+        "trainCardsRequired": ["Integer", 4],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["ATLANTA", "RALEIGH"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["RALEIGH", "WASHINGTON"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["WASHINGTON", "NEW YORK"]],
+        "color": ["String[]", ["Orange", "Black"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["NEW YORK", "PITTSBURGH"]],
+        "color": ["String[]", ["Green", "White"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["PITTSBURGH", "RALEIGH"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["RALEIGH", "CHARLESTON"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["CHARLESTON", "MIAMI"]],
+        "color": ["String[]", ["Pink"]],
+        "trainCardsRequired": ["Integer", 4],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["MIAMI", "NEW ORLEANS"]],
+        "color": ["String[]", ["Red"]],
+        "trainCardsRequired": ["Integer", 6],
         "claimedByPlayerRoute1": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       }

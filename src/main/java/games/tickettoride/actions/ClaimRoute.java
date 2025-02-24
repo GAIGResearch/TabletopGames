@@ -13,6 +13,9 @@ import games.tickettoride.TicketToRideGameState;
 import games.tickettoride.TicketToRideParameters;
 import utilities.Hash;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static core.CoreConstants.colorHash;
 import static core.CoreConstants.playerHandHash;
 import static games.tickettoride.TicketToRideConstants.*;
@@ -62,7 +65,10 @@ public class ClaimRoute extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
-        int amountToRemove = costOfRoute;
+        int amountToRemove = costOfRoute; //may also change because they can supplement with locomotive
+        int amountOfLocomotiveToRemove = 0;
+
+        String colorOfRouteToRemove = colorOfRoute; // could change incase of gray route
 
         System.out.println("PLAYER " + playerID + " CLAIMING ROUTE" );
         System.out.println("route properties before : " + edge.getProperties());
@@ -70,14 +76,47 @@ public class ClaimRoute extends AbstractAction {
 
         System.out.println("player hand before " + playerTrainCardHandDeck);
 
-        for(int i = 0; i < playerTrainCardHandDeck.getSize() && amountToRemove > 0; i ++){
-            Card currentCard = playerTrainCardHandDeck.get(i);
-            if (currentCard.toString().equals(colorOfRoute)){
-                playerTrainCardHandDeck.remove(i);
-                i--;
-                amountToRemove--;
+        Map<String, Integer>  playerTrainCards = this.getTrainCarCardAmounts(playerTrainCardHandDeck);
+
+        int currentAmountOfLocomotivesInHand = playerTrainCards.getOrDefault("Locomotive",0);
+        //when its gray colour route, any colour can be used
+        if (colorOfRoute.equals("Gray")) {
+            // Find the first color that has enough cards (excluding wildcards for now)
+            for (String color : playerTrainCards.keySet()) {
+                if (playerTrainCards.get(color)  >= costOfRoute) { //correct amount
+                    colorOfRouteToRemove = color;  // Use this color to claim the route
+                    System.out.println("in gray route claiming route, removing " + colorOfRouteToRemove);
+                    break;
+                } else if ((playerTrainCards.get(color) + currentAmountOfLocomotivesInHand >= costOfRoute) && !color.equals("Locomotive")) { //has enough locomotive to finish route
+                    colorOfRouteToRemove = color;  // Use this color to claim the route
+                    int currentColorAmount = playerTrainCards.get(color);
+                    amountOfLocomotiveToRemove = costOfRoute - currentColorAmount;
+                    amountToRemove = currentColorAmount;
+                    System.out.println("in gray route claiming route with locomotive, removing # of " + amountToRemove + colorOfRouteToRemove + " with # of locomotives: " + amountOfLocomotiveToRemove);
+                    break;
+                }
             }
+            removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove);
+        } else if (playerTrainCards.get(colorOfRoute)  >= costOfRoute){ //color of route in hand has correct amount
+            System.out.println("color of route in hand has correct amount");
+            removeTrainCarCards(playerTrainCardHandDeck, costOfRoute, colorOfRoute, amountOfLocomotiveToRemove);
+
+        } else if (playerTrainCards.get(colorOfRoute) +  currentAmountOfLocomotivesInHand >= costOfRoute){ //use locomotive to supplement
+            int currentColorAmount = playerTrainCards.get(colorOfRouteToRemove);
+            amountOfLocomotiveToRemove = costOfRoute - currentColorAmount;
+            amountToRemove = currentColorAmount;
+            System.out.println("Using Locomotive to claim route");
+            removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove);
         }
+
+        {
+
+        }
+
+
+
+
+
         System.out.println("player train cars before " + tgs.getTrainCars(playerID));
         tgs.deductTrainCars(playerID, costOfRoute);
         System.out.println("player train cars after  " + tgs.getTrainCars(playerID));
@@ -106,6 +145,41 @@ public class ClaimRoute extends AbstractAction {
         return true;
     }
 
+
+    Map<String, Integer> getTrainCarCardAmounts(Deck<Card> trainCards){
+
+        Map<String, Integer> trainCardCount = new HashMap<>();
+
+        for (Object card : trainCards) {
+            String cardColor = card.toString();
+            trainCardCount.put(cardColor, trainCardCount.getOrDefault(cardColor, 0) + 1);
+        }
+
+        System.out.println("traincardamount :" + trainCardCount);
+        return trainCardCount;
+    }
+
+    void removeTrainCarCards(Deck<Card> playerTrainCardHandDeck ,int amountToRemove, String colorOfRouteToRemove, int amountOfLocomotivesToRemove){
+        System.out.println("amounttoremove: " + amountToRemove + "colorOfRoute: " + colorOfRouteToRemove + " amountoflocomotivestoremove: " + amountOfLocomotivesToRemove );
+
+        for (int i = 0; i < playerTrainCardHandDeck.getSize() && amountToRemove > 0; i ++) { //remove colour cards
+            Card currentCard = playerTrainCardHandDeck.get(i);
+            if (currentCard.toString().equals(colorOfRouteToRemove)){
+                playerTrainCardHandDeck.remove(i);
+                i--;
+                amountToRemove--;
+            }
+        }
+
+        for (int i = 0; i < playerTrainCardHandDeck.getSize() && amountOfLocomotivesToRemove > 0; i++) { //remove locomotives
+            Card currentCard = playerTrainCardHandDeck.get(i);
+            if (currentCard.toString().equals("Locomotive")) {
+                playerTrainCardHandDeck.remove(i);
+                i--;
+                amountOfLocomotivesToRemove--;
+            }
+        }
+    }
     /**
      * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
      * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.

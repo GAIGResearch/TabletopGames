@@ -45,10 +45,8 @@ public class TicketToRideCardView extends CardView {
             Property location1Test = c.getProperty(location1Hash);
             if (location1Test != null) { //train car card
                 this.background = ImageIO.GetInstance().getImage(dataPath + "destinationCardBg.png");
-                System.out.println("this.background: " + this.background);
                 String location1 = String.valueOf(c.getProperty(location1Hash));
                 String location2 = String.valueOf(c.getProperty(location2Hash));
-                System.out.println("card tool tip : " + location1 + " to " + location2);
                 tooltip = location1 + " to " + location2;
             }
         }
@@ -61,7 +59,6 @@ public class TicketToRideCardView extends CardView {
     private static Image findBackground(Card c) {
         String dataPath = "data/tickettoride/img/";
         Image background = null;
-        System.out.println("fIND BACKGROUND");
         if (c != null) {
             Property location1Test = c.getProperty(location1Hash);
             if (location1Test != null) { //train car card
@@ -74,12 +71,9 @@ public class TicketToRideCardView extends CardView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        System.out.println("IN PAINT COMPONENT");
         if (usingSecondary) {
-            System.out.println("IN PAINT COMPONEN USING SECONDT");
             drawCard((Graphics2D) g, (Card) component, secondaryBG, 0, 0, width, height);
         } else {
-            System.out.println("IN PAINT COMPONEN MAIN");
             drawCard((Graphics2D) g, (Card) component, background, 0, 0, width, height);
         }
     }
@@ -89,14 +83,12 @@ public class TicketToRideCardView extends CardView {
     }
 
     public static void drawCard(Graphics2D g, Card card, Image background, int x, int y, int width, int height) {
-        System.out.println("draw card many parameters");
         // Draw card background
         if (background == null) {
             background = findBackground(card);
 
         }
         if (background != null) {
-            System.out.println("background is not null" + background);
             int w = background.getWidth(null);
             int h = background.getHeight(null);
             double scaleW = width*1.0/w;

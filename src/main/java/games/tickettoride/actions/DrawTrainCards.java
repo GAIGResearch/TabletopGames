@@ -59,6 +59,8 @@ public class DrawTrainCards extends AbstractAction {
 
         System.out.println( playerID + " has these cards before drawing: " + playerTrainCardHandDeck);
 
+        //draw twice
+        new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
         new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
 
 

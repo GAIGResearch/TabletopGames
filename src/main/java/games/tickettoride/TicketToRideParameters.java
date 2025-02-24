@@ -32,7 +32,7 @@ public class TicketToRideParameters extends AbstractParameters {
 
     int nInitialTrainCards = 5;
     int nInitialDestinationCards = 1;
-    int nInitialTrainCars = 7;
+    int nInitialTrainCars = 45;
 
 
 

@@ -4,7 +4,7 @@ import utilities.Hash;
 
 public class TicketToRideConstants {
 
-    public final static String[] cardColors = new String[] {"Red", "Green", "Blue", "Black", "White", "Purple", "Yellow", "Orange", "Locomotive"};
+    public final static String[] cardColors = new String[] {"Red", "Green", "Blue", "Black", "White", "Pink", "Yellow", "Orange", "Locomotive"};
 
 
     public final static int ticketToRideBoardHash = Hash.GetInstance().hash("ticketToRideBoard");
