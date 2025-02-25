@@ -1,6 +1,9 @@
 package games.seasaltpaper;
 
 import core.AbstractParameters;
+import core.Game;
+import evaluation.optimisation.TunableParameters;
+import games.GameType;
 import games.seasaltpaper.cards.CardColor;
 import games.seasaltpaper.cards.CardSuite;
 import games.seasaltpaper.cards.CardType;
@@ -13,7 +16,7 @@ import java.util.Objects;
 import static games.seasaltpaper.cards.CardColor.*;
 import static games.seasaltpaper.cards.CardSuite.*;
 
-public class SeaSaltPaperParameters extends AbstractParameters {
+public class SeaSaltPaperParameters extends TunableParameters {
 
     public String dataPath = "data/seasaltpaper/";
     public boolean individualVisibility = false;    // using individual card visibility for gameState copying
@@ -44,10 +47,10 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         put(CRAB, 1);
         put(SWIMMER, 1);
         put(SHARK, 1);
-        put(SHELL, 1);
-        put(OCTOPUS, 1);
-        put(PENGUIN, 1);
-        put(SAILOR, 1);
+        put(SHELL, 0);
+        put(OCTOPUS, 0);
+        put(PENGUIN, 0);
+        put(SAILOR, 0);
     }};
 
     public HashMap<CardSuite, Integer> multiplierDict = new HashMap<>() {{
@@ -98,9 +101,52 @@ public class SeaSaltPaperParameters extends AbstractParameters {
 
     }};
 
-    public SeaSaltPaperParameters()
-    {
+    public SeaSaltPaperParameters() {
+        addTunableParameter("numberOfCardsDraw", 2, Arrays.asList(2,3,4,5));
+        addTunableParameter("numberOfCardsDiscard", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("roundStopCondition", 7, Arrays.asList(3,5,7,10));
+        addTunableParameter("SHELL_COLLECTOR_BASE", 0, Arrays.asList(0,1,2,3));
+        addTunableParameter("SHELL_COLLECTOR_INC", 2, Arrays.asList(2,3,4,5));
+        addTunableParameter("OCTOPUS_COLLECTOR_BASE", 0, Arrays.asList(0,1,2,3));
+        addTunableParameter("OCTOPUS_COLLECTOR_INC", 3, Arrays.asList(2,3,4,5));
+        addTunableParameter("PENGUIN_COLLECTOR_BASE", 1, Arrays.asList(0,1,2,3));
+        addTunableParameter("PENGUIN_COLLECTOR_INC", 2, Arrays.asList(2,3,4,5));
+        addTunableParameter("SAILOR_COLLECTOR_BASE", 0, Arrays.asList(0,1,2,3));
+        addTunableParameter("SAILOR_COLLECTOR_INC", 5, Arrays.asList(2,3,4,5));
+        addTunableParameter("BOAT_DUO_BONUS", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("FISH_DUO_BONUS", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("CRAB_DUO_BONUS", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("SWIMMER_SHARK_DUO_BONUS", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("BOAT_MULTIPLIER", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("FISH_MULTIPLIER", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("CRAB_MULTIPLIER", 1, Arrays.asList(1,2,3,4));
+        addTunableParameter("PENGUIN_MULTIPLIER", 2, Arrays.asList(1,2,3,4));
+        addTunableParameter("SAILOR_MULTIPLIER", 3, Arrays.asList(1,2,3,4));
+    }
 
+    @Override
+    public void _reset() {
+        numberOfCardsDraw = (int) getParameterValue("numberOfCardsDraw");
+        numberOfCardsDiscard =(int) getParameterValue("numberOfCardsDiscard");
+        roundStopCondition = (int) getParameterValue("roundStopCondition");
+        collectorBonusDict.put(SHELL, new Pair<>((int) getParameterValue("SHELL_COLLECTOR_BASE"),
+                (int) getParameterValue("SHELL_COLLECTOR_INC")));
+        collectorBonusDict.put(OCTOPUS, new Pair<>((int) getParameterValue("OCTOPUS_COLLECTOR_BASE"),
+                (int) getParameterValue("OCTOPUS_COLLECTOR_INC")));
+        collectorBonusDict.put(PENGUIN, new Pair<>((int) getParameterValue("PENGUIN_COLLECTOR_BASE"),
+                (int) getParameterValue("PENGUIN_COLLECTOR_INC")));
+        collectorBonusDict.put(SAILOR, new Pair<>((int) getParameterValue("SAILOR_COLLECTOR_BASE"),
+                (int) getParameterValue("SAILOR_COLLECTOR_INC")));
+        duoBonusDict.put(BOAT, (int) getParameterValue("BOAT_DUO_BONUS"));
+        duoBonusDict.put(FISH, (int) getParameterValue("FISH_DUO_BONUS"));
+        duoBonusDict.put(CRAB, (int) getParameterValue("CRAB_DUO_BONUS"));
+        duoBonusDict.put(SWIMMER, (int) getParameterValue("SWIMMER_SHARK_DUO_BONUS"));
+        duoBonusDict.put(SHARK, (int) getParameterValue("SWIMMER_SHARK_DUO_BONUS"));
+        multiplierDict.put(BOAT, (int) getParameterValue("BOAT_MULTIPLIER"));
+        multiplierDict.put(FISH, (int) getParameterValue("FISH_MULTIPLIER"));
+        multiplierDict.put(CRAB, (int) getParameterValue("CRAB_MULTIPLIER"));
+        multiplierDict.put(PENGUIN, (int) getParameterValue("PENGUIN_MULTIPLIER"));
+        multiplierDict.put(SAILOR, (int) getParameterValue("SAILOR_MULTIPLIER"));
     }
 
     @Override
@@ -142,5 +188,10 @@ public class SeaSaltPaperParameters extends AbstractParameters {
         int result = Objects.hash(super.hashCode(), numberOfCardsDraw, numberOfCardsDiscard, individualVisibility, dataPath, discardPileCount, collectorBonusDict, duoBonusDict, multiplierDict, cardsInit);
         result = 31 * result + Arrays.hashCode(victoryCondition);
         return result;
+    }
+
+    @Override
+    public Object instantiate() {
+        return new Game(GameType.SeaSaltPaper, new SeaSaltPaperForwardModel(), new SeaSaltPaperGameState(this, GameType.SeaSaltPaper.getMinPlayers()));
     }
 }
