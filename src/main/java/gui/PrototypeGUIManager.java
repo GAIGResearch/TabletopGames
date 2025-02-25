@@ -34,7 +34,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         this.height = displayHeight;
 
         if (game != null) {
-            view = new AreaView(game.getGameState().getAllComponents(), width, height);
+            view = new AreaView(game.getGameState(), game.getGameState().getAllComponents(), width, height);
         } else {
             view = new JPanel();
         }
@@ -42,7 +42,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         if (game != null) {
             infoPanel = createGameStateInfoPanel(gameType.name(), game.getGameState(), width, defaultInfoPanelHeight);
         }
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanelOpaque(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
 
         JPanel deckView = new JPanel();
         componentViews = new ComponentView[maxComponentsInDeck];
@@ -99,7 +99,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
             if (view instanceof AreaView) {
                 ((AreaView) view).updateComponent(gameState.getAllComponents());
             } else {
-                view = new AreaView(gameState.getAllComponents(), width, height);
+                view = new AreaView(game.getGameState(), gameState.getAllComponents(), width, height);
             }
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);

@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IGameEvent;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import players.human.ActionController;

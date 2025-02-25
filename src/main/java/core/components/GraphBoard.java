@@ -1,5 +1,6 @@
 package core.components;
 
+import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
 import core.properties.*;
@@ -33,7 +34,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         boardNodes = new HashMap<>();
     }
 
-    protected GraphBoard(String name, int ID)
+    public GraphBoard(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
         boardNodes = new HashMap<>();
@@ -63,11 +64,11 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         // Assign neighbours
         for (BoardNode bn: boardNodes.values()) {
             BoardNode bnCopy = nodeCopies.get(bn.getComponentID());
-            for (BoardNode neighbour: bn.getNeighbours()) {
-                bnCopy.addNeighbour(nodeCopies.get(neighbour.getComponentID()));
+            for (BoardNode neighbour: bn.getNeighbours().keySet()) {
+                bnCopy.addNeighbourWithCost(nodeCopies.get(neighbour.getComponentID()));
             }
             for (Map.Entry<BoardNode, Integer> e: bn.getNeighbourSideMapping().entrySet()) {
-                bnCopy.addNeighbour(nodeCopies.get(e.getKey().componentID), e.getValue());
+                bnCopy.addNeighbourWithCost(nodeCopies.get(e.getKey().componentID), e.getValue());
             }
         }
         // Assign new neighbours
@@ -143,13 +144,13 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         this.boardNodes.remove(bn.getComponentID());
     }
 
-    public void breakConnection(BoardNode bn1, BoardNode bn2) {
+    public void breakConnection(AbstractGameState gs, BoardNode bn1, BoardNode bn2) {
         bn1.removeNeighbour(bn2);
         bn2.removeNeighbour(bn1);
 
         // Check if they have at least 1 more neighbour on this board. If not, remove node from this board
         boolean inBoard = false;
-        for (BoardNode n: bn1.getNeighbours()) {
+        for (BoardNode n: bn1.getNeighbours().keySet()) {
             if (boardNodes.containsKey(n.componentID)) {
                 inBoard = true;
                 break;
@@ -158,7 +159,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         if (!inBoard) boardNodes.remove(bn1.componentID);
 
         inBoard = false;
-        for (BoardNode n: bn2.getNeighbours()) {
+        for (BoardNode n: bn2.getNeighbours().keySet()) {
             if (boardNodes.containsKey(n.componentID)) {
                 inBoard = true;
                 break;
@@ -168,8 +169,8 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
     }
 
     public void addConnection(BoardNode bn1, BoardNode bn2) {
-        bn1.addNeighbour(bn2);
-        bn2.addNeighbour(bn1);
+        bn1.addNeighbourWithCost(bn2);
+        bn2.addNeighbourWithCost(bn1);
         if (!boardNodes.containsKey(bn1.componentID)) {
             boardNodes.put(bn1.componentID, bn1);
         }
@@ -179,8 +180,8 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
     }
 
     public void addConnection(BoardNode bn1, BoardNode bn2, int edgeValue) {
-        bn1.addNeighbour(bn2, edgeValue);
-        bn2.addNeighbour(bn1, edgeValue);
+        bn1.addNeighbourWithCost(bn2, edgeValue);
+        bn2.addNeighbourWithCost(bn1, edgeValue);
         if (!boardNodes.containsKey(bn1.componentID)) {
             boardNodes.put(bn1.componentID, bn1);
         }
@@ -265,8 +266,8 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
                 for (String str : psa.getValues()) {
                     BoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
                     if (neigh != null) {
-                        bn.addNeighbour(neigh);
-                        neigh.addNeighbour(bn);
+                        bn.addNeighbourWithCost(neigh);
+                        neigh.addNeighbourWithCost(bn);
                     }
                 }
             }

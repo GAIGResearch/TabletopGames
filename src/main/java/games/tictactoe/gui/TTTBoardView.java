@@ -1,7 +1,7 @@
 package games.tictactoe.gui;
 
+import core.components.BoardNode;
 import core.components.GridBoard;
-import core.components.Token;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 
@@ -17,7 +17,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
 
-    public TTTBoardView(GridBoard<Token> gridBoard) {
+    public TTTBoardView(GridBoard gridBoard) {
         super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
         rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
         highlight = new ArrayList<>();
@@ -44,9 +44,9 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<Token>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
 
-        if (highlight.size() > 0) {
+        if (!highlight.isEmpty()) {
             g.setColor(Color.green);
             Stroke s = ((Graphics2D) g).getStroke();
             ((Graphics2D) g).setStroke(new BasicStroke(3));
@@ -57,7 +57,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<Token> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -82,7 +82,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    private void drawCell(Graphics2D g, Token element, int x, int y) {
+    private void drawCell(Graphics2D g, BoardNode element, int x, int y) {
         // Paint cell background
         g.setColor(Color.lightGray);
         g.fillRect(x, y, defaultItemSize, defaultItemSize);

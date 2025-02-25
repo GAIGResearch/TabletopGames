@@ -68,7 +68,7 @@ public class Connect4GUIManager extends AbstractGUIManager {
             if (highlight.size() > 0) {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
-                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
+                    SetGridValueAction action = (SetGridValueAction) abstractAction;
                     if (action.getX() == r.x/defaultItemSize) { // && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
                         actionButtons[0].setButtonAction(action, "Play " + Connect4Constants.playerMapping.get(player.getPlayerID())

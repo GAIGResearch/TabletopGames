@@ -42,8 +42,8 @@ public class Dice extends Component {
     }};
 
     public final Type type;
-    public final int nSides;
-    private int value;  // Current value after last roll
+    public final int nSides; // Number of sides
+    protected int value;  // Current value after last roll
 
     public Dice() {
         this(d6);  // By default d6

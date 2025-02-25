@@ -39,8 +39,8 @@ public class AttackUnitsAction extends AbstractAction {
         else {
             MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
             MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
-            ArrayList<Unit> attackerUnits = state.getBoard().getElement(attacker.getLocationX(), attacker.getLocationY()).GetUnits();
-            ArrayList<Unit> defenderUnits = state.getBoard().getElement(defender.getLocationX(), defender.getLocationY()).GetUnits();
+            ArrayList<Unit> attackerUnits = ((MapTile)state.getBoard().getElement(attacker.getLocationX(), attacker.getLocationY())).GetUnits();
+            ArrayList<Unit> defenderUnits = ((MapTile)state.getBoard().getElement(defender.getLocationX(), defender.getLocationY())).GetUnits();
 
             //COMBAT SEQUENCE: Roll a dice
             int defeatedEnemyCount = 0;
@@ -69,7 +69,7 @@ public class AttackUnitsAction extends AbstractAction {
                 state.RemoveUnit(defender.getLocationX(), defender.getLocationY());
             }
             else {
-                state.getBoard().getElement(defender.getLocationX(), defender.getLocationY()).SetUnits(defenderUnits);
+                ((MapTile)state.getBoard().getElement(defender.getLocationX(), defender.getLocationY())).SetUnits(defenderUnits);
             }
 
             for (Unit unit : attackerUnits) {

@@ -1,15 +1,11 @@
 package games.mastermind.gui;
 
+import core.components.BoardNode;
 import core.components.GridBoard;
-import core.components.Token;
-import games.mastermind.MMGameState;
-import games.mastermind.MMParameters;
 import gui.IScreenHighlight;
 import gui.views.ComponentView;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import static gui.GUI.defaultItemSize;
@@ -21,7 +17,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
     Rectangle[] rects; // For highlights + action trimming
     ArrayList<Rectangle> highlight;
 
-    public MMBoardView(GridBoard<Token> gridBoard) {
+    public MMBoardView(GridBoard gridBoard) {
         super(gridBoard, gridBoard.getWidth()*defaultItemSize, gridBoard.getHeight()*defaultItemSize);
         rects = new Rectangle[gridBoard.getWidth()*gridBoard.getHeight()];
         highlight = new ArrayList<>();
@@ -42,9 +38,9 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<Token>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
 
-        if (highlight.size() > 0) {
+        if (!highlight.isEmpty()) {
             g.setColor(Color.green);
             Stroke s = ((Graphics2D) g).getStroke();
             ((Graphics2D) g).setStroke(new BasicStroke(3));
@@ -55,7 +51,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<Token> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * scaledDefaultItemSize;
         int height = gridBoard.getHeight() * scaledDefaultItemSize;
 
@@ -80,7 +76,7 @@ public class MMBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    private void drawCell(Graphics2D g, Token element, int x, int y) {
+    private void drawCell(Graphics2D g, BoardNode element, int x, int y) {
         // Paint cell background
         g.setColor(Color.lightGray);
         g.fillRect(x, y, scaledDefaultItemSize, scaledDefaultItemSize);
