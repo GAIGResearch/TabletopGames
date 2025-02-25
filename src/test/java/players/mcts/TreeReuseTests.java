@@ -4,6 +4,7 @@ import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.cantstop.CantStopForwardModel;
 import games.dominion.DominionConstants;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
@@ -67,8 +68,19 @@ public class TreeReuseTests {
         state = game.getGameState();
     }
 
+    public void initialiseCantStop() {
+        playerOne = new TestMCTSPlayer(paramsOne, STNWithTestInstrumentation::new);
+        playerOne.rolloutTest = false;
+        playerTwo = new TestMCTSPlayer(paramsTwo, STNWithTestInstrumentation::new);
+        playerTwo.rolloutTest = false;
+        fm = new CantStopForwardModel();
+        game = GameType.CantStop.createGameInstance(3, 404);
+        game.reset(List.of(playerOne, playerTwo, new RandomPlayer()));
+        state = game.getGameState();
+    }
+
     @Test
-    public void treeReuseTest() {
+    public void treeReuseTestI() {
         // TicTacToe may be a good test environment.
         // Run MCTS for 100 iterations.
         // After each action, we want to check that the tree is re-used.
@@ -81,6 +93,11 @@ public class TreeReuseTests {
 
         // Repeat to the penultimate turn (when there is only one action left)
         initialiseTicTacToe();
+        runGame();
+    }
+    @Test
+    public void treeReuseTestII() {
+        initialiseCantStop();
         runGame();
     }
 
@@ -118,9 +135,16 @@ public class TreeReuseTests {
     }
 
     @Test
-    public void treeReusedWithMultiTree() {
+    public void treeReusedWithMultiTreeI() {
         paramsOne.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         initialiseDominion();
+        runGame();
+    }
+
+    @Test
+    public void treeReusedWithMultiTreeII() {
+        paramsOne.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        initialiseCantStop();
         runGame();
     }
 
@@ -152,7 +176,8 @@ public class TreeReuseTests {
     }
 
     public void runGame() {
-        boolean selfOnlyTree = paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.SelfOnly || paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree;
+        boolean selfOnlyTree = paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.SelfOnly ||
+                paramsOne.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree;
         List<AbstractAction> actionsTakenSinceLastPlayerZeroDecision = new ArrayList<>();
         List<Integer> nextActingPlayers = new ArrayList<>();
         nextActingPlayers.add(state.getCurrentPlayer());
@@ -166,11 +191,17 @@ public class TreeReuseTests {
             AbstractAction nextAction = game.oneAction();
             System.out.println("Action: " + nextAction.toString());
             SingleTreeNode newRoot = (currentPlayer == 0 ? playerOne.getRoot(0) : playerTwo.getRoot(1));
+            if (newRoot != null) {
+                assertNull(newRoot.parent);
+                assertEquals(newRoot.root, newRoot);
+            }
 
             if (currentPlayer < 2 && newRoot != null) {
                 assertEquals(currentPlayer, newRoot.decisionPlayer);
                 SingleTreeNode topRoot = (currentPlayer == 0 ? playerOne.getRoot() : playerTwo.getRoot());
                 assertEquals(currentPlayer, topRoot.decisionPlayer);
+                assertNull(topRoot.parent);
+                assertEquals(topRoot.root, topRoot);
             }
             if (currentPlayer == 0 && !oneAction && newRoot != null) {
                 assertEquals(preActionCopy.getGamePhase(), newRoot.state.getGamePhase());
