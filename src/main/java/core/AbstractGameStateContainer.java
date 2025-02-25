@@ -1,4 +1,4 @@
-package games.seasaltpaper;
+package core;
 
 import core.AbstractGameState;
 import core.AbstractParameters;

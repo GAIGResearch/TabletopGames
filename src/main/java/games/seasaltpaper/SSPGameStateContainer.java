@@ -1,6 +1,6 @@
 package games.seasaltpaper;
 
-import core.AbstractGameState;
+import core.AbstractGameStateContainer;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.seasaltpaper.cards.SeaSaltPaperCard;
