@@ -111,7 +111,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
             if (newRoots[p] != null) {
                 // here we do not do a full rootification as that would set the turnOwner and currentPlayer
                 // to the decision player, which we want to avoid
-                // TODO: Make this more elegant
                 newRoots[p].rootify(oldRoot, null);
                 newRoots[p].resetDepth(newRoots[p]);
                 newRoots[p].state = state.copy();
@@ -119,7 +118,6 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer, IHasSt
         }
         mtRoot.roots = newRoots;
         mtRoot.state = state.copy();
-        // TODO: Also set decisionPlayer....as this may have changed (which it won't do with oneTree)
         return mtRoot;
     }
 

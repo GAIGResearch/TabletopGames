@@ -1163,7 +1163,7 @@ public class SingleTreeNode {
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching) {
             // RM uses a special policy as the average of all previous root policies
-            if (regretMatchingAverage.isEmpty())  // in case we have a very low number of visits
+            if (nVisits - inheritedVisits < 10)  // in case we have a very low number of visits
                 updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
             bestAction = regretMatchingAverage();
         } else {
