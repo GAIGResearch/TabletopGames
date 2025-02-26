@@ -8,8 +8,8 @@
   "samplingRate": 1,
   "neighbourhood": 100,
   "evalMethod": "Heuristic",
-  "nPlayers": 1,
+  "nPlayers": 4,
   "output": "results_optimisation_mcts64ms.txt",
-  "searchSpace": "json/expIt/tangledYarns/mcts-tangledyarns.json",
+  "searchSpace": "json/seasaltpaper/mcts-seasalt-64ms.json",
   "verbose": true
 }
