@@ -156,7 +156,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                     HashSet<Integer> adjacentOwners = new HashSet<>();
                     List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
                     for (Vector2D n : neighbours) {
-                        TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                        TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
                         if (other != null && other.getTilePlaced() != null) {
                             adjacentOwners.add(other.getOwnerId());
                         }
@@ -222,7 +222,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
                 if (onMars) {
                     for (int i = 0; i < gs.getBoard().getHeight(); i++) {
                         for (int j = 0; j < gs.getBoard().getWidth(); j++) {
-                            TMMapTile mt = gs.getBoard().getElement(j, i);
+                            TMMapTile mt = (TMMapTile) gs.getBoard().getElement(j, i);
 
                             // Check if we can place tile here
                             if (mt == null || mt.getTilePlaced() != null) continue;
@@ -320,7 +320,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             boolean playerTileNeighbour = false;
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
-                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getOwnerId() == player) {
                     playerTileNeighbour = true;
                     break;
@@ -337,7 +337,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             int count = 0;
             for (Vector2D n : neighbours) {
-                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() != null) {
                     return true;
                 }
@@ -353,7 +353,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         if (placedAnyTiles) {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
-                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() != null) {
                     count++;
                 }
@@ -368,7 +368,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             int count = 0;
             for (Vector2D n : neighbours) {
-                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() == t) {
                     return true;
                 }
@@ -384,7 +384,7 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
         if (placedAnyTiles) {
             List<Vector2D> neighbours = getNeighbours(new Vector2D(mt.getX(), mt.getY()));
             for (Vector2D n : neighbours) {
-                TMMapTile other = gs.getBoard().getElement(n.getX(), n.getY());
+                TMMapTile other = (TMMapTile) gs.getBoard().getElement(n.getX(), n.getY());
                 if (other != null && other.getTilePlaced() == t) {
                     count++;
                 }

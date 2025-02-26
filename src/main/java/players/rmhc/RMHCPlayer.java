@@ -77,7 +77,7 @@ public class RMHCPlayer extends AbstractPlayer {
         RMHCParams newParams = (RMHCParams) parameters.copy();
         newParams.setRandomSeed(rnd.nextInt());
         RMHCPlayer retValue = new RMHCPlayer(newParams, toString());
-        retValue.setForwardModel(getForwardModel().copy());
+        retValue.setForwardModel(getForwardModel());
         return retValue;
     }
 

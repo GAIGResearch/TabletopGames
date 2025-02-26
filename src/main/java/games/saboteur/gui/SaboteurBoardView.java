@@ -14,7 +14,7 @@ import static games.saboteur.gui.SaboteurGUIManager.boardSize;
 public class SaboteurBoardView extends JComponent {
     SaboteurGameState gs;
     SaboteurGUIManager gui;
-    PartialObservableGridBoard<PathCard> board;
+    PartialObservableGridBoard board;
     Dimension size;
     Point panPos;
 
@@ -60,7 +60,7 @@ public class SaboteurBoardView extends JComponent {
 
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
-                PathCard card = board.getElement(j, i);
+                PathCard card = (PathCard) board.getElement(j, i);
                 if (card != null) drawPathCard((Graphics2D) g, card, panPos.x + j * cellWidth, panPos.y + i * cellHeight);
                 if (gui.gridHighlight != null && gui.gridHighlight.x == j && gui.gridHighlight.y == i) {
                     g.setColor(Color.green);

@@ -106,7 +106,7 @@ public class InfectCity extends DrawCard {
         outbreakCounter.increment(1);
 
         // Find neighbouring board nodes
-        for (BoardNode b2 : n.getNeighbours()){
+        for (BoardNode b2 : n.getNeighbours().keySet()){
 
             PropertyIntArrayList players = (PropertyIntArrayList)b2.getProperty(playersHash);
             for (int playerIdx: players.getValues()){

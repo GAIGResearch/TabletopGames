@@ -1,0 +1,123 @@
+[
+  {
+    "comment" : "Range, Surge, Damage, Shield : ordering of the values for each die face",
+    "colour": ["String", "yellow"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[1,1,0,0]],
+    "2": ["Integer[]",[0,1,1,0]],
+    "3": ["Integer[]",[0,0,2,0]],
+    "4": ["Integer[]",[2,0,1,0]],
+    "5": ["Integer[]",[1,0,1,0]],
+    "6": ["Integer[]",[0,1,2,0]]
+  },
+  {
+    "colour": ["String", "blue"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[-100,0,0,0]],
+    "2": ["Integer[]",[3,0,2,0]],
+    "3": ["Integer[]",[4,0,2,0]],
+    "4": ["Integer[]",[5,0,1,0]],
+    "5": ["Integer[]",[6,1,1,0]],
+    "6": ["Integer[]",[2,1,2,0]]
+  },
+  {
+    "colour": ["String", "red"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,1,0]],
+    "2": ["Integer[]",[0,0,2,0]],
+    "3": ["Integer[]",[0,0,2,0]],
+    "4": ["Integer[]",[0,0,3,0]],
+    "5": ["Integer[]",[0,0,2,0]],
+    "6": ["Integer[]",[0,1,3,0]]
+  },
+  {
+    "colour": ["String", "brown"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,0,0]],
+    "2": ["Integer[]",[0,0,0,0]],
+    "3": ["Integer[]",[0,0,0,1]],
+    "4": ["Integer[]",[0,0,0,1]],
+    "5": ["Integer[]",[0,0,0,0]],
+    "6": ["Integer[]",[0,0,0,2]]
+  },
+  {
+    "colour": ["String", "grey"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,0,0]],
+    "2": ["Integer[]",[0,0,0,1]],
+    "3": ["Integer[]",[0,0,0,1]],
+    "4": ["Integer[]",[0,0,0,1]],
+    "5": ["Integer[]",[0,0,0,2]],
+    "6": ["Integer[]",[0,0,0,3]]
+  },
+  {
+    "colour": ["String", "black"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,0,0]],
+    "2": ["Integer[]",[0,0,0,3]],
+    "3": ["Integer[]",[0,0,0,2]],
+    "4": ["Integer[]",[0,0,0,4]],
+    "5": ["Integer[]",[0,0,0,2]],
+    "6": ["Integer[]",[0,0,0,2]]
+  },
+  {
+    "colour": ["String", "yellow"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[1,1,0,0]],
+    "2": ["Integer[]",[0,1,1,0]],
+    "3": ["Integer[]",[0,0,2,0]],
+    "4": ["Integer[]",[2,0,1,0]],
+    "5": ["Integer[]",[1,0,1,0]],
+    "6": ["Integer[]",[0,1,2,0]]
+  },
+  {
+    "colour": ["String", "blue"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[-100,0,0,0]],
+    "2": ["Integer[]",[3,0,2,0]],
+    "3": ["Integer[]",[4,0,2,0]],
+    "4": ["Integer[]",[5,0,1,0]],
+    "5": ["Integer[]",[6,1,1,0]],
+    "6": ["Integer[]",[2,1,2,0]]
+  },
+  {
+    "colour": ["String", "red"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,1,0]],
+    "2": ["Integer[]",[0,0,2,0]],
+    "3": ["Integer[]",[0,0,2,0]],
+    "4": ["Integer[]",[0,0,3,0]],
+    "5": ["Integer[]",[0,0,2,0]],
+    "6": ["Integer[]",[0,1,3,0]]
+  },
+  {
+    "colour": ["String", "brown"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,0,0]],
+    "2": ["Integer[]",[0,0,0,0]],
+    "3": ["Integer[]",[0,0,0,1]],
+    "4": ["Integer[]",[0,0,0,1]],
+    "5": ["Integer[]",[0,0,0,0]],
+    "6": ["Integer[]",[0,0,0,2]]
+  },
+  {
+    "colour": ["String", "grey"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,0,0]],
+    "2": ["Integer[]",[0,0,0,1]],
+    "3": ["Integer[]",[0,0,0,1]],
+    "4": ["Integer[]",[0,0,0,1]],
+    "5": ["Integer[]",[0,0,0,2]],
+    "6": ["Integer[]",[0,0,0,3]]
+  },
+  {
+    "colour": ["String", "black"],
+    "count": ["Integer", 6],
+    "1": ["Integer[]",[0,0,0,0]],
+    "2": ["Integer[]",[0,0,0,3]],
+    "3": ["Integer[]",[0,0,0,2]],
+    "4": ["Integer[]",[0,0,0,4]],
+    "5": ["Integer[]",[0,0,0,2]],
+    "6": ["Integer[]",[0,0,0,2]]
+  }
+]

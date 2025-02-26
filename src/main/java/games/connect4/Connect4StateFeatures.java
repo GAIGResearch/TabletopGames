@@ -2,7 +2,6 @@ package games.connect4;
 
 import core.AbstractGameState;
 import core.components.GridBoard;
-import core.components.Token;
 import players.heuristics.AbstractStateFeature;
 
 import java.util.Objects;
@@ -30,19 +29,19 @@ public class Connect4StateFeatures extends AbstractStateFeature {
     @Override
     protected double[] localFeatureVector(AbstractGameState gs, int playerID) {
         Connect4GameState state = (Connect4GameState) gs;
-        GridBoard<Token> gridBoard = state.gridBoard;
+        GridBoard gridBoard = state.gridBoard;
         int width = gridBoard.getWidth();
         int height = gridBoard.getHeight();
         double[] retValue = new double[localNames.length];
 
-        String playerChar = Connect4Constants.playerMapping.get(playerID).getTokenType();
+        String playerChar = Connect4Constants.playerMapping.get(playerID).getComponentName();
 
         // Count 1 token
         int[][] directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}};
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
 
-                String ownerChar = gridBoard.getElement(x, y).getTokenType();
+                String ownerChar = gridBoard.getElement(x, y).getComponentName();
                 if (Objects.equals(ownerChar, Connect4Constants.emptyCell)) {
                     continue;
                 }
@@ -50,7 +49,7 @@ public class Connect4StateFeatures extends AbstractStateFeature {
                 int ownerCount = 0;
                 for (int[] direction : directions) {
                     if (isInBound((x + direction[0]), y + direction[1], width, height)) {
-                        if (Objects.equals(gridBoard.getElement(x + direction[0], y + direction[1]).getTokenType(), ownerChar)) {
+                        if (Objects.equals(gridBoard.getElement(x + direction[0], y + direction[1]).getComponentName(), ownerChar)) {
                             ownerCount++;
                         }
                     }
@@ -90,7 +89,7 @@ public class Connect4StateFeatures extends AbstractStateFeature {
         return retValue;
     }
 
-    private void pattern_match(GridBoard<Token> gridBoard, int width, int height, double[] retValue, String playerChar, int x_direction, int y_direction) {
+    private void pattern_match(GridBoard gridBoard, int width, int height, double[] retValue, String playerChar, int x_direction, int y_direction) {
         int[][] visitedMap = new int[width][height];
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -105,7 +104,7 @@ public class Connect4StateFeatures extends AbstractStateFeature {
                 visitedMap[cur_x][cur_y] = 1;
 
                 // Skip the empty Cell
-                String ownerChar = gridBoard.getElement(cur_x, cur_y).getTokenType();
+                String ownerChar = gridBoard.getElement(cur_x, cur_y).getComponentName();
                 if (Objects.equals(ownerChar, Connect4Constants.emptyCell)) {
                     continue;
                 }
@@ -114,7 +113,7 @@ public class Connect4StateFeatures extends AbstractStateFeature {
                 int link = 1;
                 int new_x = cur_x + x_direction;
                 int new_y = cur_y + y_direction;
-                while (isInBound(new_x, new_y, width, height) && Objects.equals(gridBoard.getElement(new_x, new_y).getTokenType(), ownerChar)) {
+                while (isInBound(new_x, new_y, width, height) && Objects.equals(gridBoard.getElement(new_x, new_y).getComponentName(), ownerChar)) {
                     cur_x = new_x;
                     cur_y = new_y;
                     visitedMap[cur_x][cur_y] = 1;
@@ -129,10 +128,10 @@ public class Connect4StateFeatures extends AbstractStateFeature {
                     // right location (Oxox)
                     int x_next = x + 2 * x_direction;
                     int y_next = y + 2 * y_direction;
-                    if (isInBound(x_next, y_next, width, height) && Objects.equals(gridBoard.getElement(x_next, y_next).getTokenType(), ownerChar)) {
+                    if (isInBound(x_next, y_next, width, height) && Objects.equals(gridBoard.getElement(x_next, y_next).getComponentName(), ownerChar)) {
                         if (!isInBound(x_next + x_direction, y_next + y_direction, width, height)) {
                             retValue[getRetValueIdx(link + 1, ownerChar, playerChar)]++;
-                        } else if (!Objects.equals(gridBoard.getElement(x_next + x_direction, y_next + y_direction).getTokenType(), ownerChar)) {
+                        } else if (!Objects.equals(gridBoard.getElement(x_next + x_direction, y_next + y_direction).getComponentName(), ownerChar)) {
                             retValue[getRetValueIdx(link + 1, ownerChar, playerChar)]++;
                         }
 
@@ -148,9 +147,9 @@ public class Connect4StateFeatures extends AbstractStateFeature {
                     // right location (OoXo)
                     int x_next = x + 3 * x_direction;
                     int y_next = y + 3 * y_direction;
-                    if (isInBound(x_prev, y_prev, width, height) && Objects.equals(gridBoard.getElement(x_prev, y_prev).getTokenType(), ownerChar)) {
+                    if (isInBound(x_prev, y_prev, width, height) && Objects.equals(gridBoard.getElement(x_prev, y_prev).getComponentName(), ownerChar)) {
                         retValue[getRetValueIdx(link + 1, ownerChar, playerChar)]++;
-                    } else if (isInBound(x_next, y_next, width, height) && Objects.equals(gridBoard.getElement(x_next, y_next).getTokenType(), ownerChar)) {
+                    } else if (isInBound(x_next, y_next, width, height) && Objects.equals(gridBoard.getElement(x_next, y_next).getComponentName(), ownerChar)) {
                         retValue[getRetValueIdx(link + 1, ownerChar, playerChar)]++;
                     }
                 }

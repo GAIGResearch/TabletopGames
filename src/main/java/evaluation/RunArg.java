@@ -205,7 +205,7 @@ public enum RunArg {
             "sqrt(log(N)/n). The latter is derived in a cumulative regret situation, which we are less worried about.",
             false,
             new Usage[]{Usage.ParameterSearch}),
-    noiseCombination("Defines the exponent in the geenralised mean used to combine exploration terms\n" +
+    noiseCombination("Defines the exponent in the generalised mean used to combine exploration terms\n" +
             "across tuples. 1 is equivalent to a simple mean, higher values will overweight larger values until \n" +
             "a value approaching infinity is equivalent to a Max function.",
             1.0,

@@ -241,8 +241,6 @@ public class PokerGUIManager extends AbstractGUIManager {
         return wrapper;
     }
 
-
-    @Override
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);

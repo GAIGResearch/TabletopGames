@@ -1,13 +1,14 @@
 package core.actions;
 
 import core.AbstractGameState;
+import core.components.BoardNode;
 import core.components.Component;
 import core.interfaces.IPrintable;
 import core.components.GridBoard;
 
 import java.util.Objects;
 
-public class SetGridValueAction<T extends Component> extends AbstractAction implements IPrintable {
+public class SetGridValueAction extends AbstractAction implements IPrintable {
 
     private final int gridBoard;
     private final int x;
@@ -23,25 +24,25 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        T value = (T) gameState.getComponentById(valueID);
+        Component value = gameState.getComponentById(valueID);
         System.out.println("Set " + value.toString() + " at pos (" + x + ", " + y + ")");
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        T value = (T) gs.getComponentById(valueID);
-        return ((GridBoard<T>)gs.getComponentById(gridBoard)).setElement(x, y, value);
+        BoardNode value = (BoardNode) gs.getComponentById(valueID);
+        return ((GridBoard)gs.getComponentById(gridBoard)).setElement(x, y, value);
     }
 
     @Override
-    public SetGridValueAction<T> copy() {
+    public SetGridValueAction copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SetGridValueAction<?> that)) return false;
+        if (!(o instanceof SetGridValueAction that)) return false;
         return gridBoard == that.gridBoard && x == that.x && y == that.y && valueID == that.valueID;
     }
 
@@ -52,7 +53,7 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
 
     @Override
     public String getString(AbstractGameState gameState) {
-        T value = (T) gameState.getComponentById(valueID);
+        Component value = gameState.getComponentById(valueID);
         return "SetGridValueAction{" +
                 "gridBoard=" + gameState.getComponentById(gridBoard).getComponentName() +
                 ", x=" + x +
@@ -76,8 +77,8 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
     public int getValueID() {
         return valueID;
     }
-    public T getValue(AbstractGameState gameState) {
-        return (T) gameState.getComponentById(valueID);
+    public BoardNode getValue(AbstractGameState gameState) {
+        return (BoardNode) gameState.getComponentById(valueID);
     }
 
     @Override

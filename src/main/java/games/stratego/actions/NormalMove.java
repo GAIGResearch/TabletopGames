@@ -40,8 +40,8 @@ public class NormalMove extends Move{
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        GridBoard board = ((StrategoGameState)gs).getGridBoard();
         Piece movedPiece = getPiece((StrategoGameState) gs);
-        GridBoard<Piece> board = ((StrategoGameState)gs).getGridBoard();
 
         board.setElement(movedPiece.getPiecePosition().getX(), movedPiece.getPiecePosition().getY(), null);
         if (destinationCoordinate == null) {
