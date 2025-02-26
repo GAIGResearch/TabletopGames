@@ -1,0 +1,15 @@
+{
+  "game": "SeaSaltPaper",
+  "destDir": "param-optimisation/",
+  "repeats": 10,
+  "iterations": 100,
+  "evalGames": 20,
+  "matchups": 20,
+  "samplingRate": 1,
+  "neighbourhood": 100,
+  "evalMethod": "Heuristic",
+  "nPlayers": 1,
+  "output": "results_optimisation_mcts64ms.txt",
+  "searchSpace": "json/expIt/tangledYarns/mcts-tangledyarns.json",
+  "verbose": true
+}
