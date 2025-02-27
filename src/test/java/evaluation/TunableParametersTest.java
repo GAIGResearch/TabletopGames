@@ -135,7 +135,7 @@ public class TunableParametersTest {
     @Test
     public void loadedSubParamsIncludesNonParameterisedObjects() {
         String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_PR_RolloutPolicy.json";
-        ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, searchSpace);
         // actionHeuristic is a nested (non-Tunable) class, so check it is not included
         assertEquals(-1, itp.getIndexOf("rolloutPolicyParams.actionHeuristic"));
         assertEquals(-1, itp.getIndexOf("actionHeuristic"));
@@ -147,7 +147,7 @@ public class TunableParametersTest {
 
         int[] settings = new int[] {0, 0, 0, 0, 0};
 
-        MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
+        MCTSPlayer agent = itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertTrue(params.getRolloutStrategy() instanceof  BoltzmannActionPlayer);
         BoltzmannActionPlayer rollout = (BoltzmannActionPlayer) params.getRolloutStrategy();
@@ -219,5 +219,35 @@ public class TunableParametersTest {
         params.setParameterValue("heuristic", new OrdinalPosition());   // just needs to be non-default; the actual value is irrelevant
         JSONObject asJSON = params.instanceToJSON(true, Map.of("heuristic", 1));
         assertEquals(asJSON.get("heuristic"), secondHeuristic);
+    }
+
+    @Test
+    public void settingsFromJSONSuccessful() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSample.json");
+        JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_HeuristicSample.json");
+        for (int i = 0; i < settings.length; i++) {
+            String parameterName = itp.name(i);
+            Object value = itp.value(i, settings[i]);
+            Object jsonValue = json.get(parameterName);
+            if (jsonValue == null) {
+                // pick up default
+                jsonValue = params.getDefaultParameterValue(parameterName);
+            }
+            if (!JSONUtils.areValuesEqual(value, jsonValue)) {
+                System.out.println(parameterName + " " + value + " " + jsonValue);
+            }
+            assertTrue(JSONUtils.areValuesEqual(value, jsonValue));
+        }
+    }
+
+    @Test
+    public void settingsFromJSONFailsToMatchDefault() {
+
+    }
+
+    @Test
+    public void settingsFromJSONFailsToMatchSearchSpace() {
+
     }
 }

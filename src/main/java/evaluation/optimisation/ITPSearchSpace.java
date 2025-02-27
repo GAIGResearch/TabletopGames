@@ -4,7 +4,6 @@ import core.interfaces.ITunableParameters;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
-import utilities.Pair;
 import evaluation.optimisation.ntbea.*;
 
 import java.io.FileWriter;
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toMap;
@@ -163,7 +161,58 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         return itp.instantiate();
     }
 
-    public JSONObject getAgentJSON(int[] settings) {
+    // This will read in a JSON file and instantiate an agent from it
+    // it will throw an error if the contents of the JSON file do not match the SearchSpace
+    // The return value is settings that will instantiate the agent from the search space
+    public int[] settingsFromJSON(String fileName) {
+        JSONObject json = JSONUtils.loadJSONFile(fileName);
+
+        int[] settings = new int[searchDimensions.size()];
+        // We now iterate through all the tunable parameters and find the setting that corresponds
+        // to the json content; if none provided then we use the default
+        for (int i = 0; i < searchDimensions.size(); i++) {
+            String name = searchDimensions.get(i);
+            Object value = json.get(name);
+            if (value == null) {
+                // we use the default value
+                value = itp.getDefaultParameterValue(name);
+            }
+            // we need to find the index of the value in the list of possible values
+            List<Object> possibleValues = values.get(i);
+            int index = -1;
+            for (int j = 0; j < possibleValues.size(); j++) {
+                if (JSONUtils.areValuesEqual(possibleValues.get(j), value)) {
+                    index = j;
+                    break;
+                }
+            }
+            if (index == -1) {
+                throw new AssertionError("Value " + value + " not found in possible values for " + name);
+            }
+            settings[i] = index;
+        }
+
+        // Then we check all the parameters in the JSON file are valid for the ITunableParameters
+        // If any have values that are not the same as the searchspace values (or do not
+        // match the default value for that parameter), then we throw an error
+        // This is recursive as needed over any nested ITunableParameters in the JSON
+        for (Object key : json.keySet()) {
+            String keyName = (String) key;
+            if (keyName.equals("class") || keyName.equals("args") || itp.getParameterNames().contains(keyName)) {
+                continue;
+            }
+            Object value = json.get(keyName);
+            // TODO: leave recursion for now
+            Object defaultValue = itp.getDefaultParameterValue(keyName);
+            if (!value.equals(defaultValue)) {
+                throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);
+            }
+        }
+        return settings;
+    }
+
+
+    public JSONObject constructAgentJSON(int[] settings) {
         // we first need to update itp with the specified parameters, and then instantiate
         setTo(settings);
         Map<String, Integer> settingsMap = IntStream.range(0, settings.length).boxed().collect(toMap(this::name, i -> settings[i]));
@@ -173,7 +222,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
     @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
-            JSONObject json = getAgentJSON(settings);
+            JSONObject json = constructAgentJSON(settings);
             int budget = (int) itp.getParameterValue("budget");
             if (budget > 0)
                 json.put("budget", budget);

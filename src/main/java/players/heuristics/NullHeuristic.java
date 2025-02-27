@@ -13,4 +13,13 @@ public class NullHeuristic implements IStateHeuristic {
     public String toString() {
         return "NullHeuristic";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof NullHeuristic;
+    }
+    @Override
+    public int hashCode() {
+        return 7;
+    }
 }

@@ -101,7 +101,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         if (finalData instanceof JSONObject subJson) {
             K retValue = JSONUtils.loadClassFromJSON(subJson);
             if (retValue instanceof TunableParameters<?> subParams) {
-         //       TunableParameters.loadFromJSON(subParams, subJson);
+                //       TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
             }
@@ -269,6 +269,11 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      */
     @Override
     public Object getDefaultParameterValue(String parameterName) {
+        // we first see if this parameter is in the rawJSON
+        if (rawJSON != null && rawJSON.containsKey(parameterName)
+                && !(rawJSON.get(parameterName) instanceof JSONArray)) {
+            return rawJSON.get(parameterName);
+        }
         return defaultValues.get(parameterName);
     }
 
@@ -280,7 +285,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      */
     @Override
     public void setParameterValue(String parameterName, Object value) {
-    //    System.out.println("Setting " + parameterName + " to " + value);
+        //    System.out.println("Setting " + parameterName + " to " + value);
         if (parameterName.split(Pattern.quote(".")).length > 1) {
             // in this case we pass on to the subParam (as well as updating here)
             String[] split = parameterName.split(Pattern.quote("."));
@@ -362,29 +367,6 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     public Map<String, Object> getDefaultParameterValues() {
         return new HashMap<>(defaultValues);
     }
-
-    @Override
-    public String getJSONDescription() {
-        JSONObject retValue = new JSONObject();
-        retValue.put("parametersType", this.getClass().getName());
-        parameterNames.forEach(name -> {
-            Class<?> clazz = parameterTypes.get(name);
-            if (possibleValues.getOrDefault(name, Collections.emptyList()).size() > 1) {
-                List<Object> values = possibleValues.get(name);
-                if (clazz.isEnum())
-                    values = values.stream().map(Object::toString).collect(toList());
-                // TODO: Possibly something here to allow for JSONObjects to be passed in as well
-                retValue.put(name, values);
-            } else {
-                // we have a single value, or a missing
-                Object value = defaultValues.getOrDefault(name, null);
-                if (clazz.isEnum()) value = value.toString();
-                retValue.put(name, value);
-            }
-        });
-        return retValue.toJSONString();
-    }
-
 
     @Override
     public ITunableParameters instanceFromJSON(JSONObject jsonObject) {

@@ -135,6 +135,7 @@ public class NTBEA {
      * @return
      */
     public Pair<Object, int[]> run() {
+
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
             if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
@@ -360,4 +361,11 @@ public class NTBEA {
         return valueString;
     }
 
+    public void writeAgentJSON(int[] currentBestSettings, String s) {
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            itp.writeAgentJSON(currentBestSettings, s);
+        } else {
+            throw new AssertionError("Cannot write agent JSON for non-ITP search space");
+        }
+    }
 }

@@ -47,7 +47,7 @@ public class NTBEAEvaluator implements SolutionEvaluator {
 
         // searchSpace.instantiate returns an NTBEA object, not an NTBEAParameters object
         // what we can do here is run through the settings, and set up the NTBEAParameters that we want
-        JSONObject json = searchSpace.getAgentJSON(settings);
+        JSONObject json = searchSpace.constructAgentJSON(settings);
         NTBEAParameters params = JSONUtils.loadClassFromJSON(json);
 
      //   NTBEAParameters params = searchSpace.instantiate(settings);
