@@ -43,7 +43,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public boolean simpleRegret;
     public boolean verbose;
     public Mode mode;
-    public int quantile = -1;
+    public int quantile = 0;
     public int evaluationsPerTrial = 1;
 
     // and those that are not (so must be included separately in copy etc)
@@ -75,7 +75,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         addTunableParameter("simpleRegret", false);
         addTunableParameter("verbose", false);
         addTunableParameter("mode", Mode.NTBEA);
-        addTunableParameter("quantile", -1);
+        addTunableParameter("quantile", 0);
         addTunableParameter("evalsPerTrial", 1);
     }
 

@@ -7,6 +7,8 @@ import utilities.JSONUtils;
 import utilities.Pair;
 import evaluation.optimisation.ntbea.*;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +168,19 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         setTo(settings);
         Map<String, Integer> settingsMap = IntStream.range(0, settings.length).boxed().collect(toMap(this::name, i -> settings[i]));
         return itp.instanceToJSON(true, settingsMap);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void writeAgentJSON(int[] settings, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            JSONObject json = getAgentJSON(settings);
+            int budget = (int) itp.getParameterValue("budget");
+            if (budget > 0)
+                json.put("budget", budget);
+            writer.write(JSONUtils.prettyPrint(json, 1));
+        } catch (IOException e) {
+            throw new AssertionError("Error writing agent settings to file " + fileName);
+        }
     }
 
     private void setTo(int[] settings) {

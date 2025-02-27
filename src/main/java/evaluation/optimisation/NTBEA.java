@@ -129,29 +129,16 @@ public class NTBEA {
         elites.add(settings);
     }
 
-    @SuppressWarnings("unchecked")
-    public void writeAgentJSON(int[] settings, String fileName) {
-        try (FileWriter writer = new FileWriter(fileName)) {
-            JSONObject json = ((ITPSearchSpace<?>) params.searchSpace).getAgentJSON(settings);
-            if (params.budget > 0)
-                json.put("budget", params.budget);
-            writer.write(JSONUtils.prettyPrint(json, 1));
-        } catch (IOException e) {
-            throw new AssertionError("Error writing agent settings to file " + fileName);
-        }
-    }
-
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *
      * @return
      */
     public Pair<Object, int[]> run() {
-
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
-            if (params.searchSpace instanceof ITPSearchSpace<?>) {
-                writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
+            if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+                itp.writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
                         params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
             }
         }
@@ -254,7 +241,7 @@ public class NTBEA {
             printDetailsOfRun(bestResult);
         }
         if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
-            writeAgentJSON(bestResult.b,
+            itp.writeAgentJSON(bestResult.b,
                     params.destDir + File.separator + "Recommended_Final.json");
             return new Pair<>(itp.instantiate(bestResult.b), bestResult.b);
         }
