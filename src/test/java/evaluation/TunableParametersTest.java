@@ -266,4 +266,26 @@ public class TunableParametersTest {
             assertTrue(e.getMessage().contains("maxTreeDepth"));
         }
     }
+
+
+    @Test
+    public void settingsFromNestedJSONSuccessful() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+        JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+        for (int i = 0; i < settings.length; i++) {
+            String parameterName = itp.name(i);
+            Object value = itp.value(i, settings[i]);
+            Object jsonValue = json.get(parameterName);
+            if (jsonValue == null) {
+                // pick up default
+                jsonValue = params.getDefaultParameterValue(parameterName);
+            }
+            if (!JSONUtils.areValuesEqual(value, jsonValue)) {
+                System.out.println(parameterName + " " + value + " " + jsonValue);
+            }
+            assertTrue(JSONUtils.areValuesEqual(value, jsonValue));
+        }
+    }
+
 }
