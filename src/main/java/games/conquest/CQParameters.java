@@ -35,7 +35,7 @@ public class CQParameters extends TunableParameters {
     List<Setup> setups;
     public Setup p0TroopSetup;
     public Setup p1TroopSetup;
-    boolean testSetup = false;
+    boolean testSetup = true;
 
     // All of the following pre-made setups are taken from the RuneScape Wiki's strategy guide accessed in 2024.
     // The names used are those used in said strategy guide: https://runescape.wiki/w/Conquest/Strategies?oldid=35427217
@@ -108,10 +108,10 @@ public class CQParameters extends TunableParameters {
                      "      CS AA CS",
                      Chastise, BattleCry, Stoicism, Regenerate),
         GlassCannon("       C\n"+
-                       "    M A A M"+
+                       "    M A A M\n"+
                        "   S S S S S",
                        Charge, BattleCry, Stoicism, Chastise),
-        WrathOfBombard("   S H  C  H S"+
+        WrathOfBombard("   S H  C  H S\n"+
                           "    S S H S S",
                           BattleCry, Charge, Stoicism, Bombard),
         Venom("    M A H A M\n"+
@@ -200,8 +200,8 @@ public class CQParameters extends TunableParameters {
             p0TroopSetup = Setup.Empty;
             p1TroopSetup = Setup.Empty;
         } else {
-            p0TroopSetup = Setup.HalberderHedgeVariant;
-            p1TroopSetup = Setup.HalberderPure;
+            p0TroopSetup = Setup.HalberderPure;
+            p1TroopSetup = Setup.SuperChampioneer;
         }
         addTunableParameter("p0TroopSetup", p0TroopSetup, setups);
         addTunableParameter("p1TroopSetup", p1TroopSetup, setups);
