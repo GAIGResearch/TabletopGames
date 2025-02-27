@@ -198,7 +198,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         // This is recursive as needed over any nested ITunableParameters in the JSON
         for (Object key : json.keySet()) {
             String keyName = (String) key;
-            if (keyName.equals("class") || keyName.equals("args") || itp.getParameterNames().contains(keyName)) {
+            if (keyName.equals("class") || keyName.equals("args") || searchDimensions.contains(keyName)) {
                 continue;
             }
             Object value = json.get(keyName);

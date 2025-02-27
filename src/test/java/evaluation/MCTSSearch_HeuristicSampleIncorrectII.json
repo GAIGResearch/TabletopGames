@@ -18,14 +18,7 @@
         "exploreEpsilon" : 0.30,
         "rolloutTermination" : "DEFAULT",
         "maintainMasterState" : false,
-        "heuristic" : [{
+        "heuristic" : {
                 "class" : "players.heuristics.WinOnlyHeuristic"
-        },
-        {
-                "class" : "players.heuristics.ScorePlusHeuristic"
-        },
-        {
-                "class" : "players.heuristics.LeaderHeuristic"
         }
-        ]
 }

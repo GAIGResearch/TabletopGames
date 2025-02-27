@@ -242,12 +242,28 @@ public class TunableParametersTest {
     }
 
     @Test
-    public void settingsFromJSONFailsToMatchDefault() {
-
+    public void settingsFromJSONFailsToMatchSearchSpace() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        try {
+            itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectI.json");
+            fail();
+        } catch (AssertionError e) {
+            // rolloutLength in JSON is 50, which is not one of the possible tuned values
+            System.out.println(e.getMessage());
+            assertTrue(e.getMessage().contains("rolloutLength"));
+        }
     }
 
     @Test
-    public void settingsFromJSONFailsToMatchSearchSpace() {
-
+    public void settingsFromJSONFailsToMatchDefault() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        try {
+            itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectII.json");
+            fail();
+        } catch (AssertionError e) {
+            // rolloutLength in JSON is 50, which is not one of the possible tuned values
+            System.out.println(e.getMessage());
+            assertTrue(e.getMessage().contains("maxTreeDepth"));
+        }
     }
 }
