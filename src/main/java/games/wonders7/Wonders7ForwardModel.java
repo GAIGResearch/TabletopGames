@@ -54,8 +54,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         wgs.discardPile = new Deck<>("Discarded Cards", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Shuffles wonder-boards
-        // createWonderDeck(wgs, params.wonderShuffleSeed == -1 ? state.getRnd() : new Random(params.wonderShuffleSeed)); // Adds Wonders into game
-        createWonderDeck(wgs, new Random(params.wonderShuffleSeed));
+        createWonderDeck(wgs, params.wonderShuffleSeed == -1 ? state.getRnd() : new Random(params.wonderShuffleSeed)); // Adds Wonders into game
 
         // Gives each player wonder board and manufactured goods from the wonder
         for (int player = 0; player < wgs.getNPlayers(); player++) {
@@ -110,6 +109,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                     wgs.getPlayerWonderBoard(p).effectUsed = true;
                     return;
                 }
+                // the _afterAction method of BuildFromDiscard will rotate hands and check for end of age
             }
 
             rotateHands(wgs);

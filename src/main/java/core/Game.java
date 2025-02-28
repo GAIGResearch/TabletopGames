@@ -557,7 +557,6 @@ public class Game {
                     System.out.println(history.get(i));
                 }
             }
-            forwardModel.computeAvailableActions(gameState);
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
