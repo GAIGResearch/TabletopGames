@@ -541,7 +541,6 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
-        boolean errorInbound = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace).isEmpty();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.isEmpty()) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
