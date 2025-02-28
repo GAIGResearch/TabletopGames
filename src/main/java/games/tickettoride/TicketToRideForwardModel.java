@@ -151,6 +151,8 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 //                System.out.println("NODE PROP for current edge: "+ nodeProp);
             }
         }
+
+        gameArea.putComponent(TicketToRideConstants.trainCardDeckDiscardHash, new Deck<>("trainCardDeckDiscard", VISIBLE_TO_ALL));
         state.setFirstPlayer(0);
 
 
@@ -173,8 +175,18 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         int playerId = tg.getCurrentPlayer();
         Deck<Card> playerTrainCardDeck = (Deck<Card>) tg.getComponent(trainCardDeckHash);
         Deck<Card> playerDestinationCardDeck = (Deck<Card>) tg.getComponent(destinationCardDeckHash);
+        Deck<Card> trainCardDiscardDeck = (Deck<Card>) tg.getComponent(trainCardDeckDiscardHash);
 
-        if (playerTrainCardDeck.getSize() > 2){
+        if (playerTrainCardDeck.getSize() < 2){ // shuffle discard into deck
+            System.out.println("Shuffle discard into deck before" + " train card size:" + playerTrainCardDeck.getSize() + " discard size: " + trainCardDiscardDeck.getSize());
+            trainCardDiscardDeck.shuffle(tg.getRnd());
+            playerTrainCardDeck.add(trainCardDiscardDeck);
+            trainCardDiscardDeck.clear();
+
+
+        }
+
+        if (playerTrainCardDeck.getSize() >= 2){ //to do: shuffle discard into deck
             actions.add(new DrawTrainCards(playerId));
         }
         if (playerDestinationCardDeck.getSize() > 1){

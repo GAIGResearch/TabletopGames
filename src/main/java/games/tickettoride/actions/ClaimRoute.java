@@ -65,6 +65,7 @@ public class ClaimRoute extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
+
         int amountToRemove = costOfRoute; //may also change because they can supplement with locomotive
         int amountOfLocomotiveToRemove = 0;
 
@@ -73,6 +74,7 @@ public class ClaimRoute extends AbstractAction {
         System.out.println("PLAYER " + playerID + " CLAIMING ROUTE" );
         System.out.println("route properties before : " + edge.getProperties());
         Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
+        Deck<Card> trainCardDiscardDeck = (Deck<Card>) tgs.getComponent(trainCardDeckDiscardHash);
 
         System.out.println("player hand before " + playerTrainCardHandDeck);
 
@@ -96,17 +98,17 @@ public class ClaimRoute extends AbstractAction {
                     break;
                 }
             }
-            removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove);
-        } else if (playerTrainCards.get(colorOfRoute)  >= costOfRoute){ //color of route in hand has correct amount
+            removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove,trainCardDiscardDeck);
+        } else if (playerTrainCards.getOrDefault(colorOfRoute,0)  >= costOfRoute){ //color of route in hand has correct amount
             System.out.println("color of route in hand has correct amount");
-            removeTrainCarCards(playerTrainCardHandDeck, costOfRoute, colorOfRoute, amountOfLocomotiveToRemove);
+            removeTrainCarCards(playerTrainCardHandDeck, costOfRoute, colorOfRoute, amountOfLocomotiveToRemove,trainCardDiscardDeck);
 
-        } else if (playerTrainCards.get(colorOfRoute) +  currentAmountOfLocomotivesInHand >= costOfRoute){ //use locomotive to supplement
-            int currentColorAmount = playerTrainCards.get(colorOfRouteToRemove);
+        } else if (playerTrainCards.getOrDefault(colorOfRoute,0) +  currentAmountOfLocomotivesInHand >= costOfRoute){ //use locomotive to supplement
+            int currentColorAmount = playerTrainCards.getOrDefault(colorOfRouteToRemove,0);
             amountOfLocomotiveToRemove = costOfRoute - currentColorAmount;
             amountToRemove = currentColorAmount;
             System.out.println("Using Locomotive to claim route");
-            removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove);
+            removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove, trainCardDiscardDeck);
         }
 
         {
@@ -159,13 +161,15 @@ public class ClaimRoute extends AbstractAction {
         return trainCardCount;
     }
 
-    void removeTrainCarCards(Deck<Card> playerTrainCardHandDeck ,int amountToRemove, String colorOfRouteToRemove, int amountOfLocomotivesToRemove){
+    void removeTrainCarCards(Deck<Card> playerTrainCardHandDeck ,int amountToRemove, String colorOfRouteToRemove, int amountOfLocomotivesToRemove, Deck<Card> trainCardDiscardDeck){
         System.out.println("amounttoremove: " + amountToRemove + "colorOfRoute: " + colorOfRouteToRemove + " amountoflocomotivestoremove: " + amountOfLocomotivesToRemove );
 
         for (int i = 0; i < playerTrainCardHandDeck.getSize() && amountToRemove > 0; i ++) { //remove colour cards
             Card currentCard = playerTrainCardHandDeck.get(i);
             if (currentCard.toString().equals(colorOfRouteToRemove)){
+                trainCardDiscardDeck.add(currentCard);
                 playerTrainCardHandDeck.remove(i);
+
                 i--;
                 amountToRemove--;
             }
@@ -174,11 +178,15 @@ public class ClaimRoute extends AbstractAction {
         for (int i = 0; i < playerTrainCardHandDeck.getSize() && amountOfLocomotivesToRemove > 0; i++) { //remove locomotives
             Card currentCard = playerTrainCardHandDeck.get(i);
             if (currentCard.toString().equals("Locomotive")) {
+                trainCardDiscardDeck.add(currentCard);
                 playerTrainCardHandDeck.remove(i);
                 i--;
                 amountOfLocomotivesToRemove--;
             }
         }
+
+        System.out.println("Discard deck after removeTrainCarCards: " + trainCardDiscardDeck);
+
     }
     /**
      * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
