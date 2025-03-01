@@ -33,7 +33,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
     private static final Color PLAYER0 = new Color(0, 128, 0);
     private static final Color PLAYER1 = new Color(128, 0, 0);
 
-    public CQBoardView(GridBoard<Cell> gridBoard) {
+    public CQBoardView(GridBoard gridBoard) {
         super(gridBoard, gridBoard.getWidth(), gridBoard.getHeight());
 
         locationToTroopMap = new HashMap<>();
@@ -74,7 +74,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
     }
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<Cell>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
 
         if (!highlight.isEmpty()) {
             g.setColor(Color.blue);
@@ -86,7 +86,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<Cell> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridBoard.getWidth();
         int height = gridBoard.getHeight();
         rects = new Rectangle[width * height];
@@ -101,7 +101,7 @@ public class CQBoardView extends ComponentView implements IScreenHighlight {
             for (int j=0; j<width; j++) {
                 int xC = x + j * defaultCellSize;
                 int yC = y + i * defaultCellSize;
-                drawCell(g, gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, (Cell) gridBoard.getElement(j, i), xC, yC);
 
                 int idx = i * width + j;
                 if (rects[idx] == null) {

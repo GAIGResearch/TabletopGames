@@ -54,7 +54,7 @@ public class CQForwardModel extends StandardForwardModel {
         cqgs.locationToTroopMap = new HashMap<Vector2D, Integer>();
         cqgs.cells = new Cell[cqp.gridWidth][cqp.gridHeight];
         cqgs.troops = new HashSet<Troop>();
-        cqgs.gridBoard = new GridBoard<>(cqp.gridWidth, cqp.gridHeight);
+        cqgs.gridBoard = new GridBoard(cqp.gridWidth, cqp.gridHeight);
         cqgs.chosenCommands = new PartialObservableDeck[]{
                 new PartialObservableDeck<Command>("commands0", 0, 2, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER),
                 new PartialObservableDeck<Command>("commands1", 1, 2, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER)

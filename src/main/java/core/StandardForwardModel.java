@@ -129,8 +129,9 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         if (gs.getGameParameters().maxRounds != -1 && gs.roundCounter == gs.getGameParameters().maxRounds) {
             endGame(gs); // we end the game validly
         } else if (gs.getGameParameters().timeoutRounds != -1 && gs.roundCounter == gs.getGameParameters().timeoutRounds) {
-            endGame(gs);
             // then we override the Result to be Timeout
+            gs.setGameStatus(TIMEOUT);
+            endGame(gs);
             gs.setGameStatus(TIMEOUT);
             Arrays.fill(gs.playerResults, TIMEOUT);
         } else {
@@ -146,15 +147,5 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      */
     public final void endRound(AbstractGameState gs) {
         endRound(gs, gs.firstPlayer);
-    }
-
-    /**
-     * A Forward Model should be stateless - and hence have no need to implement a _copy() method
-     *
-     * @return this
-     */
-    @Override
-    public final StandardForwardModel _copy() {
-        return this;
     }
 }

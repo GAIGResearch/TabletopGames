@@ -55,8 +55,7 @@ public class RHEAParams extends PlayerParameters
         mutationCount = (int) getParameterValue("mutationCount");
         useMAST = (boolean) getParameterValue("useMAST");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        if (heuristic instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+        if (heuristic instanceof TunableParameters<?> tunableHeuristic) {
             for (String name : tunableHeuristic.getParameterNames()) {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
             }

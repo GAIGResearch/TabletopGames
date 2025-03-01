@@ -56,7 +56,7 @@ public class DeepMove extends AbstractAction implements IExtendedSequence {
         if (position == null) {
             return (Piece) gs.getComponentById(pieceID);
         } else {
-            return gs.getGridBoard().getElement(position);
+            return (Piece) gs.getGridBoard().getElement(position);
         }
     }
 

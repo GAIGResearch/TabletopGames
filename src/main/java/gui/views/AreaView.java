@@ -1,5 +1,6 @@
 package gui.views;
 
+import core.AbstractGameState;
 import core.components.*;
 import core.components.Component;
 
@@ -25,8 +26,11 @@ public class AreaView extends ComponentView {
     private Point initialClick;  // Initial point clicked in a drag motion
     private HashMap<Integer, Point> translation;  // Translations applied to rectangles after dragging motions
 
-    public AreaView(Area area, int width, int height) {
+    AbstractGameState gs;
+
+    public AreaView(AbstractGameState gs, Area area, int width, int height) {
         super(area, width, height);
+        this.gs = gs;
 
         // Initialise all maps and lists
         drawMap = new HashMap<>();
@@ -301,7 +305,7 @@ public class AreaView extends ComponentView {
 
     protected void drawArea(Graphics2D g) {
         // Draw components in area
-        drawArea(g, (Area) component, 0, 0, width, height, drawMap, dependencies, translation);
+        drawArea(g, gs, (Area) component, 0, 0, width, height, drawMap, dependencies, translation);
 
         // Draw highlight of deck
         if (deckHighlight != null) {
@@ -356,7 +360,7 @@ public class AreaView extends ComponentView {
      * @param dependencies - mapping from component ID to parent component ID (if applicable)
      * @param translation - mapping from component ID to Point representing its translation on the screen
      */
-    public static void drawArea(Graphics2D g, Area area, int x, int y, int width, int height,
+    public static void drawArea(Graphics2D g, AbstractGameState gs, Area area, int x, int y, int width, int height,
                                 HashMap<Integer, Rectangle> drawMap,
                                 HashMap<Integer, Integer> dependencies,
                                 HashMap<Integer, Point> translation) {
@@ -416,9 +420,9 @@ public class AreaView extends ComponentView {
 
             // Draw component itself (decks and areas already drawn)
             if (c instanceof GridBoard) {
-                Rectangle toDraw = getRectangle(e.getKey(),((GridBoard<?>) c).getWidth() * defaultItemSize,
-                        ((GridBoard<?>) c).getHeight() * defaultItemSize, drawMap, dependencies, translation);
-                GridBoardView.drawGridBoard(g, (GridBoard<?>) c, toDraw);
+                Rectangle toDraw = getRectangle(e.getKey(),((GridBoard) c).getWidth() * defaultItemSize,
+                        ((GridBoard) c).getHeight() * defaultItemSize, drawMap, dependencies, translation);
+                GridBoardView.drawGridBoard(g, (GridBoard) c, toDraw);
             } else if (c instanceof Counter) {
                 Rectangle toDraw = getRectangle(e.getKey(), defaultItemSize, defaultItemSize, drawMap, dependencies, translation);
                 CounterView.drawCounter(g, (Counter) c, toDraw);
@@ -430,7 +434,7 @@ public class AreaView extends ComponentView {
                 DieView.drawDie(g, (Dice) c, toDraw);
             } else if (c instanceof GraphBoard) {
                 Rectangle toDraw = getRectangle(e.getKey(), defaultBoardWidth, defaultBoardHeight, drawMap, dependencies, translation);
-                GraphBoardView.drawGraphBoard(g, (GraphBoard) c, toDraw);
+                GraphBoardView.drawGraphBoard(g, gs, (GraphBoard) c, toDraw);
             } else if (c instanceof Token) {
                 Rectangle toDraw = getRectangle(e.getKey(), defaultItemSize, defaultItemSize, drawMap, dependencies, translation);
                 TokenView.drawToken(g, (Token) c, toDraw);

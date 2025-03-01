@@ -1,0 +1,62 @@
+[
+  {
+    "name": ["String", "Health Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 25]
+  },
+  {
+    "name": ["String", "Health Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 25]
+  },
+  {
+    "name": ["String", "Health Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 25]
+  },
+  {
+    "name": ["String", "Stamina Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 25]
+  },
+  {
+    "name": ["String", "Stamina Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 25]
+  },
+  {
+    "name": ["String", "Stamina Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 25]
+  },
+  {
+    "name": ["String", "Power Potion"],
+    "type": ["String", "Potion"],
+    "value": ["Integer", 50]
+  },
+  {
+    "name": ["String", "Warding Talisman"],
+    "type": ["String", "Item"],
+    "value": ["Integer", 50]
+  },
+  {
+    "name": ["String", "Curse Doll"],
+    "type": ["String", "Item"],
+    "value": ["Integer", 50]
+  },
+  {
+    "name": ["String", "Fire Flask"],
+    "type": ["String", "Item"],
+    "value": ["Integer", 50]
+  },
+  {
+    "name": ["String", "Treasure Chest"],
+    "type": ["String", "Special"],
+    "value": ["Integer", 0]
+  },
+  {
+    "name": ["String", "Nothing"],
+    "type": ["String", "Special"],
+    "value": ["Integer", 0]
+  }
+]

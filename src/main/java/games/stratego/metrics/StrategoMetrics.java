@@ -1,6 +1,7 @@
 package games.stratego.metrics;
 
 import core.actions.LogEvent;
+import core.components.BoardNode;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -193,8 +194,9 @@ public class StrategoMetrics implements IMetricsCollection {
 
             int[] sum = new int[e.state.getNPlayers()];
             int[] n = new int[e.state.getNPlayers()];
-            for (Piece p : gs.getGridBoard().getComponents()) {
-                if (p == null) continue;
+            for (BoardNode bn : gs.getGridBoard().getComponents()) {
+                if (bn == null) continue;
+                Piece p = (Piece) bn;
                 sum[p.getOwnerId()] += p.getPieceRank();
                 n[p.getOwnerId()] ++;
             }

@@ -1,6 +1,7 @@
 package games.conquest.components;
 
 import core.CoreConstants;
+import core.components.BoardNode;
 import core.components.Component;
 import games.conquest.CQGameState;
 import utilities.Vector2D;
@@ -17,16 +18,15 @@ import java.util.Objects;
  * <p>They also need to include {@link Object#equals(Object)} and {@link Object#hashCode()} methods.</p>
  * <p>They <b>may</b> keep references to other components or actions (but these should be deep-copied in the copy() method, watch out for infinite loops!).</p>
  */
-public class Cell extends Component {
+public class Cell extends BoardNode {
     public final Vector2D position;
 
     public Cell(int x, int y) {
-        super(CoreConstants.ComponentType.AREA, "Cell");
-        position = new Vector2D(x, y);
+        this(new Vector2D(x, y));
     }
 
-    protected Cell(int componentID, Vector2D position) {
-        super(CoreConstants.ComponentType.AREA, "Cell", componentID);
+    protected Cell(Vector2D position) {
+        super("Cell");
         this.position = position;
     }
 

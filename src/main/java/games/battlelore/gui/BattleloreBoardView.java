@@ -14,12 +14,12 @@ public class BattleloreBoardView extends ComponentView {
     BattleloreGameState gameState;
     Image background;
 
-    public BattleloreBoardView(GridBoard<MapTile> hexBoard) {
+    public BattleloreBoardView(GridBoard hexBoard) {
         super(hexBoard, hexBoard.getWidth() * defaultItemSize, hexBoard.getHeight() * defaultItemSize);
         background = ImageIO.GetInstance().getImage("data/battlelore/board.png");
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<MapTile> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int offSetX = 25;
         int offSetY = 60;
 
@@ -34,7 +34,7 @@ public class BattleloreBoardView extends ComponentView {
                     xC += offSetX;
                 }
 
-                drawCell(g, gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, (MapTile) gridBoard.getElement(j, i), xC, yC);
             }
         }
 
@@ -63,7 +63,7 @@ public class BattleloreBoardView extends ComponentView {
     @Override
     protected void paintComponent(Graphics g1) {
         Graphics2D g = (Graphics2D) g1;
-        drawGridBoard(g, (GridBoard<MapTile>) component, 0, 0);
+        drawGridBoard(g, (GridBoard) component, 0, 0);
     }
 
     private void drawCell(Graphics2D g, MapTile tile, int x, int y) {

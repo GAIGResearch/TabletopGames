@@ -32,7 +32,7 @@ public class CQSetupPlayer extends MCTSPlayer {
     public CQSetupPlayer copy() {
         CQSetupPlayer retValue = new CQSetupPlayer((MCTSParams) getParameters().copy(), toString());
         if (getForwardModel() != null)
-            retValue.setForwardModel(getForwardModel().copy());
+            retValue.setForwardModel(getForwardModel());
         return retValue;
     }
 }

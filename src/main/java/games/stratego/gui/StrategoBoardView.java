@@ -50,7 +50,7 @@ public class StrategoBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<Piece>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard) component, 0, 0);
 
         if (highlight.size() > 0) {
             g.setColor(Color.green);
@@ -64,7 +64,7 @@ public class StrategoBoardView extends ComponentView {
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<Piece> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -78,7 +78,7 @@ public class StrategoBoardView extends ComponentView {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
                 int xC = x + j * defaultItemSize;
                 int yC = y + i * defaultItemSize;
-                drawCell(g, gridBoard.getElement(j, i), xC, yC);
+                drawCell(g, (Piece) gridBoard.getElement(j, i), xC, yC);
 
                 // Save rect where cell is drawn
                 int idx = i * gridBoard.getWidth() + j;

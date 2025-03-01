@@ -46,11 +46,6 @@
             <version>3.8.1</version>
         </dependency>
         <dependency>
-            <groupId>com.github.hopshackle</groupId>
-            <artifactId>NTBEA</artifactId>
-            <version>0.3.0</version>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
@@ -60,6 +55,12 @@
             <groupId>io.humble</groupId>
             <artifactId>humble-video-all</artifactId>
             <version>0.3.0</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.swinglabs/swingx -->
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swingx</artifactId>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>tw.edu.ntu.csie</groupId>

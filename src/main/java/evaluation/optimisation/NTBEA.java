@@ -6,10 +6,11 @@ import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.RunArg;
 import evaluation.listeners.IGameListener;
+import evaluation.optimisation.ntbea.functions.FunctionEvaluator;
+import evaluation.optimisation.ntbea.functions.NTBEAFunction;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import ntbea.NTupleBanditEA;
-import ntbea.NTupleSystem;
+import evaluation.optimisation.ntbea.*;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
@@ -17,7 +18,6 @@ import players.heuristics.PureScoreHeuristic;
 import players.heuristics.WinOnlyHeuristic;
 import utilities.JSONUtils;
 import utilities.Pair;
-import utilities.StatSummary;
 import utilities.Utils;
 
 import java.io.File;
@@ -32,8 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static evaluation.RunArg.byTeam;
-import static evaluation.RunArg.matchups;
+import static evaluation.RunArg.*;
 import static java.util.stream.Collectors.joining;
 
 public class NTBEA {
@@ -45,21 +44,32 @@ public class NTBEA {
     List<int[]> winnerSettings = new ArrayList<>();
     List<int[]> elites = new ArrayList<>();
     Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
-    GameEvaluator evaluator;
+    SolutionEvaluator evaluator;
     GameType game;
+    NTBEAFunction function;
     int nPlayers;
+    int discretisationLevel;
     int currentIteration = 0;
     IStateHeuristic stateHeuristic;
     IGameHeuristic gameHeuristic;
 
+    protected NTBEA(NTBEAParameters parameters) {
+        this.params = parameters;
+        landscapeModel = new NTupleSystem(params);
+        searchFramework = new NTupleBanditEA(landscapeModel, params);
+    }
+
+    public NTBEA(NTBEAParameters parameters, NTBEAFunction function, int discretisationLevel) {
+        this(parameters);
+        this.function = function;
+        this.discretisationLevel = discretisationLevel;
+
+        evaluator = new FunctionEvaluator(function, landscapeModel.getSearchSpace());
+    }
+
     public NTBEA(NTBEAParameters parameters, GameType game, int nPlayers) {
         // Now initialise the other bits and pieces needed for the NTBEA package
-        this.params = parameters;
-        landscapeModel = new NTupleSystem(params.searchSpace);
-        landscapeModel.setUse3Tuple(params.useThreeTuples);
-        landscapeModel.addTuples();
-
-        searchFramework = new NTupleBanditEA(landscapeModel, params.kExplore, params.neighbourhoodSize);
+        this(parameters);
         this.game = game;
         this.nPlayers = nPlayers;
         // Set up opponents
@@ -110,7 +120,11 @@ public class NTBEA {
     }
 
     public void setOpponents(List<AbstractPlayer> opponents) {
-        evaluator.opponents = opponents;
+        if (evaluator instanceof GameEvaluator gameEvaluator) {
+            gameEvaluator.opponents = opponents;
+        } else {
+            throw new AssertionError("Cannot set opponents for a non-game evaluator");
+        }
     }
 
     public void addElite(int[] settings) {
@@ -121,8 +135,7 @@ public class NTBEA {
     @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
         try (FileWriter writer = new FileWriter(fileName)) {
-            JSONObject json = params.searchSpace.getAgentJSON(settings);
-            json.put("budget", params.budget);
+            JSONObject json = ((ITPSearchSpace<?>) params.searchSpace).getAgentJSON(settings);
             writer.write(JSONUtils.prettyPrint(json, 1));
         } catch (IOException e) {
             throw new AssertionError("Error writing agent settings to file " + fileName);
@@ -172,8 +185,10 @@ public class NTBEA {
 
         // After all runs are complete, do some cleaning up and logging
         for (NTBEA clone : clones) {
-            writeAgentJSON(clone.winnerSettings.get(clone.winnerSettings.size() - 1),
+            if (params.searchSpace instanceof ITPSearchSpace<?>) {
+                writeAgentJSON(clone.winnerSettings.get(clone.winnerSettings.size() - 1),
                     params.destDir + File.separator + "Recommended_" + clone.currentIteration + ".json");
+            }
         }
         if (clones.size() > 1 || clones.get(0) != this) {
             // aggregate all data from all clones
@@ -190,9 +205,12 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
-        writeAgentJSON(bestResult.b,
-                params.destDir + File.separator + "Recommended_Final.json");
-        return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            writeAgentJSON(bestResult.b,
+                    params.destDir + File.separator + "Recommended_Final.json");
+            return new Pair<>(itp.instantiate(bestResult.b), bestResult.b);
+        }
+        return new Pair<>(null, bestResult.b);
     }
 
     /**
@@ -220,7 +238,7 @@ public class NTBEA {
             // i.e. we effectively add an extra 'run' for each elite
             for (int[] elite : elites) {
                 winnerSettings.add(elite);
-                winnersPerRun.add(params.searchSpace.getAgent(elite));
+                winnersPerRun.add(((ITPSearchSpace<?>) params.searchSpace).instantiate(elite));
             }
         }
 
@@ -303,6 +321,12 @@ public class NTBEA {
                 }
             }
         }
+        // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
+        if (params.verbose) {
+            System.out.println("\nFinal Recommendation: ");
+            // we don't log the final run to file to avoid duplication
+            printDetailsOfRun(bestResult);
+        }
     }
 
     protected void runTrials() {
@@ -316,23 +340,25 @@ public class NTBEA {
         runTrials();
 
         if (params.verbose)
-            logResults();
+            landscapeModel.logResults(params);
 
-        int[] thisWinnerSettings = Arrays.stream(landscapeModel.getBestOfSampled())
-                .mapToInt(d -> (int) d)
-                .toArray();
+        int[] thisWinnerSettings = landscapeModel.getBestSampled();
 
         // now run the evaluation games on the final recommendation (if any...if not we report the NTBEA landscape estimate)
         Pair<Double, Double> scoreOfBestAgent = params.evalGames == 0
-                ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0)
+                ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestSampled()), 0.0)
                 : evaluateWinner(thisWinnerSettings);
 
-        winnersPerRun.add(params.searchSpace.getAgent(thisWinnerSettings));
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            winnersPerRun.add(itp.instantiate(thisWinnerSettings));
+        }
         winnerSettings.add(thisWinnerSettings);
         Pair<Pair<Double, Double>, int[]> resultToReport = new Pair<>(scoreOfBestAgent, thisWinnerSettings);
         if (params.verbose)
             printDetailsOfRun(resultToReport);
-        logDetailsOfRun(resultToReport);
+        if (!params.logFile.isEmpty()) {
+            logSummary(resultToReport, params);
+        }
         if (resultToReport.a.a > bestResult.a.a)
             bestResult = resultToReport;
     }
@@ -348,56 +374,15 @@ public class NTBEA {
 
         double[] results = IntStream.range(0, params.evalGames)
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
-
+        Arrays.sort(results);
         double avg = Arrays.stream(results).average().orElse(0.0);
-        double stdErr = Math.sqrt(Arrays.stream(results)
-                .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
-
-        return new Pair<>(avg, stdErr);
+        double quantileValue = results[(int) (results.length * params.quantile / 100.0)];
+        double stdErr = Math.sqrt(Arrays.stream(results).map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
+        Pair<Double, Double> resultToReport = (params.quantile > 0) ?
+                new Pair<>(quantileValue, avg) :
+                new Pair<>(avg, stdErr);
+        return resultToReport;
     }
-
-
-    private void logResults() {
-
-        System.out.println("Current best sampled point (using mean estimate): " +
-                Arrays.toString(landscapeModel.getBestOfSampled()) +
-                String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled())));
-
-        String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, params.searchSpace.nDims())
-                .map(size -> landscapeModel.getTuples().stream()
-                        .filter(t -> t.tuple.length == size)
-                        .mapToInt(it -> it.ntMap.size())
-                        .sum()
-                ).toArray());
-
-        System.out.println("Tuples explored by size: " + tuplesExploredBySize);
-        System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
-
-        IntStream.range(0, params.searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
-                .mapToObj(i -> new Pair<>(params.searchSpace.name(i), landscapeModel.getTuples().get(i)))
-                .forEach(nameTuplePair ->
-                        nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
-                            StatSummary v = nameTuplePair.b.ntMap.get(k);
-                            System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
-                        })
-                );
-
-        System.out.println("\nSummary of 10 most tried full-tuple statistics:");
-        landscapeModel.getTuples().stream()
-                .filter(t -> t.tuple.length == params.searchSpace.nDims())
-                .forEach(t -> t.ntMap.keySet().stream()
-                        .map(k -> new Pair<>(k, t.ntMap.get(k)))
-                        .sorted(Comparator.comparing(p -> -p.b.n()))
-                        .limit(10)
-                        .forEach(item ->
-                                System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
-                                        item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
-                        )
-                );
-
-
-    }
-
     /**
      * This just prints out some useful info on the NTBEA results. It lists the full underlying recommended
      * parameter settings, and the estimated mean score of these (with std error).
@@ -413,17 +398,11 @@ public class NTBEA {
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%d", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                        .map(p -> String.format("\t%s:\t%s\n", params.searchSpace.name(p.a), valueToString(p.a, p.b, params.searchSpace)))
+                        .map(p -> String.format("\t%s:\t%s\n", params.searchSpace.name(p.a), valueToString(p.a, p.b, ((ITPSearchSpace<?>) params.searchSpace))))
                         .collect(joining(" ")));
     }
 
-    protected void logDetailsOfRun(Pair<Pair<Double, Double>, int[]> data) {
-        if (!params.logFile.isEmpty()) {
-            logSummary(data, params);
-        }
-    }
-
-    private static void logSummary(Pair<Pair<Double, Double>, int[]> data, NTBEAParameters params) {
+    public static void logSummary(Pair<Pair<Double, Double>, int[]> data, NTBEAParameters params) {
         try {
             Utils.createDirectory(params.destDir);
             File log = new File(params.destDir.isEmpty() ? params.logFile : params.destDir + File.separator + params.logFile);
@@ -432,11 +411,10 @@ public class NTBEA {
             // if logFile does not yet exist, write a header line first
             if (!fileExists) {
                 List<String> headers = new ArrayList<>();
-                headers.addAll(Arrays.asList("estimated value", "standard error"));
-                headers.addAll(params.searchSpace.getSearchKeys());
+                headers.addAll(Arrays.asList("Estimate", "Other"));
+                headers.addAll(IntStream.range(0, params.searchSpace.nDims()).mapToObj(params.searchSpace::name).toList());
                 writer.write(String.join("\t", headers) + "\n");
             }
-            // then write the output
             String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
             String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
                     .map(p -> valueToString(p.a, p.b, params.searchSpace))
@@ -447,7 +425,6 @@ public class NTBEA {
 
 
         } catch (IOException e) {
-            e.printStackTrace();
             System.out.println(e.getMessage() + " : Error accessing file " + params.logFile);
         }
     }
@@ -456,7 +433,7 @@ public class NTBEA {
         return new NTBEA(params, game, nPlayers);
     }
 
-    private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace ss) {
+    private static String valueToString(int paramIndex, int valueIndex, SearchSpace ss) {
         Object value = ss.value(paramIndex, valueIndex);
         String valueString = value.toString();
         if (value instanceof Integer) {

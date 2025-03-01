@@ -44,7 +44,7 @@ public class CQGameState extends AbstractGameState {
     private int selectedTroop = -1; // The troop that is allowed to move and attack
     public Vector2D highlight = null; // the highlighted cell, whether or not it contains anything
     public int cmdHighlight = -1; // the highlighted command, for the current player.
-    GridBoard<Cell> gridBoard;
+    GridBoard gridBoard;
     PartialObservableDeck[] chosenCommands;
     int[] commandPoints = new int[]{0, 0};
 
@@ -114,7 +114,7 @@ public class CQGameState extends AbstractGameState {
     }
 
     /*======= SIMPLE GETTERS AND SETTERS =======*/
-    public GridBoard<Cell> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 
