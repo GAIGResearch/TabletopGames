@@ -44,7 +44,7 @@ public class SingleTreeNode {
     // variables to track rollout - these were originally local in rollout(); but
     // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
     // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
-    protected int roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
+    protected int lastActorInRollout, lastTurnInRollout, lastRoundInRollout;
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
     Map<AbstractAction, Double> actionValueEstimates = new HashMap<>();
     Map<AbstractAction, Double> actionPDFEstimates = new HashMap<>();
@@ -555,6 +555,8 @@ public class SingleTreeNode {
     protected void advanceState(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // we execute a copy(), because this can change the action, so we then don't find the node later!
         if (inRollout) {
+            lastTurnInRollout = gs.getTurnCounter();
+            lastRoundInRollout = gs.getRoundCounter();
             lastActorInRollout = gs.getCurrentPlayer();
             root.actionsInRollout.add(new Pair<>(lastActorInRollout, act));
         } else {
@@ -587,6 +589,8 @@ public class SingleTreeNode {
             if (inRollout) {
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
                 lastActorInRollout = gs.getCurrentPlayer();
+                lastRoundInRollout = gs.getRoundCounter();
+                lastTurnInRollout = gs.getTurnCounter();
             }
             forwardModel.next(gs, action);
             root.fmCallsCount++;
@@ -883,8 +887,8 @@ public class SingleTreeNode {
      */
     protected double[] rollout(int lastActor) {
         lastActorInRollout = lastActor;
-        roundAtStartOfRollout = openLoopState.getRoundCounter();
-        turnAtStartOfRollout = openLoopState.getTurnCounter();
+        lastRoundInRollout = openLoopState.getRoundCounter();
+        lastTurnInRollout = openLoopState.getTurnCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
@@ -906,7 +910,6 @@ public class SingleTreeNode {
                 }
                 AbstractPlayer agent = rolloutState.getCurrentPlayer() == root.decisionPlayer ? params.getRolloutStrategy() : params.getOpponentModel();
                 next = agent.getAction(rolloutState, availableActions);
-                lastActorInRollout = rolloutState.getCurrentPlayer();
                 advanceState(rolloutState, next, true);
             }
         }
@@ -934,16 +937,16 @@ public class SingleTreeNode {
         int maxRollout = params.rolloutLengthPerPlayer ? params.rolloutLength * rollerState.getNPlayers() : params.rolloutLength;
         int rolloutDepth = switch (params.rolloutIncrementType) {
             case TICK -> root.actionsInRollout.size();
-            case TURN -> rollerState.getTurnCounter() - root.state.getTurnCounter();
-            case ROUND -> rollerState.getRoundCounter() - root.state.getRoundCounter();
+            case TURN -> rollerState.getTurnCounter() - turnAtStartOfRollout;
+            case ROUND -> rollerState.getRoundCounter() - roundAtStartOfRollout;
         };
         if (rolloutDepth >= maxRollout) {
             return switch (params.rolloutTermination) {
                 case DEFAULT -> true;
                 case END_ACTION -> lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
                 case START_ACTION -> lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
-                case END_TURN -> rollerState.getTurnCounter() != turnAtStartOfRollout;
-                case END_ROUND -> rollerState.getRoundCounter() != roundAtStartOfRollout;
+                case END_TURN -> rollerState.getTurnCounter() != lastTurnInRollout;
+                case END_ROUND -> rollerState.getRoundCounter() != lastRoundInRollout;
             };
         }
         return false;
