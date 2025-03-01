@@ -117,14 +117,9 @@ public class ClaimRoute extends AbstractAction {
 
 
 
-
-
-        System.out.println("player train cars before " + tgs.getTrainCars(playerID));
         tgs.deductTrainCars(playerID, costOfRoute);
-        System.out.println("player train cars after  " + tgs.getTrainCars(playerID));
 
-        Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
-        edge.setProperty(routeClaimedProp);
+
 
         //Needed to differentiate which route they used (if theres 2 diff colours on same route)
         if (indexOfColor == 0){
@@ -133,6 +128,34 @@ public class ClaimRoute extends AbstractAction {
         } else if (indexOfColor == 1) {
             Property claimedByPlayerProp = new PropertyInt("claimedByPlayerRoute2", (Integer) playerID);
             edge.setProperty(claimedByPlayerProp);
+        }
+
+        Property claimedByPlayerRoute1Prop = edge.getProperty(claimedByPlayerRoute1Hash);
+        Property claimedByPlayerRoute2Prop = edge.getProperty(claimedByPlayerRoute2Hash);
+
+        Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
+
+        int claimedByPlayerRoute1 = ((PropertyInt) claimedByPlayerRoute1Prop).value;
+        System.out.println("route1 claimed: " + claimedByPlayerRoute1);
+        int claimedByPlayerRoute2 = -2;
+        if (claimedByPlayerRoute2Prop != null){
+            claimedByPlayerRoute2  = ((PropertyInt) claimedByPlayerRoute2Prop).value;
+        }
+        System.out.println("route2 claimed: " + claimedByPlayerRoute2);
+
+
+        //note to self: gray ones not setting properly cuz its always editing route1
+        if (tgs.getNPlayers() >= 4){ //in 4+ players, double routes open up
+            System.out.println(tgs.getNPlayers() + " more than 4 players");
+            if (claimedByPlayerRoute1 != -1 && claimedByPlayerRoute2 != -1) { //if both routes taken and double route enabled, its now completely closed off
+                edge.setProperty(routeClaimedProp);
+                System.out.println(" double route claimed more than 4 players");
+            } else {
+                System.out.println(" double route not claimed more than 4 players");
+            }
+        } else{
+            System.out.println("less than 4 players");
+            edge.setProperty(routeClaimedProp);
         }
 
 
@@ -157,12 +180,11 @@ public class ClaimRoute extends AbstractAction {
             trainCardCount.put(cardColor, trainCardCount.getOrDefault(cardColor, 0) + 1);
         }
 
-        System.out.println("traincardamount :" + trainCardCount);
+
         return trainCardCount;
     }
 
     void removeTrainCarCards(Deck<Card> playerTrainCardHandDeck ,int amountToRemove, String colorOfRouteToRemove, int amountOfLocomotivesToRemove, Deck<Card> trainCardDiscardDeck){
-        System.out.println("amounttoremove: " + amountToRemove + "colorOfRoute: " + colorOfRouteToRemove + " amountoflocomotivestoremove: " + amountOfLocomotivesToRemove );
 
         for (int i = 0; i < playerTrainCardHandDeck.getSize() && amountToRemove > 0; i ++) { //remove colour cards
             Card currentCard = playerTrainCardHandDeck.get(i);
@@ -185,7 +207,6 @@ public class ClaimRoute extends AbstractAction {
             }
         }
 
-        System.out.println("Discard deck after removeTrainCarCards: " + trainCardDiscardDeck);
 
     }
     /**

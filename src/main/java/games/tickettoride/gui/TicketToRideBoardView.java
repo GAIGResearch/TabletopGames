@@ -211,10 +211,22 @@ public class TicketToRideBoardView extends JComponent {
             locationNameToNode.put( String.valueOf(b.getProperty(nameHash)), b);
         }
 
+
+
         Collection<Edge> edgeList = graphBoard.getBoardEdges();
 
         //draw lines between locations
         for (Edge currentEdge : edgeList) {
+
+            Property claimedByPlayerRoute1Prop = currentEdge.getProperty(claimedByPlayerRoute1Hash);
+            Property claimedByPlayerRoute2Prop = currentEdge.getProperty(claimedByPlayerRoute2Hash);
+
+            int claimedByPlayerRoute1 = ((PropertyInt) claimedByPlayerRoute1Prop).value;
+            int claimedByPlayerRoute2 = -2;
+            if (claimedByPlayerRoute2Prop != null){
+                claimedByPlayerRoute2  = ((PropertyInt) claimedByPlayerRoute2Prop).value;
+            }
+
 
             Property nodeProp = currentEdge.getProperty(nodesHash);
             String[] nodeNames = ((PropertyStringArray) nodeProp).getValues();
@@ -233,7 +245,12 @@ public class TicketToRideBoardView extends JComponent {
             boolean routeClaimed  = ((PropertyBoolean)currentEdge.getProperty(routeClaimedHash)).value;
             if (routeClaimed){
                 g.setColor(Color.RED);
-            } else {
+            } else if(claimedByPlayerRoute1 != -1) { //partially taken double route
+                g.setColor(Color.ORANGE);
+
+            } else if (claimedByPlayerRoute2 != -1 && claimedByPlayerRoute2Prop != null ) {
+                g.setColor(Color.ORANGE);
+            } else{
                 g.setColor(Color.GREEN);
             }
 

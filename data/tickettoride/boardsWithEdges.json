@@ -231,6 +231,7 @@
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 1],
         "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
@@ -238,6 +239,7 @@
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 1],
         "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
@@ -416,6 +418,7 @@
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 1],
         "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
@@ -438,6 +441,7 @@
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 2],
         "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
@@ -629,6 +633,7 @@
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 2],
         "claimedByPlayerRoute1": ["Integer", -1],
+        "claimedByPlayerRoute2": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },
       {
@@ -698,6 +703,13 @@
         "nodes": ["String[]", ["EL PASO", "SANTA FE"]],
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 2],
+        "claimedByPlayerRoute1": ["Integer", -1],
+        "routeClaimed": ["Boolean", false]
+      },
+      {
+        "nodes": ["String[]", ["EL PASO", "PHOENIX"]],
+        "color": ["String[]", ["Gray"]],
+        "trainCardsRequired": ["Integer", 3],
         "claimedByPlayerRoute1": ["Integer", -1],
         "routeClaimed": ["Boolean", false]
       },

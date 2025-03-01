@@ -196,7 +196,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         //System.out.println(playerId + " in compute action");
 
 
-        HashMap<Edge, List<Integer>> routesAvailableToBuy = (HashMap<Edge, List<Integer>>) checkRoutesAvailable(gameState); //key of edges, index of which color to buy
+        HashMap<Edge, List<Integer>> routesAvailableToBuy = (HashMap<Edge, List<Integer>>) checkRoutesAvailable(gameState); //key of edges, indexs of which color to buy
         if (!routesAvailableToBuy.isEmpty()) {
 
             for (Map.Entry<Edge, List<Integer>> currentRoute : routesAvailableToBuy.entrySet()) { //add every route available to list of actions
@@ -207,16 +207,25 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
                 int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
 
-                List<Integer> indexsOfColors = routesAvailableToBuy.get(currentEdge);
+                List<Integer> indexesOfColors = routesAvailableToBuy.get(currentEdge);
                 Property colorProp = currentEdge.getProperty(colorHashKey);
                 String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
-                for (int i = 0; i < indexsOfColors.size(); i++){
-                    String colorOfRoute = colorsOfRoute[indexsOfColors.get(i)];
-//                    System.out.println(colorOfRoute + " is the colors");
+                System.out.println(colorsOfRoute + " is the colors");
+                System.out.println(indexesOfColors  + " indexs of color");
+                for (int i = 0; i < indexesOfColors.size(); i++){
+                    String colorOfRoute;
+                    if (i < colorsOfRoute.length && indexesOfColors.get(i) < colorsOfRoute.length ){ //need to check because grey double routes, colorsOfRoute would be len = 1 but 2 of them could be available
+                        colorOfRoute = colorsOfRoute[indexesOfColors.get(i)];
+                    } else{
+                        colorOfRoute = colorsOfRoute[0];
+
+                    }
+
+                    System.out.println(colorOfRoute + " is the colors");
 //
 //                    System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
 
-                    actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, i));
+                    actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
                 }
 
 
@@ -296,7 +305,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 if (routeClaimed) {
                     System.out.println("This route is already claimed.");
                 } else {
-                    boolean[] routesPlayerCanAfford = checkPlayerCanAffordRoute(tg, edge);
+                    boolean[] routesPlayerCanAfford = checkPlayerCanAffordRoute(tg, edge); //e.g. true true means they can afford both in a double route
 
                     boolean atleastOneAfforded = false;
                     List<Integer> colorIndexesAvailable = new ArrayList<>();
@@ -355,6 +364,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
     boolean[] checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
         TicketToRideGameState tg = (TicketToRideGameState) gameState;
 
+        int currentPlayer = tg.getCurrentPlayer();
         boolean[] listOfAvailable = new boolean[2]; //holds indexes of colors they can afford. if both are false, then none
         listOfAvailable[0] = false;
         listOfAvailable[1] = false;
@@ -394,33 +404,58 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
                 if (colorsOfRoute[0].equals("Gray")){ //gray route claimable by any colour, so check every colour
 
-                    for (String color : playerTrainCards.keySet()) {
+                    for (String color : playerTrainCards.keySet()) { //todo: +4 players cant claim same route twice
 
                         int colorCount = playerTrainCards.get(color);
 
                         if ((colorCount + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
                             System.out.println("Gray route affordable " + color);
                             if (claimedByPlayerRoute1 == -1) {
-                                listOfAvailable[0] = true;
-                                System.out.println("Gray route route 1 able");
+                                if (claimedByPlayerRoute2Prop != null){
+                                    if (claimedByPlayerRoute2 != currentPlayer){ //check other route not claimed by same player
+                                        listOfAvailable[0] = true;
+                                        System.out.println("Gray route route 1 able");
+                                    }
+                                } else{
+                                    listOfAvailable[0] = true;
+                                    System.out.println("Gray route route 1 able");
+                                }
+
                             }
                             if (claimedByPlayerRoute2Prop != null){
-                                if (claimedByPlayerRoute2 == -1) {
+                                if (claimedByPlayerRoute2 == -1 && claimedByPlayerRoute1 != currentPlayer) {
                                     listOfAvailable[1] = true;
                                     System.out.println("Gray route route 2 able");
                                 }
                             }
                         }
                     }
-                } else {
+                } else { //any other colour
 
                     for (int i = 0; i < colorsOfRoute.length; i++){ //
                         int numberOfRequiredColor = playerTrainCards.getOrDefault(colorsOfRoute[i], 0);
                         System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
                         System.out.println("Player has Train Cards: " + numberOfRequiredColor);
                         if ((numberOfRequiredColor + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
+                            if (claimedByPlayerRoute1 == -1 && i == 0) {
+                                if (claimedByPlayerRoute2Prop != null){
+                                    if (claimedByPlayerRoute2 != currentPlayer){ //check other route not claimed by same player
+                                        listOfAvailable[0] = true;
+                                        System.out.println("Gray route route 1 able");
+                                    }
+                                } else{
+                                    listOfAvailable[0] = true;
+                                    System.out.println("Gray route route 1 able");
+                                }
+                            }
+                            if (claimedByPlayerRoute2Prop != null && i == 1 && claimedByPlayerRoute1 != currentPlayer){
+                                if (claimedByPlayerRoute2 == -1) {
+                                    listOfAvailable[1] = true;
+                                    System.out.println("Any colour route 1 able");
+                                }
+                            }
                             System.out.println("Player ID " + playerID + " can buy this route of choice " + i);
-                            listOfAvailable[i] = true;
+                            //listOfAvailable[i] = true;
                         } else {
                             System.out.println("Player ID " + playerID + " cant buy this route");
                         }
