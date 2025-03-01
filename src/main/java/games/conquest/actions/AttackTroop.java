@@ -75,7 +75,7 @@ public class AttackTroop extends CQAction {
         int reward = target.damage(dmg);
         if (reward > 0) {
             cqgs.gainCommandPoints(target.getOwnerId() ^ 1, reward);
-            cqgs.logEvent(Event.GameEvent.GAME_EVENT, "Killed troop: " + target);
+            cqgs.logEvent(Event.GameEvent.ACTION_CHOSEN, "Killed troop: " + target);
             return true;
         }
         return false;
