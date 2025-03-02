@@ -1,6 +1,7 @@
 package evaluation.optimisation;
 
 import core.interfaces.ITunableParameters;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
@@ -171,11 +172,15 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         // We now iterate through all the tunable parameters and find the setting that corresponds
         // to the json content; if none provided then we use the default
         for (int i = 0; i < searchDimensions.size(); i++) {
-            String name = searchDimensions.get(i);
-            Object value = json.get(name);
+            String fullParameterName = searchDimensions.get(i);
+            String[] name = fullParameterName.split("\\.");
+            Object value = json;
+            for (int j = 0; j < name.length; j++) {
+                value =  ((JSONObject) value).get(name[j]);
+            }
             if (value == null) {
                 // we use the default value
-                value = itp.getDefaultParameterValue(name);
+                value = itp.getDefaultParameterValue(fullParameterName);
             }
             // we need to find the index of the value in the list of possible values
             List<Object> possibleValues = values.get(i);
@@ -187,7 +192,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 }
             }
             if (index == -1) {
-                throw new AssertionError("Value " + value + " not found in possible values for " + name);
+                throw new AssertionError("Value " + value + " not found in possible values for " + fullParameterName);
             }
             settings[i] = index;
         }
@@ -202,7 +207,9 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                 continue;
             }
             Object value = json.get(keyName);
-            // TODO: leave recursion for now
+            // we do not check recursively here (possible future enhancement)
+            if (value instanceof JSONObject)
+                continue;
             Object defaultValue = itp.getDefaultParameterValue(keyName);
             if (!value.equals(defaultValue)) {
                 throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);

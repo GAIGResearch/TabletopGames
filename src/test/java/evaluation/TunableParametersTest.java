@@ -122,13 +122,13 @@ public class TunableParametersTest {
         List<CoarseTunableHeuristic.HeuristicType> expectedArray = Arrays.asList(WIN_ONLY, SCORE_PLUS, LEADER);
         assertEquals(expectedArray, itp.allValues(heuristicTypeIndex));
 
-        int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        int[] settings = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         settings[heuristicTypeIndex] = 1;
         settings[MASTBoltzmannIndex] = 3;
         MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertEquals(10.0, params.MASTBoltzmann, 0.001);
-        assertTrue(params.getHeuristic() instanceof  CoarseTunableHeuristic);
+        assertTrue(params.getHeuristic() instanceof CoarseTunableHeuristic);
         assertEquals(SCORE_PLUS, ((CoarseTunableHeuristic) params.heuristic).getHeuristicType());
     }
 
@@ -145,11 +145,11 @@ public class TunableParametersTest {
         assertEquals(5, itp.allValues(temperatureIndex).size());
         assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.allValues(temperatureIndex));
 
-        int[] settings = new int[] {0, 0, 0, 0, 0};
+        int[] settings = new int[]{0, 0, 0, 0, 0};
 
         MCTSPlayer agent = itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
-        assertTrue(params.getRolloutStrategy() instanceof  BoltzmannActionPlayer);
+        assertTrue(params.getRolloutStrategy() instanceof BoltzmannActionPlayer);
         BoltzmannActionPlayer rollout = (BoltzmannActionPlayer) params.getRolloutStrategy();
         assertEquals(0.01, rollout.temperature, 0.001);
         assertEquals(new PuertoRicoActionHeuristic001(), rollout.getActionHeuristic());
@@ -275,15 +275,21 @@ public class TunableParametersTest {
         JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
         for (int i = 0; i < settings.length; i++) {
             String parameterName = itp.name(i);
+            // now account for nested parameters
+            String[] parts = parameterName.split("\\.");
+            Object jsonValue = json;
+            for (int j = 0; j < parts.length; j++) {
+                jsonValue = ((JSONObject) jsonValue).get(parts[j]);
+            }
             Object value = itp.value(i, settings[i]);
-            Object jsonValue = json.get(parameterName);
             if (jsonValue == null) {
                 // pick up default
+                if (parameterName.equals("heuristic.heuristicType")) {
+                    fail("Should have found a value for " + parameterName);
+                }
                 jsonValue = params.getDefaultParameterValue(parameterName);
             }
-            if (!JSONUtils.areValuesEqual(value, jsonValue)) {
-                System.out.println(parameterName + " " + value + " " + jsonValue);
-            }
+            System.out.println(parameterName + " " + value + " " + jsonValue);
             assertTrue(JSONUtils.areValuesEqual(value, jsonValue));
         }
     }
