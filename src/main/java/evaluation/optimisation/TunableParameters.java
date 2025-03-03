@@ -392,7 +392,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             Object value = getParameterValue(name);
             if (value != null) {
                 // check for defaults
-                if (excludeDefaults && value.equals(getDefaultParameterValue(name))) {
+                if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
                     continue;
                 }
                 if (value instanceof ITunableParameters tp) {
@@ -408,7 +408,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                         value instanceof Boolean)) {
                     // in this case we need to extract from the original rawJSON
                     if (rawJSON == null) {
-                        if (getDefaultParameterValue(name).equals(value))
+                        if (JSONUtils.areValuesEqual(value, getDefaultParameterValue(name)))
                             continue; // in this case we have the default, so no need to pull in
                         throw new AssertionError("No rawJSON available to extract value for " + name);
                     }

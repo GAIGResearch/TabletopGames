@@ -10,6 +10,7 @@ import evaluation.optimisation.ntbea.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -168,6 +169,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
      */
     public int[] defaultSettings() {
         int[] settings = new int[searchDimensions.size()];
+        Arrays.fill(settings, -1);
         for (int i = 0; i < searchDimensions.size(); i++) {
             Object defaultValue = itp.getDefaultParameterValue(searchDimensions.get(i));
             List<Object> possibleValues = values.get(i);
@@ -177,7 +179,6 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
                     break;
                 }
             }
-            settings[i] = -1;
         }
         return settings;
     }
