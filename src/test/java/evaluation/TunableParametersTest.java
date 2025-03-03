@@ -294,4 +294,18 @@ public class TunableParametersTest {
         }
     }
 
+    @Test
+    public void instanceToJSONWithNestedDefault() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+
+        assertEquals("heuristic.heuristicType", itp.name(5));
+        settings[5] = 0;  // WIN_ONLY is default
+        JSONObject json = itp.constructAgentJSON(settings);
+        JSONObject heuristicJSON = (JSONObject) json.get("heuristic");
+        assertNotNull(heuristicJSON);
+        assertEquals("players.heuristics.CoarseTunableHeuristic", heuristicJSON.get("class"));
+        assertNull(heuristicJSON.get("heuristicType"));
+    }
+
 }

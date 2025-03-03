@@ -128,7 +128,10 @@ public class OneStepDeviations {
                     continue;
                 }
                 double stdError = Math.sqrt(totalScoreSquared[i] / gamesPlayed[i] - Math.pow(totalScore[i] / gamesPlayed[i], 2)) / Math.sqrt(gamesPlayed[i]);
-                if (totalScore[i] / gamesPlayed[i] > bestScore - 4 * Math.max(stdError, bestStdError)) {
+                double stdErrorMultiple = 2.5 + 0.08 * players.size();
+                // this is a very rough adjustment. 2.58 is about a 1% confidence interval, but is only valid if we have
+                // a single comparison. Here we have many, so we need to adjust for multiple comparisons
+                if (totalScore[i] / gamesPlayed[i] > bestScore - stdErrorMultiple * Math.max(stdError, bestStdError)) {
                     newPlayers.add(Pair.of(i, player.b));
                     //     System.out.printf("Retaining %s (%d) with score %.3f +/- %.3f %n", players.get(i), i, totalScore[i] / gamesPlayed[i], stdError);
                 } else {

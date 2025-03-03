@@ -379,8 +379,6 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
 
     @Override
     public JSONObject instanceToJSON(boolean excludeDefaults, Map<String, Integer> settings) {
-        // this is very similar to getJSONDescription(), but only
-        // considers the current Parameter settings
         // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
         JSONObject retValue = new JSONObject();
         retValue.put("class", this.getClass().getName());
@@ -391,30 +389,32 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             }
             Object value = getParameterValue(name);
             if (value != null) {
-                // check for defaults
-                if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
-                    continue;
-                }
                 if (value instanceof ITunableParameters tp) {
                     // settings need to have namespace adapted (remove the top level)
                     Map<String, Integer> subSettings = settings.entrySet().stream()
                             .filter(e -> e.getKey().contains("."))
                             .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
                     value = tp.instanceToJSON(excludeDefaults, subSettings);
-                } else if (value instanceof Enum) {
-                    value = value.toString();
-                } else if (!(value instanceof Integer || value instanceof Long ||
-                        value instanceof Double || value instanceof String ||
-                        value instanceof Boolean)) {
-                    // in this case we need to extract from the original rawJSON
-                    if (rawJSON == null) {
-                        if (JSONUtils.areValuesEqual(value, getDefaultParameterValue(name)))
-                            continue; // in this case we have the default, so no need to pull in
-                        throw new AssertionError("No rawJSON available to extract value for " + name);
+                } else {
+                    // check for defaults
+                    if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
+                        continue;
                     }
-                    Object rawValue = rawJSON.get(name);
-                    if (rawValue instanceof JSONArray arr) {
-                        value = arr.get(settings.get(name));
+                    if (value instanceof Enum) {
+                        value = value.toString();
+                    } else if (!(value instanceof Integer || value instanceof Long ||
+                            value instanceof Double || value instanceof String ||
+                            value instanceof Boolean)) {
+                        // in this case we need to extract from the original rawJSON
+                        if (rawJSON == null) {
+                            if (JSONUtils.areValuesEqual(value, getDefaultParameterValue(name)))
+                                continue; // in this case we have the default, so no need to pull in
+                            throw new AssertionError("No rawJSON available to extract value for " + name);
+                        }
+                        Object rawValue = rawJSON.get(name);
+                        if (rawValue instanceof JSONArray arr) {
+                            value = arr.get(settings.get(name));
+                        }
                     }
                 }
                 retValue.put(name, value);
