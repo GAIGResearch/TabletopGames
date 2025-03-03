@@ -763,6 +763,10 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).b;
     }
 
+    public double getSumOfSquares(int agentID, String type) {
+        return type.equals("Win") ? pointsPerPlayerSquared[agentID] : rankPerPlayerSquared[agentID];
+    }
+
     public double getOrdinalRank(int agentID) {
         return finalOrdinalRanking.get(agentID).a;
     }

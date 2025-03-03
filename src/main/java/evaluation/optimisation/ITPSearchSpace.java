@@ -162,6 +162,26 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         return itp.instantiate();
     }
 
+    /*
+    * This method returns the default settings for the search space.
+    * If the actual default value is not in the search space, then the value will be -1.
+     */
+    public int[] defaultSettings() {
+        int[] settings = new int[searchDimensions.size()];
+        for (int i = 0; i < searchDimensions.size(); i++) {
+            Object defaultValue = itp.getDefaultParameterValue(searchDimensions.get(i));
+            List<Object> possibleValues = values.get(i);
+            for (int j = 0; j < possibleValues.size(); j++) {
+                if (JSONUtils.areValuesEqual(possibleValues.get(j), defaultValue)) {
+                    settings[i] = j;
+                    break;
+                }
+            }
+            settings[i] = -1;
+        }
+        return settings;
+    }
+
     // This will read in a JSON file and instantiate an agent from it
     // it will throw an error if the contents of the JSON file do not match the SearchSpace
     // The return value is settings that will instantiate the agent from the search space
@@ -203,7 +223,7 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         // This is recursive as needed over any nested ITunableParameters in the JSON
         for (Object key : json.keySet()) {
             String keyName = (String) key;
-            if (keyName.equals("class") || keyName.equals("args") || searchDimensions.contains(keyName)) {
+            if (keyName.equals("class") || keyName.equals("args") || keyName.equals("budget") || searchDimensions.contains(keyName)) {
                 continue;
             }
             Object value = json.get(keyName);
