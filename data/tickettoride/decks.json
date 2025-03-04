@@ -53,39 +53,183 @@
     "cards": [
       {
         "name": ["String","1"],
-        "points": ["Integer", 15],
+        "points": ["Integer", 6],
         "location1": ["String","LOS ANGELES"],
         "location2": ["String","SAN FRANCISCO"]
       },
       {
         "name": ["String","2"],
-        "points": ["Integer", 30],
-        "location1": ["String","LOS ANGELES"],
-        "location2": ["String","SALT LAKE CITY"]
+        "points": ["Integer", 6],
+        "location1": ["String","NEW YORK"],
+        "location2": ["String","ATLANTA"]
       },
       {
         "name": ["String","3"],
-        "points": ["Integer", 32],
-        "location1": ["String","LOS ANGELES"],
-        "location2": ["String","SALT LAKE CITY"]
+        "points": ["Integer", 7],
+        "location1": ["String","CHICAGO"],
+        "location2": ["String","NEW ORLEANS"]
       },
       {
         "name": ["String","4"],
-        "points": ["Integer", 33],
-        "location1": ["String","LOS ANGELES"],
+        "points": ["Integer", 7],
+        "location1": ["String","CALGARY"],
         "location2": ["String","SALT LAKE CITY"]
       },
       {
         "name": ["String","5"],
-        "points": ["Integer", 34],
-        "location1": ["String","LOS ANGELES"],
-        "location2": ["String","SALT LAKE CITY"]
+        "points": ["Integer", 1],
+        "location1": ["String","VANCOUVER"],
+        "location2": ["String","SEATTLE"]
       },
       {
         "name": ["String","6"],
-        "points": ["Integer", 34],
+        "points": ["Integer", 1],
+        "location1": ["String","DALLAS"],
+        "location2": ["String","HOUSTON"]
+      },
+      {
+        "name": ["String","7"],
+        "points": ["Integer", 4],
+        "location1": ["String","DENVER"],
+        "location2": ["String","EL PASO"]
+      },
+      {
+        "name": ["String","8"],
+        "points": ["Integer", 12],
+        "location1": ["String","WINNIPEG"],
+        "location2": ["String","HOUSTON"]
+      },
+      {
+        "name": ["String","9"],
+        "points": ["Integer", 12],
+        "location1": ["String","BOSTON"],
+        "location2": ["String","MIAMI"]
+      },
+      {
+        "name": ["String","10"],
+        "points": ["Integer", 22],
+        "location1": ["String","SEATTLE"],
+        "location2": ["String","NEW YORK"]
+      },
+      {
+        "name": ["String","11"],
+        "points": ["Integer", 9],
+        "location1": ["String","MONTREAL"],
+        "location2": ["String","ATLANTA"]
+      },
+      {
+        "name": ["String","12"],
+        "points": ["Integer", 8],
+        "location1": ["String","SAULT ST. MARIE"],
+        "location2": ["String","NASHVILLE"]
+      },
+      {
+        "name": ["String","13"],
+        "points": ["Integer", 17],
+        "location1": ["String","PORTLAND"],
+        "location2": ["String","NASHVILLE"]
+      },
+      {
+        "name": ["String","14"],
+        "points": ["Integer", 13],
+        "location1": ["String","VANCOUVER"],
+        "location2": ["String","SANTA FE"]
+      },
+      {
+        "name": ["String","15"],
+        "points": ["Integer", 10],
+        "location1": ["String","TORONTO"],
+        "location2": ["String","MIAMI"]
+      },
+      {
+        "name": ["String","16"],
+        "points": ["Integer", 17],
+        "location1": ["String","SAN FRANCISCO"],
+        "location2": ["String","ATLANTA"]
+      },
+      {
+        "name": ["String","17"],
+        "points": ["Integer", 5],
+        "location1": ["String","KANSAS CITY"],
+        "location2": ["String","HOUSTON"]
+      },
+      {
+        "name": ["String","18"],
+        "points": ["Integer", 16],
+        "location1": ["String","LOS ANGELES"],
+        "location2": ["String","CHICAGO"]
+      },
+      {
+        "name": ["String","19"],
+        "points": ["Integer", 8],
+        "location1": ["String","DULUTH"],
+        "location2": ["String","HOUSTON"]
+      },
+      {
+        "name": ["String","20"],
+        "points": ["Integer", 9],
+        "location1": ["String","SAULT ST. MARIE"],
+        "location2": ["String","OKLAHOMA CITY"]
+      },
+      {
+        "name": ["String","21"],
+        "points": ["Integer", 13],
+        "location1": ["String","MONTREAL"],
+        "location2": ["String","NEW ORLEANS"]
+      },
+      {
+        "name": ["String","22"],
+        "points": ["Integer", 11],
+        "location1": ["String","WINNIPEG"],
+        "location2": ["String","LITTLE ROCK"]
+      },
+      {
+        "name": ["String","23"],
+        "points": ["Integer", 8],
         "location1": ["String","HELENA"],
         "location2": ["String","LOS ANGELES"]
+      },
+      {
+        "name": ["String","24"],
+        "points": ["Integer", 9],
+        "location1": ["String","CHICAGO"],
+        "location2": ["String","SANTA FE"]
+      },
+      {
+        "name": ["String","25"],
+        "points": ["Integer", 13],
+        "location1": ["String","CALGARY"],
+        "location2": ["String","PHOENIX"]
+      },
+      {
+        "name": ["String","26"],
+        "points": ["Integer", 11],
+        "location1": ["String","DENVER"],
+        "location2": ["String","PITTSBURGH"]
+      },
+      {
+        "name": ["String","27"],
+        "points": ["Integer", 4],
+        "location1": ["String","TORONTO"],
+        "location2": ["String","CALGARY"]
+      },
+      {
+        "name": ["String","28"],
+        "points": ["Integer", 7],
+        "location1": ["String","SALT LAKE CITY"],
+        "location2": ["String","NASHVILLE"]
+      },
+      {
+        "name": ["String","29"],
+        "points": ["Integer", 11],
+        "location1": ["String","PORTLAND"],
+        "location2": ["String","PHOENIX"]
+      },
+      {
+        "name": ["String","30"],
+        "points": ["Integer", 10],
+        "location1": ["String","DULUTH"],
+        "location2": ["String","EL PASO"]
       }
     ]
   }
