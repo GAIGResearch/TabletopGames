@@ -195,14 +195,14 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
         //System.out.println(playerId + " in compute action");
 
+        List<Edge> allRoutesAvailable = tg.getAvailableRoutes();
+        HashMap<Edge, List<Integer>> routesAvailableToBuy = tg.getAffordableRoutes(allRoutesAvailable);  //key of edges, indexs of which color to buy
 
-        HashMap<Edge, List<Integer>> routesAvailableToBuy = (HashMap<Edge, List<Integer>>) checkRoutesAvailable(gameState); //key of edges, indexs of which color to buy
         if (!routesAvailableToBuy.isEmpty()) {
 
             for (Map.Entry<Edge, List<Integer>> currentRoute : routesAvailableToBuy.entrySet()) { //add every route available to list of actions
 
                 Edge currentEdge = currentRoute.getKey();
-
 
                 Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
                 int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
@@ -227,11 +227,6 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
                     actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
                 }
-
-
-
-
-
 
             }
 
@@ -273,214 +268,7 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         endPlayerTurn(gs);
 
     }
-    //return the edge and which integer of colour they can buy
-    HashMap<Edge, List<Integer>> checkRoutesAvailable(AbstractGameState gameState) {
-        TicketToRideGameState tg = (TicketToRideGameState) gameState;
-        HashMap<Edge, List<Integer>> routesAvailableToBuy = new HashMap<Edge, List<Integer>>();
 
-        Area gameArea = tg.getArea(-1);
-        GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
-
-        HashSet<Edge> boardEdges = (HashSet<Edge>) world.getBoardEdges();
-
-        Collection<BoardNodeWithEdges> boardNodes = (Collection<BoardNodeWithEdges>) world.getBoardNodes();
-
-        System.out.println(boardNodes.size());
-
-        int routeClaimedHashKey = Hash.GetInstance().hash("routeClaimed");
-        int nodesHashKey = Hash.GetInstance().hash("nodes");
-        //goes through boardEdges list approach to find free edges - potentially faster
-        for (Edge edge : boardEdges) {
-            HashMap<Integer, Property> allProps = edge.getProperties();
-            Property nodeProp = edge.getProperty(nodesHashKey);
-
-            String nodes = Arrays.toString(((PropertyStringArray) nodeProp).getValues());
-
-            System.out.println("Edge has nodes: " +  nodes);
-
-            Property routeClaimedProp = edge.getProperty(routeClaimedHashKey);
-            if (routeClaimedProp instanceof PropertyBoolean) {
-                boolean routeClaimed = ((PropertyBoolean) routeClaimedProp).value;
-
-                if (routeClaimed) {
-                    System.out.println("This route is already claimed.");
-                } else {
-                    boolean[] routesPlayerCanAfford = checkPlayerCanAffordRoute(tg, edge); //e.g. true true means they can afford both in a double route
-
-                    boolean atleastOneAfforded = false;
-                    List<Integer> colorIndexesAvailable = new ArrayList<>();
-                    for (int i = 0; i < routesPlayerCanAfford.length; i++){ //allows the different colour options of 1 route
-                        if (routesPlayerCanAfford[i]){
-                            System.out.println("Route option is claimable " + i);
-                            colorIndexesAvailable.add(i);
-                            atleastOneAfforded = true;
-
-                        }
-                    }
-                    routesAvailableToBuy.put(edge, colorIndexesAvailable);
-                }
-            }
-
-        }
-
-
-//        //goes through board node with edges approach to find free edges
-//        for ( BoardNodeWithEdges b : boardNodes){
-//            Map<Edge, BoardNodeWithEdges> boardNodeMapping = b.getNeighbourEdgeMapping();
-//            System.out.println("Current BoardNode: " + b.getComponentName());
-//
-//
-//            for (Map.Entry<Edge, BoardNodeWithEdges> entry : boardNodeMapping.entrySet()) {
-//                Edge edge = entry.getKey();
-//                BoardNodeWithEdges neighbourNode = entry.getValue();
-//
-//                System.out.println("Edge between " + b.getComponentName() + " and " + neighbourNode.getComponentName());
-//
-//                Property routeClaimedProp = edge.getProperty(routeClaimedHashKey);
-//
-//                HashMap<Integer, Property> allProps = edge.getProperties();
-//
-//                if (routeClaimedProp instanceof PropertyBoolean) {
-//                    boolean routeClaimed = ((PropertyBoolean) routeClaimedProp).value;
-//
-//                    if (routeClaimed) {
-//                        System.out.println("This route is already claimed.");
-//
-//                    } else {
-//                        boolean canAffordRoute = checkPlayerCanAffordRoute(tg, edge);
-//                        if (canAffordRoute){
-//                            routesAvailableToBuy.add(edge);
-//                        }
-//                        System.out.println("This route is available.");
-//                    }
-//                }
-//            }
-//
-//        }
-
-        return routesAvailableToBuy;
-    }
-    //return the index of color (in edges array) that they can afford. If can't afford any, return -1
-    boolean[] checkPlayerCanAffordRoute(AbstractGameState gameState, Edge edge) {
-        TicketToRideGameState tg = (TicketToRideGameState) gameState;
-
-        int currentPlayer = tg.getCurrentPlayer();
-        boolean[] listOfAvailable = new boolean[2]; //holds indexes of colors they can afford. if both are false, then none
-        listOfAvailable[0] = false;
-        listOfAvailable[1] = false;
-
-        Property colorProp = edge.getProperty(colorHash);
-
-        Property claimedByPlayerRoute1Prop = edge.getProperty(claimedByPlayerRoute1Hash);
-        Property claimedByPlayerRoute2Prop = edge.getProperty(claimedByPlayerRoute2Hash);
-
-        int claimedByPlayerRoute1 = ((PropertyInt) claimedByPlayerRoute1Prop).value;
-        int claimedByPlayerRoute2 = -2;
-        if (claimedByPlayerRoute2Prop != null) { //if one track route, this would not exist
-            claimedByPlayerRoute2 = ((PropertyInt) claimedByPlayerRoute2Prop).value;
-        }
-
-        Area gameArea = tg.getArea(-1);
-
-
-        Property trainCardsRequiredProp = edge.getProperty(trainCardsRequiredHash);
-
-
-        if (trainCardsRequiredProp instanceof PropertyInt) {
-
-            int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
-            int playerID = tg.getCurrentPlayer();
-            Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tg.getComponentActingPlayer(playerID,playerHandHash);
-
-
-            System.out.println("In check can afford, needs # of train cards "  + trainCardsRequired );
-
-            Map<String, Integer>  playerTrainCards = this.getTrainCarCardAmounts(playerTrainCardHandDeck);
-            int currentAmountOfLocomotivesInHand = playerTrainCards.getOrDefault("Locomotive",0);
-            if (colorProp instanceof PropertyStringArray) {
-                String[] colorsOfRoute = (((PropertyStringArray) colorProp).getValues());
-                System.out.println("colors of route: "  + colorsOfRoute );
-                System.out.println("color of route: "  + colorsOfRoute[0] );
-
-                if (colorsOfRoute[0].equals("Gray")){ //gray route claimable by any colour, so check every colour
-
-                    for (String color : playerTrainCards.keySet()) { //todo: +4 players cant claim same route twice
-
-                        int colorCount = playerTrainCards.get(color);
-
-                        if ((colorCount + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
-                            System.out.println("Gray route affordable " + color);
-                            if (claimedByPlayerRoute1 == -1) {
-                                if (claimedByPlayerRoute2Prop != null){
-                                    if (claimedByPlayerRoute2 != currentPlayer){ //check other route not claimed by same player
-                                        listOfAvailable[0] = true;
-                                        System.out.println("Gray route route 1 able");
-                                    }
-                                } else{
-                                    listOfAvailable[0] = true;
-                                    System.out.println("Gray route route 1 able");
-                                }
-
-                            }
-                            if (claimedByPlayerRoute2Prop != null){
-                                if (claimedByPlayerRoute2 == -1 && claimedByPlayerRoute1 != currentPlayer) {
-                                    listOfAvailable[1] = true;
-                                    System.out.println("Gray route route 2 able");
-                                }
-                            }
-                        }
-                    }
-                } else { //any other colour
-
-                    for (int i = 0; i < colorsOfRoute.length; i++){ //
-                        int numberOfRequiredColor = playerTrainCards.getOrDefault(colorsOfRoute[i], 0);
-                        System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
-                        System.out.println("Player has Train Cards: " + numberOfRequiredColor);
-                        if ((numberOfRequiredColor + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
-                            if (claimedByPlayerRoute1 == -1 && i == 0) {
-                                if (claimedByPlayerRoute2Prop != null){
-                                    if (claimedByPlayerRoute2 != currentPlayer){ //check other route not claimed by same player
-                                        listOfAvailable[0] = true;
-                                        System.out.println("Gray route route 1 able");
-                                    }
-                                } else{
-                                    listOfAvailable[0] = true;
-                                    System.out.println("Gray route route 1 able");
-                                }
-                            }
-                            if (claimedByPlayerRoute2Prop != null && i == 1 && claimedByPlayerRoute1 != currentPlayer){
-                                if (claimedByPlayerRoute2 == -1) {
-                                    listOfAvailable[1] = true;
-                                    System.out.println("Any colour route 1 able");
-                                }
-                            }
-                            System.out.println("Player ID " + playerID + " can buy this route of choice " + i);
-                            //listOfAvailable[i] = true;
-                        } else {
-                            System.out.println("Player ID " + playerID + " cant buy this route");
-                        }
-                    }
-                }
-
-
-
-            }
-        }
-        return listOfAvailable;
-    }
-
-    // Gives map of colours and the amount a player has of it
-    Map<String, Integer> getTrainCarCardAmounts(Deck trainCards){
-
-        Map<String, Integer> trainCardCount = new HashMap<>();
-
-        for (Object card : trainCards) {
-            String cardColor = card.toString();
-            trainCardCount.put(cardColor, trainCardCount.getOrDefault(cardColor, 0) + 1);
-        }
-
-        return trainCardCount;
-    }
 
     void calculateDestinationCardPoints(AbstractGameState gameState) {
 
