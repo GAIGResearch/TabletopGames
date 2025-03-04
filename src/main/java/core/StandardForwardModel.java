@@ -23,7 +23,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         // in which case go to the next action
         // We can't just register with all items in the Stack, as this may represent some complex dependency
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
-        if (currentState.actionsInProgress.size() > 0) {
+        if (!currentState.actionsInProgress.isEmpty()) {
             IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
             if (!topOfStack.equals(action)) {
                 topOfStack._afterAction(currentState, action);
@@ -95,7 +95,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         int turnOwner = gs.turnOwner;
         do {
             turnOwner = (turnOwner + 1) % gs.nPlayers;
-            if (turnOwner == gs.turnOwner) {
+            if (turnOwner == gs.turnOwner && !gs.isNotTerminalForPlayer(turnOwner)) {
                 throw new AssertionError("Infinite loop - apparently all players are terminal, but game state is not. " +
                         "Last action played: " + gs.getHistory().get(gs.getHistory().size() - 1));
             }
