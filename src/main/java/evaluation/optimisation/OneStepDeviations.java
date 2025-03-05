@@ -177,10 +177,16 @@ public class OneStepDeviations {
                     break;
                 } else if (score > baseAgentScore - 1 * stdError) {
                     if (settings[1] == defaultSettings[dimension]) {
-                        System.out.printf("Setting to default %s (%s) with score %.3f +/- %.3f versus base agent score of %.3f%n",
-                                searchSpace.name(dimension), searchSpace.allValues(dimension).get(settings[1]), score, stdError, baseAgentScore);
-                        tweakedSettings[dimension] = settings[1];
-                        break;
+                        double bestScore = totalScore[dimensionPlayers.get(0).a] / gamesPlayed[dimensionPlayers.get(0).a];
+                        // add an additional check that the default agent is also within 1 sd of the best agent
+                        // to avoid cases where we set to the default even though this is quite a bit worse than the best agent on this setting
+                        // (in the worst case this could be 2.99 standard deviations worse than the best...so sticking to the tuned value is a better idea)
+                        if (score > bestScore - 1 * stdError) {
+                            System.out.printf("Setting to default %s (%s) with score %.3f +/- %.3f versus base agent score of %.3f%n",
+                                    searchSpace.name(dimension), searchSpace.allValues(dimension).get(settings[1]), score, stdError, baseAgentScore);
+                            tweakedSettings[dimension] = settings[1];
+                            break;
+                        }
                     }
                 } else {
                     break;  // we have reached the worse agents
