@@ -255,9 +255,15 @@ public class TicketToRideForwardModel extends StandardForwardModel {
             System.out.println("Final round for player " + gs.getCurrentPlayer());
             if (gs.getCurrentFinalRoundTurn() == gs.getNPlayers()){ //all final turns have been taken
                 System.out.println("GAME ENDED");
-                System.out.println("Edge info: ");
+                int numOfPlayers = gs.getNPlayers() - 1;
+                for (int currentPlayer = 0; currentPlayer <= numOfPlayers; currentPlayer++) {
+                    int scoreToAddOrSubtract = gs.calculateDestinationCardPoints(currentPlayer);
+                    System.out.println("scoreToAddOrSubtract: " + scoreToAddOrSubtract);
+                    gs.addScore(currentPlayer,scoreToAddOrSubtract);
 
-                calculateDestinationCardPoints(gs);
+
+                }
+
 
                 endGame(gs);
 
@@ -270,128 +276,5 @@ public class TicketToRideForwardModel extends StandardForwardModel {
     }
 
 
-    void calculateDestinationCardPoints(AbstractGameState gameState) {
 
-
-        TicketToRideGameState tgs = (TicketToRideGameState) gameState;
-        TicketToRideParameters tp = (TicketToRideParameters) gameState.getGameParameters();
-
-        int numOfPlayers = tgs.getNPlayers() - 1;
-
-        Area gameArea = tgs.getArea(-1);
-        Deck<Card> destinationCardDeck = (Deck<Card>) gameArea.getComponent(TicketToRideConstants.destinationCardDeckHash);
-
-
-        GraphBoardWithEdges world = (GraphBoardWithEdges) gameArea.getComponent(ticketToRideBoardHash);
-
-        Collection<BoardNodeWithEdges> boardNodes = (Collection<BoardNodeWithEdges>) world.getBoardNodes();
-        HashSet<Edge> boardEdges = (HashSet<Edge>) world.getBoardEdges();
-
-        for (int currentPlayer = 0; currentPlayer <= numOfPlayers; currentPlayer++) {
-            int scoreToAddOrSubtract = 0;  //based on if players completed or didnt complete destination ticket cards
-
-            Deck<Card> playerDestinationCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(currentPlayer,TicketToRideConstants.playerDestinationHandHash);
-            Map<String, List<String>> graphForSearch = getSearchGraph(boardEdges, currentPlayer);
-            //System.out.println("search graph:  "+ graphForSearch + " for player  " + currentPlayer);
-
-            for (Card currentCard : playerDestinationCardHandDeck) {
-                String location1 = String.valueOf(currentCard.getProperty(location1Hash));
-                String location2 = String.valueOf(currentCard.getProperty(location2Hash));
-                boolean isConnected = checkIfConnectedCity(graphForSearch,location1,location2);
-                //System.out.println("IN FOR LOOP for cards "+ location1 + " " + location2 + " isConnected: " + isConnected);
-                int pointsOnDestinationCard = ((PropertyInt)(currentCard.getProperty(pointsHash))).value;
-                if (isConnected){
-                    scoreToAddOrSubtract = scoreToAddOrSubtract + pointsOnDestinationCard;
-                    //System.out.println("adding due to connected: " +  pointsOnDestinationCard);
-                } else {
-                    scoreToAddOrSubtract = scoreToAddOrSubtract - pointsOnDestinationCard; //not connected reduce score
-                    //System.out.println("subtracting due to unconnected: " +  -pointsOnDestinationCard);
-                }
-            }
-            System.out.println("total points due to destination ticket cards " + scoreToAddOrSubtract);
-            tgs.addScore(currentPlayer, scoreToAddOrSubtract);
-
-        }
-
-
-        System.out.println(boardEdges.size() + " board edges size");
-        System.out.println(" all  board edges" + boardEdges );
-        for (Edge edge : boardEdges) {
-            System.out.println("FINISHED GAME EDGE: "+ edge.getProperties());
-        }
-
-
-
-    }
-
-    public Map<String, List<String>> getSearchGraph(HashSet<Edge> edges, int playerId) {
-        Map<String, List<String>> searchGraph = new HashMap<>();
-
-        for (Edge currentEdge : edges) {
-
-            boolean routeClaimed = ((PropertyBoolean)(currentEdge.getProperty(routeClaimedHash))).value;
-            //System.out.println(routeClaimed +" route claimed in getsearch");
-
-            PropertyInt claimedByRoute1Prop =  (PropertyInt)(currentEdge.getProperty(claimedByPlayerRoute1Hash));
-            PropertyInt claimedByRoute2Prop =  (PropertyInt)(currentEdge.getProperty(claimedByPlayerRoute2Hash));
-
-
-            // some edges have 2 different routes (colors), so either can be null
-            int claimedByRoute1 = -1;
-            int claimedByRoute2 = -1;
-
-            if (claimedByRoute1Prop != null) {
-                claimedByRoute1 = claimedByRoute1Prop.value;
-            }
-
-            if (claimedByRoute2Prop != null) {
-                claimedByRoute2 = claimedByRoute2Prop.value;
-            }
-
-
-            if ((routeClaimed && claimedByRoute1 == playerId) || (routeClaimed && claimedByRoute2 == playerId))  {
-
-                Property nodeProp = currentEdge.getProperty(nodesHash);
-                String[] nodes = ((PropertyStringArray) nodeProp).getValues();
-
-                System.out.println("Edge has nodes om getsearch: " + Arrays.toString(nodes));
-
-                String node1 = nodes[0];
-                String node2 = nodes[1];
-
-                searchGraph.putIfAbsent(node1, new ArrayList<>());
-                searchGraph.putIfAbsent(node2, new ArrayList<>());
-                searchGraph.get(node1).add(node2);
-                searchGraph.get(node2).add(node1);
-            }
-        }
-
-        return searchGraph;
-    }
-
-    public boolean checkIfConnectedCity(Map<String, List<String>> searchGraph, String location1, String location2) {
-        Set<String> locationsVisited = new HashSet<>();
-        return graphSearch(searchGraph, location1, location2, locationsVisited);
-    }
-
-    private boolean graphSearch(Map<String, List<String>> searchGraph, String currentLocation, String target, Set<String> locationsVisited) {
-        if (currentLocation.equals(target)) {
-            return true;
-        }
-        if (locationsVisited.contains(currentLocation)){
-            return false;
-        }
-
-        locationsVisited.add(currentLocation);
-
-        //Go through the adjacent locations of current location
-        List<String> adjacentLocations = searchGraph.getOrDefault(currentLocation, new ArrayList<>());
-        for (String currentAdjacentLocation : adjacentLocations) {
-            if (graphSearch(searchGraph, currentAdjacentLocation, target, locationsVisited)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }
