@@ -45,6 +45,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public Mode mode;
     public int quantile = 0;
     public int evaluationsPerTrial = 1;
+    public int OSDBudget = 0;
 
     // and those that are not (so must be included separately in copy etc)
     public boolean tuningGame = false;
@@ -77,6 +78,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         addTunableParameter("mode", Mode.NTBEA);
         addTunableParameter("quantile", 0);
         addTunableParameter("evalsPerTrial", 1);
+        addTunableParameter("OSDBudget", 0);
     }
 
     @Override
@@ -100,6 +102,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         mode = (Mode) getParameterValue("mode");
         quantile = (int) getParameterValue("quantile");
         evaluationsPerTrial = (int) getParameterValue("evalsPerTrial");
+        OSDBudget = (int) getParameterValue("OSDBudget");
 
         if (evalGames == -1) evalGames = iterationsPerRun / 5;
     }
@@ -126,6 +129,7 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         setParameterValue("mode", Mode.valueOf(args.get(RunArg.NTBEAMode).toString()));
         setParameterValue("quantile", args.get(RunArg.quantile));
         setParameterValue("evalsPerTrial", args.get(RunArg.evalsPerTrial));
+        setParameterValue("OSDBudget", args.get(RunArg.OSDBudget));
 
         configure(args);
     }
