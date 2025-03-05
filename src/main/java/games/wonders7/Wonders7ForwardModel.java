@@ -54,7 +54,8 @@ public class Wonders7ForwardModel extends StandardForwardModel {
         wgs.discardPile = new Deck<>("Discarded Cards", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 
         // Shuffles wonder-boards
-        createWonderDeck(wgs, new Random(params.wonderShuffleSeed)); // Adds Wonders into game
+        // createWonderDeck(wgs, params.wonderShuffleSeed == -1 ? state.getRnd() : new Random(params.wonderShuffleSeed)); // Adds Wonders into game
+        createWonderDeck(wgs, new Random(params.wonderShuffleSeed));
 
         // Gives each player wonder board and manufactured goods from the wonder
         for (int player = 0; player < wgs.getNPlayers(); player++) {
@@ -273,7 +274,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 1:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(Wonder7Card.factory(Pawnshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Well));
                         wgs.ageDeck.add(Wonder7Card.factory(Baths));
                         wgs.ageDeck.add(Wonder7Card.factory(Tavern));
                         wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost));
@@ -300,7 +301,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                         wgs.ageDeck.add(Wonder7Card.factory(LumberYard));
                         wgs.ageDeck.add(Wonder7Card.factory(OreVein));
                         wgs.ageDeck.add(Wonder7Card.factory(Excavation));
-                        wgs.ageDeck.add(Wonder7Card.factory(Pawnshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Well));
                         wgs.ageDeck.add(Wonder7Card.factory(Tavern));
                         wgs.ageDeck.add(Wonder7Card.factory(GuardTower));
                         wgs.ageDeck.add(Wonder7Card.factory(Scriptorium));
@@ -350,9 +351,9 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                         wgs.ageDeck.add(Wonder7Card.factory(Forum));
                         wgs.ageDeck.add(Wonder7Card.factory(Vineyard));
                     case 5:
-                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
-                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
-                        wgs.ageDeck.add(Wonder7Card.factory(Press));
+                        wgs.ageDeck.add(Wonder7Card.factory(LoomAge2));
+                        wgs.ageDeck.add(Wonder7Card.factory(GlassworksAge2));
+                        wgs.ageDeck.add(Wonder7Card.factory(PressAge2));
                         wgs.ageDeck.add(Wonder7Card.factory(Courthouse));
                         wgs.ageDeck.add(Wonder7Card.factory(Stables));
                         wgs.ageDeck.add(Wonder7Card.factory(Laboratory));
@@ -370,9 +371,9 @@ public class Wonders7ForwardModel extends StandardForwardModel {
                         wgs.ageDeck.add(Wonder7Card.factory(Quarry));
                         wgs.ageDeck.add(Wonder7Card.factory(Foundry));
                         wgs.ageDeck.add(Wonder7Card.factory(Brickyard));
-                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
-                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
-                        wgs.ageDeck.add(Wonder7Card.factory(Press));
+                        wgs.ageDeck.add(Wonder7Card.factory(LoomAge2));
+                        wgs.ageDeck.add(Wonder7Card.factory(GlassworksAge2));
+                        wgs.ageDeck.add(Wonder7Card.factory(PressAge2));
                         wgs.ageDeck.add(Wonder7Card.factory(Aqueduct));
                         wgs.ageDeck.add(Wonder7Card.factory(Temple));
                         wgs.ageDeck.add(Wonder7Card.factory(Courthouse));
