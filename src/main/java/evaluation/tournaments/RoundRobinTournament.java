@@ -159,7 +159,6 @@ public class RoundRobinTournament extends AbstractTournament {
         if (!destDir.isEmpty())
             this.resultsFile = destDir + File.separator + resultsFile;
     }
-
     /**
      * Runs the round robin tournament.
      */

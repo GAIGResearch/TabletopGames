@@ -94,6 +94,15 @@ public class NTBEA {
             }
 
         } else {
+            // Add check that the number of final matchups is reasonable given the number of repeats
+            if (params.tournamentGames > 0) {
+                int matchupsPerGame = Utils.gamesPerMatchup(nPlayers, params.repeats, params.tournamentGames, false);
+                if (matchupsPerGame < 1) {
+                    throw new IllegalArgumentException(String.format("Higher budget needed for the final tournament. There will be %d permutations of agents to positions in exhaustive mode, which is more than %d game in the available budget.",
+                            Utils.playerPermutations(nPlayers, params.repeats, false), params.tournamentGames));
+                }
+            }
+
             if (params.evalMethod.equals("Win"))
                 stateHeuristic = new WinOnlyHeuristic();
             if (params.evalMethod.equals("Score"))
@@ -164,7 +173,6 @@ public class NTBEA {
             // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
             // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
             // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
-            //double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
             int nTeams = params.byTeam ? game.createGameInstance(nPlayers, params.gameParams).getGameState().getNTeams() : nPlayers;
             if (players.size() < nTeams) {
                 System.out.println("Not enough players to run a tournament with " + nTeams + " players. Skipping the final tournament - " +

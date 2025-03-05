@@ -93,8 +93,6 @@ public abstract class Utils {
     public static int gamesPerMatchup(int nPlayers, int nAgents, int totalGameBudget, boolean selfPlay) {
         long permutationsOfPlayers = playerPermutations(nPlayers, nAgents, selfPlay);
         return (int) (totalGameBudget / permutationsOfPlayers);
-        // line below is if we are happy to breach the budget limit
-        // int gamesPerMatchupHigh = (int) Math.ceil((double) totalGameBudget / permutationsOfPlayers);
     }
 
     public static int playerPermutations(int nPlayers, int nAgents, boolean selfPlay) {
