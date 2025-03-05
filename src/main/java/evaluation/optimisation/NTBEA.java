@@ -186,7 +186,7 @@ public class NTBEA {
                     // if we don't have enough players to fill the game, then we will need to use self-play
                     config.put(RunArg.mode, "exhaustiveSP");
                 } else {
-                    config.put(RunArg.mode, "exhaustive");
+                    config.put(RunArg.mode, "random");
                 }
                 config.put(byTeam, true);
                 config.put(RunArg.distinctRandomSeeds, 0);

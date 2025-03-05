@@ -247,6 +247,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 // In the RANDOM case we use a new seed for each game
                 PermutationCycler idStream = new PermutationCycler(agents.size(), seedRnd, nTeams);
                 for (int i = 0; i < totalGameBudget; i++) {
+                    System.out.println("Playing game " + (i+1) + " out of " + totalGameBudget);
                     List<Integer> matchup = new ArrayList<>(nTeams);
                     for (int j = 0; j < nTeams; j++)
                         matchup.add(idStream.getAsInt());

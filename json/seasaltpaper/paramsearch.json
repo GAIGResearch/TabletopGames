@@ -1,10 +1,10 @@
 {
   "game": "SeaSaltPaper",
   "destDir": "param-optimisation/",
-  "repeats": 10,
+  "repeats": 5,
   "iterations": 100,
   "evalGames": 20,
-  "matchups": 20,
+  "matchups": 50,
   "samplingRate": 1,
   "neighbourhood": 100,
   "evalMethod": "Heuristic",
