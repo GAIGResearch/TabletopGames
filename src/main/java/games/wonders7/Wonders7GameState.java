@@ -6,10 +6,12 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import games.GameType;
+import games.wonders7.actions.BuildFromDiscard;
 import games.wonders7.cards.Wonder7Card;
 import games.wonders7.cards.Wonder7Board;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static games.wonders7.Wonders7Constants.Resource.*;
@@ -115,7 +117,20 @@ public class Wonders7GameState extends AbstractGameState {
                     // (along with any cards that were not in the game at that age)
                 }
             }
-            copy.ageDeck.add(copy.discardPile); // Groups the discard pile into the ageDeck
+            // we extract the contents of the discard pile from previous ages
+            Map<Boolean, List<Wonder7Card>> previousAgeDiscards = copy.discardPile.stream()
+                    .collect(Collectors.partitioningBy(c -> c.cardType.age == copy.currentAge));
+
+            // if the perspective player is building from the discard pile, then they know the contents of the discard pile
+            // TODO: At some point convert SevenWonders to use PartialObservableDecks; and then remove this special case
+            // TODO: Also, formally the cards played facedown by other players to build Wonders in given ages should be included in this reshuffle
+            if (currentActionInProgress() instanceof BuildFromDiscard && getCurrentPlayer() == playerId) {
+                previousAgeDiscards.get(false).addAll(previousAgeDiscards.get(true));
+                previousAgeDiscards.get(true).clear();
+                // this will ensure that the discard pile is not touched
+            }
+
+            copy.ageDeck.add(previousAgeDiscards.get(true)); // Groups the same age cards from the discard pile into the ageDeck
             copy.ageDeck.shuffle(redeterminisationRnd); // Shuffle all the cards
             for (int i = 0; i < getNPlayers(); i++) {
                 if (!isHandKnownTo(playerId, i)) {
@@ -127,11 +142,10 @@ public class Wonders7GameState extends AbstractGameState {
                     }
                 }
             }
-            Deck<Wonder7Card> discPile = copy.discardPile;
-            int nDisc = discPile.getSize();
-            discPile.clear(); // Empties the accurate pile
-            for (int i = 0; i < nDisc; i++) {
-                discPile.add(copy.ageDeck.draw()); // Fills the pile with the remaining shuffled cards in the ageDeck
+            copy.discardPile.clear(); // Empties the accurate pile
+            copy.discardPile.add(previousAgeDiscards.get(false)); // Adds the different age cards back to the pile
+            while(copy.discardPile.getSize() < this.discardPile.getSize()) {
+                copy.discardPile.add(copy.ageDeck.draw()); // Fills the pile with the remaining shuffled cards in the ageDeck
             }
             copy.turnActions = new AbstractAction[getNPlayers()];
             if (turnActions[playerId] != null)

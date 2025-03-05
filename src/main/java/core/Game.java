@@ -535,7 +535,6 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
-        boolean errorInbound = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace).isEmpty();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.isEmpty()) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
@@ -558,7 +557,6 @@ public class Game {
                     System.out.println(history.get(i));
                 }
             }
-            forwardModel.computeAvailableActions(gameState);
             throw new AssertionError("No actions available for player " + activePlayer
                     + (lastAction != null ? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()

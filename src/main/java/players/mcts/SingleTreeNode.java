@@ -386,7 +386,7 @@ public class SingleTreeNode {
         // selected == this is a clear sign that we have a problem in the expansion phase
         // although if we have no decisions to make - this is fine
 
-        // Monte carlo rollout: return value of MC rollout from the newly added node
+        // Monte Carlo rollout: return value of MC rollout from the newly added node
         int lastActorInTree = actionsInTree.isEmpty() ? decisionPlayer : actionsInTree.get(actionsInTree.size() - 1).a;
         double[] delta = selected.rollout(lastActorInTree);
         // Back up the value of the rollout through the tree

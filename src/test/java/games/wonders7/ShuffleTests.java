@@ -1,11 +1,13 @@
 package games.wonders7;
 
 import core.actions.AbstractAction;
+import games.wonders7.cards.Wonder7Card;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 public class ShuffleTests {
@@ -153,6 +155,33 @@ public class ShuffleTests {
             assertEquals(6, copy.getPlayerHands().get(i).getSize());
         }
 
+    }
+
+    @Test
+    public void testRedeterminisationWithDifferentAgeCardsInDiscard() {
+        do {
+            List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+            fm.next(state, availableActions.get(state.getRnd().nextInt(availableActions.size())));
+        } while (state.currentAge < 2);
+        assertEquals(2, state.getCurrentAge());
+        assertTrue(state.getDiscardPile().getSize() > 5);
+
+        assertEquals(7, state.getPlayerHand(0).getSize());
+        for (int trial = 0; trial < 5; trial++) {
+            List<Wonder7Card.CardType> inDiscard = state.getDiscardPile().stream()
+                    .map(c -> c.cardType).collect(toList());
+            Wonders7GameState copy = (Wonders7GameState) state.copy(2);
+
+            // check that none of the cards in the new discard pile are from Age 2
+            for (Wonder7Card card : copy.discardPile) {
+                assertEquals(1, card.cardType.age);
+            }
+            // in fact, we can check that the discard pile is the same as the copy (although the order may be different)
+            for (Wonder7Card card : copy.discardPile) {
+                assertTrue(inDiscard.contains(card.cardType));
+                inDiscard.remove(card.cardType);
+            }
+        }
     }
 }
 

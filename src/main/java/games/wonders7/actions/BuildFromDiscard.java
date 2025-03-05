@@ -38,4 +38,11 @@ public class BuildFromDiscard extends OneShotExtendedAction {
         fm.checkAgeEnd(wgs);
     }
 
+    @Override
+    public BuildFromDiscard copy() {
+        BuildFromDiscard retValue = new BuildFromDiscard(player);
+        retValue.executed = executed;
+        return retValue;
+    }
+
 }
