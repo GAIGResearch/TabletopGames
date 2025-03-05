@@ -31,13 +31,11 @@ import java.util.List;
  */
 public class ApplyCommand extends CQAction {
     public ApplyCommand(int pid, int command, CommandType type, int stateHash) {
-        this(pid, command, (Vector2D) null, type, stateHash);
+        this(pid, command, null, type, stateHash);
     }
     public ApplyCommand(int pid, int command, Troop target, CommandType type, int stateHash) {
-        this(pid, command, target == null ? null : target.getLocation(), type, stateHash);
-    }
-    public ApplyCommand(int pid, int command, Vector2D target, CommandType type, int stateHash) {
-        super(pid, command, target, stateHash);
+        // Because this action is an IExtendedSequence, it may be .copy()'ed after the target troop changes. So we need to save a local copy.
+        super(pid, command, target == null ? null : target.getLocation(), stateHash, target.copy());
         cmdType = type;
     }
 
@@ -50,7 +48,8 @@ public class ApplyCommand extends CQAction {
             return !cqgs.getCommands(cqgs.getCurrentPlayer(), false).isEmpty();
         } else {
             if (!cmd.getCommandType().phases.contains((CQGameState.CQGamePhase) cqgs.getGamePhase())) return false;
-            Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
+            if (highlight == null) highlight = cqgs.highlight;
+            target = cqgs.getTroopByLocation(highlight).copy();
             if (target == null) return false; // only Winds of Fate can be applied without target.
             if (target.hasCommand(cmd.getCommandType())) return false; // no repeat application of the same command on the same troop
             if ((target.getOwnerId() == cqgs.getCurrentPlayer()) ^ !cmdType.enemy) return false; // apply on self XOR use enemy-targeting command
@@ -97,8 +96,12 @@ public class ApplyCommand extends CQAction {
             cooldowns[cqgs.getRnd().nextInt(hs.size())].reset(); // reset selected command
         } else {
             if (highlight == null) highlight = cqgs.highlight;
-            Troop target = cqgs.getTroopByLocation(highlight);
+            if (target != null && !target.equals(cqgs.getTroopByLocation(highlight))) {
+                System.out.println("Highlight mismatch!"); // TODO: Is this an issue?
+            }
+            target = cqgs.getTroopByLocation(highlight);
             target.applyCommand(cmdType);
+            target = target.copy(); // do not save reference to same troop object in case it gets modified later.
         }
         cqgs.useCommand(playerId, cmd);
         return gs.setActionInProgress(this);
@@ -116,7 +119,7 @@ public class ApplyCommand extends CQAction {
      */
     @Override
     public ApplyCommand copy() {
-        return new ApplyCommand(playerId, cmdHighlight, highlight, cmdType, stateHash);
+        return new ApplyCommand(playerId, cmdHighlight, target == null ? null : target.copy(), cmdType, stateHash);
     }
 
     @Override
@@ -139,7 +142,8 @@ public class ApplyCommand extends CQAction {
         String str = "Apply";
         if (cmdType != null) str += " " + cmdType;
         else str += " Command";
-        if (highlight != null) str += "->" + highlight;
+        if (target != null) str += "->" + target;
+        else if (highlight != null) str += "->" + highlight;
         return str;
     }
 }

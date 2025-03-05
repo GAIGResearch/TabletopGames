@@ -3,11 +3,8 @@ package games.conquest.components;
 import core.CoreConstants;
 import core.components.Component;
 import games.conquest.CQGameState;
-import org.apache.hadoop.hdfs.protocol.proto.ErasureCodingProtos;
-import scala.collection.immutable.Vector2;
 import utilities.Vector2D;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -72,7 +69,7 @@ public class Troop extends Component {
         copy.health = health;
         copy.healthBoost = healthBoost;
         copy.distanceMoved = distanceMoved;
-        copy.setLocation(location.copy());
+        copy.setLocation(getLocation().copy());
         copy.appliedCommands = (HashSet<CommandType>) appliedCommands.clone();
         return copy;
     }
@@ -90,11 +87,11 @@ public class Troop extends Component {
     }
 
     public boolean move(Cell target, CQGameState cqgs) {
-        int distance = cqgs.getDistance(cqgs.getCell(location), target);
+        int distance = cqgs.getDistance(cqgs.getCell(getLocation()), target);
         if (distance > getMovement()) return false; // do nothing, can't move there
         if (!cqgs.moveTroop(this, target.position))
             throw new AssertionError("Could not move troop: troop not found.");
-        location = target.position;
+        setLocation(target.position);
         distanceMoved += distance;
         return true;
     }
@@ -190,6 +187,9 @@ public class Troop extends Component {
      * @return 0 if this troop survives; the cost of the troop if it died.
      */
     public int damage(int dmg) {
+        if (dmg > 100 && appliedCommands.contains(CommandType.ShieldWall))
+            dmg = 100;
+        int reward = getDmgReward(dmg);
         if (getHealth() <= dmg) {
             // Troop dies, award points
             health = 0;
@@ -208,12 +208,26 @@ public class Troop extends Component {
         if (health > dmg) {
             // Troop survives, award 0 points.
             health -= dmg;
-            return 0;
         } else {
-            // Troop dies, award points
+            // Troop dies, award points; redundancy just to be sure.
             health = 0;
+        }
+        return reward;
+    }
+
+    /**
+     * Does NOT damage the troop, but ONLY calculates what the reward would be for damaging the troop.
+     * This can be used to gauge whether or not a troop would die from dealing a certain amount of damage.
+     * @param dmg
+     * @return
+     */
+    public int getDmgReward(int dmg) {
+        if (dmg > 100 && appliedCommands.contains(CommandType.ShieldWall))
+            dmg = 100;
+        if (getHealth() <= dmg) {
             return cost;
         }
+        return 0;
     }
 
     /**
@@ -230,6 +244,6 @@ public class Troop extends Component {
 
     @Override
     public String toString() {
-        return troopType.troopName + " " + location;
+        return troopType.troopName + " " + getLocation();
     }
 }

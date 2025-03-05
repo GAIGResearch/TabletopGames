@@ -23,23 +23,26 @@ import java.util.List;
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link EndTurn} apply here as well.</p>
  */
 public class MoveTroop extends CQAction {
-    public MoveTroop(int pid, Vector2D target, int stateHash) {
-        super(pid, target, stateHash);
+    public MoveTroop(int pid, Vector2D highlight, CQGameState state) {
+        super(pid, highlight, state);
+    }
+    public MoveTroop(int pid, Vector2D highlight, int stateHash, Troop selected, Troop target) {
+        super(pid, highlight, stateHash, selected, target);
     }
 
     @Override
     public boolean canExecute(CQGameState cqgs) {
         if (cqgs.getGamePhase() != CQGameState.CQGamePhase.MovementPhase) return false;
-        Troop troop = cqgs.getSelectedTroop();
-        if (troop == null) return false;
+        selected = cqgs.getSelectedTroop();
+        if (selected == null) return false;
         Cell target = cqgs.getCell(highlight != null ? highlight : cqgs.highlight);
         if (target == null || !target.isWalkable(cqgs)) return false;
-        int distance = cqgs.getDistance(cqgs.getCell(troop.getLocation()), target);
-        if (troop.getAppliedCommands().contains(CommandType.Charge) && distance <= troop.getTroopType().movement) {
+        int distance = cqgs.getDistance(cqgs.getCell(selected.getLocation()), target);
+        if (selected.getAppliedCommands().contains(CommandType.Charge) && distance <= selected.getTroopType().movement) {
             // Prune nonsensical actions to prune action tree; if charge has been used, a troop can only move outside its normal range.
             return false;
         }
-        return distance <= troop.getMovement(); // can only execute if within movement distance.
+        return distance <= selected.getMovement(); // can only execute if within movement distance.
     }
 
     /**
@@ -56,9 +59,9 @@ public class MoveTroop extends CQAction {
     public boolean execute(AbstractGameState gs) {
         CQGameState cqgs = (CQGameState) gs;
         if (!canExecute(cqgs)) return false;
-        Troop troop = cqgs.getSelectedTroop();
+        selected = cqgs.getSelectedTroop();
         Cell target = cqgs.getCell(this.highlight != null ? this.highlight : cqgs.highlight);
-        troop.move(target, cqgs); // actually move troop.
+        selected.move(target, cqgs); // actually move troop.
 //        if (troop.getMovement() == 0) {
             // If selected troop has exhausted movement, change to CombatPhase
         // Only allow one movement to reduce search space
@@ -75,7 +78,7 @@ public class MoveTroop extends CQAction {
      */
     @Override
     public MoveTroop copy() {
-        return new MoveTroop(playerId, highlight, stateHash);
+        return new MoveTroop(playerId, highlight, stateHash, selected == null ? null : selected.copy(), target == null ? null : target.copy());
     }
 
     @Override

@@ -24,16 +24,19 @@ import utilities.Vector2D;
  * given your componentID.</p>
  */
 public class SelectTroop extends CQAction {
-    public SelectTroop(int pid, Vector2D target, int stateHash) {
-        super(pid, target, stateHash);
+    public SelectTroop(int pid, Vector2D highlight, CQGameState state) {
+        super(pid, highlight, state.hashCode(), null, state.getTroopByLocation(highlight));
+    }
+    public SelectTroop(int pid, Vector2D highlight, int stateHash, Troop target) {
+        super(pid, highlight, stateHash, null, target);
     }
 
     @Override
     public boolean canExecute(CQGameState cqgs) {
         if (cqgs.getSelectedTroop() != null) return false; // a troop was already selected.
-        Troop troop = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
+        target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
         // true if a troop is selected, it's your troop, and it's not chastised.
-        return troop != null && troop.getOwnerId() == playerId && troop.getMovement() != 0;
+        return target != null && target.getOwnerId() == playerId && target.getMovement() != 0;
     }
 
     /**
@@ -47,8 +50,8 @@ public class SelectTroop extends CQAction {
         CQGameState cqgs = (CQGameState) gs;
         if (!canExecute(cqgs)) return false;
         if (highlight == null) highlight = cqgs.highlight;
-        Troop troop = cqgs.getTroopByLocation(highlight);
-        cqgs.setSelectedTroop(troop.getComponentID());
+        target = cqgs.getTroopByLocation(highlight);
+        cqgs.setSelectedTroop(target.getComponentID());
         cqgs.setGamePhase(CQGameState.CQGamePhase.MovementPhase);
         return gs.setActionInProgress(this);
     }
@@ -61,7 +64,7 @@ public class SelectTroop extends CQAction {
      */
     @Override
     public SelectTroop copy() {
-        return new SelectTroop(playerId, highlight, stateHash);
+        return new SelectTroop(playerId, highlight, stateHash, target == null ? null : target.copy());
     }
 
     @Override
