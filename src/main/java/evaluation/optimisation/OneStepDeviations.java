@@ -19,15 +19,17 @@ import static evaluation.RunArg.*;
 
 public class OneStepDeviations {
 
+    NTBEAParameters params;
+    ITPSearchSpace<?> searchSpace;
+
+    public OneStepDeviations(NTBEAParameters params) {
+        this.params = params;
+        this.searchSpace = (ITPSearchSpace<?>) params.searchSpace;
+    }
+
     public static void main(String[] args) {
 
         Map<RunArg, Object> config = parseConfig(args, Collections.singletonList(RunArg.Usage.ParameterSearch));
-
-        // the ones we use are:
-        // opponent to get the baseline player
-        // searchSpace
-        // game, nPlayers, gameParams etc.
-        // destDir
 
         String setupFile = config.getOrDefault(RunArg.config, "").toString();
         if (!setupFile.isEmpty()) {
@@ -39,7 +41,6 @@ public class OneStepDeviations {
                 config = parseConfig(json, RunArg.Usage.ParameterSearch);
             } catch (FileNotFoundException ignored) {
                 throw new AssertionError("Config file not found : " + setupFile);
-                //    parseConfig(runGames, args);
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
@@ -48,6 +49,17 @@ public class OneStepDeviations {
         NTBEAParameters params = new NTBEAParameters(config);
         ITPSearchSpace<?> searchSpace = (ITPSearchSpace<?>) params.searchSpace;
         int[] baseSettings = searchSpace.settingsFromJSON(params.opponentDescriptor);
+
+        int[] tweakedSettings = new OneStepDeviations(params).run(baseSettings);
+
+        // Now write the tweaked agent to JSON
+        String oldStem = new File(params.opponentDescriptor).getName();
+        oldStem = oldStem.substring(0, oldStem.lastIndexOf('.'));
+        searchSpace.writeAgentJSON(tweakedSettings, params.destDir + File.separator + oldStem + "_tweaked.json");
+    }
+
+    public int[] run(int[] baseSettings) {
+
         int[] defaultSettings = searchSpace.defaultSettings();
         List<int[]> deviations = new ArrayList<>();
 
@@ -78,7 +90,7 @@ public class OneStepDeviations {
 
         do {
 
-            System.out.printf("Running tournament with remaining players: %d%n", players.size());
+            System.out.printf("Running OSD tournament with remaining players: %d%n", players.size());
 
             // We now have all agents, with [0] being the baseline agent
             Map<RunArg, Object> tournamentConfig = new HashMap<>();
@@ -193,9 +205,6 @@ public class OneStepDeviations {
                 }
             }
         }
-        // Now write the tweaked agent to JSON
-        String oldStem = new File(params.opponentDescriptor).getName();
-        oldStem = oldStem.substring(0, oldStem.lastIndexOf('.'));
-        searchSpace.writeAgentJSON(tweakedSettings, params.destDir + File.separator + oldStem + "_tweaked.json");
+        return tweakedSettings;
     }
 }

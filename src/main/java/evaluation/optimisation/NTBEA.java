@@ -247,7 +247,14 @@ public class NTBEA {
 
         // Now we optionally apply one-step deviations to the best result
         if (params.OSDBudget > 0) {
-            // TODO:
+            NTBEAParameters OSDParams = (NTBEAParameters) params.copy();
+            // we take the OSDBudget and split it across 10 iterations
+            // with a minimum of 1000 games per iteration
+            OSDParams.repeats = Math.min(10, OSDParams.OSDBudget / 1000);
+            OSDParams.tournamentGames = params.OSDBudget / OSDParams.repeats;
+            OneStepDeviations OSD = new OneStepDeviations(OSDParams);
+            // now tweak the final settings
+            bestResult.b = OSD.run(bestResult.b);
         }
 
         if (params.verbose) {
@@ -333,7 +340,7 @@ public class NTBEA {
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%d", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                        .map(p -> String.format("\t%s:\t%s\n", params.searchSpace.name(p.a), valueToString(p.a, p.b, ((ITPSearchSpace<?>) params.searchSpace))))
+                        .map(p -> String.format("\t%s:\t%s\n", params.searchSpace.name(p.a), valueToString(p.a, p.b, params.searchSpace)))
                         .collect(joining(" ")));
     }
 
