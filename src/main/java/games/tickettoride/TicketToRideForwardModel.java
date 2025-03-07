@@ -52,7 +52,6 @@ public class TicketToRideForwardModel extends StandardForwardModel {
         state._reset();
         TicketToRideParameters tp = (TicketToRideParameters) state.getGameParameters();
 
-        state.tempDeck = new Deck<>("Temp Deck", VISIBLE_TO_ALL);
         state.areas = new HashMap<>();
         state.scores = new int[state.getNPlayers()];
         state.trainCars = new int[state.getNPlayers()];
@@ -210,22 +209,35 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                 List<Integer> indexesOfColors = routesAvailableToBuy.get(currentEdge);
                 Property colorProp = currentEdge.getProperty(colorHashKey);
                 String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
-                System.out.println(colorsOfRoute + " is the colors");
-                System.out.println(indexesOfColors  + " indexs of color");
+//                System.out.println(colorsOfRoute + " is the colors");
+//                System.out.println(indexesOfColors  + " indexs of color");
+                boolean firstAdded = false; //prevent both gray actions  going into action list for double route
                 for (int i = 0; i < indexesOfColors.size(); i++){
                     String colorOfRoute;
-                    if (i < colorsOfRoute.length && indexesOfColors.get(i) < colorsOfRoute.length ){ //need to check because grey double routes, colorsOfRoute would be len = 1 but 2 of them could be available
+                    if (i < colorsOfRoute.length && indexesOfColors.get(i) < colorsOfRoute.length ){ //need to check because gray double routes, colorsOfRoute would be len = 1 but 2 of them could be available
                         colorOfRoute = colorsOfRoute[indexesOfColors.get(i)];
+                        firstAdded = true;
+                        actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
                     } else{
-                        colorOfRoute = colorsOfRoute[0];
+                        if (!firstAdded){ //if true, means one of the grey routes has been added, so dont add it again
+                            firstAdded = true;
+                            colorOfRoute = colorsOfRoute[0];
+                            actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
+
+                        }
 
                     }
 
-                    System.out.println(colorOfRoute + " is the colors");
 //
 //                    System.out.println("In for loop for routes available to buy " + currentEdge.getProperties());
 
-                    actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
+
+
+
+                   /* ClaimRoute claimRouteAction = new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i));
+                    if (!actions.contains(claimRouteAction)){
+                        actions.add(claimRouteAction);
+                    }*/
                 }
 
             }

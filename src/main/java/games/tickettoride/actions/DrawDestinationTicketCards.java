@@ -11,6 +11,8 @@ import games.tickettoride.TicketToRideConstants;
 import games.tickettoride.TicketToRideGameState;
 import games.tickettoride.TicketToRideParameters;
 
+import java.util.Objects;
+
 import static core.CoreConstants.playerHandHash;
 
 /**
@@ -46,7 +48,7 @@ public class DrawDestinationTicketCards extends AbstractAction {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
-        System.out.println("PLAYER " + playerID + " DRAWING DESTINATION CARDS" );
+        System.out.println("PLAYER " + playerID + " DOING ACTION: DRAWING DESTINATION CARDS" );
 
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
@@ -56,12 +58,12 @@ public class DrawDestinationTicketCards extends AbstractAction {
 
         Deck<Card> playerDestinationCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,TicketToRideConstants.playerDestinationHandHash);
 
-        System.out.println( playerID + " has these destination ticket cards before drawing: " + playerDestinationCardHandDeck);
+//        System.out.println( playerID + " has these destination ticket cards before drawing: " + playerDestinationCardHandDeck);
 
         new DrawCard(destinationCardDeck.getComponentID(), playerDestinationCardHandDeck.getComponentID()).execute(tgs);
 
 
-        System.out.println( playerID + " now has these destination ticket cards after drawing: "  + playerDestinationCardHandDeck);
+//        System.out.println( playerID + " now has these destination ticket cards after drawing: "  + playerDestinationCardHandDeck);
         return true;
     }
 
@@ -73,20 +75,20 @@ public class DrawDestinationTicketCards extends AbstractAction {
      */
     @Override
     public DrawDestinationTicketCards copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        return new DrawDestinationTicketCards(playerID);
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof DrawDestinationTicketCards;
+        if (this == obj) return true;
+        if (!(obj instanceof DrawDestinationTicketCards)) return false;
+        DrawDestinationTicketCards that = (DrawDestinationTicketCards) obj;
+        return playerID == that.playerID;
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(playerID);
     }
 
     @Override

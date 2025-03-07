@@ -37,7 +37,6 @@ public class  TicketToRideGameState extends AbstractGameState {
      */
 
     HashMap<Integer, Area> areas;
-    Deck<Card> tempDeck;
     GraphBoardWithEdges world;
 
     protected int[] scores;
@@ -50,8 +49,6 @@ public class  TicketToRideGameState extends AbstractGameState {
 
     public int currentFinalRoundTurn = 0; // Used to make sure every player has one turn in final round, should be equal to amount of players by the end of game
 
-    List<Map<TicketToRideParameters.TrainCar, Counter>> playerTrainCars;
-    HashMap<TicketToRideParameters.TrainCar, Counter> trainCarPool;
 
 
 
@@ -82,14 +79,11 @@ public class  TicketToRideGameState extends AbstractGameState {
     @Override
     protected List<Component> _getAllComponents() {
         List<Component> components = new ArrayList<>(areas.values());
-        components.add(tempDeck);
         components.add(world);
         return components;
     }
 
-    public Map<TicketToRideParameters.TrainCar, Counter> getPlayerTrainCars(int playerID) {
-        return playerTrainCars.get(playerID);
-    }
+
 
     public Component getComponentActingPlayer(int playerId, int componentId) {
         return areas.get(playerId).getComponent(componentId);
@@ -114,13 +108,19 @@ public class  TicketToRideGameState extends AbstractGameState {
      */
     @Override
     protected TicketToRideGameState _copy(int playerId) {
-        TicketToRideGameState copy = new TicketToRideGameState(gameParameters, getNPlayers());
-        copy.areas = areas;
-        copy.tempDeck = tempDeck.copy();
+        TicketToRideGameState copy = new TicketToRideGameState(gameParameters.copy(), getNPlayers());
+
+        copy.areas = new HashMap<>();
+        for (int key : areas.keySet()) {
+            copy.areas.put(key, areas.get(key).copy());
+        }
+
         copy.world = world.copy();
-        copy.scores = scores;
+        copy.scores = Arrays.copyOf(scores, scores.length);
+        copy.trainCars = Arrays.copyOf(trainCars, trainCars.length);
         copy.currentFinalRoundTurn = currentFinalRoundTurn;
-        copy.trainCars = trainCars;
+
+
         return copy;
     }
 
@@ -132,7 +132,7 @@ public class  TicketToRideGameState extends AbstractGameState {
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal()) {
-            return 0;
+            return new TicketToRideHeuristic().evaluateState(this,playerId);
         } else {
             // The game finished, we can instead return the actual result of the game for the given player.
             return getPlayerResults()[playerId].value;
@@ -248,8 +248,8 @@ public class  TicketToRideGameState extends AbstractGameState {
                 int currentAmountOfLocomotivesInHand = playerTrainCards.getOrDefault("Locomotive", 0);
                 if (colorProp instanceof PropertyStringArray) {
                     String[] colorsOfRoute = (((PropertyStringArray) colorProp).getValues());
-                    System.out.println("colors of route: " + colorsOfRoute);
-                    System.out.println("color of route: " + colorsOfRoute[0]);
+//                    System.out.println("colors of route: " + colorsOfRoute);
+//                    System.out.println("color of route: " + colorsOfRoute[0]);
 
                     if (colorsOfRoute[0].equals("Gray")) { //gray route claimable by any colour, so check every colour
 
@@ -258,19 +258,19 @@ public class  TicketToRideGameState extends AbstractGameState {
                             int colorCount = playerTrainCards.get(color);
 
                             if ((colorCount + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
-                                System.out.println("Gray route affordable " + color);
+                                //System.out.println("Gray route affordable " + color);
                                 if (claimedByPlayerRoute1 == -1) {
                                     if (claimedByPlayerRoute2Prop != null) {
                                         if (claimedByPlayerRoute2 != currentPlayer && !route1Added) { //check other route not claimed by same player
                                             colorIndexesAvailable.add(0);
                                             route1Added = true;
-                                            System.out.println("Gray route route 1 able");
+                                            //System.out.println("Gray route route 1 able");
                                         }
                                     } else {
                                         if(!route1Added){
                                             route1Added = true;
                                             colorIndexesAvailable.add(0);
-                                            System.out.println("Gray route route 1 able");
+                                            //System.out.println("Gray route route 1 able");
                                         }
 
                                     }
@@ -280,7 +280,7 @@ public class  TicketToRideGameState extends AbstractGameState {
                                     if (claimedByPlayerRoute2 == -1 && claimedByPlayerRoute1 != currentPlayer) {
                                         route2Added = true;
                                         colorIndexesAvailable.add(1);
-                                        System.out.println("Gray route route 2 able");
+                                        //System.out.println("Gray route route 2 able");
                                     }
                                 }
                             }
@@ -289,32 +289,32 @@ public class  TicketToRideGameState extends AbstractGameState {
 
                         for (int i = 0; i < colorsOfRoute.length; i++) { //
                             int numberOfRequiredColor = playerTrainCards.getOrDefault(colorsOfRoute[i], 0);
-                            System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
-                            System.out.println("Player has Train Cards: " + numberOfRequiredColor);
+//                            System.out.println("Train Cards Required: " + trainCardsRequired + " for color " + colorsOfRoute[i] + " which is index " + i);
+//                            System.out.println("Player has Train Cards: " + numberOfRequiredColor);
                             if ((numberOfRequiredColor + currentAmountOfLocomotivesInHand) >= trainCardsRequired) {
                                 if (claimedByPlayerRoute1 == -1 && i == 0 && !route1Added) {
                                     if (claimedByPlayerRoute2Prop != null) {
                                         if (claimedByPlayerRoute2 != currentPlayer) { //check other route not claimed by same player
                                             route1Added = true;
                                             colorIndexesAvailable.add(0);
-                                            System.out.println("Other route route 1 able");
+                                            //System.out.println("Other route route 1 able");
                                         }
                                     } else {
                                         route1Added = true;
                                         colorIndexesAvailable.add(0);
-                                        System.out.println("Other route route 1 able");
+                                        //System.out.println("Other route route 1 able");
                                     }
                                 }
                                 if (claimedByPlayerRoute2Prop != null && i == 1 && claimedByPlayerRoute1 != currentPlayer && !route2Added) {
                                     if (claimedByPlayerRoute2 == -1) {
                                         route2Added = true;
                                         colorIndexesAvailable.add(1);
-                                        System.out.println("Any colour route 1 able");
+                                        //System.out.println("Any colour route 1 able");
                                     }
                                 }
 
                             } else {
-                                System.out.println("Player ID " + currentPlayer + " cant buy this route");
+                                //System.out.println("Player ID " + currentPlayer + " cant buy this route");
                             }
                         }
                     }
@@ -348,13 +348,17 @@ public class  TicketToRideGameState extends AbstractGameState {
         if (this == o) return true;
         if (!(o instanceof TicketToRideGameState)) return false;
         if (!super.equals(o)) return false;
-        // TODO: compare all variables in the state
-        return o instanceof TicketToRideGameState;
+        TicketToRideGameState that = (TicketToRideGameState) o;
+        return currentFinalRoundTurn == that.currentFinalRoundTurn &&
+                Objects.equals(areas, that.areas) &&
+                Objects.equals(world, that.world) &&
+                Arrays.equals(scores, that.scores) &&
+                Arrays.equals(trainCars, that.trainCars);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), areas, tempDeck, world);
+        return Objects.hash(super.hashCode(), areas, world, Arrays.hashCode(scores), Arrays.hashCode(trainCars), currentFinalRoundTurn);
     }
     public Component getComponent(int componentId, int playerId) {
         return areas.get(playerId).getComponent(componentId);
@@ -368,14 +372,12 @@ public class  TicketToRideGameState extends AbstractGameState {
     }
 
     protected void _reset() {
-        areas = null;
-        scores = null;
-//        tempDeck = null;
-        world = null;
-        trainCars = null;
+        areas = new HashMap<>();
+        scores = new int[getNPlayers()];
+        world = new GraphBoardWithEdges();
+        trainCars = new int[getNPlayers()];
         currentFinalRoundTurn = 0;
-//        nCardsDrawn = 0;
-//        researchStationLocations = new ArrayList<>();
+
     }
     void addComponents() {
         super.addAllComponents();
@@ -415,7 +417,7 @@ public class  TicketToRideGameState extends AbstractGameState {
             String location1 = String.valueOf(currentCard.getProperty(location1Hash));
             String location2 = String.valueOf(currentCard.getProperty(location2Hash));
             boolean isConnected = checkIfConnectedCity(graphForSearch,location1,location2);
-            System.out.println("IN FOR LOOP for cards "+ location1 + " " + location2 + " isConnected: " + isConnected);
+            //System.out.println("IN FOR LOOP for cards "+ location1 + " " + location2 + " isConnected: " + isConnected);
             int pointsOnDestinationCard = ((PropertyInt)(currentCard.getProperty(pointsHash))).value;
             if (isConnected){
                 scoreToAddOrSubtract = scoreToAddOrSubtract + pointsOnDestinationCard;
@@ -471,7 +473,7 @@ public class  TicketToRideGameState extends AbstractGameState {
                 Property nodeProp = currentEdge.getProperty(nodesHash);
                 String[] nodes = ((PropertyStringArray) nodeProp).getValues();
 
-                System.out.println("Edge has nodes om getsearch: " + Arrays.toString(nodes));
+                //System.out.println("Edge has nodes om getsearch: " + Arrays.toString(nodes));
 
                 String node1 = nodes[0];
                 String node2 = nodes[1];

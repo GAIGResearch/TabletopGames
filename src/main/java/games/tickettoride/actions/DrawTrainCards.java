@@ -47,7 +47,7 @@ public class DrawTrainCards extends AbstractAction {
      */
     @Override
     public boolean execute(AbstractGameState gs) {
-        System.out.println("PLAYER " + playerID + " DRAWING CARDS" );
+        System.out.println("PLAYER " + playerID + " DOING ACTION: DRAWING CARDS" );
 
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
@@ -57,14 +57,14 @@ public class DrawTrainCards extends AbstractAction {
 
         Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
 
-        System.out.println( playerID + " has these cards before drawing: " + playerTrainCardHandDeck);
+//        System.out.println( playerID + " has these cards before drawing: " + playerTrainCardHandDeck);
 
         //draw twice
         new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
         new DrawCard(trainCardDeck.getComponentID(), playerTrainCardHandDeck.getComponentID()).execute(tgs);
 
-
-        System.out.println( playerID + " now has these cards after drawing: "  + playerTrainCardHandDeck);
+//
+//        System.out.println( playerID + " now has these cards after drawing: "  + playerTrainCardHandDeck);
         return true;
     }
 
@@ -76,14 +76,15 @@ public class DrawTrainCards extends AbstractAction {
      */
     @Override
     public DrawTrainCards copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        return new DrawTrainCards(playerID);
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof DrawTrainCards;
+        if (this == obj) return true;
+        if (!(obj instanceof DrawTrainCards)) return false;
+        DrawTrainCards that = (DrawTrainCards) obj;
+        return playerID == that.playerID;
     }
 
     @Override

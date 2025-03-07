@@ -15,6 +15,7 @@ import utilities.Hash;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import static core.CoreConstants.colorHash;
 import static core.CoreConstants.playerHandHash;
@@ -71,12 +72,12 @@ public class ClaimRoute extends AbstractAction {
 
         String colorOfRouteToRemove = colorOfRoute; // could change incase of gray route
 
-        System.out.println("PLAYER " + playerID + " CLAIMING ROUTE" );
-        System.out.println("route properties before : " + edge.getProperties());
+        System.out.println("PLAYER " + playerID + " DOING ACTION: CLAIMING ROUTE" );
+        //System.out.println("route properties before : " + edge.getProperties());
         Deck<Card> playerTrainCardHandDeck = (Deck<Card>) tgs.getComponentActingPlayer(playerID,playerHandHash);
         Deck<Card> trainCardDiscardDeck = (Deck<Card>) tgs.getComponent(trainCardDeckDiscardHash);
 
-        System.out.println("player hand before " + playerTrainCardHandDeck);
+        //System.out.println("player hand before " + playerTrainCardHandDeck);
 
         Map<String, Integer>  playerTrainCards = this.getTrainCarCardAmounts(playerTrainCardHandDeck);
 
@@ -87,27 +88,27 @@ public class ClaimRoute extends AbstractAction {
             for (String color : playerTrainCards.keySet()) {
                 if (playerTrainCards.get(color)  >= costOfRoute) { //correct amount
                     colorOfRouteToRemove = color;  // Use this color to claim the route
-                    System.out.println("in gray route claiming route, removing " + colorOfRouteToRemove);
+                    //System.out.println("in gray route claiming route, removing " + colorOfRouteToRemove);
                     break;
                 } else if ((playerTrainCards.get(color) + currentAmountOfLocomotivesInHand >= costOfRoute) && !color.equals("Locomotive")) { //has enough locomotive to finish route
                     colorOfRouteToRemove = color;  // Use this color to claim the route
                     int currentColorAmount = playerTrainCards.get(color);
                     amountOfLocomotiveToRemove = costOfRoute - currentColorAmount;
                     amountToRemove = currentColorAmount;
-                    System.out.println("in gray route claiming route with locomotive, removing # of " + amountToRemove + colorOfRouteToRemove + " with # of locomotives: " + amountOfLocomotiveToRemove);
+                    //System.out.println("in gray route claiming route with locomotive, removing # of " + amountToRemove + colorOfRouteToRemove + " with # of locomotives: " + amountOfLocomotiveToRemove);
                     break;
                 }
             }
             removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove,trainCardDiscardDeck);
         } else if (playerTrainCards.getOrDefault(colorOfRoute,0)  >= costOfRoute){ //color of route in hand has correct amount
-            System.out.println("color of route in hand has correct amount");
+            //System.out.println("color of route in hand has correct amount");
             removeTrainCarCards(playerTrainCardHandDeck, costOfRoute, colorOfRoute, amountOfLocomotiveToRemove,trainCardDiscardDeck);
 
         } else if (playerTrainCards.getOrDefault(colorOfRoute,0) +  currentAmountOfLocomotivesInHand >= costOfRoute){ //use locomotive to supplement
             int currentColorAmount = playerTrainCards.getOrDefault(colorOfRouteToRemove,0);
             amountOfLocomotiveToRemove = costOfRoute - currentColorAmount;
             amountToRemove = currentColorAmount;
-            System.out.println("Using Locomotive to claim route");
+            //System.out.println("Using Locomotive to claim route");
             removeTrainCarCards(playerTrainCardHandDeck, amountToRemove, colorOfRouteToRemove, amountOfLocomotiveToRemove, trainCardDiscardDeck);
         }
 
@@ -136,12 +137,12 @@ public class ClaimRoute extends AbstractAction {
         Property routeClaimedProp = new PropertyBoolean("routeClaimed", (Boolean) true);
 
         int claimedByPlayerRoute1 = ((PropertyInt) claimedByPlayerRoute1Prop).value;
-        System.out.println("route1 claimed: " + claimedByPlayerRoute1);
+        //System.out.println("route1 claimed: " + claimedByPlayerRoute1);
         int claimedByPlayerRoute2 = -2;
         if (claimedByPlayerRoute2Prop != null){
             claimedByPlayerRoute2  = ((PropertyInt) claimedByPlayerRoute2Prop).value;
         }
-        System.out.println("route2 claimed: " + claimedByPlayerRoute2);
+        //System.out.println("route2 claimed: " + claimedByPlayerRoute2);
 
 
         //note to self: gray ones not setting properly cuz its always editing route1
@@ -149,23 +150,23 @@ public class ClaimRoute extends AbstractAction {
             System.out.println(tgs.getNPlayers() + " more than 4 players");
             if (claimedByPlayerRoute1 != -1 && claimedByPlayerRoute2 != -1) { //if both routes taken and double route enabled, its now completely closed off
                 edge.setProperty(routeClaimedProp);
-                System.out.println(" double route claimed more than 4 players");
+                //System.out.println(" double route claimed more than 4 players");
             } else {
-                System.out.println(" double route not claimed more than 4 players");
+                //System.out.println(" double route not claimed more than 4 players");
             }
         } else{
-            System.out.println("less than 4 players");
+            //System.out.println("less than 4 players");
             edge.setProperty(routeClaimedProp);
         }
 
 
-        System.out.println(tgs.getGameScore(playerID) + " points before");
+//        System.out.println(tgs.getGameScore(playerID) + " points before");
         tgs.addScore(playerID, tp.getPointsPerRoute(costOfRoute));
-        System.out.println("Claim route of color: " + colorOfRoute + " and size of " + costOfRoute);
-        System.out.println(tgs.getGameScore(playerID) + " points after");
-        System.out.println("player hand after " + playerTrainCardHandDeck);
-
-        System.out.println("route properties after : " + edge.getProperties());
+//        System.out.println("Claim route of color: " + colorOfRoute + " and size of " + costOfRoute);
+//        System.out.println(tgs.getGameScore(playerID) + " points after");
+//        System.out.println("player hand after " + playerTrainCardHandDeck);
+//
+//        System.out.println("route properties after : " + edge.getProperties());
 
         return true;
     }
@@ -217,20 +218,24 @@ public class ClaimRoute extends AbstractAction {
      */
     @Override
     public ClaimRoute copy() {
-        // TODO: copy non-final variables appropriately
-        return this;
+        return new ClaimRoute(edge, playerID, colorOfRoute, costOfRoute, indexOfColor);
     }
 
     @Override
     public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        return obj instanceof ClaimRoute;
+        if (this == obj) return true;
+        if (!(obj instanceof ClaimRoute)) return false;
+        ClaimRoute that = (ClaimRoute) obj;
+        return playerID == that.playerID &&
+                costOfRoute == that.costOfRoute &&
+                indexOfColor == that.indexOfColor &&
+                edge.equals(that.edge) &&
+                colorOfRoute.equals(that.colorOfRoute);
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(edge, playerID, colorOfRoute, costOfRoute, indexOfColor);
     }
 
     @Override
