@@ -372,10 +372,10 @@ public class  TicketToRideGameState extends AbstractGameState {
     }
 
     protected void _reset() {
-        areas = new HashMap<>();
-        scores = new int[getNPlayers()];
-        world = new GraphBoardWithEdges();
-        trainCars = new int[getNPlayers()];
+        areas = null;
+        scores = null;
+        world = null;
+        trainCars = null;
         currentFinalRoundTurn = 0;
 
     }
