@@ -219,7 +219,8 @@ public class NTBEA {
                         new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
 
                 // We then want to check the win rate against the elite agent (if one was provided)
-                // we only regard an agent as better, if it beats the elite agent by at least 1.6 se (so, c. 90%) confidence
+                // we only regard an agent as better if it beats the elite agent with about 90% confidence (adjusted for multiple comparisons)
+                double zScore = Utils.standardZScore(0.10, agentsInOrder.size() - 1);
                 if (elites.size() == 1 && agentsInOrder.get(0) != winnersPerRun.size() - 1) {
                     // The elite agent is always the last one (and if the elite won fair and square, then we skip this
                     double eliteMean;
@@ -229,11 +230,11 @@ public class NTBEA {
                     if (params.evalMethod.equals("Ordinal")) {
                         eliteMean = tournament.getOrdinalRank(winnersPerRun.size() - 1);
                         eliteErr = tournament.getOrdinalStdErr(winnersPerRun.size() - 1);
-                        winnerBeatsEliteBySignificantMargin = eliteMean - 1.6 * eliteErr > bestResult.a.a;
+                        winnerBeatsEliteBySignificantMargin = eliteMean - zScore * eliteErr > bestResult.a.a;
                     } else {
                         eliteMean = tournament.getWinRate(winnersPerRun.size() - 1);
                         eliteErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                        winnerBeatsEliteBySignificantMargin = eliteMean + 1.6 * eliteErr < bestResult.a.a;
+                        winnerBeatsEliteBySignificantMargin = eliteMean + zScore * eliteErr < bestResult.a.a;
                     }
                     if (!winnerBeatsEliteBySignificantMargin) {
                         if (params.verbose)

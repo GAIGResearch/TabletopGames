@@ -223,15 +223,15 @@ public class SkillLadder {
         int nPlayers = (int) config.get(RunArg.nPlayers);
 
         ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + budget + File.separator + "NTBEA";
-        ntbeaParameters.repeats = Math.max(nPlayers, ntbeaParameters.repeats);
-        ntbeaParameters.budget = budget;
+        ntbeaParameters.setParameterValue("repeats", Math.max(nPlayers, ntbeaParameters.repeats));
+        ntbeaParameters.setParameterValue("budget", budget);
 
-        ntbeaParameters.tournamentGames = (int) (gameBudget * NTBEABudgetOnTournament);
-        ntbeaParameters.iterationsPerRun = (gameBudget - ntbeaParameters.tournamentGames) / ntbeaParameters.repeats;
+        ntbeaParameters.setParameterValue("matchups",  (int) (gameBudget * NTBEABudgetOnTournament));
+        ntbeaParameters.setParameterValue("iterations", (gameBudget - ntbeaParameters.tournamentGames) / ntbeaParameters.repeats);
         if (ntbeaParameters.mode == NTBEAParameters.Mode.StableNTBEA) {
-            ntbeaParameters.iterationsPerRun /= nPlayers;
+            ntbeaParameters.setParameterValue("iterations", ntbeaParameters.iterationsPerRun /= nPlayers);
         }
-        ntbeaParameters.evalGames = 0;
+        ntbeaParameters.setParameterValue("evalGames", 0);
         ntbeaParameters.logFile = "NTBEA_Runs.log";
 
         return ntbeaParameters;

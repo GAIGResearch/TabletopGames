@@ -131,10 +131,9 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         setParameterValue("evalsPerTrial", args.get(RunArg.evalsPerTrial));
         setParameterValue("OSDBudget", args.get(RunArg.OSDBudget));
 
-        configure(args);
-    }
+        _reset();
 
-    public void configure(Map<RunArg, Object> args) {
+        // then the non-tunable parameters
         tuningGame = (boolean) args.get(RunArg.tuneGame);
         byTeam = (boolean) args.get(RunArg.byTeam);
         gameType = GameType.valueOf(args.get(RunArg.game).toString());
@@ -142,7 +141,6 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         gameParams = args.get(RunArg.gameParams).equals("") ? null :
                 AbstractParameters.createFromFile(gameType, (String) args.get(RunArg.gameParams));
 
-        mode = Mode.valueOf((String) args.get(RunArg.NTBEAMode));
         listenerClasses = (List<String>) args.get(RunArg.listener);
         destDir = (String) args.get(RunArg.destDir);
         if (destDir.isEmpty()) destDir = "NTBEA";
@@ -218,13 +216,14 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     protected NTBEAParameters _copy() {
         NTBEAParameters ntp = new NTBEAParameters();
         ntp.searchSpace = searchSpace;
-        ntp.gameParams = gameParams.copy();
+        ntp.gameParams = gameParams == null ? null : gameParams.copy();
         ntp.tuningGame = tuningGame;
         ntp.byTeam = byTeam;
         ntp.listenerClasses = listenerClasses;
         ntp.destDir = destDir;
         ntp.gameType = gameType;
         ntp.nPlayers = nPlayers;
+        ntp.logFile = logFile;
         return ntp;
     }
 
@@ -232,12 +231,13 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     protected boolean _equals(Object o) {
         if (o instanceof NTBEAParameters parameters) {
             return searchSpace.equals(parameters.searchSpace) &&
-                    gameParams.equals(parameters.gameParams) &&
+                    ((gameParams == null && parameters.gameParams == null) || gameParams.equals(parameters.gameParams)) &&
                     tuningGame == parameters.tuningGame &&
                     byTeam == parameters.byTeam &&
                     listenerClasses.equals(parameters.listenerClasses) &&
                     destDir.equals(parameters.destDir) &&
                     gameType.equals(parameters.gameType) &&
+                    logFile.equals(parameters.logFile) &&
                     nPlayers == parameters.nPlayers;
         }
         return false;

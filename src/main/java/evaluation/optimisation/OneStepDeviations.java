@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -131,23 +132,26 @@ public class OneStepDeviations {
 
             System.out.printf("Iteration %d: Best agent is %s (%d) with score %.3f +/- %.3f%n",
                     iteration, players.get(bestIndex), bestIndex, bestScore, bestStdError);
-            // Now run through all players, and discard any more than 4 standard deviations below the best
+            // Now run through all players, and discard any that are significantly worse than the best
             List<Pair<Integer, AbstractPlayer>> newPlayers = new ArrayList<>();
             for (Pair<Integer, AbstractPlayer> player : players) {
                 int i = player.a;
-                if (i == 0) {
-                    newPlayers.add(player); // never discard the baseline agent
+                if (i == 0 || i == bestIndex) {
+                    newPlayers.add(player); // never discard the baseline agent, or the best agent
                     continue;
                 }
-                double stdError = Math.sqrt(totalScoreSquared[i] / gamesPlayed[i] - Math.pow(totalScore[i] / gamesPlayed[i], 2)) / Math.sqrt(gamesPlayed[i]);
-                double stdErrorMultiple = 2.5 + 0.08 * players.size();
-                // this is a very rough adjustment. 2.58 is about a 1% confidence interval, but is only valid if we have
-                // a single comparison. Here we have many, so we need to adjust for multiple comparisons
-                if (totalScore[i] / gamesPlayed[i] > bestScore - stdErrorMultiple * Math.max(stdError, bestStdError)) {
+                double stdError = Utils.meanDiffStandardError(totalScore[bestIndex], totalScore[i],
+                        totalScoreSquared[bestIndex], totalScoreSquared[i], (int) gamesPlayed[bestIndex], (int) gamesPlayed[i]);
+                double stdErrorMultiple = Utils.standardZScore(0.01, players.size() - 1);
+                // We go for a 99% confidence that any given agent is worse than the best (adjusted for multiple comparisons)
+                // This technically does not adjust for the fact we compare against the MAX agent, so implicitly there are N(N-1)/2 comparisons
+                // instead of N-1, but the full set of comparisons are not independent. We adjust for this by choosing a 1% confidence interval.
+                if (totalScore[i] / gamesPlayed[i] > bestScore - stdErrorMultiple * stdError) {
                     newPlayers.add(Pair.of(i, player.b));
                     //     System.out.printf("Retaining %s (%d) with score %.3f +/- %.3f %n", players.get(i), i, totalScore[i] / gamesPlayed[i], stdError);
                 } else {
-                    System.out.printf("Discarding %s (%d) with score %.3f +/- %.3f %n", player.b, i, totalScore[i] / gamesPlayed[i], stdError);
+                    System.out.printf("Discarding %s (%d) with score %.3f, and mean diff of %.3f +/- %.3f %n",
+                            player.b, i, totalScore[i] / gamesPlayed[i], bestScore - totalScore[i] / gamesPlayed[i], stdError);
                 }
             }
 
@@ -179,23 +183,28 @@ public class OneStepDeviations {
                     throw new AssertionError("Dimension mismatch");
                 }
                 double score = totalScore[stuff.a] / gamesPlayed[stuff.a];
-                double stdError = Math.sqrt(totalScoreSquared[stuff.a] / gamesPlayed[stuff.a] - Math.pow(totalScore[stuff.a] / gamesPlayed[stuff.a], 2))
-                        / Math.sqrt(gamesPlayed[stuff.a]);
-                System.out.printf("Processing Agent %s (%d) with score %.3f +/- %.3f %n", stuff.b, stuff.a, score, stdError);
-                if (score > baseAgentScore + 2 * stdError) {
-                    System.out.printf("Tweaking %s to %s with score %.3f +/- %.3f versus base agent score of %.3f%n",
-                            searchSpace.name(dimension), searchSpace.allValues(dimension).get(settings[1]), score, stdError, baseAgentScore);
+                double stdError = Utils.meanDiffStandardError(totalScore[0], totalScore[stuff.a],
+                        totalScoreSquared[0], totalScoreSquared[stuff.a], (int) gamesPlayed[0], (int) gamesPlayed[stuff.a]);
+                double adjustedZScore = Utils.standardZScore(0.05, players.size() - 1);
+                System.out.printf("Processing Agent %s (%d) with score %.3f, diff to base of %.3f +/- %.3f %n",
+                        stuff.b, stuff.a, score, score - baseAgentScore, stdError);
+                double adjustedZDefaultComparison = Utils.standardZScore(0.25, baseSettings.length);
+                if (score > baseAgentScore + adjustedZScore * stdError) {
+                    System.out.printf("Tweaking %s to %s with score %.3f, better than base agent by %.3f +/- %.3f%n",
+                            searchSpace.name(dimension), searchSpace.allValues(dimension).get(settings[1]), score,
+                            score - baseAgentScore, stdError);
                     tweakedSettings[dimension] = settings[1];
                     break;
-                } else if (score > baseAgentScore - 1 * stdError) {
+                } else if (score > baseAgentScore - adjustedZDefaultComparison * stdError) {
                     if (settings[1] == defaultSettings[dimension]) {
                         double bestScore = totalScore[dimensionPlayers.get(0).a] / gamesPlayed[dimensionPlayers.get(0).a];
-                        // add an additional check that the default agent is also within 1 sd of the best agent
+                        // add an additional check that the default agent is also within spitting distance of the best agent
                         // to avoid cases where we set to the default even though this is quite a bit worse than the best agent on this setting
                         // (in the worst case this could be 2.99 standard deviations worse than the best...so sticking to the tuned value is a better idea)
-                        if (score > bestScore - 1 * stdError) {
-                            System.out.printf("Setting to default %s (%s) with score %.3f +/- %.3f versus base agent score of %.3f%n",
-                                    searchSpace.name(dimension), searchSpace.allValues(dimension).get(settings[1]), score, stdError, baseAgentScore);
+                        if (score > bestScore - adjustedZDefaultComparison * stdError) {
+                            System.out.printf("Setting to default %s (%s) with score %.3f, improving over base agent by %.3f +/- %.3f%n",
+                                    searchSpace.name(dimension), searchSpace.allValues(dimension).get(settings[1]), score,
+                                    score - baseAgentScore, stdError);
                             tweakedSettings[dimension] = settings[1];
                             break;
                         }
