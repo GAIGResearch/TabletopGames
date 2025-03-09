@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static evaluation.RunArg.*;
 
@@ -149,8 +150,8 @@ public class OneStepDeviations {
             List<Pair<Integer, AbstractPlayer>> newPlayers = new ArrayList<>();
             double stdErrorMultiple = Utils.standardZScore(0.01, players.size() - 1);
             double stdBetterMultiple = Utils.standardZScore(0.10, players.size() - 1);
-            System.out.printf("Discarding agents with score more than %.3f standard errors worse than best%n", stdErrorMultiple);
-            System.out.printf("Checking for agents significantly better than baseline by more than %.3f standard errors%n", stdBetterMultiple);
+     //       System.out.printf("Discarding agents with score more than %.3f standard errors worse than best%n", stdErrorMultiple);
+     //       System.out.printf("Checking for agents significantly better than baseline by more than %.3f standard errors%n", stdBetterMultiple);
             for (Pair<Integer, AbstractPlayer> player : players) {
                 int i = player.a;
                 if (i == 0) {
@@ -234,10 +235,13 @@ public class OneStepDeviations {
         // Now we work out the final tweaked 'best' agent
         // We take the single best agent that is better than the baseline
         // As long as this improvement is significant. Keep working through all agents, but now track the best lower bound
-        // TODO: If all the deviations are to their default values, then we are more lenient in the significance test
+        // If there is no significant improvement, then we will consider any settings that are just better than the
+        // baseline as long as the changes are all to default settings
         double baseAgentScore = totalScore.get(0) / gamesPlayed.get(0);
         double adjustedZScore = Utils.standardZScore(0.05, players.size() - 1);
         double bestLowerBound = baseAgentScore;
+        int[] bestDefaultSettings = null;
+        double bestDefaultScore = -Double.MAX_VALUE;
         int selectedPlayer = -1;
         System.out.printf("Base agent score is %.3f, and zScore needed is %.3f%n", baseAgentScore, adjustedZScore);
         for (Pair<Integer, AbstractPlayer> stuff : players) {
@@ -251,11 +255,25 @@ public class OneStepDeviations {
                 // best so far
                 bestLowerBound = score - adjustedZScore * stdError;
                 selectedPlayer = playerIndex;
+            } else if (score > baseAgentScore) {
+                // check for default settings
+                boolean allDefault = IntStream.range(0, playerSettings.get(playerIndex).size())
+                        .allMatch(i ->  playerSettings.get(playerIndex).get(i).equals(baseSettings[i])
+                                || playerSettings.get(playerIndex).get(i).equals(defaultSettings[i]));
+                if (allDefault && score > bestDefaultScore) {
+                    bestDefaultScore = score;
+                    bestDefaultSettings = playerSettings.get(playerIndex).stream().mapToInt(Integer::intValue).toArray();
+                }
             }
         }
         if (selectedPlayer == -1) {
             System.out.println("No significant improvement found");
-            return baseSettings;
+            if (bestDefaultScore > -Double.MAX_VALUE) {
+                System.out.printf("Best default settings agent is %s with score %.3f%n", getAgentName(bestDefaultSettings, baseSettings), bestDefaultScore);
+                return bestDefaultSettings;
+            } else {
+                return baseSettings;
+            }
         } else {
             int finalSelectedPlayer = selectedPlayer;
             AbstractPlayer playerSelected = players.stream().filter(data -> data.a == finalSelectedPlayer).findFirst().get().b;
