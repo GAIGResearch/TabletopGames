@@ -325,7 +325,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public boolean equals(Object o) {
         if (o instanceof GraphBoardWithEdges) {
             GraphBoardWithEdges other = (GraphBoardWithEdges) o;
-            return componentID == other.componentID && other.boardNodes.equals(boardNodes) && boardEdges == other.boardEdges;
+            return componentID == other.componentID && other.boardNodes.equals(boardNodes) && other.boardEdges.equals(boardEdges) ;
         }
         return false;
     }
