@@ -760,6 +760,8 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
     public double getWinRateAlphaRank(int agentID) {
+        if (alphaRankByWin == null)
+            return getWinRate(agentID);
         return alphaRankByWin[agentID];
     }
 
@@ -776,6 +778,8 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public double getOrdinalAlphaRank(int agentID) {
+        if (alphaRankByOrdinal == null)
+            return -getOrdinalRank(agentID);
         return alphaRankByOrdinal[agentID];
     }
 

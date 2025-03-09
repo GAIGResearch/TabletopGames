@@ -195,7 +195,7 @@ public class NTBEA {
                 createListeners().forEach(tournament::addListener);
                 tournament.run();
                 // create a new list of results in descending order of score
-                IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
+                IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? tournament::getOrdinalAlphaRank : tournament::getWinRateAlphaRank;
                 List<Integer> agentsInOrder = IntStream.range(0, players.size())
                         .boxed()
                         .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
@@ -204,9 +204,10 @@ public class NTBEA {
                 params.logFile = "RRT_" + params.logFile;
                 for (int index : agentsInOrder) {
                     if (params.verbose)
-                        System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
+                        System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f\tWinAlpha: %.3f\tOrdinalAlpha: %.3f%n", index, Arrays.toString(winnerSettings.get(index)),
                                 tournament.getWinRate(index), tournament.getWinStdErr(index),
-                                tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                                tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index),
+                                tournament.getWinRateAlphaRank(index), tournament.getOrdinalAlphaRank(index));
                     Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
                     if (params.evalMethod.equals("Ordinal"))
                         resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
@@ -214,6 +215,8 @@ public class NTBEA {
                     logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
                 }
                 params.logFile = params.logFile.substring(4);
+                // Note that the bestResult uses AlphaRank, as this factors in *who* the agent beats and
+                // helps prevent a high win rate against only weak opponents from being the best result
                 bestResult = params.evalMethod.equals("Ordinal") ?
                         new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
                         new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
@@ -230,11 +233,12 @@ public class NTBEA {
                     if (params.evalMethod.equals("Ordinal")) {
                         eliteMean = tournament.getOrdinalRank(winnersPerRun.size() - 1);
                         eliteErr = tournament.getOrdinalStdErr(winnersPerRun.size() - 1);
-                        winnerBeatsEliteBySignificantMargin = eliteMean - zScore * eliteErr > bestResult.a.a;
+                        // The sqrt(2) is to adjust for a test on the difference between two means (assuming same n and sd)
+                        winnerBeatsEliteBySignificantMargin = eliteMean - zScore * Math.sqrt(2) * eliteErr > bestResult.a.a;
                     } else {
                         eliteMean = tournament.getWinRate(winnersPerRun.size() - 1);
                         eliteErr = tournament.getWinStdErr(winnersPerRun.size() - 1);
-                        winnerBeatsEliteBySignificantMargin = eliteMean + zScore * eliteErr < bestResult.a.a;
+                        winnerBeatsEliteBySignificantMargin = eliteMean + zScore * Math.sqrt(2) * eliteErr < bestResult.a.a;
                     }
                     if (!winnerBeatsEliteBySignificantMargin) {
                         if (params.verbose)
