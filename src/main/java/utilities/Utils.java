@@ -1,6 +1,7 @@
 package utilities;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.json.simple.JSONObject;
 
@@ -480,6 +481,13 @@ public abstract class Utils {
         double adjustedAlpha = 1.0 - Math.pow(1.0 - alpha, 1.0 / N);
         NormalDistribution nd = new NormalDistribution();
         return nd.inverseCumulativeProbability(1.0 - adjustedAlpha);
+    }
+
+    public static double standardTScore(double alpha, int N, int df) {
+        // n1 and n2 are the numbers in the two samples
+        TDistribution tDist = new TDistribution(df);
+        double adjustedAlpha = 1.0 - Math.pow(1.0 - alpha, 1.0 / N);
+        return tDist.inverseCumulativeProbability(1.0 - adjustedAlpha);
     }
 
 

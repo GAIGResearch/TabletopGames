@@ -320,10 +320,9 @@ public class NTBEA {
         double avg = Arrays.stream(results).average().orElse(0.0);
         double quantileValue = results[(int) (results.length * params.quantile / 100.0)];
         double stdErr = Math.sqrt(Arrays.stream(results).map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
-        Pair<Double, Double> resultToReport = (params.quantile > 0) ?
+        return (params.quantile > 0) ?
                 new Pair<>(quantileValue, avg) :
                 new Pair<>(avg, stdErr);
-        return resultToReport;
     }
 
     /**

@@ -62,12 +62,12 @@ public class OneStepDeviations {
     public int[] run(int[] baseSettings) {
 
         int[] defaultSettings = searchSpace.defaultSettings();
-        List<int[]> playerSettings = new ArrayList<>();
+        List<List<Integer>> playerSettings = new ArrayList<>();
 
         // we store the players with their index in the list, as this makes it easier later when we filter the list by various criteria
         List<Pair<Integer, AbstractPlayer>> players = new ArrayList<>();
         players.add(Pair.of(0, (AbstractPlayer) searchSpace.instantiate(baseSettings)));
-        playerSettings.add(baseSettings); // dummy for baseline agent
+        playerSettings.add(Arrays.stream(baseSettings).boxed().toList()); // dummy for baseline agent
         int nextIndex = 1;
         for (int i = 0; i < baseSettings.length; i++) {
             for (int j = 0; j < params.searchSpace.nValues(i); j++) {
@@ -78,9 +78,9 @@ public class OneStepDeviations {
                 settings[i] = j;
                 AbstractPlayer player = (AbstractPlayer) searchSpace.instantiate(settings);
                 // we set the name to indicate the one step deviation
-                player.setName(String.format("%s: %s", searchSpace.name(i), searchSpace.allValues(i).get(j)));
+                player.setName(getAgentName(settings, baseSettings));
                 players.add(Pair.of(nextIndex, player));
-                playerSettings.add(settings);
+                playerSettings.add(Arrays.stream(settings).boxed().toList());
                 nextIndex++;
             }
         }
@@ -148,12 +148,13 @@ public class OneStepDeviations {
             // Now run through all players, and discard any that are significantly worse than the best
             List<Pair<Integer, AbstractPlayer>> newPlayers = new ArrayList<>();
             double stdErrorMultiple = Utils.standardZScore(0.01, players.size() - 1);
-            double stdBetterMultiple = Utils.standardZScore(0.05, players.size() - 1);
+            double stdBetterMultiple = Utils.standardZScore(0.10, players.size() - 1);
             System.out.printf("Discarding agents with score more than %.3f standard errors worse than best%n", stdErrorMultiple);
+            System.out.printf("Checking for agents significantly better than baseline by more than %.3f standard errors%n", stdBetterMultiple);
             for (Pair<Integer, AbstractPlayer> player : players) {
                 int i = player.a;
-                if (i == 0 || i == bestIndex) {
-                    newPlayers.add(player); // never discard the baseline agent, or the best agent
+                if (i == 0) {
+                    newPlayers.add(player); // never discard the baseline agent
                     continue;
                 }
                 double stdError = Utils.meanDiffStandardError(totalScore.get(bestIndex), totalScore.get(i),
@@ -163,6 +164,8 @@ public class OneStepDeviations {
                 // instead of N-1, but the full set of comparisons are not independent. We adjust for this by choosing a 1% confidence interval.
                 if (totalScore.get(i) / gamesPlayed.get(i) >= bestScore - stdErrorMultiple * stdError) {
                     newPlayers.add(Pair.of(i, player.b));
+    //                System.out.printf("Keeping %s (%d) with score %.3f, and mean diff of %.3f +/- %.3f %n",
+   //                         player.b, i, totalScore.get(i) / gamesPlayed.get(i), bestScore - totalScore.get(i) / gamesPlayed.get(i), stdError);
                     // and also check for significant improvement over the baseline agent
                     if (!agentsMuchBetterThanBaseline.contains(i)) {
                         double stdErrorToBase = Utils.meanDiffStandardError(totalScore.get(0), totalScore.get(i),
@@ -178,7 +181,7 @@ public class OneStepDeviations {
                             player.b, i, totalScore.get(i) / gamesPlayed.get(i), bestScore - totalScore.get(i) / gamesPlayed.get(i), stdError);
                 }
             }
-            // TODO: Now add in new combo-players that combine the setting deviations of players that are better then baseline
+            // Now add in new combo-players that combine the setting deviations of players that are better then baseline
             // We use all compatible combinations of agentsMuchBetterThanBaseline, and add them to the list of players
             // after checking that these settings have not already been tried
             // A 'compatible' combination is one where the deviation indices do not overlap
@@ -186,43 +189,37 @@ public class OneStepDeviations {
             // First all possible combinations of agentsMuchBetterThanBaseline
             for (int i = 0; i < agentsMuchBetterThanBaseline.size(); i++) {
                 for (int j = i + 1; j < agentsMuchBetterThanBaseline.size(); j++) {
-                    int[] settings1 = playerSettings.get(agentsMuchBetterThanBaseline.get(i));
-                    int[] settings2 = playerSettings.get(agentsMuchBetterThanBaseline.get(j));
+                    List<Integer> settings1 = playerSettings.get(agentsMuchBetterThanBaseline.get(i));
+                    List<Integer> settings2 = playerSettings.get(agentsMuchBetterThanBaseline.get(j));
                     boolean compatible = true;
-                    for (int k = 0; k < settings1.length; k++) {
-                        if (settings1[k] != baseSettings[k] && settings2[k] != baseSettings[k]) {
+                    for (int k = 0; k < settings1.size(); k++) {
+                        if (!settings1.get(k).equals(playerSettings.get(0).get(k)) &&
+                                !settings2.get(k).equals(playerSettings.get(0).get(k))) {
                             compatible = false;
+                            break;
                         }
                     }
                     if (compatible) {
-                        int[] combinedSettings = settings1.clone();
+                        List<Integer> combinedSettings = new ArrayList<>(settings1);
                         // use 1 as the base, and add in the changes that 2 makes
-                        for (int k = 0; k < settings1.length; k++) {
-                            if (settings2[k] != baseSettings[k]) {
-                                combinedSettings[k] = settings2[k];
+                        for (int k = 0; k < settings1.size(); k++) {
+                            if (!settings2.get(k).equals(playerSettings.get(0).get(k))) {
+                                combinedSettings.set(k, settings2.get(k));
                             }
                         }
                         // check for duplicate
                         if (!playerSettings.contains(combinedSettings)) {
                             // add new player
-                            AbstractPlayer player = (AbstractPlayer) searchSpace.instantiate(combinedSettings);
-                            int finalI = i;
-                            int iIndex = players.stream()
-                                    .filter(data -> data.a.equals(agentsMuchBetterThanBaseline.get(finalI)))
-                                            .findFirst().get().a;
-                            int finalJ = j;
-                            int jIndex = players.stream()
-                                    .filter(data -> data.a.equals(agentsMuchBetterThanBaseline.get(finalJ)))
-                                            .findFirst().get().a;
-                            player.setName(String.format("%s + %s", players.get(iIndex).b,
-                                    players.get(jIndex).b));
+                            int[] combinedSettingsArray = combinedSettings.stream().mapToInt(Integer::intValue).toArray();
+                            AbstractPlayer player = (AbstractPlayer) searchSpace.instantiate(combinedSettingsArray);
+                            player.setName(getAgentName(combinedSettingsArray, baseSettings));
                             newPlayers.add(Pair.of(nextIndex, player));
                             playerSettings.add(combinedSettings);
                             gamesPlayed.add(0);
                             totalScore.add(0.0);
                             totalScoreSquared.add(0.0);
                             nextIndex++;
-                            System.out.printf("Adding new player %s with settings %s%n", player, Arrays.toString(combinedSettings));
+                            System.out.printf("Adding new player %s with settings %s%n", player, Arrays.toString(combinedSettingsArray));
                         }
                     }
                 }
@@ -263,7 +260,20 @@ public class OneStepDeviations {
             int finalSelectedPlayer = selectedPlayer;
             AbstractPlayer playerSelected = players.stream().filter(data -> data.a == finalSelectedPlayer).findFirst().get().b;
             System.out.printf("Selected agent is %s with score %.3f%n", playerSelected, totalScore.get(selectedPlayer) / gamesPlayed.get(selectedPlayer));
-            return playerSettings.get(selectedPlayer);
+            return playerSettings.get(selectedPlayer).stream().mapToInt(Integer::intValue).toArray();
         }
+    }
+
+    private String getAgentName(int[] settings, int[] baseSettings) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < settings.length; i++) {
+            if (settings[i] == baseSettings[i]) {
+                continue;
+            }
+            sb.append(searchSpace.name(i)).append(": ").append(searchSpace.allValues(i).get(settings[i])).append(", ");
+        }
+        // remove last comma and space
+        sb.delete(sb.length() - 2, sb.length());
+        return sb.toString();
     }
 }
