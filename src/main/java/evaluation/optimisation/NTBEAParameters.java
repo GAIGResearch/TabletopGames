@@ -46,6 +46,8 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public int quantile = 0;
     public int evaluationsPerTrial = 1;
     public int OSDBudget = 0;
+    public boolean OSDTournament = false;
+    public double OSDConfidence = 0.9;
 
     // and those that are not (so must be included separately in copy etc)
     public boolean tuningGame = false;
@@ -79,6 +81,8 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         addTunableParameter("quantile", 0);
         addTunableParameter("evalsPerTrial", 1);
         addTunableParameter("OSDBudget", 0);
+        addTunableParameter("OSDTournament", false);
+        addTunableParameter("OSDConfidence", 0.9);
     }
 
     @Override
@@ -103,6 +107,8 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         quantile = (int) getParameterValue("quantile");
         evaluationsPerTrial = (int) getParameterValue("evalsPerTrial");
         OSDBudget = (int) getParameterValue("OSDBudget");
+        OSDTournament = (boolean) getParameterValue("OSDTournament");
+        OSDConfidence = (double) getParameterValue("OSDConfidence");
 
         if (evalGames == -1) evalGames = iterationsPerRun / 5;
     }
@@ -130,6 +136,8 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         setParameterValue("quantile", args.get(RunArg.quantile));
         setParameterValue("evalsPerTrial", args.get(RunArg.evalsPerTrial));
         setParameterValue("OSDBudget", args.get(RunArg.OSDBudget));
+        setParameterValue("OSDTournament", args.get(RunArg.OSDTournament));
+        setParameterValue("OSDConfidence", args.get(RunArg.OSDConfidence));
 
         _reset();
 

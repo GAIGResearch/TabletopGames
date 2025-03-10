@@ -115,7 +115,7 @@ public class OneStepDeviations {
             int bestIndex = 0;
             double bestScore = -Double.MAX_VALUE;
             double bestStdError = 0.0;
-            if (evaluator == null) {
+            if (evaluator == null || params.OSDTournament) {
                 // We now have all agents, with [0] being the baseline agent
                 Map<RunArg, Object> tournamentConfig = new HashMap<>();
                 tournamentConfig.put(matchups, params.tournamentGames);
@@ -177,8 +177,8 @@ public class OneStepDeviations {
             System.out.printf("Baseline agent has score %.3f%n", baseAgentScore);
             // Now run through all players, and discard any that are significantly worse than the best
             List<Pair<Integer, Object>> newPlayers = new ArrayList<>();
-            double stdErrorMultiple = Utils.standardZScore(0.01, players.size() - 1);
-            double stdBetterMultiple = Utils.standardZScore(0.10, players.size() - 1);
+            double stdErrorMultiple = Utils.standardZScore((1.0 - params.OSDConfidence) / 5.0, players.size() - 1);
+            double stdBetterMultiple = Utils.standardZScore((1.0 - params.OSDConfidence), players.size() - 1);
      //       System.out.printf("Discarding agents with score more than %.3f standard errors worse than best%n", stdErrorMultiple);
      //       System.out.printf("Checking for agents significantly better than baseline by more than %.3f standard errors%n", stdBetterMultiple);
             for (Pair<Integer, Object> player : players) {
@@ -267,7 +267,7 @@ public class OneStepDeviations {
         // If there is no significant improvement, then we will consider any settings that are just better than the
         // baseline as long as the changes are all to default settings
         double baseAgentScore = totalScore.get(0) / gamesPlayed.get(0);
-        double adjustedZScore = Utils.standardZScore(0.05, players.size() - 1);
+        double adjustedZScore = Utils.standardZScore(1.0 - params.OSDConfidence, players.size() - 1);
         double bestLowerBound = baseAgentScore;
         int[] bestDefaultSettings = null;
         double bestDefaultScore = -Double.MAX_VALUE;
