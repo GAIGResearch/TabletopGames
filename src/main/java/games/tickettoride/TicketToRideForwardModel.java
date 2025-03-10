@@ -203,11 +203,15 @@ public class TicketToRideForwardModel extends StandardForwardModel {
 
                 Edge currentEdge = currentRoute.getKey();
 
+                Property nodeProp = currentEdge.getProperty(nodesHash);
+                String[] nodes = ((PropertyStringArray) nodeProp).getValues();
+
                 Property trainCardsRequiredProp = currentEdge.getProperty(trainCardsRequiredHashKey);
                 int trainCardsRequired = ((PropertyInt) trainCardsRequiredProp).value;
 
                 List<Integer> indexesOfColors = routesAvailableToBuy.get(currentEdge);
                 Property colorProp = currentEdge.getProperty(colorHashKey);
+                int edgeId = currentEdge.getComponentID();
                 String[] colorsOfRoute = ((PropertyStringArray) colorProp).getValues();
 //                System.out.println(colorsOfRoute + " is the colors");
 //                System.out.println(indexesOfColors  + " indexs of color");
@@ -217,12 +221,12 @@ public class TicketToRideForwardModel extends StandardForwardModel {
                     if (i < colorsOfRoute.length && indexesOfColors.get(i) < colorsOfRoute.length ){ //need to check because gray double routes, colorsOfRoute would be len = 1 but 2 of them could be available
                         colorOfRoute = colorsOfRoute[indexesOfColors.get(i)];
                         firstAdded = true;
-                        actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
+                        actions.add(new ClaimRoute(edgeId,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i), nodes[0], nodes[1]));
                     } else{
                         if (!firstAdded){ //if true, means one of the grey routes has been added, so dont add it again
                             firstAdded = true;
                             colorOfRoute = colorsOfRoute[0];
-                            actions.add(new ClaimRoute(currentEdge,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i)));
+                            actions.add(new ClaimRoute(edgeId,playerId, colorOfRoute, trainCardsRequired, indexesOfColors.get(i), nodes[0], nodes[1]));
 
                         }
 

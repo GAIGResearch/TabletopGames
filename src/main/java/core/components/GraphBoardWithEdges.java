@@ -59,8 +59,10 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public GraphBoardWithEdges copy()
     {
         GraphBoardWithEdges b = new GraphBoardWithEdges(componentName, componentID);
-        b.boardEdges = new HashSet<Edge>();
-        b.boardEdges = (HashSet<Edge>) this.boardEdges.clone();
+        HashSet<Edge> newEdges = new HashSet<>();
+        for (Edge edge : this.boardEdges) {
+            newEdges.add(edge.copy());
+        }
         HashMap<Integer, BoardNodeWithEdges> nodeCopies = new HashMap<>();
         HashMap<Integer, Edge> edgeCopies = new HashMap<>();
         // Copy board nodes
@@ -84,7 +86,7 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
 
         // Assign new neighbours
         b.setBoardNodes(nodeCopies);
-
+        b.setBoardEdges(newEdges);
         // Copy properties
         copyComponentTo(b);
 
@@ -123,6 +125,9 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     }
     public void setBoardNodes(Map<Integer, BoardNodeWithEdges> boardNodes) {
         this.boardNodes = boardNodes;
+    }
+    public void setBoardEdges(HashSet<Edge> boardEdges) {
+        this.boardEdges = boardEdges;
     }
 
     public void addBoardNode(BoardNodeWithEdges bn) {

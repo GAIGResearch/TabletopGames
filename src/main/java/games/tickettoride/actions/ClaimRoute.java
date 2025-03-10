@@ -40,20 +40,24 @@ import static games.tickettoride.TicketToRideConstants.*;
 public class ClaimRoute extends AbstractAction {
 
 
-    public final Edge edge;
+    public final int edgeID;
     public final int playerID;
     public final String colorOfRoute;
     public final int costOfRoute;
     public final int indexOfColor;
+    public final String location1;
+    public final String location2;
 
 
 
-    public ClaimRoute(Edge edge, int playerID, String colorOfRoute, int costOfRoute, int indexOfColor) {
-        this.edge = edge;
+    public ClaimRoute(int edgeId, int playerID, String colorOfRoute, int costOfRoute, int indexOfColor, String location1, String location2) {
+        this.edgeID = edgeId;
         this.playerID = playerID;
         this.colorOfRoute = colorOfRoute;
         this.costOfRoute = costOfRoute;
         this.indexOfColor = indexOfColor;
+        this.location1 = location1;
+        this.location2 = location2;
 
     }
     /**
@@ -66,6 +70,8 @@ public class ClaimRoute extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         TicketToRideGameState tgs = (TicketToRideGameState) gs;
         TicketToRideParameters tp = (TicketToRideParameters) gs.getGameParameters();
+
+        Edge edge = (Edge) tgs.getComponentById(edgeID);
 
         int amountToRemove = costOfRoute; //may also change because they can supplement with locomotive
         int amountOfLocomotiveToRemove = 0;
@@ -218,7 +224,7 @@ public class ClaimRoute extends AbstractAction {
      */
     @Override
     public ClaimRoute copy() {
-        return new ClaimRoute(edge, playerID, colorOfRoute, costOfRoute, indexOfColor);
+        return new ClaimRoute(edgeID, playerID, colorOfRoute, costOfRoute, indexOfColor, location1, location2);
     }
 
     @Override
@@ -229,20 +235,25 @@ public class ClaimRoute extends AbstractAction {
         return playerID == that.playerID &&
                 costOfRoute == that.costOfRoute &&
                 indexOfColor == that.indexOfColor &&
-                edge.equals(that.edge) &&
-                colorOfRoute.equals(that.colorOfRoute);
+                edgeID == that.edgeID &&
+                colorOfRoute.equals(that.colorOfRoute)&&
+                location1.equals(that.location1)&&
+                location2.equals(that.location2);
+
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(edge, playerID, colorOfRoute, costOfRoute, indexOfColor);
+        return Objects.hash(edgeID, playerID, colorOfRoute, costOfRoute, indexOfColor, location1, location2);
     }
 
     @Override
     public String toString() {
-        Property nodeProp = edge.getProperty(nodesHash);
-        String[] nodes = ((PropertyStringArray) nodeProp).getValues();
-        return "Claimed route between " + nodes[0] + " and " + nodes[1] + " of color: " + colorOfRoute + " and size of " + costOfRoute ;
+//        Edge edge = (Edge) tgs.getComponentById(edgeID);
+//        Property nodeProp = edge.getProperty(nodesHash);
+//        String[] nodes = ((PropertyStringArray) nodeProp).getValues();
+        return "Claim route between " + location1 + " and " + location2 + " Color of route is: "  + colorOfRoute + " and size of " + costOfRoute ;
     }
 
     /**

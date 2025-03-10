@@ -460,14 +460,6 @@
         "routeClaimed": ["Boolean", false]
       },
       {
-        "nodes": ["String[]", ["NEW YORK", "PITTSBURGH"]],
-        "color": ["String[]", ["Green", "White"]],
-        "trainCardsRequired": ["Integer", 2],
-        "claimedByPlayerRoute1": ["Integer", -1],
-        "claimedByPlayerRoute2": ["Integer", -1],
-        "routeClaimed": ["Boolean", false]
-      },
-      {
         "nodes": ["String[]", ["PITTSBURGH", "RALEIGH"]],
         "color": ["String[]", ["Gray"]],
         "trainCardsRequired": ["Integer", 2],
