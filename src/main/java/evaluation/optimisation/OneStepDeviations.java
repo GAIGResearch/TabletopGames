@@ -3,6 +3,7 @@ package evaluation.optimisation;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import evaluation.RunArg;
+import evaluation.optimisation.ntbea.SolutionEvaluator;
 import evaluation.tournaments.RoundRobinTournament;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,10 +24,16 @@ public class OneStepDeviations {
 
     NTBEAParameters params;
     ITPSearchSpace<?> searchSpace;
+    SolutionEvaluator evaluator;
 
     public OneStepDeviations(NTBEAParameters params) {
+        this(params, null);
+    }
+
+    public OneStepDeviations(NTBEAParameters params, SolutionEvaluator evaluator) {
         this.params = params;
         this.searchSpace = (ITPSearchSpace<?>) params.searchSpace;
+        this.evaluator = evaluator;
     }
 
     public static void main(String[] args) {
@@ -66,8 +73,8 @@ public class OneStepDeviations {
         List<List<Integer>> playerSettings = new ArrayList<>();
 
         // we store the players with their index in the list, as this makes it easier later when we filter the list by various criteria
-        List<Pair<Integer, AbstractPlayer>> players = new ArrayList<>();
-        players.add(Pair.of(0, (AbstractPlayer) searchSpace.instantiate(baseSettings)));
+        List<Pair<Integer, Object>> players = new ArrayList<>();
+        players.add(Pair.of(0, searchSpace.instantiate(baseSettings)));
         playerSettings.add(Arrays.stream(baseSettings).boxed().toList()); // dummy for baseline agent
         int nextIndex = 1;
         for (int i = 0; i < baseSettings.length; i++) {
@@ -77,9 +84,11 @@ public class OneStepDeviations {
                 }
                 int[] settings = baseSettings.clone();
                 settings[i] = j;
-                AbstractPlayer player = (AbstractPlayer) searchSpace.instantiate(settings);
+                Object player = searchSpace.instantiate(settings);
                 // we set the name to indicate the one step deviation
-                player.setName(getAgentName(settings, baseSettings));
+                if (player instanceof AbstractPlayer) {
+                    ((AbstractPlayer) player).setName(getAgentName(settings, baseSettings));
+                }
                 players.add(Pair.of(nextIndex, player));
                 playerSettings.add(Arrays.stream(settings).boxed().toList());
                 nextIndex++;
@@ -102,37 +111,58 @@ public class OneStepDeviations {
         do {
             System.out.printf("Running OSD tournament with remaining players: %d%n", players.size());
 
-            // We now have all agents, with [0] being the baseline agent
-            Map<RunArg, Object> tournamentConfig = new HashMap<>();
-            tournamentConfig.put(matchups, params.tournamentGames);
-            tournamentConfig.put(RunArg.mode, players.size() > 6 ? "random" : "exhaustive");
-            tournamentConfig.put(byTeam, true);
-            tournamentConfig.put(RunArg.distinctRandomSeeds, 0);
-            tournamentConfig.put(RunArg.budget, params.budget);
-            tournamentConfig.put(RunArg.verbose, false);
-            tournamentConfig.put(RunArg.destDir, params.destDir);
-            List<AbstractPlayer> tournamentPlayers = players.stream().map(p -> p.b).toList();
-            RoundRobinTournament tournament = new RoundRobinTournament(
-                    tournamentPlayers,
-                    params.gameType,
-                    params.nPlayers,
-                    params.gameParams,
-                    tournamentConfig);
-            tournament.run();
-
-            // extract the results
+            // store the results
             int bestIndex = 0;
             double bestScore = -Double.MAX_VALUE;
             double bestStdError = 0.0;
+            if (evaluator == null) {
+                // We now have all agents, with [0] being the baseline agent
+                Map<RunArg, Object> tournamentConfig = new HashMap<>();
+                tournamentConfig.put(matchups, params.tournamentGames);
+                tournamentConfig.put(RunArg.mode, players.size() > 6 ? "random" : "exhaustive");
+                tournamentConfig.put(byTeam, true);
+                tournamentConfig.put(RunArg.distinctRandomSeeds, 0);
+                tournamentConfig.put(RunArg.budget, params.budget);
+                tournamentConfig.put(RunArg.verbose, false);
+                tournamentConfig.put(RunArg.destDir, params.destDir);
+                List<AbstractPlayer> tournamentPlayers = players.stream().map(p -> p.b).map(o -> (AbstractPlayer) o).toList();
+                RoundRobinTournament tournament = new RoundRobinTournament(
+                        tournamentPlayers,
+                        params.gameType,
+                        params.nPlayers,
+                        params.gameParams,
+                        tournamentConfig);
+                tournament.run();
+
+                for (int loop = 0; loop < players.size(); loop++) {
+                    int i = players.get(loop).a;
+                    int g = tournament.getNGamesPlayed()[loop];
+                    gamesPlayed.set(i, gamesPlayed.get(i) + g);
+                    totalScore.set(i, totalScore.get(i) + (params.evalMethod.equals("Win")
+                            ? tournament.getWinRate(loop) * g
+                            : -tournament.getOrdinalRank(loop) * g));
+                    totalScoreSquared.set(i, totalScoreSquared.get(i) + tournament.getSumOfSquares(loop, params.evalMethod));
+                }
+            } else {
+                // we instead use the SolutionEvaluator to get the fitness
+                // We still populated gamesPlayed, totalScore and totalScoreSquared, but using the results from the evaluator
+                // we divide the total budget between the number of agents
+                int gamesPerPlayer = params.tournamentGames / players.size();
+                for (int loop = 0; loop < players.size(); loop++) {
+                    int i = players.get(loop).a;
+                    int[] settings = playerSettings.get(i).stream().mapToInt(Integer::intValue).toArray();
+                    for (int g = 0; g < gamesPerPlayer; g++) {
+                        double fitness = evaluator.evaluate(settings);
+                        totalScore.set(i, totalScore.get(i) + fitness);
+                        totalScoreSquared.set(i, totalScoreSquared.get(i) + Math.pow(fitness, 2));
+                    }
+                    gamesPlayed.set(i, gamesPlayed.get(i) + gamesPerPlayer);
+                }
+            }
+
             int robustGamesThreshold = iteration * params.tournamentGames / gamesPlayed.size();
             for (int loop = 0; loop < players.size(); loop++) {
                 int i = players.get(loop).a;
-                int g = tournament.getNGamesPlayed()[loop];
-                gamesPlayed.set(i, gamesPlayed.get(i) + g);
-                totalScore.set(i, totalScore.get(i) + (params.evalMethod.equals("Win")
-                        ? tournament.getWinRate(loop) * g
-                        : -tournament.getOrdinalRank(loop) * g));
-                totalScoreSquared.set(i, totalScoreSquared.get(i) + tournament.getSumOfSquares(loop, params.evalMethod));
                 // if we have played enough games, then check if best
                 if (gamesPlayed.get(i) >= robustGamesThreshold && totalScore.get(i) / gamesPlayed.get(i) > bestScore) {
                     bestIndex = loop;
@@ -141,18 +171,17 @@ public class OneStepDeviations {
                             / Math.sqrt(gamesPlayed.get(i));
                 }
             }
-
             double baseAgentScore = totalScore.get(0) / gamesPlayed.get(0);
             System.out.printf("Iteration %d: Best robust agent is %s with score %.3f +/- %.3f%n",
                     iteration, players.get(bestIndex), bestScore, bestStdError);
             System.out.printf("Baseline agent has score %.3f%n", baseAgentScore);
             // Now run through all players, and discard any that are significantly worse than the best
-            List<Pair<Integer, AbstractPlayer>> newPlayers = new ArrayList<>();
+            List<Pair<Integer, Object>> newPlayers = new ArrayList<>();
             double stdErrorMultiple = Utils.standardZScore(0.01, players.size() - 1);
             double stdBetterMultiple = Utils.standardZScore(0.10, players.size() - 1);
      //       System.out.printf("Discarding agents with score more than %.3f standard errors worse than best%n", stdErrorMultiple);
      //       System.out.printf("Checking for agents significantly better than baseline by more than %.3f standard errors%n", stdBetterMultiple);
-            for (Pair<Integer, AbstractPlayer> player : players) {
+            for (Pair<Integer, Object> player : players) {
                 int i = player.a;
                 if (i == 0) {
                     newPlayers.add(player); // never discard the baseline agent
@@ -244,7 +273,7 @@ public class OneStepDeviations {
         double bestDefaultScore = -Double.MAX_VALUE;
         int selectedPlayer = -1;
         System.out.printf("Base agent score is %.3f, and zScore needed is %.3f%n", baseAgentScore, adjustedZScore);
-        for (Pair<Integer, AbstractPlayer> stuff : players) {
+        for (Pair<Integer, Object> stuff : players) {
             int playerIndex = stuff.a;
             double score = totalScore.get(playerIndex) / gamesPlayed.get(playerIndex);
             double stdError = Utils.meanDiffStandardError(totalScore.get(0), totalScore.get(playerIndex),
@@ -276,7 +305,7 @@ public class OneStepDeviations {
             }
         } else {
             int finalSelectedPlayer = selectedPlayer;
-            AbstractPlayer playerSelected = players.stream().filter(data -> data.a == finalSelectedPlayer).findFirst().get().b;
+            Object playerSelected = players.stream().filter(data -> data.a == finalSelectedPlayer).findFirst().get().b;
             System.out.printf("Selected agent is %s with score %.3f%n", playerSelected, totalScore.get(selectedPlayer) / gamesPlayed.get(selectedPlayer));
             return playerSettings.get(selectedPlayer).stream().mapToInt(Integer::intValue).toArray();
         }

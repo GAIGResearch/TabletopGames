@@ -257,7 +257,7 @@ public class NTBEA {
             // with a minimum of 1000 games per iteration
             OSDParams.repeats = Math.min(10, OSDParams.OSDBudget / 1000);
             OSDParams.tournamentGames = params.OSDBudget / OSDParams.repeats;
-            OneStepDeviations OSD = new OneStepDeviations(OSDParams);
+            OneStepDeviations OSD = new OneStepDeviations(OSDParams, evaluator);
             // now tweak the final settings
             bestResult.b = OSD.run(bestResult.b);
         }
