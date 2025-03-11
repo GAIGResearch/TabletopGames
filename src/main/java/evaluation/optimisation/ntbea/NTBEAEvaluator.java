@@ -50,7 +50,7 @@ public class NTBEAEvaluator implements SolutionEvaluator {
         NTBEAParameters params = JSONUtils.loadClassFromJSON(json);
 
         // We now set up iterations based on the budget (this is an awkward override of the usual meaning of 'budget')
-        params.setParameterValue("iterations", params.tournamentGames / params.repeats / params.evaluationsPerTrial - params.evalGames - params.OSDBudget);
+        params.setParameterValue("iterations", (params.tournamentGames - - params.OSDBudget) / params.repeats / params.evaluationsPerTrial - params.evalGames);
         if (params.iterationsPerRun <= 0)
             throw new AssertionError("Budget too low for NTBEA");
         params.setParameterValue("matchups", 0);

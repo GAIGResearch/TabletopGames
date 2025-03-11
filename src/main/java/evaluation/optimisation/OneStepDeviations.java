@@ -104,7 +104,8 @@ public class OneStepDeviations {
 
         do {
             int numberStillUnderConsideration = (int) stillUnderConsideration.stream().filter(b -> b).count();
-            System.out.printf("Running OSD tournament with remaining players: %d%n", numberStillUnderConsideration);
+            if (params.verbose)
+                System.out.printf("Running OSD tournament with remaining players: %d%n", numberStillUnderConsideration);
 
             // store the results
             int bestIndex = 0;
@@ -181,10 +182,12 @@ public class OneStepDeviations {
                 }
             }
             double baseAgentScore = totalScore.get(0) / gamesPlayed.get(0);
-            System.out.printf("Iteration %d: Best robust agent is %s with score %.3f +/- %.3f%n",
-                    iteration, getAgentName(playerSettings.get(bestIndex).stream().mapToInt(i -> i).toArray(), baseSettings),
-                    bestScore, bestStdError);
-            System.out.printf("Baseline agent has score %.3f%n", baseAgentScore);
+            if (params.verbose) {
+                System.out.printf("Iteration %d: Best robust agent is %s with score %.3f +/- %.3f%n",
+                        iteration, getAgentName(playerSettings.get(bestIndex).stream().mapToInt(i -> i).toArray(), baseSettings),
+                        bestScore, bestStdError);
+                System.out.printf("Baseline agent has score %.3f%n", baseAgentScore);
+            }
             // Now run through all players, and discard any that are significantly worse than the best
             double stdErrorMultiple = Utils.standardZScore((1.0 - params.OSDConfidence) / 5.0, numberStillUnderConsideration - 1);
             double stdBetterMultiple = Utils.standardZScore((1.0 - params.OSDConfidence), numberStillUnderConsideration - 1);
@@ -206,17 +209,19 @@ public class OneStepDeviations {
                         double stdErrorToBase = Utils.meanDiffStandardError(totalScore.get(0), totalScore.get(i),
                                 totalScoreSquared.get(0), totalScoreSquared.get(i), gamesPlayed.get(0), gamesPlayed.get(i));
                         if (totalScore.get(i) / gamesPlayed.get(i) > baseAgentScore + stdBetterMultiple * stdErrorToBase) {
-                            System.out.printf("Agent %s is significantly better than baseline with score %.3f, and mean diff of %.3f +/- %.3f %n",
-                                    getAgentName(playerSettings.get(i).stream().mapToInt(n -> n).toArray(), baseSettings),
-                                    totalScore.get(i) / gamesPlayed.get(i), totalScore.get(i) / gamesPlayed.get(i) - baseAgentScore, stdErrorToBase);
+                            if (params.verbose)
+                                System.out.printf("Agent %s is significantly better than baseline with score %.3f, and mean diff of %.3f +/- %.3f %n",
+                                        getAgentName(playerSettings.get(i).stream().mapToInt(n -> n).toArray(), baseSettings),
+                                        totalScore.get(i) / gamesPlayed.get(i), totalScore.get(i) / gamesPlayed.get(i) - baseAgentScore, stdErrorToBase);
                             agentsMuchBetterThanBaseline.add(i);
                         }
                     }
                 } else {
                     stillUnderConsideration.set(i, false);
-                    System.out.printf("Discarding %s with score %.3f, and mean diff of %.3f +/- %.3f %n",
-                            getAgentName(playerSettings.get(i).stream().mapToInt(n -> n).toArray(), baseSettings),
-                            totalScore.get(i) / gamesPlayed.get(i), bestScore - totalScore.get(i) / gamesPlayed.get(i), stdError);
+                    if (params.verbose)
+                        System.out.printf("Discarding %s with score %.3f, and mean diff of %.3f +/- %.3f %n",
+                                getAgentName(playerSettings.get(i).stream().mapToInt(n -> n).toArray(), baseSettings),
+                                totalScore.get(i) / gamesPlayed.get(i), bestScore - totalScore.get(i) / gamesPlayed.get(i), stdError);
                 }
             }
             // Now add in new combo-players that combine the setting deviations of players that are better then baseline
@@ -253,9 +258,11 @@ public class OneStepDeviations {
                             gamesPlayed.add(0);
                             totalScore.add(0.0);
                             totalScoreSquared.add(0.0);
+                            stillUnderConsideration.add(true);
                             nextIndex++;
-                            System.out.printf("Adding new player %s with settings %s%n", getAgentName(combinedSettingsArray, baseSettings),
-                                    Arrays.toString(combinedSettingsArray));
+                            if (params.verbose)
+                                System.out.printf("Adding new player %s with settings %s%n", getAgentName(combinedSettingsArray, baseSettings),
+                                        Arrays.toString(combinedSettingsArray));
                         }
                     }
                 }
@@ -278,14 +285,16 @@ public class OneStepDeviations {
         int[] bestDefaultSettings = null;
         double bestDefaultScore = -Double.MAX_VALUE;
         int selectedPlayer = -1;
-        System.out.printf("Base agent score is %.3f, and zScore needed is %.3f%n", baseAgentScore, adjustedZScore);
+        if (params.verbose)
+            System.out.printf("Base agent score is %.3f, and zScore needed is %.3f%n", baseAgentScore, adjustedZScore);
         for (int i = 1; i < playerSettings.size(); i++) {
             double score = totalScore.get(i) / gamesPlayed.get(i);
             double stdError = Utils.meanDiffStandardError(totalScore.get(0), totalScore.get(i),
                     totalScoreSquared.get(0), totalScoreSquared.get(i), gamesPlayed.get(0), gamesPlayed.get(i));
-            System.out.printf("Processing Agent %s with score %.3f, diff to base of %.3f +/- %.3f %n",
-                    getAgentName(playerSettings.get(i).stream().mapToInt(Integer::intValue).toArray(), baseSettings),
-                    score, score - baseAgentScore, stdError);
+            if (params.verbose)
+                System.out.printf("Processing Agent %s with score %.3f, diff to base of %.3f +/- %.3f %n",
+                        getAgentName(playerSettings.get(i).stream().mapToInt(Integer::intValue).toArray(), baseSettings),
+                        score, score - baseAgentScore, stdError);
             if (score > baseAgentScore + adjustedZScore * stdError && score - adjustedZScore * stdError > bestLowerBound) {
                 // best so far
                 bestLowerBound = score - adjustedZScore * stdError;
@@ -303,17 +312,20 @@ public class OneStepDeviations {
             }
         }
         if (selectedPlayer == -1) {
-            System.out.println("No significant improvement found");
+            if (params.verbose)
+                System.out.println("No significant improvement found");
             if (bestDefaultScore > -Double.MAX_VALUE) {
-                System.out.printf("Best default settings agent is %s with score %.3f%n", getAgentName(bestDefaultSettings, baseSettings), bestDefaultScore);
+                if (params.verbose)
+                    System.out.printf("Best default settings agent is %s with score %.3f%n", getAgentName(bestDefaultSettings, baseSettings), bestDefaultScore);
                 return bestDefaultSettings;
             } else {
                 return baseSettings;
             }
         } else {
             int[] finalSettings = playerSettings.get(selectedPlayer).stream().mapToInt(Integer::intValue).toArray();
-            System.out.printf("Selected agent is %s with score %.3f%n", getAgentName(finalSettings, baseSettings),
-                    totalScore.get(selectedPlayer) / gamesPlayed.get(selectedPlayer));
+            if (params.verbose)
+                System.out.printf("Selected agent is %s with score %.3f%n", getAgentName(finalSettings, baseSettings),
+                        totalScore.get(selectedPlayer) / gamesPlayed.get(selectedPlayer));
             return finalSettings;
         }
     }

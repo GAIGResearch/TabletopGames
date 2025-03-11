@@ -255,7 +255,7 @@ public class NTBEA {
             NTBEAParameters OSDParams = (NTBEAParameters) params.copy();
             // we take the OSDBudget and split it across 10 iterations
             // with a minimum of 1000 games per iteration
-            OSDParams.repeats = Math.min(10, OSDParams.OSDBudget / 1000);
+            OSDParams.repeats = Math.max(Math.min(10, OSDParams.OSDBudget / 1000), 1);
             OSDParams.tournamentGames = params.OSDBudget / OSDParams.repeats;
             OneStepDeviations OSD = new OneStepDeviations(OSDParams, evaluator);
             // now tweak the final settings
