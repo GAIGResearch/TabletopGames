@@ -445,7 +445,7 @@ public class JSONUtils {
             value = loadClassFromJSON((JSONObject) value);
         if (possibleValue instanceof JSONObject)
             possibleValue = loadClassFromJSON((JSONObject) possibleValue);
-        if (possibleValue instanceof Enum) {
+        if (possibleValue instanceof Enum || value instanceof Enum) {
             return possibleValue.toString().equals(value.toString());
         } else if (possibleValue instanceof Number && value instanceof Number) {
             return ((Number) possibleValue).doubleValue() == ((Number) value).doubleValue();

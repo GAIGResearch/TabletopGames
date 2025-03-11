@@ -45,14 +45,12 @@ public class NTBEAEvaluator implements SolutionEvaluator {
             System.out.printf("Starting evaluation of %s at %tT%n",
                     Arrays.toString(settings), System.currentTimeMillis());
 
-        // searchSpace.instantiate returns an NTBEA object, not an NTBEAParameters object
         // what we can do here is run through the settings, and set up the NTBEAParameters that we want
         JSONObject json = searchSpace.constructAgentJSON(settings);
         NTBEAParameters params = JSONUtils.loadClassFromJSON(json);
 
-     //   NTBEAParameters params = searchSpace.instantiate(settings);
-        // We now set up iterations based on the budget
-        params.setParameterValue("iterations", params.budget / params.repeats / params.evaluationsPerTrial - params.evalGames);
+        // We now set up iterations based on the budget (this is an awkward override of the usual meaning of 'budget')
+        params.setParameterValue("iterations", params.tournamentGames / params.repeats / params.evaluationsPerTrial - params.evalGames - params.OSDBudget);
         if (params.iterationsPerRun <= 0)
             throw new AssertionError("Budget too low for NTBEA");
         params.setParameterValue("matchups", 0);

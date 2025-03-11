@@ -231,7 +231,9 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             // we do not check recursively here (possible future enhancement)
             if (value instanceof JSONObject)
                 continue;
-            Object defaultValue = itp.getDefaultParameterValue(keyName);
+            // slightly awkward...TunableParameters has a rawJSON set of data that should be used to provide local overrides to the
+            // global defaults specific to the main parameter definition
+            Object defaultValue = itp instanceof TunableParameters<?> tp ? tp.getDefaultOverride(keyName) : itp.getDefaultParameterValue(keyName);
             if (!value.equals(defaultValue)) {
                 throw new AssertionError("Value " + value + " for parameter " + keyName + " does not match default value " + defaultValue);
             }

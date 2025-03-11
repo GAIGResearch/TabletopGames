@@ -269,12 +269,16 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      */
     @Override
     public Object getDefaultParameterValue(String parameterName) {
+        return defaultValues.get(parameterName);
+    }
+
+    public Object getDefaultOverride(String parameterName) {
         // we first see if this parameter is in the rawJSON
         if (rawJSON != null && rawJSON.containsKey(parameterName)
                 && !(rawJSON.get(parameterName) instanceof JSONArray)) {
             return rawJSON.get(parameterName);
         }
-        return defaultValues.get(parameterName);
+        return getDefaultParameterValue(parameterName);
     }
 
     /**
@@ -377,6 +381,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         rawJSON = json;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JSONObject instanceToJSON(boolean excludeDefaults, Map<String, Integer> settings) {
         // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
@@ -389,17 +394,13 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             }
             Object value = getParameterValue(name);
             if (value != null) {
-                if (value instanceof ITunableParameters tp) {
+                if (value instanceof ITunableParameters<?> tp) {
                     // settings need to have namespace adapted (remove the top level)
                     Map<String, Integer> subSettings = settings.entrySet().stream()
                             .filter(e -> e.getKey().contains("."))
                             .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
                     value = tp.instanceToJSON(excludeDefaults, subSettings);
                 } else {
-                    // check for defaults
-                    if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
-                        continue;
-                    }
                     if (value instanceof Enum) {
                         value = value.toString();
                     } else if (!(value instanceof Integer || value instanceof Long ||
@@ -416,8 +417,24 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
                             value = arr.get(settings.get(name));
                         }
                     }
+                    // check for defaults
+                    if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
+                        continue;
+                    }
                 }
                 retValue.put(name, value);
+            }
+        }
+        // We now add in any non-default values in rawJSON (i.e. ones not parameterised via settings)
+        if (rawJSON != null) {
+            for (Object key : rawJSON.keySet()) {
+                if (key instanceof String && !settings.containsKey(key) && !retValue.containsKey(key)) {
+                    // check for default
+                    if (excludeDefaults && JSONUtils.areValuesEqual(rawJSON.get(key), getDefaultParameterValue(key.toString()))) {
+                        continue;
+                    }
+                    retValue.put(key, rawJSON.get(key));
+                }
             }
         }
         return retValue;

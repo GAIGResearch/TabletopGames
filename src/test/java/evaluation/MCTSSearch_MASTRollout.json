@@ -18,7 +18,7 @@
         "budget" : 40,
         "epsilon" : 1e-6,
         "breakMS" : 0,
-        "exploreEpsilon" : 0.30,
+        "exploreEpsilon" : 0.37,
         "rolloutTermination" : "DEFAULT",
         "maintainMasterState" : false,
         "heuristic" : {

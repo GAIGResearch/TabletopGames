@@ -3,6 +3,8 @@ package evaluation;
 import core.AbstractPlayer;
 import evaluation.optimisation.ITPSearchSpace;
 import games.puertorico.PuertoRicoActionHeuristic001;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
+import org.apache.spark.sql.catalyst.expressions.Abs$;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -256,12 +258,14 @@ public class TunableParametersTest {
 
     @Test
     public void settingsFromJSONFailsToMatchDefault() {
-        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        // If the searchSpace defines a fixed value for a parameter, then we should use this
+        ITPSearchSpace<AbstractPlayer> itp = new ITPSearchSpace<>(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
         try {
-            itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectII.json");
-            fail();
+            int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectII.json");
+            JSONObject json = itp.constructAgentJSON(settings);
+            fail("Should have thrown an error");
         } catch (AssertionError e) {
-            // rolloutLength in JSON is 50, which is not one of the possible tuned values
+            // maxTreeDepth in SampleIncorrectII.json is 20, which is going to be ignored as it differs to that in the main search space
             System.out.println(e.getMessage());
             assertTrue(e.getMessage().contains("maxTreeDepth"));
         }
@@ -270,7 +274,7 @@ public class TunableParametersTest {
 
     @Test
     public void settingsFromNestedJSONSuccessful() {
-        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        ITPSearchSpace<AbstractPlayer> itp = new ITPSearchSpace<>(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
         int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
         JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
         for (int i = 0; i < settings.length; i++) {
@@ -292,6 +296,15 @@ public class TunableParametersTest {
             System.out.println(parameterName + " " + value + " " + jsonValue);
             assertTrue(JSONUtils.areValuesEqual(value, jsonValue));
         }
+    }
+
+    @Test
+    public void settingsFromJSONPickUpNonDefaults() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+        JSONObject json = itp.constructAgentJSON(settings);
+        // We should pick up the default override in MCTSSearch_MASTRollout.json of 0.37
+        assertEquals(0.37, (Double) json.get("exploreEpsilon"), 0.001);
     }
 
     @Test
