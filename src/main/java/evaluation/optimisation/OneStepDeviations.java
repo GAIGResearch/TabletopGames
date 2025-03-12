@@ -169,15 +169,16 @@ public class OneStepDeviations {
                 }
             }
 
-            int robustGamesThreshold = iteration * params.tournamentGames / gamesPlayed.size();
+            int robustGamesThreshold = Math.min(iteration * params.tournamentGames / gamesPlayed.size(), 3);
             for (int i = 0; i < playerSettings.size(); i++) {
                 if (stillUnderConsideration.get(i)) {
                     // if we have played enough games, then check if best
                     if (gamesPlayed.get(i) >= robustGamesThreshold && totalScore.get(i) / gamesPlayed.get(i) > bestScore) {
                         bestIndex = i;
                         bestScore = totalScore.get(i) / gamesPlayed.get(i);
-                        bestStdError = Math.sqrt(totalScoreSquared.get(i) / gamesPlayed.get(i) - Math.pow(bestScore, 2))
-                                / Math.sqrt(gamesPlayed.get(i));
+                        int n = gamesPlayed.get(i);
+                        bestStdError = Math.sqrt(totalScoreSquared.get(i) / n - Math.pow(bestScore, 2))
+                                / Math.sqrt(n-1);
                     }
                 }
             }
@@ -194,7 +195,7 @@ public class OneStepDeviations {
             //       System.out.printf("Discarding agents with score more than %.3f standard errors worse than best%n", stdErrorMultiple);
             //       System.out.printf("Checking for agents significantly better than baseline by more than %.3f standard errors%n", stdBetterMultiple);
             for (int i = 1; i < playerSettings.size(); i++) { // we skip the baseline agent at position 0, which is always retained
-                if (!stillUnderConsideration.get(i)) {
+                if (!stillUnderConsideration.get(i) || gamesPlayed.get(i) < 3) {  // need a minimum number of games to be considered
                     continue;
                 }
                 double stdError = Utils.meanDiffStandardError(totalScore.get(bestIndex), totalScore.get(i),
@@ -288,6 +289,9 @@ public class OneStepDeviations {
         if (params.verbose)
             System.out.printf("Base agent score is %.3f, and zScore needed is %.3f%n", baseAgentScore, adjustedZScore);
         for (int i = 1; i < playerSettings.size(); i++) {
+            if (gamesPlayed.get(i) < 3) {
+                continue;
+            }
             double score = totalScore.get(i) / gamesPlayed.get(i);
             double stdError = Utils.meanDiffStandardError(totalScore.get(0), totalScore.get(i),
                     totalScoreSquared.get(0), totalScoreSquared.get(i), gamesPlayed.get(0), gamesPlayed.get(i));
