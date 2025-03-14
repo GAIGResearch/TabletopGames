@@ -175,7 +175,7 @@ public class WonderAbilities {
         do {
             if (state.getRoundCounter() % 6 == 0 && state.getCurrentPlayer() == 0 && !state.isActionInProgress()) {
                 // before the first action of each Age
-                assertEquals(state.playerHands.get(2).getSize(), 7);
+                assertEquals(7, state.playerHands.get(2).getSize());
                 for (int p = 0; p < 4; p++) {
                     state.getPlayerHand(p).remove(6);  // remove random card, add expensive one
                     state.getPlayerHand(p).add(Wonder7Card.factory(Palace));
@@ -263,6 +263,39 @@ public class WonderAbilities {
         } while (state.isNotTerminal());
 
         assertEquals(3, checks);
+    }
+
+    @Test
+    public void halicarnassusOnLastRoundOfAge() {
+        // we trigger Halicarnassus on the last round of an age...and check the age still ends correctly
+        state.playerWonderBoard[3] = new Wonder7Board(Wonder7Board.Wonder.TheMausoleumOfHalicarnassus, 1);
+        for (int i = 0; i < 20; i++) { // take 20 actions (6 rounds)
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        assertEquals(1, state.getCurrentAge());
+        for (int p = 0; p < 4; p++) {
+            assertEquals(2, state.getPlayerHand(p).getSize()); // for the last round
+        }
+        state.playerWonderBoard[3].changeStage();  // stage one;  should allow building from discard pile
+
+        for (int i = 0; i < 4; i++) { // take 4 actions
+            List<AbstractAction> actions = fm.computeAvailableActions(state);
+            int index = rnd.nextInt(actions.size());
+            fm.next(state, actions.get(index));
+        }
+        assertTrue(state.isActionInProgress());
+        assertEquals(3, state.getCurrentPlayer());
+        assertTrue(state.currentActionInProgress() instanceof BuildFromDiscard);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        fm.next(state, actions.get(0));
+
+        assertEquals(2, state.getCurrentAge());
+        for (int p = 0; p < 4; p++) {
+            assertEquals(7, state.getPlayerHand(p).getSize());
+        }
+
     }
 
 }

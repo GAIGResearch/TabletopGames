@@ -37,19 +37,19 @@ public class Wonder7Board extends Card {
                 List.of(Map.of(Victory, 3), Map.of(ScienceWild, 1), Map.of(Victory, 7)),
                 List.of(Map.of(Stone, 2), Map.of(Clay, 3, Glass, 1)),
                 List.of(emptyMap(), Map.of(ScienceWild, 1))
-        ), // TODO: Babylon Night side special ability to build the discard card at the end of each age
+        ),
         TheStatueOfZeusInOlympia(Clay,
                 List.of(Map.of(Stone, 2), Map.of(Wood, 2), Map.of(Clay, 3)),
                 List.of(Map.of(Victory, 3), emptyMap(), Map.of(Victory, 7)),
                 List.of(Map.of(Ore, 2), Map.of(Clay, 3), Map.of(Glass, 1, Papyrus, 1, Textile, 1)),
                 List.of(Map.of(Victory, 2), Map.of(Victory, 3), Map.of(Victory, 5))
-        ), // TODO: Olympia Night side special ability to build first/last cards of each age for free
+        ),
         TheMausoleumOfHalicarnassus(Textile,
                 List.of(Map.of(Ore, 2), Map.of(Glass, 1, Papyrus, 1), Map.of(Stone, 3)),
                 List.of(Map.of(Victory, 3), emptyMap(), Map.of(Victory, 7)),
                 List.of(Map.of(Ore, 2), Map.of(Glass, 1, Papyrus, 1), Map.of(Stone, 3)),
                 List.of(Map.of(Victory, 2), Map.of(Victory, 1), emptyMap())
-        ),  // TODO: Halicarnassus Night side special ability to build from discard at end of turn that each stage is built
+        ),
         ThePyramidsOfGiza(Clay,
                 List.of(Map.of(Wood, 2), Map.of(Clay, 2, Textile, 1), Map.of(Stone, 4)),
                 List.of(Map.of(Victory, 3), Map.of(Victory, 5), Map.of(Victory, 7)),
