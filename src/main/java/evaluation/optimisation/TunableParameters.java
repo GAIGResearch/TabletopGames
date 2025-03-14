@@ -33,6 +33,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     private static boolean debug = false;
     private JSONObject rawJSON;
     protected boolean resetOn = true; // if set to false while setting many parameter values, the _reset() method will not be called (for efficiency)
+    List<String> staticParameters = new ArrayList<>();
     List<String> parameterNames = new ArrayList<>();
     Map<String, List<Object>> possibleValues = new HashMap<>();
     Map<String, Object> defaultValues = new HashMap<>();
@@ -58,8 +59,19 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     /**
      * Instantiate parameters from a JSONObject
      */
+    @SuppressWarnings("unchecked")
     public static void loadFromJSON(TunableParameters<?> params, JSONObject rawData) {
         List<String> allParams = params.getParameterNames();
+
+        // Static parameter, load from json and exclude from tuning
+        // THIS IS UNCHECKED
+        // TODO Add validation once I figure
+        for (String pName : params.staticParameters) {
+            if (params.staticParameters.contains(pName)) {
+                params.currentValues.put(pName, rawData.getOrDefault(pName, params.getDefaultParameterValues()));
+            }
+        }
+
         for (String pName : allParams) {
             if (debug)
                 System.out.println("\tLoading " + pName);
@@ -79,7 +91,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         allParams.add("class");
         allParams.add("args"); // this may be present if there are non-configurable parameters needed for the constructor
         for (Object key : rawData.keySet()) {
-            if (key instanceof String && !allParams.contains(key)) {
+            if (key instanceof String && !(allParams.contains(key) || params.staticParameters.contains(key))) {
                 System.out.println("Unexpected key in JSON for TunableParameters : " + key);
             }
         }
@@ -124,7 +136,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     }
 
     private static boolean isParamArray(String name, JSONObject json) {
-        return (json.get(name) instanceof List);
+        return (json.get(name) instanceof JSONArray);
     }
 
     private static boolean isParamJSON(String name, JSONObject json) {
@@ -185,6 +197,19 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         tunable.currentValues = currentValues;
         tunable._reset();
         return tunable;
+    }
+
+
+    /**
+     * Adds a static parameter to the game. This value CANNOT be tuned, but can be loaded in from JSON
+     * @param name The name of the parameter to add
+     * @param defaultValue The value this parameter should take if no value is suppled through JSON
+     * @param <T> The type of the parameter
+     */
+    public <T> void addStaticParameter(String name, T defaultValue) {
+        staticParameters.add(name);
+        defaultValues.put(name, defaultValue);
+        currentValues.put(name, defaultValue);
     }
 
     /**

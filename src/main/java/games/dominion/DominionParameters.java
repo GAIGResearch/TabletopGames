@@ -4,6 +4,7 @@ import core.*;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import games.dominion.cards.*;
+import org.json.simple.JSONArray;
 
 import java.util.*;
 
@@ -36,16 +37,7 @@ public class DominionParameters extends TunableParameters {
         addTunableParameter("SILVER_SUPPLY", 40, Arrays.asList(10,20,30,40,50));
         addTunableParameter("GOLD_SUPPLY", 30, Arrays.asList(10,20,30,40,50));
         addTunableParameter("initialShuffleSeed", -1);
-        addTunableParameter("CARD_0", CardType.class, CardType.ARTISAN);
-        addTunableParameter("CARD_1", CardType.class, CardType.BANDIT);
-        addTunableParameter("CARD_2", CardType.class, CardType.BUREAUCRAT);
-        addTunableParameter("CARD_3", CardType.class, CardType.CHAPEL);
-        addTunableParameter("CARD_4", CardType.class, CardType.FESTIVAL);
-        addTunableParameter("CARD_5", CardType.class, CardType.GARDENS);
-        addTunableParameter("CARD_6", CardType.class, CardType.SENTRY);
-        addTunableParameter("CARD_7", CardType.class, CardType.THRONE_ROOM);
-        addTunableParameter("CARD_8", CardType.class, CardType.WITCH);
-        addTunableParameter("CARD_9", CardType.class, CardType.WORKSHOP);
+        addStaticParameter("CARDS", new ArrayList<Object>());
         _reset();
     }
 
@@ -61,13 +53,11 @@ public class DominionParameters extends TunableParameters {
         SILVER_SUPPLY = (int) getParameterValue("SILVER_SUPPLY");
         GOLD_SUPPLY = (int) getParameterValue("GOLD_SUPPLY");
         initialShuffleSeed = (int) getParameterValue("initialShuffleSeed");
-        for (int i = 0; i < 10; i++) {
-            CardType card = (CardType) getParameterValue("CARD_" + i);
-            if (card != null) {
-                cardsUsed.add(card);
-            } else {
-                throw new AssertionError("No valid card for index " + i);
-            }
+        List<Object> cardsJSON = (List<Object>) getParameterValue("CARDS");
+        //if (!cardsJSON.isEmpty() && cardsJSON.size() != 10) throw new IllegalArgumentException("CardsUsed has a size of " + cardsJSON.size() + " instead of 10");
+        for (Object o : cardsJSON) {
+            CardType card = CardType.valueOf((String) o);
+            cardsUsed.add(card);
         }
     }
 
