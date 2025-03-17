@@ -87,8 +87,7 @@ public enum PlayerType {
                 player = new RandomPlayer(r);
                 break;
             case OSLA:
-                player = new OSLAPlayer();
-                player.getParameters().setParameterValue("seed", seed);
+                player = new OSLAPlayer(r);
                 break;
             case MCTS:
                 if (params == null) {
