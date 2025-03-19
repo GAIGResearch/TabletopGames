@@ -190,6 +190,8 @@ public class Troop extends Component {
      * @return 0 if this troop survives; the cost of the troop if it died.
      */
     public int damage(int dmg) {
+        if (dmg > 100 && appliedCommands.contains(CommandType.ShieldWall))
+            dmg = 100;
         if (getHealth() <= dmg) {
             // Troop dies, award points
             health = 0;
