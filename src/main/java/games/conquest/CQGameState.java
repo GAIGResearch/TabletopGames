@@ -287,7 +287,6 @@ public class CQGameState extends AbstractGameState {
             for (CQParameters.Setup setup : ((CQParameters) getGameParameters()).setups)
                 if (!setup.equals(CQParameters.Setup.Test) && !setup.equals(CQParameters.Setup.Empty))
                     actions.add(new ApplySetup(setup));
-            return actions;
         }
         if (!phase.equals(CQGamePhase.SelectionPhase))
             actions.add(new EndTurn());
@@ -298,7 +297,7 @@ public class CQGameState extends AbstractGameState {
                 int commandId = c.getComponentID();
                 if (c.getCost() > getCommandPoints(uid)) continue;
                 if (c.getCommandType() == CommandType.WindsOfFate) {
-                    ApplyCommand cmd = new ApplyCommand(uid, commandId, c.getCommandType(), hash);
+                    ApplyCommand cmd = new ApplyCommand(uid, commandId, (Vector2D) null, c.getCommandType(), hash);
                     if (cmd.canExecute(this)) {
                         actions.add(cmd); // only add it if it can execute
                     }
@@ -323,7 +322,7 @@ public class CQGameState extends AbstractGameState {
                 }
             }
             for (Troop t : getTroops(uid)) {
-                SelectTroop sel = new SelectTroop(uid, t.getLocation(), this);
+                SelectTroop sel = new SelectTroop(uid, t.getLocation(), hash);
                 if (canPerformAction(sel, false))
                     actions.add(sel);
             }
@@ -334,7 +333,7 @@ public class CQGameState extends AbstractGameState {
             if (!currentTroop.hasMoved())
                 for (int i = Math.max(0, pos.getX() - range); i <= Math.min(gridBoard.getWidth(), pos.getX() + range); i++) {
                     for (int j = Math.max(0, pos.getY() - range); j <= Math.min(gridBoard.getHeight(), pos.getY() + range); j++) {
-                        MoveTroop mov = new MoveTroop(uid, new Vector2D(i, j), this);
+                        MoveTroop mov = new MoveTroop(uid, new Vector2D(i, j), hash);
                         if (canPerformAction(mov, false))
                             actions.add(mov);
                     }
@@ -344,7 +343,7 @@ public class CQGameState extends AbstractGameState {
             assert currentTroop != null;
             Cell c = getCell(currentTroop.getLocation());
             for (Troop t : getTroops(uid ^ 1)) {
-                AttackTroop atk = new AttackTroop(uid, t.getLocation(), this);
+                AttackTroop atk = new AttackTroop(uid, t.getLocation(), hash);
                 if (canPerformAction(atk, false)) {
                     actions.add(atk);
                 }
@@ -352,7 +351,7 @@ public class CQGameState extends AbstractGameState {
         }
         if (actions.isEmpty()) {
             for (Troop t : getTroops(uid)) {
-                SelectTroop sel = new SelectTroop(uid, t.getLocation(), this);
+                SelectTroop sel = new SelectTroop(uid, t.getLocation(), hash);
                 if (canPerformAction(sel, false))
                     actions.add(sel);
                 else {

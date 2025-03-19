@@ -23,24 +23,14 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
     // Otherwise two of the same action type targeting the same square are flagged as equal
     int stateHash = 0;
 
-    // This tracks the selected / targeted troop. It's used to be able to call toString() with information whether the troop dies.
-    Troop target = null;
-    Troop selected = null;
-
-
-    public CQAction(int pid, Vector2D highlight, CQGameState state) {
-        this(pid, highlight, state.hashCode(), state.getSelectedTroop(), state.getTroopByLocation(highlight));
-    }
-    public CQAction(int pid, int cmd, Vector2D highlight, int stateHash, Troop target) {
-        this(pid, highlight, stateHash, null, target);
-        cmdHighlight = cmd;
-    }
-    public CQAction(int pid, Vector2D highlight, int stateHash, Troop selected, Troop target) {
+    public CQAction(int pid, Vector2D target, int currentStateHash) {
         playerId = pid;
-        this.highlight = highlight;
-        this.stateHash = stateHash;
-        this.selected = selected;
-        this.target = target;
+        highlight = target;
+        stateHash = currentStateHash;
+    }
+    public CQAction(int pid, int cmd, Vector2D target, int stateHash) {
+        this(pid, target, stateHash);
+        cmdHighlight = cmd;
     }
 
     public boolean targetsTroop(Troop troop) {
@@ -110,16 +100,10 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
     abstract String _toString();
     @Override
     public String toString() {
-        String str = "";
-        if (selected != null) {
-            str += selected + " ";
-        }
-        str += _toString();
-        if (target != null) {
-            str += " " + target;
-        } else if (highlight != null)
-            str += " " + highlight;
-        return str;
+        if (highlight != null)
+            return _toString() + " " + highlight;
+        else
+            return _toString();
     }
 
     @Override
@@ -133,7 +117,7 @@ public abstract class CQAction extends AbstractAction implements IExtendedSequen
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, highlight, selected, target, cmdHighlight, executed, stateHash);
+        return Objects.hash(playerId, highlight, cmdHighlight, executed, stateHash);
     }
 
     /**

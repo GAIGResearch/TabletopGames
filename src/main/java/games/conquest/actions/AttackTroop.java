@@ -20,19 +20,16 @@ import utilities.Vector2D;
  * <p>They should also extend the {@link AbstractAction} class, or any other core actions. As such, all guidelines in {@link EndTurn} apply here as well.</p>
  */
 public class AttackTroop extends CQAction {
-    public AttackTroop(int pid, Vector2D highlight, CQGameState state) {
-        super(pid, highlight, state);
-    }
-    public AttackTroop(int pid, Vector2D highlight, int stateHash, Troop selected, Troop target) {
-        super(pid, highlight, stateHash, selected, target);
+    public AttackTroop(int pid, Vector2D target, int stateHash) {
+        super(pid, target, stateHash);
     }
 
     @Override
     public boolean canExecute(CQGameState cqgs) {
-        selected = cqgs.getSelectedTroop();
+        Troop selected = cqgs.getSelectedTroop();
         if (selected == null || cqgs.getGamePhase() == CQGameState.CQGamePhase.RallyPhase)
             return false; // can't attack before selecting a troop, or after a previous attack.
-        target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
+        Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
         if (target.getOwnerId() == selected.getOwnerId())
             return false; // can't attack own troop
         int distance = cqgs.getCell(target.getLocation()).getChebyshev(selected.getLocation());
@@ -53,8 +50,8 @@ public class AttackTroop extends CQAction {
     public boolean execute(AbstractGameState gs) {
         gs.setActionInProgress(this);
         CQGameState cqgs = (CQGameState) gs;
-        target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
-        selected = cqgs.getSelectedTroop();
+        Troop target = cqgs.getTroopByLocation(highlight != null ? highlight : cqgs.highlight);
+        Troop selected = cqgs.getSelectedTroop();
         if (target == null || selected == null) return false;
         int distance = cqgs.getCell(target.getLocation()).getChebyshev(selected.getLocation());
         if (distance > selected.getRange()) return false;
@@ -92,7 +89,7 @@ public class AttackTroop extends CQAction {
      */
     @Override
     public AttackTroop copy() {
-        return new AttackTroop(playerId, highlight, stateHash, selected == null ? null : selected.copy(), target == null ? null : target.copy());
+        return new AttackTroop(playerId, highlight, stateHash);
     }
 
     @Override
@@ -106,9 +103,6 @@ public class AttackTroop extends CQAction {
 
     @Override
     public String _toString() {
-        if (selected != null && target != null && target.getDmgReward(selected.getDamage()) > 0) {
-            return "Kill Troop";
-        }
         return "Attack Troop";
     }
 }
