@@ -69,6 +69,12 @@ public interface IExtendedSequence {
      * This is called by ForwardModel whenever an action has just been taken. It enables the IExtendedSequence
      * to maintain local state in whichever way is most suitable.
      *
+     * It is called as well as (and before) the _afterAction method on the ForwardModel.
+     * This means that ForwardModel._afterAction() may need check to see if an action is in progress and skip
+     * its own logic in this case:
+     *          if (state.isActionInProgress()) continue;
+     * This line of code has not yet been incorporated into the framework due to a couple of older games.
+     *
      * After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
      * In some cases there is no need to implement anything in this method - if for example you can tell if all
      * actions are complete from the state directly, then that can be implemented purely in executionComplete()
