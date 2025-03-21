@@ -27,8 +27,8 @@ public class CouncilRoom extends DominionAction{
 
     @Override
     public AbstractAction copy() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+        CouncilRoom retValue = new CouncilRoom(player, dummyAction);
+        return retValue;
     }
     
 }
