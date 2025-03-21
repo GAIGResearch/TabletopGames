@@ -50,11 +50,14 @@ public class Vassal extends DominionAction implements IExtendedSequence {
         if (dgs.getDeck(DeckType.DRAW, player).getSize() == 0) {
             return actions;
         }
+
         // Draw the top card of the deck, and if action card, it can be played
         // This card is discarded afterwards
         DominionCard card = dgs.getDeck(DeckType.DRAW, player).draw();
         if (card.isActionCard()) {
-            actions.add(card.getAction(player));
+            DominionAction action = card.getAction(player);
+            action.dummyAction = true;
+            actions.add(action);
         }
 
         return actions;
