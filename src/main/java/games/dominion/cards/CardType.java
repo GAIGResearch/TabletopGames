@@ -26,7 +26,7 @@ public enum CardType {
     SMITHY(4, 0, 0, 0, 3, 0, 0),
     THRONE_ROOM(4, 0, 0),
     BANDIT(5, 0, 0, false, false, true, false, true),
-    COUNCIL_ROOM(5, 0, 0),
+    COUNCIL_ROOM(5, 0, 0, false, false ,true, false, false, 0, 4, 1, 0),
     FESTIVAL(5, 0, 0, 2, 0, 1, 2),
     LABORATORY(5, 0, 0, 1, 2, 0, 0),
     LIBRARY(5, 0, 0),
