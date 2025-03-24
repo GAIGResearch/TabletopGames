@@ -24,7 +24,7 @@ import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
-    public double K = Math.sqrt(2);
+    public double K = 1.0;
     public int rolloutLength = 1000; // effectively to end of game
     public boolean rolloutLengthPerPlayer = false;  // if true, then rolloutLength is multiplied by the number of players
     public int maxTreeDepth = 1000; // effectively no limit
