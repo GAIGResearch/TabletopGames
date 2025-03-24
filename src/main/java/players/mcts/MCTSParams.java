@@ -77,7 +77,7 @@ public class MCTSParams extends PlayerParameters {
     public Class<?> instantiationClass;
 
     public MCTSParams() {
-        addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
+        addTunableParameter("K", 1.0, Arrays.asList(0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 0.1);
         addTunableParameter("rolloutLength", 1000, Arrays.asList(0, 3, 10, 30, 100, 1000));
