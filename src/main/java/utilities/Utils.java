@@ -101,7 +101,12 @@ public abstract class Utils {
         if (selfPlay) {
             return (int) Math.pow(nAgents, nPlayers);
         } else {
-            return (int) (CombinatoricsUtils.factorial(nAgents) / CombinatoricsUtils.factorial(nAgents - nPlayers));
+            // nAgents! / (nAgents - nPlayers)!, without having to compute large factorials which may overflow an integer.
+            int ret = 1;
+            for (int i=0;i<nPlayers;i++) {
+                ret *= nAgents - i;
+            }
+            return ret;
         }
     }
 
