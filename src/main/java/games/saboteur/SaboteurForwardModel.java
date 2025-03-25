@@ -170,12 +170,11 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
 
         //Shuffle Necessary decks
-        Random r = new Random(sgs.getGameParameters().getRandomSeed() + sgs.getRoundCounter());
-        sgs.drawDeck.shuffle(r);
-        sgs.goalDeck.shuffle(r);
+        sgs.drawDeck.shuffle(sgs.getRnd());
+        sgs.goalDeck.shuffle(sgs.getRnd());
 
         // Assign roles
-        sgs.roleDeck.shuffle(r);
+        sgs.roleDeck.shuffle(sgs.getRnd());
         for(int i = 0; i < sgs.roleDeck.getSize(); i++)
         {
             for (int j = 0; j < sgs.getNPlayers(); j++)
@@ -460,6 +459,7 @@ public class SaboteurForwardModel extends StandardForwardModel {
         }
         if (action instanceof PlacePathCard currentPlacement)
         {
+            boolean roundOver = false;
             int goalDirection = hasGoalInPossibleDirection(sgs, currentPlacement);
             if(goalDirection != -1)
             {
@@ -472,26 +472,27 @@ public class SaboteurForwardModel extends StandardForwardModel {
                 if(goalCard.hasTreasure())
                 {
                     distributeMinerEarnings(sgs);
+                    roundOver = true;
                 }
             }
-            Vector2D location = new Vector2D(currentPlacement.getX(), currentPlacement.getY());
-            PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location.getX(), location.getY());
-            boolean[] directions = currentCard.getDirections();
-            //add available options
-            if(currentCard.type == PathCard.PathCardType.Path)
-            {
-                for(int i = 0; i < 4; i++)
-                {
-                    Vector2D offset = getCardOffset(i);
-                    int neighborX = location.getX() + offset.getX();
-                    int neighborY = location.getY() + offset.getY();
-                    if(sgs.gridBoard.getElement(neighborX, neighborY) == null && directions[i])
-                    {
-                        sgs.pathCardOptions.add(new Vector2D(neighborX, neighborY));
-                    }
-                    else if(sgs.gridBoard.getElement(neighborX, neighborY) != null && directions[i])
-                    {
-                        recalculatePathCardOptions(sgs);
+            if (!roundOver) {
+                Vector2D location = new Vector2D(currentPlacement.getX(), currentPlacement.getY());
+                PathCard currentCard = (PathCard) sgs.gridBoard.getElement(location.getX(), location.getY());
+                if (currentCard == null) {
+                    throw new AssertionError("Card should not be null");
+                }
+                boolean[] directions = currentCard.getDirections();
+                //add available options
+                if (currentCard.type == PathCard.PathCardType.Path) {
+                    for (int i = 0; i < 4; i++) {
+                        Vector2D offset = getCardOffset(i);
+                        int neighborX = location.getX() + offset.getX();
+                        int neighborY = location.getY() + offset.getY();
+                        if (sgs.gridBoard.getElement(neighborX, neighborY) == null && directions[i]) {
+                            sgs.pathCardOptions.add(new Vector2D(neighborX, neighborY));
+                        } else if (sgs.gridBoard.getElement(neighborX, neighborY) != null && directions[i]) {
+                            recalculatePathCardOptions(sgs);
+                        }
                     }
                 }
             }

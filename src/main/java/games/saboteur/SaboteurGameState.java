@@ -68,7 +68,6 @@ public class SaboteurGameState extends AbstractGameState
     protected SaboteurGameState _copy(int playerId)
     {
         SaboteurGameState copy = new SaboteurGameState(gameParameters.copy(), getNPlayers());
-        copy.rnd = rnd;
 
         //copying brokenToolsDeck
         copy.toolDeck = new ArrayList<>();
@@ -109,15 +108,15 @@ public class SaboteurGameState extends AbstractGameState
         if (playerId != -1 && getCoreGameParameters().partialObservable) {
             // Player cards
             copy.playerDecks = new ArrayList<>();
-            for (int i = 0, playerNuggetDecksSize = playerDecks.size(); i < playerNuggetDecksSize; i++) {
+            for (int i = 0; i < playerDecks.size(); i++) {
                 copy.playerDecks.add(playerDecks.get(i).copy());
                 if (i != playerId) {
                     copy.drawDeck.add(copy.playerDecks.get(i));
                     copy.playerDecks.get(i).clear();
                 }
             }
-            copy.drawDeck.shuffle(copy.rnd);
-            for (int i = 0, playerNuggetDecksSize = playerDecks.size(); i < playerNuggetDecksSize; i++) {
+            copy.drawDeck.shuffle(redeterminisationRnd);
+            for (int i = 0; i < playerDecks.size(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerDecks.get(i).getSize(); j++) {
                         copy.playerDecks.get(i).add(copy.drawDeck.pick(0));
@@ -127,15 +126,15 @@ public class SaboteurGameState extends AbstractGameState
 
             // Nuggets
             copy.playerNuggetDecks = new ArrayList<>();
-            for (int i = 0, playerNuggetDecksSize = playerNuggetDecks.size(); i < playerNuggetDecksSize; i++) {
+            for (int i = 0; i < playerNuggetDecks.size(); i++) {
                 copy.playerNuggetDecks.add(playerNuggetDecks.get(i).copy());
                 if (i != playerId) {
                     copy.nuggetDeck.add(copy.playerNuggetDecks.get(i));
                     copy.playerNuggetDecks.get(i).clear();
                 }
             }
-            copy.nuggetDeck.shuffle(copy.rnd);
-            for (int i = 0, playerNuggetDecksSize = playerNuggetDecks.size(); i < playerNuggetDecksSize; i++) {
+            copy.nuggetDeck.shuffle(redeterminisationRnd);
+            for (int i = 0; i < playerNuggetDecks.size(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerNuggetDecks.get(i).getSize(); j++) {
                         copy.playerNuggetDecks.get(i).add(copy.nuggetDeck.pick(0));
@@ -154,7 +153,7 @@ public class SaboteurGameState extends AbstractGameState
                 }
             }
             if (copy.goalDeck.getSize() > 0) {
-                copy.goalDeck.shuffle(rnd);
+                copy.goalDeck.shuffle(redeterminisationRnd);
                 for (int i = 0; i < gridBoard.getHeight(); i++) {
                     for (int j = 0; j < gridBoard.getWidth(); j++) {
                         PathCard c = (PathCard) gridBoard.getElement(j, i);
@@ -166,14 +165,16 @@ public class SaboteurGameState extends AbstractGameState
                 }
             }
 
+            // TODO: Discards should only be shuffled if not known - and if not known, then they should
+            // TODO: be shuffled into the draw deck for redistribution and not just shuffled in place
+
             // Shuffle discard and role deck to hide info. Current player should have same role
-            copy.discardDeck.shuffle(copy.rnd);
+            copy.discardDeck.shuffle(redeterminisationRnd);
             SaboteurCard rc = copy.roleDeck.pick(playerId);
-            copy.roleDeck.shuffle(copy.rnd);
+            copy.roleDeck.shuffle(redeterminisationRnd);
             copy.roleDeck.add(rc, playerId);
         } else {
             //copying playerDecks
-            copy.drawDeck = drawDeck.copy();
             copy.playerDecks = new ArrayList<>();
             for(Deck<SaboteurCard> playerDeck : playerDecks)
             {
@@ -294,6 +295,15 @@ public class SaboteurGameState extends AbstractGameState
         return Objects.hash(playerDecks, toolDeck, roleDeck, playerNuggetDecks,
                 drawDeck, discardDeck, goalDeck, gridBoard, nuggetDeck, pathCardOptions,
                 centerOfGrid, nOfMiners, nOfSaboteurs);
+    }
+
+    @Override
+    public String toString() {
+        // we take each of the 13 hash coded and convert them to a string separated by |
+        return String.format("%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s",
+                playerDecks.hashCode(), toolDeck.hashCode(), roleDeck.hashCode(), playerNuggetDecks.hashCode(),
+                drawDeck.hashCode(), discardDeck.hashCode(), goalDeck.hashCode(), gridBoard.hashCode(), nuggetDeck.hashCode(),
+                pathCardOptions.hashCode(), centerOfGrid, nOfMiners, nOfSaboteurs);
     }
 
 }

@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class PathCard extends SaboteurCard {
-    final private boolean[] directions;
+    final private boolean[] directions;  // The array is final - but the contents are not!
     final public PathCardType type;
     final boolean hasTreasure;
 
@@ -22,14 +22,14 @@ public class PathCard extends SaboteurCard {
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure) {
         super(SaboteurCardType.Path);
         this.type = type;
-        this.directions = direction.clone();
+        this.directions = direction;
         this.hasTreasure = hasTreasure;
     }
 
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure, int componentID) {
         super(SaboteurCardType.Path, componentID);
         this.type = type;
-        this.directions = direction.clone();
+        this.directions = direction;
         this.hasTreasure = hasTreasure;
     }
 
@@ -78,8 +78,7 @@ public class PathCard extends SaboteurCard {
     @Override
     public PathCard copy()
     {
-      //  return new PathCard(type, directions.clone(), hasTreasure, componentID);
-        return this;
+        return new PathCard(type, directions.clone(), hasTreasure, componentID);
     }
 
     public String getString()
