@@ -289,7 +289,7 @@ public class OneStepDeviations {
         if (params.verbose)
             System.out.printf("Base agent score is %.3f, and zScore needed is %.3f%n", baseAgentScore, adjustedZScore);
         for (int i = 1; i < playerSettings.size(); i++) {
-            if (gamesPlayed.get(i) < 3) {
+            if (!stillUnderConsideration.get(i) || gamesPlayed.get(i) < 3) {
                 continue;
             }
             double score = totalScore.get(i) / gamesPlayed.get(i);
