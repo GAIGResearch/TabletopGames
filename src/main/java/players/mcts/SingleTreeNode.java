@@ -1057,9 +1057,12 @@ public class SingleTreeNode {
 
         stats.update(result);
 
-        if (params.treePolicy == RegretMatching && nVisits >= actionsToConsider.size() && nVisits % Math.max(actionsToConsider.size(), 10) == 0) {
-            // we update the average policy each time we have had the opportunity to take each action once (or every 10 visits, if that is greater)
-            updateRegretMatchingAverage(actionsToConsider);
+        if (params.treePolicy == RegretMatching) {
+            int updateEvery = Math.max(actionsToConsider.size(), 10);
+            if (nVisits >= updateEvery && nVisits % updateEvery == 0) {
+                // we update the average policy each time we have had the opportunity to take each action once (or every 10 visits, if that is greater)
+                updateRegretMatchingAverage(actionsToConsider);
+            }
         }
 
         if (params.backupPolicy == MCTSEnums.BackupPolicy.MonteCarlo)
@@ -1163,8 +1166,10 @@ public class SingleTreeNode {
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching) {
             // RM uses a special policy as the average of all previous root policies
-            if (regretMatchingAverage.isEmpty() || nVisits - inheritedVisits <= 10)  // in case we have a very low number of visits
-                updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
+            List<AbstractAction> actionsToConsider = actionsToConsider(actionsFromOpenLoopState);
+            int updateEvery = Math.max(actionsToConsider.size(), 10);
+            if (regretMatchingAverage.isEmpty() || nVisits - inheritedVisits <= updateEvery)  // in case we have a very low number of visits
+                updateRegretMatchingAverage(actionsToConsider);
             bestAction = regretMatchingAverage();
         } else {
             // We iterate through all actions valid in the original root state

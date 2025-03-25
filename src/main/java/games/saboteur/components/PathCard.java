@@ -22,14 +22,14 @@ public class PathCard extends SaboteurCard {
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure) {
         super(SaboteurCardType.Path);
         this.type = type;
-        this.directions = direction;
+        this.directions = direction.clone();
         this.hasTreasure = hasTreasure;
     }
 
     public PathCard(PathCardType type, boolean[] direction, boolean hasTreasure, int componentID) {
         super(SaboteurCardType.Path, componentID);
         this.type = type;
-        this.directions = direction;
+        this.directions = direction.clone();
         this.hasTreasure = hasTreasure;
     }
 
@@ -78,7 +78,8 @@ public class PathCard extends SaboteurCard {
     @Override
     public PathCard copy()
     {
-        return new PathCard(type, directions.clone(), hasTreasure, componentID);
+      //  return new PathCard(type, directions.clone(), hasTreasure, componentID);
+        return this;
     }
 
     public String getString()
