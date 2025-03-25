@@ -1163,7 +1163,7 @@ public class SingleTreeNode {
             bestAction = treePolicyAction(false);
         } else if (params.treePolicy == RegretMatching) {
             // RM uses a special policy as the average of all previous root policies
-            if (nVisits - inheritedVisits < 10)  // in case we have a very low number of visits
+            if (regretMatchingAverage.isEmpty() || nVisits - inheritedVisits <= 10)  // in case we have a very low number of visits
                 updateRegretMatchingAverage(actionsToConsider(actionsFromOpenLoopState));
             bestAction = regretMatchingAverage();
         } else {
@@ -1232,7 +1232,8 @@ public class SingleTreeNode {
         }
         double[] pdf = pdf(potentials);
         int index = sampleFrom(pdf, rnd.nextDouble());
-        return regretMatchingAverage.keySet().stream().skip(index).findFirst().orElseThrow(() -> new AssertionError("No action found"));
+        return regretMatchingAverage.keySet().stream()
+                .skip(index).findFirst().orElseThrow(() -> new AssertionError("No action found"));
     }
 
     public int getVisits() {

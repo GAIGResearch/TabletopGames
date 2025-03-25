@@ -178,7 +178,7 @@ public class OneStepDeviations {
                         bestScore = totalScore.get(i) / gamesPlayed.get(i);
                         int n = gamesPlayed.get(i);
                         bestStdError = Math.sqrt(totalScoreSquared.get(i) / n - Math.pow(bestScore, 2))
-                                / Math.sqrt(n-1);
+                                / Math.sqrt(n - 1);
                     }
                 }
             }
@@ -343,7 +343,8 @@ public class OneStepDeviations {
             sb.append(params.searchSpace.name(i)).append(": ").append(params.searchSpace.value(i, settings[i])).append(", ");
         }
         // remove last comma and space
-        sb.delete(sb.length() - 2, sb.length());
+        if (sb.length() > 2)
+            sb.delete(sb.length() - 2, sb.length());
         return sb.toString();
     }
 }
