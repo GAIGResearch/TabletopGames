@@ -183,11 +183,15 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
         return settings;
     }
 
+    public int[] settingsFromJSON(String fileName) {
+        JSONObject json = JSONUtils.loadJSONFile(fileName);
+        return settingsFromJSON(json);
+    }
+
     // This will read in a JSON file and instantiate an agent from it
     // it will throw an error if the contents of the JSON file do not match the SearchSpace
     // The return value is settings that will instantiate the agent from the search space
-    public int[] settingsFromJSON(String fileName) {
-        JSONObject json = JSONUtils.loadJSONFile(fileName);
+    public int[] settingsFromJSON(JSONObject json) {
 
         int[] settings = new int[searchDimensions.size()];
         // We now iterate through all the tunable parameters and find the setting that corresponds
@@ -196,8 +200,8 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
             String fullParameterName = searchDimensions.get(i);
             String[] name = fullParameterName.split("\\.");
             Object value = json;
-            for (int j = 0; j < name.length; j++) {
-                value =  ((JSONObject) value).get(name[j]);
+            for (String s : name) {
+                value = ((JSONObject) value).get(s);
             }
             if (value == null) {
                 // we use the default value

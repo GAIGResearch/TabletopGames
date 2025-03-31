@@ -146,6 +146,9 @@ public class NTBEA {
     public Pair<Object, int[]> run() {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
+            // TODO: Check for existence of the output file. If it already exists, then we
+            // TODO: load the file, convert it to add to winnerSettings
+            // TODO: And then skip this iteration
             runIteration();
             if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
                 itp.writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
@@ -268,11 +271,19 @@ public class NTBEA {
             printDetailsOfRun(bestResult);
         }
         if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
-            itp.writeAgentJSON(bestResult.b,
-                    params.destDir + File.separator + "Recommended_Final.json");
+            itp.writeAgentJSON(bestResult.b, finalFilename());
             return new Pair<>(itp.instantiate(bestResult.b), bestResult.b);
         }
         return new Pair<>(null, bestResult.b);
+    }
+
+    public final String finalFilename() {
+        return params.destDir + File.separator + "Recommended_Final.json";
+    }
+
+    public boolean hasAlreadyRun() {
+        File f = new File(finalFilename());
+        return f.exists();
     }
 
     protected void runTrials() {

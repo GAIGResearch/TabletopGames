@@ -2,17 +2,21 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import core.interfaces.ITunableParameters;
 import evaluation.RunArg;
 import evaluation.RunArg.Usage;
 import evaluation.listeners.IGameListener;
+import evaluation.optimisation.ITPSearchSpace;
 import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
+import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.io.File;
@@ -79,11 +83,20 @@ public class SkillLadder {
         if (runNTBEA) {
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(config, startingTimeBudget);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
-            ntbeaParameters.printSearchSpaceDetails();
-            // first we tune the minimum budget against the default starting agent
-            Pair<Object, int[]> results = ntbea.run();
-            allAgents.add(new Pair<>((AbstractPlayer) results.a, results.b));
-            currentBestSettings = results.b;
+            // If NTBEA has already run we skip this step (after reading in the agent
+            // and adding it to allAgents).
+            if (ntbea.hasAlreadyRun() && ntbeaParameters.searchSpace instanceof ITPSearchSpace<?> itp) {
+                currentBestSettings = itp.settingsFromJSON(ntbea.finalFilename());
+                AbstractPlayer agent = (AbstractPlayer) itp.instantiate(currentBestSettings);
+                allAgents.add(Pair.of(agent, currentBestSettings));
+                System.out.println("NTBEA for budget of " + startingTimeBudget + " has already completed - skipping");
+            } else { // RunNTBEA
+                ntbeaParameters.printSearchSpaceDetails();
+                // first we tune the minimum budget against the default starting agent
+                Pair<Object, int[]> results = ntbea.run();
+                allAgents.add(new Pair<>((AbstractPlayer) results.a, results.b));
+                currentBestSettings = results.b;
+            }
         } else {
             // We are not tuning between rungs, and just update the budget in the player definition
             allAgents.add(new Pair<>(PlayerFactory.createPlayer(player), new int[0]));
@@ -98,19 +111,27 @@ public class SkillLadder {
                 // ensure we have one repeat for each player position (to make the tournament easier)
                 // we will have one from the elite set, so we need nPlayers-1 more
                 NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
-                AbstractPlayer benchmark = allAgents.get(i).a.copy();
-                // and set the budget of the benchmark (NTBEA will set the budgets of the other players)
-                if (benchmark instanceof IAnyTimePlayer bm) {
-                    bm.setBudget(newBudget);
-                }
-                ntbea.setOpponents(Collections.singletonList(benchmark));
-                ntbea.addElite(currentBestSettings);
+                // If NTBEA has already run for this rung, then read in the final result and skip it
+                if (ntbea.hasAlreadyRun() && ntbeaParameters.searchSpace instanceof ITPSearchSpace<?> itp) {
+                    currentBestSettings = itp.settingsFromJSON(ntbea.finalFilename());
+                    AbstractPlayer agent = (AbstractPlayer) itp.instantiate(currentBestSettings);
+                    allAgents.add(Pair.of(agent, currentBestSettings));
+                    System.out.println("NTBEA for budget of " + newBudget + " has already completed - skipping");
+                } else {
+                    AbstractPlayer benchmark = allAgents.get(i).a.copy();
+                    // and set the budget of the benchmark (NTBEA will set the budgets of the other players)
+                    if (benchmark instanceof IAnyTimePlayer bm) {
+                        bm.setBudget(newBudget);
+                    }
+                    ntbea.setOpponents(Collections.singletonList(benchmark));
+                    ntbea.addElite(currentBestSettings);
 
-                Pair<Object, int[]> results = ntbea.run();
-                allAgents.add(new Pair<>((AbstractPlayer) results.a, results.b));
-                if (i == 0 || !Arrays.equals(results.b, currentBestSettings)) {
-                    currentBestSettings = results.b;
-                    ntbea.writeAgentJSON(currentBestSettings, destDir + File.separator + "NTBEA_Budget_" + newBudget + ".json");
+                    Pair<Object, int[]> results = ntbea.run();
+                    allAgents.add(Pair.of((AbstractPlayer) results.a, results.b));
+                    if (i == 0 || !Arrays.equals(results.b, currentBestSettings)) {
+                        currentBestSettings = results.b;
+                        ntbea.writeAgentJSON(currentBestSettings, destDir + File.separator + "NTBEA_Budget_" + newBudget + ".json");
+                    }
                 }
             } else {
                 allAgents.add(new Pair<>(PlayerFactory.createPlayer(player), new int[0]));
@@ -133,21 +154,28 @@ public class SkillLadder {
                 ((IAnyTimePlayer) agents.get(0)).setBudget(newBudget);
                 ((IAnyTimePlayer) agents.get(1)).setBudget(otherBudget);
 
-                long startTime = System.currentTimeMillis();
-                RoundRobinTournament RRT = runRoundRobinTournament(agents, 0, matchups, listenerClasses,
-                        gameType, nPlayers, params, "onevsall",
-                        destDir + File.separator + (runAgainstAllAgents ? "Budget_" + newBudget + "_vs_" + otherBudget : "Budget_" + newBudget));
-                long endTime = System.currentTimeMillis();
+                // If the output file from the Tournament already exists, then
+                // we skip this, and log that the tournament has already been run.
+                String outputDirectory = destDir + File.separator +
+                        (runAgainstAllAgents ? "Budget_" + newBudget + "_vs_" + otherBudget : "Budget_" + newBudget);
+                if ((new File(outputDirectory + File.separator + "TournamentResults.txt")).exists()) {
+                    System.out.println("Skipping Tournament as already run : " + outputDirectory);
+                } else {
+                    long startTime = System.currentTimeMillis();
+                    RoundRobinTournament RRT = runRoundRobinTournament(agents, 0, matchups, listenerClasses,
+                            gameType, nPlayers, params, "onevsall", outputDirectory);
+                    long endTime = System.currentTimeMillis();
 
-                System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
-                        matchups, (endTime - startTime) / 60000,
-                        newBudget,
-                        RRT.getWinRate(0) * 100, RRT.getWinStdErr(0) * 100 * 2,
-                        RRT.getOrdinalRank(0), RRT.getOrdinalStdErr(0) * 2,
-                        otherBudget,
-                        RRT.getWinRate(1) * 100, RRT.getWinStdErr(1) * 100 * 2,
-                        RRT.getOrdinalRank(1), RRT.getOrdinalStdErr(1) * 2
-                );
+                    System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
+                            matchups, (endTime - startTime) / 60000,
+                            newBudget,
+                            RRT.getWinRate(0) * 100, RRT.getWinStdErr(0) * 100 * 2,
+                            RRT.getOrdinalRank(0), RRT.getOrdinalStdErr(0) * 2,
+                            otherBudget,
+                            RRT.getWinRate(1) * 100, RRT.getWinStdErr(1) * 100 * 2,
+                            RRT.getOrdinalRank(1), RRT.getOrdinalStdErr(1) * 2
+                    );
+                }
             }
         }
         // As a final step we run a tournament for each budget with each (unique) agent from any of the budgets
@@ -226,7 +254,7 @@ public class SkillLadder {
         ntbeaParameters.setParameterValue("repeats", Math.max(nPlayers, ntbeaParameters.repeats));
         ntbeaParameters.setParameterValue("budget", budget);
 
-        ntbeaParameters.setParameterValue("matchups",  (int) (gameBudget * NTBEABudgetOnTournament));
+        ntbeaParameters.setParameterValue("matchups", (int) (gameBudget * NTBEABudgetOnTournament));
         ntbeaParameters.setParameterValue("iterations", (gameBudget - ntbeaParameters.tournamentGames) / ntbeaParameters.repeats);
         if (ntbeaParameters.mode == NTBEAParameters.Mode.StableNTBEA) {
             ntbeaParameters.setParameterValue("iterations", ntbeaParameters.iterationsPerRun /= nPlayers);
