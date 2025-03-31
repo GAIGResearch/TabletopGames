@@ -146,9 +146,8 @@ public class NTBEA {
     public Pair<Object, int[]> run() {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
-            // TODO: Check for existence of the output file. If it already exists, then we
-            // TODO: load the file, convert it to add to winnerSettings
-            // TODO: And then skip this iteration
+            // Check for existence of the output file. If it already exists, then we
+            // load the file, convert it to add to winnerSettings. Then skip this iteration
             String iterationFilename = params.destDir + File.separator + "Recommended_" + currentIteration + ".json";
             if ((new File(iterationFilename)).exists() && params.searchSpace instanceof ITPSearchSpace<?> itp) {
                 int[] settings = itp.settingsFromJSON(iterationFilename);
