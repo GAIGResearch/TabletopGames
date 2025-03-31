@@ -149,10 +149,16 @@ public class NTBEA {
             // TODO: Check for existence of the output file. If it already exists, then we
             // TODO: load the file, convert it to add to winnerSettings
             // TODO: And then skip this iteration
-            runIteration();
-            if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
-                itp.writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1),
-                        params.destDir + File.separator + "Recommended_" + currentIteration + ".json");
+            String iterationFilename = params.destDir + File.separator + "Recommended_" + currentIteration + ".json";
+            if ((new File(iterationFilename)).exists() && params.searchSpace instanceof ITPSearchSpace<?> itp) {
+                int[] settings = itp.settingsFromJSON(iterationFilename);
+                winnerSettings.add(settings);
+                System.out.println("NTBEA for iteration " + currentIteration + " has already completed - skipping");
+            } else {
+                runIteration();
+                if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+                    itp.writeAgentJSON(winnerSettings.get(winnerSettings.size() - 1), iterationFilename);
+                }
             }
         }
 
