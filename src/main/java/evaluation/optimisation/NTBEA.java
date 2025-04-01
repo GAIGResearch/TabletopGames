@@ -152,6 +152,7 @@ public class NTBEA {
             if ((new File(iterationFilename)).exists() && params.searchSpace instanceof ITPSearchSpace<?> itp) {
                 int[] settings = itp.settingsFromJSON(iterationFilename);
                 winnerSettings.add(settings);
+                winnersPerRun.add(itp.instantiate(settings));
                 System.out.println("NTBEA for iteration " + currentIteration + " has already completed - skipping");
             } else {
                 runIteration();
