@@ -11,6 +11,7 @@ import games.dominion.DominionGameState.DominionGamePhase;
 import games.dominion.actions.*;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import games.wonders7.actions.PlayCard;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -1224,6 +1225,50 @@ public class BaseActionCardsTest {
         assertEquals(4, state.getDeck(DeckType.DRAW, 2).getSize());
         assertEquals(0, state.getDeck(DeckType.DISCARD, 3).getSize());
         assertEquals(6, state.getDeck(DeckType.DRAW, 3).getSize());
+    }
+
+    @Test
+    public void throneRoomWithMilitia() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.MILITIA, 0, DeckType.HAND);
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        state.addCard(CardType.MOAT, 3, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+
+        do {
+            AbstractAction next = fm.computeAvailableActions(state).get(0);
+            fm.next(state, next);
+        } while (state.isActionInProgress());
+
+        assertEquals(3, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 2).getSize());
+        assertEquals(6, state.getDeck(DeckType.HAND, 3).getSize());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+    }
+
+
+    @Test
+    public void throneRoomWithMilitiaAndFollowOnCard() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
+        state.addCard(CardType.MOAT, 0, DeckType.HAND);
+        state.addCard(CardType.MILITIA, 0, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(0);
+        fm.next(state, throneRoom);
+
+        do {
+            AbstractAction next = fm.computeAvailableActions(state).get(0);
+            fm.next(state, next);
+        } while (state.isActionInProgress());
+
+        assertEquals(3, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 2).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 3).getSize());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(10, actions.size());
     }
 
     @Test
