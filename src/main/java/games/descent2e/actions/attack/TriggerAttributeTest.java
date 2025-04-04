@@ -81,6 +81,9 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
         // If one (or more) does, then we stop, and go back to the main game loop for this
         // decision to be made
         boolean foundInterrupt = false;
+        if (phase == ALL_DONE) {
+            return;
+        }
         do {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
@@ -113,7 +116,6 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
     }
 
     protected void executePhase(DescentGameState state) {
-        // System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
@@ -130,7 +132,6 @@ public class TriggerAttributeTest extends DescentAction implements IExtendedSequ
                 phase = ALL_DONE;
                 break;
         }
-        // and reset interrupts
     }
 
     public String toString() {
