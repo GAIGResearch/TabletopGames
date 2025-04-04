@@ -144,11 +144,13 @@ public class MulticolorRentAction extends AbstractAction implements IExtendedSeq
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MulticolorRentAction that = (MulticolorRentAction) o;
-        return playerID == that.playerID && doubleTheRent == that.doubleTheRent;
+        return playerID == that.playerID && doubleTheRent == that.doubleTheRent && target == that.target &&
+                rent == that.rent && actionState == that.actionState && reaction == that.reaction &&
+                executed == that.executed;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, doubleTheRent);
+        return Objects.hash(playerID, doubleTheRent, target, rent, actionState, reaction, executed);
     }
     @Override
     public String toString() {
