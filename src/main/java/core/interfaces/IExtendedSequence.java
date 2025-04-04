@@ -64,6 +64,16 @@ public interface IExtendedSequence {
     boolean executionComplete(AbstractGameState state);
 
     /**
+     * This returns the ID of the parent Extended Sequence that spawned this one.
+     * @return
+     */
+    default int getParentId(){return -1;}
+
+    default int getChildID(){return -1;}
+
+    default void setChildID(int id){}
+
+    /**
      * Usual copy() standards apply.
      * NO REFERENCES TO COMPONENTS TO BE KEPT, PRIMITIVE TYPES ONLY.
      *

@@ -69,15 +69,8 @@ public class Militia extends DominionAttackAction {
     @Override
     public boolean isAttackComplete(int currentTarget, DominionGameState state) {
         PartialObservableDeck<DominionCard> hand = (PartialObservableDeck<DominionCard>) state.getDeck(DeckType.HAND, currentTarget);
-        // Does the victim now have 3 or fewer cards in hand? OR have a revealed MOAT card
+        // Does the victim now have 3 or fewer cards in hand? (a revealed MOAT card would not get this far...the defended flag on the game state is used instead)
         return hand.getSize() <= OTHERS_DISCARD_DOWN_TO;
-
-        // This is actually done via the defended flag on the game state to make it generic across all ATTACK cards
-//        for (int i = 0; i < hand.getSize(); i++) {
-//            if (hand.getVisibilityForPlayer(i, player) && hand.get(i).cardType() == CardType.MOAT) {
-//                return true;
-//            }
-//        }
     }
 
     @Override

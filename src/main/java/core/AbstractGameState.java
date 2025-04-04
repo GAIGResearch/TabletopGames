@@ -389,12 +389,9 @@ public abstract class AbstractGameState {
         return !actionsInProgress.empty();
     }
 
-    public final boolean setActionInProgress(IExtendedSequence action) {
-        if (action == null && !actionsInProgress.isEmpty())
-            actionsInProgress.pop();
-        else
+    public final void setActionInProgress(IExtendedSequence action) {
+        if (action != null)
             actionsInProgress.push(action);
-        return true;
     }
 
     final void checkActionsInProgress() {

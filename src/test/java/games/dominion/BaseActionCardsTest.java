@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static core.CoreConstants.GameResult.GAME_END;
+import static games.dominion.DominionGameState.DominionGamePhase.Buy;
 import static games.dominion.DominionGameState.DominionGamePhase.Play;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
@@ -1228,7 +1229,7 @@ public class BaseActionCardsTest {
     }
 
     @Test
-    public void throneRoomWithMilitia() {
+    public void throneRoomWithMilitiaAndMoat() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.MILITIA, 0, DeckType.HAND);
         state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
@@ -1246,16 +1247,25 @@ public class BaseActionCardsTest {
         assertEquals(6, state.getDeck(DeckType.HAND, 3).getSize());
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertFalse(actions.isEmpty());
+        assertEquals(Buy, state.getGamePhase());
+        assertEquals(0, state.getCurrentPlayer());
     }
 
 
     @Test
-    public void throneRoomWithMilitiaAndFollowOnCard() {
+    public void throneRoomWithMilitiaAndFollowOnCardsThatCannotBeUsed() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
-        state.addCard(CardType.MOAT, 0, DeckType.HAND);
-        state.addCard(CardType.MILITIA, 0, DeckType.HAND);
-        ThroneRoom throneRoom = new ThroneRoom(0);
+        do {
+            AbstractAction next = fm.computeAvailableActions(state).get(0);
+            fm.next(state, next);
+        } while (state.getCurrentPlayer() == 0);
+
+        state.addCard(CardType.THRONE_ROOM, 1, DeckType.HAND);
+        state.addCard(CardType.MOAT, 1, DeckType.HAND);
+        state.addCard(CardType.VILLAGE, 1, DeckType.HAND);
+        state.addCard(CardType.MILITIA, 1, DeckType.HAND);
+        ThroneRoom throneRoom = new ThroneRoom(1);
         fm.next(state, throneRoom);
 
         do {
@@ -1263,12 +1273,14 @@ public class BaseActionCardsTest {
             fm.next(state, next);
         } while (state.isActionInProgress());
 
-        assertEquals(3, state.getDeck(DeckType.HAND, 1).getSize());
+        assertEquals(3, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(3, state.getDeck(DeckType.HAND, 2).getSize());
         assertEquals(3, state.getDeck(DeckType.HAND, 3).getSize());
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(10, actions.size());
+        assertFalse(actions.isEmpty());
+        assertEquals(Buy, state.getGamePhase());
+        assertEquals(1, state.getCurrentPlayer());
     }
 
     @Test
