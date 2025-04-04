@@ -143,11 +143,12 @@ public class SlyDealAction extends AbstractAction implements IExtendedSequence, 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SlyDealAction that = (SlyDealAction) o;
-        return playerID == that.playerID;
+        return playerID == that.playerID && target == that.target && reaction == that.reaction &&
+                executed == that.executed && actionState == that.actionState && take == that.take && from == that.from;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(playerID);
+        return Objects.hash(playerID, target, take, from, actionState, reaction, executed);
     }
     @Override
     public String toString() { return "SlyDeal action"; }
