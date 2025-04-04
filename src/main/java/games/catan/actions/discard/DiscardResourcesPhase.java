@@ -50,7 +50,9 @@ public class DiscardResourcesPhase extends AbstractAction implements IExtendedSe
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (action instanceof DoNothing) nDiscarded = nDiscards;
-        else nDiscarded += ((DiscardResources) action).resourcesToDiscard.length;
+        else if (action instanceof  DiscardResources) {
+            nDiscarded += ((DiscardResources) action).resourcesToDiscard.length;
+        }
     }
 
     @Override

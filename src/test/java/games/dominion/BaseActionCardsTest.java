@@ -1096,11 +1096,16 @@ public class BaseActionCardsTest {
         state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
         ThroneRoom throneRoom = new ThroneRoom(0);
         fm.next(state, throneRoom);
+        // one ThroneRoom on table, one in hand
+        assertEquals(1, state.getDeck(DeckType.HAND, 0).stream().filter(c -> c.cardType() == CardType.THRONE_ROOM).count());
+        assertEquals(1, state.getDeck(DeckType.TABLE, 0).stream().filter(c -> c.cardType() == CardType.THRONE_ROOM).count());
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
-        assertEquals(DominionCard.create(CardType.THRONE_ROOM).getAction(0), nextActions.get(0));
+        assertEquals(DominionCard.create(CardType.THRONE_ROOM).getAction(0, false), nextActions.get(0));
 
         fm.next(state, nextActions.get(0));
+        assertEquals(0, state.getDeck(DeckType.HAND, 0).stream().filter(c -> c.cardType() == CardType.THRONE_ROOM).count());
+        assertEquals(2, state.getDeck(DeckType.TABLE, 0).stream().filter(c -> c.cardType() == CardType.THRONE_ROOM).count());
         // playing the second throne room - with no actions left should give us a single Pass action
         nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());

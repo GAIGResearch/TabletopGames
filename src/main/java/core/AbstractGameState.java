@@ -64,7 +64,7 @@ public abstract class AbstractGameState {
     // Current game phase
     protected IGamePhase gamePhase;
     // Stack for extended actions
-    protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
+    Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
     private int gameID;
     // rnd is used for all random number generation in the game - for events within the game
@@ -181,6 +181,7 @@ public abstract class AbstractGameState {
      * In general getCurrentPlayer() should be used to find the current player.
      * getTurnOwner() will give a different answer if an Extended Action Sequence is in progress.
      * In this case getTurnOwner() returns the underlying player on whose turn the Action Sequence was initiated.
+     *
      * @return the player whose turn it currently is (which may be different to the next player to act)
      */
     public int getTurnOwner() {return turnOwner;}
@@ -199,6 +200,7 @@ public abstract class AbstractGameState {
     public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
+
     void setGameID(int id) {
         gameID = id;
     } // package level deliberately
@@ -355,6 +357,7 @@ public abstract class AbstractGameState {
             return; // to avoid expensive string manipulations
         logEvent(event, eventText.get());
     }
+
     public void logEvent(IGameEvent event, String eventText) {
         LogEvent logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
@@ -362,6 +365,7 @@ public abstract class AbstractGameState {
             recordHistory(eventText);
         }
     }
+
     public void logEvent(IGameEvent event) {
         LogEvent logAction = new LogEvent(event.name());
         listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
@@ -380,11 +384,25 @@ public abstract class AbstractGameState {
         return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
     }
 
+    public final IExtendedSequence getQueuedAction(int index) {
+        if (index < 0 || index >= actionsInProgress.size()) {
+            throw new IndexOutOfBoundsException("Index " + index + " out of bounds for action stack of size " + actionsInProgress.size());
+        }
+        return actionsInProgress.get(index);
+    }
+
+    /*
+     * Alert: The method has a side effect of calling checkActionsInProgress(), which will
+     * update the top actions on the stack, and will remove them from the queue.
+     * Formally it therefore can change the state of the stack (the actual removal from the stack is deferred from the
+     * point at which the action is formally completed, to the point at which we actually check the stack).
+     */
     public final boolean isActionInProgress() {
         // This checkActionsInProgress is essential
         // When an action is completely executed this is marked on the Action (accessible via IExtendedSequence.executionComplete())
-        // However this does not [currently] actively remove the action from the queue on the game state. Whenever we check the actionsInProgress queue, we
-        // therefore first have to remove any completed actions (which is what checkActionsInProgress() does).
+        // However this does not [currently] actively remove the action from the queue on the game state. Hence,
+        // whenever we check the actionsInProgress queue we
+        // first have to remove any completed actions (which is what checkActionsInProgress() does).
         checkActionsInProgress();
         return !actionsInProgress.empty();
     }
@@ -395,11 +413,29 @@ public abstract class AbstractGameState {
     }
 
     final void checkActionsInProgress() {
-        while (!actionsInProgress.isEmpty() &&
-                currentActionInProgress().executionComplete(this)) {
-            actionsInProgress.pop();
+        while (!actionsInProgress.isEmpty()) {
+            IExtendedSequence topOfStack = actionsInProgress.peek();
+            if (topOfStack.executionComplete(this)) {
+                actionsInProgress.pop();
+                if (!actionsInProgress.empty()) {
+                    actionsInProgress.peek().afterRemovalFromQueue(this, topOfStack);
+                    // this tells the next item on the queue that it is now at the top and the subsequent one has been completed
+                    // the details of what this subsequent sequence did may be of relevance to its parent
+                }
+                // the next iteration of this loop may then remove the next action in the stack
+            } else {
+                // if the top of the stack is not complete, then we are done
+                break;
+            }
         }
     }
+
+    /**
+     * This method is designed for testing only!
+     * The actionsInProgress stack is not intended to be modified directly.
+     *
+     * @return
+     */
     public final Stack<IExtendedSequence> getActionsInProgress() {
         return actionsInProgress;
     }
@@ -418,7 +454,7 @@ public abstract class AbstractGameState {
     /**
      * Create a copy of the game state containing only those components the given player can observe (if partial
      * observable).
-     *
+     * <p>
      * This is also responsible for shuffling any hidden information, such as cards in a deck. (aka 'redeterminisation')
      * There are some utilities to assist with this in utilities.DeterminisationUtilities.
      * One of the most important things to remember is that the random number generator from getRnd() should not be used in this method.
@@ -452,7 +488,7 @@ public abstract class AbstractGameState {
 
     /**
      * @param playerId - the player observed
-     * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
+     * @param tier     - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
      * @return Double.MAX_VALUE - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
      */
     public double getTiebreak(int playerId, int tier) {
@@ -462,6 +498,7 @@ public abstract class AbstractGameState {
     /**
      * This sets the number of tieBreak levels in a game.
      * If we reach this level then we stop recursing.
+     *
      * @return the number of levels of tiebreaks in the game
      */
     public int getTiebreakLevels() {return 5;}
@@ -537,7 +574,7 @@ public abstract class AbstractGameState {
                     retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case VISIBLE_TO_OWNER:
-                   if (((Component) container).getOwnerId() != player)
+                    if (((Component) container).getOwnerId() != player)
                         retValue.addAll(container.getComponents().stream().map(Component::getComponentID).toList());
                     break;
                 case TOP_VISIBLE_TO_ALL:
@@ -631,11 +668,11 @@ public abstract class AbstractGameState {
     /**
      * Override the hashCode as needed for individual game states
      * (It is OK for two java objects to be not equal and have the same hashcode)
-     *         we deliberately exclude history and allComponents from the hashcode
-     *         this is because history is deliberately erased at times to hide hidden information (and is read-only)
-     *         and allComponents is not always populated (it is a convenience to get hold of all components in a game
-     *         at the superclass level - the actually important components are instantiated in sub-classes, and should be
-     *         included in the hashCode() method implemented there
+     * we deliberately exclude history and allComponents from the hashcode
+     * this is because history is deliberately erased at times to hide hidden information (and is read-only)
+     * and allComponents is not always populated (it is a convenience to get hold of all components in a game
+     * at the superclass level - the actually important components are instantiated in sub-classes, and should be
+     * included in the hashCode() method implemented there
      */
     @Override
     public int hashCode() {
@@ -648,9 +685,9 @@ public abstract class AbstractGameState {
     /**
      * HashCodeArray compiles all necessary hash codes for each individual game state.
      * Override as necessary for each game state.
-     *          This is used for the ForwardModelTester for checking that the game state is correctly copied
-     *          for games such as Descent, which have a lot of changing pieces and hash codes each state to manage.
-     *          This allows us to see what hasn't been copied over between states.
+     * This is used for the ForwardModelTester for checking that the game state is correctly copied
+     * for games such as Descent, which have a lot of changing pieces and hash codes each state to manage.
+     * This allows us to see what hasn't been copied over between states.
      */
     public int[] hashCodeArray() {
         return new int[0];
@@ -659,10 +696,10 @@ public abstract class AbstractGameState {
     /**
      * SuperHashCodeArray compiles all necessary hash codes about the game itself.
      * This is used for the ForwardModelTester for checking that the game state is correctly copied,
-     *          and should generally not require overriding.
+     * and should generally not require overriding.
      */
     public final int[] superHashCodeArray() {
-        return new int[] {
+        return new int[]{
                 Objects.hash(gameParameters),
                 Objects.hash(gameStatus),
                 Objects.hash(gamePhase),
@@ -677,16 +714,14 @@ public abstract class AbstractGameState {
         };
     }
 
-    public boolean isGameOver()
-    {
+    public boolean isGameOver() {
         return gameStatus.equals(GAME_END);
     }
 
-    public int getWinner()
-    {
-        if(gameStatus.equals(GAME_END)){
-            for(int playerId = 0; playerId < nPlayers; playerId++)
-                if(playerResults[playerId] == WIN_GAME)
+    public int getWinner() {
+        if (gameStatus.equals(GAME_END)) {
+            for (int playerId = 0; playerId < nPlayers; playerId++)
+                if (playerResults[playerId] == WIN_GAME)
                     return playerId;
         }
         return -1;
