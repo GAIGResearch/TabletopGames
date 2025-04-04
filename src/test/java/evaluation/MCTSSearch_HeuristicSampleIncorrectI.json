@@ -1,20 +1,17 @@
 {
         "class":"players.mcts.MCTSParams",
         "K" : 1.0,
-        "rolloutLength" : [30, 100, 300, 1000],
+        "rolloutLength" : 50,
         "maxTreeDepth" : 100,
         "budgetType" : "BUDGET_TIME",
         "information" : "Information_Set",
         "selectionPolicy" : "SIMPLE",
         "treePolicy" : "UCB_Tuned",
         "paranoid" : false,
-        "opponentTreePolicy" : ["OneTree", "MultiTree", "SelfOnly"],
         "rolloutType" : "MAST",
-        "oppModelType" : ["RANDOM", "MAST"],
-        "MAST" : ["Tree", "Rollout", "Both"],
-        "MASTGamma" : [0.0, 0.5, 0.9, 1.0],
-        "MASTDefaultValue" : [-100.0, -10.0, 0.0, 10.0, 100.0],
-        "MASTBoltzmann" : [0.01, 0.1, 1.0, 10.0, 100.0],
+        "MAST" : "Both",
+        "MASTGamma" : 0.5,
+        "MASTBoltzmann" : 0.01,
         "budget" : 40,
         "epsilon" : 1e-6,
         "breakMS" : 0,
@@ -25,7 +22,7 @@
                 "class" : "players.heuristics.WinOnlyHeuristic"
         },
         {
-                "class" : "players.heuristics.ScoreHeuristic"
+                "class" : "players.heuristics.ScorePlusHeuristic"
         },
         {
                 "class" : "players.heuristics.LeaderHeuristic"

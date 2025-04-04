@@ -432,4 +432,23 @@ public class JSONUtils {
         }
         return json;
     }
+
+    /*
+        This tests the equality of two objects, even if they are of different types.
+        This supports 'equality' to include:
+        - the objects are different versions of Number, but with the same underlying numeric value
+        - one of the objects is an Enum, and the other is a String representation of the enum
+        - if either of the inputs are JSONObjects, then thhese will be instantiated
+         */
+    public static boolean areValuesEqual(Object possibleValue, Object value) {
+        if (value instanceof JSONObject)
+            value = loadClassFromJSON((JSONObject) value);
+        if (possibleValue instanceof JSONObject)
+            possibleValue = loadClassFromJSON((JSONObject) possibleValue);
+        if (possibleValue instanceof Enum || value instanceof Enum) {
+            return possibleValue.toString().equals(value.toString());
+        } else if (possibleValue instanceof Number && value instanceof Number) {
+            return ((Number) possibleValue).doubleValue() == ((Number) value).doubleValue();
+        } else return possibleValue.equals(value);
+    }
 }

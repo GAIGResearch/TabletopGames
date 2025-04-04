@@ -257,17 +257,17 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>ProgressiveLearner</id>
+                        <id>MetaNTBEA</id>
                         <configuration>
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.ProgressiveLearner</mainClass>
+                                    <mainClass> evaluation.optimisation.ntbea.functions.MetaNTBEA</mainClass>
                                 </manifest>
                             </archive>
-                            <finalName>ProgressiveLearner</finalName>
+                            <finalName>MetaNTBEA</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

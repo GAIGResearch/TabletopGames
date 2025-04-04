@@ -3,6 +3,8 @@ package evaluation;
 import core.AbstractPlayer;
 import evaluation.optimisation.ITPSearchSpace;
 import games.puertorico.PuertoRicoActionHeuristic001;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
+import org.apache.spark.sql.catalyst.expressions.Abs$;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Before;
@@ -122,20 +124,20 @@ public class TunableParametersTest {
         List<CoarseTunableHeuristic.HeuristicType> expectedArray = Arrays.asList(WIN_ONLY, SCORE_PLUS, LEADER);
         assertEquals(expectedArray, itp.allValues(heuristicTypeIndex));
 
-        int[] settings = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        int[] settings = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
         settings[heuristicTypeIndex] = 1;
         settings[MASTBoltzmannIndex] = 3;
         MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
         assertEquals(10.0, params.MASTBoltzmann, 0.001);
-        assertTrue(params.getHeuristic() instanceof  CoarseTunableHeuristic);
+        assertTrue(params.getHeuristic() instanceof CoarseTunableHeuristic);
         assertEquals(SCORE_PLUS, ((CoarseTunableHeuristic) params.heuristic).getHeuristicType());
     }
 
     @Test
     public void loadedSubParamsIncludesNonParameterisedObjects() {
         String searchSpace = "src\\test\\java\\evaluation\\MCTSSearch_PR_RolloutPolicy.json";
-        ITPSearchSpace itp = new ITPSearchSpace(params, searchSpace);
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, searchSpace);
         // actionHeuristic is a nested (non-Tunable) class, so check it is not included
         assertEquals(-1, itp.getIndexOf("rolloutPolicyParams.actionHeuristic"));
         assertEquals(-1, itp.getIndexOf("actionHeuristic"));
@@ -145,11 +147,11 @@ public class TunableParametersTest {
         assertEquals(5, itp.allValues(temperatureIndex).size());
         assertEquals(Arrays.asList(0.01, 0.1, 1.0, 10.0, 100.0), itp.allValues(temperatureIndex));
 
-        int[] settings = new int[] {0, 0, 0, 0, 0};
+        int[] settings = new int[]{0, 0, 0, 0, 0};
 
-        MCTSPlayer agent = (MCTSPlayer) itp.instantiate(settings);
+        MCTSPlayer agent = itp.instantiate(settings);
         MCTSParams params = agent.getParameters();
-        assertTrue(params.getRolloutStrategy() instanceof  BoltzmannActionPlayer);
+        assertTrue(params.getRolloutStrategy() instanceof BoltzmannActionPlayer);
         BoltzmannActionPlayer rollout = (BoltzmannActionPlayer) params.getRolloutStrategy();
         assertEquals(0.01, rollout.temperature, 0.001);
         assertEquals(new PuertoRicoActionHeuristic001(), rollout.getActionHeuristic());
@@ -220,4 +222,103 @@ public class TunableParametersTest {
         JSONObject asJSON = params.instanceToJSON(true, Map.of("heuristic", 1));
         assertEquals(asJSON.get("heuristic"), secondHeuristic);
     }
+
+    @Test
+    public void settingsFromJSONSuccessful() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSample.json");
+        JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_HeuristicSample.json");
+        for (int i = 0; i < settings.length; i++) {
+            String parameterName = itp.name(i);
+            Object value = itp.value(i, settings[i]);
+            Object jsonValue = json.get(parameterName);
+            if (jsonValue == null) {
+                // pick up default
+                jsonValue = params.getDefaultParameterValue(parameterName);
+            }
+            if (!JSONUtils.areValuesEqual(value, jsonValue)) {
+                System.out.println(parameterName + " " + value + " " + jsonValue);
+            }
+            assertTrue(JSONUtils.areValuesEqual(value, jsonValue));
+        }
+    }
+
+    @Test
+    public void settingsFromJSONFailsToMatchSearchSpace() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        try {
+            itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectI.json");
+            fail();
+        } catch (AssertionError e) {
+            // rolloutLength in JSON is 50, which is not one of the possible tuned values
+            System.out.println(e.getMessage());
+            assertTrue(e.getMessage().contains("rolloutLength"));
+        }
+    }
+
+    @Test
+    public void settingsFromJSONFailsToMatchDefault() {
+        // If the searchSpace defines a fixed value for a parameter, then we should use this
+        ITPSearchSpace<AbstractPlayer> itp = new ITPSearchSpace<>(params, "src/test/java/evaluation/MCTSSearch_Heuristic.json");
+        try {
+            int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_HeuristicSampleIncorrectII.json");
+            JSONObject json = itp.constructAgentJSON(settings);
+            fail("Should have thrown an error");
+        } catch (AssertionError e) {
+            // maxTreeDepth in SampleIncorrectII.json is 20, which is going to be ignored as it differs to that in the main search space
+            System.out.println(e.getMessage());
+            assertTrue(e.getMessage().contains("maxTreeDepth"));
+        }
+    }
+
+
+    @Test
+    public void settingsFromNestedJSONSuccessful() {
+        ITPSearchSpace<AbstractPlayer> itp = new ITPSearchSpace<>(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+        JSONObject json = JSONUtils.loadJSONFile("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+        for (int i = 0; i < settings.length; i++) {
+            String parameterName = itp.name(i);
+            // now account for nested parameters
+            String[] parts = parameterName.split("\\.");
+            Object jsonValue = json;
+            for (int j = 0; j < parts.length; j++) {
+                jsonValue = ((JSONObject) jsonValue).get(parts[j]);
+            }
+            Object value = itp.value(i, settings[i]);
+            if (jsonValue == null) {
+                // pick up default
+                if (parameterName.equals("heuristic.heuristicType")) {
+                    fail("Should have found a value for " + parameterName);
+                }
+                jsonValue = params.getDefaultParameterValue(parameterName);
+            }
+            System.out.println(parameterName + " " + value + " " + jsonValue);
+            assertTrue(JSONUtils.areValuesEqual(value, jsonValue));
+        }
+    }
+
+    @Test
+    public void settingsFromJSONPickUpNonDefaults() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+        JSONObject json = itp.constructAgentJSON(settings);
+        // We should pick up the default override in MCTSSearch_MASTRollout.json of 0.37
+        assertEquals(0.37, (Double) json.get("exploreEpsilon"), 0.001);
+    }
+
+    @Test
+    public void instanceToJSONWithNestedDefault() {
+        ITPSearchSpace<MCTSPlayer> itp = new ITPSearchSpace(params, "src/test/java/evaluation/MCTSSearch_MASTRollout.json");
+        int[] settings = itp.settingsFromJSON("src/test/java/evaluation/MCTSSearch_MASTRolloutSample.json");
+
+        assertEquals("heuristic.heuristicType", itp.name(5));
+        settings[5] = 0;  // WIN_ONLY is default
+        JSONObject json = itp.constructAgentJSON(settings);
+        JSONObject heuristicJSON = (JSONObject) json.get("heuristic");
+        assertNotNull(heuristicJSON);
+        assertEquals("players.heuristics.CoarseTunableHeuristic", heuristicJSON.get("class"));
+        assertNull(heuristicJSON.get("heuristicType"));
+    }
+
 }

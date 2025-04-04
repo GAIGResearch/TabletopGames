@@ -57,7 +57,7 @@ public enum RunArg {
             "\tmust be provided, or the a json-format file that provides the requisite details. \n" +
             "\tThe json-format file is needed if non-default settings for the IGameHeuristic are used.",
             "Win",
-            new Usage[]{Usage.ParameterSearch}),
+            new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
     evalsPerTrial("The number of games to run per NTBEA trial (default is 1)",
             1,
             new Usage[]{Usage.ParameterSearch}),
@@ -114,8 +114,8 @@ public enum RunArg {
             new Usage[]{Usage.RunGames, Usage.ParameterSearch}),
     matchups("The total number of matchups to run in a tournament.\n" +
             "\tIf the mode is 'exhaustive', then this will be the maximum number of games run. TAG will divide\n" +
-            "\tthis by the total number of permutations, and run an equal number of games for each permutation.\n" +
-            "\tFor NTBEA this will be used as a final tournament between the recommended agents from each run.",
+            "\this by the total number of permutations, and run an equal number of games for each permutation.\n" +
+            "\tFor NTBEA/SkillLadder this will be used as a final tournament between the recommended agents from each run.",
             1,
             new Usage[]{Usage.RunGames, Usage.ParameterSearch, Usage.SkillLadder}),
     mode("exhaustive|exhaustiveSP|random|sequential|fixed\n" +
@@ -209,6 +209,16 @@ public enum RunArg {
             "across tuples. 1 is equivalent to a simple mean, higher values will overweight larger values until \n" +
             "a value approaching infinity is equivalent to a Max function.",
             1.0,
+            new Usage[]{Usage.ParameterSearch}),
+    OSDBudget("Budget of games to be used for a one step deviation analysis of the final recommended agent",
+            0,
+            new Usage[]{Usage.ParameterSearch}),
+    OSDTournament("If true then a tournament between all one-step-devation agents will be run instead of\n" +
+            "using the evaluation method of NTBEA (default is false).",
+            false,
+            new Usage[]{Usage.ParameterSearch}),
+    OSDConfidence("The confidence level to use for the one-step deviation analysis. Default is 0.9",
+            0.9,
             new Usage[]{Usage.ParameterSearch}),
     quantile("The target quantile for NTBEA evaluation overall. The default (-1) will use the mean\n" +
             "of the evalGame results. A value of 50 will use the median, and 10 the figure below which 10% of the results lie.\n" +

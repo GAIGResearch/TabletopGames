@@ -101,7 +101,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         if (finalData instanceof JSONObject subJson) {
             K retValue = JSONUtils.loadClassFromJSON(subJson);
             if (retValue instanceof TunableParameters<?> subParams) {
-         //       TunableParameters.loadFromJSON(subParams, subJson);
+                //       TunableParameters.loadFromJSON(subParams, subJson);
                 params.setParameterValue(name, subParams);
                 //    params.registerChild(name, subJson);
             }
@@ -272,6 +272,15 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         return defaultValues.get(parameterName);
     }
 
+    public Object getDefaultOverride(String parameterName) {
+        // we first see if this parameter is in the rawJSON
+        if (rawJSON != null && rawJSON.containsKey(parameterName)
+                && !(rawJSON.get(parameterName) instanceof JSONArray)) {
+            return rawJSON.get(parameterName);
+        }
+        return getDefaultParameterValue(parameterName);
+    }
+
     /**
      * Sets the value of the given parameter.
      *
@@ -280,7 +289,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
      */
     @Override
     public void setParameterValue(String parameterName, Object value) {
-    //    System.out.println("Setting " + parameterName + " to " + value);
+        //    System.out.println("Setting " + parameterName + " to " + value);
         if (parameterName.split(Pattern.quote(".")).length > 1) {
             // in this case we pass on to the subParam (as well as updating here)
             String[] split = parameterName.split(Pattern.quote("."));
@@ -364,29 +373,6 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     }
 
     @Override
-    public String getJSONDescription() {
-        JSONObject retValue = new JSONObject();
-        retValue.put("parametersType", this.getClass().getName());
-        parameterNames.forEach(name -> {
-            Class<?> clazz = parameterTypes.get(name);
-            if (possibleValues.getOrDefault(name, Collections.emptyList()).size() > 1) {
-                List<Object> values = possibleValues.get(name);
-                if (clazz.isEnum())
-                    values = values.stream().map(Object::toString).collect(toList());
-                // TODO: Possibly something here to allow for JSONObjects to be passed in as well
-                retValue.put(name, values);
-            } else {
-                // we have a single value, or a missing
-                Object value = defaultValues.getOrDefault(name, null);
-                if (clazz.isEnum()) value = value.toString();
-                retValue.put(name, value);
-            }
-        });
-        return retValue.toJSONString();
-    }
-
-
-    @Override
     public ITunableParameters instanceFromJSON(JSONObject jsonObject) {
         return JSONUtils.loadClassFromJSON(jsonObject);
     }
@@ -395,10 +381,9 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         rawJSON = json;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public JSONObject instanceToJSON(boolean excludeDefaults, Map<String, Integer> settings) {
-        // this is very similar to getJSONDescription(), but only
-        // considers the current Parameter settings
         // we will recurse over nested ITunableParameters (but do not jump over intervening non-Tunable objects)
         JSONObject retValue = new JSONObject();
         retValue.put("class", this.getClass().getName());
@@ -409,33 +394,47 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             }
             Object value = getParameterValue(name);
             if (value != null) {
-                // check for defaults
-                if (excludeDefaults && value.equals(getDefaultParameterValue(name))) {
-                    continue;
-                }
-                if (value instanceof ITunableParameters tp) {
+                if (value instanceof ITunableParameters<?> tp) {
                     // settings need to have namespace adapted (remove the top level)
                     Map<String, Integer> subSettings = settings.entrySet().stream()
                             .filter(e -> e.getKey().contains("."))
                             .collect(toMap(e -> e.getKey().substring(e.getKey().indexOf(".") + 1), Map.Entry::getValue));
                     value = tp.instanceToJSON(excludeDefaults, subSettings);
-                } else if (value instanceof Enum) {
-                    value = value.toString();
-                } else if (!(value instanceof Integer || value instanceof Long ||
-                        value instanceof Double || value instanceof String ||
-                        value instanceof Boolean)) {
-                    // in this case we need to extract from the original rawJSON
-                    if (rawJSON == null) {
-                        if (getDefaultParameterValue(name).equals(value))
-                            continue; // in this case we have the default, so no need to pull in
-                        throw new AssertionError("No rawJSON available to extract value for " + name);
+                } else {
+                    if (value instanceof Enum) {
+                        value = value.toString();
+                    } else if (!(value instanceof Integer || value instanceof Long ||
+                            value instanceof Double || value instanceof String ||
+                            value instanceof Boolean)) {
+                        // in this case we need to extract from the original rawJSON
+                        if (rawJSON == null) {
+                            if (JSONUtils.areValuesEqual(value, getDefaultParameterValue(name)))
+                                continue; // in this case we have the default, so no need to pull in
+                            throw new AssertionError("No rawJSON available to extract value for " + name);
+                        }
+                        Object rawValue = rawJSON.get(name);
+                        if (rawValue instanceof JSONArray arr) {
+                            value = arr.get(settings.get(name));
+                        }
                     }
-                    Object rawValue = rawJSON.get(name);
-                    if (rawValue instanceof JSONArray arr) {
-                        value = arr.get(settings.get(name));
+                    // check for defaults
+                    if (excludeDefaults && JSONUtils.areValuesEqual(value, getDefaultParameterValue(name))) {
+                        continue;
                     }
                 }
                 retValue.put(name, value);
+            }
+        }
+        // We now add in any non-default values in rawJSON (i.e. ones not parameterised via settings)
+        if (rawJSON != null) {
+            for (Object key : rawJSON.keySet()) {
+                if (key instanceof String && !settings.containsKey(key) && !retValue.containsKey(key)) {
+                    // check for default
+                    if (excludeDefaults && JSONUtils.areValuesEqual(rawJSON.get(key), getDefaultParameterValue(key.toString()))) {
+                        continue;
+                    }
+                    retValue.put(key, rawJSON.get(key));
+                }
             }
         }
         return retValue;

@@ -59,13 +59,6 @@ public interface ITunableParameters<T> {
     T instantiate();
 
     /**
-     * @return A JSONString of these Tunable Parameters
-     * This is required for interfacing with the NTBEA library
-     * It is a representation of the parameter space (use instanceToJSON() for a representation of the current settings)
-     */
-    String getJSONDescription();
-
-    /**
      * @return a TunableParameters object instantiated from JSON
      * This only supports specific settings, and not the full range of possible settings
      * (For that use a SearchSpace)

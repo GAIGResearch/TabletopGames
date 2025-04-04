@@ -7,18 +7,42 @@ import core.actions.ActionSpace;
 import java.util.List;
 
 /**
- * An Action (usually) that entails a sequence of linked actions/decisions. This takes temporary control of deciding
- * which player is currently making a decision (the currentPlayer) from TurnOrder, and of what actions they have
- * available from ForwardModel.
+ * This is a mini-ForwardModel that takes temporary control of:
+ *      i) which player is currently making a decision (the getCurrentPlayer()),
+ *      ii) what actions they have (computeAvailableActions()), and
+ *      iii) what happens after an action is taken (_afterAction()).
+ * These are the three normal responsibilities of ForwardModel.
  *
- * ForwardModel will register all actions taken and the current state just before execution of each action in next().
- *
- * IExtendedSequence is then responsible for tracking all local state necessary for its set of actions, and marking
+ * IExtendedSequence is also responsible for tracking all local state necessary for its set of actions, and marking
  * itself as complete. (ForwardModel will then detect this, and remove it from the Stack of open actions.)
+ * This means that - unlike ForwardModel - IExtendedSequence is not stateless, and hence must implement a copy() method.
+ * Effectively an IExtendedSequence also incorporates a mini-GameState that tracks game progress within the sequence.
  *
- * Assuming this interface is used by an Action, then the execute(AbstractGameState state) method should call:
- *      state.setActionInProgress(this)
- * The core framework will then trigger delegation from ForwardModel and TurnOrder.
+ * ForwardModel retains responsibility for applying all actions (via next()).
+ *
+ * The GameState stores a Stack of IExtendedSequences, and the current one is always the one at the top of the stack.
+ * This stack is deep-copied whenever the GameState is copied, so that the IExtendedSequences are also copied.
+ *
+ * To trigger an IExtendedSequence, it is added to the stack by calling:
+ *      state.setActionInProgress(sequenceObject)
+ * The core framework will then trigger delegation from ForwardModel.
+ *
+ * There are two common patterns for IExtendedSequence:
+ *     i) Extending an Action directly, so that this then controls the later decisions that are part of the action.
+ *     ii) A distinct sub-phase of the game, encapsulating a linked series of decisions.
+ * In general the current advice is not to extend an Action directly, but to use the second pattern.
+ * For example:
+ *      - Player chooses Action A that requires a number of other decisions to be made.
+ *      - Action A does not extend IExtendedSequence, but created a new Object (let's call it SubPhaseA) that does.
+ *      - in execute() of Action A, it adds SubPhaseA to the stack with state.setActionInProgress(SubPhaseA)
+ *      - SubPhaseA then controls the next set of decisions. Once the last decision is taken, SubPhaseA marks itself as complete.
+ *
+ * It does not need to be the Action that puts the IExtendedSequence on the stack. It could be triggered by any event.
+ * Another common pattern is for this to be done in the _afterAction() method of the ForwardModel once certain
+ * preconditions for SubPhaseA are met.
+ *
+ * After every action is taken, the ForwardModel will check the top of the stack to see if it is finished (and will
+ * continue until it finds one that is not). If it is finished, it will remove it from the stack.
  */
 public interface IExtendedSequence {
 
@@ -44,6 +68,12 @@ public interface IExtendedSequence {
     /**
      * This is called by ForwardModel whenever an action has just been taken. It enables the IExtendedSequence
      * to maintain local state in whichever way is most suitable.
+     *
+     * It is called as well as (and before) the _afterAction method on the ForwardModel.
+     * This means that ForwardModel._afterAction() may need check to see if an action is in progress and skip
+     * its own logic in this case:
+     *          if (state.isActionInProgress()) continue;
+     * This line of code has not yet been incorporated into the framework due to a couple of older games.
      *
      * After this call, the state of IExtendedSequence should be correct ahead of the next decision to be made.
      * In some cases there is no need to implement anything in this method - if for example you can tell if all
