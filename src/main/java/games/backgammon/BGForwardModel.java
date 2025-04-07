@@ -6,8 +6,7 @@ import core.actions.AbstractAction;
 import core.components.Dice;
 import gametemplate.actions.GTAction;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
@@ -32,12 +31,12 @@ public class BGForwardModel extends StandardForwardModel {
         gameState.piecesBorneOff = new int[2];
 
         // Initialize pieces according to BGParameters
-        gameState.piecesPerPoint[0][0] = bgp.startingAt24;
+        gameState.piecesPerPoint[0][23] = bgp.startingAt24;
         gameState.piecesPerPoint[0][5] = bgp.startingAt6;
         gameState.piecesPerPoint[0][7] = bgp.startingAt8;
         gameState.piecesPerPoint[0][12] = bgp.startingAt13;
 
-        gameState.piecesPerPoint[1][0] = bgp.startingAt24;
+        gameState.piecesPerPoint[1][23] = bgp.startingAt24;
         gameState.piecesPerPoint[1][5] = bgp.startingAt6;
         gameState.piecesPerPoint[1][7] = bgp.startingAt8;
         gameState.piecesPerPoint[1][12] = bgp.startingAt13;
@@ -47,6 +46,7 @@ public class BGForwardModel extends StandardForwardModel {
             gameState.dice[i] = new Dice(bgp.diceSides);
         }
         gameState.diceUsed = new boolean[bgp.diceNumber];
+        gameState.rollDice();
 
         gameState.blots = new int[2];
     }
@@ -67,17 +67,18 @@ public class BGForwardModel extends StandardForwardModel {
         // (removing any moves that would move to a point occupied by two or more opponent tokens)
         BGGameState bgs = (BGGameState) gameState;
         int playerId = bgs.getCurrentPlayer();
-        int[] diceAvailable = bgs.getAvailableDiceValues();
+        // just look at unique dice values
+        int[] diceAvailable = Arrays.stream(bgs.getAvailableDiceValues())
+                .distinct()
+                .toArray();
         int boardSize = bgs.piecesPerPoint[playerId].length;
         for (int i : diceAvailable) {
-            for (int j = 0; j < boardSize; j++) {
-                if (bgs.piecesPerPoint[playerId][j] > 0) {
-                    int to = j + bgs.dice[i].getValue();
-                    if (to < boardSize) {
-                        if (bgs.piecesPerPoint[1 - playerId][boardSize - to - 1] < 2) {
-                            // we can move to this point
-                            actions.add(new MovePiece(j, to));
-                        }
+            for (int from = i; from < boardSize; from++) {
+                if (bgs.piecesPerPoint[playerId][from] > 0) {
+                    int to = from - i;
+                    if (bgs.piecesPerPoint[1 - playerId][boardSize - to - 1] < 2) {
+                        // we can move to this point
+                        actions.add(new MovePiece(from, to));
                     }
                 }
             }

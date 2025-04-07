@@ -40,8 +40,8 @@ public class BGGameState extends AbstractGameState {
 
     // the first index is the player, the second index is the point on the board
     // the arrays for each player are in reverse order..i.e each is from the perspective of the player
-    // with [0] being the first point (on the opponent's home board) and [23] being the last point (on the player's home board)
-    // so a player's home board is [18] to [23].
+    // with [0] being the first point (on the player's home board) and [23] being the last (24th) point (on the opponent's home board)
+    // so a player's home board is [0] through [5]
     protected int[][] piecesPerPoint;
     protected int[] piecesOnBar;  // currently out the game and need to be put into play as first moves
     protected int[] piecesBorneOff;
@@ -98,6 +98,24 @@ public class BGGameState extends AbstractGameState {
             die.roll(rnd);
         }
         Arrays.fill(diceUsed, false);
+    }
+
+    // for testing only
+    public void setDiceValues(int[] values) {
+        for (int i = 0; i < dice.length; i++) {
+            dice[i].setValue(values[i]);
+        }
+        Arrays.fill(diceUsed, false);
+    }
+
+    public void useDiceValue(int dieValue) {
+        for (int i = 0; i < dice.length; i++) {
+            if (dice[i].getValue() == dieValue) {
+                diceUsed[i] = true;
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Die value not found");
     }
 
     public int[] getDiceValues() {

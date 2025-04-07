@@ -7,14 +7,24 @@ public class MovePiece extends AbstractAction {
 
     public final int from;
     public final int to;
+    public final boolean diceOverride;
 
     public MovePiece(int from, int to) {
+        this(from, to, false);
+    }
+
+    public MovePiece(int from, int to, boolean diceOverride) {
         this.from = from;
         this.to = to;
+        this.diceOverride = diceOverride;
+        if (from > -1 && from < to) {
+            throw new IllegalArgumentException("from must be greater than to");
+        }
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
+        // TODO: Deal with movement of pieces from the bar
         BGGameState bgp = (BGGameState) gs;
         int playerId = bgp.getCurrentPlayer();
         if (bgp.getPiecesOnPoint(playerId, from) > 0) {
@@ -33,6 +43,11 @@ public class MovePiece extends AbstractAction {
             }
         } else {
             throw new IllegalArgumentException("No pieces on the from point");
+        }
+        if (!diceOverride) {
+            // mark the die as used
+            int dieValue = from - to;
+            bgp.useDiceValue(dieValue);
         }
         return true;
     }
