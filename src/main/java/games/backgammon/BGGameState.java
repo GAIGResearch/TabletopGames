@@ -47,6 +47,7 @@ public class BGGameState extends AbstractGameState {
     protected int[] piecesBorneOff;
 
     protected Dice[] dice;
+    protected boolean[] diceUsed;
 
     protected int[] blots;
 
@@ -90,6 +91,33 @@ public class BGGameState extends AbstractGameState {
         }
         piecesPerPoint[playerId][from]--;
         piecesPerPoint[playerId][to]++;
+    }
+
+    public void rollDice() {
+        for (Dice die : dice) {
+            die.roll(rnd);
+        }
+        Arrays.fill(diceUsed, false);
+    }
+
+    public int[] getDiceValues() {
+        int[] values = new int[dice.length];
+        for (int i = 0; i < dice.length; i++) {
+            values[i] = dice[i].getValue();
+        }
+        return values;
+    }
+
+    public int[] getAvailableDiceValues() {
+        // only return values for dice not yet used
+        int[] values = new int[dice.length];
+        int count = 0;
+        for (int i = 0; i < dice.length; i++) {
+            if (!diceUsed[i]) {
+                values[count++] = dice[i].getValue();
+            }
+        }
+        return Arrays.copyOf(values, count);
     }
 
     public void movePieceToBar(int playerId, int point) {

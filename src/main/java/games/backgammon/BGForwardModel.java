@@ -46,6 +46,7 @@ public class BGForwardModel extends StandardForwardModel {
         for (int i = 0; i < bgp.diceNumber; i++) {
             gameState.dice[i] = new Dice(bgp.diceSides);
         }
+        gameState.diceUsed = new boolean[bgp.diceNumber];
 
         gameState.blots = new int[2];
     }
@@ -57,15 +58,41 @@ public class BGForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        // TODO: Add in bearing off actions once possible
+        // TODO: force move of any pieces on bar first
         List<AbstractAction> actions = new ArrayList<>();
-        // TODO: create action classes for the current player in the given game state and add them to the list. Below just an example that does nothing, remove.
-        actions.add(new GTAction());
+        // We create the set of possible actions
+        // For each available dice value we consider each point that has player tokens on
+        // and add the possible moves to the list of actions
+        // (removing any moves that would move to a point occupied by two or more opponent tokens)
+        BGGameState bgs = (BGGameState) gameState;
+        int playerId = bgs.getCurrentPlayer();
+        int[] diceAvailable = bgs.getAvailableDiceValues();
+        int boardSize = bgs.piecesPerPoint[playerId].length;
+        for (int i : diceAvailable) {
+            for (int j = 0; j < boardSize; j++) {
+                if (bgs.piecesPerPoint[playerId][j] > 0) {
+                    int to = j + bgs.dice[i].getValue();
+                    if (to < boardSize) {
+                        if (bgs.piecesPerPoint[1 - playerId][boardSize - to - 1] < 2) {
+                            // we can move to this point
+                            actions.add(new MovePiece(j, to));
+                        }
+                    }
+                }
+            }
+        }
         return actions;
     }
 
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
-
+        // a player's turn ends when they have used all the dice values, or have no valid moves
+        BGGameState bgs = (BGGameState) currentState;
+        int[] diceAvailable = bgs.getAvailableDiceValues();
+        if (diceAvailable.length == 0 || computeAvailableActions(currentState).isEmpty()) {
+            // end of turn: switch player
+            bgs.rollDice();
+            endPlayerTurn(bgs);  // default is to move to next player
+        }
     }
-
-
 }
