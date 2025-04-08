@@ -1,6 +1,7 @@
 package games.backgammon;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Dice;
@@ -58,7 +59,6 @@ public class BGForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        // TODO: Add in bearing off actions once possible
         List<AbstractAction> actions = new ArrayList<>();
         // We create the set of possible actions
         // For each available dice value we consider each point that has player tokens on
@@ -71,7 +71,8 @@ public class BGForwardModel extends StandardForwardModel {
                 .distinct()
                 .toArray();
         int boardSize = bgs.piecesPerPoint[playerId].length;
-        if(bgs.getPiecesOnBar(playerId) > 0) {
+
+        if (bgs.getPiecesOnBar(playerId) > 0) {
             // player has pieces on the bar, so they can only move those
             for (int i : diceAvailable) {
                 if (bgs.piecesPerPoint[1 - playerId][boardSize - i] < 2) {
@@ -80,6 +81,17 @@ public class BGForwardModel extends StandardForwardModel {
                 }
             }
             return actions;
+        }
+
+        if (bgs.allPiecesOnHomeBoard(playerId)) {
+            // now we can bear off, so add these possibilities to the actions list
+            int maxDieValue = Arrays.stream(diceAvailable).max().orElse(0);
+            for (int i = 0; i < maxDieValue; i++) {
+                if (bgs.piecesPerPoint[playerId][i] > 0) {
+                    // we can bear off this piece
+                    actions.add(new MovePiece(i, -1));
+                }
+            }
         }
 
         for (int i : diceAvailable) {
@@ -99,11 +111,17 @@ public class BGForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         // a player's turn ends when they have used all the dice values, or have no valid moves
         BGGameState bgs = (BGGameState) currentState;
-        int[] diceAvailable = bgs.getAvailableDiceValues();
-        if (diceAvailable.length == 0 || computeAvailableActions(currentState).isEmpty()) {
-            // end of turn: switch player
-            bgs.rollDice();
-            endPlayerTurn(bgs);  // default is to move to next player
+        BGParameters bgp = (BGParameters) currentState.getGameParameters();
+        // check for game end
+        if (bgs.piecesBorneOff[0] == bgp.piecesPerPlayer || bgs.piecesBorneOff[1] == bgp.piecesPerPlayer) {
+            endGame(bgs);
+        } else {
+            int[] diceAvailable = bgs.getAvailableDiceValues();
+            if (diceAvailable.length == 0 || computeAvailableActions(currentState).isEmpty()) {
+                // end of turn: switch player
+                bgs.rollDice();
+                endPlayerTurn(bgs);  // default is to move to next player
+            }
         }
     }
 }

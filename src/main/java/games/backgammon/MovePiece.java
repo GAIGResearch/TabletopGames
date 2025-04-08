@@ -35,25 +35,44 @@ public class MovePiece extends AbstractAction {
         int piecesAtStart = from < 0 ? bgp.getPiecesOnBar(playerId) : bgp.getPiecesOnPoint(playerId, from);
         int boardLength = bgp.getPlayerPieces(0).length;
         if (piecesAtStart > 0) {
-            // check to see if opponent has pieces on the point
-            int opponentPieces = bgp.getPiecesOnPoint(1 - playerId, boardLength - to - 1);
-            if (opponentPieces > 1) {
-                throw new IllegalArgumentException("Cannot move to a point occupied by two or more opponent pieces");
-            } else if (opponentPieces == 1) {
-                // hit the opponent's piece
-                bgp.movePieceToBar(1 - playerId, boardLength - to - 1); // move to bar
-                // then move ours
+            if (to < 0) {
+                // we are bearing off
                 bgp.movePiece(playerId, from, to);
             } else {
-                // we just move the piece
-                bgp.movePiece(playerId, from, to);
+                // check to see if opponent has pieces on the point
+                int opponentPieces = bgp.getPiecesOnPoint(1 - playerId, boardLength - to - 1);
+                if (opponentPieces > 1) {
+                    throw new IllegalArgumentException("Cannot move to a point occupied by two or more opponent pieces");
+                } else if (opponentPieces == 1) {
+                    // hit the opponent's piece
+                    bgp.movePieceToBar(1 - playerId, boardLength - to - 1); // move to bar
+                    // then move ours
+                    bgp.movePiece(playerId, from, to);
+                } else {
+                    // we just move the piece
+                    bgp.movePiece(playerId, from, to);
+                }
             }
         } else {
             throw new IllegalArgumentException("No pieces on the from point");
         }
         if (!diceOverride) {
             // mark the die as used
-            int dieValue = from - to;
+            int dieValue = switch (to) {
+                case -1 -> {
+                    // in this case any die value will do...so we take the lowest available one
+                    int min = 0;
+                    for (int d : bgp.getAvailableDiceValues()) {
+                        if (d > min && d >= from + 1) {
+                            min = d;
+                        }
+                    }
+                    if (min == 0)
+                        throw new IllegalArgumentException("No dice available for this move");
+                    yield min;
+                }
+                default -> from < 0 ? to + 1 : from - to;
+            };
             bgp.useDiceValue(dieValue);
         }
         return true;
@@ -89,11 +108,14 @@ public class MovePiece extends AbstractAction {
         // If there was no hit, then report the total number of pieces on the point after the move
         StringBuilder sb = new StringBuilder();
         int player = bgp.getCurrentPlayer();
-        sb.append("Move Piece from ").append(from).append(" to ").append(to).append(" (1 of ").append(bgp.getPiecesOnPoint(player, from)).append(" pieces.\n");
-        if (bgp.getPiecesOnPoint(1 - player, bgp.getPlayerPieces(0).length - to - 1) > 0) {
-            sb.append("Hit opponent's piece on point ").append(bgp.getPlayerPieces(0).length - to - 1).append("\n");
-        } else {
-            sb.append("No hit, total pieces on point ").append(to).append(" after move: ").append(1 + bgp.getPiecesOnPoint(player, to)).append("\n");
+        int pieces = from < 0 ? bgp.getPiecesOnBar(player) : bgp.getPiecesOnPoint(player, from);
+        sb.append("Move Piece from ").append(from).append(" to ").append(to).append(" (1 of ").append(pieces).append(" pieces.\n");
+        if (to > 0) {
+            if (bgp.getPiecesOnPoint(1 - player, bgp.getPlayerPieces(0).length - to - 1) > 0) {
+                sb.append("Hit opponent's piece on point ").append(bgp.getPlayerPieces(0).length - to - 1).append("\n");
+            } else {
+                sb.append("No hit, total pieces on point ").append(to).append(" after move: ").append(1 + bgp.getPiecesOnPoint(player, to)).append("\n");
+            }
         }
         return sb.toString();
     }

@@ -85,12 +85,16 @@ public class BGGameState extends AbstractGameState {
         return piecesPerPoint[playerId].clone();
     }
 
+    public int getPiecesBorneOff(int playerId) {
+        return piecesBorneOff[playerId];
+    }
     /**
      * -1 indicates the bar (from), or borne off (to)
      */
     public void movePiece(int playerId, int from, int to) {
+        int boardLength = piecesPerPoint[0].length;
         int ownPiecesOnStartSpace = from < 0 ? piecesOnBar[playerId] : piecesPerPoint[playerId][from];
-        int opponentPiecesOnEndSpace = to < 0 ? 0 : piecesPerPoint[1 - playerId][to];
+        int opponentPiecesOnEndSpace = to < 0 ? 0 : piecesPerPoint[1 - playerId][boardLength - to - 1];
         if (ownPiecesOnStartSpace <= 0)
             throw new IllegalArgumentException("No pieces on the from point");
         if (opponentPiecesOnEndSpace > 1)
@@ -152,6 +156,18 @@ public class BGGameState extends AbstractGameState {
             }
         }
         return Arrays.copyOf(values, count);
+    }
+
+    public boolean allPiecesOnHomeBoard(int playerId) {
+        BGParameters params = (BGParameters) getGameParameters();
+        if (piecesOnBar[playerId] > 0)
+            return false;
+        for (int i = params.homeBoardSize; i < params.boardSize; i++) {
+            if (piecesPerPoint[playerId][i] > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void movePieceToBar(int playerId, int point) {
@@ -222,4 +238,5 @@ public class BGGameState extends AbstractGameState {
                 Arrays.deepHashCode(piecesPerPoint) +
                 super.hashCode();
     }
+
 }

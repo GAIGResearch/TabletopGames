@@ -1,6 +1,7 @@
 package games.backgammon;
 
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import org.junit.Before;
 import org.junit.Test;
@@ -174,17 +175,73 @@ public class BasicMoves {
 
     @Test
     public void turnSkippedIfPiecesOnBarAndNoMovePossible() {
-        fail("Not yet implemented");
+        gameState.piecesOnBar[0] = 2;
+        gameState.setDiceValues(new int[]{2, 3});
+
+        gameState.movePiece(1, 12, 22);
+        gameState.movePiece(1, 12, 22);
+        assertEquals(2, gameState.getPiecesOnPoint(1, 22));
+
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertFalse(availableActions.contains(new MovePiece(-1, 1)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertEquals(1, availableActions.size());
+
+        forwardModel.next(gameState, availableActions.get(0));
+        assertEquals(1, gameState.getPiecesOnPoint(0, 2));
+        assertEquals(1, gameState.getPiecesOnBar(0));
+        assertEquals(1, gameState.getCurrentPlayer());
+        assertEquals(2, gameState.getAvailableDiceValues().length);
     }
 
     @Test
     public void mayOnlyBearOffOnceAllPiecesInHomeBoard() {
-        fail("Not yet implemented");
+        // first we move all pieces to the homeboard of player 1
+        for (int pos = 6; pos < 24; pos++) {
+            for (int i = gameState.getPiecesOnPoint(1, pos); i > 0; i--)
+                gameState.movePiece(1, pos, 4);  // a pretty random point in the home board
+        }
+        // take two actions for player 0
+        gameState.setDiceValues(new int[]{5, 6});
+        do {
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+        } while (gameState.getCurrentPlayer() == 0);
+        gameState.movePiece(1, 4, 20);
+
+        gameState.setDiceValues(new int[]{5, 6});
+        assertEquals(1, gameState.getCurrentPlayer());
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(2, availableActions.size());
+        assertTrue(availableActions.contains(new MovePiece(20, 15)));
+        assertTrue(availableActions.contains(new MovePiece(20, 14)));
+
+        gameState.movePiece(1, 20, 4);
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(2, availableActions.size());
+        assertTrue(availableActions.contains(new MovePiece(4, -1)));
+        assertTrue(availableActions.contains(new MovePiece(5, -1)));
+
+        forwardModel.next(gameState, availableActions.get(0));
+        assertEquals(1, gameState.getPiecesBorneOff(1));
+        assertEquals(1, gameState.getGameScore(1), 0.01);
+        assertEquals(0, gameState.getGameScore(0), 0.01);
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(1, availableActions.size());
+        assertTrue(availableActions.contains(new MovePiece(4, -1)));
+        assertFalse(availableActions.contains(new MovePiece(5, -1))); // needs a 6, already used
     }
 
     @Test
     public void gameEndsOnceAllPiecesBorneOff() {
-        fail("Not yet implemented");
+        mayOnlyBearOffOnceAllPiecesInHomeBoard();
+        // this sets up player 1 to just bear off
+        do {
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+        } while (gameState.isNotTerminal());
+        assertEquals(15, gameState.getGameScore(1), 0.01);
+        assertEquals(15, gameState.getPiecesBorneOff(1));
+        assertEquals(CoreConstants.GameResult.WIN_GAME, gameState.getPlayerResults()[1]);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, gameState.getPlayerResults()[0]);
     }
 }
 
