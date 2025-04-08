@@ -85,12 +85,28 @@ public class BGGameState extends AbstractGameState {
         return piecesPerPoint[playerId].clone();
     }
 
+    /**
+     * -1 indicates the bar (from), or borne off (to)
+     */
     public void movePiece(int playerId, int from, int to) {
-        if (piecesPerPoint[playerId][from] <= 0) {
+        int ownPiecesOnStartSpace = from < 0 ? piecesOnBar[playerId] : piecesPerPoint[playerId][from];
+        int opponentPiecesOnEndSpace = to < 0 ? 0 : piecesPerPoint[1 - playerId][to];
+        if (ownPiecesOnStartSpace <= 0)
             throw new IllegalArgumentException("No pieces on the from point");
-        }
-        piecesPerPoint[playerId][from]--;
-        piecesPerPoint[playerId][to]++;
+        if (opponentPiecesOnEndSpace > 1)
+            throw new IllegalArgumentException("Cannot move to a point occupied by two or more opponent pieces");
+
+
+        // actual hit of opponent pieces is done in MovePiece class
+        if (from < 0)
+            piecesOnBar[playerId]--;
+        else
+            piecesPerPoint[playerId][from]--;
+
+        if (to < 0)
+            piecesBorneOff[playerId]++;
+        else
+            piecesPerPoint[playerId][to]++;
     }
 
     public void rollDice() {

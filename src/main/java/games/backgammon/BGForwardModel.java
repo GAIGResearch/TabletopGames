@@ -59,7 +59,6 @@ public class BGForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         // TODO: Add in bearing off actions once possible
-        // TODO: force move of any pieces on bar first
         List<AbstractAction> actions = new ArrayList<>();
         // We create the set of possible actions
         // For each available dice value we consider each point that has player tokens on
@@ -72,6 +71,17 @@ public class BGForwardModel extends StandardForwardModel {
                 .distinct()
                 .toArray();
         int boardSize = bgs.piecesPerPoint[playerId].length;
+        if(bgs.getPiecesOnBar(playerId) > 0) {
+            // player has pieces on the bar, so they can only move those
+            for (int i : diceAvailable) {
+                if (bgs.piecesPerPoint[1 - playerId][boardSize - i] < 2) {
+                    // we can move to this point
+                    actions.add(new MovePiece(-1, i - 1));
+                }
+            }
+            return actions;
+        }
+
         for (int i : diceAvailable) {
             for (int from = i; from < boardSize; from++) {
                 if (bgs.piecesPerPoint[playerId][from] > 0) {

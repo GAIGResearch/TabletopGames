@@ -9,6 +9,12 @@ public class MovePiece extends AbstractAction {
     public final int to;
     public final boolean diceOverride;
 
+    /**
+     * Move Piece from one point to another (-1 is the bar)
+     *
+     * @param from -1 for the bar, 0-23 for the points
+     * @param to   0-23 for the points, -1 to bear off
+     */
     public MovePiece(int from, int to) {
         this(from, to, false);
     }
@@ -24,17 +30,18 @@ public class MovePiece extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        // TODO: Deal with movement of pieces from the bar
         BGGameState bgp = (BGGameState) gs;
         int playerId = bgp.getCurrentPlayer();
-        if (bgp.getPiecesOnPoint(playerId, from) > 0) {
+        int piecesAtStart = from < 0 ? bgp.getPiecesOnBar(playerId) : bgp.getPiecesOnPoint(playerId, from);
+        int boardLength = bgp.getPlayerPieces(0).length;
+        if (piecesAtStart > 0) {
             // check to see if opponent has pieces on the point
-            int opponentPieces = bgp.getPiecesOnPoint(1 - playerId, bgp.getPlayerPieces(0).length - to - 1);
+            int opponentPieces = bgp.getPiecesOnPoint(1 - playerId, boardLength - to - 1);
             if (opponentPieces > 1) {
                 throw new IllegalArgumentException("Cannot move to a point occupied by two or more opponent pieces");
             } else if (opponentPieces == 1) {
                 // hit the opponent's piece
-                bgp.movePieceToBar(1 - playerId, bgp.getPlayerPieces(0).length - to - 1); // move to bar
+                bgp.movePieceToBar(1 - playerId, boardLength - to - 1); // move to bar
                 // then move ours
                 bgp.movePiece(playerId, from, to);
             } else {

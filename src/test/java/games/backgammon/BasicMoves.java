@@ -146,5 +146,45 @@ public class BasicMoves {
         assertEquals(1, gameState.blots[0]);
         assertEquals(0, gameState.blots[1]);
     }
+
+    @Test
+    public void mustMoveFromBarFirst() {
+        // set a piece on the bar  (technically this means we have 16 pieces)
+        gameState.piecesOnBar[0] = 1;
+        gameState.setDiceValues(new int[]{2, 3});
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertTrue(availableActions.contains(new MovePiece(-1, 1)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertEquals(2, availableActions.size());
+
+        gameState.movePiece(1, 12, 22);
+        assertEquals(1, gameState.getPiecesOnPoint(1, 22));
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertTrue(availableActions.contains(new MovePiece(-1, 1)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertEquals(2, availableActions.size());
+
+        gameState.movePiece(1, 12, 22);
+        assertEquals(2, gameState.getPiecesOnPoint(1, 22));
+        availableActions = forwardModel.computeAvailableActions(gameState);
+        assertFalse(availableActions.contains(new MovePiece(-1, 1)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertEquals(1, availableActions.size());
+    }
+
+    @Test
+    public void turnSkippedIfPiecesOnBarAndNoMovePossible() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void mayOnlyBearOffOnceAllPiecesInHomeBoard() {
+        fail("Not yet implemented");
+    }
+
+    @Test
+    public void gameEndsOnceAllPiecesBorneOff() {
+        fail("Not yet implemented");
+    }
 }
 
