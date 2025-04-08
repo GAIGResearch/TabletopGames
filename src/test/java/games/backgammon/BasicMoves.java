@@ -3,6 +3,7 @@ package games.backgammon;
 
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -238,10 +239,25 @@ public class BasicMoves {
         do {
             forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
         } while (gameState.isNotTerminal());
-        assertEquals(15, gameState.getGameScore(1), 0.01);
         assertEquals(15, gameState.getPiecesBorneOff(1));
+        assertEquals(15, gameState.getGameScore(1), 0.01);
         assertEquals(CoreConstants.GameResult.WIN_GAME, gameState.getPlayerResults()[1]);
         assertEquals(CoreConstants.GameResult.LOSE_GAME, gameState.getPlayerResults()[0]);
+        assertTrue(gameState.getTurnCounter() > 6);
+    }
+
+    @Test
+    public void passActionIfNoMovesPossibleAtStartOfPlayersTurn() {
+        // first we move all pieces of player 0 to position 12 (point 13)
+        for (int pos = 0; pos < 24; pos++) {
+            if (pos == 12) continue;
+            for (int i = gameState.getPiecesOnPoint(0, pos); i > 0; i--)
+                gameState.movePiece(0, pos, 12);  // a pretty random point in the home board
+        }
+        gameState.setDiceValues(new int[]{1, 1});
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(1, availableActions.size());
+        assertEquals(new DoNothing(), availableActions.get(0));
     }
 }
 

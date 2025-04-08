@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Dice;
 import gametemplate.actions.GTAction;
 
@@ -80,6 +81,8 @@ public class BGForwardModel extends StandardForwardModel {
                     actions.add(new MovePiece(-1, i - 1));
                 }
             }
+            if (actions.isEmpty())
+                actions.add(new DoNothing());
             return actions;
         }
 
@@ -105,6 +108,10 @@ public class BGForwardModel extends StandardForwardModel {
                 }
             }
         }
+        if (actions.isEmpty()) {
+            // no moves available, so we can only do nothing
+            actions.add(new DoNothing());
+        }
         return actions;
     }
 
@@ -117,7 +124,7 @@ public class BGForwardModel extends StandardForwardModel {
             endGame(bgs);
         } else {
             int[] diceAvailable = bgs.getAvailableDiceValues();
-            if (diceAvailable.length == 0 || computeAvailableActions(currentState).isEmpty()) {
+            if (diceAvailable.length == 0 || computeAvailableActions(currentState).stream().noneMatch(c -> c instanceof MovePiece)) {
                 // end of turn: switch player
                 bgs.rollDice();
                 endPlayerTurn(bgs);  // default is to move to next player

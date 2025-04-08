@@ -189,6 +189,11 @@ public class BGGameState extends AbstractGameState {
         copy.piecesOnBar = Arrays.copyOf(piecesOnBar, piecesOnBar.length);
         copy.piecesBorneOff = Arrays.copyOf(piecesBorneOff, piecesBorneOff.length);
         copy.blots = Arrays.copyOf(blots, blots.length);
+        copy.dice = new Dice[dice.length];
+        for (int i = 0; i < dice.length; i++) {
+            copy.dice[i] = dice[i].copy();
+        }
+        copy.diceUsed = Arrays.copyOf(diceUsed, diceUsed.length);
         return copy;
     }
 
@@ -226,6 +231,8 @@ public class BGGameState extends AbstractGameState {
             return Arrays.equals(piecesBorneOff, bgs.piecesBorneOff) &&
                     Arrays.equals(piecesOnBar, bgs.piecesOnBar) &&
                     Arrays.equals(blots, bgs.blots) &&
+                    Arrays.equals(diceUsed, bgs.diceUsed) &&
+                    Arrays.equals(dice, bgs.dice) &&
                     Arrays.deepEquals(piecesPerPoint, bgs.piecesPerPoint);
         }
         return false;
@@ -235,6 +242,9 @@ public class BGGameState extends AbstractGameState {
     public int hashCode() {
         return Arrays.hashCode(piecesBorneOff) + 31 *
                 Arrays.hashCode(piecesOnBar) + 31 * 31 *
+                Arrays.hashCode(blots) + 31 * 31 * 31 *
+                Arrays.hashCode(diceUsed) + 31 * 31 * 31 * 31 *
+                Arrays.hashCode(dice) + 31 * 31 * 31 * 31 * 31 *
                 Arrays.deepHashCode(piecesPerPoint) +
                 super.hashCode();
     }
