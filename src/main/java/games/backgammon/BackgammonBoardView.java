@@ -16,6 +16,8 @@ public class BackgammonBoardView extends JComponent {
     private int[][] piecesPerPoint = new int[2][24]; // [player][point]
     private int[] piecesOnBar = new int[2];      // [player]
     private int[] piecesBorneOff = new int[2];   // [player]
+    private int[] diceValues = new int[2];
+    private boolean[] diceUsed = new boolean[2];
 
     public BackgammonBoardView() {
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -31,6 +33,8 @@ public class BackgammonBoardView extends JComponent {
             piecesOnBar[player] = state.getPiecesOnBar(player);
             piecesBorneOff[player] = state.getPiecesBorneOff(player);
         }
+        diceValues = state.getDiceValues();
+        diceUsed = state.diceUsed.clone();
 
         // Repaint the board to reflect the updated state
         repaint();
@@ -81,6 +85,9 @@ public class BackgammonBoardView extends JComponent {
             g2d.setColor(player == 0 ? Color.WHITE : Color.BLACK);
             g2d.drawString("Borne Off: " + piecesBorneOff[player], x, y);
         }
+        // Draw the dice in the middle of the board
+        drawDice(g2d, boardWidth / 2, boardHeight / 2);
+
     }
 
     private void drawDiscs(Graphics2D g2d, int x, int yStart, int numDiscs, int player, boolean fromTop) {
@@ -118,12 +125,53 @@ public class BackgammonBoardView extends JComponent {
         } else {
             yPoints = new int[]{y, y - triangleHeight, y};
         }
-
-
-
         g2d.setColor(isDark ? Color.DARK_GRAY : Color.LIGHT_GRAY);
         g2d.fillPolygon(xPoints, yPoints, 3);
         g2d.setColor(Color.BLACK);
         g2d.drawPolygon(xPoints, yPoints, 3);
+    }
+
+    private void drawDice(Graphics2D g2d, int centerX, int centerY) {
+        int dieSize = 40; // Size of each die
+        int dieMargin = 10; // Margin between dice
+
+        for (int i = 0; i < diceValues.length; i++) {
+            int x = centerX - (diceValues.length * (dieSize + dieMargin)) / 2 + i * (dieSize + dieMargin);
+            int y = centerY - dieSize / 2;
+
+            // Set color based on whether the die has been used
+            g2d.setColor(diceUsed[i] ? Color.LIGHT_GRAY : Color.WHITE);
+            g2d.fillRoundRect(x, y, dieSize, dieSize, 10, 10);
+
+            g2d.setColor(Color.BLACK);
+            g2d.drawRoundRect(x, y, dieSize, dieSize, 10, 10);
+
+            // Draw the die face
+            drawDieFace(g2d, x, y, dieSize, diceValues[i]);
+        }
+    }
+
+    private void drawDieFace(Graphics2D g2d, int x, int y, int size, int value) {
+        int dotSize = size / 6; // Size of the dots
+        int offset = size / 4; // Offset for the dots from the center
+
+        g2d.setColor(Color.BLACK);
+
+        // Draw dots based on the die value
+        if (value == 1 || value == 3 || value == 5) {
+            g2d.fillOval(x + size / 2 - dotSize / 2, y + size / 2 - dotSize / 2, dotSize, dotSize);
+        }
+        if (value >= 2) {
+            g2d.fillOval(x + offset - dotSize / 2, y + offset - dotSize / 2, dotSize, dotSize);
+            g2d.fillOval(x + size - offset - dotSize / 2, y + size - offset - dotSize / 2, dotSize, dotSize);
+        }
+        if (value >= 4) {
+            g2d.fillOval(x + offset - dotSize / 2, y + size - offset - dotSize / 2, dotSize, dotSize);
+            g2d.fillOval(x + size - offset - dotSize / 2, y + offset - dotSize / 2, dotSize, dotSize);
+        }
+        if (value == 6) {
+            g2d.fillOval(x + offset - dotSize / 2, y + size / 2 - dotSize / 2, dotSize, dotSize);
+            g2d.fillOval(x + size - offset - dotSize / 2, y + size / 2 - dotSize / 2, dotSize, dotSize);
+        }
     }
 }
