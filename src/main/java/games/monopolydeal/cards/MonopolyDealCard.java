@@ -46,7 +46,7 @@ public class MonopolyDealCard extends Card{
         if(!(isPropertyCard()))
             return this;
         else {
-            MonopolyDealCard cardCopy = new MonopolyDealCard(this.cardType(), componentID);
+            MonopolyDealCard cardCopy = new MonopolyDealCard(type, componentID);
             cardCopy.useAs = this.useAs;
             return cardCopy;
         }
@@ -54,13 +54,13 @@ public class MonopolyDealCard extends Card{
 
     @Override
     public int hashCode(){
-        return Objects.hash(super.hashCode(), type, useAs);
+        return Objects.hash(super.hashCode(), type.ordinal(), useAs.ordinal());
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof MonopolyDealCard other) {
-            return other.type == type && other.useAs == useAs;
+            return other.type == type && other.useAs == useAs && super.equals(obj);
         }
         return false;
     }

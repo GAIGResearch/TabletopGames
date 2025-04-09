@@ -56,6 +56,22 @@ public interface IExtendedSequence {
     void _afterAction(AbstractGameState state, AbstractAction action);
 
     /**
+     * This is called whenever the IExtendedSequence is moved to the top of the queue.
+     * It provides the extended sequence that was just removed (likely to be a child created by this sequence)
+     * so that any clean up can take place.
+     *
+     * The default behaviour is to call _afterAction() on the completed sequence if it is an AbstractAction.
+     * If it is *not* an AbstractAction, then this will need to be overridden.
+     * @param state
+     * @param completedSequence
+     */
+    default void afterRemovalFromQueue(AbstractGameState state, IExtendedSequence completedSequence) {
+        if (completedSequence instanceof AbstractAction action) {
+            this._afterAction(state, action);
+        }
+    }
+
+    /**
      * Return true if this extended sequence has now completed and there is nothing left to do.
      *
      * @param state The current game state
