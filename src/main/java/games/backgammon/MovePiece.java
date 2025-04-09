@@ -71,7 +71,7 @@ public class MovePiece extends AbstractAction {
                         throw new IllegalArgumentException("No dice available for this move");
                     yield min;
                 }
-                default -> from < 0 ? to + 1 : from - to;
+                default -> from < 0 ? boardLength - to : from - to;
             };
             bgp.useDiceValue(dieValue);
         }
@@ -98,25 +98,16 @@ public class MovePiece extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Move Piece from %d to %d", from, to);
+        return String.format("Move Piece from %d to %d", from + 1, to + 1);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
         BGGameState bgp = (BGGameState) gameState;
-        // a slightly more meaningful string that includes the number of pieces on the starting point, whether there was a hit
-        // If there was no hit, then report the total number of pieces on the point after the move
         StringBuilder sb = new StringBuilder();
         int player = bgp.getCurrentPlayer();
         int pieces = from < 0 ? bgp.getPiecesOnBar(player) : bgp.getPiecesOnPoint(player, from);
-        sb.append("Move Piece from ").append(from).append(" to ").append(to).append(" (1 of ").append(pieces).append(" pieces.\n");
-        if (to > 0) {
-            if (bgp.getPiecesOnPoint(1 - player, bgp.getPlayerPieces(0).length - to - 1) > 0) {
-                sb.append("Hit opponent's piece on point ").append(bgp.getPlayerPieces(0).length - to - 1).append("\n");
-            } else {
-                sb.append("No hit, total pieces on point ").append(to).append(" after move: ").append(1 + bgp.getPiecesOnPoint(player, to)).append("\n");
-            }
-        }
+        sb.append("Move Piece from ").append(from + 1).append(" to ").append(to + 1).append(" (1 of ").append(pieces).append(" pieces)");
         return sb.toString();
     }
 }

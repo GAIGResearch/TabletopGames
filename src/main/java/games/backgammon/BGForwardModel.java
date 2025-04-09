@@ -76,9 +76,9 @@ public class BGForwardModel extends StandardForwardModel {
         if (bgs.getPiecesOnBar(playerId) > 0) {
             // player has pieces on the bar, so they can only move those
             for (int i : diceAvailable) {
-                if (bgs.piecesPerPoint[1 - playerId][boardSize - i] < 2) {
+                if (bgs.piecesPerPoint[1 - playerId][i - 1] < 2) {
                     // we can move to this point
-                    actions.add(new MovePiece(-1, i - 1));
+                    actions.add(new MovePiece(-1, boardSize - i));
                 }
             }
             if (actions.isEmpty())

@@ -155,22 +155,22 @@ public class BasicMoves {
         gameState.piecesOnBar[0] = 1;
         gameState.setDiceValues(new int[]{2, 3});
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertTrue(availableActions.contains(new MovePiece(-1, 1)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 22)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 21)));
         assertEquals(2, availableActions.size());
 
-        gameState.movePiece(1, 12, 22);
-        assertEquals(1, gameState.getPiecesOnPoint(1, 22));
+        gameState.movePiece(1, 12, 2);
+        assertEquals(1, gameState.getPiecesOnPoint(1, 2));
         availableActions = forwardModel.computeAvailableActions(gameState);
-        assertTrue(availableActions.contains(new MovePiece(-1, 1)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 22)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 21)));
         assertEquals(2, availableActions.size());
 
-        gameState.movePiece(1, 12, 22);
-        assertEquals(2, gameState.getPiecesOnPoint(1, 22));
+        gameState.movePiece(1, 12, 2);
+        assertEquals(2, gameState.getPiecesOnPoint(1, 2));
         availableActions = forwardModel.computeAvailableActions(gameState);
-        assertFalse(availableActions.contains(new MovePiece(-1, 1)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertFalse(availableActions.contains(new MovePiece(-1, 21)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 22)));
         assertEquals(1, availableActions.size());
     }
 
@@ -179,17 +179,17 @@ public class BasicMoves {
         gameState.piecesOnBar[0] = 2;
         gameState.setDiceValues(new int[]{2, 3});
 
-        gameState.movePiece(1, 12, 22);
-        gameState.movePiece(1, 12, 22);
-        assertEquals(2, gameState.getPiecesOnPoint(1, 22));
+        gameState.movePiece(1, 12, 1);
+        gameState.movePiece(1, 12, 1);
+        assertEquals(2, gameState.getPiecesOnPoint(1, 1));
 
         var availableActions = forwardModel.computeAvailableActions(gameState);
-        assertFalse(availableActions.contains(new MovePiece(-1, 1)));
-        assertTrue(availableActions.contains(new MovePiece(-1, 2)));
+        assertFalse(availableActions.contains(new MovePiece(-1, 22)));
+        assertTrue(availableActions.contains(new MovePiece(-1, 21)));
         assertEquals(1, availableActions.size());
 
         forwardModel.next(gameState, availableActions.get(0));
-        assertEquals(1, gameState.getPiecesOnPoint(0, 2));
+        assertEquals(1, gameState.getPiecesOnPoint(0, 21));
         assertEquals(1, gameState.getPiecesOnBar(0));
         assertEquals(1, gameState.getCurrentPlayer());
         assertEquals(2, gameState.getAvailableDiceValues().length);

@@ -72,7 +72,7 @@ public class BackgammonBoardView extends JComponent {
         // Draw the discs on the bar
         for (int player = 0; player < piecesOnBar.length; player++) {
             int x = margin + 12 * triangleBase + triangleBase / 2 - discRadius / 2;
-            int yStart = player == 0 ? margin + discMargin : boardHeight - margin - discMargin - discRadius;
+            int yStart = player == 1 ? margin + discMargin : boardHeight - margin - discMargin - discRadius;
             drawDiscs(g2d, x, yStart, piecesOnBar[player], player, player == 0);
         }
 
@@ -80,13 +80,40 @@ public class BackgammonBoardView extends JComponent {
         for (int player = 0; player < piecesBorneOff.length; player++) {
             String borneOffText = "Borne Off: " + piecesBorneOff[player];
             int x = boardWidth - g.getFontMetrics().stringWidth(borneOffText) - margin * 3; // Position next to the bar
-            int y = player == 0 ? margin + boardHeight / 2 : boardHeight / 2 - margin;
+            int y = player == 1 ? margin + boardHeight / 2 : boardHeight / 2 - margin;
 
             g2d.setColor(player == 0 ? Color.WHITE : Color.BLACK);
             g2d.drawString("Borne Off: " + piecesBorneOff[player], x, y);
         }
         // Draw the dice in the middle of the board
         drawDice(g2d, boardWidth / 2, boardHeight / 2);
+
+        // Number the points (white / black text for the two players as they use different colors)
+        // The base of each triangle should be labelled with whitePoint / blackPoint so that the text appears over/under the discs
+        g2d.setColor(Color.WHITE);
+        for (int i = 0; i < 12; i++) {
+            String text = i + 1 + " / ";
+            int x = margin + (11 - i) * triangleBase + triangleBase / 2 - g.getFontMetrics().stringWidth(text) / 2;
+            int y = margin - g.getFontMetrics().getHeight() / 2;
+            g2d.drawString(text, x, y);
+            // then on the other side of the board
+            text = i + 13 + " /  ";
+            y = boardHeight - g.getFontMetrics().getHeight() / 2;
+            x = margin + i * triangleBase + triangleBase / 2 - g.getFontMetrics().stringWidth(text) / 2;
+            g2d.drawString(text, x, y);
+        }
+        g2d.setColor(Color.BLACK);
+        for (int i = 0; i < 12; i++) {
+            String text = " " + (i + 1);
+            int x = margin + (11 - i) * triangleBase + triangleBase / 2 + g.getFontMetrics().stringWidth(text) / 2;
+            int y = boardHeight - g.getFontMetrics().getHeight() / 2;
+            g2d.drawString(text, x, y);
+            // then on the other (top) side of the board
+            text = " " + (i + 13);
+            x = margin + i * triangleBase + triangleBase / 2 + g.getFontMetrics().stringWidth(text) / 2;
+            y = margin - g.getFontMetrics().getHeight() / 2;
+            g2d.drawString(text, x, y);
+        }
 
     }
 
@@ -95,7 +122,7 @@ public class BackgammonBoardView extends JComponent {
             int y = fromTop ? yStart + i * (discRadius + discMargin) : yStart - i * (discRadius + discMargin);
             g2d.setColor(player == 0 ? Color.WHITE : Color.BLACK);
             g2d.fillOval(x, y, discRadius, discRadius);
-            g2d.setColor(Color.CYAN);
+            g2d.setColor(Color.BLACK);
             g2d.drawOval(x, y, discRadius, discRadius);
         }
     }
