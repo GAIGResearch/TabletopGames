@@ -284,7 +284,7 @@ public enum GameType {
     Backgammon(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement, DiceRolling),
-            BGGameState.class, BGForwardModel.class, BGParameters.class, null),
+            BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
     Mastermind(1,1,
             Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
             List.of(PatternBuilding),

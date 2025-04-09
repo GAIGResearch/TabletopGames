@@ -259,5 +259,17 @@ public class BasicMoves {
         assertEquals(1, availableActions.size());
         assertEquals(new DoNothing(), availableActions.get(0));
     }
+
+    @Test
+    public void twoMovesPerTurn() {
+        for (int t = 0; t < 10; t++) {
+            assertEquals(t, gameState.getTurnCounter());
+            assertEquals(t % 2, gameState.getCurrentPlayer());
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+            assertEquals(1, gameState.getAvailableDiceValues().length);
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+            assertEquals(2, gameState.getAvailableDiceValues().length);
+        }
+    }
 }
 

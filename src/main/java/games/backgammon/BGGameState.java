@@ -130,7 +130,7 @@ public class BGGameState extends AbstractGameState {
 
     public void useDiceValue(int dieValue) {
         for (int i = 0; i < dice.length; i++) {
-            if (dice[i].getValue() == dieValue) {
+            if (!diceUsed[i] && dice[i].getValue() == dieValue) {
                 diceUsed[i] = true;
                 return;
             }
