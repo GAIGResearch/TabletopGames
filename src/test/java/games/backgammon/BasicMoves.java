@@ -213,23 +213,46 @@ public class BasicMoves {
         assertEquals(1, gameState.getCurrentPlayer());
         var availableActions = forwardModel.computeAvailableActions(gameState);
         assertEquals(2, availableActions.size());
-        assertTrue(availableActions.contains(new MovePiece(20, 15)));
         assertTrue(availableActions.contains(new MovePiece(20, 14)));
+        assertTrue(availableActions.contains(new MovePiece(20, 15)));
 
-        gameState.movePiece(1, 20, 4);
+        gameState.movePiece(1, 20, 5);
         availableActions = forwardModel.computeAvailableActions(gameState);
         assertEquals(2, availableActions.size());
         assertTrue(availableActions.contains(new MovePiece(4, -1)));
         assertTrue(availableActions.contains(new MovePiece(5, -1)));
 
-        forwardModel.next(gameState, availableActions.get(0));
+        forwardModel.next(gameState, new MovePiece(5, -1));
         assertEquals(1, gameState.getPiecesBorneOff(1));
         assertEquals(1, gameState.getGameScore(1), 0.01);
         assertEquals(0, gameState.getGameScore(0), 0.01);
         availableActions = forwardModel.computeAvailableActions(gameState);
         assertEquals(1, availableActions.size());
         assertTrue(availableActions.contains(new MovePiece(4, -1)));
-        assertFalse(availableActions.contains(new MovePiece(5, -1))); // needs a 6, already used
+    }
+
+    @Test
+    public void bearingOffUsesLowestDie() {
+        // first we move all pieces to the homeboard of player 1
+        for (int pos = 5; pos < 24; pos++) {
+            for (int i = gameState.getPiecesOnPoint(1, pos); i > 0; i--)
+                gameState.movePiece(1, pos, 1); // just needs a 2
+        }
+        // take two actions for player 0
+        gameState.setDiceValues(new int[]{2, 3});
+        do {
+            forwardModel.next(gameState, forwardModel.computeAvailableActions(gameState).get(0));
+        } while (gameState.getCurrentPlayer() == 0);
+
+        gameState.setDiceValues(new int[]{2, 4});
+        assertEquals(1, gameState.getCurrentPlayer());
+        var availableActions = forwardModel.computeAvailableActions(gameState);
+        assertEquals(1, availableActions.size());
+        assertTrue(availableActions.contains(new MovePiece(1, -1)));
+
+        forwardModel.next(gameState, availableActions.get(0));
+        assertEquals(1, gameState.getPiecesBorneOff(1));
+        assertEquals(4, gameState.getAvailableDiceValues()[0]);
     }
 
     @Test
