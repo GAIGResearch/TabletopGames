@@ -204,15 +204,25 @@ public class BGGameState extends AbstractGameState {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        // for a default heuristic, we count a piece borne off as worth 1.0
-        // and otherwise we divide its current position by 24, so a point on the bar is worth zero
-        double score = 0;
-        for (int i = 0; i < piecesPerPoint[playerId].length; i++) {
-            score += piecesPerPoint[playerId][i] * i / 24.0;
+
+        if (isNotTerminal()) {
+            // for a default heuristic, we count a piece borne off as worth 1.0
+            // and otherwise we divide its current position by 24, so a point on the bar is worth zero
+            double score = 0;
+            int boardLength = piecesPerPoint[0].length;
+            for (int i = 0; i < piecesPerPoint[playerId].length; i++) {
+                // pieces are worth more the closer they are to the home board (i.e. the lower the index)
+                score += piecesPerPoint[playerId][boardLength - i - 1] * i / 24.0;
+                // opponent pieces are worth less the closer they are to their home board (i.e. the lower the index)
+                score -= piecesPerPoint[1 - playerId][i] * i / 24.0;
+            }
+            // borne off
+            score += piecesBorneOff[playerId];
+            score -= piecesBorneOff[1 - playerId];
+            return score / 15.0;  // to scale to 1.0 when all our pieces are borne off and none of the opponent
         }
-        // borne off
-        score += piecesBorneOff[playerId];
-        return score;
+        // if the game is over, return 1.0 for a win and 0.0 for a loss
+        return playerResults[playerId].value;
     }
 
     /**
