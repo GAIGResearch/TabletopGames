@@ -1,7 +1,17 @@
 package games.backgammon;
 
+import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.CoreConstants;
+import core.actions.AbstractAction;
+import games.dotsboxes.AddGridCellEdge;
+import games.dotsboxes.DBEdge;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.List;
 
 public class BackgammonBoardView extends JComponent {
 
@@ -19,10 +29,51 @@ public class BackgammonBoardView extends JComponent {
     private int[] diceValues = new int[2];
     private boolean[] diceUsed = new boolean[2];
 
+    int firstClick = -1;
+    int secondClick = -1;
+
     public BackgammonBoardView() {
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
-    }
 
+        // now add a MouseListener to listen for clicks
+        this.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getButton() == MouseEvent.BUTTON1) {
+                    // left-click
+                    int x = evt.getX();
+                    int y = evt.getY();
+                    boolean topHalf = (y < boardHeight / 2);
+                    // we now convert this x, y position to one of the 'points' on the board
+                    // between 1 and 24, or 0 for the bar, or 25 to bear-off
+
+                    int point = (x - margin) / triangleBase;
+                    if (topHalf) {
+                        point = switch (point) {
+                            case -1 -> -1;
+                            case 12 -> 0;
+                            default -> 12 - point;
+                        };
+                    } else {
+                        // bottom half
+                        point = switch (point) {
+                            case -1 -> -1;
+                            case 12 -> 25;
+                            default -> point + 13;
+                        };
+                    }
+                    // this is from the perspective of player 0
+                    if (firstClick == -1)
+                        firstClick = point;
+                    else
+                        secondClick = point;
+                } else {
+                    // we clear out the variables and reset
+                    firstClick = -1;
+                    secondClick = -1;
+                }
+            }
+        });
+    }
 
     public synchronized void update(BGGameState state) {
         int nPlayers = state.getNPlayers();
