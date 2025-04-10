@@ -214,6 +214,7 @@
                                 </manifest>
                             </archive>
                             <finalName>FrontEnd</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -232,6 +233,7 @@
                                 </manifest>
                             </archive>
                             <finalName>RunGames</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -250,6 +252,7 @@
                                 </manifest>
                             </archive>
                             <finalName>ParameterSearch</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -268,6 +271,7 @@
                                 </manifest>
                             </archive>
                             <finalName>MetaNTBEA</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -286,6 +290,7 @@
                                 </manifest>
                             </archive>
                             <finalName>SkillLadder</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <phase>package</phase>
                         <goals>
