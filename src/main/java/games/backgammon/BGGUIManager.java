@@ -21,7 +21,7 @@ public class BGGUIManager extends AbstractGUIManager {
     public BGGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         BGGameState state = (BGGameState) game.getGameState();
-        view = new BackgammonBoardView();
+        view = new BackgammonBoardView((BGForwardModel) game.getForwardModel());
 
         width = backgammonWidth;
         height = backgammonHeight;
@@ -59,8 +59,8 @@ public class BGGUIManager extends AbstractGUIManager {
             int to = playerId == 0 ? view.secondClick : 25 - view.secondClick;
 
             // Handle special cases for the bar (0) and bearing off (25)
-            if (view.firstClick == 0) from = 0; // Bar
-            if (view.secondClick == 25) to = 0; // Bearing off
+            if (view.firstClick == 25) from = 0; // Bar
+            if (view.secondClick == 0) to = 0; // Bearing off
 
             // Check if a valid MovePiece action exists
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(bgState);

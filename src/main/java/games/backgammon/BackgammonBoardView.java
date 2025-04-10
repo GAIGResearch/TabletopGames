@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import games.descent2e.actions.Move;
 import games.dotsboxes.AddGridCellEdge;
 import games.dotsboxes.DBEdge;
 
@@ -11,7 +12,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class BackgammonBoardView extends JComponent {
 
@@ -28,12 +33,16 @@ public class BackgammonBoardView extends JComponent {
     private int[] piecesBorneOff = new int[2];   // [player]
     private int[] diceValues = new int[2];
     private boolean[] diceUsed = new boolean[2];
+    private BGForwardModel forwardModel;
+    private List<MovePiece> validActions = new ArrayList<>();
+    private int currentPlayer = 0;
 
     int firstClick = -1;
     int secondClick = -1;
 
-    public BackgammonBoardView() {
+    public BackgammonBoardView(BGForwardModel model) {
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
+        forwardModel = model;
 
         // now add a MouseListener to listen for clicks
         this.addMouseListener(new MouseAdapter() {
@@ -44,7 +53,7 @@ public class BackgammonBoardView extends JComponent {
                     int y = evt.getY();
                     boolean topHalf = (y < boardHeight / 2);
                     // we now convert this x, y position to one of the 'points' on the board
-                    // between 1 and 24, or 0 for the bar, or 25 to bear-off
+                    // between 1 and 24, or 0 to bear-off and 25 for the bar
 
                     int point = (x - margin) / triangleBase;
                     if (topHalf) {
@@ -71,12 +80,19 @@ public class BackgammonBoardView extends JComponent {
                     firstClick = -1;
                     secondClick = -1;
                 }
+                System.out.println("Clicked on point: " + (firstClick == -1 ? "none" : firstClick) + ", " + (secondClick == -1 ? "none" : secondClick));
             }
         });
     }
 
     public synchronized void update(BGGameState state) {
         int nPlayers = state.getNPlayers();
+
+        validActions = forwardModel.computeAvailableActions(state).stream()
+                .filter(a -> a instanceof MovePiece)
+                .map(MovePiece.class::cast)
+                .collect(toList());
+        currentPlayer = state.getCurrentPlayer();
 
         // Update pieces on points
         for (int player = 0; player < nPlayers; player++) {
@@ -101,7 +117,9 @@ public class BackgammonBoardView extends JComponent {
         g2d.fillRect(0, 0, boardWidth, boardHeight);
 
         // Draw the triangles
-        drawTriangles(g2d);
+        for (int i = 0; i < 24; i++) {
+            drawTriangle(g2d, i);
+        }
 
         // Draw the discs on the triangles
         // point is measured from the perspective of player 0
@@ -178,36 +196,62 @@ public class BackgammonBoardView extends JComponent {
         }
     }
 
-    private void drawTriangles(Graphics2D g2d) {
-        int xStart = margin;
-        int yTop = margin;
-        int yBottom = boardHeight - margin;
+    private void drawTriangle(Graphics2D g2d, int i) {
+        // we start with i = 0 on the top row on the far right
+        // and i = 23 on the bottom row on the far right
+        // with the triangles proceeding in a horseshoe shape around the board
 
-        // Draw top row of triangles (12 points)
-        for (int i = 0; i < 12; i++) {
-            drawTriangle(g2d, xStart + i * triangleBase, yTop, true, i % 2 == 0);
-        }
+        boolean isDark = i % 2 == 0;
+        boolean pointingDown = i < 12;
+        int x = pointingDown ? boardWidth - triangleBase * (i + 2) : margin + triangleBase * (i - 12);
+        int y = pointingDown ? margin : boardHeight - margin;
 
-        // Draw bottom row of triangles (12 points)
-        for (int i = 0; i < 12; i++) {
-            drawTriangle(g2d, xStart + i * triangleBase, yBottom, false, i % 2 == 0);
-        }
-    }
+        int[] xPoints = new int[]{x, x + triangleBase / 2, x + triangleBase};
+        int[] yPoints = pointingDown ? new int[]{y, y + triangleHeight, y} : new int[]{y, y - triangleHeight, y};
 
-    private void drawTriangle(Graphics2D g2d, int x, int y, boolean pointingUp, boolean isDark) {
-        int[] xPoints = {x, x + triangleBase / 2, x + triangleBase};
-        int[] yPoints;
-
-        if (pointingUp) {
-            yPoints = new int[]{y, y + triangleHeight, y};
-        } else {
-            yPoints = new int[]{y, y - triangleHeight, y};
-        }
         g2d.setColor(isDark ? Color.DARK_GRAY : Color.LIGHT_GRAY);
         g2d.fillPolygon(xPoints, yPoints, 3);
         g2d.setColor(Color.BLACK);
         g2d.drawPolygon(xPoints, yPoints, 3);
+
+        // Then, if firstClick is -1, we look through validActions to find the from position of all valid moves
+        // and highlight the triangles that are valid moves
+        // i and from/to in MovePiece use 0..23 for the points
+        // firstClick and secondClick use 1..24 for the points
+        int clickPlayerPerspective = currentPlayer == 0 ? i : (23 - i);
+        if (firstClick == -1) {
+            for (MovePiece action : validActions) {
+                if (action.from == clickPlayerPerspective) {
+                    g2d.setColor(Color.YELLOW);
+                    g2d.setStroke(new BasicStroke(2));
+                    g2d.drawPolygon(xPoints, yPoints, 3);
+                    break;
+                }
+            }
+        } else if (secondClick == -1) {
+            // Highlight the second click position
+            // but only considering validActions for which from = firstClick
+            for (MovePiece action : validActions) {
+                int fromPoint = currentPlayer == 0 ? firstClick - 1 : 24 - firstClick;
+                if (firstClick == 25 && currentPlayer == 0 || firstClick == 0 && currentPlayer == 1) {
+                    fromPoint = -1; // Bar
+                }
+                if (action.from == fromPoint && action.to == clickPlayerPerspective) {
+                    g2d.setColor(Color.RED);
+                    g2d.setStroke(new BasicStroke(2));
+                    g2d.drawPolygon(xPoints, yPoints, 3);
+                    break;
+                }
+            }
+            if (i == firstClick - 1) {
+                // also keep yellow if we have clicked on a triangle
+                g2d.setColor(Color.YELLOW);
+                g2d.setStroke(new BasicStroke(2));
+                g2d.drawPolygon(xPoints, yPoints, 3);
+            }
+        }
     }
+
 
     private void drawDice(Graphics2D g2d, int centerX, int centerY) {
         int dieSize = 40; // Size of each die
