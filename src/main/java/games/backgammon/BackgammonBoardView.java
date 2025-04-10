@@ -80,7 +80,6 @@ public class BackgammonBoardView extends JComponent {
                     firstClick = -1;
                     secondClick = -1;
                 }
-                System.out.println("Clicked on point: " + (firstClick == -1 ? "none" : firstClick) + ", " + (secondClick == -1 ? "none" : secondClick));
             }
         });
     }

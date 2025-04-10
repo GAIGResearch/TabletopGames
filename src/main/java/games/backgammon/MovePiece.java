@@ -61,9 +61,9 @@ public class MovePiece extends AbstractAction {
             int dieValue = switch (to) {
                 case -1 -> {
                     // in this case any die value will do...so we take the lowest available one
-                    int min = 0;
+                    int min = 6;
                     for (int d : bgp.getAvailableDiceValues()) {
-                        if (d > min && d >= from + 1) {
+                        if (d < min && d >= from + 1) {
                             min = d;
                         }
                     }
