@@ -135,13 +135,11 @@ public class RoundRobinTournament extends AbstractTournament {
                 boolean selfPlay = tournamentMode == EXHAUSTIVE_SELF_PLAY;
                 this.gamesPerMatchup = Utils.gamesPerMatchup(agentPositions, agents.size(), totalGameBudget, selfPlay);
                 if (this.gamesPerMatchup < 1) {
-                    System.out.println(String.format("Higher budget needed. There are %d permutations of agents to positions in exhaustive mode, which is more than %d game in the available budget.",
+                    throw new IllegalArgumentException(String.format("Higher budget needed. There are %d permutations of agents to positions in exhaustive mode, which is more than %d game in the available budget.",
                             Utils.playerPermutations(agentPositions, agents.size(), selfPlay), totalGameBudget));
-                    System.out.println("Defaulting to Random mode.");
-                } else {
-                    actualGames = this.gamesPerMatchup * Utils.playerPermutations(agentPositions, agents.size(), selfPlay);
-                    break;
                 }
+                actualGames = this.gamesPerMatchup * Utils.playerPermutations(agentPositions, agents.size(), selfPlay);
+                break;
             case FIXED:
                 // we run the totalGameBudget number of games with no change to agent order
             case RANDOM:
@@ -161,6 +159,7 @@ public class RoundRobinTournament extends AbstractTournament {
         if (!destDir.isEmpty())
             this.resultsFile = destDir + File.separator + resultsFile;
     }
+
     /**
      * Runs the round robin tournament.
      */
@@ -215,7 +214,7 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public int getWinnerIndex() {
-        Map<Integer, Pair<Double, Double>> ranking = switch(evalMethod) {
+        Map<Integer, Pair<Double, Double>> ranking = switch (evalMethod) {
             case "Ordinal", "Score" -> finalOrdinalRanking;
             default -> finalWinRanking;
         };
@@ -761,6 +760,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public double getWinRate(int agentID) {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
+
     public double getWinRateAlphaRank(int agentID) {
         if (alphaRankByWin == null)
             return getWinRate(agentID);

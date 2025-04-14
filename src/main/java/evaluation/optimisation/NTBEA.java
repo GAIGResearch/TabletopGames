@@ -259,6 +259,9 @@ public class NTBEA {
         }
         // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
 
+        // TODO: However, if elites is not empty, then this means we are using the elite as the benchmark
+        // so if the best evalGames result is not better than the elite, then we should use the elite.
+
         // Now we optionally apply one-step deviations to the best result
         if (params.OSDBudget > 0) {
             NTBEAParameters OSDParams = (NTBEAParameters) params.copy();
