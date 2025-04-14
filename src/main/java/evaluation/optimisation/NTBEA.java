@@ -263,18 +263,25 @@ public class NTBEA {
             if (!elites.isEmpty()) {
                 // we assume (As the only supported use case as of April 2025) that the last
                 // element of the elite array is the one that was just used as a benchmark
-                double minimumPerformanceLevel = params.evalMethod.equals("Ordinal") ?
-                        nPlayers / 2.0 :
-                        1.0 / nPlayers ;
-                if (bestResult.a.a < minimumPerformanceLevel) {
-                    // keep the elite agent as the winner
-                    System.out.format("Challenger only achieved %.3f against a minimum target of %.3f. Sticking with the current benchmark.",
-                            bestResult.a.a, minimumPerformanceLevel);
-                    bestResult = Pair.of(Pair.of(minimumPerformanceLevel, 0.0), elites.get(0));
+                if (params.evalMethod.equals("Ordinal")) {
+                    double maxLevel = (nPlayers + 1) / 2.0;
+                    if (bestResult.a.a > maxLevel) {
+                        // keep the elite agent as the winner
+                        System.out.format("Challenger only achieved %.3f against a maximum target of %.3f. Sticking with the current benchmark.",
+                                bestResult.a.a, maxLevel);
+                        bestResult = Pair.of(Pair.of(maxLevel, 0.0), elites.get(0));
+                    }
+                } else {
+                    double minLevel = 1.0 / nPlayers;
+                    if (bestResult.a.a < minLevel) {
+                        // keep the elite agent as the winner
+                        System.out.format("Challenger only achieved %.3f against a minimum target of %.3f. Sticking with the current benchmark.",
+                                bestResult.a.a, minLevel);
+                        bestResult = Pair.of(Pair.of(minLevel, 0.0), elites.get(0));
+                    }
                 }
             }
         }
-
         // Now we optionally apply one-step deviations to the best result
         if (params.OSDBudget > 0) {
             NTBEAParameters OSDParams = (NTBEAParameters) params.copy();
