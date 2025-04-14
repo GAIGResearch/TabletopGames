@@ -256,11 +256,24 @@ public class NTBEA {
                     }
                 }
             }
+        } else {
+            // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
+            // However, if elites is not empty, then this means we are using the elite as the benchmark
+            // so if the best evalGames result is not better than the elite, then we should use the elite.
+            if (!elites.isEmpty()) {
+                // we assume (As the only supported use case as of April 2025) that the last
+                // element of the elite array is the one that was just used as a benchmark
+                double minimumPerformanceLevel = params.evalMethod.equals("Ordinal") ?
+                        nPlayers / 2.0 :
+                        1.0 / nPlayers ;
+                if (bestResult.a.a < minimumPerformanceLevel) {
+                    // keep the elite agent as the winner
+                    System.out.format("Challenger only achieved %.3f against a minimum target of %.3f. Sticking with the current benchmark.",
+                            bestResult.a.a, minimumPerformanceLevel);
+                    bestResult = Pair.of(Pair.of(minimumPerformanceLevel, 0.0), elites.get(0));
+                }
+            }
         }
-        // otherwise we use the evalGames results from each run to pick the best one (which is already in bestResult)
-
-        // TODO: However, if elites is not empty, then this means we are using the elite as the benchmark
-        // so if the best evalGames result is not better than the elite, then we should use the elite.
 
         // Now we optionally apply one-step deviations to the best result
         if (params.OSDBudget > 0) {
