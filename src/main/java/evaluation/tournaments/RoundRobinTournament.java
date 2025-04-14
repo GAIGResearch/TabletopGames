@@ -135,11 +135,13 @@ public class RoundRobinTournament extends AbstractTournament {
                 boolean selfPlay = tournamentMode == EXHAUSTIVE_SELF_PLAY;
                 this.gamesPerMatchup = Utils.gamesPerMatchup(agentPositions, agents.size(), totalGameBudget, selfPlay);
                 if (this.gamesPerMatchup < 1) {
-                    throw new IllegalArgumentException(String.format("Higher budget needed. There are %d permutations of agents to positions in exhaustive mode, which is more than %d game in the available budget.",
+                    System.out.println(String.format("Higher budget needed. There are %d permutations of agents to positions in exhaustive mode, which is more than %d game in the available budget.",
                             Utils.playerPermutations(agentPositions, agents.size(), selfPlay), totalGameBudget));
+                    System.out.println("Defaulting to Random mode.");
+                } else {
+                    actualGames = this.gamesPerMatchup * Utils.playerPermutations(agentPositions, agents.size(), selfPlay);
+                    break;
                 }
-                actualGames = this.gamesPerMatchup * Utils.playerPermutations(agentPositions, agents.size(), selfPlay);
-                break;
             case FIXED:
                 // we run the totalGameBudget number of games with no change to agent order
             case RANDOM:

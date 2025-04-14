@@ -60,7 +60,7 @@ public class MCTSParams extends PlayerParameters {
     public IActionKey MASTActionKey;
     public IStateKey MCGSStateKey;
     public boolean MCGSExpandAfterClash = true;
-    public double firstPlayUrgency = 10e6;
+    public double firstPlayUrgency = 1e6;
     @NotNull public IActionHeuristic actionHeuristic = IActionHeuristic.nullReturn;
     public int actionHeuristicRecalculationThreshold = 20;
     public boolean pUCT = false;  // in this case we multiply the exploration value in UCB by the probability that the action heuristic would take the action
@@ -112,7 +112,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTDefaultValue", 0.0);
         addTunableParameter("MCGSStateKey", IStateKey.class);
         addTunableParameter("MCGSExpandAfterClash", true);
-        addTunableParameter("FPU", 10e6);
+        addTunableParameter("FPU", 1e6);
         addTunableParameter("actionHeuristic", IActionHeuristic.class,  IActionHeuristic.nullReturn);
         addTunableParameter("progressiveBias", 0.0);
         addTunableParameter("pUCT", false);

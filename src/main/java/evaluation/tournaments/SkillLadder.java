@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static evaluation.RunArg.evalGames;
 import static evaluation.RunArg.parseConfig;
 
 /**
@@ -210,7 +211,8 @@ public class SkillLadder {
             // number of games in the final tournament for each budget is the largest of:
             // - matchups * nPlayers, or
             // - the number of games run to judge relative performance at each budget between the repeat winners
-            int gamesToRun = Math.max(matchups * nPlayers, (int) ((int) config.get(RunArg.tuningBudget) * (double) config.get(RunArg.finalPercent)));
+            int gamesToRun = Math.max(Math.max(matchups, (int) config.get(RunArg.evalGames)) * nPlayers,
+                    (int) ((int) config.get(RunArg.tuningBudget) * (double) config.get(RunArg.finalPercent)));
             RoundRobinTournament RRT = runRoundRobinTournament(agents, newBudget, gamesToRun,
                     listenerClasses, gameType, nPlayers, params,
                     agents.size() >= nPlayers ? "exhaustive" : "exhaustiveSP",
