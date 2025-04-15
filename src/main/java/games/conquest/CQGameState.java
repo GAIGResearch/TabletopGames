@@ -99,13 +99,13 @@ public class CQGameState extends AbstractGameState {
                 troops.add(unit);
                 int x,y;
                 if (uid == 0) {
-                    x = i;
-                    // move troops forward as much as possible, when fewer than 3 lines are provided.
-                    y = cqp.nSetupRows - lines.length + j;
-                } else {
                     x = cqp.gridWidth-1 - i;
                     // move troops forward as much as possible, when fewer than 3 lines are provided.
-                    y = cqp.gridHeight-1 - (cqp.nSetupRows - lines.length + j);
+                    y = cqp.nSetupRows-1 - j;
+                } else {
+                    x = i;
+                    // move troops forward as much as possible, when fewer than 3 lines are provided.
+                    y = cqp.gridHeight - cqp.nSetupRows + j;
                 }
                 addTroop(unit, new Vector2D(x, y));
                 if (nTroops >= cqp.maxTroops) return;
