@@ -121,7 +121,7 @@ public abstract class FeatureListener implements IGameListener {
     public abstract double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
     /*
-     * Override this is the feature vector is not all numeric
+     * Override this if the feature vector is not all numeric
      */
     public abstract Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
