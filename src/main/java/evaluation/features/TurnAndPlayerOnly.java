@@ -14,4 +14,9 @@ public class TurnAndPlayerOnly implements IStateFeatureVector {
         return new double[]{state.getCurrentPlayer(), state.getRoundCounter(), state.getTurnCounter()};
     }
 
+    @Override
+    public Object[] featureVector(AbstractGameState state, int playerID) {
+        return new Object[]{state.getCurrentPlayer(), state.getRoundCounter(), state.getTurnCounter()};
+    }
+
 }
