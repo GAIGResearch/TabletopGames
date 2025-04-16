@@ -24,7 +24,7 @@ public class DecisionTreeActionHeuristic extends AbstractDecisionTreeHeuristic i
         // get the features for the state and action
         int playerId = state.getCurrentPlayer();
         double[] stateFeatures = this.stateFeatures.doubleVector(state, playerId);
-        double[] actionFeatures = this.actionFeatures.featureVector(action, state, playerId);
+        double[] actionFeatures = this.actionFeatures.doubleVector(action, state, playerId);
         // combine the features
         double[] features = new double[stateFeatures.length + actionFeatures.length];
         System.arraycopy(stateFeatures, 0, features, 0, stateFeatures.length);
@@ -43,7 +43,7 @@ public class DecisionTreeActionHeuristic extends AbstractDecisionTreeHeuristic i
         // Then we get the action features for each action
         double[][] actionFeatures = new double[actions.size()][];
         for (int i = 0; i < actions.size(); i++) {
-            actionFeatures[i] = this.actionFeatures.featureVector(actions.get(i), state, playerId);
+            actionFeatures[i] = this.actionFeatures.doubleVector(actions.get(i), state, playerId);
         }
         // Then we combine the features
         double[][] features = new double[actions.size()][stateFeatures.length + actionFeatures[0].length];

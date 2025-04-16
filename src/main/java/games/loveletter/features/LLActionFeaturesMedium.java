@@ -34,7 +34,7 @@ public class LLActionFeaturesMedium implements IActionFeatureVector {
     }
 
     @Override
-    public double[] featureVector(AbstractAction a, AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractAction a, AbstractGameState state, int playerID) {
         double[] retValue = new double[names().length];
         LoveLetterGameState llgs = (LoveLetterGameState) state;
         if (!(a instanceof PlayCard))

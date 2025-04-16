@@ -26,6 +26,7 @@ public class ActionFeatureListener extends FeatureListener {
     protected IActionFeatureVector psiFn;
     protected IStateFeatureVector phiFn;
     protected double[] cachedPhi;
+    protected Object[] cachedObjectPhi;
     private Map<String, Map<AbstractAction, Double>> actionValues = new HashMap<>();
 
 
@@ -51,14 +52,27 @@ public class ActionFeatureListener extends FeatureListener {
 
 
     @Override
-    public double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+    public double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         // We put phi in first, and then psi
         double[] retValue = new double[psiFn.names().length + phiFn.names().length];
         double[] phi = cachedPhi == null ?
                 phiFn != null ? phiFn.doubleVector(state, perspectivePlayer) : new double[0]
                 : cachedPhi;
         System.arraycopy(phi, 0, retValue, 0, phi.length);
-        double[] psi = psiFn.featureVector(action, state, perspectivePlayer);
+        double[] psi = psiFn.doubleVector(action, state, perspectivePlayer);
+        System.arraycopy(psi, 0, retValue, phi.length, psi.length);
+        return retValue;
+    }
+
+    @Override
+    public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+        // We put phi in first, and then psi
+        Object[] retValue = new Object[psiFn.names().length + phiFn.names().length];
+        Object[] phi = cachedObjectPhi == null ?
+                phiFn != null ? phiFn.featureVector(state, perspectivePlayer) : new Object[0]
+                : cachedObjectPhi;
+        System.arraycopy(phi, 0, retValue, 0, phi.length);
+        Object[] psi = psiFn.featureVector(action, state, perspectivePlayer);
         System.arraycopy(psi, 0, retValue, phi.length, psi.length);
         return retValue;
     }
@@ -71,6 +85,7 @@ public class ActionFeatureListener extends FeatureListener {
     @Override
     public void processState(AbstractGameState state, AbstractAction action) {
         // we override this from FeatureListener, because we want to record the feature vector for each action
+        // we record this once, and cache the results for all actions
         if (action == null) return; // we do not record data for the GAME_OVER event
         cachedPhi = null;
         List<AbstractAction> availableActions = game.getForwardModel().computeAvailableActions(state);
@@ -85,12 +100,12 @@ public class ActionFeatureListener extends FeatureListener {
             actionValues.put("CHOSEN", av);
         }
         int p = state.getCurrentPlayer();
-        double[] phi = extractFeatureVector(action, state, p);
+        double[] phi = extractDoubleVector(action, state, p);
         currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScores(action)));  // chosen
         if (includeActionsNotTaken) {
             for (AbstractAction alternativeAction : availableActions) {
                 if (alternativeAction.equals(action)) continue;
-                phi = extractFeatureVector(alternativeAction, state, p);
+                phi = extractDoubleVector(alternativeAction, state, p);
                 currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, getActionScores(alternativeAction))); // not chosen
             }
         }

@@ -58,7 +58,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
     }
 
     private double[] mergePhiAndPsi(AbstractGameState state, double[] phi, AbstractAction action) {
-        double[] psi = actionFeatures.featureVector(action, state, state.getCurrentPlayer());
+        double[] psi = actionFeatures.doubleVector(action, state, state.getCurrentPlayer());
         double[] combined = new double[phi.length + psi.length];
         System.arraycopy(phi, 0, combined, 0, phi.length);
         System.arraycopy(psi, 0, combined, phi.length, psi.length);

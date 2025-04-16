@@ -5,14 +5,9 @@ import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
-import utilities.Utils;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.IntStream;
-
-import static evaluation.metrics.IDataLogger.ReportDestination.ToBoth;
-import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
 
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
@@ -123,8 +118,12 @@ public abstract class FeatureListener implements IGameListener {
 
     public abstract String[] names();
 
-    public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
+    public abstract double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
+    /*
+     * Override this is the feature vector is not all numeric
+     */
+    public abstract Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
     /**
      * this takes in the raw JSON string of an agent definition, and applies appropriate
@@ -139,14 +138,31 @@ public abstract class FeatureListener implements IGameListener {
 
     public void processState(AbstractGameState state, AbstractAction action) {
         // we record one state for each player after each relevant event occurs
+        // we first determine if the data is double[] or Object[]
+        boolean isDouble = true;
+        int currentPlayer = state.getCurrentPlayer();
+        double[] doubleData = new double[0];
+        try {
+            doubleData = extractDoubleVector(action, state, currentPlayer);
+        } catch (UnsupportedOperationException e) {
+            isDouble = false;
+        }
         if (currentPlayerOnly && state.isNotTerminal()) {
-            int p = state.getCurrentPlayer();
-            double[] phi = extractFeatureVector(action, state, p);
-            currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
+            if (isDouble) {
+                currentData.add(new StateFeatureListener.LocalDataWrapper(currentPlayer, doubleData, state, new HashMap<>()));
+            } else {
+                Object[] phi = extractFeatureVector(action, state, currentPlayer);
+                currentData.add(new StateFeatureListener.LocalDataWrapper(currentPlayer, phi, state, new HashMap<>()));
+            }
         } else {
             for (int p = 0; p < state.getNPlayers(); p++) {
-                double[] phi = extractFeatureVector(action, state, p);
-                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
+                if (isDouble) {
+                    double[] phi = p == currentPlayer ? doubleData : extractDoubleVector(action, state, p);
+                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
+                } else {
+                    Object[] phi = extractFeatureVector(action, state, p);
+                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, new HashMap<>()));
+                }
             }
         }
     }
@@ -160,9 +176,11 @@ public abstract class FeatureListener implements IGameListener {
         final double[] actionScores;
         final String[] actionScoreNames;
         final double[] array;
+        final Object[] objArray;
 
-        LocalDataWrapper(int player, double[] contents, AbstractGameState state, Map<String, Double> actionScore) {
+        LocalDataWrapper(int player, double[] contents, Object[] contentsObj, AbstractGameState state, Map<String, Double> actionScore) {
             array = contents;
+            objArray = contentsObj;
             this.gameTurn = state.getTurnCounter();
             this.gameRound = state.getRoundCounter();
             this.player = player;
@@ -176,5 +194,12 @@ public abstract class FeatureListener implements IGameListener {
                 i++;
             }
         }
+        LocalDataWrapper(int player, Object[] contents, AbstractGameState state, Map<String, Double> actionScore) {
+            this(player, new double[0], contents, state, actionScore);
+        }
+        LocalDataWrapper(int player, double[] contents, AbstractGameState state, Map<String, Double> actionScore) {
+            this(player, contents, new Object[0], state, actionScore);
+        }
+
     }
 }

@@ -30,8 +30,11 @@ public class StateFeatureListener extends FeatureListener {
     }
 
     @Override
-    public double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+    public double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         return phiFn.doubleVector(state, perspectivePlayer);
+    }
+    public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
+        return phiFn.featureVector(state, perspectivePlayer);
     }
 
     @Override
