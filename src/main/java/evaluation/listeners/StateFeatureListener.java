@@ -31,7 +31,7 @@ public class StateFeatureListener extends FeatureListener {
 
     @Override
     public double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
-        return phiFn.featureVector(state, perspectivePlayer);
+        return phiFn.doubleVector(state, perspectivePlayer);
     }
 
     @Override

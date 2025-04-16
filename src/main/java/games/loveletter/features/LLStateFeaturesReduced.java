@@ -24,7 +24,7 @@ public class LLStateFeaturesReduced implements IStateFeatureVector {
             "ADVANTAGE"};
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerId) {
+    public double[] doubleVector(AbstractGameState gs, int playerId) {
         LoveLetterGameState llgs = (LoveLetterGameState) gs;
         LoveLetterParameters llp = (LoveLetterParameters) gs.getGameParameters();
 

@@ -4,14 +4,9 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IActionHeuristic;
-import core.interfaces.ICoefficients;
 import core.interfaces.IStateFeatureVector;
-import utilities.Pair;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.DoubleUnaryOperator;
 
 /**
  * Provides a wrapper around an IStateFeatureVector and an array of coefficients
@@ -54,7 +49,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
         double[] retValue = new double[actions.size()];
-        double[] phi = features.featureVector(state, state.getCurrentPlayer());
+        double[] phi = features.doubleVector(state, state.getCurrentPlayer());
         for (AbstractAction action : actions) {
             double[] combined = mergePhiAndPsi(state, phi, action);
             retValue[actions.indexOf(action)] = inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
@@ -74,7 +69,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
     public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
-        double[] phi = features.featureVector(state, state.getCurrentPlayer());
+        double[] phi = features.doubleVector(state, state.getCurrentPlayer());
         double[] combined = mergePhiAndPsi(state, phi, action);
         return inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
     }

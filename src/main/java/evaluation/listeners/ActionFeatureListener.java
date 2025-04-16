@@ -55,7 +55,7 @@ public class ActionFeatureListener extends FeatureListener {
         // We put phi in first, and then psi
         double[] retValue = new double[psiFn.names().length + phiFn.names().length];
         double[] phi = cachedPhi == null ?
-                phiFn != null ? phiFn.featureVector(state, perspectivePlayer) : new double[0]
+                phiFn != null ? phiFn.doubleVector(state, perspectivePlayer) : new double[0]
                 : cachedPhi;
         System.arraycopy(phi, 0, retValue, 0, phi.length);
         double[] psi = psiFn.featureVector(action, state, perspectivePlayer);

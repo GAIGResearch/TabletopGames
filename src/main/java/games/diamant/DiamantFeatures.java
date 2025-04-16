@@ -29,7 +29,7 @@ public class DiamantFeatures implements IStateFeatureVector, IStateFeatureJSON {
     }
 
     @Override
-    public double[] featureVector(AbstractGameState gameState, int playerId) {
+    public double[] doubleVector(AbstractGameState gameState, int playerId) {
         DiamantGameState gs = (DiamantGameState) gameState;
         double[] retVal = new double[getObservationSpace()];
         retVal[0] = gs.getTreasureChests().get(playerId).getValue();

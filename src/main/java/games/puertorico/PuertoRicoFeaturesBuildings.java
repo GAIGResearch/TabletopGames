@@ -17,7 +17,7 @@ public class PuertoRicoFeaturesBuildings implements IStateFeatureVector {
         return retValue;
     }
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         PuertoRicoGameState state = (PuertoRicoGameState) gs;
         double[] retValue = new double[names().length];
 

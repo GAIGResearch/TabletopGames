@@ -14,7 +14,7 @@ public abstract class AbstractStateFeature implements IStateFeatureVector {
     protected abstract double[] localFeatureVector(AbstractGameState gs, int playerID);
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         double[] localFeatures = localFeatureVector(state, playerID);
         double[] retValue = new double[coreNames.length + localFeatures.length];
 

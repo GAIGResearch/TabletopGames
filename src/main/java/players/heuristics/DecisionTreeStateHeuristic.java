@@ -25,7 +25,7 @@ public class DecisionTreeStateHeuristic extends AbstractDecisionTreeHeuristic im
         if (drModel == null) return 0;  // no model, no prediction (this is fine)
 
         // get the features for the state
-        double[] features = this.stateFeatures.featureVector(state, playerId);
+        double[] features = this.stateFeatures.doubleVector(state, playerId);
 
         // return the prediction from the model
         return drModel.predict(Vectors.dense(features));

@@ -40,7 +40,7 @@ public class TTTFeatures implements IStateFeatureVector, IStateFeatureJSON {
     }
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         TicTacToeGameState tttgs = (TicTacToeGameState) state;
         List<Double> listVec = new ArrayList<>();
         String playerSymbol = (playerID == 0) ? "x" : "o";

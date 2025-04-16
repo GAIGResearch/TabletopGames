@@ -14,7 +14,7 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
             "provinceCount", "duchyCount", "estateCount", "totalCards"};
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerId) {
+    public double[] doubleVector(AbstractGameState gs, int playerId) {
         DominionGameState state = (DominionGameState) gs;
 
         double[] retValue = new double[names.length];

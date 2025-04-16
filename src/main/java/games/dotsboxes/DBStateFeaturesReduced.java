@@ -10,8 +10,8 @@ public class DBStateFeaturesReduced implements IStateFeatureVector {
     private IStateFeatureVector fullFeatureVector = new DBStateFeatures();
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
-        double[] featureVector = fullFeatureVector.featureVector(state, playerID);
+    public double[] doubleVector(AbstractGameState state, int playerID) {
+        double[] featureVector = fullFeatureVector.doubleVector(state, playerID);
         double[] retValue = new double[names.length];
         retValue[0] = featureVector[1];
         retValue[1] = featureVector[0];

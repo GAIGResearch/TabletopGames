@@ -74,7 +74,7 @@ public class CatanStateFeatures implements IStateFeatureVector {
 
 
     @Override
-    public double[] featureVector(AbstractGameState state, int playerID) {
+    public double[] doubleVector(AbstractGameState state, int playerID) {
         double[] retValue = new double[localNames.length];
         CatanGameState catanState = (CatanGameState) state;
         retValue[0] = catanState.getTurnCounter();

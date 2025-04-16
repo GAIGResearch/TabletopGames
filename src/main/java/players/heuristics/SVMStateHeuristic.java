@@ -64,7 +64,7 @@ public class SVMStateHeuristic implements IStateHeuristic {
     public double evaluateState(AbstractGameState state, int playerId) {
         if (model == null)
             return defaultHeuristic.evaluateState(state, playerId);
-        double[] phi = features.featureVector(state, playerId);
+        double[] phi = features.doubleVector(state, playerId);
         svm_node[] data = new svm_node[phi.length + 1];
         data[0] = new svm_node(); // bias
         data[0].index = 0;

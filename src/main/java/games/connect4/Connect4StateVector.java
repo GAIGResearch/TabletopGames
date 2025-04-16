@@ -15,7 +15,7 @@ public class Connect4StateVector implements IStateFeatureVector, IStateKey {
     ).toArray(String[]::new);
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
+    public double[] doubleVector(AbstractGameState gs, int playerID) {
         Connect4GameState state = (Connect4GameState) gs;
         String playerChar = Connect4Constants.playerMapping.get(playerID).getComponentName();
 
