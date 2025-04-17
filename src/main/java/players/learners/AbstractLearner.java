@@ -1,6 +1,8 @@
 package players.learners;
 
 import core.interfaces.ILearner;
+import utilities.Pair;
+import utilities.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -58,24 +60,13 @@ public abstract class AbstractLearner implements ILearner {
     }
 
     protected void loadData(String... files) {
-        List<double[]> data = new ArrayList<>();
-        for (String file : files) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                header = reader.readLine().split("\\t");
-                descriptions = new String[header.length - 11];
-                System.arraycopy(header, 5, descriptions, 0, descriptions.length);
-                while (reader.ready()) {
-                    double[] datum = Arrays.stream(reader.readLine().split("\\t")).mapToDouble(Double::parseDouble).toArray();
-                    data.add(datum);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new AssertionError("Problem reading file " + file);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                throw new AssertionError("Problem parsing data as numeric : " + file);
-            }
-        }
+
+        Pair<List<String>, List<List<String>>> rawData = Utils.loadDataWithHeader("\t", files);
+        List<double[]> data = rawData.b.stream()
+                .map(s -> s.stream().mapToDouble(Double::parseDouble).toArray())
+                .toList();
+        header = rawData.a.toArray(new String[0]);
+        descriptions = new String[header.length - 11];
 
         // now convert data to [][]
         // we assume (for the moment) that the columns are: GameID, Player, Round, Turn, CurrentScore... Win, Ordinal, FinalScore
