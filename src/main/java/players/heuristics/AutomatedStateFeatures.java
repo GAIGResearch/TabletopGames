@@ -4,11 +4,9 @@ import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import utilities.Pair;
 import utilities.Utils;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class AutomatedStateFeatures implements IStateFeatureVector {
 
@@ -36,24 +34,54 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
     public void processData(String inputFile, String outputFile) {
         // load files...the columns should correspond to the underlying vector
         Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFile);
-        try {
-            List<String[]> columnsData = extractColumnsToArray(inputFile);
+        List<String> headers = data.a;
+        List<List<String>> dataRows = data.b;
 
-            if (columnsData != null && !columnsData.isEmpty()) {
-                // Print the extracted data (for demonstration)
-                for (int i = 0; i < columnsData.size(); i++) {
-                    System.out.println("Column " + (i + 1) + ": " + Arrays.toString(columnsData.get(i)));
-                }
-            } else {
-                System.out.println("No data extracted or file not found.");
-            }
-
-        } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
+        // We need to check that the data is consistent with the underlying vector
+        String[] underlyingNames = underlyingVector.names();
+        if (underlyingNames.length != headers.size()) {
+            throw new IllegalArgumentException("Number of columns in data file does not match underlying vector");
         }
 
+        // We now want to convert the dataRows into dataColumns
+        List<List<String>> dataColumns = new ArrayList<>();
+        for (int i = 0; i < headers.size(); i++) {
+            dataColumns.add(new ArrayList<>());
+        }
+        for (List<String> row : dataRows) {
+            if (row.size() != headers.size()) {
+                System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
+                continue; // Skip rows with inconsistent number of columns
+            }
+            for (int i = 0; i < headers.size(); i++) {
+                dataColumns.get(i).add(row.get(i));
+            }
+        }
 
         // for each column, determine the type of data
+        for (int i = 0; i < headers.size(); i++) {
+            List<String> columnData = dataColumns.get(i);
+
+            // Check if the column is numeric
+            boolean isNumeric = true;
+            List<Double> numericValues = new ArrayList<>();
+            for (String value : columnData) {
+                if (!isNumeric(value)) {
+                    isNumeric = false;
+                    break;
+                }
+                try {
+                    numericValues.add(Double.parseDouble(value));
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing number: " + value);
+                    isNumeric = false;
+                    break;
+                }
+            }
+            if (!isNumeric) {
+                // Check if the column is an enum
+            }
+        }
 
         // 1. Enum.
         // We create one feature for each possible value of the enum.
@@ -67,62 +95,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         // throw an exception
     }
 
-    public static List<String[]> extractColumnsToArray(String filePath) throws IOException {
-        List<String[]> columns = new ArrayList<>();
-        BufferedReader reader = null;
-
-        try {
-            reader = new BufferedReader(new FileReader(filePath));
-            String headerLine = reader.readLine(); // Read the header line
-
-            if (headerLine == null) {
-                return columns; // Empty file
-            }
-
-            String[] headers = headerLine.split("\t");
-            int numColumns = headers.length;
-
-            // Initialize ArrayLists to store data for each column
-            List<String>[] columnLists = new List[numColumns];
-            for (int i = 0; i < numColumns; i++) {
-                columnLists[i] = new ArrayList<>();
-            }
-
-            String dataLine;
-            while ((dataLine = reader.readLine()) != null) {
-                String[] values = dataLine.split("\t");
-
-                // Ensure that each row has the expected number of columns
-                if (values.length == numColumns) {
-                    for (int i = 0; i < numColumns; i++) {
-                        columnLists[i].add(values[i]);
-                    }
-                } else {
-                    System.err.println("Warning: Skipping row with inconsistent number of columns: " + dataLine);
-                }
-            }
-
-            // Convert ArrayLists to String arrays
-            for (int i = 0; i < numColumns; i++) {
-                columns.add(columnLists[i].toArray(new String[0]));
-            }
-
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    System.err.println("Error closing reader: " + e.getMessage());
-                }
-            }
-        }
-
-        return columns;
-    }
 
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
         // TODO: implement this
+        return new double[0];
     }
 
     @Override
@@ -132,6 +109,12 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
 
     @Override
     public String[] names() {
+        // TODO: implement this
         return underlyingVector.names();
+    }
+
+    @Override
+    public Class<?>[] types() {
+        return new Class[0];
     }
 }

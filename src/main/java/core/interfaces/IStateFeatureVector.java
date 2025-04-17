@@ -2,6 +2,8 @@ package core.interfaces;
 
 import core.AbstractGameState;
 
+import java.util.Arrays;
+
 /**
  * This defines an interface for a feature vector representation of a game state.
  * It provides two access points to the underlying feature vector:
@@ -46,6 +48,12 @@ public interface IStateFeatureVector extends IStateKey {
     }
 
     String[] names();
+    default Class<?>[] types() {
+        // the default is all double
+        Class<?>[] retValue = new Class[names().length];
+        Arrays.fill(retValue, Double.class);
+        return retValue;
+    }
 
     @Override
     default Integer getKey(AbstractGameState state, int p) {
