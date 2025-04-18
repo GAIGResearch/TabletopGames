@@ -9,10 +9,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -371,7 +368,7 @@ public abstract class Utils {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 header = Arrays.asList(reader.readLine().split(Pattern.quote(delimiter)));
                 while (reader.ready()) {
-                    List<String> datum = Arrays.stream(reader.readLine().split("\\t"))
+                    List<String> datum = Arrays.stream(reader.readLine().split(Pattern.quote(delimiter)))
                             .toList();
                     data.add(datum);
                 }
@@ -384,6 +381,22 @@ public abstract class Utils {
             }
         }
         return Pair.of(header, data);
+    }
+    public static void writeDataWithHeader(String delimiter, List<String> newFeatureNames, List<List<Object>> newDataRows, String outputFile) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            // Write the header
+            writer.write(String.join(Pattern.quote(delimiter), newFeatureNames));
+            writer.newLine();
+
+            // Write the data rows
+            for (List<Object> row : newDataRows) {
+                List<String> stringRow = row.stream().map(Object::toString).collect(toList());
+                writer.write(String.join(Pattern.quote(delimiter), stringRow));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -661,6 +674,5 @@ public abstract class Utils {
     public static List<String> enumNames(Enum<?> e) {
         return enumNames((Class<? extends Enum<?>>) e.getClass());
     }
-
 
 }
