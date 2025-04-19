@@ -2,6 +2,8 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
+import games.dominion.metrics.DomStateFeaturesReduced;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import utilities.JSONUtils;
@@ -42,7 +44,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         jsonObject.put("underlyingVector", underlyingVector.getClass().getName());
         // instead of writing each of the remaining fields as an array,
         // we want an array of JSONObjects, one per feature that has subfields for name, type, enumValue, range, and index
-        List<JSONObject> featureObjects = new ArrayList<>();
+        JSONArray featureObjects = new JSONArray();
         for (int i = 0; i < featureNames.size(); i++) {
             JSONObject featureObject = new JSONObject();
             featureObject.put("name", featureNames.get(i));
@@ -121,12 +123,14 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
         List<Integer> underlyingFeatureIndices = new ArrayList<>();
         List<Class<?>> newFeatureClasses = new ArrayList<>();
+        Map<Integer, Integer> underlyingIndexToRowIndex = new HashMap<>();
 
         // load files...the columns should correspond to the underlying vector
         // while allowing for additional columns (for target values)
         Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFile);
         List<String> headers = data.a;
         List<List<String>> dataRows = data.b;
+        Map<String, Integer> targetData = new HashMap<>();
 
         // We now want to convert the dataRows into dataColumns
         List<List<String>> dataColumns = new ArrayList<>();
@@ -164,9 +168,12 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                 newEnumValues.add(null);
                 newFeatureRanges.add(null);
                 underlyingFeatureIndices.add(-1);
-                newFeatureClasses.add(calculateClass(columnData));
+                Class<?> columnType = calculateClass(columnData);
+                newFeatureClasses.add(columnType);
+                targetData.put(headers.get(i), i);
             } else {
                 Class<?> columnType = underlyingVector.types()[underlyingindex];
+                underlyingIndexToRowIndex.put(underlyingindex, i);
                 String columnName = headers.get(i);
                 System.out.println("Processing column: " + columnName + " of type: " + columnType);
 
@@ -193,14 +200,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                     List<Integer> numericValues = validateIntColumnData(columnData);
                     Collections.sort(numericValues);
                     for (int b = 0; b < buckets; b++) {
-                        int lowerBound = numericValues.get((int) Math.floor((double) (b * numericValues.size()) / buckets));
-                        int upperBound = numericValues.get((int) Math.floor((double) ((b + 1) * numericValues.size()) / buckets));
-                        if (b == 0) {
-                            lowerBound = Integer.MIN_VALUE;
-                        }
-                        if (b == buckets - 1) {
-                            upperBound = Integer.MAX_VALUE;
-                        }
+                        int lowerBound = b == 0 ? Integer.MIN_VALUE :
+                                numericValues.get((int) (double) ((b * numericValues.size()) / buckets));
+                        int upperBound = b == buckets - 1 ? Integer.MAX_VALUE :
+                                numericValues.get((int) (double) (((b + 1) * numericValues.size()) / buckets));
+
                         newFeatureRanges.add(new Pair<>(lowerBound, upperBound));
                         newFeatureNames.add(columnName + "_B" + b);
                         newFeatureTypes.add(featureType.RANGE);
@@ -219,14 +223,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                     // we sort the total set of values in order and then divide this into buckets
                     Collections.sort(numericValues);
                     for (int b = 0; b < buckets; b++) {
-                        double lowerBound = numericValues.get((int) Math.floor((double) (b * numericValues.size()) / buckets));
-                        double upperBound = numericValues.get((int) Math.floor((double) ((b + 1) * numericValues.size()) / buckets));
-                        if (b == 0) {
-                            lowerBound = Double.NEGATIVE_INFINITY;
-                        }
-                        if (b == buckets - 1) {
-                            upperBound = Double.POSITIVE_INFINITY;
-                        }
+                        double lowerBound = b == 0 ? Double.NEGATIVE_INFINITY :
+                                numericValues.get((int) (double) ((b * numericValues.size()) / buckets));
+                        double upperBound = b == buckets - 1 ? Double.POSITIVE_INFINITY :
+                                numericValues.get((int) (double) (((b + 1) * numericValues.size()) / buckets));
+
                         newFeatureRanges.add(new Pair<>(lowerBound, upperBound));
                         newFeatureNames.add(columnName + "_B" + b);
                         newFeatureTypes.add(featureType.RANGE);
@@ -281,43 +282,44 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
             }
             List<Object> newRow = new ArrayList<>();
             for (int j = 0; j < newFeatureNames.size(); j++) {
-                String value = row.get(underlyingFeatureIndices.get(j));
-                if (newFeatureTypes.get(j) == featureType.RANGE) {
-                    double numericValue = Double.parseDouble(value);
-                    Pair<Number, Number> range = newFeatureRanges.get(j);
-                    if (numericValue >= range.a.doubleValue() && numericValue < range.b.doubleValue()) {
-                        newRow.add(1);
-                    } else {
-                        newRow.add(0);
-                    }
-                } else if (newFeatureTypes.get(j) == featureType.ENUM) {
-                    Enum<?> enumValue = (Enum<?>) newEnumValues.get(j);
-                    if (enumValue.name().equals(value)) {
-                        newRow.add(1);
-                    } else {
-                        newRow.add(0);
-                    }
-                } else if (newFeatureTypes.get(j) == featureType.STRING) {
-                    String stringValue = (String) newEnumValues.get(j);
-                    if (stringValue.equals(value)) {
-                        newRow.add(1);
-                    } else {
-                        newRow.add(0);
-                    }
-                } else if (newFeatureTypes.get(j) == featureType.TARGET) {
-                    // Just add the original value
-                    newRow.add(value);
+                if (newFeatureTypes.get(j) == featureType.TARGET) {
+                    newRow.add(row.get(targetData.get(newFeatureNames.get(j))));
                 } else {
-                    // RAW or TARGET feature
-                    if (newFeatureClasses.get(j) == Integer.class || newFeatureClasses.get(j) == int.class) {
-                        newRow.add(Integer.parseInt(value));
-                    } else if (newFeatureClasses.get(j) == Double.class || newFeatureClasses.get(j) == double.class) {
-                        newRow.add(Double.parseDouble(value));
-                    } else if (newFeatureClasses.get(j) == Boolean.class || newFeatureClasses.get(j) == boolean.class) {
-                        newRow.add(Boolean.parseBoolean(value));
+                    String value = row.get(underlyingIndexToRowIndex.get(underlyingFeatureIndices.get(j)));
+                    if (newFeatureTypes.get(j) == featureType.RANGE) {
+                        double numericValue = Double.parseDouble(value);
+                        Pair<Number, Number> range = newFeatureRanges.get(j);
+                        if (numericValue >= range.a.doubleValue() && numericValue < range.b.doubleValue()) {
+                            newRow.add(1);
+                        } else {
+                            newRow.add(0);
+                        }
+                    } else if (newFeatureTypes.get(j) == featureType.ENUM) {
+                        Enum<?> enumValue = (Enum<?>) newEnumValues.get(j);
+                        if (enumValue.name().equals(value)) {
+                            newRow.add(1);
+                        } else {
+                            newRow.add(0);
+                        }
+                    } else if (newFeatureTypes.get(j) == featureType.STRING) {
+                        String stringValue = (String) newEnumValues.get(j);
+                        if (stringValue.equals(value)) {
+                            newRow.add(1);
+                        } else {
+                            newRow.add(0);
+                        }
                     } else {
-                        // Handle other types as needed
-                        System.err.println("Warning: Unsupported type for column: " + newFeatureNames.get(j));
+                        // RAW feature
+                        if (newFeatureClasses.get(j) == Integer.class || newFeatureClasses.get(j) == int.class) {
+                            newRow.add(Integer.parseInt(value));
+                        } else if (newFeatureClasses.get(j) == Double.class || newFeatureClasses.get(j) == double.class) {
+                            newRow.add(Double.parseDouble(value));
+                        } else if (newFeatureClasses.get(j) == Boolean.class || newFeatureClasses.get(j) == boolean.class) {
+                            newRow.add(Boolean.parseBoolean(value));
+                        } else {
+                            // Handle other types as needed
+                            System.err.println("Warning: Unsupported type for column: " + newFeatureNames.get(j));
+                        }
                     }
                 }
             }
@@ -337,13 +339,19 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                 featureIndices.add(underlyingFeatureIndices.get(i));
             }
         }
+
+        // remove the suffix from output file, and replace with json
+        String jsonOutputFile = outputFile.substring(0, outputFile.lastIndexOf('.')) + ".json";
+        writeToJSON(jsonOutputFile);
     }
 
     private Class<?> calculateClass(List<String> columnData) {
         // Check if all values are numeric
         boolean allNumeric = true;
         for (String value : columnData) {
-            if (!isNumeric(value)) {
+            try {
+                Double.parseDouble(value);
+            } catch (NumberFormatException e) {
                 allNumeric = false;
                 break;
             }
@@ -365,10 +373,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
     private List<Double> validateDoubleColumnData(List<String> columnData) {
         List<Double> numericValues = new ArrayList<>();
         for (String value : columnData) {
-            if (isNumeric(value)) {
+            try {
                 numericValues.add(Double.parseDouble(value));
-            } else {
-                System.err.println("Warning: Skipping non-numeric value: " + value);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Skipping non-numeric double value: " + value);
+                return Collections.emptyList();
             }
         }
         return numericValues;
@@ -377,13 +386,21 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
     private List<Integer> validateIntColumnData(List<String> columnData) {
         List<Integer> numericValues = new ArrayList<>();
         for (String value : columnData) {
-            if (isNumeric(value)) {
+            try {
                 numericValues.add(Integer.parseInt(value));
-            } else {
-                System.err.println("Warning: Skipping non-numeric value: " + value);
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Skipping non-numeric integer value: " + value);
+                return Collections.emptyList();
             }
         }
         return numericValues;
     }
 
+
+    public static void main(String[] args) {
+        AutomatedStateFeatures asf = new AutomatedStateFeatures(new DomStateFeaturesReduced());
+        String inputFile = "C:\\TAG\\DominionFeatures\\DomStateFeatures001.txt"; // Replace with your input file path
+        String outputFile = "C:\\TAG\\DominionFeatures\\ASF.txt"; // Replace with your output file path
+        asf.processData(inputFile, outputFile);
+    }
 }

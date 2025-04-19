@@ -385,13 +385,13 @@ public abstract class Utils {
     public static void writeDataWithHeader(String delimiter, List<String> newFeatureNames, List<List<Object>> newDataRows, String outputFile) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
             // Write the header
-            writer.write(String.join(Pattern.quote(delimiter), newFeatureNames));
+            writer.write(String.join(delimiter, newFeatureNames));
             writer.newLine();
 
             // Write the data rows
             for (List<Object> row : newDataRows) {
                 List<String> stringRow = row.stream().map(Object::toString).collect(toList());
-                writer.write(String.join(Pattern.quote(delimiter), stringRow));
+                writer.write(String.join(delimiter, stringRow));
                 writer.newLine();
             }
         } catch (IOException e) {
