@@ -6,7 +6,6 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 
@@ -18,12 +17,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
 
     int buckets = 3;  // TODO: Extend this to be configurable for each underlying numeric feature independently
     IStateFeatureVector underlyingVector;
-    List<String> newFeatureNames = new ArrayList<>();
-    List<featureType> newFeatureTypes = new ArrayList<>();
-    List<Object> newEnumValues = new ArrayList<>();
-    List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
-    List<Integer> underlyingFeatureIndices = new ArrayList<>();
-    List<Class<?>> newFeatureClasses = new ArrayList<>();
+    List<String> featureNames = new ArrayList<>();
+    List<featureType> featureTypes = new ArrayList<>();
+    List<Object> enumValues = new ArrayList<>();
+    List<Pair<Number, Number>> featureRanges = new ArrayList<>();
+    List<Integer> featureIndices = new ArrayList<>();
 
     public AutomatedStateFeatures(IStateFeatureVector underlyingVector) {
         this.underlyingVector = underlyingVector;
@@ -37,7 +35,66 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         // TODO: write to a JSON file
     }
 
+    @Override
+    public double[] doubleVector(AbstractGameState state, int playerID) {
+        // we first extract the underlying vector to get the raw data
+        Object[] underlyingVectorData = underlyingVector.featureVector(state, playerID);
+
+        // then we iterate over the automated features and generate these from the raw data
+        double[] featureVector = new double[featureNames.size()];
+        for (int i = 0; i < featureNames.size(); i++) {
+            int underlyingIndex = featureIndices.get(i);
+            if (underlyingIndex == -1) {
+                throw new IllegalArgumentException("Feature index cannot be -1");
+            } else {
+                Object value = underlyingVectorData[underlyingIndex];
+                switch (featureTypes.get(i)) {
+                    case RAW:
+                        featureVector[i] = ((Number) value).doubleValue();
+                        break;
+                    case ENUM:
+                        Enum<?> enumValue = (Enum<?>) value;
+                        featureVector[i] = enumValue.equals(enumValues.get(i)) ? 1 : 0;
+                        break;
+                    case STRING:
+                        String stringValue = (String) value;
+                        featureVector[i] = stringValue.equals(enumValues.get(i)) ? 1 : 0;
+                        break;
+                    case RANGE:
+                        double numericValue = ((Number) value).doubleValue();
+                        Pair<Number, Number> range = featureRanges.get(i);
+                        if (numericValue >= range.a.doubleValue() && numericValue < range.b.doubleValue()) {
+                            featureVector[i] = 1;
+                        } else {
+                            featureVector[i] = 0;
+                        }
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported type: " + featureTypes.get(i));
+                }
+            }
+        }
+        return featureVector;
+    }
+
+    @Override
+    public Object[] featureVector(AbstractGameState state, int playerID) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    @Override
+    public String[] names() {
+        return featureNames.toArray(new String[0]);
+    }
+
     public void processData(String inputFile, String outputFile) {
+        List<String> newFeatureNames = new ArrayList<>();
+        List<featureType> newFeatureTypes = new ArrayList<>();
+        List<Object> newEnumValues = new ArrayList<>();
+        List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
+        List<Integer> underlyingFeatureIndices = new ArrayList<>();
+        List<Class<?>> newFeatureClasses = new ArrayList<>();
+
         // load files...the columns should correspond to the underlying vector
         // while allowing for additional columns (for target values)
         Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFile);
@@ -88,6 +145,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
 
                 if (!columnType.isEnum()) {
                     newFeatureNames.add(columnName);
+                    newFeatureClasses.add(columnType);
                     newEnumValues.add(null);
                     newFeatureRanges.add(null);
                     underlyingFeatureIndices.add(underlyingindex);
@@ -120,6 +178,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                         newFeatureNames.add(columnName + "_B" + b);
                         newFeatureTypes.add(featureType.RANGE);
                         newEnumValues.add(null);
+                        newFeatureClasses.add(Integer.class);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
 
@@ -144,6 +203,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                         newFeatureRanges.add(new Pair<>(lowerBound, upperBound));
                         newFeatureNames.add(columnName + "_B" + b);
                         newFeatureTypes.add(featureType.RANGE);
+                        newFeatureClasses.add(Double.class);
                         newEnumValues.add(null);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
@@ -158,6 +218,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                         uniqueValues.add(enumValue);
                         newFeatureNames.add(columnName + "_" + enumValue.name());
                         newFeatureTypes.add(featureType.ENUM);
+                        newFeatureClasses.add(Boolean.class);
                         newEnumValues.add(enumValue);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
@@ -173,6 +234,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                     for (String value : uniqueValues) {
                         newFeatureNames.add(columnName + "_" + value);
                         newFeatureTypes.add(featureType.STRING);
+                        newFeatureClasses.add(Boolean.class);
                         newEnumValues.add(value);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
@@ -237,6 +299,17 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
 
         // Now we write the new data to the output file
         Utils.writeDataWithHeader("\t", newFeatureNames, newDataRows, outputFile);
+
+        // and finally we set the new feature names, types, ranges, and indices (ignoring any TARGET features)
+        for (int i = 0; i < newFeatureNames.size(); i++) {
+            if (underlyingFeatureIndices.get(i) != -1) {
+                featureNames.add(newFeatureNames.get(i));
+                featureTypes.add(newFeatureTypes.get(i));
+                enumValues.add(newEnumValues.get(i));
+                featureRanges.add(newFeatureRanges.get(i));
+                featureIndices.add(underlyingFeatureIndices.get(i));
+            }
+        }
     }
 
     private Class<?> calculateClass(List<String> columnData) {
@@ -286,25 +359,4 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         return numericValues;
     }
 
-    @Override
-    public double[] doubleVector(AbstractGameState state, int playerID) {
-        // TODO: implement this
-        return new double[0];
-    }
-
-    @Override
-    public Object[] featureVector(AbstractGameState state, int playerID) {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    @Override
-    public String[] names() {
-        // TODO: implement this
-        return underlyingVector.names();
-    }
-
-    @Override
-    public Class<?>[] types() {
-        return new Class[0];
-    }
 }
