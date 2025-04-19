@@ -20,7 +20,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         RAW, ENUM, STRING, RANGE, TARGET
     }
 
-    int buckets = 3;  // TODO: Extend this to be configurable for each underlying numeric feature independently
+    int buckets = 5;  // TODO: Extend this to be configurable for each underlying numeric feature independently
     IStateFeatureVector underlyingVector;
     List<String> featureNames = new ArrayList<>();
     List<featureType> featureTypes = new ArrayList<>();
@@ -186,63 +186,32 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                     newFeatureTypes.add(featureType.RAW);
                 }
 
-                // TODO: Consider what to do (if anything) for conditional features
-                // i.e. should we distinguish between a 0 and a "" in a numeric column?
-                // with "" being a missing value that is excluded and *NOT* counted as a zero when
-                // calculating the buckets
-                // in fact, the issue is that with some columns, zero will mean "not populated", and in others
-                // it will mean "populated with zero"...there is no easy way to distinguish between these
-
                 if (columnType.equals(Boolean.class) || columnType.equals(boolean.class)) {
                     // we do nothing - a RAW feature is all we need
-                } else if (columnType.equals(Integer.class) || columnType.equals(int.class)) {
+                } else if (columnType.equals(Integer.class) || columnType.equals(int.class) ||
+                        columnType.equals(Double.class) || columnType.equals(double.class)) {
                     // we then add a one-hot feature for each bucket
-                    List<Integer> numericValues = validateIntColumnData(columnData);
-                    Collections.sort(numericValues);
-                    for (int b = 0; b < buckets; b++) {
-                        int lowerBound = b == 0 ? Integer.MIN_VALUE :
-                                numericValues.get((int) (double) ((b * numericValues.size()) / buckets));
-                        int upperBound = b == buckets - 1 ? Integer.MAX_VALUE :
-                                numericValues.get((int) (double) (((b + 1) * numericValues.size()) / buckets));
 
-                        newFeatureRanges.add(new Pair<>(lowerBound, upperBound));
-                        newFeatureNames.add(columnName + "_B" + b);
+                    Class<?> numericClass = columnType.equals(Integer.class) || columnType.equals(int.class) ?
+                            Integer.class : Double.class;
+                    List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets, numericClass);
+                    for (int b = 0; b < proposedFeatureRanges.size(); b++) {
+                        Pair<Number, Number> range = proposedFeatureRanges.get(b);
                         newFeatureTypes.add(featureType.RANGE);
+                        newFeatureRanges.add(range);
+                        newFeatureNames.add(columnName + "_B" + b);
                         newEnumValues.add(null);
-                        newFeatureClasses.add(Integer.class);
+                        newFeatureClasses.add(numericClass);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
 
-                } else if (columnType.equals(Double.class) || columnType.equals(double.class)) {// we add a raw feature for this column
-                    // we then add a one-hot feature for each bucket
-                    List<Double> numericValues = validateDoubleColumnData(columnData);
-                    if (numericValues.isEmpty()) {
-                        System.err.println("Warning: Skipping column with non-numeric data: " + columnName);
-                        continue; // Skip columns with non-numeric data
-                    }
-                    // we sort the total set of values in order and then divide this into buckets
-                    Collections.sort(numericValues);
-                    for (int b = 0; b < buckets; b++) {
-                        double lowerBound = b == 0 ? Double.NEGATIVE_INFINITY :
-                                numericValues.get((int) (double) ((b * numericValues.size()) / buckets));
-                        double upperBound = b == buckets - 1 ? Double.POSITIVE_INFINITY :
-                                numericValues.get((int) (double) (((b + 1) * numericValues.size()) / buckets));
-
-                        newFeatureRanges.add(new Pair<>(lowerBound, upperBound));
-                        newFeatureNames.add(columnName + "_B" + b);
-                        newFeatureTypes.add(featureType.RANGE);
-                        newFeatureClasses.add(Double.class);
-                        newEnumValues.add(null);
-                        underlyingFeatureIndices.add(underlyingindex);
-                    }
                 } else if (columnType.isEnum()) {
                     Class<Enum> enumClass = (Class<Enum>) columnType;
                     Set<Enum<?>> uniqueValues = new HashSet<>();
                     Enum[] enumValues = enumClass.getEnumConstants();
                     // we then add one feature per enum value as a one-hot encoding
 
-                    for (int count = 0; count < enumValues.length; count++) {
-                        Enum<?> enumValue = enumValues[count];
+                    for (Enum<?> enumValue : enumValues) {
                         uniqueValues.add(enumValue);
                         newFeatureNames.add(columnName + "_" + enumValue.name());
                         newFeatureTypes.add(featureType.ENUM);
@@ -343,6 +312,113 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         // remove the suffix from output file, and replace with json
         String jsonOutputFile = outputFile.substring(0, outputFile.lastIndexOf('.')) + ".json";
         writeToJSON(jsonOutputFile);
+    }
+
+    private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues, int buckets, List<Number> exclusions) {
+        List<Pair<Number, Number>> featureRanges = new ArrayList<>();
+        for (int b = 0; b < buckets; b++) {
+            Number lowerBound = b == 0 ? Double.NEGATIVE_INFINITY :
+                    numericValues.get((b * numericValues.size()) / buckets);
+            Number upperBound = b == buckets - 1 ? Double.POSITIVE_INFINITY :
+                    numericValues.get(((b + 1) * numericValues.size()) / buckets);
+            featureRanges.add(new Pair<>(lowerBound, upperBound));
+        }
+        // now we detect any ranges with the same start and end bounds
+        List<Number> newExclusions = featureRanges.stream()
+                .filter(pair -> pair.a.equals(pair.b))
+                .map(pair -> pair.a)
+                .toList();
+        if (!newExclusions.isEmpty()) {
+            List<T> filteredValues = numericValues.stream()
+                    .filter(value -> !newExclusions.contains(value))
+                    .toList();
+            List<Number> allExclusions = new ArrayList<>(exclusions);
+            allExclusions.addAll(newExclusions);
+            featureRanges = calculateFeatureRanges(filteredValues, buckets - newExclusions.size(), allExclusions);
+
+            // we now create one Range for each of the excluded values
+            for (Number exclusion : newExclusions) {
+                // we then need to find the value in the data that bracket the exclusion (defaulting to +/- infinity)
+                Number nextHighestValue = Double.POSITIVE_INFINITY;
+                for (T value : numericValues) {  // this relies on the fact that the values are sorted
+                    if (value.doubleValue() > exclusion.doubleValue()) {
+                        nextHighestValue = value;
+                        break;
+                    }
+                }
+
+                // we check if the exclusion is already in the ranges
+                List<Pair<Number, Number>> toRemove = new ArrayList<>();
+                List<Pair<Number, Number>> toAdd = new ArrayList<>();
+                for (Pair<Number, Number> range : featureRanges) {
+                    if (range.a.doubleValue() < exclusion.doubleValue() && range.b.doubleValue() > exclusion.doubleValue()) {
+                        // we need to remove this range, and split it into two
+                        toRemove.add(range);
+                        toAdd.add(Pair.of(range.a, exclusion));
+                        toAdd.add(Pair.of(nextHighestValue, range.b));
+                    }
+                }
+                // remove the ranges that we split
+                featureRanges.removeAll(toRemove);
+                featureRanges.addAll(toAdd);
+                // then add the exclusion as a range
+                featureRanges.add(new Pair<>(exclusion, nextHighestValue));
+            }
+
+            // and sort the features to be in ascending order
+            featureRanges.sort(Comparator.comparingDouble(pair -> pair.a.doubleValue() + pair.b.doubleValue() * 0.0001));
+
+
+            // then go up the feature ranges to check that they enclose the real line, and that the end point of one is
+            // the start point of the next
+            List<Integer> toRemove = new ArrayList<>();
+            for (int i = 0; i < featureRanges.size() - 1; i++) {
+                Pair<Number, Number> range1 = featureRanges.get(i);
+                Pair<Number, Number> range2 = featureRanges.get(i + 1);
+   //             System.out.println("Checking ranges: " + range1 + " and " + range2);
+                // if two ranges start at the same point, then we remove the first one (the one with the earlier end point)
+                if (range1.a.equals(range2.a)) {
+                    toRemove.add(i);
+     //               System.out.println("Removing range: " + range1 + " because it is equal to: " + range2);
+                    continue;
+                }
+                if (range1.b.doubleValue() != range2.a.doubleValue()) {
+                    range1.b = range2.a;
+                }
+            }
+            // remove the ranges that we split (this has to be by index, as some ranges may be duplicated, and we don't want to remove both)
+            for (int i = toRemove.size() - 1; i >= 0; i--) {
+                featureRanges.remove((int) toRemove.get(i));
+            }
+            // if the first range has an end point that is equal to the lowest value in the data, then we remove it
+            // and amend the next range to start at minus infinity
+            if (featureRanges.get(0).b.doubleValue() <= numericValues.get(0).doubleValue()) {
+                System.out.println("Removing range: " + featureRanges.get(0) + " because it is equal to: " + numericValues.get(0));
+                featureRanges.remove(0);
+                featureRanges.get(0).a = Double.NEGATIVE_INFINITY;
+            }
+
+            // TODO: We could additionally check for the case that we have used more buckets than wanted
+            // but this is not a problem for now, and the buckets parameter is an order of magnitude one anyway
+        }
+
+        return featureRanges;
+    }
+
+    private List<Pair<Number, Number>> calculateFeatureRanges(List<String> columnData, int buckets, Class<?> clazz) {
+        List<Double> doubleValues;
+        List<Integer> integerValues;
+        if (clazz == Double.class) {
+            doubleValues = validateDoubleColumnData(columnData);
+            Collections.sort(doubleValues);
+            return calculateFeatureRanges(doubleValues, buckets, Collections.emptyList());
+        } else if (clazz == Integer.class) {
+            integerValues = validateIntColumnData(columnData);
+            Collections.sort(integerValues);
+            return calculateFeatureRanges(integerValues, buckets, Collections.emptyList());
+        } else {
+            throw new IllegalArgumentException("Unsupported class type: " + clazz);
+        }
     }
 
     private Class<?> calculateClass(List<String> columnData) {
