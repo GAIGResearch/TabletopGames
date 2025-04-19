@@ -164,6 +164,14 @@ public class JSONUtils {
         return loadClassFromJSON(first).getClass();
     }
 
+    @SuppressWarnings("unchecked")
+    public static void writeJSON(JSONObject json, String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            writer.write(JSONUtils.prettyPrint(json, 1));
+        } catch (IOException e) {
+            throw new AssertionError("Error writing JSON to file " + fileName);
+        }
+    }
     /**
      * Given a filename that contains only a single class, this will instantiate the class
      * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to

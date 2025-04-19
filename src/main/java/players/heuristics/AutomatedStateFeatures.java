@@ -2,6 +2,9 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -31,8 +34,32 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         // TODO: load from a JSON file
     }
 
+    @SuppressWarnings("unchecked")
     public void writeToJSON(String destination) {
-        // TODO: write to a JSON file
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("class", this.getClass().getName());
+        jsonObject.put("buckets", buckets);
+        jsonObject.put("underlyingVector", underlyingVector.getClass().getName());
+        // instead of writing each of the remaining fields as an array,
+        // we want an array of JSONObjects, one per feature that has subfields for name, type, enumValue, range, and index
+        List<JSONObject> featureObjects = new ArrayList<>();
+        for (int i = 0; i < featureNames.size(); i++) {
+            JSONObject featureObject = new JSONObject();
+            featureObject.put("name", featureNames.get(i));
+            featureObject.put("type", featureTypes.get(i).toString());
+            if (featureTypes.get(i) == featureType.ENUM || featureTypes.get(i) == featureType.STRING) {
+                featureObject.put("enumValue", enumValues.get(i).toString());
+            } else if (featureTypes.get(i) == featureType.RANGE) {
+                Pair<Number, Number> range = featureRanges.get(i);
+                featureObject.put("range", "[" + range.a + ", " + range.b + "]");
+            }
+            featureObject.put("index", featureIndices.get(i));
+            featureObjects.add(featureObject);
+        }
+        jsonObject.put("features", featureObjects);
+
+        // Write the JSON object to the specified destination
+        JSONUtils.writeJSON(jsonObject, destination);
     }
 
     @Override

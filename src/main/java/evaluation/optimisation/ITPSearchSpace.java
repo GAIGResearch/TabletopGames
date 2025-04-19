@@ -255,15 +255,11 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
 
     @SuppressWarnings("unchecked")
     public void writeAgentJSON(int[] settings, String fileName) {
-        try (FileWriter writer = new FileWriter(fileName)) {
             JSONObject json = constructAgentJSON(settings);
             int budget = (int) itp.getParameterValue("budget");
             if (budget > 0)
                 json.put("budget", budget);
-            writer.write(JSONUtils.prettyPrint(json, 1));
-        } catch (IOException e) {
-            throw new AssertionError("Error writing agent settings to file " + fileName);
-        }
+            JSONUtils.writeJSON(json, fileName);
     }
 
     private void setTo(int[] settings) {
