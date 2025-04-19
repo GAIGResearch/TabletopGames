@@ -4,12 +4,7 @@ import core.interfaces.ILearner;
 import utilities.Pair;
 import utilities.Utils;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public abstract class AbstractLearner implements ILearner {
 
@@ -22,22 +17,22 @@ public abstract class AbstractLearner implements ILearner {
     Target targetType;
 
     public enum Target {
-        WIN(3, false),  // 0 or 1 for loss/win
-        ORDINAL(2, false), // -1 for first to -n for nth place
-        SCORE(1, false),  // raw score
-        SCORE_DELTA(1, false),  // targets the change in score between now and end of the game
-        WIN_MEAN(3, true), // 0 or 1 for loss/win, with discount to 0.5 average (discount over the rounds in a game,
+        WIN("Win", false),  // 0 or 1 for loss/win
+        ORDINAL("Ordinal", false), // -1 for first to -n for nth place
+        SCORE("FinalScore", false),  // raw score
+        SCORE_DELTA("FinalScoreAdv", false),  // targets the change in score between now and end of the game
+        WIN_MEAN("Win", true), // 0 or 1 for loss/win, with discount to 0.5 average (discount over the rounds in a game,
         // so that at the start (with little information), we reduce noise
-        ORD_MEAN(2, true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
-        ORD_SCALE(2, false), // as ORDINAL, but scaled to 0 to 1 (for Logistic regression targeting)
-        ORD_MEAN_SCALE(2, true), // as ORD_MEAN, but scaled to 0 to 1 ( for Logistic regression targeting)
-        ACTION_SCORE(4, false); // targets the score of the action taken (for Q-learning
+        ORD_MEAN("Ordinal", true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
+        ORD_SCALE("Ordinal", false), // as ORDINAL, but scaled to 0 to 1 (for Logistic regression targeting)
+        ORD_MEAN_SCALE("Ordinal", true), // as ORD_MEAN, but scaled to 0 to 1 ( for Logistic regression targeting)
+        ACTION_SCORE("ActionScore", false); // targets the score of the action taken (for Q-learning
 
-        public final int indexOffset;
         public final boolean discountToMean;
+        public final String header;
 
-        Target(int i, boolean d) {
-            indexOffset = i;
+        Target(String header, boolean d) {
+            this.header = header;
             discountToMean = d;
         }
     }
@@ -66,21 +61,26 @@ public abstract class AbstractLearner implements ILearner {
                 .map(s -> s.stream().mapToDouble(Double::parseDouble).toArray())
                 .toList();
         header = rawData.a.toArray(new String[0]);
-        descriptions = new String[header.length - 11];
 
-        // now convert data to [][]
-        // we assume (for the moment) that the columns are: GameID, Player, Round, Turn, CurrentScore... Win, Ordinal, FinalScore
-        // with ... representing the game specific features
-        // these fields are all defined in FeatureListener, and we assume that any Listener that records data
-        // subclasses this class; adding additional game-specific data on top (or rather, in between).
-        // TODO: This is unclear, and should be tidied up to reduce fragility
-        if (!header[0].equals("GameID") || !header[1].equals("Player") || !header[2].equals("Round") || !header[3].equals("Turn") || !header[4].equals("CurrentScore")) {
-            throw new AssertionError("Unexpected starting header entries " + String.join("", header));
+        String[] specialColumns = {"GameID", "Player", "Turn",  "CurrentScore", "Win", "Ordinal",
+                "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks", "ActionScore"};
+        Map<String, Integer> indexForSpecialColumns = new HashMap<>();
+
+        // now link these to their actual index in the data
+        for (int i = 0; i < header.length; i++) {
+            String h = header[i];
+            if (Arrays.asList(specialColumns).contains(h)) {
+                indexForSpecialColumns.put(h, i);
+            }
         }
-        if (!header[header.length - 1].equals("FinalScore") || !header[header.length - 2].equals("Ordinal")
-                || !header[header.length - 3].equals("Win") || !header[header.length - 4].equals(("ActionScore"))
-                || !header[header.length - 5].equals("TotalRounds") || !header[header.length - 6].equals("PlayerCount")) {
-            throw new AssertionError("Unexpected final header entries " + String.join("", header));
+        // then set descriptions to the rest of the data
+        descriptions = new String[header.length - indexForSpecialColumns.size()];
+        int j = 0;
+        for (String h : header) {
+            if (!indexForSpecialColumns.containsKey(h)) {
+                descriptions[j] = h;
+                j++;
+            }
         }
 
         dataArray = new double[data.size()][];
@@ -89,8 +89,8 @@ public abstract class AbstractLearner implements ILearner {
         for (int i = 0; i < dataArray.length; i++) {
             double[] allData = data.get(i);
             // calculate the number of turns from this point until the end of the game
-            double turns = allData[header.length - 5] - allData[2];
-            double playerCount = allData[header.length - 6];
+            double turns = allData[indexForSpecialColumns.get("TotalTurns")] - allData[indexForSpecialColumns.get("Turn")];
+            double playerCount = allData[indexForSpecialColumns.get("PlayerCount")];
             // discount target (towards expected result where relevant)
             double expectedAverage = 0.0;
             if (targetType == Target.WIN_MEAN)
@@ -99,19 +99,30 @@ public abstract class AbstractLearner implements ILearner {
                 expectedAverage = (1.0 + playerCount) / 2.0;
 
             if (targetType == Target.SCORE_DELTA)
-                target[i][0] = (allData[header.length - targetType.indexOffset] - allData[4]) * Math.pow(gamma, turns);
+                target[i][0] = (allData[indexForSpecialColumns.get(targetType.header)] -
+                        allData[indexForSpecialColumns.get("CurrentScore")]) * Math.pow(gamma, turns);
             else
-                target[i][0] = (allData[header.length - targetType.indexOffset] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
+                target[i][0] = (allData[indexForSpecialColumns.get(targetType.header)] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
 
             if (targetType == Target.ORDINAL || targetType == Target.ORD_MEAN)
                 target[i][0] = -target[i][0];  // if we are targeting the Ordinal position, then high is bad!
             if (targetType == Target.ORD_MEAN_SCALE || targetType == Target.ORD_SCALE)
                 target[i][0] = (playerCount - target[i][0]) / (playerCount - 1.0);  // scale to [0, 1]
 
-            currentScore[i][0] = allData[4];
-            double[] regressionData = new double[header.length - 10];
+            currentScore[i][0] = allData[indexForSpecialColumns.get("CurrentScore")];
+            double[] regressionData = new double[descriptions.length + 1];
             regressionData[0] = 1.0; // the bias term
-            System.arraycopy(allData, 5, regressionData, 1, regressionData.length - 1);
+            // then copy the rest of the data into the regression data
+            // we skip the special columns (GameID, Player, Turn, CurrentScore, Win, Ordinal, FinalScore, FinalScoreAdv)
+            // and just copy the rest of the data
+            j = 1;
+            for (int h = 0; h < header.length; h++) {
+                String headerName = header[h];
+                if (!indexForSpecialColumns.containsKey(headerName)) {
+                    regressionData[j] = allData[h];
+                    j++;
+                }
+            }
             dataArray[i] = regressionData;
         }
     }

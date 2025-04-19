@@ -334,7 +334,9 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                     .toList();
             List<Number> allExclusions = new ArrayList<>(exclusions);
             allExclusions.addAll(newExclusions);
-            featureRanges = calculateFeatureRanges(filteredValues, buckets - newExclusions.size(), allExclusions);
+            featureRanges = filteredValues.isEmpty()
+                    ? new ArrayList<>()
+                    : calculateFeatureRanges(filteredValues, buckets - newExclusions.size(), allExclusions);
 
             // we now create one Range for each of the excluded values
             for (Number exclusion : newExclusions) {
@@ -393,13 +395,9 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
             // if the first range has an end point that is equal to the lowest value in the data, then we remove it
             // and amend the next range to start at minus infinity
             if (featureRanges.get(0).b.doubleValue() <= numericValues.get(0).doubleValue()) {
-                System.out.println("Removing range: " + featureRanges.get(0) + " because it is equal to: " + numericValues.get(0));
                 featureRanges.remove(0);
                 featureRanges.get(0).a = Double.NEGATIVE_INFINITY;
             }
-
-            // TODO: We could additionally check for the case that we have used more buckets than wanted
-            // but this is not a problem for now, and the buckets parameter is an order of magnitude one anyway
         }
 
         return featureRanges;
@@ -476,7 +474,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
     public static void main(String[] args) {
         AutomatedStateFeatures asf = new AutomatedStateFeatures(new DomStateFeaturesReduced());
         String inputFile = "C:\\TAG\\DominionFeatures\\DomStateFeatures001.txt"; // Replace with your input file path
-        String outputFile = "C:\\TAG\\DominionFeatures\\ASF.txt"; // Replace with your output file path
+        String outputFile = "C:\\TAG\\DominionFeatures\\ASF_2.txt"; // Replace with your output file path
         asf.processData(inputFile, outputFile);
     }
 }
