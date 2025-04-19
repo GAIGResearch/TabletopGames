@@ -13,14 +13,14 @@ import static org.apache.commons.lang3.StringUtils.isNumeric;
 public class AutomatedStateFeatures implements IStateFeatureVector {
 
     enum featureType {
-        RAW, ENUM, RANGE, TARGET
+        RAW, ENUM, STRING, RANGE, TARGET
     }
 
     int buckets = 3;  // TODO: Extend this to be configurable for each underlying numeric feature independently
     IStateFeatureVector underlyingVector;
     List<String> newFeatureNames = new ArrayList<>();
     List<featureType> newFeatureTypes = new ArrayList<>();
-    List<Enum<?>> newEnumValues = new ArrayList<>();
+    List<Object> newEnumValues = new ArrayList<>();
     List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
     List<Integer> underlyingFeatureIndices = new ArrayList<>();
     List<Class<?>> newFeatureClasses = new ArrayList<>();
@@ -161,8 +161,24 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                         newEnumValues.add(enumValue);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
+                } else if (columnType.equals(String.class)) {
+                    // in this case, we proceed much like the enum case
+                    // we add a one-hot feature for each unique value (but if there are more than 10 different values,
+                    // we just skip the field completely)
+                    Set<String> uniqueValues = new HashSet<>(columnData);
+                    if (uniqueValues.size() > 10) {
+                        System.err.println("Warning: Skipping column with too many unique values: " + columnName);
+                        continue; // Skip columns with too many unique values
+                    }
+                    for (String value : uniqueValues) {
+                        newFeatureNames.add(columnName + "_" + value);
+                        newFeatureTypes.add(featureType.STRING);
+                        newEnumValues.add(value);
+                        underlyingFeatureIndices.add(underlyingindex);
+                    }
                 } else {
                     throw new IllegalArgumentException("Unsupported column type: " + columnType + " for column: " + columnName);
+
                 }
             }
         }
@@ -186,12 +202,22 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                         newRow.add(0);
                     }
                 } else if (newFeatureTypes.get(j) == featureType.ENUM) {
-                    Enum<?> enumValue = newEnumValues.get(j);
+                    Enum<?> enumValue = (Enum<?>) newEnumValues.get(j);
                     if (enumValue.name().equals(value)) {
                         newRow.add(1);
                     } else {
                         newRow.add(0);
                     }
+                } else if (newFeatureTypes.get(j) == featureType.STRING) {
+                    String stringValue = (String) newEnumValues.get(j);
+                    if (stringValue.equals(value)) {
+                        newRow.add(1);
+                    } else {
+                        newRow.add(0);
+                    }
+                } else if (newFeatureTypes.get(j) == featureType.TARGET) {
+                    // Just add the original value
+                    newRow.add(value);
                 } else {
                     // RAW or TARGET feature
                     if (newFeatureClasses.get(j) == Integer.class || newFeatureClasses.get(j) == int.class) {
