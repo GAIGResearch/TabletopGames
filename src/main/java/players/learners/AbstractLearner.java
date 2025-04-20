@@ -83,6 +83,9 @@ public abstract class AbstractLearner implements ILearner {
             }
         }
 
+        // TODO: discounting should really use TICKS as more reliably generic across games, even if it
+        // does not map in the same way all the time
+
         dataArray = new double[data.size()][];
         target = new double[data.size()][1];
         currentScore = new double[data.size()][1];

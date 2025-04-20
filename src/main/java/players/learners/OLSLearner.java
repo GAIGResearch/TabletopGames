@@ -12,9 +12,17 @@ import java.io.FileWriter;
 public class OLSLearner extends ApacheLearner {
 
     double[] coefficients;
+    double elasticNetParam = 0.8;
+    double regParam = 0.1;
 
-    public OLSLearner(double gamma, Target target) {
+    public OLSLearner(Target target) {
+        super(1.0, target);
+    }
+
+    public OLSLearner(double gamma, double elasticNetParam, double regParam, Target target) {
         super(gamma, target);
+        this.elasticNetParam = elasticNetParam;
+        this.regParam = regParam;
     }
 
     @Override
@@ -33,7 +41,8 @@ public class OLSLearner extends ApacheLearner {
         LinearRegression lr = new LinearRegression()
                 .setFitIntercept(true)
                 .setMaxIter(10)
-                .setRegParam(0.1)
+                .setRegParam(regParam)
+                .setElasticNetParam(elasticNetParam)
                 .setLabelCol("target")
                 .setFeaturesCol("features");
 

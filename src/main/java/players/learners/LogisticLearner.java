@@ -15,9 +15,15 @@ import static java.util.stream.Collectors.joining;
 public class LogisticLearner extends ApacheLearner {
 
     double[] coefficients;
+    double regParam = 0.1;
 
-    public LogisticLearner(double gamma, Target target) {
+    public LogisticLearner(Target target) {
+        super(1.0, target);
+    }
+
+    public LogisticLearner(double gamma, double regParam, Target target) {
         super(gamma, target);
+        this.regParam = regParam;
     }
 
     public static void main(String[] args) {
@@ -60,7 +66,6 @@ public class LogisticLearner extends ApacheLearner {
                 .setFamily("Binomial")
                 .setLink("Logit")
                 .setRegParam(0.01)
-                //       .setElasticNetParam(0.8)
                 .setLabelCol("target")
                 .setFeaturesCol("features");
 
@@ -89,7 +94,7 @@ public class LogisticLearner extends ApacheLearner {
                     .setMaxIter(10)
                     .setFamily("Binomial")
                     .setLink("Logit")
-                    .setRegParam(0.1)
+                    .setRegParam(regParam)
                     .setLabelCol("target")
                     .setFeaturesCol("features");
 
@@ -106,11 +111,25 @@ public class LogisticLearner extends ApacheLearner {
         }
 
         @Override
-        public void writeToFile (String file) {
+        public void writeToFile(String prefix) {
+            // we don't go via JSONUtils because we want to keep the order of coefficients in the output file
+
+            // remove the current suffix (if one exists)
+            if (prefix.contains(".")) {
+                prefix = prefix.substring(0, prefix.lastIndexOf('.'));
+            }
+            String file = prefix + ".json";
             try (FileWriter writer = new FileWriter(file, false)) {
-                writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
-                writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4f", d)).collect(joining("\t")));
-                writer.write("\n");
+                writer.write("{\n");
+                writer.write("\t\"BIAS\": " + String.format("%.3g", coefficients[0]) + ",\n");
+                for (int i = 1; i < coefficients.length; i++) {
+                    writer.write("\t\"" + descriptions[i - 1] + "\": " + String.format("%.3g", coefficients[i]));
+                    if (i < coefficients.length - 1) {
+                        writer.write(",");
+                    }
+                    writer.write("\n");
+                }
+                writer.write("}\n");
             } catch (Exception e) {
                 e.printStackTrace();
             }
