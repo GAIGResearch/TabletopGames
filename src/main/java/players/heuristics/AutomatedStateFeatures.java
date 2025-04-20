@@ -33,7 +33,66 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
     }
 
     public AutomatedStateFeatures(String jsonDescription) {
-        // TODO: load from a JSON file
+        JSONObject json = JSONUtils.loadJSONFile(jsonDescription);
+        if (json.get("class") == null || json.get("class").toString().isEmpty()) {
+            throw new IllegalArgumentException("Invalid JSON file: missing 'class' field");
+        }
+        if (!json.get("class").toString().equals(this.getClass().getName())) {
+            throw new IllegalArgumentException("Invalid JSON file: class mismatch");
+        }
+        // now populate each of the class fields from JSON
+        buckets = Integer.parseInt(json.get("buckets").toString());
+        underlyingVector = JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingVector"));
+        JSONArray features = (JSONArray) json.get("features");
+        for (Object feature : features) {
+            JSONObject featureObject = (JSONObject) feature;
+            String name = featureObject.get("name").toString();
+            featureNames.add(name);
+            String type = featureObject.get("type").toString();
+            switch (type) {
+                case "RAW" -> {
+                    featureTypes.add(featureType.RAW);
+                    enumValues.add(null);
+                    featureRanges.add(null);
+                }
+                case "ENUM" -> {
+                    featureTypes.add(featureType.ENUM);
+                    enumValues.add(featureObject.get("enumValue"));
+                    featureRanges.add(null);
+                }
+                case "STRING" -> {
+                    featureTypes.add(featureType.STRING);
+                    enumValues.add(featureObject.get("enumValue"));
+                    featureRanges.add(null);
+                }
+                case "RANGE" -> {
+                    featureTypes.add(featureType.RANGE);
+                    String rangeString = featureObject.get("range").toString();
+                    String[] rangeParts = rangeString.replaceAll("[\\[\\]]", "").split(",");
+                    Number lowerBound =  Double.parseDouble(rangeParts[0]);
+                    Number upperBound = Double.parseDouble(rangeParts[1]);
+                    featureRanges.add(new Pair<>(lowerBound, upperBound));
+                }
+                default -> throw new IllegalArgumentException("Unsupported type: " + type);
+            }
+            int index = Integer.parseInt(featureObject.get("index").toString());
+            featureIndices.add(index);
+        }
+    }
+
+    public static void mergeCoefficientFile(String coefficients, String featureDefinition) {
+        // The assumption is that both files are JSON.
+        // The featureDefinition is as output by writeToJSON below
+        // and the coefficients is a simple list of the names of features as the key, and the value is the coefficient
+
+        // The aim here is to read in the featureDefinition (readFromJSON), remove any features which are not in the coefficients
+        // or which have a zero coefficient.
+        // Then we write a single JSON file, based on the featureDefinition, but with the coefficients added
+        // as an additional JSONArray ("coefficients") to the JSON object
+
+        // read the coefficients
+        JSONObject coefficientsObject = JSONUtils.loadJSONFile(coefficients);
+        JSONObject featureDefinitionObject = JSONUtils.loadJSONFile(featureDefinition);
     }
 
     @SuppressWarnings("unchecked")

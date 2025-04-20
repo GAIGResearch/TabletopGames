@@ -59,17 +59,22 @@ public class OLSLearner extends ApacheLearner {
 
     @Override
     public void writeToFile(String prefix) {
+        writeToFile(prefix, descriptions, coefficients);
+    }
+
+    public static void writeToFile(String prefix, String[] descriptions, double[] coefficients) {
         // we don't go via JSONUtils because we want to keep the order of coefficients in the output file
 
         // remove the current suffix (if one exists)
         if (prefix.contains(".")) {
             prefix = prefix.substring(0, prefix.lastIndexOf('.'));
         }
-        String file = prefix + ".json";
+        String file = prefix + "_coeffsOnly.json";
         try (FileWriter writer = new FileWriter(file, false)) {
             writer.write("{\n");
             writer.write("\t\"BIAS\": " + String.format("%.3g", coefficients[0]) + ",\n");
             for (int i = 1; i < coefficients.length; i++) {
+                if (Math.abs(coefficients[i]) < 0.000001) continue; // skip zero coefficients
                 writer.write("\t\"" + descriptions[i - 1] + "\": " + String.format("%.3g", coefficients[i]));
                 if (i < coefficients.length - 1) {
                     writer.write(",");
@@ -80,6 +85,10 @@ public class OLSLearner extends ApacheLearner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        // then write the full class
+
+
     }
 
     @Override

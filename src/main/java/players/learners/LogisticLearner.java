@@ -112,27 +112,7 @@ public class LogisticLearner extends ApacheLearner {
 
         @Override
         public void writeToFile(String prefix) {
-            // we don't go via JSONUtils because we want to keep the order of coefficients in the output file
-
-            // remove the current suffix (if one exists)
-            if (prefix.contains(".")) {
-                prefix = prefix.substring(0, prefix.lastIndexOf('.'));
-            }
-            String file = prefix + ".json";
-            try (FileWriter writer = new FileWriter(file, false)) {
-                writer.write("{\n");
-                writer.write("\t\"BIAS\": " + String.format("%.3g", coefficients[0]) + ",\n");
-                for (int i = 1; i < coefficients.length; i++) {
-                    writer.write("\t\"" + descriptions[i - 1] + "\": " + String.format("%.3g", coefficients[i]));
-                    if (i < coefficients.length - 1) {
-                        writer.write(",");
-                    }
-                    writer.write("\n");
-                }
-                writer.write("}\n");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            OLSLearner.writeToFile(prefix, descriptions, coefficients);
         }
 
         @Override
