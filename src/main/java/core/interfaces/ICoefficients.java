@@ -17,6 +17,7 @@ public interface ICoefficients {
     double[] coefficients();
 
     int[][] interactions();
+
     double[] interactionCoefficients();
 
     default int indexOf(String name) {
@@ -82,11 +83,7 @@ public interface ICoefficients {
         }
     }
 
-
-    default Pair<double[], Map<int[], Double>> readJSONCoefficientsFile(File coeffFile) {
-        // the JSON file is a list of properties, each of which is the name of a feature or set of features
-        // (in which case they are separated by colons), and then the coefficient for that feature
-        JSONObject json = loadJSONFile(coeffFile.toString());
+    default Pair<double[], Map<int[], Double>> coefficientsFromJSON(JSONObject json) {
         // now extract all properties in the JSON file
         // and add them to the coefficients if there is no colon in the name
         // If there is a colon in the name, then split by this and look up the relevant feature
@@ -119,6 +116,39 @@ public interface ICoefficients {
             }
         }
         return new Pair<>(coefficients, interactionCoefficients);
+    }
+
+
+    default Pair<double[], Map<int[], Double>> readJSONCoefficientsFile(File coeffFile) {
+        // the JSON file is a list of properties, each of which is the name of a feature or set of features
+        // (in which case they are separated by colons), and then the coefficient for that feature
+        JSONObject json = loadJSONFile(coeffFile.toString());
+        return coefficientsFromJSON(json);
+    }
+
+    default JSONObject coefficientsAsJSON() {
+        // this is the reverse of readJSONCoefficientsFile
+        JSONObject json = new JSONObject();
+        json.put("BIAS", coefficients()[0]);
+        for (int i = 0; i < coefficients().length - 1; i++) {
+            if (Math.abs(coefficients()[i + 1]) > 0.0001) {
+                json.put(names()[i], coefficients()[i + 1]);
+            }
+        }
+        if (interactions() != null) {
+            for (int i = 0; i < interactions().length; i++) {
+                if (Math.abs(interactionCoefficients()[i]) > 0.0001) {
+                    StringBuilder key = new StringBuilder();
+                    for (int j = 0; j < interactions()[i].length; j++) {
+                        if (j > 0)
+                            key.append(":");
+                        key.append(names()[j]);
+                    }
+                    json.put(key.toString(), interactionCoefficients()[i]);
+                }
+            }
+        }
+        return json;
     }
 
     private double getJSONAsDouble(JSONObject json, Object key) {

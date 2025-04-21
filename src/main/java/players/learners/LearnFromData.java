@@ -1,5 +1,7 @@
 package players.learners;
 
+import core.interfaces.IToJSON;
+import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 import utilities.Utils;
 
@@ -35,7 +37,10 @@ public class LearnFromData {
             files = new String[]{inputFileName};
         }
 
-        learner.learnFrom(files);
-        learner.writeToFile(outputFileName);
+        Object learnedThing = learner.learnFrom(files);
+        if (learnedThing instanceof IToJSON toJSON) {
+            JSONObject json = toJSON.toJSON();
+            JSONUtils.writeJSON(json, outputFileName);
+        }
     }
 }

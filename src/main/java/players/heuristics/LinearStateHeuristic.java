@@ -2,9 +2,15 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import utilities.JSONUtils;
 import utilities.Utils;
 
-public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristic {
+import java.util.Arrays;
+import java.util.List;
+
+public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristic, IToJSON {
 
     protected IStateFeatureVector features;
     protected IStateHeuristic defaultHeuristic;
@@ -19,10 +25,48 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         this.defaultHeuristic = defaultHeuristic;
         loadFromFile(coefficientsFile);
     }
+
     public LinearStateHeuristic(IStateFeatureVector featureVector, double[] coefficients, IStateHeuristic defaultHeuristic) {
         this.features = featureVector;
         this.defaultHeuristic = defaultHeuristic;
         this.coefficients = coefficients;
+    }
+
+    public LinearStateHeuristic(JSONObject json) {
+
+        this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
+        this.defaultHeuristic = JSONUtils.loadClassFromJSON((JSONObject) json.get("defaultHeuristic"));
+
+        // Coefficients to be pulled in from JSON
+        if (json.get("coefficients") instanceof JSONObject coefficientsAsJSON) {
+            this.coefficients = new double[coefficientsAsJSON.size()];
+            List<String> allFeatureNames = Arrays.stream(features.names()).toList();
+            for (int i = 0; i < allFeatureNames.size(); i++) {
+                String featureName = allFeatureNames.get(i);
+                if (featureName.contains(":")) {
+                    // interaction term
+                    List<String> featureNames = Arrays.stream(featureName.split(":")).toList();
+                    int[] featureIndices = new int[featureNames.size()];
+                    for (int j = 0; j < featureNames.size(); j++) {
+                        int index = indexOf(featureNames.get(j));
+                        if (index == -1) {
+                            throw new IllegalArgumentException("Feature " + featureNames.get(j) + " not found in feature vector");
+                        }
+                        featureIndices[j] = index;
+                    }
+                    double coefficient = ((Number) coefficientsAsJSON.get(featureName)).doubleValue();
+                    this.interactionCoefficients[i] = coefficient;
+                    this.interactions[i] = featureIndices;
+                } else {
+                    double coefficient = ((Number) coefficientsAsJSON.get(featureName)).doubleValue();
+                    this.coefficients[i] = coefficient;
+                }
+            }
+        } else if (json.get("coefficients") instanceof String coefficientsFile) {
+            loadFromFile(coefficientsFile);
+        } else {
+            throw new IllegalArgumentException("Coefficients must be a JSON array or a file name");
+        }
     }
 
     @Override
@@ -40,5 +84,44 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         return 0;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("class", "players.heuristics.LinearStateHeuristic");
+
+        JSONObject coefficientsAsJSON = coefficientsAsJSON();
+        json.put("coefficients", coefficientsAsJSON);
+        JSONObject featuresJson = new JSONObject();
+        if (features instanceof IToJSON toJSON) {
+            featuresJson = toJSON.toJSON();
+            if (featuresJson.get("features") != null && featuresJson.get("features") instanceof JSONArray) {
+                JSONArray featuresObject = (JSONArray) featuresJson.get("features");
+                // we now remove any features for which there is no matching coefficient
+                JSONArray newFeaturesObject = new JSONArray();
+                for (JSONObject f : (Iterable<JSONObject>) featuresObject) {
+                    String name = (String) f.get("name");
+                    if (coefficientsAsJSON.containsKey(name))
+                        newFeaturesObject.add(f);
+                }
+                featuresJson.put("features", newFeaturesObject);
+            } else {
+                featuresJson.put("class", features.getClass().getName());
+            }
+        } else {
+            featuresJson.put("class", features.getClass().getName());
+        }
+        json.put("features", featuresJson);
+        if (defaultHeuristic != null) {
+            if (defaultHeuristic instanceof IToJSON toJSON) {
+                json.put("defaultHeuristic", toJSON.toJSON());
+            } else {
+                JSONObject defaultHeuristicJson = new JSONObject();
+                defaultHeuristicJson.put("class", defaultHeuristic.getClass().getName());
+                json.put("defaultHeuristic", defaultHeuristicJson);
+            }
+        }
+        return json;
+    }
 
 }

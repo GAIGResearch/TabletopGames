@@ -1,5 +1,6 @@
 package utilities;
 
+import core.interfaces.IToJSON;
 import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONArray;
@@ -60,6 +61,15 @@ public class JSONUtils {
                 return (T) Enum.valueOf(enumClass, val);
             }
             Class<T> outputClass = (Class<T>) Class.forName(cl);
+            if (IToJSON.class.isAssignableFrom(outputClass)) {
+                // this should have a constructor that takes a JSONObject
+                Constructor<?> constructor = outputClass.getConstructor(JSONObject.class);
+                if (constructor == null) {
+                    throw new AssertionError("Constructor from JSONObject not implemented in " + cl);
+                }
+                return (T) constructor.newInstance(json);
+            }  // If no such constructor then we try the other approaches
+
             if (TunableParameters.class.isAssignableFrom(outputClass)) {
                 // in this case we do not look for the Constructor arguments, as
                 // the parameters are defined directly as name-value pairs in JSON

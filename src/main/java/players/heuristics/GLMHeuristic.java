@@ -2,6 +2,8 @@ package players.heuristics;
 
 import core.interfaces.ICoefficients;
 import core.interfaces.IStateHeuristic;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import utilities.Pair;
 
 import java.util.HashMap;

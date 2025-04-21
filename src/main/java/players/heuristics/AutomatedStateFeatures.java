@@ -2,6 +2,7 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IToJSON;
 import games.dominion.metrics.DomStateFeaturesReduced;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,7 +15,7 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNumeric;
 
-public class AutomatedStateFeatures implements IStateFeatureVector {
+public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
 
     enum featureType {
         RAW, ENUM, STRING, RANGE, TARGET
@@ -32,8 +33,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         this.underlyingVector = underlyingVector;
     }
 
-    public AutomatedStateFeatures(String jsonDescription) {
-        JSONObject json = JSONUtils.loadJSONFile(jsonDescription);
+    public AutomatedStateFeatures(JSONObject json) {
         if (json.get("class") == null || json.get("class").toString().isEmpty()) {
             throw new IllegalArgumentException("Invalid JSON file: missing 'class' field");
         }
@@ -80,27 +80,8 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         }
     }
 
-    public static void mergeCoefficientFile(String coefficients, String featureDefinition) {
-        // The assumption is that both files are JSON.
-        // The featureDefinition is as output by writeToJSON below
-        // and the coefficients is a simple list of the names of features as the key, and the value is the coefficient
-
-        // The aim here is to read in the featureDefinition (readFromJSON), remove any features which are not in the coefficients
-        // or which have a zero coefficient.
-        // Then we write a single JSON file, based on the featureDefinition, but with the coefficients added
-        // as an additional JSONArray ("coefficients") to the JSON object
-
-        // read the coefficients
-        JSONObject coefficientsObject = JSONUtils.loadJSONFile(coefficients);
-        JSONObject featureDefinitionObject = JSONUtils.loadJSONFile(featureDefinition);
-    }
-    @SuppressWarnings("unchecked")
-    public void writeToJSON(String destination) {
-        writeToJSONWithCoefficients(destination, new HashMap<>());
-    }
-
-    @SuppressWarnings("unchecked")
-    public void writeToJSONWithCoefficients(String destination, Map<String, Double> coefficients) {
+    @Override
+    public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("class", this.getClass().getName());
         jsonObject.put("buckets", buckets);
@@ -111,9 +92,6 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         // we want an array of JSONObjects, one per feature that has subfields for name, type, enumValue, range, and index
         JSONArray featureObjects = new JSONArray();
         for (int i = 0; i < featureNames.size(); i++) {
-            if (!coefficients.isEmpty() && !coefficients.containsKey(featureNames.get(i))) {
-                continue; // skip features with no coefficient (if coefficients are provided)
-            }
             JSONObject featureObject = new JSONObject();
             featureObject.put("name", featureNames.get(i));
             featureObject.put("type", featureTypes.get(i).toString());
@@ -123,14 +101,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                 Pair<Number, Number> range = featureRanges.get(i);
                 featureObject.put("range", "[" + range.a + ", " + range.b + "]");
             }
-            featureObject.put("coefficient", coefficients.get(featureNames.get(i)));
             featureObject.put("index", featureIndices.get(i));
             featureObjects.add(featureObject);
         }
         jsonObject.put("features", featureObjects);
-
-        // Write the JSON object to the specified destination
-        JSONUtils.writeJSON(jsonObject, destination);
+        return jsonObject;
     }
 
     @Override
@@ -380,7 +355,8 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
 
         // remove the suffix from output file, and replace with json
         String jsonOutputFile = outputFile.substring(0, outputFile.lastIndexOf('.')) + ".json";
-        writeToJSON(jsonOutputFile);
+        JSONObject outputJson = toJSON();
+        JSONUtils.writeJSON(outputJson, jsonOutputFile);
     }
 
     private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues, int buckets, List<Number> exclusions) {

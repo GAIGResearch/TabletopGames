@@ -90,11 +90,6 @@ public class OLSLearner extends ApacheLearner {
         }
     }
 
-    @Override
-    public void writeToFile(String prefix) {
-        writeToFile(prefix, descriptions, coefficients, this);
-    }
-
     public static void writeToFile(String prefix, String[] descriptions, double[] coefficients, AbstractLearner learner) {
         // we don't go via JSONUtils because we want to keep the order of coefficients in the output file
 

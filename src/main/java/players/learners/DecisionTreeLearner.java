@@ -90,7 +90,6 @@ public class DecisionTreeLearner extends ApacheLearner {
         }
     }
 
-    @Override
     public void writeToFile(String file) {
         try {
             drModel.write().overwrite().save(file);

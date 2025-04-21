@@ -131,11 +131,6 @@ public class LogisticLearner extends ApacheLearner {
     }
 
     @Override
-    public void writeToFile(String prefix) {
-        OLSLearner.writeToFile(prefix, descriptions, coefficients, this);
-    }
-
-    @Override
     public String name() {
         return "Logistic";
     }

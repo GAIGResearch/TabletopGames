@@ -10,6 +10,7 @@ import games.GameType;
 import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
+import utilities.JSONUtils;
 import utilities.Pair;
 
 import java.io.File;
@@ -275,11 +276,15 @@ public class ProgressiveLearner {
 
     private void learnFromNewData() {
         // for the moment we will just supply the most recent file
-        learner.learnFrom(dataFilesByIteration[iter]);
+        Object thing = learner.learnFrom(dataFilesByIteration[iter]);
 
         String iterationPrefix = String.format("%s_%d", prefix, iter);
         learnedFilesByIteration[iter] = iterationPrefix;
-        learner.writeToFile(iterationPrefix);
+        if (thing instanceof IToJSON toJSON) {
+            // we need to write the learned heuristic to a file
+            String fileName = iterationPrefix + ".json";
+            JSONUtils.writeJSON(toJSON.toJSON(), fileName);
+        }
 
         // if we only have one agent type, then we can create one agent as the result of this round
         agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, iterationPrefix));
