@@ -100,7 +100,9 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("class", this.getClass().getName());
         jsonObject.put("buckets", buckets);
-        jsonObject.put("underlyingVector", underlyingVector.getClass().getName());
+        JSONObject underlyingVector = new JSONObject();
+        underlyingVector.put("class", this.underlyingVector.getClass().getName());
+        jsonObject.put("underlyingVector", underlyingVector);
         // instead of writing each of the remaining fields as an array,
         // we want an array of JSONObjects, one per feature that has subfields for name, type, enumValue, range, and index
         JSONArray featureObjects = new JSONArray();

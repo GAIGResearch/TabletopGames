@@ -62,7 +62,7 @@ public abstract class AbstractLearner implements ILearner {
                 .toList();
         header = rawData.a.toArray(new String[0]);
 
-        String[] specialColumns = {"GameID", "Player", "Turn",  "CurrentScore", "Win", "Ordinal",
+        String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
                 "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks", "ActionScore"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
