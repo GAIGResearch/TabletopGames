@@ -70,7 +70,13 @@ public class JSONUtils {
                 TunableParameters.loadFromJSON((TunableParameters) t, json);
                 return t;
             }
-            JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
+            JSONArray argArray = new JSONArray();
+            try {
+                argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
+            } catch (ClassCastException e) {
+                // this is a single argument, so we need to wrap it in an array
+                argArray.add(json.get("args"));
+            }
             Class<?>[] argClasses = new Class[argArray.size()];
             Object[] args = new Object[argArray.size()];
             for (int i = 0; i < argClasses.length; i++) {

@@ -1,10 +1,15 @@
 package players.learners;
 
+import core.interfaces.IActionFeatureVector;
 import core.interfaces.ILearner;
+import core.interfaces.IStateFeatureVector;
 import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public abstract class AbstractLearner implements ILearner {
 
@@ -15,6 +20,8 @@ public abstract class AbstractLearner implements ILearner {
     String[] descriptions;
     double gamma;
     Target targetType;
+    IStateFeatureVector stateFeatureVector;
+    IActionFeatureVector actionFeatureVector;
 
     public enum Target {
         WIN("Win", false),  // 0 or 1 for loss/win
@@ -37,21 +44,25 @@ public abstract class AbstractLearner implements ILearner {
         }
     }
 
-    public AbstractLearner() {
-        this(1.0, Target.WIN);
+    public AbstractLearner(IStateFeatureVector stateFeatureVector) {
+        this(1.0, Target.WIN, stateFeatureVector);
     }
 
-    public AbstractLearner(double gamma, Target target) {
+    public AbstractLearner(IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        this(1.0, Target.ACTION_SCORE, stateFeatureVector, actionFeatureVector);
+    }
+
+    public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
         this.gamma = gamma;
         this.targetType = target;
+        this.stateFeatureVector = stateFeatureVector;
     }
 
-    public void setGamma(double newGamma) {
-        gamma = newGamma;
-    }
-
-    public void setTarget(Target newTarget) {
-        targetType = newTarget;
+    public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        this.gamma = gamma;
+        this.targetType = target;
+        this.stateFeatureVector = stateFeatureVector;
+        this.actionFeatureVector = actionFeatureVector;
     }
 
     protected void loadData(String... files) {
@@ -74,13 +85,24 @@ public abstract class AbstractLearner implements ILearner {
             }
         }
         // then set descriptions to the rest of the data
-        descriptions = new String[header.length - indexForSpecialColumns.size()];
-        int j = 0;
-        for (String h : header) {
-            if (!indexForSpecialColumns.containsKey(h)) {
-                descriptions[j] = h;
-                j++;
+        // and validate that the data matches the feature vector
+        descriptions = stateFeatureVector == null ?
+                actionFeatureVector.names() : stateFeatureVector.names();
+        List<String> expectedNames = Arrays.stream(descriptions).collect(toList());
+        Map<String, Integer> indexForDescriptions = new HashMap<>();
+        for (int i = 0; i < header.length; i++) {
+            String h = header[i];
+            if (!indexForSpecialColumns.containsKey(h) && !expectedNames.contains(h)) {
+                throw new IllegalArgumentException("Unexpected column name " + h);
             }
+            if (expectedNames.contains(h)) {
+                indexForDescriptions.put(h, i);
+                expectedNames.remove(h);
+            }
+        }
+        // we allow missing features in the data, but not extra ones
+        if (!expectedNames.isEmpty()) {
+            System.out.println("Missing features: " + expectedNames);
         }
 
         // TODO: discounting should really use TICKS as more reliably generic across games, even if it
@@ -116,13 +138,11 @@ public abstract class AbstractLearner implements ILearner {
             double[] regressionData = new double[descriptions.length + 1];
             regressionData[0] = 1.0; // the bias term
             // then copy the rest of the data into the regression data
-            // we skip the special columns (GameID, Player, Turn, CurrentScore, Win, Ordinal, FinalScore, FinalScoreAdv)
-            // and just copy the rest of the data
-            j = 1;
-            for (int h = 0; h < header.length; h++) {
-                String headerName = header[h];
-                if (!indexForSpecialColumns.containsKey(headerName)) {
-                    regressionData[j] = allData[h];
+            // the order of the data in the regression data is the same as the order in the names() of the feature vector
+            int j = 1;
+            for (String h : descriptions) {
+                if (indexForDescriptions.get(h) != null) {
+                    regressionData[j] = allData[indexForDescriptions.get(h)];
                     j++;
                 }
             }

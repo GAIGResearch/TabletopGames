@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import org.apache.spark.ml.linalg.Vectors;
+import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 
 public class DecisionTreeStateHeuristic extends AbstractDecisionTreeHeuristic implements IStateHeuristic {
 
@@ -11,6 +12,12 @@ public class DecisionTreeStateHeuristic extends AbstractDecisionTreeHeuristic im
     IStateHeuristic defaultHeuristic;
     public DecisionTreeStateHeuristic(IStateFeatureVector stateFeatures, String directory, IStateHeuristic defaultHeuristic) {
         super(directory);
+        this.stateFeatures = stateFeatures;
+        this.defaultHeuristic = defaultHeuristic;
+    }
+    public DecisionTreeStateHeuristic(IStateFeatureVector stateFeatures, DecisionTreeRegressionModel decisionTreeRegressionModel,
+                                      IStateHeuristic defaultHeuristic) {
+        super(decisionTreeRegressionModel);
         this.stateFeatures = stateFeatures;
         this.defaultHeuristic = defaultHeuristic;
     }

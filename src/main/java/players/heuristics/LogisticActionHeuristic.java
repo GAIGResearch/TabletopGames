@@ -10,4 +10,9 @@ public class LogisticActionHeuristic extends LinearActionHeuristic {
         super(actionFeatureVector, featureVector, coefficientsFile);
         setInverseLinkFunction(x -> 1.0 / (1.0 + Math.exp(-x)));
     }
+    public LogisticActionHeuristic(IActionFeatureVector actionFeatureVector, IStateFeatureVector featureVector,
+                                   double[] coefficients) {
+        super(actionFeatureVector, featureVector, coefficients);
+        setInverseLinkFunction(x -> 1.0 / (1.0 + Math.exp(-x)));
+    }
 }

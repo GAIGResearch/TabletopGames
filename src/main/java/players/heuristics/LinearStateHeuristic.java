@@ -19,6 +19,11 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         this.defaultHeuristic = defaultHeuristic;
         loadFromFile(coefficientsFile);
     }
+    public LinearStateHeuristic(IStateFeatureVector featureVector, double[] coefficients, IStateHeuristic defaultHeuristic) {
+        this.features = featureVector;
+        this.defaultHeuristic = defaultHeuristic;
+        this.coefficients = coefficients;
+    }
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {

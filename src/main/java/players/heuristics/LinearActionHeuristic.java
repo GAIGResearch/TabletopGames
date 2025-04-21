@@ -43,6 +43,15 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
         loadFromFile(coefficientsFile);
     }
+    public LinearActionHeuristic(IActionFeatureVector actionFeatureVector, IStateFeatureVector featureVector, double[] coefficients) {
+        this.features = featureVector;
+        this.actionFeatures = actionFeatureVector;
+        // then add on the action feature names
+        names = new String[features.names().length + actionFeatures.names().length];
+        System.arraycopy(features.names(), 0, names, 0, features.names().length);
+        System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
+        this.coefficients = coefficients;
+    }
 
     @Override
     public double[] evaluateAllActions(List<AbstractAction> actions, AbstractGameState state) {

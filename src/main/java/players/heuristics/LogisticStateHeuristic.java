@@ -11,4 +11,8 @@ public class LogisticStateHeuristic extends LinearStateHeuristic {
         super(featureVector, coefficientsFile, defaultHeuristic);
         setInverseLinkFunction(x -> 1.0 / (1.0 + Math.exp(-x)));
     }
+    public LogisticStateHeuristic(IStateFeatureVector featureVector, double[] coefficients, IStateHeuristic defaultHeuristic) {
+        super(featureVector, coefficients, defaultHeuristic);
+        setInverseLinkFunction(x -> 1.0 / (1.0 + Math.exp(-x)));
+    }
 }

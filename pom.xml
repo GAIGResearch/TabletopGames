@@ -63,11 +63,6 @@
             <version>1.6.1</version>
         </dependency>
         <dependency>
-            <groupId>tw.edu.ntu.csie</groupId>
-            <artifactId>libsvm</artifactId>
-            <version>3.25</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>

@@ -94,9 +94,13 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         JSONObject coefficientsObject = JSONUtils.loadJSONFile(coefficients);
         JSONObject featureDefinitionObject = JSONUtils.loadJSONFile(featureDefinition);
     }
-
     @SuppressWarnings("unchecked")
     public void writeToJSON(String destination) {
+        writeToJSONWithCoefficients(destination, new HashMap<>());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void writeToJSONWithCoefficients(String destination, Map<String, Double> coefficients) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("class", this.getClass().getName());
         jsonObject.put("buckets", buckets);
@@ -107,6 +111,9 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
         // we want an array of JSONObjects, one per feature that has subfields for name, type, enumValue, range, and index
         JSONArray featureObjects = new JSONArray();
         for (int i = 0; i < featureNames.size(); i++) {
+            if (!coefficients.isEmpty() && !coefficients.containsKey(featureNames.get(i))) {
+                continue; // skip features with no coefficient (if coefficients are provided)
+            }
             JSONObject featureObject = new JSONObject();
             featureObject.put("name", featureNames.get(i));
             featureObject.put("type", featureTypes.get(i).toString());
@@ -116,6 +123,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector {
                 Pair<Number, Number> range = featureRanges.get(i);
                 featureObject.put("range", "[" + range.a + ", " + range.b + "]");
             }
+            featureObject.put("coefficient", coefficients.get(featureNames.get(i)));
             featureObject.put("index", featureIndices.get(i));
             featureObjects.add(featureObject);
         }

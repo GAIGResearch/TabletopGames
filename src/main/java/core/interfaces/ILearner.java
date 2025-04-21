@@ -2,7 +2,7 @@ package core.interfaces;
 
 public interface ILearner {
 
-    void learnFrom(String... files);
+    Object learnFrom(String... files);
 
     /**
      * Write the model to the file system.

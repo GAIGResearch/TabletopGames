@@ -6,6 +6,7 @@ import core.interfaces.IActionFeatureVector;
 import core.interfaces.IActionHeuristic;
 import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.linalg.Vectors;
+import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 
 import java.util.List;
 
@@ -15,6 +16,11 @@ public class DecisionTreeActionHeuristic extends AbstractDecisionTreeHeuristic i
     IActionFeatureVector actionFeatures;
     public DecisionTreeActionHeuristic(IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures, String directory) {
         super(directory);
+        this.stateFeatures = stateFeatures;
+        this.actionFeatures = actionFeatures;
+    }
+    public DecisionTreeActionHeuristic(IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures, DecisionTreeRegressionModel drModel) {
+        super(drModel);
         this.stateFeatures = stateFeatures;
         this.actionFeatures = actionFeatures;
     }

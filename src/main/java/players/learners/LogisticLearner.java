@@ -1,11 +1,17 @@
 package players.learners;
 
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.GeneralizedLinearRegression;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import players.heuristics.LogisticActionHeuristic;
+import players.heuristics.LogisticStateHeuristic;
+import players.heuristics.OrdinalPosition;
+import players.heuristics.WinOnlyHeuristic;
 
 import java.io.FileWriter;
 import java.util.Arrays;
@@ -17,12 +23,21 @@ public class LogisticLearner extends ApacheLearner {
     double[] coefficients;
     double regParam = 0.1;
 
-    public LogisticLearner(Target target) {
-        super(1.0, target);
+    public LogisticLearner(Target target, IStateFeatureVector stateFeatureVector) {
+        super(1.0, target, stateFeatureVector);
     }
 
-    public LogisticLearner(double gamma, double regParam, Target target) {
-        super(gamma, target);
+    public LogisticLearner(Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        super(1.0, target, stateFeatureVector, actionFeatureVector);
+    }
+
+    public LogisticLearner(double gamma, double regParam, Target target, IStateFeatureVector stateFeatureVector) {
+        super(gamma, target, stateFeatureVector);
+        this.regParam = regParam;
+    }
+
+    public LogisticLearner(double gamma, double regParam, Target target, IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
+        super(gamma, target, stateFeatureVector, actionFeatureVector);
         this.regParam = regParam;
     }
 
@@ -76,48 +91,53 @@ public class LogisticLearner extends ApacheLearner {
 
     }
 
-        @Override
-        public void learnFromApacheData (){
+    @Override
+    public Object learnFromApacheData() {
 
-            RFormula formula = new RFormula()
-                    .setFormula("target ~ " + String.join(" + ", descriptions))
-                    .setFeaturesCol("features")
-                    .setLabelCol("target");
+        RFormula formula = new RFormula()
+                .setFormula("target ~ " + String.join(" + ", descriptions))
+                .setFeaturesCol("features")
+                .setLabelCol("target");
 
-            Dataset<Row> training = formula.fit(apacheData).transform(apacheData).select("features", "target");
+        Dataset<Row> training = formula.fit(apacheData).transform(apacheData).select("features", "target");
 
-            if (debug)
-                training.show(10);
+        if (debug)
+            training.show(10);
 
-            GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
-                    .setFitIntercept(true)
-                    .setMaxIter(10)
-                    .setFamily("Binomial")
-                    .setLink("Logit")
-                    .setRegParam(regParam)
-                    .setLabelCol("target")
-                    .setFeaturesCol("features");
+        GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
+                .setFitIntercept(true)
+                .setMaxIter(10)
+                .setFamily("Binomial")
+                .setLink("Logit")
+                .setRegParam(regParam)
+                .setLabelCol("target")
+                .setFeaturesCol("features");
 
-            GeneralizedLinearRegressionModel lrModel = lr.fit(training);
+        GeneralizedLinearRegressionModel lrModel = lr.fit(training);
 
-            if (debug)
-                System.out.println(lrModel.coefficients());
+        if (debug)
+            System.out.println(lrModel.coefficients());
 
-            coefficients = new double[descriptions.length + 1];
-            coefficients[0] = lrModel.intercept();
-            double[] coeffs = lrModel.coefficients().toArray();
-            System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
+        coefficients = new double[descriptions.length + 1];
+        coefficients[0] = lrModel.intercept();
+        double[] coeffs = lrModel.coefficients().toArray();
+        System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
 
+        if (this.actionFeatureVector == null) {
+            return new LogisticStateHeuristic(stateFeatureVector, coefficients, new WinOnlyHeuristic());
+        } else {
+            return new LogisticActionHeuristic(actionFeatureVector, stateFeatureVector, coefficients);
         }
+    }
 
-        @Override
-        public void writeToFile(String prefix) {
-            OLSLearner.writeToFile(prefix, descriptions, coefficients);
-        }
+    @Override
+    public void writeToFile(String prefix) {
+        OLSLearner.writeToFile(prefix, descriptions, coefficients, this);
+    }
 
-        @Override
-        public String name() {
-            return "Logistic";
-        }
+    @Override
+    public String name() {
+        return "Logistic";
+    }
 
 }
