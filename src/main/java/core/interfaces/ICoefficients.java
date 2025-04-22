@@ -1,5 +1,6 @@
 package core.interfaces;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Pair;
 
@@ -9,6 +10,22 @@ import java.util.*;
 import static utilities.JSONUtils.loadJSONFile;
 
 public interface ICoefficients {
+
+    @SuppressWarnings("unchecked")
+    static void removeUnusedFeatures(JSONObject coefficientsAsJSON, JSONObject featuresJson, IStateFeatureVector features) {
+        if (featuresJson.get("features") != null && featuresJson.get("features") instanceof JSONArray jsonArray) {
+            // we now remove any features for which there is no matching coefficient
+            JSONArray newFeaturesObject = new JSONArray();
+            for (JSONObject f : (Iterable<JSONObject>) jsonArray) {
+                String name = (String) f.get("name");
+                if (coefficientsAsJSON.containsKey(name))
+                    newFeaturesObject.add(f);
+            }
+            featuresJson.put("features", newFeaturesObject);
+        } else {
+            featuresJson.put("class", features.getClass().getName());
+        }
+    }
 
     String[] names();
 

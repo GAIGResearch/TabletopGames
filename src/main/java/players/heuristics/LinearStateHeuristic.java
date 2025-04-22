@@ -2,7 +2,6 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.*;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 import utilities.Utils;
@@ -61,19 +60,7 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         JSONObject featuresJson = new JSONObject();
         if (features instanceof IToJSON toJSON) {
             featuresJson = toJSON.toJSON();
-            if (featuresJson.get("features") != null && featuresJson.get("features") instanceof JSONArray) {
-                JSONArray featuresObject = (JSONArray) featuresJson.get("features");
-                // we now remove any features for which there is no matching coefficient
-                JSONArray newFeaturesObject = new JSONArray();
-                for (JSONObject f : (Iterable<JSONObject>) featuresObject) {
-                    String name = (String) f.get("name");
-                    if (coefficientsAsJSON.containsKey(name))
-                        newFeaturesObject.add(f);
-                }
-                featuresJson.put("features", newFeaturesObject);
-            } else {
-                featuresJson.put("class", features.getClass().getName());
-            }
+            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson, features);
         } else {
             featuresJson.put("class", features.getClass().getName());
         }

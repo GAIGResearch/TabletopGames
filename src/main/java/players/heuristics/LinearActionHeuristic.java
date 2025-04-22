@@ -2,9 +2,7 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IActionFeatureVector;
-import core.interfaces.IActionHeuristic;
-import core.interfaces.IStateFeatureVector;
+import core.interfaces.*;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 
@@ -13,7 +11,7 @@ import java.util.List;
 /**
  * Provides a wrapper around an IStateFeatureVector and an array of coefficients
  */
-public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuristic {
+public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuristic, IToJSON {
 
     protected IStateFeatureVector features;
     protected IActionFeatureVector actionFeatures;
@@ -58,6 +56,28 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
         this.actionFeatures = JSONUtils.loadClassFromJSON((JSONObject) json.get("actionFeatures"));
         loadCoefficientsFromJSON(json);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        json.put("class", "players.heuristics.LinearActionHeuristic");
+        JSONObject coefficientsAsJSON = coefficientsAsJSON();
+        json.put("coefficients", coefficientsAsJSON);
+        if (features instanceof IToJSON toJSON) {
+            JSONObject featuresJson = toJSON.toJSON();
+            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson, features);
+            json.put("features", toJSON.toJSON());
+        } else {
+            json.put("features", features.getClass().getName());
+        }
+        if (actionFeatures instanceof IToJSON toJSON) {
+            json.put("actionFeatures", toJSON.toJSON());
+        } else {
+            json.put("actionFeatures", actionFeatures.getClass().getName());
+        }
+        return json;
     }
 
     @Override
