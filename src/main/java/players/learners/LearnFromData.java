@@ -1,11 +1,13 @@
 package players.learners;
 
+import core.interfaces.ICoefficients;
 import core.interfaces.IToJSON;
 import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 import utilities.Utils;
 
 import java.io.File;
+import java.io.FileWriter;
 
 public class LearnFromData {
 
@@ -41,6 +43,19 @@ public class LearnFromData {
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
             JSONUtils.writeJSON(json, outputFileName);
+        }
+        // write the coefficients to a file
+        if (learnedThing instanceof ICoefficients coefficients) {
+            String coefficientsFile = outputFileName.replace(".json", "_coeffsOnly.json");
+            String output = coefficients.coefficientsInReadableFormat();
+            // write output to coefficientsFile
+
+            try (FileWriter writer = new FileWriter(new File(coefficientsFile))) {
+                writer.write(output);
+            } catch (Exception e) {
+                System.out.println("Error writing file " + coefficientsFile + " : " + e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
     }
 }

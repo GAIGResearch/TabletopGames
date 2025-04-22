@@ -60,16 +60,13 @@ public class JSONUtils {
                 Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(en);
                 return (T) Enum.valueOf(enumClass, val);
             }
+            // To instantiate an Object from JSON we run through three possibilities:
+            // 1. The class is a TunableParameters class, and we load it directly
+            // 2. The class has a constructor that takes a JSONObject
+            // 3. The class has a constructor that takes a set of arguments (specified in the 'args' JSONArray in the JSON)
             Class<T> outputClass = (Class<T>) Class.forName(cl);
-            if (IToJSON.class.isAssignableFrom(outputClass)) {
-                // this should have a constructor that takes a JSONObject
-                Constructor<?> constructor = outputClass.getConstructor(JSONObject.class);
-                if (constructor == null) {
-                    throw new AssertionError("Constructor from JSONObject not implemented in " + cl);
-                }
-                return (T) constructor.newInstance(json);
-            }  // If no such constructor then we try the other approaches
 
+            // 1. check for TunableParameters
             if (TunableParameters.class.isAssignableFrom(outputClass)) {
                 // in this case we do not look for the Constructor arguments, as
                 // the parameters are defined directly as name-value pairs in JSON
@@ -80,6 +77,15 @@ public class JSONUtils {
                 TunableParameters.loadFromJSON((TunableParameters) t, json);
                 return t;
             }
+            // 2. then look for a constructor that takes a JSONObject
+            try {
+                Constructor<?> constructor = outputClass.getConstructor();
+                return (T) constructor.newInstance();
+            } catch (NoSuchMethodException e) {
+                // continue to the next step and look for args
+            }
+
+            // 3. now look for a constructor that takes a set of args
             JSONArray argArray = new JSONArray();
             try {
                 argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
@@ -188,6 +194,7 @@ public class JSONUtils {
             throw new AssertionError("Error writing JSON to file " + fileName);
         }
     }
+
     /**
      * Given a filename that contains only a single class, this will instantiate the class
      * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to

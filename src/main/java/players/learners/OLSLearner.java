@@ -90,42 +90,6 @@ public class OLSLearner extends ApacheLearner {
         }
     }
 
-    public static void writeToFile(String prefix, String[] descriptions, double[] coefficients, AbstractLearner learner) {
-        // we don't go via JSONUtils because we want to keep the order of coefficients in the output file
-
-        // remove the current suffix (if one exists)
-        if (prefix.contains(".")) {
-            prefix = prefix.substring(0, prefix.lastIndexOf('.'));
-        }
-        String file = prefix + "_coeffsOnly.json";
-        List<String> relevantFeatures = new ArrayList<>();
-        try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write("{\n");
-            writer.write("\t\"BIAS\": " + String.format("%.3g", coefficients[0]) + ",\n");
-            for (int i = 1; i < coefficients.length; i++) {
-                if (Math.abs(coefficients[i]) < 0.000001) continue; // skip zero coefficients
-                writer.write("\t\"" + descriptions[i - 1] + "\": " + String.format("%.3g", coefficients[i]));
-                if (i < coefficients.length - 1) {
-                    writer.write(",");
-                }
-                relevantFeatures.add(descriptions[i - 1]);
-                writer.write("\n");
-            }
-            writer.write("}\n");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        // then write the full class for the IStateHeuristic or IActionHeuristic
-        String classFile = prefix + ".json";
-        if (learner.stateFeatureVector != null) {
-
-        } else if (learner.actionFeatureVector != null) {
-        }
-
-
-    }
-
     @Override
     public String name() {
         return "OLS";

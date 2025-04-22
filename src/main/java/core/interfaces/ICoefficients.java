@@ -4,9 +4,7 @@ import org.json.simple.JSONObject;
 import utilities.Pair;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static utilities.JSONUtils.loadJSONFile;
 
@@ -149,6 +147,39 @@ public interface ICoefficients {
             }
         }
         return json;
+    }
+
+    default String coefficientsInReadableFormat() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\n");
+        sb.append("\t\"BIAS\": " + String.format("%.3g", coefficients()[0]) + ",\n");
+        for (int i = 1; i < coefficients().length; i++) {
+            if (Math.abs(coefficients()[i]) < 0.000001) continue; // skip zero coefficients
+            sb.append("\t\"" + names()[i - 1] + "\": " + String.format("%.3g", coefficients()[i]));
+            if (i < coefficients().length - 1) {
+                sb.append(",");
+            }
+            sb.append("\n");
+        }
+        // then for interactions
+        if (interactions() != null) {
+            for (int i = 0; i < interactions().length; i++) {
+                if (Math.abs(interactionCoefficients()[i]) < 0.000001) continue; // skip zero coefficients
+                StringBuilder key = new StringBuilder();
+                for (int j = 0; j < interactions()[i].length; j++) {
+                    if (j > 0)
+                        key.append(":");
+                    key.append(names()[interactions()[i][j]]);
+                }
+                sb.append("\t\"" + key + "\": " + String.format("%.3g", interactionCoefficients()[i]));
+                if (i < interactions().length - 1) {
+                    sb.append(",");
+                }
+                sb.append("\n");
+            }
+        }
+        sb.append("}\n");
+        return sb.toString();
     }
 
     private double getJSONAsDouble(JSONObject json, Object key) {
