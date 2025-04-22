@@ -50,7 +50,7 @@ public class LearnFromData {
             String output = coefficients.coefficientsInReadableFormat();
             // write output to coefficientsFile
 
-            try (FileWriter writer = new FileWriter(new File(coefficientsFile))) {
+            try (FileWriter writer = new FileWriter(coefficientsFile)) {
                 writer.write(output);
             } catch (Exception e) {
                 System.out.println("Error writing file " + coefficientsFile + " : " + e.getMessage());

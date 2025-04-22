@@ -62,8 +62,8 @@ public class JSONUtils {
             }
             // To instantiate an Object from JSON we run through three possibilities:
             // 1. The class is a TunableParameters class, and we load it directly
-            // 2. The class has a constructor that takes a JSONObject
-            // 3. The class has a constructor that takes a set of arguments (specified in the 'args' JSONArray in the JSON)
+            // 2. The class has a constructor that takes a set of arguments (specified in the 'args' JSONArray in the JSON)
+            // 3. The class has a constructor that takes a JSONObject
             Class<T> outputClass = (Class<T>) Class.forName(cl);
 
             // 1. check for TunableParameters
@@ -77,80 +77,97 @@ public class JSONUtils {
                 TunableParameters.loadFromJSON((TunableParameters) t, json);
                 return t;
             }
-            // 2. then look for a constructor that takes a JSONObject
+
+            // 2. now look for a constructor that takes a set of args
+            if (json.containsKey("args") && json.get("args") instanceof JSONArray) {
+                // we have a set of args, so we need to find the constructor that matches
+                // first we need to get the args
+                // this is a JSONArray, so we need to convert it to an array of objects
+                // and then find the constructor that matches
+                JSONArray argArray = (JSONArray) json.get("args");
+
+                Class<?>[] argClasses = new Class[argArray.size()];
+                Object[] args = new Object[argArray.size()];
+                for (int i = 0; i < argClasses.length; i++) {
+                    Object arg = argArray.get(i);
+                    if (arg instanceof JSONObject) {
+                        // we have recursion
+                        // we need to instantiate this, and then stick it in
+                        arg = loadClassFromJSON((JSONObject) arg);
+                        argClasses[i] = arg.getClass();
+                    } else if (arg instanceof Long) {
+                        argClasses[i] = int.class;
+                        args[i] = ((Long) arg).intValue();
+                        arg = args[i];
+                    } else if (arg instanceof Double) {
+                        argClasses[i] = double.class;
+                    } else if (arg instanceof Boolean) {
+                        argClasses[i] = boolean.class;
+                    } else if (arg instanceof String str) {
+                        // if the string ends with .json, then we load this as a JSONOBject
+                        // and then we load the class from that
+                        if (str.endsWith(".json")) {
+                            JSONObject subJSON = loadJSONFile(str);
+                            arg = loadClassFromJSON(subJSON);
+                            argClasses[i] = arg.getClass();
+                        } else if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false")) {
+                            argClasses[i] = boolean.class;
+                        } else if (str.equalsIgnoreCase("null")) {
+                            argClasses[i] = String.class;
+                        } else {
+                            argClasses[i] = String.class;
+                        }
+                    } else if (arg instanceof JSONArray) {
+                        Object first = ((JSONArray) arg).get(0);
+                        if (first instanceof JSONObject) {
+                            Class<?> arrayClass = determineArrayClass((JSONArray) arg);
+
+                            T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
+                            argClasses[i] = arr.getClass();
+                            for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                                arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+                            }
+                            arg = arr;
+
+                        } else if (first instanceof Long) {
+                            argClasses[i] = int[].class;
+                            args[i] = ((Long) first).intValue();
+                            arg = args[i];
+                        } else if (first instanceof Double) {
+                            argClasses[i] = double[].class;
+                            arg = ((JSONArray) arg).toArray(new Double[0]);
+                        } else if (first instanceof Boolean) {
+                            argClasses[i] = boolean[].class;
+                            arg = ((JSONArray) arg).toArray(new Boolean[0]);
+                        } else if (first instanceof String) {
+                            argClasses[i] = String[].class;
+                            arg = ((JSONArray) arg).toArray(new String[0]);
+                        }
+                    } else {
+                        throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
+                    }
+                    args[i] = arg;
+                }
+
+                Class<?> clazz = Class.forName(cl);
+                Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
+                if (constructor == null)
+                    throw new AssertionError("No matching Constructor found for " + clazz);
+                //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+                return (T) constructor.newInstance(args);
+            }
+
+            // 3. then look for a constructor that takes a JSONObject
             try {
                 Constructor<?> constructor = outputClass.getConstructor(JSONObject.class);
                 return (T) constructor.newInstance(json);
             } catch (NoSuchMethodException e) {
-                // continue to the next step and look for args
+                // continue to the next step
             }
 
-            // 3. now look for a constructor that takes a set of args
-            JSONArray argArray = new JSONArray();
-            try {
-                argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
-            } catch (ClassCastException e) {
-                // this is a single argument, so we need to wrap it in an array
-                argArray.add(json.get("args"));
-            }
-            Class<?>[] argClasses = new Class[argArray.size()];
-            Object[] args = new Object[argArray.size()];
-            for (int i = 0; i < argClasses.length; i++) {
-                Object arg = argArray.get(i);
-                if (arg instanceof JSONObject) {
-                    // we have recursion
-                    // we need to instantiate this, and then stick it in
-                    arg = loadClassFromJSON((JSONObject) arg);
-                    argClasses[i] = arg.getClass();
-                } else if (arg instanceof Long) {
-                    argClasses[i] = int.class;
-                    args[i] = ((Long) arg).intValue();
-                    arg = args[i];
-                } else if (arg instanceof Double) {
-                    argClasses[i] = double.class;
-                } else if (arg instanceof Boolean) {
-                    argClasses[i] = boolean.class;
-                } else if (arg instanceof String) {
-                    argClasses[i] = String.class;
-                } else if (arg instanceof JSONArray) {
-                    Object first = ((JSONArray) arg).get(0);
-                    if (first instanceof JSONObject) {
-                        Class<?> arrayClass = determineArrayClass((JSONArray) arg);
-
-                        T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
-                        argClasses[i] = arr.getClass();
-                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
-                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
-                        }
-                        arg = arr;
-
-                    } else if (first instanceof Long) {
-                        argClasses[i] = int[].class;
-                        args[i] = ((Long) first).intValue();
-                        arg = args[i];
-                    } else if (first instanceof Double) {
-                        argClasses[i] = double[].class;
-                        arg = ((JSONArray) arg).toArray(new Double[0]);
-                    } else if (first instanceof Boolean) {
-                        argClasses[i] = boolean[].class;
-                        arg = ((JSONArray) arg).toArray(new Boolean[0]);
-                    } else if (first instanceof String) {
-                        argClasses[i] = String[].class;
-                        arg = ((JSONArray) arg).toArray(new String[0]);
-                    }
-                } else {
-                    throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
-                }
-                args[i] = arg;
-            }
-
-            Class<?> clazz = Class.forName(cl);
-            Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
-            if (constructor == null)
-                throw new AssertionError("No matching Constructor found for " + clazz);
-            //   System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
-            Object retValue = constructor.newInstance(args);
-            return outputClass.cast(retValue);
+            // 4. And finally look for a constructor that takes no arguments
+            Constructor<?> constructor = outputClass.getConstructor();
+            return (T) constructor.newInstance();
 
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
@@ -428,7 +445,7 @@ public class JSONUtils {
         for (String key : partitioned.keySet()) {
             Map<String, String> subMap = partitioned.get(key).stream().map(k -> new AbstractMap.SimpleEntry<>(k, stuff.get(key.equals(k) ? k : key + "." + k)))
                     .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-            if (subMap.size() == 0)
+            if (subMap.isEmpty())
                 throw new AssertionError("Empty subMap for key " + key);
             if (subMap.size() == 1 && subMap.containsKey(key)) {
                 // this is a single entry, so we just add it as a String

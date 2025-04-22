@@ -518,8 +518,8 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
 
     public static void main(String[] args) {
         AutomatedStateFeatures asf = new AutomatedStateFeatures(new DomStateFeaturesReduced());
-        String inputFile = "C:\\TAG\\DominionFeatures\\DomStateFeatures001.txt"; // Replace with your input file path
-        String outputFile = "C:\\TAG\\DominionFeatures\\ASF_2.txt"; // Replace with your output file path
+        String inputFile = "C:\\TAG\\DominionFeaturesASF\\DomStateFeatures001.txt"; // Replace with your input file path
+        String outputFile = "C:\\TAG\\DominionFeaturesASF\\ASF_22Apr.txt"; // Replace with your output file path
         asf.processData(inputFile, outputFile);
     }
 }

@@ -67,13 +67,15 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         json.put("coefficients", coefficientsAsJSON);
         if (features instanceof IToJSON toJSON) {
             JSONObject featuresJson = toJSON.toJSON();
-            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson, features);
+            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
             json.put("features", toJSON.toJSON());
         } else {
             json.put("features", features.getClass().getName());
         }
         if (actionFeatures instanceof IToJSON toJSON) {
-            json.put("actionFeatures", toJSON.toJSON());
+            JSONObject actionFeaturesJson = toJSON.toJSON();
+            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, actionFeaturesJson);
+            json.put("actionFeatures", actionFeaturesJson);
         } else {
             json.put("actionFeatures", actionFeatures.getClass().getName());
         }

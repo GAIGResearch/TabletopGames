@@ -60,7 +60,7 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
         JSONObject featuresJson = new JSONObject();
         if (features instanceof IToJSON toJSON) {
             featuresJson = toJSON.toJSON();
-            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson, features);
+            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
         } else {
             featuresJson.put("class", features.getClass().getName());
         }

@@ -12,7 +12,7 @@ import static utilities.JSONUtils.loadJSONFile;
 public interface ICoefficients {
 
     @SuppressWarnings("unchecked")
-    static void removeUnusedFeatures(JSONObject coefficientsAsJSON, JSONObject featuresJson, IStateFeatureVector features) {
+    static void removeUnusedFeatures(JSONObject coefficientsAsJSON, JSONObject featuresJson) {
         if (featuresJson.get("features") != null && featuresJson.get("features") instanceof JSONArray jsonArray) {
             // we now remove any features for which there is no matching coefficient
             JSONArray newFeaturesObject = new JSONArray();
@@ -22,8 +22,6 @@ public interface ICoefficients {
                     newFeaturesObject.add(f);
             }
             featuresJson.put("features", newFeaturesObject);
-        } else {
-            featuresJson.put("class", features.getClass().getName());
         }
     }
 
