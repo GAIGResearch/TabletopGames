@@ -5,6 +5,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IActionHeuristic;
 import core.interfaces.IStateFeatureVector;
+import org.json.simple.JSONObject;
+import utilities.JSONUtils;
 
 import java.util.List;
 
@@ -22,7 +24,6 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
     public String[] names() {
         return names;
     }
-
 
     /**
      * The coefficientsFile is a tab separated file with the first line being the names of the features
@@ -51,6 +52,12 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         System.arraycopy(features.names(), 0, names, 0, features.names().length);
         System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
         this.coefficients = coefficients;
+    }
+    public LinearActionHeuristic(JSONObject json) {
+        // Much the same logic as LinearStateHeuristic
+        this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
+        this.actionFeatures = JSONUtils.loadClassFromJSON((JSONObject) json.get("actionFeatures"));
+        loadCoefficientsFromJSON(json);
     }
 
     @Override

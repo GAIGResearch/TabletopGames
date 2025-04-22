@@ -1,14 +1,10 @@
 package players.heuristics;
 
 import core.interfaces.ICoefficients;
-import core.interfaces.IStateHeuristic;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Pair;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.DoubleUnaryOperator;
 
 public abstract class GLMHeuristic implements ICoefficients {
@@ -36,25 +32,40 @@ public abstract class GLMHeuristic implements ICoefficients {
     public double[] interactionCoefficients() {
         return interactionCoefficients;
     }
+
     @Override
     public int[][] interactions() {
         return interactions;
     }
+
     public void setInverseLinkFunction(DoubleUnaryOperator inverseLinkFunction) {
         this.inverseLinkFunction = inverseLinkFunction;
     }
 
+    public void loadCoefficientsFromJSON(JSONObject json) {
+        // Coefficients to be pulled in from JSON
+        if (json.get("coefficients") instanceof JSONObject coefficientsAsJSON) {
+            Pair<double[], List<Pair<int[], Double>>> coeffs = this.coefficientsFromJSON(coefficientsAsJSON);
+            coefficients = coeffs.a;
+            interactions = coeffs.b.stream().map(p -> p.a).toArray(int[][]::new);
+            interactionCoefficients = coeffs.b.stream().mapToDouble(p -> p.b).toArray();
+        } else if (json.get("coefficients") instanceof String coefficientsFile) {
+            loadFromFile(coefficientsFile);
+        } else {
+            throw new IllegalArgumentException("Coefficients must be a JSON array or a file name");
+        }
+    }
+
     public void loadFromFile(String coefficientsFile) {
-        Pair<double[], Map<int[], Double>> x = loadModel(coefficientsFile);
+        Pair<double[], List<Pair<int[], Double>>> x = loadModel(coefficientsFile);
         this.coefficients = x.a;
-        List<int[]> loadedInteractions = x.b.keySet().stream().toList();
-        if (loadedInteractions.isEmpty())
+        if (x.b.isEmpty())
             return;
-        this.interactions = new int[loadedInteractions.size()][loadedInteractions.get(0).length];
-        this.interactionCoefficients = new double[loadedInteractions.size()];
+        this.interactions = new int[x.b.size()][x.b.get(0).a.length];
+        this.interactionCoefficients = new double[x.b.size()];
         for (int i = 0; i < interactions.length; i++) {
-            interactions[i] = loadedInteractions.get(i);
-            interactionCoefficients[i] = x.b.get(loadedInteractions.get(i));
+            interactions[i] = x.b.get(i).a;
+            interactionCoefficients[i] = x.b.get(i).b;
         }
     }
 

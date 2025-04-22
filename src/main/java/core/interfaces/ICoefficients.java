@@ -46,15 +46,15 @@ public interface ICoefficients {
         return retValue;
     }
 
-    default Pair<double[], Map<int[], Double>> loadModel(String coefficientsFile) {
+    default Pair<double[], List<Pair<int[], Double>>> loadModel(String coefficientsFile) {
         if (coefficientsFile.isEmpty()) {
             // in this case will default to the defaultHeuristic
-            return new Pair<>(new double[0], new HashMap<>());
+            return Pair.of(new double[0], new ArrayList<>());
         } else {
             File coeffFile = new File(coefficientsFile);
             if (coeffFile.exists() && coeffFile.isFile()) {
                 if (coeffFile.getName().endsWith(".csv") || coeffFile.getName().endsWith(".txt"))
-                    return new Pair<>(readFlatCoefficientsFile(coeffFile), new HashMap<>());
+                    return Pair.of(readFlatCoefficientsFile(coeffFile), new ArrayList<>());
                 else if (coeffFile.getName().endsWith(".json"))
                     return readJSONCoefficientsFile(coeffFile);
                 else
@@ -81,12 +81,12 @@ public interface ICoefficients {
         }
     }
 
-    default Pair<double[], Map<int[], Double>> coefficientsFromJSON(JSONObject json) {
+    default Pair<double[], List<Pair<int[], Double>>> coefficientsFromJSON(JSONObject json) {
         // now extract all properties in the JSON file
         // and add them to the coefficients if there is no colon in the name
         // If there is a colon in the name, then split by this and look up the relevant feature
         // columns, and put an entry into JSONCoefficients
-        Map<int[], Double> interactionCoefficients = new HashMap<>();
+        List<Pair<int[], Double>> interactionCoefficients = new ArrayList<>();
         double[] coefficients = new double[names().length + 1]; // +1 for the bias term
         for (Object key : json.keySet()) {
             String keyStr = (String) key;
@@ -100,7 +100,7 @@ public interface ICoefficients {
                     }
                     featureIndices[i] = featureIndex;
                 }
-                interactionCoefficients.put(featureIndices, getJSONAsDouble(json, key));
+                interactionCoefficients.add(Pair.of(featureIndices, getJSONAsDouble(json, key)));
             } else {
                 if (keyStr.equals("BIAS")) {
                     coefficients[0] = getJSONAsDouble(json, key);
@@ -117,7 +117,7 @@ public interface ICoefficients {
     }
 
 
-    default Pair<double[], Map<int[], Double>> readJSONCoefficientsFile(File coeffFile) {
+    default Pair<double[], List<Pair<int[], Double>>> readJSONCoefficientsFile(File coeffFile) {
         // the JSON file is a list of properties, each of which is the name of a feature or set of features
         // (in which case they are separated by colons), and then the coefficient for that feature
         JSONObject json = loadJSONFile(coeffFile.toString());

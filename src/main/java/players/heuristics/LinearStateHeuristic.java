@@ -7,9 +7,6 @@ import org.json.simple.JSONObject;
 import utilities.JSONUtils;
 import utilities.Utils;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristic, IToJSON {
 
     protected IStateFeatureVector features;
@@ -35,38 +32,7 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
     public LinearStateHeuristic(JSONObject json) {
         this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
         this.defaultHeuristic = JSONUtils.loadClassFromJSON((JSONObject) json.get("defaultHeuristic"));
-
-        // Coefficients to be pulled in from JSON
-        if (json.get("coefficients") instanceof JSONObject coefficientsAsJSON) {
-            this.coefficients = new double[coefficientsAsJSON.size()];
-            this.coefficients[0] = ((Number) coefficientsAsJSON.get("BIAS")).doubleValue();
-            List<String> allFeatureNames = Arrays.stream(features.names()).toList();
-            for (int i = 0; i < allFeatureNames.size(); i++) {
-                String featureName = allFeatureNames.get(i);
-                if (featureName.contains(":")) {
-                    // interaction term
-                    List<String> featureNames = Arrays.stream(featureName.split(":")).toList();
-                    int[] featureIndices = new int[featureNames.size()];
-                    for (int j = 0; j < featureNames.size(); j++) {
-                        int index = indexOf(featureNames.get(j));
-                        if (index == -1) {
-                            throw new IllegalArgumentException("Feature " + featureNames.get(j) + " not found in feature vector");
-                        }
-                        featureIndices[j] = index;
-                    }
-                    double coefficient = ((Number) coefficientsAsJSON.get(featureName)).doubleValue();
-                    this.interactionCoefficients[i] = coefficient;
-                    this.interactions[i] = featureIndices;
-                } else {
-                    double coefficient = ((Number) coefficientsAsJSON.get(featureName)).doubleValue();
-                    this.coefficients[i+1] = coefficient;
-                }
-            }
-        } else if (json.get("coefficients") instanceof String coefficientsFile) {
-            loadFromFile(coefficientsFile);
-        } else {
-            throw new IllegalArgumentException("Coefficients must be a JSON array or a file name");
-        }
+        loadCoefficientsFromJSON(json);
     }
 
     @Override
