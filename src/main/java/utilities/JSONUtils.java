@@ -79,8 +79,8 @@ public class JSONUtils {
             }
             // 2. then look for a constructor that takes a JSONObject
             try {
-                Constructor<?> constructor = outputClass.getConstructor();
-                return (T) constructor.newInstance();
+                Constructor<?> constructor = outputClass.getConstructor(JSONObject.class);
+                return (T) constructor.newInstance(json);
             } catch (NoSuchMethodException e) {
                 // continue to the next step and look for args
             }
