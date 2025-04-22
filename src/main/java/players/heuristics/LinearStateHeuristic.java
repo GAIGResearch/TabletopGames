@@ -33,13 +33,13 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
     }
 
     public LinearStateHeuristic(JSONObject json) {
-
         this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
         this.defaultHeuristic = JSONUtils.loadClassFromJSON((JSONObject) json.get("defaultHeuristic"));
 
         // Coefficients to be pulled in from JSON
         if (json.get("coefficients") instanceof JSONObject coefficientsAsJSON) {
             this.coefficients = new double[coefficientsAsJSON.size()];
+            this.coefficients[0] = ((Number) coefficientsAsJSON.get("BIAS")).doubleValue();
             List<String> allFeatureNames = Arrays.stream(features.names()).toList();
             for (int i = 0; i < allFeatureNames.size(); i++) {
                 String featureName = allFeatureNames.get(i);
@@ -59,7 +59,7 @@ public class LinearStateHeuristic extends GLMHeuristic implements IStateHeuristi
                     this.interactions[i] = featureIndices;
                 } else {
                     double coefficient = ((Number) coefficientsAsJSON.get(featureName)).doubleValue();
-                    this.coefficients[i] = coefficient;
+                    this.coefficients[i+1] = coefficient;
                 }
             }
         } else if (json.get("coefficients") instanceof String coefficientsFile) {
