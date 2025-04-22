@@ -11,8 +11,8 @@ import java.util.Objects;
 
 public abstract class DominionAction extends AbstractAction {
 
-    protected final CardType type;
-    protected final int player;
+    public final CardType type;
+    public final int player;
     protected boolean dummyAction;
 
     public DominionAction(CardType type, int playerId) {

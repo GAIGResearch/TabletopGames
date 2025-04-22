@@ -81,7 +81,7 @@ public class ActionFeatureListener extends FeatureListener {
                 cachedObjectPhi = new Object[0];
             }
         }
-        System.arraycopy(retValue, 0, retValue, 0, cachedObjectPhi.length);
+        System.arraycopy(cachedObjectPhi, 0, retValue, 0, cachedObjectPhi.length);
         Object[] psi = psiFn.featureVector(action, state, perspectivePlayer);
         System.arraycopy(psi, 0, retValue, cachedObjectPhi.length, psi.length);
         return retValue;

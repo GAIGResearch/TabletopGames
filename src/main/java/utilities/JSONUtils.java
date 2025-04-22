@@ -104,7 +104,7 @@ public class JSONUtils {
                     } else if (arg instanceof Boolean) {
                         argClasses[i] = boolean.class;
                     } else if (arg instanceof String str) {
-                        // if the string ends with .json, then we load this as a JSONOBject
+                        // if the string ends with .json, then we load this as a JSONObject
                         // and then we load the class from that
                         if (str.endsWith(".json")) {
                             JSONObject subJSON = loadJSONFile(str);
@@ -216,7 +216,7 @@ public class JSONUtils {
      * Given a filename that contains only a single class, this will instantiate the class
      * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
      * find and call the relevant constructor
-     *
+     *z
      * @param filename - the filename
      * @param <T>      - the Class type that is to be instantiated
      * @return
@@ -330,7 +330,7 @@ public class JSONUtils {
                             .keySet().stream())
                     .distinct()
                     .sorted(String.CASE_INSENSITIVE_ORDER)
-                    .collect(toList()));
+                    .toList());
 
             writer.write(String.join("\t", headers) + "\n");
             for (String key : map.keySet()) {

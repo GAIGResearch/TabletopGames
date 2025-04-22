@@ -2,7 +2,6 @@ package players.learners;
 
 
 import core.interfaces.IActionFeatureVector;
-import core.interfaces.IStateFeatureJSON;
 import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.LinearRegression;
@@ -10,10 +9,6 @@ import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import players.heuristics.*;
-
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class OLSLearner extends ApacheLearner {
 
@@ -37,8 +32,7 @@ public class OLSLearner extends ApacheLearner {
     }
 
     public OLSLearner(double gamma, double elasticNetParam, double regParam, Target target,
-                        IStateFeatureVector stateFeatureVector,
-                      IActionFeatureVector actionFeatureVector) {
+                      IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
         super(gamma, target, stateFeatureVector, actionFeatureVector);
         this.elasticNetParam = elasticNetParam;
         this.regParam = regParam;
@@ -78,7 +72,7 @@ public class OLSLearner extends ApacheLearner {
         if (this.actionFeatureVector == null) {
             // return the learned OLS heuristic
             return new LinearStateHeuristic(stateFeatureVector, coefficients,
-                    switch(targetType) {
+                    switch (targetType) {
                         case ORDINAL, ORD_MEAN, ORD_SCALE, ORD_MEAN_SCALE -> new OrdinalPosition();
                         case SCORE -> new PureScoreHeuristic();
                         case SCORE_DELTA -> new LeaderHeuristic();
