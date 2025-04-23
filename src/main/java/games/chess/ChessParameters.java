@@ -25,7 +25,7 @@ public class ChessParameters extends AbstractParameters {
     @Override
     protected boolean _equals(Object o) {
         // TODO: compare all variables.
-        return o instanceof GTParameters;
+        return o instanceof ChessParameters;
     }
 
     @Override
