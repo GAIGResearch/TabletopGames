@@ -46,9 +46,9 @@ public class MovePiece extends AbstractAction {
         ChessGameState gs = (ChessGameState) ags;
         
 
-        gs.getBoard().setElement(startX, startY, null);
-        gs.getBoard().getElement(targetX, targetY);
         
+        gs.setPiece(targetX, targetY, gs.getPiece(startX, startY));
+        gs.setPiece(startX, startY, null);
 
 
         return true;
@@ -92,8 +92,20 @@ public class MovePiece extends AbstractAction {
      */
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        ChessGameState gs = (ChessGameState) gameState;
+        ChessPiece startPiece = gs.getPiece(startX, startY);
+        ChessPiece targetPiece = gs.getPiece(targetX, targetY);
+        String startPieceName = startPiece != null ? startPiece.getType().toString() : "empty";
+        String targetPieceName = targetPiece != null ? targetPiece.getType().toString() : "empty";
+
+        String startSquare = "(" + startX + ", " + startY + ")";
+        String targetSquare = "(" + targetX + ", " + targetY + ")";
+        String output = "Move " + startPieceName + " from " + startSquare + " to " + targetSquare;
+
+
+        return output;
     }
+    
 
 
     /**

@@ -26,38 +26,33 @@ public class ChessPiece extends BoardNode {
         PAWN,
         NONE //Used for empty squares, not a piece
     }
-    public enum ChessPieceColor {
-        WHITE,
-        BLACK,
-        NONE //Used for empty squares, not a piece
-    }
 
     //Type of the piece (e.g. KING, QUEEN, etc.)
     private ChessPieceType type;
-    //Color of the piece (e.g. WHITE, BLACK)
-    private ChessPieceColor color;
+
     //Has the piece moved? (e.g. for castling or en passant)
     private boolean moved = false; //Might be better to only have this for pieces where it matters (e.g. pawns, rooks, kings)
     
 
 
-    public ChessPiece(ChessPieceType type, ChessPieceColor color, boolean moved) {
+    public ChessPiece(ChessPieceType type, int ownerID, boolean moved) {
         super(-1, "ChessPiece");
         this.type = type;
-        this.color = color;
+        this.setOwnerId(ownerID);
         this.moved = moved;
+
     }
 
-    protected ChessPiece(ChessPieceType type, ChessPieceColor color, boolean moved, int componentID) {
+    protected ChessPiece(ChessPieceType type, int ownerID, boolean moved, int componentID) {
         super(-1, "ChessPiece", componentID);
         this.type = type;
-        this.color = color;
+        this.setOwnerId(ownerID);
         this.moved = moved;
     }
 
     @Override
     public ChessPiece copy() {
-        ChessPiece copy = new ChessPiece(type, color, moved, componentID);
+        ChessPiece copy = new ChessPiece(type, ownerId, moved, componentID);
         copyComponentTo(copy);
         return copy;
     }
@@ -66,11 +61,19 @@ public class ChessPiece extends BoardNode {
     public boolean equals(Object o) {
         if (!(o instanceof ChessPiece)) return false;
         ChessPiece other = (ChessPiece) o;
-        return this.type == other.type && this.color == other.color;
+        return this.type == other.type && this.getOwnerId() == other.getOwnerId() &&
+                this.moved == other.moved && this.componentID == other.componentID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, color, moved, componentID);
+        return Objects.hash(type, ownerId, moved, componentID);
+    }
+
+    public ChessPieceType getChessPieceType() {
+        return type;
+    }
+    public boolean getMoved() {
+        return moved;
     }
 }

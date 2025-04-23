@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.Objects;
 
 import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.s;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -28,6 +29,12 @@ public class ChessGameState extends AbstractGameState {
 
     ChessPiece[][] pieces = new ChessPiece[8][8];
     GridBoard board = new GridBoard(pieces);
+    //Mapping from piece to its position on the board
+    HashMap<ChessPiece, int[]> pieceToPosition = new HashMap<>();
+    //List of white pieces
+    List<ChessPiece> whitePieces = new ArrayList<>();
+    //List of black pieces
+    List<ChessPiece> blackPieces = new ArrayList<>();
 
     //Number of moves without a pawn move or capture
     int halfMoveClock = 0;
@@ -86,7 +93,27 @@ public class ChessGameState extends AbstractGameState {
     @Override
     protected ChessGameState _copy(int playerId) {
         ChessGameState copy = new ChessGameState(getGameParameters(), getNPlayers());
-        // TODO: deep copy all variables to the new game state.
+        copy.whitePieces = new ArrayList<>(whitePieces);
+        copy.blackPieces = new ArrayList<>(blackPieces);
+        copy.halfMoveClock = halfMoveClock;
+        copy.repetitionCount = repetitionCount;
+        copy.pieces = new ChessPiece[8][8]; //Is this really the best way to do this? Ew...
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[i].length; j++) {
+                if (pieces[i][j] != null) {
+                    copy.pieces[i][j] = pieces[i][j].copy();
+                } else {
+                    copy.pieces[i][j] = null;
+                }
+            }
+        }
+        copy.board = new GridBoard(copy.pieces);
+        copy.pieceToPosition = new HashMap<>(pieceToPosition.size());
+        for (ChessPiece piece : pieceToPosition.keySet()) {
+            copy.pieceToPosition.put(piece.copy(), pieceToPosition.get(piece).clone());
+        }
+        copy.pieceToPosition = pieceToPosition;
+
         return copy;
     }
 
@@ -134,8 +161,53 @@ public class ChessGameState extends AbstractGameState {
     public GridBoard getBoard() {
         return board;
     }
+
     public void setPiece(int x, int y, ChessPiece piece) {
         pieces[x][y] = piece;
+        if (piece != null) {
+            pieceToPosition.put(piece, new int[]{x, y});
+        }
+    }
+    public ChessPiece getPiece(int x, int y) {
+        return pieces[x][y];
+    }
+    public List<ChessPiece> getPieces(int playerId) {
+        if (playerId == 0) {
+            return whitePieces;
+        } else if (playerId == 1) {
+            return blackPieces;
+        } else {
+            throw new IllegalArgumentException("Invalid player ID: " + playerId);
+        }
+    }
+    public List<ChessPiece> getWhitePieces() {
+        return whitePieces;
+    }
+    public List<ChessPiece> getBlackPieces() {
+        return blackPieces;
+    }
+    public HashMap<ChessPiece, int[]> getPieceToPosition() {
+        return pieceToPosition;
+    }
+    public void updatePieceLists()
+    {
+        whitePieces.clear();
+        blackPieces.clear();
+        pieceToPosition.clear();
+        for (int i = 0; i < pieces.length; i++) {
+            for (int j = 0; j < pieces[i].length; j++) {
+                ChessPiece piece = pieces[i][j];
+                if (piece != null) {
+                    if (piece.getOwnerId() == 0) {
+                        whitePieces.add(piece);
+                    } else if (piece.getOwnerId() == 1) {
+                        blackPieces.add(piece);
+                    }
+                    pieceToPosition.put(piece, new int[]{i, j});
+                }
+            }
+        }
+        return;
     }
 
 
