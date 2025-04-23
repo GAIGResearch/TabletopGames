@@ -66,7 +66,8 @@ public class AttackTroop extends CQAction {
             return true;
         }
         // Counterattack, as the troop survived
-        damage(cqgs, vigilance ? target : selected, vigilance ? dmg : counterDmg);
+        if (counterAttack)
+            damage(cqgs, vigilance ? target : selected, vigilance ? dmg : counterDmg);
         cqgs.setGamePhase(CQGameState.CQGamePhase.RallyPhase);
         return gs.setActionInProgress(this);
     }
