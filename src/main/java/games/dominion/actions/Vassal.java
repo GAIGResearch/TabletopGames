@@ -6,6 +6,7 @@ import java.util.List;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.dominion.DominionGameState;
 import games.dominion.DominionConstants.DeckType;
@@ -18,8 +19,7 @@ import games.dominion.cards.DominionCard;
 public class Vassal extends DominionAction implements IExtendedSequence {
 
     boolean executed = false;
-    boolean emptyDeck = false;
-    DominionCard drawnCard;
+    CardType cardType;
 
     public Vassal(int playerId) {
         super(CardType.VASSAL, playerId);
@@ -32,6 +32,21 @@ public class Vassal extends DominionAction implements IExtendedSequence {
     @Override
     boolean _execute(DominionGameState state) {
         state.setActionInProgress(this);
+        Deck<DominionCard> drawPile = state.getDeck(DeckType.DRAW, player);
+        Deck<DominionCard> discardPile = state.getDeck(DeckType.DISCARD, player);
+
+        // Reshuffle if draw pile is empty
+        if (drawPile.getSize() == 0) {
+            discardPile.shuffle(state.getRnd());
+            drawPile.add(discardPile);
+            discardPile.clear();
+        }
+
+        // Discard top card from the deck
+        DominionCard card = drawPile.draw();
+        state.getDeck(DeckType.TABLE, player).add(card);
+        cardType = card.cardType();
+
         return true;
     }
 
@@ -39,8 +54,7 @@ public class Vassal extends DominionAction implements IExtendedSequence {
     public Vassal copy() {
         Vassal retValue = new Vassal(player, dummyAction);
         retValue.executed = executed;
-        retValue.emptyDeck = emptyDeck;
-        retValue.drawnCard = drawnCard;
+        retValue.cardType = cardType;
         return retValue;
     }
 
@@ -48,19 +62,17 @@ public class Vassal extends DominionAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         DominionGameState dgs = (DominionGameState) state;
 
+        DominionCard card = dgs.getDeck(DeckType.TABLE, player).peek();
+
+        assert card.cardType() == cardType: "Discarded CardType: " + card.cardType() + ", does not mach: " + cardType;
+
         List<AbstractAction> actions = new ArrayList<>();
         actions.add(new DoNothing());
 
-        if (dgs.getDeck(DeckType.DRAW, player).getSize() == 0) {
-            emptyDeck = true;
-            return actions;
-        }
-
-        // Draw the top card of the deck, and if action card, it can be played
-        // This card is discarded afterwards
-        drawnCard = dgs.getDeck(DeckType.DRAW, player).draw().copy();
-        if (drawnCard.isActionCard()) {
-            DominionAction action = drawnCard.getAction(player);
+        // If the card discarded is an action card
+        // it can be played
+        if (card.isActionCard()) {
+            DominionAction action = card.getAction(player);
             action.dummyAction = true;
             actions.add(action);
         }
@@ -76,16 +88,12 @@ public class Vassal extends DominionAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         DominionGameState dgs = (DominionGameState) state;
+        Deck<DominionCard> discardPile = dgs.getDeck(DeckType.DISCARD, player);
         executed = true;
 
-        if (emptyDeck) {
-            return;
-        }
-        else if (action instanceof DoNothing) {
-            dgs.getDeck(DeckType.DISCARD, player).add(drawnCard);
-        }
-        else {
-            dgs.getDeck(DeckType.TABLE, player).add(drawnCard);
+        if (action instanceof DoNothing) {
+            DominionCard playedCard = dgs.getDeck(DeckType.TABLE, player).draw();
+            dgs.getDeck(DeckType.DISCARD, player).add(playedCard);
         }
     }
 
@@ -98,30 +106,16 @@ public class Vassal extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Vassal) {
             Vassal other = (Vassal) obj;
-
-            boolean sameCard;
-
-            if (drawnCard == null && other.drawnCard == null) {
-                sameCard = true;
-            }
-            else if (drawnCard != null && drawnCard.equals(other.drawnCard)) {
-                sameCard = true;
-            }
-            else {
-                sameCard = false;
-            }
-
             return super.equals(obj) && other.executed == executed
-                                     && emptyDeck == other.emptyDeck
-                                     && sameCard;
+                                     && other.cardType == cardType;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        int cardHash = drawnCard != null ? drawnCard.hashCode() : 0;
-        return super.hashCode() + (executed ? 1 : 0) + cardHash + (emptyDeck ? 1 : 0);
+        int cardHash = cardType != null ? cardType.hashCode() : 9000;
+        return super.hashCode() + (executed ? 1 : 0) + cardHash;
     }
     
 }
