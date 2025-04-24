@@ -4,11 +4,16 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import games.dominion.actions.*;
+import games.dominion.cards.CardType;
 
 public class DomActionFeatures implements IActionFeatureVector {
     String[] names = new String[]{
             "actionType",
             "cardType"
+    };
+    Class<?>[] types = new Class[]{
+            ActionType.class,
+            CardType.class
     };
 
     public enum ActionType {
@@ -49,5 +54,10 @@ public class DomActionFeatures implements IActionFeatureVector {
     @Override
     public String[] names() {
         return names;
+    }
+
+    @Override
+    public Class[] types() {
+        return types;
     }
 }

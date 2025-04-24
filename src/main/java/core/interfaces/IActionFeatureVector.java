@@ -3,6 +3,8 @@ package core.interfaces;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
+import java.util.Arrays;
+
 public interface IActionFeatureVector {
 
     double[] doubleVector(AbstractAction action, AbstractGameState state, int playerID);
@@ -17,5 +19,11 @@ public interface IActionFeatureVector {
     }
 
     String[] names();
+    default Class<?>[] types() {
+        // the default is all double
+        Class<?>[] retValue = new Class[names().length];
+        Arrays.fill(retValue, Double.class);
+        return retValue;
+    }
 
 }

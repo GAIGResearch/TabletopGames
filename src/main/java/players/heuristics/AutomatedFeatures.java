@@ -1,39 +1,63 @@
 package players.heuristics;
 
 import core.AbstractGameState;
+import core.actions.AbstractAction;
+import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
+import games.dominion.metrics.DomActionFeatures;
 import games.dominion.metrics.DomStateFeaturesReduced;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.testng.annotations.ObjectFactory;
 import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.isNumeric;
-
-public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
+public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeatureVector, IToJSON {
 
     enum featureType {
         RAW, ENUM, STRING, RANGE, TARGET
     }
 
     int buckets = 5;  // TODO: Extend this to be configurable for each underlying numeric feature independently
-    IStateFeatureVector underlyingVector;
+    T underlyingVector;
+    String[] underlyingNames;
+    Class<?>[] underlyingTypes;
+
     List<String> featureNames = new ArrayList<>();
     List<featureType> featureTypes = new ArrayList<>();
     List<Object> enumValues = new ArrayList<>();
     List<Pair<Number, Number>> featureRanges = new ArrayList<>();
     List<Integer> featureIndices = new ArrayList<>();
 
-    public AutomatedStateFeatures(IStateFeatureVector underlyingVector) {
+    public AutomatedFeatures(T underlyingVector) {
+        validateUnderlyingVector(underlyingVector);
+    }
+    private void validateUnderlyingVector(T underlyingVector) {
         this.underlyingVector = underlyingVector;
+        if (!(underlyingVector instanceof IStateFeatureVector) && !(underlyingVector instanceof IActionFeatureVector)) {
+            throw new IllegalArgumentException("Underlying vector must be of type IStateFeatureVector or IActionFeatureVector");
+        }
+        if (underlyingVector instanceof IStateFeatureVector stateFeatures) {
+            underlyingNames = stateFeatures.names();
+            underlyingTypes = new Class<?>[underlyingNames.length];
+            for (int i = 0; i < underlyingNames.length; i++) {
+                underlyingTypes[i] = stateFeatures.types()[i];
+            }
+        } else {
+            IActionFeatureVector actionFeatures = (IActionFeatureVector) underlyingVector;
+            underlyingNames = actionFeatures.names();
+            underlyingTypes = new Class<?>[underlyingNames.length];
+            for (int i = 0; i < underlyingNames.length; i++) {
+                underlyingTypes[i] = actionFeatures.types()[i];
+            }
+        }
     }
 
-    public AutomatedStateFeatures(JSONObject json) {
+    public AutomatedFeatures(JSONObject json) {
         if (json.get("class") == null || json.get("class").toString().isEmpty()) {
             throw new IllegalArgumentException("Invalid JSON file: missing 'class' field");
         }
@@ -43,6 +67,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
         // now populate each of the class fields from JSON
         buckets = Integer.parseInt(json.get("buckets").toString());
         underlyingVector = JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingVector"));
+        validateUnderlyingVector(underlyingVector);
         JSONArray features = (JSONArray) json.get("features");
         for (Object feature : features) {
             JSONObject featureObject = (JSONObject) feature;
@@ -69,7 +94,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
                     featureTypes.add(featureType.RANGE);
                     String rangeString = featureObject.get("range").toString();
                     String[] rangeParts = rangeString.replaceAll("[\\[\\]]", "").split(",");
-                    Number lowerBound =  Double.parseDouble(rangeParts[0]);
+                    Number lowerBound = Double.parseDouble(rangeParts[0]);
                     Number upperBound = Double.parseDouble(rangeParts[1]);
                     featureRanges.add(new Pair<>(lowerBound, upperBound));
                 }
@@ -107,12 +132,31 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
         jsonObject.put("features", featureObjects);
         return jsonObject;
     }
+    @Override
+    public double[] doubleVector(AbstractAction action, AbstractGameState state, int playerID) {
+        // we first extract the underlying vector to get the raw data
+        Object[] underlyingVectorData;
+        if (underlyingVector instanceof IActionFeatureVector stateFeatures) {
+            underlyingVectorData = stateFeatures.featureVector(action, state, playerID);
+        } else {
+            throw new IllegalArgumentException("Unsupported underlying vector type: " + underlyingVector.getClass());
+        }
+        return buildCompositeFeatures(underlyingVectorData);
+    }
 
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
         // we first extract the underlying vector to get the raw data
-        Object[] underlyingVectorData = underlyingVector.featureVector(state, playerID);
+        Object[] underlyingVectorData;
+        if (underlyingVector instanceof IStateFeatureVector stateFeatures) {
+            underlyingVectorData = stateFeatures.featureVector(state, playerID);
+        } else {
+            throw new IllegalArgumentException("Unsupported underlying vector type: " + underlyingVector.getClass());
+        }
+        return buildCompositeFeatures(underlyingVectorData);
+    }
 
+    private double[] buildCompositeFeatures(Object[] underlyingVectorData) {
         // then we iterate over the automated features and generate these from the raw data
         double[] featureVector = new double[featureNames.size()];
         for (int i = 0; i < featureNames.size(); i++) {
@@ -154,10 +198,19 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
     public Object[] featureVector(AbstractGameState state, int playerID) {
         throw new UnsupportedOperationException("Not supported.");
     }
+    @Override
+    public Object[] featureVector(AbstractAction action, AbstractGameState state, int playerID) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
 
     @Override
     public String[] names() {
         return featureNames.toArray(new String[0]);
+    }
+
+    @Override
+    public Class<?>[] types() {
+        return featureTypes.toArray(new Class[0]);
     }
 
     public void processData(String inputFile, String outputFile) {
@@ -197,8 +250,8 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
 
             // now determine is the column is one of those specified in the underlying vector
             int underlyingindex = -1;
-            for (int j = 0; j < underlyingVector.names().length; j++) {
-                if (underlyingVector.names()[j].equals(headers.get(i))) {
+            for (int j = 0; j < underlyingNames.length; j++) {
+                if (underlyingNames[j].equals(headers.get(i))) {
                     underlyingindex = j;
                     break;
                 }
@@ -216,7 +269,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
                 newFeatureClasses.add(columnType);
                 targetData.put(headers.get(i), i);
             } else {
-                Class<?> columnType = underlyingVector.types()[underlyingindex];
+                Class<?> columnType = underlyingTypes[underlyingindex];
                 underlyingIndexToRowIndex.put(underlyingindex, i);
                 String columnName = headers.get(i);
                 System.out.println("Processing column: " + columnName + " of type: " + columnType);
@@ -261,6 +314,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
                         newFeatureTypes.add(featureType.ENUM);
                         newFeatureClasses.add(Boolean.class);
                         newEnumValues.add(enumValue);
+                        newFeatureRanges.add(null);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
                 } else if (columnType.equals(String.class)) {
@@ -277,6 +331,7 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
                         newFeatureTypes.add(featureType.STRING);
                         newFeatureClasses.add(Boolean.class);
                         newEnumValues.add(value);
+                        newFeatureRanges.add(null);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
                 } else {
@@ -422,11 +477,11 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
             for (int i = 0; i < featureRanges.size() - 1; i++) {
                 Pair<Number, Number> range1 = featureRanges.get(i);
                 Pair<Number, Number> range2 = featureRanges.get(i + 1);
-   //             System.out.println("Checking ranges: " + range1 + " and " + range2);
+                //             System.out.println("Checking ranges: " + range1 + " and " + range2);
                 // if two ranges start at the same point, then we remove the first one (the one with the earlier end point)
                 if (range1.a.equals(range2.a)) {
                     toRemove.add(i);
-     //               System.out.println("Removing range: " + range1 + " because it is equal to: " + range2);
+                    //               System.out.println("Removing range: " + range1 + " because it is equal to: " + range2);
                     continue;
                 }
                 if (range1.b.doubleValue() != range2.a.doubleValue()) {
@@ -517,9 +572,9 @@ public class AutomatedStateFeatures implements IStateFeatureVector, IToJSON {
 
 
     public static void main(String[] args) {
-        AutomatedStateFeatures asf = new AutomatedStateFeatures(new DomStateFeaturesReduced());
-        String inputFile = "C:\\TAG\\DominionFeaturesASF\\DomStateFeatures001.txt"; // Replace with your input file path
-        String outputFile = "C:\\TAG\\DominionFeaturesASF\\ASF_22Apr.txt"; // Replace with your output file path
+        AutomatedFeatures asf = new AutomatedFeatures(new DomActionFeatures());
+        String inputFile = "C:\\TAG\\DominionFeatures\\DomActionFeatures001.txt"; // Replace with your input file path
+        String outputFile = "C:\\TAG\\DominionFeatures\\AAF_24Apr.txt"; // Replace with your output file path
         asf.processData(inputFile, outputFile);
     }
 }
