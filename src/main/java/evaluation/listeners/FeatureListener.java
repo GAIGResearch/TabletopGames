@@ -71,14 +71,20 @@ public abstract class FeatureListener implements IGameListener {
         for (StateFeatureListener.LocalDataWrapper record : currentData) {
             // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
             // data is written to file in a sensible order for human viewing
-            Map<String, Double> data = new LinkedHashMap<>();
+            Map<String, Object> data = new LinkedHashMap<>();
             data.put("GameID", (double) state.getGameID());
             data.put("Player", (double) record.player);
             data.put("Round", (double) record.gameRound);
             data.put("Turn", (double) record.gameTurn);
             data.put("CurrentScore", record.currentScore);
-            for (int i = 0; i < record.array.length; i++) {
-                data.put(names()[i], record.array[i]);
+            if (record.array.length > 0) {
+                for (int i = 0; i < record.array.length; i++) {
+                    data.put(names()[i], record.array[i]);
+                }
+            } else {
+                for (int i = 0; i < record.objArray.length; i++) {
+                    data.put(names()[i], record.objArray[i]);
+                }
             }
             data.put("PlayerCount", (double) getGame().getPlayers().size());
             data.put("TotalRounds", finalRound);
