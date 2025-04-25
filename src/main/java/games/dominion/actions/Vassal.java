@@ -31,7 +31,6 @@ public class Vassal extends DominionAction implements IExtendedSequence {
 
     @Override
     boolean _execute(DominionGameState state) {
-        state.setActionInProgress(this);
         Deck<DominionCard> drawPile = state.getDeck(DeckType.DRAW, player);
         Deck<DominionCard> discardPile = state.getDeck(DeckType.DISCARD, player);
 
@@ -42,10 +41,17 @@ public class Vassal extends DominionAction implements IExtendedSequence {
             discardPile.clear();
         }
 
-        // Discard top card from the deck
-        DominionCard card = drawPile.draw();
-        state.getDeck(DeckType.TABLE, player).add(card);
-        cardType = card.cardType();
+        // There is an edge case where this is the only card they have left
+        if (discardPile.getSize() > 0) {
+            state.setActionInProgress(this);
+
+            // Discard top card from the deck...
+            DominionCard card = drawPile.draw();
+
+            // ...and move to table
+            state.getDeck(DeckType.TABLE, player).add(card);
+            cardType = card.cardType();
+        }
 
         return true;
     }
@@ -88,9 +94,9 @@ public class Vassal extends DominionAction implements IExtendedSequence {
     @Override
     public void _afterAction(AbstractGameState state, AbstractAction action) {
         DominionGameState dgs = (DominionGameState) state;
-        Deck<DominionCard> discardPile = dgs.getDeck(DeckType.DISCARD, player);
         executed = true;
 
+        // They choose not to play the action, move it to discard pile
         if (action instanceof DoNothing) {
             DominionCard playedCard = dgs.getDeck(DeckType.TABLE, player).draw();
             dgs.getDeck(DeckType.DISCARD, player).add(playedCard);
