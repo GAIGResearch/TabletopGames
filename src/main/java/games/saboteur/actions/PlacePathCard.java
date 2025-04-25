@@ -50,7 +50,7 @@ public class PlacePathCard extends SetGridValueAction
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), rotated);
+        return super.hashCode() + 31 * (rotated ? 1 : 0);
     }
 
     @Override

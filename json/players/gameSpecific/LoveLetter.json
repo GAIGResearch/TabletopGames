@@ -1,15 +1,15 @@
 {
   "budgetType": "BUDGET_TIME",
-  "rolloutLength": 3,
+  "rolloutLength": 1,
+  "rolloutLengthPerPlayer" : true,
   "opponentTreePolicy": "SelfOnly",
-  "MASTGamma": 0,
   "heuristic": {
     "class": "players.heuristics.LeaderHeuristic"
   },
   "K": 1,
-  "exploreEpsilon": 0.3,
-  "treePolicy": "RegretMatching",
-  "MAST": "Both",
+  "FPU" : 100.0,
+  "treePolicy": "UCB_Tuned",
+  "reuseTree" : true,
   "rolloutType": "RANDOM",
   "information": "Information_Set",
   "class": "players.mcts.MCTSParams",

@@ -24,4 +24,13 @@ public class WinOnlyHeuristic implements IStateHeuristic {
     public String toString() {
         return "WinOnlyHeuristic";
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof WinOnlyHeuristic;
+    }
+    @Override
+    public int hashCode() {
+        return 4;
+    }
 }

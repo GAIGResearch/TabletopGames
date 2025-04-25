@@ -1,5 +1,7 @@
 package utilities;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.json.simple.JSONObject;
 
@@ -93,8 +95,6 @@ public abstract class Utils {
     public static int gamesPerMatchup(int nPlayers, int nAgents, int totalGameBudget, boolean selfPlay) {
         long permutationsOfPlayers = playerPermutations(nPlayers, nAgents, selfPlay);
         return (int) (totalGameBudget / permutationsOfPlayers);
-        // line below is if we are happy to breach the budget limit
-        // int gamesPerMatchupHigh = (int) Math.ceil((double) totalGameBudget / permutationsOfPlayers);
     }
 
     public static int playerPermutations(int nPlayers, int nAgents, boolean selfPlay) {
@@ -463,6 +463,36 @@ public abstract class Utils {
             for (int i = next + 1; i < n; i++)
                 indices[i] = 0;
         }
+    }
+
+    /*
+        * Returns the standard error on the difference between two means.
+        * The inputs are the sums of the values, the sums of the squares of the values, and the number of values for each set of data.
+     */
+    public static double meanDiffStandardError(double sum1, double sum2, double sumSq1, double sumSq2, int n1, int n2) {
+        double mean1 = sum1 / n1;
+        double mean2 = sum2 / n2;
+        double variance1 = sumSq1 / n1 - mean1 * mean1;
+        double variance2 = sumSq2 / n2 - mean2 * mean2;
+        double pooledVariance = ((n1 - 1) * variance1 + (n2 - 1) * variance2) / (n1 + n2 - 2);
+        return Math.sqrt(pooledVariance * (1.0 / n1 + 1.0 / n2));
+    }
+
+    /*
+    * Given a required confidence level, alpha, and the number of (independent) tests that are being conducted, N, this function
+    * returns the standard z-score that should be used for each test individually to determine if a result is statistically significant.
+     */
+    public static double standardZScore(double alpha, int N) {
+        double adjustedAlpha = 1.0 - Math.pow(1.0 - alpha, 1.0 / N);
+        NormalDistribution nd = new NormalDistribution();
+        return nd.inverseCumulativeProbability(1.0 - adjustedAlpha);
+    }
+
+    public static double standardTScore(double alpha, int N, int df) {
+        // n1 and n2 are the numbers in the two samples
+        TDistribution tDist = new TDistribution(df);
+        double adjustedAlpha = 1.0 - Math.pow(1.0 - alpha, 1.0 / N);
+        return tDist.inverseCumulativeProbability(1.0 - adjustedAlpha);
     }
 
 

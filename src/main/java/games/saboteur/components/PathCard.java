@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class PathCard extends SaboteurCard {
-    final private boolean[] directions;
+    final private boolean[] directions;  // The array is final - but the contents are not!
     final public PathCardType type;
     final boolean hasTreasure;
 
