@@ -16,14 +16,15 @@ import utilities.Utils;
 
 import java.util.*;
 
-public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeatureVector, IToJSON {
+public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVector, IToJSON {
 
     enum featureType {
         RAW, ENUM, STRING, RANGE, TARGET
     }
 
     int buckets = 5;  // TODO: Extend this to be configurable for each underlying numeric feature independently
-    T underlyingVector;
+    IStateFeatureVector underlyingState;
+    IActionFeatureVector underlyingAction;
     String[] underlyingNames;
     Class<?>[] underlyingTypes;
 
@@ -33,27 +34,37 @@ public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeature
     List<Pair<Number, Number>> featureRanges = new ArrayList<>();
     List<Integer> featureIndices = new ArrayList<>();
 
-    public AutomatedFeatures(T underlyingVector) {
-        validateUnderlyingVector(underlyingVector);
+    public AutomatedFeatures(IStateFeatureVector underlyingStateVector, IActionFeatureVector underlyingActionVector) {
+        validateUnderlyingVector(underlyingStateVector, underlyingActionVector);
     }
-    private void validateUnderlyingVector(T underlyingVector) {
-        this.underlyingVector = underlyingVector;
-        if (!(underlyingVector instanceof IStateFeatureVector) && !(underlyingVector instanceof IActionFeatureVector)) {
-            throw new IllegalArgumentException("Underlying vector must be of type IStateFeatureVector or IActionFeatureVector");
-        }
-        if (underlyingVector instanceof IStateFeatureVector stateFeatures) {
-            underlyingNames = stateFeatures.names();
-            underlyingTypes = new Class<?>[underlyingNames.length];
-            for (int i = 0; i < underlyingNames.length; i++) {
-                underlyingTypes[i] = stateFeatures.types()[i];
-            }
+
+    public AutomatedFeatures(IStateFeatureVector underlyingStateVector) {
+        validateUnderlyingVector(underlyingStateVector, null);
+    }
+
+    public AutomatedFeatures(IActionFeatureVector underlyingActionVector) {
+        validateUnderlyingVector(null, underlyingActionVector);
+    }
+
+    private void validateUnderlyingVector(IStateFeatureVector state, IActionFeatureVector action) {
+        this.underlyingState = state;
+        this.underlyingAction = action;
+        if (underlyingState != null) {
+            underlyingNames = state.names();
+            underlyingTypes = state.types();
         } else {
-            IActionFeatureVector actionFeatures = (IActionFeatureVector) underlyingVector;
-            underlyingNames = actionFeatures.names();
-            underlyingTypes = new Class<?>[underlyingNames.length];
-            for (int i = 0; i < underlyingNames.length; i++) {
-                underlyingTypes[i] = actionFeatures.types()[i];
-            }
+            underlyingNames = new String[0];
+            underlyingTypes = new Class<?>[0];
+        }
+        if (underlyingAction != null) {
+            String[] tempNames = new String[underlyingNames.length + action.names().length];
+            System.arraycopy(underlyingNames, 0, tempNames, 0, underlyingNames.length);
+            System.arraycopy(action.names(), 0, tempNames, underlyingNames.length, action.names().length);
+            underlyingNames = tempNames;
+            Class[] tempTypes = new Class<?>[underlyingTypes.length + action.types().length];
+            System.arraycopy(underlyingTypes, 0, tempTypes, 0, underlyingTypes.length);
+            System.arraycopy(action.types(), 0, tempTypes, underlyingTypes.length, action.types().length);
+            underlyingTypes = tempTypes;
         }
     }
 
@@ -66,8 +77,13 @@ public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeature
         }
         // now populate each of the class fields from JSON
         buckets = Integer.parseInt(json.get("buckets").toString());
-        underlyingVector = JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingVector"));
-        validateUnderlyingVector(underlyingVector);
+        underlyingState = json.containsKey("underlyingState") ?
+                JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingState"))
+                : null;
+        underlyingAction = json.containsKey("underlyingAction") ?
+                JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingAction"))
+                : null;
+        validateUnderlyingVector(underlyingState, underlyingAction);
         JSONArray features = (JSONArray) json.get("features");
         for (Object feature : features) {
             JSONObject featureObject = (JSONObject) feature;
@@ -110,9 +126,16 @@ public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeature
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("class", this.getClass().getName());
         jsonObject.put("buckets", buckets);
-        JSONObject underlyingVector = new JSONObject();
-        underlyingVector.put("class", this.underlyingVector.getClass().getName());
-        jsonObject.put("underlyingVector", underlyingVector);
+        if (this.underlyingState != null) {
+            JSONObject underlyingState = new JSONObject();
+            underlyingState.put("class", this.underlyingState.getClass().getName());
+            jsonObject.put("underlyingState", underlyingState);
+        }
+        if (this.underlyingAction != null) {
+            JSONObject underlyingAction = new JSONObject();
+            underlyingAction.put("class", this.underlyingAction.getClass().getName());
+            jsonObject.put("underlyingAction", underlyingAction);
+        }
         // instead of writing each of the remaining fields as an array,
         // we want an array of JSONObjects, one per feature that has subfields for name, type, enumValue, range, and index
         JSONArray featureObjects = new JSONArray();
@@ -132,27 +155,30 @@ public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeature
         jsonObject.put("features", featureObjects);
         return jsonObject;
     }
+
     @Override
     public double[] doubleVector(AbstractAction action, AbstractGameState state, int playerID) {
         // we first extract the underlying vector to get the raw data
         Object[] underlyingVectorData;
-        if (underlyingVector instanceof IActionFeatureVector stateFeatures) {
-            underlyingVectorData = stateFeatures.featureVector(action, state, playerID);
+        if (underlyingState != null) {
+            underlyingVectorData = underlyingState.featureVector(state, playerID);
         } else {
-            throw new IllegalArgumentException("Unsupported underlying vector type: " + underlyingVector.getClass());
+            underlyingVectorData = new Object[0];
+        }
+        if (underlyingAction != null) {
+            Object[] actionVectorData = underlyingAction.featureVector(action, state, playerID);
+            Object[] temp = new Object[underlyingVectorData.length + actionVectorData.length];
+            System.arraycopy(underlyingVectorData, 0, temp, 0, underlyingVectorData.length);
+            System.arraycopy(actionVectorData, 0, temp, underlyingVectorData.length, actionVectorData.length);
+            underlyingVectorData = temp;
         }
         return buildCompositeFeatures(underlyingVectorData);
     }
 
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
-        // we first extract the underlying vector to get the raw data
-        Object[] underlyingVectorData;
-        if (underlyingVector instanceof IStateFeatureVector stateFeatures) {
-            underlyingVectorData = stateFeatures.featureVector(state, playerID);
-        } else {
-            throw new IllegalArgumentException("Unsupported underlying vector type: " + underlyingVector.getClass());
-        }
+        // in this case we just have to worry about the state vector
+        Object[] underlyingVectorData = underlyingState.featureVector(state, playerID);
         return buildCompositeFeatures(underlyingVectorData);
     }
 
@@ -198,6 +224,7 @@ public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeature
     public Object[] featureVector(AbstractGameState state, int playerID) {
         throw new UnsupportedOperationException("Not supported.");
     }
+
     @Override
     public Object[] featureVector(AbstractAction action, AbstractGameState state, int playerID) {
         throw new UnsupportedOperationException("Not supported.");
@@ -572,7 +599,7 @@ public class AutomatedFeatures<T> implements IStateFeatureVector, IActionFeature
 
 
     public static void main(String[] args) {
-        AutomatedFeatures asf = new AutomatedFeatures(new DomActionFeatures());
+        AutomatedFeatures asf = new AutomatedFeatures(new DomStateFeaturesReduced(), new DomActionFeatures());
         String inputFile = "C:\\TAG\\DominionFeatures\\DomActionFeatures001.txt"; // Replace with your input file path
         String outputFile = "C:\\TAG\\DominionFeatures\\AAF_24Apr.txt"; // Replace with your output file path
         asf.processData(inputFile, outputFile);
