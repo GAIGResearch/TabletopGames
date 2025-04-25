@@ -113,6 +113,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     Number lowerBound = Double.parseDouble(rangeParts[0]);
                     Number upperBound = Double.parseDouble(rangeParts[1]);
                     featureRanges.add(new Pair<>(lowerBound, upperBound));
+                    enumValues.add(null);
                 }
                 default -> throw new IllegalArgumentException("Unsupported type: " + type);
             }

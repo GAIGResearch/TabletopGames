@@ -7,7 +7,6 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,7 +32,10 @@ public abstract class AbstractLearner implements ILearner {
         ORD_MEAN("Ordinal", true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
         ORD_SCALE("Ordinal", false), // as ORDINAL, but scaled to 0 to 1 (for Logistic regression targeting)
         ORD_MEAN_SCALE("Ordinal", true), // as ORD_MEAN, but scaled to 0 to 1 ( for Logistic regression targeting)
-        ACTION_SCORE("ActionScore", false); // targets the score of the action taken (for Q-learning
+        ACTION_CHOSEN("CHOSEN", false), // targets the probability of the action taken
+        ACTION_VISITS("VISIT_PROPORTION", false),
+        ACTION_ADV("ADVANTAGE", false), // targets the advantage of the action taken
+        ACTION_SCORE("ACTION_VALUE", false); // targets the score of the action taken (for Q-learning
 
         public final boolean discountToMean;
         public final String header;
@@ -74,7 +76,8 @@ public abstract class AbstractLearner implements ILearner {
         header = rawData.a.toArray(new String[0]);
 
         String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
-                "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks", "ActionScore"};
+                "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks", "CHOSEN",
+                "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
         // now link these to their actual index in the data
@@ -116,6 +119,10 @@ public abstract class AbstractLearner implements ILearner {
             // calculate the number of turns from this point until the end of the game
             double turns = allData[indexForSpecialColumns.get("TotalTurns")] - allData[indexForSpecialColumns.get("Turn")];
             double playerCount = allData[indexForSpecialColumns.get("PlayerCount")];
+            int targetIndex = indexForSpecialColumns.getOrDefault(targetType.header, -1);
+            if (targetIndex == -1) {
+                throw new IllegalArgumentException("Target " + targetType.header + " not found in data");
+            }
             // discount target (towards expected result where relevant)
             double expectedAverage = 0.0;
             if (targetType == Target.WIN_MEAN)
@@ -124,10 +131,11 @@ public abstract class AbstractLearner implements ILearner {
                 expectedAverage = (1.0 + playerCount) / 2.0;
 
             if (targetType == Target.SCORE_DELTA)
-                target[i][0] = (allData[indexForSpecialColumns.get(targetType.header)] -
+                target[i][0] = (allData[targetIndex] -
                         allData[indexForSpecialColumns.get("CurrentScore")]) * Math.pow(gamma, turns);
-            else
-                target[i][0] = (allData[indexForSpecialColumns.get(targetType.header)] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
+            else {
+                target[i][0] = (allData[targetIndex] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
+            }
 
             if (targetType == Target.ORDINAL || targetType == Target.ORD_MEAN)
                 target[i][0] = -target[i][0];  // if we are targeting the Ordinal position, then high is bad!
