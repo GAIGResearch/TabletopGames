@@ -241,7 +241,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return featureTypes.toArray(new Class[0]);
     }
 
-    public void processData(String inputFile, String outputFile) {
+    public void processData(String outputFile, String... inputFiles) {
         List<String> newFeatureNames = new ArrayList<>();
         List<featureType> newFeatureTypes = new ArrayList<>();
         List<Object> newEnumValues = new ArrayList<>();
@@ -252,7 +252,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // load files...the columns should correspond to the underlying vector
         // while allowing for additional columns (for target values)
-        Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFile);
+        Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFiles);
         List<String> headers = data.a;
         List<List<String>> dataRows = data.b;
         Map<String, Integer> targetData = new HashMap<>();
@@ -598,11 +598,4 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return numericValues;
     }
 
-
-    public static void main(String[] args) {
-        AutomatedFeatures asf = new AutomatedFeatures(new DomStateFeaturesReduced(), new DomActionFeatures());
-        String inputFile = "C:\\TAG\\DominionFeatures\\DomActionFeatures001.txt"; // Replace with your input file path
-        String outputFile = "C:\\TAG\\DominionFeatures\\AAF_24Apr.txt"; // Replace with your output file path
-        asf.processData(inputFile, outputFile);
-    }
 }

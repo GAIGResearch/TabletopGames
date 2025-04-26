@@ -23,6 +23,14 @@ public class LogisticLearner extends ApacheLearner {
     double[] coefficients;
     double regParam = 0.1;
 
+    public LogisticLearner() {
+        super();
+    }
+
+    public LogisticLearner(double gamma, double regularisation, Target target) {
+        this(gamma, regularisation, target, null, null);
+    }
+
     public LogisticLearner(Target target, IStateFeatureVector stateFeatureVector) {
         super(1.0, target, stateFeatureVector);
     }

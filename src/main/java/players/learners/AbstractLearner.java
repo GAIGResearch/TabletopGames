@@ -54,6 +54,8 @@ public abstract class AbstractLearner implements ILearner {
         this(1.0, Target.ACTION_SCORE, stateFeatureVector, actionFeatureVector);
     }
 
+    public AbstractLearner(){}
+
     public AbstractLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
         this.gamma = gamma;
         this.targetType = target;
@@ -67,6 +69,25 @@ public abstract class AbstractLearner implements ILearner {
         this.actionFeatureVector = actionFeatureVector;
     }
 
+    public AbstractLearner setStateFeatureVector(IStateFeatureVector stateFeatureVector) {
+        this.stateFeatureVector = stateFeatureVector;
+        return this;
+    }
+
+    public AbstractLearner setActionFeatureVector(IActionFeatureVector actionFeatureVector) {
+        this.actionFeatureVector = actionFeatureVector;
+        return this;
+    }
+
+    public AbstractLearner setGamma(double gamma) {
+        this.gamma = gamma;
+        return this;
+    }
+    public AbstractLearner setTarget(Target target) {
+        this.targetType = target;
+        return this;
+    }
+
     protected void loadData(String... files) {
 
         Pair<List<String>, List<List<String>>> rawData = Utils.loadDataWithHeader("\t", files);
@@ -77,7 +98,7 @@ public abstract class AbstractLearner implements ILearner {
 
         String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
                 "FinalScore", "FinalScoreAdv", "TotalRounds", "PlayerCount", "TotalTurns", "TotalTicks", "CHOSEN",
-                "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE"};
+                "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
         // now link these to their actual index in the data

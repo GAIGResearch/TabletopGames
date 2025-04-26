@@ -32,6 +32,10 @@ public abstract class ApacheLearner extends AbstractLearner {
         // And the hack to get this to work on Windows (without the Winutils.exe and hadoop.dll nightmare)
         spark.sparkContext().hadoopConfiguration().setClass("fs.file.impl", BareLocalFileSystem.class, FileSystem.class);
     }
+
+    public ApacheLearner() {
+        super();
+    }
     public ApacheLearner(double gamma, Target target, IStateFeatureVector stateFeatureVector) {
         super(gamma, target, stateFeatureVector);
     }

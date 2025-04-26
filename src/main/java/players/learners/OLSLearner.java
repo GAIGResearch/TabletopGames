@@ -16,6 +16,13 @@ public class OLSLearner extends ApacheLearner {
     double elasticNetParam = 0.8;
     double regParam = 0.1;
 
+    public OLSLearner() {
+        super();
+    }
+    public OLSLearner(double gamma, double elasticNetParam, double regParam, Target target) {
+        this(gamma, elasticNetParam, regParam, target, null, null);
+    }
+
     public OLSLearner(Target target, IStateFeatureVector stateFeatureVector) {
         super(1.0, target, stateFeatureVector);
     }
