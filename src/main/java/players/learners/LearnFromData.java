@@ -6,6 +6,9 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
 import games.dominion.metrics.DomActionFeatures;
 import games.dominion.metrics.DomStateFeaturesReduced;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
+import org.apache.spark.ml.regression.LinearRegressionModel;
+import org.apache.spark.ml.util.HasTrainingSummary;
 import org.json.simple.JSONObject;
 import players.heuristics.AutomatedFeatures;
 import utilities.JSONUtils;
@@ -64,6 +67,11 @@ public class LearnFromData {
         learner.setStateFeatureVector(asf);
 
         Object learnedThing = learner.learnFrom(convertedDataFile);
+        if (learnedThing instanceof GeneralizedLinearRegressionModel glm) {
+            // we want to get the AIC and BIC from the model
+            double aic = glm.summary().aic();
+        }
+
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
             JSONUtils.writeJSON(json, outputFileName);

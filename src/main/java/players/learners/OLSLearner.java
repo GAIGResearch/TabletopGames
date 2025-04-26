@@ -4,6 +4,8 @@ package players.learners;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
+import org.apache.spark.ml.regression.GeneralizedLinearRegression;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.apache.spark.ml.regression.LinearRegression;
 import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.sql.Dataset;
@@ -13,14 +15,13 @@ import players.heuristics.*;
 public class OLSLearner extends ApacheLearner {
 
     double[] coefficients;
-    double elasticNetParam = 0.8;
     double regParam = 0.1;
 
     public OLSLearner() {
         super();
     }
-    public OLSLearner(double gamma, double elasticNetParam, double regParam, Target target) {
-        this(gamma, elasticNetParam, regParam, target, null, null);
+    public OLSLearner(double gamma, double regParam, Target target) {
+        this(gamma, regParam, target, null, null);
     }
 
     public OLSLearner(Target target, IStateFeatureVector stateFeatureVector) {
@@ -31,17 +32,15 @@ public class OLSLearner extends ApacheLearner {
         super(1.0, target, stateFeatureVector, actionFeatureVector);
     }
 
-    public OLSLearner(double gamma, double elasticNetParam, double regParam, Target target,
+    public OLSLearner(double gamma, double regParam, Target target,
                       IStateFeatureVector stateFeatureVector) {
         super(gamma, target, stateFeatureVector);
-        this.elasticNetParam = elasticNetParam;
         this.regParam = regParam;
     }
 
-    public OLSLearner(double gamma, double elasticNetParam, double regParam, Target target,
+    public OLSLearner(double gamma, double regParam, Target target,
                       IStateFeatureVector stateFeatureVector, IActionFeatureVector actionFeatureVector) {
         super(gamma, target, stateFeatureVector, actionFeatureVector);
-        this.elasticNetParam = elasticNetParam;
         this.regParam = regParam;
     }
 
@@ -58,15 +57,25 @@ public class OLSLearner extends ApacheLearner {
         if (debug)
             training.show(10);
 
-        LinearRegression lr = new LinearRegression()
+//        LinearRegression lr = new LinearRegression()
+//                .setFitIntercept(true)
+//                .setMaxIter(10)
+//                .setRegParam(regParam)
+//                .setElasticNetParam(elasticNetParam)
+//                .setLabelCol("target")
+//                .setFeaturesCol("features");
+//
+//        LinearRegressionModel lrModel = lr.fit(training);
+        GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
                 .setFitIntercept(true)
                 .setMaxIter(10)
+                .setFamily("gaussian")
+                .setLink("identity")
                 .setRegParam(regParam)
-                .setElasticNetParam(elasticNetParam)
                 .setLabelCol("target")
                 .setFeaturesCol("features");
 
-        LinearRegressionModel lrModel = lr.fit(training);
+        GeneralizedLinearRegressionModel lrModel = lr.fit(training);
 
         if (debug)
             System.out.println(lrModel.coefficients());

@@ -49,56 +49,6 @@ public class LogisticLearner extends ApacheLearner {
         this.regParam = regParam;
     }
 
-    public static void main(String[] args) {
-
-        Dataset<Row> df = spark.read()
-                .option("delimiter", "\t")
-                .option("header", "true")
-                .option("inferSchema", "true")
-                .csv("Apache_0.data");
-
-        df.show(10);
-
-        String[] regressors = new String[]{"POINT_ADVANTAGE", "POINTS", "THREE_BOXES", "TWO_BOXES"};
-
-
-        //"GOLD_IN_DECK", "PROVINCE_IN_DECK", "ESTATE_IN_DECK", "DUCHY_IN_DECK", "TR_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS", "ROUND11", "OUR_TURN"};
-
-        // headers are not case-sensitive, so ORDINAL7 is the current position, and Ordinal119 is the final achieved position
-        try {
-            df.createTempView("data");
-        } catch (AnalysisException e) {
-            e.printStackTrace();
-        }
-        // for 4 players
-        df = spark.sql(String.format("select %s, (1 - (Ordinal13 - 1) / 3) as Ordinal From data", String.join(", ", regressors)));
-
-        df.show(10);
-
-        RFormula formula = new RFormula()
-                .setFormula("Ordinal ~ " + String.join(" + ", regressors))
-                .setFeaturesCol("features")
-                .setLabelCol("target");
-
-        Dataset<Row> training = formula.fit(df).transform(df).select("features", "target");
-
-        training.show(10);
-
-        GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
-                .setMaxIter(10)
-                .setFamily("Binomial")
-                .setLink("Logit")
-                .setRegParam(0.01)
-                .setLabelCol("target")
-                .setFeaturesCol("features");
-
-        GeneralizedLinearRegressionModel lrModel = lr.fit(training);
-
-        System.out.println(lrModel.coefficients());
-
-
-    }
-
     @Override
     public Object learnFromApacheData() {
 
