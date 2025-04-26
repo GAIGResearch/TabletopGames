@@ -79,6 +79,13 @@ public abstract class AbstractLearner implements ILearner {
         return this;
     }
 
+    public IActionFeatureVector getActionFeatureVector() {
+        return actionFeatureVector;
+    }
+    public IStateFeatureVector getStateFeatureVector() {
+        return stateFeatureVector;
+    }
+
     public AbstractLearner setGamma(double gamma) {
         this.gamma = gamma;
         return this;

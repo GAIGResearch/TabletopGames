@@ -5,11 +5,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
-import games.dominion.metrics.DomActionFeatures;
-import games.dominion.metrics.DomStateFeaturesReduced;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.testng.annotations.ObjectFactory;
 import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Utils;
@@ -18,7 +15,7 @@ import java.util.*;
 
 public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVector, IToJSON {
 
-    enum featureType {
+    public enum featureType {
         RAW, ENUM, STRING, RANGE, TARGET
     }
 
@@ -259,6 +256,14 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return this.buckets[index];
     }
 
+    public featureType getFeatureType(String feature) {
+        int index = Arrays.asList(featureNames).indexOf(feature);
+        if (index == -1) {
+            throw new IllegalArgumentException("Feature " + feature + " not found in underlying vector");
+        }
+        return featureTypes.get(index);
+    }
+
     public void processData(String outputFile, String... inputFiles) {
         List<String> newFeatureNames = new ArrayList<>();
         List<featureType> newFeatureTypes = new ArrayList<>();
@@ -337,15 +342,17 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
                     Class<?> numericClass = columnType.equals(Integer.class) || columnType.equals(int.class) ?
                             Integer.class : Double.class;
-                    List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets[underlyingindex], numericClass);
-                    for (int b = 0; b < proposedFeatureRanges.size(); b++) {
-                        Pair<Number, Number> range = proposedFeatureRanges.get(b);
-                        newFeatureTypes.add(featureType.RANGE);
-                        newFeatureRanges.add(range);
-                        newFeatureNames.add(columnName + "_B" + b);
-                        newEnumValues.add(null);
-                        newFeatureClasses.add(numericClass);
-                        underlyingFeatureIndices.add(underlyingindex);
+                    if (buckets[underlyingindex] > 1) {
+                        List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets[underlyingindex], numericClass);
+                        for (int b = 0; b < proposedFeatureRanges.size(); b++) {
+                            Pair<Number, Number> range = proposedFeatureRanges.get(b);
+                            newFeatureTypes.add(featureType.RANGE);
+                            newFeatureRanges.add(range);
+                            newFeatureNames.add(columnName + "_B" + b);
+                            newEnumValues.add(null);
+                            newFeatureClasses.add(numericClass);
+                            underlyingFeatureIndices.add(underlyingindex);
+                        }
                     }
 
                 } else if (columnType.isEnum()) {
