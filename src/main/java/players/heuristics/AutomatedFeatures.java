@@ -22,7 +22,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         RAW, ENUM, STRING, RANGE, TARGET
     }
 
-    int buckets = 5;  // TODO: Extend this to be configurable for each underlying numeric feature independently
+    int defaultBuckets = 1;
     IStateFeatureVector underlyingState;
     IActionFeatureVector underlyingAction;
     String[] underlyingNames;
@@ -33,6 +33,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     List<Object> enumValues = new ArrayList<>();
     List<Pair<Number, Number>> featureRanges = new ArrayList<>();
     List<Integer> featureIndices = new ArrayList<>();
+    int[] buckets;
 
     public AutomatedFeatures(IStateFeatureVector underlyingStateVector, IActionFeatureVector underlyingActionVector) {
         validateUnderlyingVector(underlyingStateVector, underlyingActionVector);
@@ -66,6 +67,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             System.arraycopy(action.types(), 0, tempTypes, underlyingTypes.length, action.types().length);
             underlyingTypes = tempTypes;
         }
+        buckets = new int[names().length];
+        Arrays.fill(buckets, defaultBuckets);
     }
 
     public AutomatedFeatures(JSONObject json) {
@@ -76,7 +79,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             throw new IllegalArgumentException("Invalid JSON file: class mismatch");
         }
         // now populate each of the class fields from JSON
-        buckets = Integer.parseInt(json.get("buckets").toString());
+        defaultBuckets = Integer.parseInt(json.get("defaultBuckets").toString());
         underlyingState = json.containsKey("underlyingState") ?
                 JSONUtils.loadClassFromJSON((JSONObject) json.get("underlyingState"))
                 : null;
@@ -126,7 +129,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     public JSONObject toJSON() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("class", this.getClass().getName());
-        jsonObject.put("buckets", buckets);
+        jsonObject.put("defaultBuckets", defaultBuckets);
         if (this.underlyingState != null) {
             JSONObject underlyingState = new JSONObject();
             underlyingState.put("class", this.underlyingState.getClass().getName());
@@ -241,6 +244,21 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return featureTypes.toArray(new Class[0]);
     }
 
+    public void setBuckets(String feature, int buckets) {
+        int index = Arrays.asList(underlyingNames).indexOf(feature);
+        if (index == -1) {
+            throw new IllegalArgumentException("Feature " + feature + " not found in underlying vector");
+        }
+        this.buckets[index] = buckets;
+    }
+    public int getBuckets(String feature) {
+        int index = Arrays.asList(underlyingNames).indexOf(feature);
+        if (index == -1) {
+            throw new IllegalArgumentException("Feature " + feature + " not found in underlying vector");
+        }
+        return this.buckets[index];
+    }
+
     public void processData(String outputFile, String... inputFiles) {
         List<String> newFeatureNames = new ArrayList<>();
         List<featureType> newFeatureTypes = new ArrayList<>();
@@ -319,7 +337,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
                     Class<?> numericClass = columnType.equals(Integer.class) || columnType.equals(int.class) ?
                             Integer.class : Double.class;
-                    List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets, numericClass);
+                    List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets[underlyingindex], numericClass);
                     for (int b = 0; b < proposedFeatureRanges.size(); b++) {
                         Pair<Number, Number> range = proposedFeatureRanges.get(b);
                         newFeatureTypes.add(featureType.RANGE);

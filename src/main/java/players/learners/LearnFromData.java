@@ -67,10 +67,9 @@ public class LearnFromData {
         learner.setStateFeatureVector(asf);
 
         Object learnedThing = learner.learnFrom(convertedDataFile);
-        if (learnedThing instanceof GeneralizedLinearRegressionModel glm) {
-            // we want to get the AIC and BIC from the model
-            double aic = glm.summary().aic();
-        }
+
+        // we are now in a position to modify the features in a loop
+        improveModel(learnedThing, (ApacheLearner) learner, asf);
 
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
@@ -89,5 +88,22 @@ public class LearnFromData {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private static Object improveModel(Object startingModel, ApacheLearner learner, AutomatedFeatures asf) {
+        if (startingModel instanceof GeneralizedLinearRegressionModel glm) {
+            double baselineAIC = glm.summary().aic();
+
+            // TODO: Add in the consideration of different bucketing techniques
+
+
+            // TODO: Add in each possible interaction between features
+
+
+
+        } else {
+            throw new RuntimeException("Invalid starting Model " + startingModel.getClass());
+        }
+        return startingModel;
     }
 }
