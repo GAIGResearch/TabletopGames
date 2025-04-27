@@ -76,15 +76,14 @@ public class LogisticLearner extends ApacheLearner {
         if (debug)
             System.out.println(lrModel.coefficients());
 
-        coefficients = new double[descriptions.length + 1];
-        coefficients[0] = lrModel.intercept();
-        double[] coeffs = lrModel.coefficients().toArray();
-        System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
-
         if (this.actionFeatureVector == null) {
-            return new LogisticStateHeuristic(stateFeatureVector, coefficients, new WinOnlyHeuristic());
+            LogisticStateHeuristic retValue = new LogisticStateHeuristic(stateFeatureVector, coefficients, new WinOnlyHeuristic());
+            retValue.setModel(lrModel);
+            return retValue;
         } else {
-            return new LogisticActionHeuristic(actionFeatureVector, stateFeatureVector, coefficients);
+            LogisticActionHeuristic retValue = new LogisticActionHeuristic(actionFeatureVector, stateFeatureVector, coefficients);
+            retValue.setModel(lrModel);
+            return retValue;
         }
     }
 

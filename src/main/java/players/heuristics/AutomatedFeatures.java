@@ -64,7 +64,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             System.arraycopy(action.types(), 0, tempTypes, underlyingTypes.length, action.types().length);
             underlyingTypes = tempTypes;
         }
-        buckets = new int[names().length];
+        buckets = new int[underlyingNames.length];
         Arrays.fill(buckets, defaultBuckets);
     }
 
@@ -157,6 +157,18 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return jsonObject;
     }
 
+    public AutomatedFeatures copy() {
+        AutomatedFeatures copy = new AutomatedFeatures(underlyingState, underlyingAction);
+        copy.defaultBuckets = this.defaultBuckets;
+        copy.featureNames = new ArrayList<>(this.featureNames);
+        copy.featureTypes = new ArrayList<>(this.featureTypes);
+        copy.enumValues = new ArrayList<>(this.enumValues);
+        copy.featureRanges = new ArrayList<>(this.featureRanges);
+        copy.featureIndices = new ArrayList<>(this.featureIndices);
+        copy.buckets = Arrays.copyOf(this.buckets, this.buckets.length);
+        return copy;
+    }
+
     @Override
     public double[] doubleVector(AbstractAction action, AbstractGameState state, int playerID) {
         // we first extract the underlying vector to get the raw data
@@ -241,30 +253,22 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return featureTypes.toArray(new Class[0]);
     }
 
-    public void setBuckets(String feature, int buckets) {
-        int index = Arrays.asList(underlyingNames).indexOf(feature);
-        if (index == -1) {
-            throw new IllegalArgumentException("Feature " + feature + " not found in underlying vector");
-        }
+    public void setBuckets(int index, int buckets) {
         this.buckets[index] = buckets;
     }
-    public int getBuckets(String feature) {
-        int index = Arrays.asList(underlyingNames).indexOf(feature);
-        if (index == -1) {
-            throw new IllegalArgumentException("Feature " + feature + " not found in underlying vector");
-        }
+    public int getBuckets(int index) {
         return this.buckets[index];
     }
 
-    public featureType getFeatureType(String feature) {
-        int index = Arrays.asList(featureNames).indexOf(feature);
-        if (index == -1) {
-            throw new IllegalArgumentException("Feature " + feature + " not found in underlying vector");
-        }
+    public featureType getFeatureType(int index) {
         return featureTypes.get(index);
     }
 
-    public void processData(String outputFile, String... inputFiles) {
+    public int getUnderlyingIndex(int index) {
+        return featureIndices.get(index);
+    }
+
+    public List<List<Object>> processData(String outputFile, String... inputFiles) {
         List<String> newFeatureNames = new ArrayList<>();
         List<featureType> newFeatureTypes = new ArrayList<>();
         List<Object> newEnumValues = new ArrayList<>();
@@ -323,7 +327,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 Class<?> columnType = underlyingTypes[underlyingindex];
                 underlyingIndexToRowIndex.put(underlyingindex, i);
                 String columnName = headers.get(i);
-                System.out.println("Processing column: " + columnName + " of type: " + columnType);
+     //           System.out.println("Processing column: " + columnName + " of type: " + columnType);
 
                 if (!columnType.isEnum()) {
                     newFeatureNames.add(columnName);
@@ -451,6 +455,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         Utils.writeDataWithHeader("\t", newFeatureNames, newDataRows, outputFile);
 
         // and finally we set the new feature names, types, ranges, and indices (ignoring any TARGET features)
+        featureNames.clear();
+        featureTypes.clear();
+        enumValues.clear();
+        featureRanges.clear();
+        featureIndices.clear();
         for (int i = 0; i < newFeatureNames.size(); i++) {
             if (underlyingFeatureIndices.get(i) != -1) {
                 featureNames.add(newFeatureNames.get(i));
@@ -465,6 +474,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         String jsonOutputFile = outputFile.substring(0, outputFile.lastIndexOf('.')) + ".json";
         JSONObject outputJson = toJSON();
         JSONUtils.writeJSON(outputJson, jsonOutputFile);
+        return newDataRows;
     }
 
     private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues, int buckets, List<Number> exclusions) {

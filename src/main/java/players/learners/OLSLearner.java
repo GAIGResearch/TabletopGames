@@ -80,23 +80,22 @@ public class OLSLearner extends ApacheLearner {
         if (debug)
             System.out.println(lrModel.coefficients());
 
-        coefficients = new double[descriptions.length + 1];
-        coefficients[0] = lrModel.intercept();
-        double[] coeffs = lrModel.coefficients().toArray();
-        System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
-
         if (this.actionFeatureVector == null) {
             // return the learned OLS heuristic
-            return new LinearStateHeuristic(stateFeatureVector, coefficients,
+            LinearStateHeuristic retValue = new LinearStateHeuristic(stateFeatureVector, coefficients,
                     switch (targetType) {
                         case ORDINAL, ORD_MEAN, ORD_SCALE, ORD_MEAN_SCALE -> new OrdinalPosition();
                         case SCORE -> new PureScoreHeuristic();
                         case SCORE_DELTA -> new LeaderHeuristic();
                         default -> new WinOnlyHeuristic();
                     });
+            retValue.setModel(lrModel);
+            return retValue;
         } else {
             // return the learned OLS heuristic
-            return new LinearActionHeuristic(actionFeatureVector, stateFeatureVector, coefficients);
+            LinearActionHeuristic retValue = new LinearActionHeuristic(actionFeatureVector, stateFeatureVector, coefficients);
+            retValue.setModel(lrModel);
+            return retValue;
         }
     }
 

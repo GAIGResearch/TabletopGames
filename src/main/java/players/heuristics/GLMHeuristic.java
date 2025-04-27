@@ -1,6 +1,7 @@
 package players.heuristics;
 
 import core.interfaces.ICoefficients;
+import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
 import org.json.simple.JSONObject;
 import utilities.Pair;
 
@@ -22,6 +23,9 @@ public abstract class GLMHeuristic implements ICoefficients {
     protected int[][] interactions;
 
     protected DoubleUnaryOperator inverseLinkFunction = x -> x;  // default to linear link function
+
+    // This is not actually used, but is available immediately after training
+    protected GeneralizedLinearRegressionModel underlyingModel;
 
     @Override
     public double[] coefficients() {
@@ -67,6 +71,18 @@ public abstract class GLMHeuristic implements ICoefficients {
             interactions[i] = x.b.get(i).a;
             interactionCoefficients[i] = x.b.get(i).b;
         }
+    }
+
+    public GeneralizedLinearRegressionModel getModel() {
+        return underlyingModel;
+    }
+    public GLMHeuristic setModel(GeneralizedLinearRegressionModel model) {
+        this.underlyingModel = model;
+        double[] coeffs = model.coefficients().toArray();
+        coefficients = new double[coeffs.length + 1];
+        coefficients[0] = model.intercept();
+        System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
+        return this;
     }
 
 }

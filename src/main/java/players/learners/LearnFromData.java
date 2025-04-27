@@ -4,22 +4,23 @@ import core.interfaces.IActionFeatureVector;
 import core.interfaces.ICoefficients;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IToJSON;
-import games.dominion.metrics.DomActionFeatures;
-import games.dominion.metrics.DomStateFeaturesReduced;
-import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
-import org.apache.spark.ml.regression.LinearRegressionModel;
-import org.apache.spark.ml.util.HasTrainingSummary;
 import org.json.simple.JSONObject;
 import players.heuristics.AutomatedFeatures;
+import players.heuristics.GLMHeuristic;
 import utilities.JSONUtils;
 import utilities.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LearnFromData {
 
     static int BUCKET_INCREMENT = 2;
+    static int BIC_MULTIPLIER = 3;
 
     public static void main(String[] args) {
 
@@ -60,7 +61,7 @@ public class LearnFromData {
 
         AutomatedFeatures asf = new AutomatedFeatures(stateFeatures, actionFeatures);
         // construct the output file by adding _ASF before the suffix (which can be anything)
-        asf.processData(convertedDataFile, dataFiles);
+        List<List<Object>> convertedData = asf.processData(convertedDataFile, dataFiles);
 
         // this will have created the raw data from which we now learn
         String outputFileName = Utils.getArg(args, "output", "LearnedHeuristic.json");
@@ -70,7 +71,7 @@ public class LearnFromData {
         Object learnedThing = learner.learnFrom(convertedDataFile);
 
         // we are now in a position to modify the features in a loop
-        learnedThing = improveModel(learnedThing, (ApacheLearner) learner, dataFiles);
+        learnedThing = improveModel(learnedThing, (ApacheLearner) learner, convertedData.size(), dataFiles);
 
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
@@ -91,58 +92,88 @@ public class LearnFromData {
         }
     }
 
-    private static Object improveModel(Object startingModel,
+    private static Object improveModel(Object startingHeuristic,
                                        ApacheLearner learner,
+                                        int n,
                                        String... dataFiles) {
-        if (startingModel instanceof GeneralizedLinearRegressionModel glm) {
-            double bestAIC = glm.summary().aic();
+
+        if (startingHeuristic instanceof GLMHeuristic glm) {
             AutomatedFeatures asf = (AutomatedFeatures) learner.getStateFeatureVector();
-            AutomatedFeatures bestFeatures = asf;
+            String bestFeatureDescription = "";
+            double baseBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
+            double bestBIC = baseBIC;
+            System.out.println("Starting modified BIC: " + baseBIC);
+            List<String> excludedFeatures = new ArrayList<>();
 
-            for (int i = 0; i < asf.names().length; i++) {
-                String firstFeature = asf.names()[i];
-                AutomatedFeatures.featureType type1 = asf.getFeatureType(firstFeature);
+            do {
+                AutomatedFeatures bestFeatures = null;
+                baseBIC = bestBIC;  // reset baseline
+                for (int i = 0; i < asf.names().length; i++) {
+                    String firstFeature = asf.names()[i];
+                    AutomatedFeatures.featureType type1 = asf.getFeatureType(i);
 
-                // TODO: Range features are currently not considered for interactions
-                // TODO: If interactions are on bucket features, then do we need to freeze this bucket level?
-                // TODO: Or, somehow map the new buckets to the old buckets? [messy]
-                if (type1 == AutomatedFeatures.featureType.RANGE)
-                    continue;
-
-                if (type1 == AutomatedFeatures.featureType.RAW) {
-                    // TODO: Add in the consideration of different bucketing techniques
-                    AutomatedFeatures adjustedASF = asf.copy();
-                    adjustedASF.setBuckets(firstFeature, asf.getBuckets(firstFeature) + BUCKET_INCREMENT);
-                    adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
-
-                    GeneralizedLinearRegressionModel newModel = (GeneralizedLinearRegressionModel) learner.learnFrom("ImproveModel_tmp.txt");
-                    // then find AIC
-                    double newAIC = newModel.summary().aic();
-                    if (newAIC > bestAIC) {
-                        bestAIC = newAIC;
-                        bestFeatures = adjustedASF;
-                        startingModel = newModel;
-                    }
-                }
-
-                for (int j = i; j < asf.names().length; j++) {
-                    String secondFeature = asf.names()[j];
-                    AutomatedFeatures.featureType type2 = asf.getFeatureType(secondFeature);
-
-                    if (type2 == AutomatedFeatures.featureType.RANGE)
+                    // TODO: RANGE features are currently not considered for interactions
+                    // TODO: If interactions are on RANGE features, then do we need to freeze this bucket level?
+                    // TODO: Or, somehow map the new buckets to the old buckets? [messy]
+                    if (type1 == AutomatedFeatures.featureType.RANGE)
                         continue;
 
-                    // TODO: Consider the interaction of features
+                    if (type1 == AutomatedFeatures.featureType.RAW) {
+                        if (excludedFeatures.contains(firstFeature))
+                            continue;
+                        // once a feature is below the base AIC, we save time by not checking it again
+                        AutomatedFeatures adjustedASF = asf.copy();
+                        int underlyingIndex = asf.getUnderlyingIndex(i);
+                        adjustedASF.setBuckets(underlyingIndex, asf.getBuckets(underlyingIndex) + BUCKET_INCREMENT);
+                        adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
+                        learner.setStateFeatureVector(adjustedASF);
 
+                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
+                        // then find AIC
+                        double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
+                        System.out.printf("Feature: %25s, Buckets: %d, BIC: %.2f%n",
+                                firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
+                        if (newBIC < bestBIC) {
+                            bestBIC = newBIC;
+                            bestFeatures = adjustedASF;
+                            startingHeuristic = newHeuristic;
+                            bestFeatureDescription = firstFeature + " (Buckets: " + adjustedASF.getBuckets(underlyingIndex) + ")";
+                        } else if (newBIC > baseBIC) {
+                            excludedFeatures.add(firstFeature);
+                            System.out.println("Feature " + firstFeature + " excluded");
+                        }
+                    }
+
+                    for (int j = i; j < asf.names().length; j++) {
+                        String secondFeature = asf.names()[j];
+                        AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
+
+                        if (type2 == AutomatedFeatures.featureType.RANGE)
+                            continue;
+
+                        // TODO: Consider the interaction of features
+
+                    }
                 }
-            }
-
-            // TODO: check to see if the best change improves the AIC by enough to warrant it's inclusion.
-            // TODO: If so, then re-iterate on the new features
+                // We then update to the single best change (provided it improved on the AIC
+                asf = bestFeatures;
+                if (bestFeatureDescription.isEmpty()) {
+                    System.out.println("No features improved AIC");
+                } else {
+                    System.out.println("Best feature: " + bestFeatureDescription);
+                    System.out.println("New AIC: " + bestBIC);
+                }
+            } while (asf != null);
 
         } else {
-            throw new RuntimeException("Invalid starting Model " + startingModel.getClass());
+            throw new RuntimeException("Invalid starting Model " + startingHeuristic.getClass());
         }
-        return startingModel;
+        return startingHeuristic;
+    }
+
+    private static double bicFromAic(double aic, int k, int n) {
+        double nll = aic / 2.0 - k;
+        double bic = 2 * nll + BIC_MULTIPLIER * k * Math.log(n);
+        return bic;
     }
 }
