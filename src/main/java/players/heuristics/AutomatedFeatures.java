@@ -16,7 +16,7 @@ import java.util.*;
 public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVector, IToJSON {
 
     public enum featureType {
-        RAW, ENUM, STRING, RANGE, TARGET
+        RAW, ENUM, STRING, RANGE, INTERACTION, TARGET
     }
 
     int defaultBuckets = 1;
@@ -30,6 +30,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     List<Object> enumValues = new ArrayList<>();
     List<Pair<Number, Number>> featureRanges = new ArrayList<>();
     List<Integer> featureIndices = new ArrayList<>();
+    List<Pair<Integer, Integer>> interactions = new ArrayList<>();
     int[] buckets;
 
     public AutomatedFeatures(IStateFeatureVector underlyingStateVector, IActionFeatureVector underlyingActionVector) {
@@ -95,16 +96,19 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     featureTypes.add(featureType.RAW);
                     enumValues.add(null);
                     featureRanges.add(null);
+                    interactions.add(null);
                 }
                 case "ENUM" -> {
                     featureTypes.add(featureType.ENUM);
                     enumValues.add(featureObject.get("enumValue"));
                     featureRanges.add(null);
+                    interactions.add(null);
                 }
                 case "STRING" -> {
                     featureTypes.add(featureType.STRING);
                     enumValues.add(featureObject.get("enumValue"));
                     featureRanges.add(null);
+                    interactions.add(null);
                 }
                 case "RANGE" -> {
                     featureTypes.add(featureType.RANGE);
@@ -114,12 +118,35 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     Number upperBound = Double.parseDouble(rangeParts[1]);
                     featureRanges.add(new Pair<>(lowerBound, upperBound));
                     enumValues.add(null);
+                    interactions.add(null);
+                }
+                case "INTERACTION" -> {
+                    featureTypes.add(featureType.INTERACTION);
+                    String interactionString = featureObject.get("interaction").toString();
+                    String[] interactionParts = interactionString.replaceAll("[\\[\\]]", "").split(",");
+                    int first = Integer.parseInt(interactionParts[0]);
+                    int second = Integer.parseInt(interactionParts[1]);
+                    interactions.add(Pair.of(first, second));
+                    enumValues.add(null);
+                    featureRanges.add(null);
                 }
                 default -> throw new IllegalArgumentException("Unsupported type: " + type);
             }
             int index = Integer.parseInt(featureObject.get("index").toString());
             featureIndices.add(index);
         }
+    }
+
+    public void addInteraction(int first, int second) {
+        if (first < 0 || first >= featureNames.size() || second < 0 || second >= featureNames.size()) {
+            throw new IllegalArgumentException("Invalid feature indices for interaction: " + first + ", " + second);
+        }
+        featureNames.add(featureNames.get(first) + ":" + featureNames.get(second));
+        interactions.add(Pair.of(first, second));
+        featureTypes.add(featureType.INTERACTION);
+        enumValues.add(null);
+        featureRanges.add(null);
+        featureIndices.add(-1);
     }
 
     @Override
@@ -149,6 +176,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             } else if (featureTypes.get(i) == featureType.RANGE) {
                 Pair<Number, Number> range = featureRanges.get(i);
                 featureObject.put("range", "[" + range.a + ", " + range.b + "]");
+            } else if (featureTypes.get(i) == featureType.INTERACTION) {
+                featureObject.put("interaction", "[" + interactions.get(i).a + ", " + interactions.get(i).b + "]");
             }
             featureObject.put("index", featureIndices.get(i));
             featureObjects.add(featureObject);
@@ -200,34 +229,43 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         double[] featureVector = new double[featureNames.size()];
         for (int i = 0; i < featureNames.size(); i++) {
             int underlyingIndex = featureIndices.get(i);
-            if (underlyingIndex == -1) {
-                throw new IllegalArgumentException("Feature index cannot be -1");
-            } else {
-                Object value = underlyingVectorData[underlyingIndex];
-                switch (featureTypes.get(i)) {
-                    case RAW:
-                        featureVector[i] = ((Number) value).doubleValue();
-                        break;
-                    case ENUM:
-                        Enum<?> enumValue = (Enum<?>) value;
-                        featureVector[i] = enumValue.equals(enumValues.get(i)) ? 1 : 0;
-                        break;
-                    case STRING:
-                        String stringValue = (String) value;
-                        featureVector[i] = stringValue.equals(enumValues.get(i)) ? 1 : 0;
-                        break;
-                    case RANGE:
-                        double numericValue = ((Number) value).doubleValue();
-                        Pair<Number, Number> range = featureRanges.get(i);
-                        if (numericValue >= range.a.doubleValue() && numericValue < range.b.doubleValue()) {
-                            featureVector[i] = 1;
-                        } else {
-                            featureVector[i] = 0;
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unsupported type: " + featureTypes.get(i));
-                }
+            if (underlyingIndex == -1) continue; // Interactions covered on second pass
+            Object value = underlyingVectorData[underlyingIndex];
+            switch (featureTypes.get(i)) {
+                case RAW:
+                    featureVector[i] = ((Number) value).doubleValue();
+                    break;
+                case ENUM:
+                    Enum<?> enumValue = (Enum<?>) value;
+                    featureVector[i] = enumValue.equals(enumValues.get(i)) ? 1 : 0;
+                    break;
+                case STRING:
+                    String stringValue = (String) value;
+                    featureVector[i] = stringValue.equals(enumValues.get(i)) ? 1 : 0;
+                    break;
+                case RANGE:
+                    double numericValue = ((Number) value).doubleValue();
+                    Pair<Number, Number> range = featureRanges.get(i);
+                    if (numericValue >= range.a.doubleValue() && numericValue < range.b.doubleValue()) {
+                        featureVector[i] = 1;
+                    } else {
+                        featureVector[i] = 0;
+                    }
+                    break;
+                case INTERACTION:
+                    break; // Handled in the second pass
+                default:
+                    throw new IllegalArgumentException("Unsupported type: " + featureTypes.get(i));
+            }
+        }
+        // second pass for interactions now that we have the raw data
+        for (int i = 0; i < featureNames.size(); i++) {
+            if (Objects.requireNonNull(featureTypes.get(i)) == featureType.INTERACTION) {
+                Pair<Integer, Integer> interaction = interactions.get(i);
+                double firstValue = featureVector[interaction.a];
+                double secondValue = featureVector[interaction.b];
+                featureVector[i] = firstValue * secondValue;
+                // TODO: Do I need this here? This might be better as an interaction coefficient in the heuristic
             }
         }
         return featureVector;
@@ -256,6 +294,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     public void setBuckets(int index, int buckets) {
         this.buckets[index] = buckets;
     }
+
     public int getBuckets(int index) {
         return this.buckets[index];
     }
@@ -275,6 +314,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
         List<Integer> underlyingFeatureIndices = new ArrayList<>();
         List<Class<?>> newFeatureClasses = new ArrayList<>();
+        List<Pair<Integer, Integer>> newInteractions = new ArrayList<>();
         Map<Integer, Integer> underlyingIndexToRowIndex = new HashMap<>();
 
         // load files...the columns should correspond to the underlying vector
@@ -312,6 +352,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 }
             }
             if (underlyingindex == -1) {
+                // TODO: This skips interactions!
                 // this column is not in the underlying vector
                 // so we do not generate any features
                 // we do however keep it to write to the output file
@@ -319,6 +360,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 newFeatureTypes.add(featureType.TARGET);
                 newEnumValues.add(null);
                 newFeatureRanges.add(null);
+                newInteractions.add(null);
                 underlyingFeatureIndices.add(-1);
                 Class<?> columnType = calculateClass(columnData);
                 newFeatureClasses.add(columnType);
@@ -327,7 +369,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 Class<?> columnType = underlyingTypes[underlyingindex];
                 underlyingIndexToRowIndex.put(underlyingindex, i);
                 String columnName = headers.get(i);
-     //           System.out.println("Processing column: " + columnName + " of type: " + columnType);
+                //           System.out.println("Processing column: " + columnName + " of type: " + columnType);
 
                 if (!columnType.isEnum()) {
                     newFeatureNames.add(columnName);
@@ -460,6 +502,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         enumValues.clear();
         featureRanges.clear();
         featureIndices.clear();
+        interactions.clear();
         for (int i = 0; i < newFeatureNames.size(); i++) {
             if (underlyingFeatureIndices.get(i) != -1) {
                 featureNames.add(newFeatureNames.get(i));
@@ -467,6 +510,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 enumValues.add(newEnumValues.get(i));
                 featureRanges.add(newFeatureRanges.get(i));
                 featureIndices.add(underlyingFeatureIndices.get(i));
+                interactions.add(interactions.get(i));
             }
         }
 

@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static players.heuristics.AutomatedFeatures.featureType.INTERACTION;
+import static players.heuristics.AutomatedFeatures.featureType.RANGE;
+
 public class LearnFromData {
 
     static int BUCKET_INCREMENT = 2;
@@ -94,7 +97,7 @@ public class LearnFromData {
 
     private static Object improveModel(Object startingHeuristic,
                                        ApacheLearner learner,
-                                        int n,
+                                       int n,
                                        String... dataFiles) {
 
         if (startingHeuristic instanceof GLMHeuristic glm) {
@@ -115,7 +118,7 @@ public class LearnFromData {
                     // TODO: RANGE features are currently not considered for interactions
                     // TODO: If interactions are on RANGE features, then do we need to freeze this bucket level?
                     // TODO: Or, somehow map the new buckets to the old buckets? [messy]
-                    if (type1 == AutomatedFeatures.featureType.RANGE)
+                    if (type1 == RANGE || type1 == INTERACTION)
                         continue;
 
                     if (type1 == AutomatedFeatures.featureType.RAW) {
@@ -148,11 +151,34 @@ public class LearnFromData {
                         String secondFeature = asf.names()[j];
                         AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
 
-                        if (type2 == AutomatedFeatures.featureType.RANGE)
+                        if (type2 == RANGE)
+                            continue;
+                        // currently we only support 2-way interactions between two original features
+                        if (type2 == INTERACTION)
                             continue;
 
                         // TODO: Consider the interaction of features
+                        // Add a
+                        AutomatedFeatures adjustedASF = asf.copy();
+                        adjustedASF.addInteraction(i, j);
+                        adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
+                        learner.setStateFeatureVector(adjustedASF);
 
+                        // TODO: Refactor to remove code repetition
+                        GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
+                        // then find AIC
+                        double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
+                        System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
+                                firstFeature, secondFeature, newBIC);
+
+                        if (newBIC < bestBIC) {
+                            bestBIC = newBIC;
+                            bestFeatures = adjustedASF;
+                            startingHeuristic = newHeuristic;
+                            bestFeatureDescription = firstFeature + " : " + secondFeature;
+                        }
+                        // TODO: We can also pass the raw data directly to the learner without going through
+                        // a file on disk (which may save some time)
                     }
                 }
                 // We then update to the single best change (provided it improved on the AIC
@@ -161,9 +187,12 @@ public class LearnFromData {
                     System.out.println("No features improved AIC");
                 } else {
                     System.out.println("Best feature: " + bestFeatureDescription);
-                    System.out.println("New AIC: " + bestBIC);
+                    System.out.println("New BIC: " + bestBIC);
                 }
             } while (asf != null);
+
+
+            // TODO: We now run through a second loop to remove any features that are not helpful
 
         } else {
             throw new RuntimeException("Invalid starting Model " + startingHeuristic.getClass());
