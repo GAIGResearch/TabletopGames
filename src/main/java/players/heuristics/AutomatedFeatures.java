@@ -192,6 +192,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         copy.featureNames = new ArrayList<>(this.featureNames);
         copy.featureTypes = new ArrayList<>(this.featureTypes);
         copy.enumValues = new ArrayList<>(this.enumValues);
+        copy.interactions = new ArrayList<>(this.interactions);
         copy.featureRanges = new ArrayList<>(this.featureRanges);
         copy.featureIndices = new ArrayList<>(this.featureIndices);
         copy.buckets = Arrays.copyOf(this.buckets, this.buckets.length);
@@ -265,7 +266,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 double firstValue = featureVector[interaction.a];
                 double secondValue = featureVector[interaction.b];
                 featureVector[i] = firstValue * secondValue;
-                // TODO: Do I need this here? This might be better as an interaction coefficient in the heuristic
             }
         }
         return featureVector;
@@ -308,6 +308,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     }
 
     public List<List<Object>> processData(String outputFile, String... inputFiles) {
+        return processData(null, outputFile, inputFiles);
+    }
+
+    public List<List<Object>> processData(AutomatedFeatures previousFeatures, String outputFile, String... inputFiles) {
+        // previousFeatures is the ASF (if any) that the inputFiles have already been processed with
         List<String> newFeatureNames = new ArrayList<>();
         List<featureType> newFeatureTypes = new ArrayList<>();
         List<Object> newEnumValues = new ArrayList<>();
@@ -331,7 +336,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         }
         for (List<String> row : dataRows) {
             if (row.size() != headers.size()) {
-                System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
+                //         System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
                 continue; // Skip rows with inconsistent number of columns
             }
             for (int i = 0; i < headers.size(); i++) {
@@ -340,10 +345,33 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         }
 
         // for each column, determine the type of data
+        featureLoop:
         for (int i = 0; i < headers.size(); i++) {
             List<String> columnData = dataColumns.get(i);
+            //      System.out.println("Processing column: " + headers.get(i));
 
-            // now determine is the column is one of those specified in the underlying vector
+            // is the column one which is already processed?
+            // if so, we can take the information directly from the previous features
+            if (previousFeatures != null) {
+                for (int j = 0; j < previousFeatures.featureNames.size(); j++) {
+                    if (previousFeatures.featureNames.get(j).equals(headers.get(i))) {
+                        newFeatureNames.add(previousFeatures.featureNames.get(j));
+                        newFeatureTypes.add(previousFeatures.featureTypes.get(j));
+                        newEnumValues.add(previousFeatures.enumValues.get(j));
+                        newFeatureRanges.add(previousFeatures.featureRanges.get(j));
+                        newInteractions.add(previousFeatures.interactions.get(j));
+                        underlyingFeatureIndices.add(previousFeatures.featureIndices.get(j));
+                        if (previousFeatures.featureTypes.get(j) == featureType.RAW)
+                            underlyingIndexToRowIndex.put(j, i);
+                        // We just check the first 20 values to determine the class (to avoid performance issues)
+                        newFeatureClasses.add(calculateClass(columnData, false));
+                        //       System.out.println("Skipped " + headers.get(i) + " as already processed");
+                        continue featureLoop;
+                    }
+                }
+            }
+
+            // now determine if the column is one of those specified in the underlying vector
             int underlyingindex = -1;
             for (int j = 0; j < underlyingNames.length; j++) {
                 if (underlyingNames[j].equals(headers.get(i))) {
@@ -352,8 +380,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 }
             }
             if (underlyingindex == -1) {
-                // TODO: This skips interactions!
-                // this column is not in the underlying vector
+                // this column is not in the underlying vector, or is already processed
                 // so we do not generate any features
                 // we do however keep it to write to the output file
                 newFeatureNames.add(headers.get(i));
@@ -362,7 +389,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 newFeatureRanges.add(null);
                 newInteractions.add(null);
                 underlyingFeatureIndices.add(-1);
-                Class<?> columnType = calculateClass(columnData);
+                Class<?> columnType = calculateClass(columnData, true);
                 newFeatureClasses.add(columnType);
                 targetData.put(headers.get(i), i);
             } else {
@@ -375,6 +402,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     newFeatureNames.add(columnName);
                     newFeatureClasses.add(columnType);
                     newEnumValues.add(null);
+                    newInteractions.add(null);
                     newFeatureRanges.add(null);
                     underlyingFeatureIndices.add(underlyingindex);
                     newFeatureTypes.add(featureType.RAW);
@@ -396,6 +424,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                             newFeatureRanges.add(range);
                             newFeatureNames.add(columnName + "_B" + b);
                             newEnumValues.add(null);
+                            newInteractions.add(null);
                             newFeatureClasses.add(numericClass);
                             underlyingFeatureIndices.add(underlyingindex);
                         }
@@ -413,6 +442,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         newFeatureTypes.add(featureType.ENUM);
                         newFeatureClasses.add(Boolean.class);
                         newEnumValues.add(enumValue);
+                        newInteractions.add(null);
                         newFeatureRanges.add(null);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
@@ -430,6 +460,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                         newFeatureTypes.add(featureType.STRING);
                         newFeatureClasses.add(Boolean.class);
                         newEnumValues.add(value);
+                        newInteractions.add(null);
                         newFeatureRanges.add(null);
                         underlyingFeatureIndices.add(underlyingindex);
                     }
@@ -437,6 +468,70 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     throw new IllegalArgumentException("Unsupported column type: " + columnType + " for column: " + columnName);
 
                 }
+            }
+        }
+
+        // Now a second pass to pick up new interactions that need to be added
+        for (int i = 0; i < featureNames.size(); i++) {
+            if (featureTypes.get(i) != featureType.INTERACTION) {
+                continue; // Only interested in interactions
+            }
+            // then check to see if this is in newFeatureNames
+            if (newFeatureNames.contains(featureNames.get(i)))
+                continue;
+
+            if (previousFeatures == null) {
+                throw new IllegalArgumentException("Cannot process interaction " + featureNames.get(i) + " without previous features");
+            }
+
+            Pair<Integer, Integer> interactionIndices = interactions.get(i);
+            // as a safety check we compare the featureNames and newFeatureNames at the specified indices to ensure
+            // these are the same
+            // The indexing of newFeatureNames includes all TARGET features. These are not included in the indexing of previousFeatures
+            List<String> newFeatureNamesExcludingTargets = new ArrayList<>();
+            for (int j = 0; j < newFeatureNames.size(); j++) {
+                if (newFeatureTypes.get(j) != featureType.TARGET) {
+                    newFeatureNamesExcludingTargets.add(newFeatureNames.get(j));
+                }
+            }
+            String nameOrig1 = previousFeatures.featureNames.get(interactionIndices.a);
+            String nameOrig2 = previousFeatures.featureNames.get(interactionIndices.b);
+            String nameNew1 = newFeatureNamesExcludingTargets.get(interactionIndices.a);
+            String nameNew2 = newFeatureNamesExcludingTargets.get(interactionIndices.b);
+            if (!nameOrig1.equals(nameNew1) || !nameOrig2.equals(nameNew2)) {
+                String errorString = "Interaction " + featureNames.get(i) + " does not match previous features: " +
+                        nameOrig1 + " vs " + nameNew1 + ", " + nameOrig2 + " vs " + nameNew2;
+                throw new AssertionError(errorString);
+            }
+
+            newFeatureNames.add(featureNames.get(i));
+            newFeatureTypes.add(featureType.INTERACTION);
+            newEnumValues.add(null);
+            newFeatureRanges.add(null);
+            newInteractions.add(Pair.of(interactionIndices.a, interactionIndices.b));
+            underlyingFeatureIndices.add(-1);
+            newFeatureClasses.add(Double.class);
+        }
+
+        // update feature names, types, ranges, and indices (ignoring any TARGET features)
+        featureNames.clear();
+        featureTypes.clear();
+        enumValues.clear();
+        featureRanges.clear();
+        featureIndices.clear();
+        interactions.clear();
+        int[] featureToRowIndex = new int[newFeatureNames.size()];  // formally bigger than needed
+        int featuresFound = 0;
+        for (int i = 0; i < newFeatureNames.size(); i++) {
+            if (newFeatureTypes.get(i) != featureType.TARGET) {
+                featureNames.add(newFeatureNames.get(i));
+                featureTypes.add(newFeatureTypes.get(i));
+                enumValues.add(newEnumValues.get(i));
+                featureRanges.add(newFeatureRanges.get(i));
+                featureIndices.add(underlyingFeatureIndices.get(i));
+                interactions.add(newInteractions.get(i));
+                featureToRowIndex[featuresFound] = i;
+                featuresFound++;
             }
         }
 
@@ -451,6 +546,12 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             for (int j = 0; j < newFeatureNames.size(); j++) {
                 if (newFeatureTypes.get(j) == featureType.TARGET) {
                     newRow.add(row.get(targetData.get(newFeatureNames.get(j))));
+                } else if (newFeatureTypes.get(j) == featureType.INTERACTION) {
+                    // we need to find the two features that are being interacted
+                    Pair<Integer, Integer> interaction = newInteractions.get(j);
+                    double firstValue = Double.parseDouble(row.get(featureToRowIndex[interaction.a]));
+                    double secondValue = Double.parseDouble(row.get(featureToRowIndex[interaction.b]));
+                    newRow.add(firstValue * secondValue);
                 } else {
                     String value = row.get(underlyingIndexToRowIndex.get(underlyingFeatureIndices.get(j)));
                     if (newFeatureTypes.get(j) == featureType.RANGE) {
@@ -495,24 +596,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // Now we write the new data to the output file
         Utils.writeDataWithHeader("\t", newFeatureNames, newDataRows, outputFile);
-
-        // and finally we set the new feature names, types, ranges, and indices (ignoring any TARGET features)
-        featureNames.clear();
-        featureTypes.clear();
-        enumValues.clear();
-        featureRanges.clear();
-        featureIndices.clear();
-        interactions.clear();
-        for (int i = 0; i < newFeatureNames.size(); i++) {
-            if (underlyingFeatureIndices.get(i) != -1) {
-                featureNames.add(newFeatureNames.get(i));
-                featureTypes.add(newFeatureTypes.get(i));
-                enumValues.add(newEnumValues.get(i));
-                featureRanges.add(newFeatureRanges.get(i));
-                featureIndices.add(underlyingFeatureIndices.get(i));
-                interactions.add(interactions.get(i));
-            }
-        }
 
         // remove the suffix from output file, and replace with json
         String jsonOutputFile = outputFile.substring(0, outputFile.lastIndexOf('.')) + ".json";
@@ -626,10 +709,11 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         }
     }
 
-    private Class<?> calculateClass(List<String> columnData) {
+    private Class<?> calculateClass(List<String> columnData, boolean checkAll) {
         // Check if all values are numeric
         boolean allNumeric = true;
-        for (String value : columnData) {
+        List<String> dataToCheck = checkAll ? columnData : columnData.subList(0, Math.min(columnData.size(), 20));
+        for (String value : dataToCheck) {
             try {
                 Double.parseDouble(value);
             } catch (NumberFormatException e) {
@@ -640,7 +724,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
 
         // Determine the class based on the data type
         if (allNumeric) {
-            if (columnData.stream().allMatch(value -> value.contains("."))) {
+            if (dataToCheck.stream().allMatch(value -> value.contains("."))) {
                 return Double.class;
             } else {
                 return Integer.class;

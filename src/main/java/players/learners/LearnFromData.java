@@ -108,6 +108,8 @@ public class LearnFromData {
             System.out.println("Starting modified BIC: " + baseBIC);
             List<String> excludedFeatures = new ArrayList<>();
 
+            int iteration = 0;
+            String[] rawData = dataFiles;
             do {
                 AutomatedFeatures bestFeatures = null;
                 baseBIC = bestBIC;  // reset baseline
@@ -128,13 +130,17 @@ public class LearnFromData {
                         AutomatedFeatures adjustedASF = asf.copy();
                         int underlyingIndex = asf.getUnderlyingIndex(i);
                         adjustedASF.setBuckets(underlyingIndex, asf.getBuckets(underlyingIndex) + BUCKET_INCREMENT);
-                        adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
+                        // TODO: This will re-process everything, which is not ideal. We really just want to re-process the column
+                        // for which the bucketing is being changed. We could do this with another copy of asf that then has those
+                        // features remove removed.
+
+                        adjustedASF.processData("ImproveModel_tmp.txt", rawData);
                         learner.setStateFeatureVector(adjustedASF);
 
                         GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
-                        // then find AIC
+                        // then find BIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                        System.out.printf("Feature: %25s, Buckets: %d, BIC: %.2f%n",
+                        System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
                                 firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
                         if (newBIC < bestBIC) {
                             bestBIC = newBIC;
@@ -147,7 +153,7 @@ public class LearnFromData {
                         }
                     }
 
-                    for (int j = i; j < asf.names().length; j++) {
+                    for (int j = i+1; j < asf.names().length; j++) {
                         String secondFeature = asf.names()[j];
                         AutomatedFeatures.featureType type2 = asf.getFeatureType(j);
 
@@ -157,11 +163,11 @@ public class LearnFromData {
                         if (type2 == INTERACTION)
                             continue;
 
-                        // TODO: Consider the interaction of features
-                        // Add a
+                        // Consider the interaction of features
                         AutomatedFeatures adjustedASF = asf.copy();
                         adjustedASF.addInteraction(i, j);
-                        adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
+                        // providing the previous ASF means we will just calculate the new interaction
+                        adjustedASF.processData(asf, "ImproveModel_tmp.txt", dataFiles);
                         learner.setStateFeatureVector(adjustedASF);
 
                         // TODO: Refactor to remove code repetition
@@ -181,6 +187,14 @@ public class LearnFromData {
                         // a file on disk (which may save some time)
                     }
                 }
+                // We then also need to set up the data file to be used as the baseline for the next iteration
+                if (bestFeatures != null) {
+                    String newFileName = "ImproveModel_Iter_" + iteration + ".txt";
+                    bestFeatures.processData(asf, newFileName, rawData);
+                    iteration++;
+                    rawData = new String[]{newFileName};
+                }
+
                 // We then update to the single best change (provided it improved on the AIC
                 asf = bestFeatures;
                 if (bestFeatureDescription.isEmpty()) {
@@ -202,7 +216,6 @@ public class LearnFromData {
 
     private static double bicFromAic(double aic, int k, int n) {
         double nll = aic / 2.0 - k;
-        double bic = 2 * nll + BIC_MULTIPLIER * k * Math.log(n);
-        return bic;
+        return 2 * nll + BIC_MULTIPLIER * k * Math.log(n);
     }
 }

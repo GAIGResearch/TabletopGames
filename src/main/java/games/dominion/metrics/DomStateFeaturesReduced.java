@@ -2,8 +2,7 @@ package games.dominion.metrics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
-import games.dominion.DominionConstants;
-import games.dominion.DominionGameState;
+import games.dominion.*;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 
@@ -11,7 +10,8 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
 
     String[] names = new String[]{"victoryPoints", "treasureValue", "actionCards", "treasureInHand",
             "actionsLeft", "buysLeft", "actionCardsInHand",
-            "provinceCount", "duchyCount", "estateCount", "totalCards"};
+            "provinceCount", "duchyCount", "estateCount", "totalCards", "actionSize"};
+    DominionForwardModel fm = new DominionForwardModel();
 
     @Override
     public double[] doubleVector(AbstractGameState gs, int playerId) {
@@ -50,6 +50,8 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
         retValue[9] = state.getTotal(playerId, c -> c.cardType() == CardType.ESTATE ? 1 : 0);
 
         retValue[10] = state.getTotalCards(playerId);
+
+        retValue[11] = fm.computeAvailableActions(state).size();
 
         return retValue;
     }
