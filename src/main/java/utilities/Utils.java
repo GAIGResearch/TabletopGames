@@ -375,9 +375,6 @@ public abstract class Utils {
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new AssertionError("Problem reading file " + file);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                throw new AssertionError("Problem parsing data as numeric : " + file);
             }
         }
         return Pair.of(header, data);

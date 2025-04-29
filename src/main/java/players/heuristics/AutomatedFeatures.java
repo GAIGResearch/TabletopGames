@@ -12,6 +12,7 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVector, IToJSON {
@@ -148,6 +149,25 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         enumValues.add(null);
         featureRanges.add(null);
         featureIndices.add(-1);
+    }
+
+    public void removeFeature(int i) {
+        if (i < 0 || i >= featureNames.size()) {
+            throw new IllegalArgumentException("Invalid feature index: " + i);
+        }
+        if (featureTypes.get(i) == featureType.RAW && buckets[i] == 1) {
+            // also remove from buckets
+            int[] newBuckets = new int[buckets.length - 1];
+            System.arraycopy(buckets, 0, newBuckets, 0, i);
+            System.arraycopy(buckets, i + 1, newBuckets, i, buckets.length - i - 1);
+            buckets = newBuckets;
+        }
+        featureNames.remove(i);
+        featureTypes.remove(i);
+        enumValues.remove(i);
+        featureRanges.remove(i);
+        featureIndices.remove(i);
+        interactions.remove(i);
     }
 
     @Override
@@ -364,7 +384,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         }
         for (List<String> row : dataRows) {
             if (row.size() != headers.size()) {
-                //         System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
+                System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
                 continue; // Skip rows with inconsistent number of columns
             }
             for (int i = 0; i < headers.size(); i++) {
@@ -381,7 +401,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             Class<?> columnType = underlyingTypes[i];
 
             if (!headers.contains(columnName)) {
-                //        System.out.println("Missing column: " + columnName);
+                System.out.println("Missing column: " + columnName);
                 continue;
             }
 
@@ -436,7 +456,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 List<String> actualEnumColumns = startingFeatures.stream().filter(r -> r.underlyingIndex == finalI1)
                         .map(r -> r.name)
                         .toList();
-                if (expectedEnumColumns.size() + 1 == actualEnumColumns.size()) {
+                if (expectedEnumColumns.size() == actualEnumColumns.size()) {
                     // we just copy over
                     newColumnDetails.add(new ColumnDetails(
                             columnName, featureType.TARGET, null, null, i, columnType, null
@@ -476,7 +496,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 int firstIndex = -1;
                 int secondIndex = -1;
 
-                // We now need to find the indices for the interaction in the new data...which may have additional columns
+                // We now need to find the indices for the interaction in the new data.
                 for (int loop = 0; loop < newColumnDetails.size(); loop++) {
                     ColumnDetails columnDetails = newColumnDetails.get(loop);
                     if (columnDetails.name.equals(firstName)) {
@@ -514,6 +534,10 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         // we run through all the columns (in header), and any that we have not already included in newColumns, we add in unchanged
         for (int i = 0; i < headers.size(); i++) {
             String columnName = headers.get(i);
+            // Skip the raw non-numeric columns
+            if (Arrays.asList(underlyingNames).contains(columnName))
+                continue;
+
             if (newColumnDetails.stream().noneMatch(r -> r.name.equals(columnName))) {
                 newColumnDetails.add(new ColumnDetails(
                         columnName, featureType.TARGET, null, null, -1, String.class, null
@@ -542,7 +566,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         featureIndices.clear();
         interactions.clear();
         for (ColumnDetails column : newColumnDetails) {
-            if (column.type.equals(featureType.TARGET))
+            if (column.type == featureType.TARGET)
                 continue;
             featureNames.add(column.name);
             featureTypes.add(column.type);
@@ -550,6 +574,21 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             featureRanges.add(column.range);
             featureIndices.add(column.underlyingIndex);
             interactions.add(column.interaction);
+        }
+        // update interactions here given changes to indices, as removing the TARGET columns will have changed the indices
+        for (int i = 0; i < interactions.size(); i++) {
+            Pair<Integer, Integer> interaction = interactions.get(i);
+            if (interaction != null) {
+                String interactionName = featureNames.get(i);
+                // split this by :, then look up each component in featureNames
+                String[] components = interactionName.split(":");
+                List<Integer> indices = Arrays.stream(components).map(s -> featureNames.indexOf(s)).toList();
+                if (indices.size() == 2) {
+                    interactions.set(i, Pair.of(indices.get(0), indices.get(1)));
+                } else {
+                    throw new IllegalArgumentException("Unsupported interaction: " + interactionName);
+                }
+            }
         }
 
         Utils.writeDataWithHeader("\t", newColumnDetails.stream().map(r -> r.name).toList(),
@@ -597,7 +636,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         List<Pair<ColumnDetails, List<?>>> newColumns = new ArrayList<>();
         String feature = underlyingNames[i];
         Class<?> columnType = underlyingTypes[i];
-        // Add TARGET feature for column
+        // add column for unchanged value as TARGET
         newColumns.add(Pair.of(
                 new ColumnDetails(feature, featureType.TARGET, null, null, i, columnType, null),
                 columnData)

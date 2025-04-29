@@ -98,9 +98,6 @@ public abstract class AbstractLearner implements ILearner {
     protected void loadData(String... files) {
 
         Pair<List<String>, List<List<String>>> rawData = Utils.loadDataWithHeader("\t", files);
-        List<double[]> data = rawData.b.stream()
-                .map(s -> s.stream().mapToDouble(Double::parseDouble).toArray())
-                .toList();
         header = rawData.a.toArray(new String[0]);
 
         String[] specialColumns = {"GameID", "Player", "Turn", "Round", "Tick", "CurrentScore", "Win", "Ordinal",
@@ -108,13 +105,6 @@ public abstract class AbstractLearner implements ILearner {
                 "ACTION_VISITS", "ADVANTAGE", "ACTION_VALUE", "VISIT_PROPORTION"};
         Map<String, Integer> indexForSpecialColumns = new HashMap<>();
 
-        // now link these to their actual index in the data
-        for (int i = 0; i < header.length; i++) {
-            String h = header[i];
-            if (Arrays.asList(specialColumns).contains(h)) {
-                indexForSpecialColumns.put(h, i);
-            }
-        }
         // then set descriptions to the rest of the data
         // and validate that the data matches the feature vector
         descriptions = stateFeatureVector == null ?
@@ -123,12 +113,15 @@ public abstract class AbstractLearner implements ILearner {
         Map<String, Integer> indexForDescriptions = new HashMap<>();
         for (int i = 0; i < header.length; i++) {
             String h = header[i];
-            if (!indexForSpecialColumns.containsKey(h) && !expectedNames.contains(h)) {
-                throw new IllegalArgumentException("Unexpected column name " + h);
-            }
+//            if (!indexForSpecialColumns.containsKey(h) && !expectedNames.contains(h)) {
+//                System.out.println("Unexpected feature: " + h);
+//            }
             if (expectedNames.contains(h)) {
                 indexForDescriptions.put(h, i);
                 expectedNames.remove(h);
+            }
+            if (Arrays.asList(specialColumns).contains(h)) {
+                indexForSpecialColumns.put(h, i);
             }
         }
         // we allow missing features in the data, but not extra ones
@@ -139,14 +132,15 @@ public abstract class AbstractLearner implements ILearner {
         // TODO: discounting should really use TICKS as more reliably generic across games, even if it
         // does not map in the same way all the time
 
-        dataArray = new double[data.size()][];
-        target = new double[data.size()][1];
-        currentScore = new double[data.size()][1];
+        dataArray = new double[rawData.b.size()][];
+        target = new double[rawData.b.size()][1];
+        currentScore = new double[rawData.b.size()][1];
         for (int i = 0; i < dataArray.length; i++) {
-            double[] allData = data.get(i);
+            List<String> allData = rawData.b.get(i);
             // calculate the number of turns from this point until the end of the game
-            double turns = allData[indexForSpecialColumns.get("TotalTurns")] - allData[indexForSpecialColumns.get("Turn")];
-            double playerCount = allData[indexForSpecialColumns.get("PlayerCount")];
+            double turns = Double.parseDouble(allData.get(indexForSpecialColumns.get("TotalTurns"))) -
+                    Double.parseDouble(allData.get(indexForSpecialColumns.get("Turn")));
+            double playerCount = Double.parseDouble(allData.get(indexForSpecialColumns.get("PlayerCount")));
             int targetIndex = indexForSpecialColumns.getOrDefault(targetType.header, -1);
             if (targetIndex == -1) {
                 throw new IllegalArgumentException("Target " + targetType.header + " not found in data");
@@ -159,10 +153,10 @@ public abstract class AbstractLearner implements ILearner {
                 expectedAverage = (1.0 + playerCount) / 2.0;
 
             if (targetType == Target.SCORE_DELTA)
-                target[i][0] = (allData[targetIndex] -
-                        allData[indexForSpecialColumns.get("CurrentScore")]) * Math.pow(gamma, turns);
+                target[i][0] = (Double.parseDouble(allData.get(targetIndex)) -
+                        Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")))) * Math.pow(gamma, turns);
             else {
-                target[i][0] = (allData[targetIndex] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
+                target[i][0] = (Double.parseDouble(allData.get(targetIndex)) - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
             }
 
             if (targetType == Target.ORDINAL || targetType == Target.ORD_MEAN)
@@ -170,7 +164,7 @@ public abstract class AbstractLearner implements ILearner {
             if (targetType == Target.ORD_MEAN_SCALE || targetType == Target.ORD_SCALE)
                 target[i][0] = (playerCount - target[i][0]) / (playerCount - 1.0);  // scale to [0, 1]
 
-            currentScore[i][0] = allData[indexForSpecialColumns.get("CurrentScore")];
+            currentScore[i][0] = Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")));
             double[] regressionData = new double[descriptions.length + 1];
             regressionData[0] = 1.0; // the bias term
             // then copy the rest of the data into the regression data
@@ -178,7 +172,7 @@ public abstract class AbstractLearner implements ILearner {
             int j = 1;
             for (String h : descriptions) {
                 if (indexForDescriptions.get(h) != null) {
-                    regressionData[j] = allData[indexForDescriptions.get(h)];
+                    regressionData[j] = Double.parseDouble(allData.get(indexForDescriptions.get(h)));
                     j++;
                 }
             }
