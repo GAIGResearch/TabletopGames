@@ -5,8 +5,12 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import games.chess.ChessGameState;
 import games.chess.components.ChessPiece;
+import games.chess.components.ChessPiece.MovedState;
+
 import java.lang.System;
 import java.util.Objects;
+
+import org.checkerframework.checker.units.qual.C;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -24,18 +28,15 @@ import java.util.Objects;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class MovePiece extends AbstractAction {
+public class Castle extends AbstractAction {
+    public enum CastleType {
+        KING_SIDE,
+        QUEEN_SIDE
+    }
+    CastleType castleType;
 
-    private final int startX;
-    private final int startY;
-    private final int targetX;
-    private final int targetY;
-
-    public MovePiece(int sx, int sy, int tx, int ty) {
-        this.startX = sx;
-        this.startY = sy;
-        this.targetX = tx;
-        this.targetY = ty;
+    public Castle(CastleType castleType) {
+        this.castleType = castleType;
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -46,37 +47,29 @@ public class MovePiece extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState ags) {
         ChessGameState gs = (ChessGameState) ags;
-        ChessPiece piece = gs.getPiece(startX, startY);
+        int[] kingPos = gs.getKingPosition(gs.getCurrentPlayer());
+        ChessPiece king = gs.getPiece(kingPos[0], kingPos[1]);
+        ChessPiece rook = null;
 
-        //Delete the piece in the start position
-        gs.deletePiece(piece); // Remove the piece from its original position
-
-        // Set the moved flag to true for the piece being moved.
-        if (piece == null)
-            return false; // No piece to move, return false
-        if (piece.getMoved() == ChessPiece.MovedState.NOT_MOVED) {
-            piece.setMoved(ChessPiece.MovedState.MOVED);
-        } 
-
-        // Check if the target position is empty or occupied by an opponent's piece
-        ChessPiece targetPiece = gs.getPiece(targetX, targetY);
-
-        gs.incrementHalfMoveClock(); // Increment the half-move clock for the current player
-
-        if (targetPiece != null && targetPiece.getOwnerId() == 1-piece.getOwnerId()) {
-            gs.deletePiece(targetPiece);// Capture(remove) the opponent's piece
-            gs.resetHalfMoveClock(); // Reset the half-move clock when a piece is captured
-            // System.out.println("Captured piece at (" + targetX + ", " + targetY + ")");
+        if (castleType == CastleType.KING_SIDE) {
+            // Move the king and rook to their new positions for king-side castling
+            rook = gs.getPiece(kingPos[0] + 3, kingPos[1]);
+            gs.updatePiecePosition(king, kingPos[0] + 2, kingPos[1]);
+            gs.updatePiecePosition(rook, kingPos[0] + 1, kingPos[1]);
+        } else if (castleType == CastleType.QUEEN_SIDE) {
+            // Move the king and rook to their new positions for queen-side castling
+            rook = gs.getPiece(kingPos[0] - 4, kingPos[1]);
+            gs.updatePiecePosition(king, kingPos[0] - 2, kingPos[1]);
+            gs.updatePiecePosition(rook, kingPos[0] - 1, kingPos[1]);
+        } else {
+            // Invalid castling type
+            return false;
         }
 
-        // Reset the half-move clock if the moved piece is a pawn
-
-        if (piece.getChessPieceType() == ChessPiece.ChessPieceType.PAWN) {
-            gs.resetHalfMoveClock();
-        }
-        
-        gs.setPiece(targetX, targetY, piece); // Move the piece to the target position
-
+        // Set the moved flags.
+        king.setMoved(MovedState.MOVED); // Set the moved flag for the king
+        rook.setMoved(MovedState.MOVED); // Set the moved flag for the roo
+           
         return true;
     }
 
@@ -87,33 +80,29 @@ public class MovePiece extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public MovePiece copy() {
+    public Castle copy() {
         // TODO: copy non-final variables appropriately
+        
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof MovePiece)) return false;
-        MovePiece other = (MovePiece) obj;
-        return startX == other.startX && startY == other.startY && targetX == other.targetX && targetY == other.targetY;
-
+        // TODO: compare all other variables in the class
+        return obj instanceof Castle && ((Castle) obj).castleType == this.castleType;
     }
 
     @Override
     public int hashCode() {
         // TODO: return the hash of all other variables in the class
-        return Objects.hash(startX, startY, targetX, targetY);
+        return Objects.hash(castleType);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "MovePiece{" +
-                "startX=" + startX +
-                ", startY=" + startY +
-                ", targetX=" + targetX +
-                ", targetY=" + targetY +
+        return "Castle{" +
+                "castleType=" + castleType +
                 '}';
     }
 
@@ -125,18 +114,17 @@ public class MovePiece extends AbstractAction {
      */
     @Override
     public String getString(AbstractGameState gameState) {
-        ChessGameState gs = (ChessGameState) gameState;
-        ChessPiece startPiece = gs.getPiece(startX, startY);
-        ChessPiece targetPiece = gs.getPiece(targetX, targetY);
-        String startPieceName = startPiece != null ? startPiece.getChessPieceType().toString() : "empty";
-        String targetPieceName = targetPiece != null ? targetPiece.getChessPieceType().toString() : "empty";
-        String startSquare = gs.getChessCoordinates(startX, startY);
-        String targetSquare = gs.getChessCoordinates(targetX, targetY);
-        String output = "Move " + startPieceName + " from " + startSquare + " to " + targetSquare;
-
-        if (targetPiece != null) {
-            output += ", capturing " + targetPieceName;
+        String output = "Castle: ";
+        if (castleType == CastleType.KING_SIDE) {
+            output += "King-side castling";
+        } else if (castleType == CastleType.QUEEN_SIDE) {
+            output += "Queen-side castling";
+        } else {
+            output += "Invalid castling type";
         }
+        output += " for player " + gameState.getCurrentPlayer() + ".";
+
+
         return output;
     }
     
