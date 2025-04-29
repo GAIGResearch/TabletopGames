@@ -12,6 +12,7 @@ import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVector, IToJSON {
 
@@ -307,27 +308,54 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         return featureIndices.get(index);
     }
 
-    public List<List<Object>> processData(String outputFile, String... inputFiles) {
-        return processData(null, outputFile, inputFiles);
+    public record ColumnDetails(String name, featureType type, Object enumValue, Pair<Number, Number> range,
+                                int underlyingIndex, Class<?> clazz, Pair<Integer, Integer> interaction) {
     }
 
-    public List<List<Object>> processData(AutomatedFeatures previousFeatures, String outputFile, String... inputFiles) {
-        // previousFeatures is the ASF (if any) that the inputFiles have already been processed with
-        List<String> newFeatureNames = new ArrayList<>();
-        List<featureType> newFeatureTypes = new ArrayList<>();
-        List<Object> newEnumValues = new ArrayList<>();
-        List<Pair<Number, Number>> newFeatureRanges = new ArrayList<>();
-        List<Integer> underlyingFeatureIndices = new ArrayList<>();
-        List<Class<?>> newFeatureClasses = new ArrayList<>();
-        List<Pair<Integer, Integer>> newInteractions = new ArrayList<>();
-        Map<Integer, Integer> underlyingIndexToRowIndex = new HashMap<>();
+    public List<ColumnDetails> getColumnDetails() {
+        List<ColumnDetails> columnDetails = new ArrayList<>();
+        for (int i = 0; i < featureNames.size(); i++) {
+            columnDetails.add(new ColumnDetails(
+                    featureNames.get(i),
+                    featureTypes.get(i),
+                    enumValues.get(i),
+                    featureRanges.get(i),
+                    featureIndices.get(i),
+                    featureIndices.get(i) == -1 ? Double.class : underlyingTypes[featureIndices.get(i)],
+                    interactions.get(i)
+            ));
+        }
+        return columnDetails;
+    }
+
+    public List<List<Object>> processData(String outputFile, String... inputFiles) {
+        // inputFiles contain the raw data.
+        // There can be two types of columns:
+        // 1. Columns that refer to existing featureNames. These are detected by matching the names.
+        // 2. Columns that are not features. These are copied over into the output file without becoming features.
+
+        // The point of processData is to also add in new columns for features that do not yet have columns
+        // 1. Bucketing of numeric features (range features).
+        //          For the moment we always recalculate bucket features from scratch. (TODO: improve this?)
+        //          As the data distribution may have changed.
+        // 2. One-hot encoding of enum features
+        //          We check the enum, and check to see if all of the expected columns are present.
+        // 3. One-hot encoding of string features
+        //          As for enum features
+        // 4. One-hot encoding of boolean features
+        //          As for enum features
+        // 5. Interaction columns between any two of the above features
+        //          if this already exists in the data, we do not add it again
+
+        List<ColumnDetails> newColumnDetails = new ArrayList<>(); // will be populated with new columns
+        Map<Integer, Integer> underlyingIndexToDataIndex = new HashMap<>();
+        List<ColumnDetails> startingFeatures = getColumnDetails();
 
         // load files...the columns should correspond to the underlying vector
         // while allowing for additional columns (for target values)
         Pair<List<String>, List<List<String>>> data = Utils.loadDataWithHeader("\t", inputFiles);
         List<String> headers = data.a;
         List<List<String>> dataRows = data.b;
-        Map<String, Integer> targetData = new HashMap<>();
 
         // We now want to convert the dataRows into dataColumns
         List<List<String>> dataColumns = new ArrayList<>();
@@ -343,268 +371,269 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 dataColumns.get(i).add(row.get(i));
             }
         }
+        List<List<?>> newDataColumns = new ArrayList<>(); // set up to take the new data (especially where we can just copy this from the old)
 
-        // for each column, determine the type of data
-        featureLoop:
-        for (int i = 0; i < headers.size(); i++) {
-            List<String> columnData = dataColumns.get(i);
-            //      System.out.println("Processing column: " + headers.get(i));
+        // Loop over all underlyingNames/Types to determine if the current features match with the data
+        // if they do match then we can pull over the relevant details from the current set up
+        // if they do not match, then we need to calculate from scratch
+        for (int i = 0; i < underlyingNames.length; i++) {
+            String columnName = underlyingNames[i];
+            Class<?> columnType = underlyingTypes[i];
 
-            // is the column one which is already processed?
-            // if so, we can take the information directly from the previous features
-            if (previousFeatures != null) {
-                for (int j = 0; j < previousFeatures.featureNames.size(); j++) {
-                    if (previousFeatures.featureNames.get(j).equals(headers.get(i))) {
-                        newFeatureNames.add(previousFeatures.featureNames.get(j));
-                        newFeatureTypes.add(previousFeatures.featureTypes.get(j));
-                        newEnumValues.add(previousFeatures.enumValues.get(j));
-                        newFeatureRanges.add(previousFeatures.featureRanges.get(j));
-                        newInteractions.add(previousFeatures.interactions.get(j));
-                        underlyingFeatureIndices.add(previousFeatures.featureIndices.get(j));
-                        if (previousFeatures.featureTypes.get(j) == featureType.RAW)
-                            underlyingIndexToRowIndex.put(j, i);
-                        // We just check the first 20 values to determine the class (to avoid performance issues)
-                        newFeatureClasses.add(calculateClass(columnData, false));
-                        //       System.out.println("Skipped " + headers.get(i) + " as already processed");
-                        continue featureLoop;
-                    }
-                }
+            if (!headers.contains(columnName)) {
+                //        System.out.println("Missing column: " + columnName);
+                continue;
             }
 
-            // now determine if the column is one of those specified in the underlying vector
-            int underlyingindex = -1;
-            for (int j = 0; j < underlyingNames.length; j++) {
-                if (underlyingNames[j].equals(headers.get(i))) {
-                    underlyingindex = j;
-                    break;
-                }
-            }
-            if (underlyingindex == -1) {
-                // this column is not in the underlying vector, or is already processed
-                // so we do not generate any features
-                // we do however keep it to write to the output file
-                newFeatureNames.add(headers.get(i));
-                newFeatureTypes.add(featureType.TARGET);
-                newEnumValues.add(null);
-                newFeatureRanges.add(null);
-                newInteractions.add(null);
-                underlyingFeatureIndices.add(-1);
-                Class<?> columnType = calculateClass(columnData, true);
-                newFeatureClasses.add(columnType);
-                targetData.put(headers.get(i), i);
-            } else {
-                Class<?> columnType = underlyingTypes[underlyingindex];
-                underlyingIndexToRowIndex.put(underlyingindex, i);
-                String columnName = headers.get(i);
-                //           System.out.println("Processing column: " + columnName + " of type: " + columnType);
+            int columnIndex = headers.indexOf(columnName);
+            underlyingIndexToDataIndex.put(i, columnIndex);
 
-                if (!columnType.isEnum()) {
-                    newFeatureNames.add(columnName);
-                    newFeatureClasses.add(columnType);
-                    newEnumValues.add(null);
-                    newInteractions.add(null);
-                    newFeatureRanges.add(null);
-                    underlyingFeatureIndices.add(underlyingindex);
-                    newFeatureTypes.add(featureType.RAW);
-                }
-
-                if (columnType.equals(Boolean.class) || columnType.equals(boolean.class)) {
-                    // we do nothing - a RAW feature is all we need
-                } else if (columnType.equals(Integer.class) || columnType.equals(int.class) ||
-                        columnType.equals(Double.class) || columnType.equals(double.class)) {
-                    // we then add a one-hot feature for each bucket
-
-                    Class<?> numericClass = columnType.equals(Integer.class) || columnType.equals(int.class) ?
-                            Integer.class : Double.class;
-                    if (buckets[underlyingindex] > 1) {
-                        List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets[underlyingindex], numericClass);
-                        for (int b = 0; b < proposedFeatureRanges.size(); b++) {
-                            Pair<Number, Number> range = proposedFeatureRanges.get(b);
-                            newFeatureTypes.add(featureType.RANGE);
-                            newFeatureRanges.add(range);
-                            newFeatureNames.add(columnName + "_B" + b);
-                            newEnumValues.add(null);
-                            newInteractions.add(null);
-                            newFeatureClasses.add(numericClass);
-                            underlyingFeatureIndices.add(underlyingindex);
+            if (columnType.equals(Boolean.class)) {
+                // Boolean column: Just add raw column directly
+                newColumnDetails.add(new ColumnDetails(
+                        columnName, featureType.RAW, null, null, i, columnType, null
+                ));
+                newDataColumns.add(validateBooleanColumnData(dataColumns.get(columnIndex)));
+            } else if (columnType.equals(Double.class) || columnType.equals(double.class) ||
+                    columnType.equals(Integer.class) || columnType.equals(int.class)) {
+                // Numeric column: Check for RAW column and a RANGE column for each BUCKET
+                // Does header contain the column name (RAW) and one RANGE column for each bucket?
+                List<String> expectedBucketColumns = IntStream.range(0, getBuckets(i))
+                        .mapToObj(b -> columnName + "_B" + b)
+                        .toList();
+                boolean copiedColumns = false;
+                if (headers.contains(columnName) && headers.containsAll(expectedBucketColumns)) {
+                    // then we can pull over the RAW and RANGE columns from the starting features
+                    int finalI = i;
+                    List<ColumnDetails> original = startingFeatures.stream().filter(r -> r.underlyingIndex == finalI).toList();
+                    if (original.size() == 1 + getBuckets(i)) {
+                        for (ColumnDetails columnDetail : original) {
+                            newColumnDetails.add(columnDetail);
+                            if (columnDetail.type == featureType.RAW) {
+                                newDataColumns.add(dataColumns.get(columnIndex));
+                            } else if (columnDetail.type == featureType.RANGE) {
+                                // we need to find the range in the data
+                                int bucketIndex = Integer.parseInt(columnDetail.name.substring(columnDetail.name.indexOf("_B") + 2));
+                                newDataColumns.add(dataColumns.get(headers.indexOf(expectedBucketColumns.get(bucketIndex))));
+                            }
                         }
+                        copiedColumns = true;
                     }
-
-                } else if (columnType.isEnum()) {
-                    Class<Enum> enumClass = (Class<Enum>) columnType;
-                    Set<Enum<?>> uniqueValues = new HashSet<>();
-                    Enum[] enumValues = enumClass.getEnumConstants();
-                    // we then add one feature per enum value as a one-hot encoding
-
-                    for (Enum<?> enumValue : enumValues) {
-                        uniqueValues.add(enumValue);
-                        newFeatureNames.add(columnName + "_" + enumValue.name());
-                        newFeatureTypes.add(featureType.ENUM);
-                        newFeatureClasses.add(Boolean.class);
-                        newEnumValues.add(enumValue);
-                        newInteractions.add(null);
-                        newFeatureRanges.add(null);
-                        underlyingFeatureIndices.add(underlyingindex);
+                }
+                if (!copiedColumns) {
+                    List<Pair<ColumnDetails, List<?>>> missingColumns = handleMissingRawFeature(i, dataColumns.get(columnIndex));
+                    for (Pair<ColumnDetails, List<?>> missingColumn : missingColumns) {
+                        newColumnDetails.add(missingColumn.a);
+                        newDataColumns.add(missingColumn.b);
                     }
-                } else if (columnType.equals(String.class)) {
-                    // in this case, we proceed much like the enum case
-                    // we add a one-hot feature for each unique value (but if there are more than 10 different values,
-                    // we just skip the field completely)
-                    Set<String> uniqueValues = new HashSet<>(columnData);
-                    if (uniqueValues.size() > 10) {
-                        System.err.println("Warning: Skipping column with too many unique values: " + columnName);
-                        continue; // Skip columns with too many unique values
-                    }
-                    for (String value : uniqueValues) {
-                        newFeatureNames.add(columnName + "_" + value);
-                        newFeatureTypes.add(featureType.STRING);
-                        newFeatureClasses.add(Boolean.class);
-                        newEnumValues.add(value);
-                        newInteractions.add(null);
-                        newFeatureRanges.add(null);
-                        underlyingFeatureIndices.add(underlyingindex);
+                }
+            } else if (columnType.isEnum()) {
+                // Enum column: Check for one column per enum value, as well as one with the RAW value
+                List<String> expectedEnumColumns = Arrays.stream(columnType.getEnumConstants())
+                        .map(e -> columnName + "_" + ((Enum<?>) e).name())
+                        .toList();
+                int finalI1 = i;
+                List<String> actualEnumColumns = startingFeatures.stream().filter(r -> r.underlyingIndex == finalI1)
+                        .map(r -> r.name)
+                        .toList();
+                if (expectedEnumColumns.size() + 1 == actualEnumColumns.size()) {
+                    // we just copy over
+                    newColumnDetails.add(new ColumnDetails(
+                            columnName, featureType.TARGET, null, null, i, columnType, null
+                    ));
+                    newDataColumns.add(dataColumns.get(columnIndex));
+                    for (String expectedEnumColumn : expectedEnumColumns) {
+                        int enumIndex = headers.indexOf(expectedEnumColumn);
+                        if (enumIndex == -1) {
+                            throw new IllegalArgumentException("Missing column: " + expectedEnumColumn);
+                        }
+                        newColumnDetails.add(new ColumnDetails(
+                                expectedEnumColumn, featureType.ENUM, null, null, i, Boolean.class, null
+                        ));
+                        newDataColumns.add(dataColumns.get(enumIndex));
                     }
                 } else {
-                    throw new IllegalArgumentException("Unsupported column type: " + columnType + " for column: " + columnName);
-
+                    // recalculate
+                    List<Pair<ColumnDetails, List<?>>> missingColumns = handleMissingEnumFeature(i, dataColumns.get(columnIndex));
+                    for (Pair<ColumnDetails, List<?>> missingColumn : missingColumns) {
+                        newColumnDetails.add(missingColumn.a);
+                        newDataColumns.add(missingColumn.b);
+                    }
                 }
+            } else {
+                throw new IllegalArgumentException("Unsupported column type: " + columnType);
             }
         }
 
-        // Now a second pass to pick up new interactions that need to be added
+        // We now run through all interactions and check if they are already present in the data (if so, we add them in without further processing)
+        // if not, then we need to calculate them
         for (int i = 0; i < featureNames.size(); i++) {
-            if (featureTypes.get(i) != featureType.INTERACTION) {
-                continue; // Only interested in interactions
-            }
-            // then check to see if this is in newFeatureNames
-            if (newFeatureNames.contains(featureNames.get(i)))
-                continue;
+            if (featureTypes.get(i) == featureType.INTERACTION) {
+                Pair<Integer, Integer> interaction = interactions.get(i);
+                String firstName = featureNames.get(interaction.a);
+                String secondName = featureNames.get(interaction.b);
+                String interactionName = firstName + ":" + secondName;
+                int firstIndex = -1;
+                int secondIndex = -1;
 
-            if (previousFeatures == null) {
-                throw new IllegalArgumentException("Cannot process interaction " + featureNames.get(i) + " without previous features");
-            }
-
-            Pair<Integer, Integer> interactionIndices = interactions.get(i);
-            // as a safety check we compare the featureNames and newFeatureNames at the specified indices to ensure
-            // these are the same
-            // The indexing of newFeatureNames includes all TARGET features. These are not included in the indexing of previousFeatures
-            List<String> newFeatureNamesExcludingTargets = new ArrayList<>();
-            for (int j = 0; j < newFeatureNames.size(); j++) {
-                if (newFeatureTypes.get(j) != featureType.TARGET) {
-                    newFeatureNamesExcludingTargets.add(newFeatureNames.get(j));
+                // We now need to find the indices for the interaction in the new data...which may have additional columns
+                for (int loop = 0; loop < newColumnDetails.size(); loop++) {
+                    ColumnDetails columnDetails = newColumnDetails.get(loop);
+                    if (columnDetails.name.equals(firstName)) {
+                        firstIndex = loop;
+                    }
+                    if (columnDetails.name.equals(secondName)) {
+                        secondIndex = loop;
+                    }
+                }
+                newColumnDetails.add(new ColumnDetails(
+                        interactionName, featureType.INTERACTION, null, null, -1, Double.class, Pair.of(firstIndex, secondIndex)
+                ));
+                if (headers.contains(interactionName)) {
+                    // just copy over
+                    int interactionIndex = headers.indexOf(interactionName);
+                    newDataColumns.add(dataColumns.get(interactionIndex));
+                } else {
+                    // need to calculate this
+                    List<Double> interactionData = new ArrayList<>();
+                    for (int j = 0; j < newDataColumns.get(0).size(); j++) {
+                        Object firstValueObj = newDataColumns.get(firstIndex).get(j);
+                        Object secondValueObj = newDataColumns.get(secondIndex).get(j);
+                        double firstValue = firstValueObj instanceof Number ? ((Number) firstValueObj).doubleValue() :
+                                firstValueObj instanceof String ? Double.parseDouble((String) firstValueObj) : 0;
+                        double secondValue = secondValueObj instanceof Number ? ((Number) secondValueObj).doubleValue() :
+                                secondValueObj instanceof String ? Double.parseDouble((String) secondValueObj) : 0;
+                        interactionData.add(firstValue * secondValue);
+                    }
+                    newDataColumns.add(interactionData);
                 }
             }
-            String nameOrig1 = previousFeatures.featureNames.get(interactionIndices.a);
-            String nameOrig2 = previousFeatures.featureNames.get(interactionIndices.b);
-            String nameNew1 = newFeatureNamesExcludingTargets.get(interactionIndices.a);
-            String nameNew2 = newFeatureNamesExcludingTargets.get(interactionIndices.b);
-            if (!nameOrig1.equals(nameNew1) || !nameOrig2.equals(nameNew2)) {
-                String errorString = "Interaction " + featureNames.get(i) + " does not match previous features: " +
-                        nameOrig1 + " vs " + nameNew1 + ", " + nameOrig2 + " vs " + nameNew2;
-                throw new AssertionError(errorString);
-            }
-
-            newFeatureNames.add(featureNames.get(i));
-            newFeatureTypes.add(featureType.INTERACTION);
-            newEnumValues.add(null);
-            newFeatureRanges.add(null);
-            newInteractions.add(Pair.of(interactionIndices.a, interactionIndices.b));
-            underlyingFeatureIndices.add(-1);
-            newFeatureClasses.add(Double.class);
         }
 
-        // update feature names, types, ranges, and indices (ignoring any TARGET features)
+        // Then all other data in the input file
+        // we run through all the columns (in header), and any that we have not already included in newColumns, we add in unchanged
+        for (int i = 0; i < headers.size(); i++) {
+            String columnName = headers.get(i);
+            if (newColumnDetails.stream().noneMatch(r -> r.name.equals(columnName))) {
+                newColumnDetails.add(new ColumnDetails(
+                        columnName, featureType.TARGET, null, null, -1, String.class, null
+                ));
+                newDataColumns.add(dataColumns.get(i));
+            }
+        }
+
+        // We now have all the column, to write to file we need to convert this into a set of rows
+        List<List<Object>> newDataRows = new ArrayList<>();
+        for (int i = 0; i < newDataColumns.size(); i++) {
+            List<?> columnData = newDataColumns.get(i);
+            for (int j = 0; j < columnData.size(); j++) {
+                if (newDataRows.size() <= j) {
+                    newDataRows.add(new ArrayList<>());
+                }
+                newDataRows.get(j).add(columnData.get(j));
+            }
+        }
+
+        // we also need to set the featureNames and so on from the new column details
         featureNames.clear();
         featureTypes.clear();
         enumValues.clear();
         featureRanges.clear();
         featureIndices.clear();
         interactions.clear();
-        int[] featureToRowIndex = new int[newFeatureNames.size()];  // formally bigger than needed
-        int featuresFound = 0;
-        for (int i = 0; i < newFeatureNames.size(); i++) {
-            if (newFeatureTypes.get(i) != featureType.TARGET) {
-                featureNames.add(newFeatureNames.get(i));
-                featureTypes.add(newFeatureTypes.get(i));
-                enumValues.add(newEnumValues.get(i));
-                featureRanges.add(newFeatureRanges.get(i));
-                featureIndices.add(underlyingFeatureIndices.get(i));
-                interactions.add(newInteractions.get(i));
-                featureToRowIndex[featuresFound] = i;
-                featuresFound++;
-            }
+        for (ColumnDetails column : newColumnDetails) {
+            if (column.type.equals(featureType.TARGET))
+                continue;
+            featureNames.add(column.name);
+            featureTypes.add(column.type);
+            enumValues.add(column.enumValue);
+            featureRanges.add(column.range);
+            featureIndices.add(column.underlyingIndex);
+            interactions.add(column.interaction);
         }
 
-        // Now we convert the dataRows into the new feature space
-        List<List<Object>> newDataRows = new ArrayList<>();
-        for (List<String> row : dataRows) {
-            if (row.size() != headers.size()) {
-                System.err.println("Warning: Skipping row with inconsistent number of columns: " + row);
-                continue; // Skip rows with inconsistent number of columns
-            }
-            List<Object> newRow = new ArrayList<>();
-            for (int j = 0; j < newFeatureNames.size(); j++) {
-                if (newFeatureTypes.get(j) == featureType.TARGET) {
-                    newRow.add(row.get(targetData.get(newFeatureNames.get(j))));
-                } else if (newFeatureTypes.get(j) == featureType.INTERACTION) {
-                    // we need to find the two features that are being interacted
-                    Pair<Integer, Integer> interaction = newInteractions.get(j);
-                    double firstValue = Double.parseDouble(row.get(featureToRowIndex[interaction.a]));
-                    double secondValue = Double.parseDouble(row.get(featureToRowIndex[interaction.b]));
-                    newRow.add(firstValue * secondValue);
-                } else {
-                    String value = row.get(underlyingIndexToRowIndex.get(underlyingFeatureIndices.get(j)));
-                    if (newFeatureTypes.get(j) == featureType.RANGE) {
-                        double numericValue = Double.parseDouble(value);
-                        Pair<Number, Number> range = newFeatureRanges.get(j);
-                        if (numericValue >= range.a.doubleValue() && numericValue < range.b.doubleValue()) {
-                            newRow.add(1);
-                        } else {
-                            newRow.add(0);
-                        }
-                    } else if (newFeatureTypes.get(j) == featureType.ENUM) {
-                        Enum<?> enumValue = (Enum<?>) newEnumValues.get(j);
-                        if (enumValue.name().equals(value)) {
-                            newRow.add(1);
-                        } else {
-                            newRow.add(0);
-                        }
-                    } else if (newFeatureTypes.get(j) == featureType.STRING) {
-                        String stringValue = (String) newEnumValues.get(j);
-                        if (stringValue.equals(value)) {
-                            newRow.add(1);
-                        } else {
-                            newRow.add(0);
-                        }
-                    } else {
-                        // RAW feature
-                        if (newFeatureClasses.get(j) == Integer.class || newFeatureClasses.get(j) == int.class) {
-                            newRow.add(Integer.parseInt(value));
-                        } else if (newFeatureClasses.get(j) == Double.class || newFeatureClasses.get(j) == double.class) {
-                            newRow.add(Double.parseDouble(value));
-                        } else if (newFeatureClasses.get(j) == Boolean.class || newFeatureClasses.get(j) == boolean.class) {
-                            newRow.add(Boolean.parseBoolean(value));
-                        } else {
-                            // Handle other types as needed
-                            System.err.println("Warning: Unsupported type for column: " + newFeatureNames.get(j));
-                        }
-                    }
-                }
-            }
-            newDataRows.add(newRow);
-        }
-
-        // Now we write the new data to the output file
-        Utils.writeDataWithHeader("\t", newFeatureNames, newDataRows, outputFile);
-
-        // remove the suffix from output file, and replace with json
-        String jsonOutputFile = outputFile.substring(0, outputFile.lastIndexOf('.')) + ".json";
-        JSONObject outputJson = toJSON();
-        JSONUtils.writeJSON(outputJson, jsonOutputFile);
+        Utils.writeDataWithHeader("\t", newColumnDetails.stream().map(r -> r.name).toList(),
+                newDataRows, outputFile);
         return newDataRows;
     }
 
-    private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues, int buckets, List<Number> exclusions) {
+
+    // Stub methods for handling missing features
+    private List<Pair<ColumnDetails, List<?>>> handleMissingRawFeature(int i, List<String> columnData) {
+        List<Pair<ColumnDetails, List<?>>> newColumns = new ArrayList<>();
+        String feature = underlyingNames[i];
+        Class<?> columnType = underlyingTypes[i];
+        Class<?> numericClass = columnType.equals(Integer.class) || columnType.equals(int.class) ?
+                Integer.class : Double.class;
+        // Add RAW feature for column
+        ColumnDetails newColumnDetails = new ColumnDetails(feature, featureType.RAW, null, null, i, columnType, null);
+        List<?> newColumnData = numericClass == Integer.class ?
+                columnData.stream().map(Integer::parseInt).toList() :
+                columnData.stream().map(Double::parseDouble).toList();
+        newColumns.add(Pair.of(newColumnDetails, newColumnData));
+        if (buckets[i] > 1) {
+            List<Pair<Number, Number>> proposedFeatureRanges = calculateFeatureRanges(columnData, buckets[i], numericClass);
+            for (int b = 0; b < proposedFeatureRanges.size(); b++) {
+                Pair<Number, Number> range = proposedFeatureRanges.get(b);
+                String rangeName = feature + "_B" + b;
+                newColumns.add(Pair.of(
+                        new ColumnDetails(rangeName, featureType.RANGE, null, range, i, numericClass, null),
+                        columnData.stream()
+                                .map(Double::parseDouble)
+                                .map(value -> {
+                                    if (value >= range.a.doubleValue() && value < range.b.doubleValue()) {
+                                        return 1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }).toList()
+                ));
+            }
+        }
+        return newColumns;
+    }
+
+    private List<Pair<ColumnDetails, List<?>>> handleMissingEnumFeature(int i, List<String> columnData) {
+        List<Pair<ColumnDetails, List<?>>> newColumns = new ArrayList<>();
+        String feature = underlyingNames[i];
+        Class<?> columnType = underlyingTypes[i];
+        // Add TARGET feature for column
+        newColumns.add(Pair.of(
+                new ColumnDetails(feature, featureType.TARGET, null, null, i, columnType, null),
+                columnData)
+        );
+        if (columnType.isEnum()) {
+            // Add ENUM features for each enum value
+            Object[] enumValues = columnType.getEnumConstants();
+            for (Object enumValue : enumValues) {
+                String enumName = feature + "_" + ((Enum<?>) enumValue).name();
+                newColumns.add(Pair.of(
+                        new ColumnDetails(enumName, featureType.ENUM, enumValue, null, i, Boolean.class, null),
+                        columnData.stream()
+                                .map(value -> ((Enum<?>) enumValue).name().equals(value) ? 1 : 0)
+                                .toList())
+                );
+            }
+        } else {
+            // Handle string features
+            Set<String> uniqueValues = new HashSet<>(columnData);
+            if (uniqueValues.size() <= 10)
+                for (String value : uniqueValues) {
+                    String enumName = feature + "_" + value;
+                    newColumns.add(Pair.of(
+                            new ColumnDetails(enumName, featureType.STRING, value, null, i, Boolean.class, null),
+                            columnData.stream()
+                                    .map(v -> v.equals(value) ? 1 : 0)
+                                    .toList())
+                    );
+                }
+        }
+        return newColumns;
+    }
+
+
+    private <T extends Number> List<Pair<Number, Number>> calculateFeatureRanges(List<T> numericValues,
+                                                                                 int buckets, List<Number> exclusions) {
         List<Pair<Number, Number>> featureRanges = new ArrayList<>();
         for (int b = 0; b < buckets; b++) {
             Number lowerBound = b == 0 ? Double.NEGATIVE_INFINITY :
@@ -746,6 +775,26 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             }
         }
         return numericValues;
+    }
+
+    private List<Boolean> validateBooleanColumnData(List<String> columnData) {
+        List<Boolean> booleanValues = new ArrayList<>();
+        for (String value : columnData) {
+            if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                booleanValues.add(Boolean.parseBoolean(value));
+            } else {
+                Double number = Double.parseDouble(value);
+                if (number == 0.0) {
+                    booleanValues.add(false);
+                } else if (number == 1.0) {
+                    booleanValues.add(true);
+                } else {
+                    System.err.println("Warning: Skipping non-boolean value: " + value);
+                    return Collections.emptyList();
+                }
+            }
+        }
+        return booleanValues;
     }
 
     private List<Integer> validateIntColumnData(List<String> columnData) {

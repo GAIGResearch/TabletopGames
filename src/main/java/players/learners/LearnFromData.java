@@ -7,7 +7,9 @@ import core.interfaces.IToJSON;
 import org.json.simple.JSONObject;
 import players.heuristics.AutomatedFeatures;
 import players.heuristics.GLMHeuristic;
+import scala.Int;
 import utilities.JSONUtils;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.io.File;
@@ -163,11 +165,19 @@ public class LearnFromData {
                         if (type2 == INTERACTION)
                             continue;
 
+                        // check that this is not already an interaction
+                        Pair<Integer, Integer> interaction = Pair.of(i, j);
+                        if (asf.getColumnDetails().stream().anyMatch(r -> r.type() == INTERACTION &&
+                                r.interaction().equals(interaction))) {
+                          //  System.out.println("Already an interaction: " + firstFeature + " : " + secondFeature);
+                            continue;
+                        }
+
                         // Consider the interaction of features
                         AutomatedFeatures adjustedASF = asf.copy();
                         adjustedASF.addInteraction(i, j);
                         // providing the previous ASF means we will just calculate the new interaction
-                        adjustedASF.processData(asf, "ImproveModel_tmp.txt", dataFiles);
+                        adjustedASF.processData("ImproveModel_tmp.txt", dataFiles);
                         learner.setStateFeatureVector(adjustedASF);
 
                         // TODO: Refactor to remove code repetition
@@ -190,7 +200,7 @@ public class LearnFromData {
                 // We then also need to set up the data file to be used as the baseline for the next iteration
                 if (bestFeatures != null) {
                     String newFileName = "ImproveModel_Iter_" + iteration + ".txt";
-                    bestFeatures.processData(asf, newFileName, rawData);
+                    bestFeatures.processData(newFileName, rawData);
                     iteration++;
                     rawData = new String[]{newFileName};
                 }
