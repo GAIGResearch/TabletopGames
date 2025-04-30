@@ -10,9 +10,12 @@ import games.chess.actions.MovePiece;
 import games.chess.components.ChessPiece;
 import utilities.Hash;
 
+import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -31,7 +34,7 @@ public class ChessGameState extends AbstractGameState {
     //List of black pieces
     List<ChessPiece> blackPieces = new ArrayList<>();
     //Game state counts 
-    HashMap<ChessBoard, Integer> gameStateCounts = new HashMap<>();
+    Map<Integer, Integer> gameStateCounts = new HashMap<>();
 
     //Number of moves without a pawn move or capture
     int halfMoveClock = 0;
@@ -181,12 +184,15 @@ public class ChessGameState extends AbstractGameState {
         return o instanceof ChessGameState that &&
                 super.equals(o) &&
                 this.halfMoveClock == that.halfMoveClock &&
+                this.whitePieces.equals(that.whitePieces) &&
+                this.blackPieces.equals(that.blackPieces) &&
+                this.gameStateCounts.equals(that.gameStateCounts) &&
                 this.board.equals(that.board);
     }
     
     @Override
     public int hashCode() {
-        return board.hashCode();
+        return Objects.hash(super.hashCode(), halfMoveClock, whitePieces, blackPieces, gameStateCounts, board);
     }
 
     public ChessBoard getBoard() {
@@ -411,13 +417,14 @@ public class ChessGameState extends AbstractGameState {
     }
     public boolean AddCheckRepetitionCount() {
         // Check if the current board state has been seen before
-        if (gameStateCounts.containsKey(board)) {
-            gameStateCounts.put(board, gameStateCounts.get(board) + 1);
-            if (gameStateCounts.get(board) >= 3) { 
+        int boardHash = board.hashCode();
+        if (gameStateCounts.containsKey(boardHash)) {
+            gameStateCounts.put(boardHash, gameStateCounts.get(boardHash) + 1);
+            if (gameStateCounts.get(boardHash) >= 3) { 
                 return true; // Draw by repetition
             }
         } else {
-            gameStateCounts.put(board, 1); // Add the new board state to the map
+            gameStateCounts.put(boardHash, 1); // Add the new board state to the map
         }
         return false; // No draw by repetition
     }
@@ -427,6 +434,18 @@ public class ChessGameState extends AbstractGameState {
         char file = (char) ('a' + x);
         char rank = (char) ('1' + y);
         return "" + file + rank;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Chess Game State Hash:").append(hashCode()).append("\n");
+        sb.append("White Pieces: ").append(whitePieces.hashCode()).append("\n");
+        sb.append("Black Pieces: ").append(blackPieces.hashCode()).append("\n");
+        sb.append("Game State Counts: ").append(gameStateCounts.hashCode()).append("\n");
+        sb.append("Half Move Clock: ").append(halfMoveClock).append("\n");
+        sb.append("Board:\n").append(board.hashCode()).append("\n");
+        return sb.toString();
     }
 
 

@@ -17,12 +17,12 @@ import games.chess.actions.MovePiece;
 import games.chess.components.ChessPiece.ChessPieceType;
 
 public class Promotion extends AbstractAction {
-    private int startX;
-    private int startY;
+    private final int startX;
+    private final int startY;
 
-    private int targetX;
-    private int targetY;
-    private ChessPieceType newPieceType;
+    private final int targetX;
+    private final int targetY;
+    private final ChessPieceType newPieceType;
 
 
     public Promotion(int startX, int startY, int targetX, int targetY, ChessPieceType newPieceType) {
