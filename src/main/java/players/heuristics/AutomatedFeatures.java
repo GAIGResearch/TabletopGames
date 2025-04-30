@@ -449,26 +449,30 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 }
             } else if (columnType.isEnum()) {
                 // Enum column: Check for one column per enum value, as well as one with the RAW value
-                List<String> expectedEnumColumns = Arrays.stream(columnType.getEnumConstants())
-                        .map(e -> columnName + "_" + ((Enum<?>) e).name())
+                Class<? extends Enum> enumClass = (Class<? extends Enum>) underlyingTypes[i];
+                Object[] enumValues = enumClass.getEnumConstants();
+
+                List<String> expectedEnums = Arrays.stream(enumValues)
+                        .map(e -> ((Enum<?>) e).name())
                         .toList();
                 int finalI1 = i;
                 List<String> actualEnumColumns = startingFeatures.stream().filter(r -> r.underlyingIndex == finalI1)
                         .map(r -> r.name)
                         .toList();
-                if (expectedEnumColumns.size() == actualEnumColumns.size()) {
+                if (expectedEnums.size() + 1 == actualEnumColumns.size()) {
                     // we just copy over
                     newColumnDetails.add(new ColumnDetails(
                             columnName, featureType.TARGET, null, null, i, columnType, null
                     ));
                     newDataColumns.add(dataColumns.get(columnIndex));
-                    for (String expectedEnumColumn : expectedEnumColumns) {
+                    for (String expectedEnum : expectedEnums) {
+                        String expectedEnumColumn = columnName + "_" + expectedEnum;
                         int enumIndex = headers.indexOf(expectedEnumColumn);
                         if (enumIndex == -1) {
                             throw new IllegalArgumentException("Missing column: " + expectedEnumColumn);
                         }
                         newColumnDetails.add(new ColumnDetails(
-                                expectedEnumColumn, featureType.ENUM, null, null, i, Boolean.class, null
+                                expectedEnumColumn, featureType.ENUM, Enum.valueOf(enumClass, expectedEnum), null, i, Boolean.class, null
                         ));
                         newDataColumns.add(dataColumns.get(enumIndex));
                     }
