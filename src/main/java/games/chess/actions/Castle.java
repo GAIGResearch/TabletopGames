@@ -33,7 +33,7 @@ public class Castle extends AbstractAction {
         KING_SIDE,
         QUEEN_SIDE
     }
-    CastleType castleType;
+    final CastleType castleType;
 
     public Castle(CastleType castleType) {
         this.castleType = castleType;
@@ -81,8 +81,7 @@ public class Castle extends AbstractAction {
      */
     @Override
     public Castle copy() {
-        // TODO: copy non-final variables appropriately
-        
+        // immutable        
         return this;
     }
 
@@ -94,8 +93,7 @@ public class Castle extends AbstractAction {
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return Objects.hash(castleType);
+        return castleType.ordinal() + 467272;
     }
 
     @Override

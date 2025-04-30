@@ -118,10 +118,10 @@ public class ChessForwardModel extends StandardForwardModel {
         switch (type) {
             case KING:
                 actions.addAll(computeAvailableActionsKing(chessState, x, y, playerId));
-                break; //Missing castling logic
+                break;
             case PAWN:
                 actions.addAll(computeAvailableActionsPawn(chessState, x, y, playerId));
-                break;//Missing en passant and promotion logic
+                break;//Missing en passant
             case ROOK:
                 actions.addAll(computeAvailableActionsRook(chessState, x, y, playerId));
                 break;
@@ -611,8 +611,8 @@ public class ChessForwardModel extends StandardForwardModel {
         endPlayerTurn(chessState);
         //Print board state
         // System.out.println("Available actions: " + computeAvailableActions(chessState) + " for player " + chessState.getCurrentPlayer());
-        System.out.println(chessState.getBoardString());
-        System.out.println("Turn number: " + chessState.getTurnCounter() + " Half-move clock: " + chessState.halfMoveClock);
+        // System.out.println(chessState.getBoardString());
+        // System.out.println("Turn number: " + chessState.getTurnCounter() + " Half-move clock: " + chessState.halfMoveClock);
         checkGameEnd(chessState);
         
     }
