@@ -155,13 +155,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         if (i < 0 || i >= featureNames.size()) {
             throw new IllegalArgumentException("Invalid feature index: " + i);
         }
-        if (featureTypes.get(i) == featureType.RAW && buckets[i] == 1) {
-            // also remove from buckets
-            int[] newBuckets = new int[buckets.length - 1];
-            System.arraycopy(buckets, 0, newBuckets, 0, i);
-            System.arraycopy(buckets, i + 1, newBuckets, i, buckets.length - i - 1);
-            buckets = newBuckets;
-        }
+        // we do not remove from buckets, underlyingNames or underlyingTypes as those are all indexed from the (unchanged) underlying vector
         featureNames.remove(i);
         featureTypes.remove(i);
         enumValues.remove(i);
