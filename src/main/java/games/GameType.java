@@ -5,6 +5,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import core.rules.AbstractRuleBasedForwardModel;
+import dev.langchain4j.agent.tool.P;
+import games.backgammon.*;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameParameters;
 import games.battlelore.BattleloreGameState;
@@ -277,11 +279,15 @@ public enum GameType {
             HeartsGameState.class, HeartsForwardModel.class, HeartsParameters.class, HeartsGUIManager.class),
     ChineseCheckers(2, 6,
             Arrays.asList(Strategy, Abstract),
-            Arrays.asList(GridMovement),
+            List.of(GridMovement),
             CCGameState.class, CCForwardModel.class, CCParameters.class, CCGUIManager.class),
+    Backgammon(2, 2,
+            Arrays.asList(Strategy, Abstract),
+            Arrays.asList(GridMovement, DiceRolling),
+            BGGameState.class, BGForwardModel.class, BGParameters.class, BGGUIManager.class),
     Mastermind(1,1,
-            Arrays.asList(Simple, Abstract, CodeBreaking),
-            Arrays.asList(),
+            Arrays.asList(Simple, Abstract, CodeBreaking, Deduction),
+            List.of(PatternBuilding),
             MMGameState.class, MMForwardModel.class, MMParameters.class, MMGUIManager.class),
     WarOfTheToads(2, 2,
             Arrays.asList(Strategy, Abstract, Cards),

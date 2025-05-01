@@ -159,6 +159,7 @@ public class RoundRobinTournament extends AbstractTournament {
         if (!destDir.isEmpty())
             this.resultsFile = destDir + File.separator + resultsFile;
     }
+
     /**
      * Runs the round robin tournament.
      */
@@ -213,7 +214,7 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
     public int getWinnerIndex() {
-        Map<Integer, Pair<Double, Double>> ranking = switch(evalMethod) {
+        Map<Integer, Pair<Double, Double>> ranking = switch (evalMethod) {
             case "Ordinal", "Score" -> finalOrdinalRanking;
             default -> finalWinRanking;
         };
@@ -759,6 +760,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public double getWinRate(int agentID) {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
+
     public double getWinRateAlphaRank(int agentID) {
         if (alphaRankByWin == null)
             return getWinRate(agentID);
