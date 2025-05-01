@@ -162,6 +162,20 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
         featureRanges.remove(i);
         featureIndices.remove(i);
         interactions.remove(i);
+
+        // we now need to rework interactions to account for the removed feature
+        for (int j = 0; j < interactions.size(); j++) {
+            Pair<Integer, Integer> interaction = interactions.get(j);
+            if (interaction == null) continue; // this is not an interaction
+            if (interaction.a == i || interaction.b == i) {
+                throw new IllegalArgumentException("Cannot remove feature involved in interaction: " + i);
+            }
+            if (interaction.a > i)
+                interaction = Pair.of(interaction.a - 1, interaction.b);
+            if (interaction.b > i)
+                interaction = Pair.of(interaction.a, interaction.b - 1);
+            interactions.set(j, interaction);
+        }
     }
 
     @Override

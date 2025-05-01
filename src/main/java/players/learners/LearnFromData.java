@@ -7,7 +7,6 @@ import core.interfaces.IToJSON;
 import org.json.simple.JSONObject;
 import players.heuristics.AutomatedFeatures;
 import players.heuristics.GLMHeuristic;
-import scala.Int;
 import utilities.JSONUtils;
 import utilities.Pair;
 import utilities.Utils;
@@ -15,14 +14,13 @@ import utilities.Utils;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static players.heuristics.AutomatedFeatures.featureType.*;
 
 public class LearnFromData {
 
     static int BUCKET_INCREMENT = 2;
-    static int BIC_MULTIPLIER = 10;
+    static int BIC_MULTIPLIER = 3;
 
     public static void main(String[] args) {
 
@@ -105,17 +103,27 @@ public class LearnFromData {
             double baseBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
             double bestBIC = baseBIC;
             System.out.println("Starting modified BIC: " + baseBIC);
+            List<String> excludedFeatures = new ArrayList<>();
             List<String> excludedBucketFeatures = new ArrayList<>();
             List<String> excludedInteractionFeatures = new ArrayList<>();
             int iteration = 0;
             String[] rawData = dataFiles;
             AutomatedFeatures bestFeatures;
+
+            // we check for any zero coefficients in startingHeuristic
+            // and exclude those features from the search
+            for (int i = 0; i < asf.names().length; i++) {
+                if (glm.coefficients()[i] == 0) {
+                    excludedFeatures.add(asf.names()[i]);
+                }
+            }
+
             do {
                 bestFeatures = null;
                 baseBIC = bestBIC;  // reset baseline
                 for (int i = 0; i < asf.names().length; i++) {
-                    // TODO: if a column has a single unique value, then we should not consider it at all
-                    // TODO: This can be detected by a zero coefficient in the initial model
+                    if (excludedFeatures.contains(asf.names()[i]))
+                        continue;  // skip as it has a zero coefficient
 
                     String firstFeature = asf.names()[i];
                     AutomatedFeatures.featureType type1 = asf.getFeatureType(i);
@@ -168,6 +176,8 @@ public class LearnFromData {
                         // currently we only support 2-way interactions between two original features
                         if (type2 == INTERACTION)
                             continue;
+                        if (excludedFeatures.contains(secondFeature))
+                            continue;  // skip as it has a zero coefficient
 
 
                         if (excludedInteractionFeatures.contains(firstFeature + ":" + secondFeature))
@@ -235,7 +245,7 @@ public class LearnFromData {
                             cd -> Arrays.stream(cd.name().split(":")))
                     .distinct()
                     .toList();
-            System.out.println("Columns with interactions: " + columnsWithInteraction);
+      //      System.out.println("Columns with interactions: " + columnsWithInteraction);
             do {
                 bestFeatures = null;
                 baseBIC = bestBIC; // reset baseline
@@ -250,29 +260,23 @@ public class LearnFromData {
 
                     AutomatedFeatures adjustedASF = asf.copy();
                     adjustedASF.removeFeature(i);
-                    adjustedASF.processData("ImproveModel_tmp.txt", rawData);
                     learner.setStateFeatureVector(adjustedASF);
 
                     GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
                     double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                    System.out.printf("Considering Feature: %20s, BIC: %.2f%n", featureToRemove, newBIC);
+      //              System.out.printf("Considering Feature: %20s, BIC: %.2f (%d/%d)%n", featureToRemove, newBIC, adjustedASF.names().length, asf.names().length);
 
                     if (newBIC < bestBIC) {
                         bestBIC = newBIC;
                         bestFeatures = adjustedASF;
                         startingHeuristic = newHeuristic;
-                        bestFeatureDescription = "Removed " + featureToRemove;
-                        System.out.printf("Removed Feature: %20s, BIC: %.2f%n", featureToRemove, newBIC);
+                        bestFeatureDescription = String.format("Removed Feature: %20s, BIC: %.2f", featureToRemove, newBIC);
                     } else if (newBIC > baseBIC) {
                         excludedReductionFeatures.add(featureToRemove);
                     }
                 }
 
                 if (bestFeatures != null) {
-                    String newFileName = "ImproveModel_Iter_Remove_" + iteration + ".txt";
-                    bestFeatures.processData(newFileName, rawData);
-                    iteration++;
-                    rawData = new String[]{newFileName};
                     asf = bestFeatures;
                     System.out.println("Best feature modification: " + bestFeatureDescription);
                     System.out.println("New BIC: " + bestBIC);

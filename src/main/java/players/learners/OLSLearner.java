@@ -6,8 +6,6 @@ import core.interfaces.IStateFeatureVector;
 import org.apache.spark.ml.feature.RFormula;
 import org.apache.spark.ml.regression.GeneralizedLinearRegression;
 import org.apache.spark.ml.regression.GeneralizedLinearRegressionModel;
-import org.apache.spark.ml.regression.LinearRegression;
-import org.apache.spark.ml.regression.LinearRegressionModel;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import players.heuristics.*;
