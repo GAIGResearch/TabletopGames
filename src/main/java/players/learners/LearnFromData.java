@@ -113,9 +113,12 @@ public class LearnFromData {
             // we check for any zero coefficients in startingHeuristic
             // and exclude those features from the search
             for (int i = 0; i < asf.names().length; i++) {
-                if (glm.coefficients()[i] == 0) {
+                if (Math.abs(glm.coefficients()[i+1]) < 0.00001) {
                     excludedFeatures.add(asf.names()[i]);
                 }
+            }
+            if (!excludedFeatures.isEmpty()) {
+                System.out.println("Excluding features with zero coefficients: " + excludedFeatures);
             }
 
             do {
