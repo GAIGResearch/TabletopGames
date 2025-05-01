@@ -45,7 +45,6 @@ public class RootForwardModel extends StandardForwardModel {
         RootParameters rp = (RootParameters) firstState.getGameParameters();
         Arrays.fill(state.playerVictoryConditions, Score);
         Arrays.fill(state.playerScores,0);
-        rp.setMaxRounds(20);  // set a maximum to avoid never-ending games
         state.gameMap = createRootNodeGraph(true);
         state.mapType = RootParameters.MapType.Summer;
         state.actionsPlayed = 0;

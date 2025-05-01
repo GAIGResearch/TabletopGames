@@ -71,8 +71,16 @@ public class BGGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // TODO: add all components to the list
-        return new ArrayList<>();
+        // Let's create one Token per piece (while we're not using Tokens to record the pieces in game state, this may be helpful to something tracking the number of pieces)
+        List<Component> tokens = new ArrayList<>();
+        for (int player = 0; player < 2; player++) {
+            for (int i = 0; i < piecesPerPoint[player].length; i++) {
+                tokens.add(new Token("Piece for "  + player + " on point " + i));
+            }
+        }
+        tokens.addAll(Arrays.stream(dice).toList());
+
+        return tokens;
     }
 
     public int getPiecesOnPoint(int playerId, int point) {
