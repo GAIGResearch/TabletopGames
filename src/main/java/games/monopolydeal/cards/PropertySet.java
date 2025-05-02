@@ -82,12 +82,13 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         PropertySet that = (PropertySet) o;
-        return isComplete == that.isComplete && hasWild == that.hasWild && hasHouse == that.hasHouse && hasHotel == that.hasHotel && type == that.type;
+        return isComplete == that.isComplete && hasWild == that.hasWild && hasHouse == that.hasHouse &&
+                hasHotel == that.hasHotel && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, isComplete, hasWild, hasHouse, hasHotel);
+        return Objects.hash(super.hashCode(), type.ordinal(), isComplete, hasWild, hasHouse, hasHotel);
     }
 
     @Override

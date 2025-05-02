@@ -39,7 +39,8 @@ public class OverworkSequence extends AbstractAction implements IExtendedSequenc
         RootGameState currentState = (RootGameState) gs;
         if (gs.getCurrentPlayer() == playerID && currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat && currentState.getWood() > 0){
             currentState.increaseActionsPlayed();
-            return currentState.setActionInProgress(this);
+            currentState.setActionInProgress(this);
+            return true;
         }
         return false;
     }
