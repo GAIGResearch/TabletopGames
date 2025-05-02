@@ -58,7 +58,8 @@ public class FileStatsLogger implements IStatisticLogger {
 
     public void setOutPutDirectory(String... nestedDirectories) {
         if (writer != null) {
-            throw new AssertionError("Cannot set output directory after initialisation");
+            processDataAndFinish();
+            writer = null;
         }
         String folder = Utils.createDirectory(nestedDirectories);
         this.fileName = folder + File.separator + this.fileName;

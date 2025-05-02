@@ -29,6 +29,9 @@ public abstract class FeatureListener implements IGameListener {
     }
 
     public void setLogger(IStatisticLogger logger) {
+        if (logger != null) {
+            logger.processDataAndFinish();
+        }
         this.logger = logger;
     }
 

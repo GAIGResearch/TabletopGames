@@ -22,6 +22,13 @@ public class LearnFromData {
     static int BUCKET_INCREMENT = 2;
     static int BIC_MULTIPLIER = 3;
 
+    AbstractLearner learner;
+    String outputFileName;
+    IStateFeatureVector stateFeatures;
+    IActionFeatureVector actionFeatures;
+    String data;
+
+
     public static void main(String[] args) {
 
         String stateClassString = Utils.getArg(args, "state", "");
@@ -48,10 +55,31 @@ public class LearnFromData {
             System.exit(0);
         }
         File dataFile = new File(data);
+
         if (!dataFile.exists()) {
             System.out.println("Data file " + data + " does not exist");
             System.exit(0);
         }
+
+        String outputFileName = Utils.getArg(args, "output", "LearnedHeuristic.json");
+
+        LearnFromData learnFromData = new LearnFromData(data, stateFeatures, actionFeatures,
+                outputFileName, learner);
+        learnFromData.learn();
+    }
+
+
+    public LearnFromData(String data, IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures,
+                         String outputFileName, AbstractLearner learner) {
+        this.stateFeatures = stateFeatures;
+        this.actionFeatures = actionFeatures;
+        this.outputFileName = outputFileName;
+        this.learner = learner;
+        this.data = data;
+    }
+
+    public Object learn() {
+        File dataFile = new File(data);
         String convertedDataFile = data.replaceAll("\\.[^.]+$", "_ASF$0");
         String[] dataFiles = new String[]{data};
         if (dataFile.isDirectory()) {
@@ -64,7 +92,6 @@ public class LearnFromData {
         List<List<Object>> convertedData = asf.processData(convertedDataFile, dataFiles);
 
         // this will have created the raw data from which we now learn
-        String outputFileName = Utils.getArg(args, "output", "LearnedHeuristic.json");
 
         learner.setStateFeatureVector(asf);
 
@@ -90,6 +117,7 @@ public class LearnFromData {
                 throw new RuntimeException(e);
             }
         }
+        return learnedThing;
     }
 
     private static Object improveModel(Object startingHeuristic,
