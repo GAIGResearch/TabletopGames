@@ -28,6 +28,7 @@ import games.chinesecheckers.gui.CCGUIManager;
 import games.chess.ChessForwardModel;
 import games.chess.ChessGameState;
 import games.chess.ChessParameters;
+import games.chess.ChessGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -300,7 +301,7 @@ public enum GameType {
     Chess(2, 2,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(GridMovement),
-            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, null);
+            ChessGameState.class, ChessForwardModel.class, ChessParameters.class, ChessGUIManager.class),;
 
 
     // Core classes where the game is defined

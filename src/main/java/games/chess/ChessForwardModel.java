@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.CoreConstants;
 import games.chess.ChessGameState;
 import games.chess.actions.Castle;
+import games.chess.actions.EnPassant;
 import games.chess.actions.MovePiece;
 import games.chess.actions.Promotion;
 import games.chess.actions.Castle;
@@ -25,6 +26,7 @@ import java.util.List;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 
 import org.checkerframework.checker.units.qual.C;
+import org.checkerframework.checker.units.qual.g;
 
 /**
  * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
@@ -37,7 +39,6 @@ import org.checkerframework.checker.units.qual.C;
  */
 public class ChessForwardModel extends StandardForwardModel {
 
-    List<AbstractAction> cachedActions = new ArrayList<>(); // Cache for available actions
     /**
      * Initializes all variables in the given game state. Performs initial game setup according to game rules, e.g.:
      * <ul>
@@ -78,7 +79,7 @@ public class ChessForwardModel extends StandardForwardModel {
         chessState.setPiece(5, 7, new ChessPiece(ChessPiece.ChessPieceType.BISHOP, 1, 5, 7, ChessPiece.MovedState.NOT_RELEVANT));
         chessState.setPiece(6, 7, new ChessPiece(ChessPiece.ChessPieceType.KNIGHT, 1, 6, 7, ChessPiece.MovedState.NOT_RELEVANT));
         chessState.setPiece(7, 7, new ChessPiece(ChessPiece.ChessPieceType.ROOK, 1, 7, 7, ChessPiece.MovedState.NOT_MOVED));
-
+        chessState.AddCheckRepetitionCount();
 
         chessState.halfMoveClock = 0;
     }
@@ -89,13 +90,6 @@ public class ChessForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-
-        //We need to calculate avaliable actions for next player in afterAction.
-        //TODO: cache does not work in MCTS
-        //If the cached actions are empty, it means we are at the start of the game or that the game is over (in which case it should not reach this). 
-        if (cachedActions != null && !cachedActions.isEmpty()) {
-            return cachedActions;
-        }
         List<AbstractAction> actions = new ArrayList<>();
         ChessGameState chessState = (ChessGameState) gameState;
         int playerId = chessState.getCurrentPlayer();
@@ -121,7 +115,7 @@ public class ChessForwardModel extends StandardForwardModel {
                 break;
             case PAWN:
                 actions.addAll(computeAvailableActionsPawn(chessState, x, y, playerId));
-                break;//Missing en passant
+                break;
             case ROOK:
                 actions.addAll(computeAvailableActionsRook(chessState, x, y, playerId));
                 break;
@@ -220,7 +214,7 @@ public class ChessForwardModel extends StandardForwardModel {
                     break;
                 case QUEEN:
                     // Queen can move like both a rook and a bishop
-                    if (pieceX == x || pieceY == y || (Math.abs(pieceX - x) == Math.abs(pieceY - y) && pieceX != x)) {
+                    if (pieceX == x || pieceY == y || ((Math.abs(pieceX - x) == Math.abs(pieceY - y) && pieceX != x))) {
                         // Check if there are no pieces between the queen and the target cell
                         int stepX = (x - pieceX) == 0 ? 0 : (x - pieceX) / Math.abs(x - pieceX);
                         int stepY = (y - pieceY) == 0 ? 0 : (y - pieceY) / Math.abs(y - pieceY);
@@ -271,13 +265,11 @@ public class ChessForwardModel extends StandardForwardModel {
         // Check if the king and rook have not moved yet, there are no pieces between them, the king is not in check, and the squares the king moves through are not attacked
         // Check for castling to the left (queenside)
         ChessPiece kingChessPiece = chessState.getPiece(x, y);
-        if (kingChessPiece == null) {
-            return actions; // No piece to move, return empty actions
-        }
+
         ChessPiece rookChessPiece = chessState.getPiece(0, y);
         if (kingChessPiece.getMoved() == ChessPiece.MovedState.NOT_MOVED && rookChessPiece != null && rookChessPiece.getOwnerId() == playerId && rookChessPiece.getMoved() == ChessPiece.MovedState.NOT_MOVED) {
             Castle move = new Castle(Castle.CastleType.QUEEN_SIDE);
-            if (isOccupiedBy(chessState, 1, y) == -1 && isOccupiedBy(chessState, 2, y) == -1 && !isInCheck(chessState, playerId) && !isCellThreatened(chessState, x-2, y, playerId) && !isCellThreatened(chessState, x-1, y, playerId)) {
+            if (isOccupiedBy(chessState, 1, y) == -1 && isOccupiedBy(chessState, 2, y) == -1 && isOccupiedBy(chessState, 3, y) == -1 && !isInCheck(chessState, playerId) && !isCellThreatened(chessState, x-2, y, 1-playerId) && !isCellThreatened(chessState, x-1, y, 1-playerId)) {
                 actions.add(move);
             }
         }
@@ -297,11 +289,13 @@ public class ChessForwardModel extends StandardForwardModel {
     protected List<AbstractAction> computeAvailableActionsPawn(ChessGameState chessState, int x, int y, int playerId) {
         List<AbstractAction> actions = new ArrayList<>();
         int newX, newY;
+        ChessPiece enPassantTarget;
+        AbstractAction move;
         // Pawn can move one square forward, or two squares forward if it hasn't moved yet
         int direction = (playerId == 0) ? 1 : -1; // White moves up, Black moves down
         newX = x;
         newY = y + direction;
-        MovePiece move = new MovePiece(x, y, newX, newY);
+        move = new MovePiece(x, y, newX, newY);
         if (isWithinBounds(newX, newY) && isOccupiedBy(chessState, newX, newY) == -1 && !CheckAfterMove(chessState, move)) {
             //check if the pawn is on the last row for promotion
             if (newY == 0 || newY == 7) {
@@ -344,10 +338,17 @@ public class ChessForwardModel extends StandardForwardModel {
                 }
             } else
                 actions.add(new MovePiece(x, y, newX, newY));
-
         }
+        //Enpassant logic
+        enPassantTarget = isWithinBounds(newX, y) ? chessState.getPiece(newX, y) : null;
+        move = new EnPassant(x, y, newX);
+        if (isWithinBounds(newX, newY) && enPassantTarget != null && enPassantTarget.getChessPieceType() == ChessPiece.ChessPieceType.PAWN &&
+         enPassantTarget.getEnPassant() && enPassantTarget.getOwnerId() == 1-playerId  && !CheckAfterMove(chessState, move)) {
+            actions.add(move);
+        }
+
+
         newX = x + 1;
-        newY = y + direction;
         move = new MovePiece(x, y, newX, newY);
         if (isWithinBounds(newX, newY) && isOccupiedBy(chessState, newX, newY) == 1-playerId && !CheckAfterMove(chessState, move)) {
             //Check for promotion
@@ -361,6 +362,15 @@ public class ChessForwardModel extends StandardForwardModel {
             } else
                 actions.add(new MovePiece(x, y, newX, newY));
         }
+
+        //Enpassant logic
+        enPassantTarget = isWithinBounds(newX, y) ? chessState.getPiece(newX, y) : null;
+        move = new EnPassant(x, y, newX);
+        if (isWithinBounds(newX, newY) && enPassantTarget != null && enPassantTarget.getChessPieceType() == ChessPiece.ChessPieceType.PAWN &&
+         enPassantTarget.getEnPassant() && enPassantTarget.getOwnerId() == 1-playerId  && !CheckAfterMove(chessState, move)) {
+            actions.add(move);
+        }
+
         return actions;
     }
 
@@ -374,19 +384,17 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x + i;
             newY = y;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            
-            if (CheckAfterMove(chessState, move)) {
-                continue; // Skip if the move puts the king in check
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-                
             } else if (occupiedBy == playerId) {
                 break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         // Left direction
@@ -394,17 +402,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x - i;
             newY = y;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue; // Skip if the move puts the king in check
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            } else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         // Forward direction
@@ -412,17 +418,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x;
             newY = y + i;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue; // Skip if the move puts the king in check
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            } else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         // Backward direction
@@ -430,17 +434,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x;
             newY = y - i;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue; // Skip if the move puts the king in check
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1)
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         return actions;
@@ -456,17 +458,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x + i;
             newY = y + i;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue; // Skip if the move puts the king in check
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            } else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         // Forward-left direction
@@ -474,17 +474,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x - i;
             newY = y + i;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue;
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            } else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         // Backward-right direction
@@ -492,17 +490,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x + i;
             newY = y - i;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue;
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            } else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         // Backward-left direction
@@ -510,17 +506,15 @@ public class ChessForwardModel extends StandardForwardModel {
             newX = x - i;
             newY = y - i;
             MovePiece move = new MovePiece(x, y, newX, newY);
-            if (CheckAfterMove(chessState, move)) {
-                continue;
-            }
+            boolean check = CheckAfterMove(chessState, move);
             int occupiedBy = isOccupiedBy(chessState, newX, newY);
-            if (occupiedBy == -1) {
+            if (occupiedBy == -1 && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
-            } else if (occupiedBy == playerId) {
-                break; // Stop if blocked by own piece
-            } else {
+            } else if (occupiedBy == 1-playerId && !check) {
                 actions.add(new MovePiece(x, y, newX, newY));
                 break; // Stop after capturing
+            } else if (occupiedBy == playerId) {
+                break; // Can't capture because it leaves the king in check. Stop looking further (blocked by enemy piece)
             }
         }
         return actions;
@@ -546,7 +540,7 @@ public class ChessForwardModel extends StandardForwardModel {
         return actions;
     }
 
-    protected boolean CheckAfterMove(ChessGameState chessState, MovePiece action) {
+    protected boolean CheckAfterMove(ChessGameState chessState, AbstractAction action) {
         
         // Check if any opponent piece can attack the king's position after a move
         int playerId = chessState.getCurrentPlayer();
@@ -558,8 +552,9 @@ public class ChessForwardModel extends StandardForwardModel {
         return isCellThreatened(nextGameState, kingX, kingY, 1-playerId);
     }
 
-    protected boolean isInCheck(ChessGameState chessState, int playerId) {
+    protected boolean isInCheck(AbstractGameState gameState, int playerId) {
         // Check if the player's king is in check
+        ChessGameState chessState = (ChessGameState) gameState;
         int[] kingPosition = chessState.getKingPosition(playerId);
         int kingX = kingPosition[0];
         int kingY = kingPosition[1];
@@ -570,10 +565,9 @@ public class ChessForwardModel extends StandardForwardModel {
     protected void checkGameEnd(ChessGameState chessState) {
 
         // Check if the game is over (checkmate or stalemate)
-        // cachedActions = null; // Clear the cached actions
         List<AbstractAction> availableActions = computeAvailableActions(chessState);
-        // cachedActions = availableActions; // Cache the available actions for the next player
-        if (availableActions.isEmpty()) {
+        ChessParameters chessParameters = (ChessParameters) chessState.getGameParameters();
+        if (availableActions.isEmpty() && chessState.isNotTerminal()) {
             // No available actions, check for stalemate or checkmate
             if (isInCheck(chessState, chessState.getCurrentPlayer())) {
                 // Checkmate
@@ -586,22 +580,34 @@ public class ChessForwardModel extends StandardForwardModel {
                 chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1 - chessState.getCurrentPlayer());
                 System.out.println("Stalemate!");
             }
-            endGame(chessState);
+            chessState.setGameStatus(CoreConstants.GameResult.GAME_END);
         }
         //Check half-move clock. If it reaches 50, the game is drawn if a player claims so, and is automatically drawn at 75. 
         //The claim is not implemented, and we will just end the game at 50 moves, i.e. two moves per player for a total of 100.
-        //Order here is important because checkmate takes precedence over 50-move rule.
-        if (chessState.halfMoveClock >= 100) {
+        //Order here is important because checkmate takes precedence over 50-move rule. 
+        if (chessState.isNotTerminal() && chessState.halfMoveClock >= 100) {
             chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, chessState.getCurrentPlayer());
             chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1 - chessState.getCurrentPlayer());
-            endGame(chessState);
+            chessState.setGameStatus(CoreConstants.GameResult.GAME_END);
             System.out.println("Draw by 50-move rule");
         }
-        if (chessState.AddCheckRepetitionCount()) {
+
+        //Check maximum number of rounds
+        if (chessState.isNotTerminal() && chessState.getRoundCounter() >= chessParameters.maxRounds) {
             chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, chessState.getCurrentPlayer());
             chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1 - chessState.getCurrentPlayer());
-            endGame(chessState);
-            System.out.println("Draw by threefold repetition");
+            chessState.setGameStatus(CoreConstants.GameResult.GAME_END);
+            System.out.println("Draw by maximum number of moves"+" ("+chessParameters.maxRounds+")");
+        }
+
+        //Check draw by repetition. The game is drawn if a board position is repeated drawByRepetition times. Default is 3, if set to 0, it is disabled.
+        if (chessState.isNotTerminal() && chessParameters.drawByRepetition != 0) {
+            if (chessState.AddCheckRepetitionCount()) {
+                chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, chessState.getCurrentPlayer());
+                chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1 - chessState.getCurrentPlayer());
+                chessState.setGameStatus(CoreConstants.GameResult.GAME_END);
+                System.out.println("Draw by "+ chessParameters.drawByRepetition + "-fold repetition");
+            }
         }
     }
 
@@ -609,11 +615,22 @@ public class ChessForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         ChessGameState chessState = (ChessGameState) currentState;
         endPlayerTurn(chessState);
+        if (chessState.getCurrentPlayer() == 0) {
+            endRound(chessState);
+        }
+        chessState.resetEnPassant();
+
         //Print board state
         // System.out.println("Available actions: " + computeAvailableActions(chessState) + " for player " + chessState.getCurrentPlayer());
         // System.out.println(chessState.getBoardString());
         // System.out.println("Turn number: " + chessState.getTurnCounter() + " Half-move clock: " + chessState.halfMoveClock);
         checkGameEnd(chessState);
         
+    }
+
+    @Override
+    public void endGame(AbstractGameState gameState) {
+        ChessGameState chessState = (ChessGameState) gameState;
+        chessState.setGameStatus(CoreConstants.GameResult.GAME_END);
     }
 }
