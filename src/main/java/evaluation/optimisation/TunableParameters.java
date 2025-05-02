@@ -67,9 +67,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
         // THIS IS UNCHECKED
         // TODO Add validation once I figure
         for (String pName : params.staticParameters) {
-            if (params.staticParameters.contains(pName)) {
-                params.currentValues.put(pName, rawData.getOrDefault(pName, params.getDefaultParameterValue(pName)));
-            }
+            params.currentValues.put(pName, rawData.getOrDefault(pName, params.getDefaultParameterValue(pName)));
         }
 
         for (String pName : allParams) {

@@ -31,25 +31,13 @@ public class Vassal extends DominionAction implements IExtendedSequence {
 
     @Override
     boolean _execute(DominionGameState state) {
-        Deck<DominionCard> drawPile = state.getDeck(DeckType.DRAW, player);
-        Deck<DominionCard> discardPile = state.getDeck(DeckType.DISCARD, player);
+        Deck<DominionCard> tablePile = state.getDeck(DeckType.TABLE, player);
+        boolean couldDraw = state.drawCard(player, DeckType.DRAW, player, DeckType.TABLE);
 
-        // Reshuffle if draw pile is empty
-        if (drawPile.getSize() == 0) {
-            discardPile.shuffle(state.getRnd());
-            drawPile.add(discardPile);
-            discardPile.clear();
-        }
-
-        // There is an edge case where this is the only card they have left
-        if (discardPile.getSize() > 0) {
+        // Only start action sequence if they were able to draw (edge case fix)
+        if (couldDraw) {
             state.setActionInProgress(this);
-
-            // Discard top card from the deck...
-            DominionCard card = drawPile.draw();
-
-            // ...and move to table
-            state.getDeck(DeckType.TABLE, player).add(card);
+            DominionCard card = tablePile.peek();
             cardType = card.cardType();
         }
 
@@ -70,7 +58,9 @@ public class Vassal extends DominionAction implements IExtendedSequence {
 
         DominionCard card = dgs.getDeck(DeckType.TABLE, player).peek();
 
-        assert card.cardType() == cardType: "Discarded CardType: " + card.cardType() + ", does not mach: " + cardType;
+        if (card.cardType() != cardType) {
+            throw new AssertionError("Discarded CardType: \" + card.cardType() + \", does not mach: \" + cardType");
+        }
 
         List<AbstractAction> actions = new ArrayList<>();
         actions.add(new DoNothing());

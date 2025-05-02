@@ -32,21 +32,19 @@ public class Library extends DominionAction implements IExtendedSequence {
         DominionGameState dgs = (DominionGameState) state;
         List<AbstractAction> actions = new ArrayList<>();
 
-        // Make sure player can do this action
-        if (dgs.getDeck(DeckType.DRAW, player).getSize() == 0 || dgs.getDeck(DeckType.HAND, player).getSize() >= 7) {
-            actions.add(new DoNothing());
+        boolean couldDraw = dgs.drawCard(player);
+        actions.add(new DoNothing());
+
+        // Edge case if they have no hands left in play (discard and draw pile is empty)
+        if (!couldDraw) {
             return actions;
         }
 
-        // Draw the top card of the deck
-        DominionCard card = dgs.getDeck(DeckType.DRAW, player).peek();
+        DominionCard drawnCard = dgs.getDeck(DeckType.HAND,player).peek();
 
-        // Card can always be moved to hand
-        actions.add(new MoveCard(card.cardType(), player, DeckType.DRAW, player, DeckType.HAND, true));
-
-        // If it is an action, it can also be discarded
-        if (card.isActionCard()) {
-            actions.add(new MoveCard(card.cardType(), player, DeckType.DRAW, player, DeckType.DISCARD, true));
+        // If it is an action card they have the option to discard it
+        if (drawnCard.isActionCard()) {
+            actions.add(new MoveCard(drawnCard.cardType(), player, DeckType.HAND, player, DeckType.DISCARD, true));
         }
 
         return actions;
@@ -63,11 +61,6 @@ public class Library extends DominionAction implements IExtendedSequence {
 
         // If the player has 7 cards in hand, the action is complete
         if (dgs.getDeck(DeckType.HAND, player).getSize() >= 7) {
-            executed = true;
-        }
-
-        // If there are no more cards to draw, the action is complete
-        if (dgs.getDeck(DeckType.DRAW, player).getSize() == 0) {
             executed = true;
         }
     }
@@ -88,6 +81,19 @@ public class Library extends DominionAction implements IExtendedSequence {
         Library retValue = new Library(player, dummyAction);
         retValue.executed = executed;
         return retValue;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Library other) {
+            return super.equals(obj) && other.executed == executed;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + (executed ? 1: 0);
     }
     
 }
