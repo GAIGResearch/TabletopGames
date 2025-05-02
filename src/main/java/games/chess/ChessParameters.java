@@ -1,8 +1,12 @@
 package games.chess;
 
+
+
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.Game;
 import evaluation.optimisation.TunableParameters;
+import games.GameType;
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -14,23 +18,44 @@ import evaluation.optimisation.TunableParameters;
  * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
  * automatic game parameter optimisation tools in the framework.</p>
  */
-public class ChessParameters extends AbstractParameters {
+public class ChessParameters extends TunableParameters {
+
+    public int maxRounds = 300; // Maximum number of moves in the game before it ends in a draw
+    public int drawByRepetition = 3; // Number of times a position must be repeated for a draw by repetition to be declared, 0 for no limit
+    public String dataPathString = "data/chess/"; // Path to the data folder for the game, used for loading images and other resources
+
+    
+
+    public ChessParameters() {
+        addTunableParameter("maxRounds", 100);
+        addTunableParameter("drawByRepetition", 3);
+        _reset();
+    }
+    
+    public Game instantiate() {
+        return new Game(GameType.Chess, new ChessForwardModel(), new ChessGameState(this, GameType.Chess.getMinPlayers()));
+    }
+
+    public void _reset() {
+        maxRounds = (int) getParameterValue("maxRounds");
+        drawByRepetition = (int) getParameterValue("drawByRepetition");
+    }
 
     @Override
     protected AbstractParameters _copy() {
-        // TODO: deep copy of all variables.
         return this;
     }
 
     @Override
     protected boolean _equals(Object o) {
-        // TODO: compare all variables.
-        return o instanceof ChessParameters;
+        if (!(o instanceof ChessParameters)) return false;
+        ChessParameters that = (ChessParameters) o;
+        return maxRounds == that.maxRounds && drawByRepetition == that.drawByRepetition;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hashcode of all variables.
-        return super.hashCode();
+        return 31 * maxRounds + drawByRepetition;
     }
+
 }

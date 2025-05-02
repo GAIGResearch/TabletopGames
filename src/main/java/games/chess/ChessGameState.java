@@ -49,6 +49,7 @@ public class ChessGameState extends AbstractGameState {
      */
     public ChessGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+
     }
 
     /**
@@ -92,8 +93,10 @@ public class ChessGameState extends AbstractGameState {
     @Override
     protected ChessGameState _copy(int playerId) {
         ChessGameState copy = new ChessGameState(getGameParameters(), getNPlayers());
-        copy.whitePieces = new ArrayList<>(whitePieces);
-        copy.blackPieces = new ArrayList<>(blackPieces);
+        copy.whitePieces = new ArrayList<>();
+        copy.whitePieces.addAll(whitePieces.stream().map(ChessPiece::copy).toList());
+        copy.blackPieces = new ArrayList<>();
+        copy.blackPieces.addAll(blackPieces.stream().map(ChessPiece::copy).toList());
         copy.gameStateCounts = new HashMap<>(gameStateCounts);
         copy.halfMoveClock = halfMoveClock;
         copy.board = (ChessBoard) board.copy();
@@ -417,7 +420,7 @@ public class ChessGameState extends AbstractGameState {
     }
     public boolean AddCheckRepetitionCount() {
         // Check if the current board state has been seen before
-        int boardHash = board.hashCode();
+        int boardHash = Objects.hash(board.hashCode(), getCurrentPlayer());
         if (gameStateCounts.containsKey(boardHash)) {
             gameStateCounts.put(boardHash, gameStateCounts.get(boardHash) + 1);
             if (gameStateCounts.get(boardHash) >= 3) { 
@@ -434,6 +437,15 @@ public class ChessGameState extends AbstractGameState {
         char file = (char) ('a' + x);
         char rank = (char) ('1' + y);
         return "" + file + rank;
+    }
+
+    public void resetEnPassant() {
+        for (ChessPiece piece : getPlayerPieces(getCurrentPlayer())){
+            if (piece.getChessPieceType() == ChessPiece.ChessPieceType.PAWN) {
+                piece.setEnPassant(false); // Reset en passant for all pawns
+                board.setPiece(piece.getPosition()[0], piece.getPosition()[1], piece); // Update the board with the new piece state
+            }
+        }
     }
 
     @Override

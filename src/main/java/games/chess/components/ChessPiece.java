@@ -64,18 +64,19 @@ public class ChessPiece extends Token {
         this.y = y;
     }
 
-    protected ChessPiece(ChessPieceType type, int ownerID, int x, int y, MovedState moved, int componentID) {
+    protected ChessPiece(ChessPieceType type, int ownerID, int x, int y, MovedState moved, boolean enPassant, int componentID) {
         super(type.toString(), componentID);
         this.type = type;
         this.setOwnerId(ownerID);
         this.movedState = moved;
         this.x = x;
         this.y = y;
+        this.enPassant = enPassant;
     }
 
     @Override
     public ChessPiece copy() {
-        ChessPiece copy = new ChessPiece(type, ownerId, x, y, movedState, componentID);
+        ChessPiece copy = new ChessPiece(type, ownerId, x, y, movedState, enPassant, componentID);
         return copy;
     }
 
@@ -97,7 +98,7 @@ public class ChessPiece extends Token {
     public String toString() {
         //Return first letter of type and color (e.g. "wK" for white king, "bQ" for black queen) lower case the knight
         String color = (getOwnerId() == 0) ? "w" : "b";
-        String pieceType = (type == ChessPieceType.KNIGHT) ? "n" : type.toString().substring(0, 1);
+        String pieceType = (type == ChessPieceType.KNIGHT) ? "N" : type.toString().substring(0, 1);
         return color + pieceType;
     }
 
@@ -132,7 +133,7 @@ public class ChessPiece extends Token {
         this.x = x;
         this.y = y;
     }
-    public boolean isEnPassant() {
+    public boolean getEnPassant() {
         return enPassant;
     }
 

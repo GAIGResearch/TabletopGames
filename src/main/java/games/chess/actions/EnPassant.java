@@ -5,12 +5,8 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import games.chess.ChessGameState;
 import games.chess.components.ChessPiece;
-import games.chess.components.ChessPiece.MovedState;
-
 import java.lang.System;
 import java.util.Objects;
-
-import org.checkerframework.checker.units.qual.C;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -28,15 +24,16 @@ import org.checkerframework.checker.units.qual.C;
  * use the {@link AbstractGameState#getComponentById(int)} function to retrieve the actual reference to the component,
  * given your componentID.</p>
  */
-public class Castle extends AbstractAction {
-    public enum CastleType {
-        KING_SIDE,
-        QUEEN_SIDE
-    }
-    public final CastleType castleType;
+public class EnPassant extends AbstractAction {
 
-    public Castle(CastleType castleType) {
-        this.castleType = castleType;
+    private final int startX;
+    private final int startY;
+    private final int targetX;
+
+    public EnPassant(int sx, int sy, int tx) {
+        this.startX = sx;
+        this.startY = sy;
+        this.targetX = tx;
     }
     /**
      * Executes this action, applying its effect to the given game state. Can access any component IDs stored
@@ -47,29 +44,19 @@ public class Castle extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState ags) {
         ChessGameState gs = (ChessGameState) ags;
-        int[] kingPos = gs.getKingPosition(gs.getCurrentPlayer());
-        ChessPiece king = gs.getPiece(kingPos[0], kingPos[1]);
-        ChessPiece rook = null;
+        ChessPiece piece = gs.getPiece(startX, startY);
+        int direction = (piece.getOwnerId() == 0) ? 1 : -1; // Determine the direction based on the owner ID
+        ChessPiece targetPiece = gs.getPiece(targetX, startY); // Get the pawn that is being captured
+        int targetY = startY+direction; // The target Y position for the en passant move
 
-        if (castleType == CastleType.KING_SIDE) {
-            // Move the king and rook to their new positions for king-side castling
-            rook = gs.getPiece(kingPos[0] + 3, kingPos[1]);
-            gs.updatePiecePosition(king, kingPos[0] + 2, kingPos[1]);
-            gs.updatePiecePosition(rook, kingPos[0] + 1, kingPos[1]);
-        } else if (castleType == CastleType.QUEEN_SIDE) {
-            // Move the king and rook to their new positions for queen-side castling
-            rook = gs.getPiece(kingPos[0] - 4, kingPos[1]);
-            gs.updatePiecePosition(king, kingPos[0] - 2, kingPos[1]);
-            gs.updatePiecePosition(rook, kingPos[0] - 1, kingPos[1]);
-        } else {
-            // Invalid castling type
-            return false;
-        }
+        //Delete the piece in the start position
+        gs.deletePiece(piece); // Remove the piece from its original position
+        gs.incrementHalfMoveClock(); // Increment the half-move clock for the current player
+        gs.deletePiece(targetPiece);// Capture(remove) the opponent's piece
+        gs.resetHalfMoveClock(); // Reset the half-move clock when a piece is captured
+        
+        gs.setPiece(targetX, targetY, piece); // Move the piece to the target position
 
-        // Set the moved flags.
-        king.setMoved(MovedState.MOVED); // Set the moved flag for the king
-        rook.setMoved(MovedState.MOVED); // Set the moved flag for the roo
-           
         return true;
     }
 
@@ -80,26 +67,32 @@ public class Castle extends AbstractAction {
      * then you can just return <code>`this`</code>.</p>
      */
     @Override
-    public Castle copy() {
-        // immutable        
+    public EnPassant copy() {
+        // TODO: copy non-final variables appropriately
         return this;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Castle && ((Castle) obj).castleType == this.castleType;
+        if (!(obj instanceof EnPassant)) return false;
+        EnPassant other = (EnPassant) obj;
+        return startX == other.startX && startY == other.startY && targetX == other.targetX;
+
     }
 
     @Override
     public int hashCode() {
-        return castleType.ordinal() + 467272;
+        // TODO: return the hash of all other variables in the class
+        return Objects.hash(startX, startY, targetX);
     }
 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "Castle{" +
-                "castleType=" + castleType +
+        return "EnPassant{" +
+                "startX=" + startX +
+                ", startY=" + startY +
+                ", targetX=" + targetX +
                 '}';
     }
 
@@ -111,17 +104,15 @@ public class Castle extends AbstractAction {
      */
     @Override
     public String getString(AbstractGameState gameState) {
-        String output = "Castle: ";
-        if (castleType == CastleType.KING_SIDE) {
-            output += "King-side castling";
-        } else if (castleType == CastleType.QUEEN_SIDE) {
-            output += "Queen-side castling";
-        } else {
-            output += "Invalid castling type";
-        }
-        output += " for player " + gameState.getCurrentPlayer() + ".";
-
-
+        ChessGameState gs = (ChessGameState) gameState;
+        int direction = (gs.getPiece(startX, startY).getOwnerId() == 0) ? 1 : -1; // Determine the direction based on the owner ID
+        ChessPiece startPiece = gs.getPiece(startX, startY);
+        ChessPiece targetPiece = gs.getPiece(targetX, startY);
+        String startPieceName = startPiece != null ? startPiece.getChessPieceType().toString() : "empty";
+        String targetPieceName = targetPiece != null ? targetPiece.getChessPieceType().toString() : "empty";
+        String startSquare = gs.getChessCoordinates(startX, startY);
+        String targetSquare = gs.getChessCoordinates(targetX, startY+direction); // The target Y position for the en passant move
+        String output = "En Passant: " + startPieceName + " at " + startSquare + " captures " + targetPieceName + " at " + targetSquare;
         return output;
     }
     
