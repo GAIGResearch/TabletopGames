@@ -212,6 +212,7 @@ public class ExpertIteration {
         if (!getArg(originalArgs, "valueSS", "").isEmpty()) {
             config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
             config.put(RunArg.opponent, "random"); // TODO: Change this to be best agent from last iteration
+            config.put(RunArg.destDir, dataDir + File.separator + String.format("NTBEA_%2d", iter));
             NTBEAParameters ntbeaParams = new NTBEAParameters(config);
 
             NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);

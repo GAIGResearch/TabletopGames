@@ -3,6 +3,7 @@ package utilities;
 import core.interfaces.IToJSON;
 import evaluation.optimisation.TunableParameters;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.apache.hadoop.yarn.webapp.ToJSON;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -258,7 +259,8 @@ public class JSONUtils {
      * Given a filename that contains only a single class, this will instantiate the class
      * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
      * find and call the relevant constructor
-     *z
+     * z
+     *
      * @param filename - the filename
      * @param <T>      - the Class type that is to be instantiated
      * @return
@@ -429,6 +431,9 @@ public class JSONUtils {
                 }
                 sb.append("\t".repeat(Math.max(0, tabDepth - 1))).append("]");
                 tabDepth--;
+            } else if (value instanceof IToJSON toJSON) {
+                JSONObject subJSON = toJSON.toJSON();
+                sb.append(prettyPrint(subJSON, tabDepth + 1));
             } else if (value instanceof String) {
                 sb.append("\"").append(value).append("\"");
             } else if (value instanceof Long || value instanceof Integer ||
