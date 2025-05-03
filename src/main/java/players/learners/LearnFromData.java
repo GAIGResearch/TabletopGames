@@ -32,9 +32,9 @@ public class LearnFromData {
     public static void main(String[] args) {
 
         String stateClassString = Utils.getArg(args, "state", "");
-        IStateFeatureVector stateFeatures = stateClassString.isEmpty() ? null : JSONUtils.loadClassFromString(stateClassString);
+        IStateFeatureVector stateFeatures = stateClassString.isEmpty() ? null : JSONUtils.loadClass(stateClassString);
         String actionClassString = Utils.getArg(args, "action", "");
-        IActionFeatureVector actionFeatures = actionClassString.isEmpty() ? null : JSONUtils.loadClassFromString(actionClassString);
+        IActionFeatureVector actionFeatures = actionClassString.isEmpty() ? null : JSONUtils.loadClass(actionClassString);
 
         if (stateFeatures == null && actionFeatures == null) {
             System.out.println("Need to specify a state or action feature vector");
@@ -44,10 +44,10 @@ public class LearnFromData {
         // We need the learner config
         String learnerFile = Utils.getArg(args, "learner", "");
         if (learnerFile.isEmpty()) {
-            System.out.println("Need to specify a learner file");
+            System.out.println("Need to specify a learner");
             System.exit(0);
         }
-        AbstractLearner learner = JSONUtils.loadClassFromFile(learnerFile);
+        AbstractLearner learner = JSONUtils.loadClass(learnerFile);
 
         String data = Utils.getArg(args, "data", "");
         if (data.isEmpty()) {

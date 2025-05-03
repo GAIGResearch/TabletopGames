@@ -119,10 +119,7 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
             }
             throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(requiredClass.getEnumConstants()));
         } else if (data.getClass() == String.class) {
-            // if this ends with json then interpret it as a json file
-            if (data.toString().endsWith(".json")) {
-                return JSONUtils.loadClassFromFile(data.toString());
-            }
+            return JSONUtils.loadClass(data.toString());
         }
         System.out.println("Warning: parsing param " + name + "; couldn't find correct type, assigning default value: " + defaultValue);
         return defaultValue;

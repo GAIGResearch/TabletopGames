@@ -213,6 +213,45 @@ public class JSONUtils {
     }
 
     /**
+     * General purpose method to load a class
+     * The order in which we check is:
+     * 1) if the string ends with ".json" then we assume this is a file name, and call loadFromFile
+     * 2) if the string contains a '{' then we assume this is a JSON object, and call loadFromJSON
+     * 3) Finally we assume this is a class name with a no-arg constructor
+     *
+     * @param rawData - see above
+     * @param <T>     - the Class type that is to be instantiated
+     * @return
+     */
+    public static <T> T loadClass(String rawData) {
+        try {
+            if (rawData.endsWith(".json")) {
+                // we assume this is a file name
+                return loadClassFromFile(rawData);
+            }
+            if (!rawData.contains("{")) {
+                // we assume this is a class name with a no-arg constructor as a special case
+                Class<?> clazz = Class.forName(rawData);
+                Constructor<?> constructor = clazz.getConstructor();
+                return (T) constructor.newInstance();
+            }
+            Reader reader = new StringReader(rawData);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject json = (JSONObject) jsonParser.parse(reader);
+            // We expect a class field to tell us the Class to use
+            // then a set of parameter values
+            return loadClassFromJSON(json);
+
+        } catch (ParseException e) {
+            throw new AssertionError("Problem parsing JSON in " + rawData);
+        } catch (IOException e) {
+            throw new AssertionError("Problem processing String in " + rawData);
+        } catch (Exception e) {
+            throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
+        }
+    }
+
+    /**
      * Given a filename that contains only a single class, this will instantiate the class
      * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
      * find and call the relevant constructor
@@ -239,36 +278,6 @@ public class JSONUtils {
         }
     }
 
-    /**
-     * Given a string that contains the JSON for a single class, this will instantiate the class
-     *
-     * @param rawData - the JSON as a raw string
-     * @param <T>     - the Class type that is to be instantiated
-     * @return
-     */
-    public static <T> T loadClassFromString(String rawData) {
-        try {
-            if (!rawData.contains("{")) {
-                // we assume this is a class name with a no-arg constructor as a special case
-                Class<?> clazz = Class.forName(rawData);
-                Constructor<?> constructor = clazz.getConstructor();
-                return (T) constructor.newInstance();
-            }
-            Reader reader = new StringReader(rawData);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject json = (JSONObject) jsonParser.parse(reader);
-            // We expect a class field to tell us the Class to use
-            // then a set of parameter values
-            return loadClassFromJSON(json);
-
-        } catch (ParseException e) {
-            throw new AssertionError("Problem parsing JSON in " + rawData);
-        } catch (IOException e) {
-            throw new AssertionError("Problem processing String in " + rawData);
-        } catch (Exception e) {
-            throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
-        }
-    }
 
     public static Map<String, Object> loadMapFromJSON(JSONObject json) {
         Map<String, Object> map = new HashMap<>();

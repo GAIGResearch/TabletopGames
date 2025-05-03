@@ -236,7 +236,7 @@ public class MCTSParams extends PlayerParameters {
             case MAST -> new MASTPlayer(MASTActionKey, MASTBoltzmann, 0.0, getRandomSeed(), MASTDefaultValue);
             case CLASS ->
                 // we have a bespoke Class to instantiate
-                    JSONUtils.loadClassFromString(details);
+                    JSONUtils.loadClass(details);
             case PARAMS -> throw new AssertionError("PolicyParameters have not been set");
             default -> throw new AssertionError("Unknown strategy type : " + type);
         };

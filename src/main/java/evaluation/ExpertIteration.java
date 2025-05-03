@@ -13,20 +13,12 @@ import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
 import utilities.JSONUtils;
-import utilities.Pair;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import static evaluation.RunArg.playerDirectory;
+import static utilities.JSONUtils.loadClass;
 import static utilities.JSONUtils.loadClassFromFile;
 import static utilities.Utils.getArg;
 
@@ -77,26 +69,25 @@ public class ExpertIteration {
         stateDataFilesByIteration = new String[iterations];
 
         useRounds = getArg(args, "useRounds", false);
-        actionFeatureVector = loadClassFromFile(getArg(args, "actionFeatures", ""));
         if (!getArg(args, "stateFeatures", "").isEmpty()) {
-            stateFeatureVector = loadClassFromFile(getArg(args, "stateFeatures", ""));
+            stateFeatureVector = loadClass(getArg(args, "stateFeatures", ""));
             stateListener = new StateFeatureListener(stateFeatureVector,
                     useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                     false, "dummy.txt");
             String learnerDefinition = getArg(args, "learner", "");
             if (learnerDefinition.equals(""))
                 throw new IllegalArgumentException("Must specify a state learner file");
-            stateLearner = loadClassFromFile(learnerDefinition);
+            stateLearner = loadClass(learnerDefinition);
         }
         if (!getArg(args, "actionFeatures", "").isEmpty()) {
-            actionFeatureVector = loadClassFromFile(getArg(args, "actionFeatures", ""));
+            actionFeatureVector = loadClass(getArg(args, "actionFeatures", ""));
             actionListener = new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
                     Event.GameEvent.ACTION_CHOSEN,
                     true, "dummy.txt");
             String learnerDefinition = getArg(args, "actionLearner", "");
             if (learnerDefinition.equals(""))
                 throw new IllegalArgumentException("Must specify an action learner file");
-            actionLearner = loadClassFromFile(learnerDefinition);
+            actionLearner = loadClass(learnerDefinition);
         }
 
         prefix = getArg(args, "prefix", "EI");
@@ -144,17 +135,14 @@ public class ExpertIteration {
         // load in the initial agent(s)
         agents.addAll(PlayerFactory.createPlayers(player));
 
-        do {
+        gatherData();
 
-            gatherData();
+        learnFromNewData();
 
-            learnFromNewData();
+        //         tuneAgents();
 
-            //         tuneAgents();
-
-            //          pruneAgents();
-            iter++;
-        } while (iter < iterations);
+        //          pruneAgents();
+        iter++;
 
     }
 
@@ -189,18 +177,20 @@ public class ExpertIteration {
         // for the moment we will just supply the most recent file
         if (stateLearner != null) {
             Object thing = stateLearner.learnFrom(stateDataFilesByIteration[iter]);
+            if (thing instanceof IToJSON toJSON) {
+                // we need to write the learned heuristic to a file
+                String fileName = prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json";
+                JSONUtils.writeJSON(toJSON.toJSON(), fileName);
+            }
         }
-        String iterationPrefix = String.format("%s_%d", prefix, iter);
-        learnedFilesByIteration[iter] = iterationPrefix;
-        if (thing instanceof IToJSON toJSON) {
-            // we need to write the learned heuristic to a file
-            String fileName = iterationPrefix + ".json";
-            JSONUtils.writeJSON(toJSON.toJSON(), fileName);
+        if (actionLearner != null) {
+            Object thing = actionLearner.learnFrom(actionDataFilesByIteration[iter]);
+            if (thing instanceof IToJSON toJSON) {
+                // we need to write the learned heuristic to a file
+                String fileName = prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json";
+                JSONUtils.writeJSON(toJSON.toJSON(), fileName);
+            }
         }
 
-        // if we only have one agent type, then we can create one agent as the result of this round
-        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, iterationPrefix));
-        agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter + 1));
-        agentsPerGeneration[iter].addDecorator(randomExplorer);
     }
 }

@@ -75,24 +75,7 @@ public class NTBEA {
                 : PlayerFactory.createPlayers(params.opponentDescriptor);
 
         if (params.tuningGame) {
-            if (new File(params.evalMethod).exists()) {
-                // load from file
-                gameHeuristic = JSONUtils.loadClassFromFile(params.evalMethod);
-            } else {
-                if (params.evalMethod.contains(".json"))
-                    throw new AssertionError("File not found : " + params.evalMethod);
-                try {
-                    Class<?> evalClass = Class.forName("evaluation.heuristics." + params.evalMethod);
-                    gameHeuristic = (IGameHeuristic) evalClass.getConstructor().newInstance();
-                } catch (ClassNotFoundException e) {
-                    throw new AssertionError("evaluation.heuristics." + params.evalMethod + " not found");
-                } catch (NoSuchMethodException e) {
-                    throw new AssertionError("evaluation.heuristics." + params.evalMethod + " has no no-arg constructor");
-                } catch (ReflectiveOperationException e) {
-                    throw new AssertionError("evaluation.heuristics." + params.evalMethod + " reflection error");
-                }
-            }
-
+            gameHeuristic = JSONUtils.loadClass(params.evalMethod);
         } else {
             // Add check that the number of final matchups is reasonable given the number of repeats
             if (params.tournamentGames > 0) {
