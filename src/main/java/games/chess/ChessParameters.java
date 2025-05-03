@@ -8,16 +8,7 @@ import core.Game;
 import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
-/**
- * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
- * maximum number of rounds in the game etc.). These parameters should be used everywhere in the code instead of
- * local variables or hard-coded numbers, by accessing these parameters from the game state via {@link AbstractGameState#getGameParameters()}.</p>
- *
- * <p>It should then implement appropriate {@link #_copy()}, {@link #_equals(Object)} and {@link #hashCode()} functions.</p>
- *
- * <p>The class can optionally extend from {@link TunableParameters} instead, which allows to use
- * automatic game parameter optimisation tools in the framework.</p>
- */
+
 public class ChessParameters extends TunableParameters {
 
     public int maxRounds = 300; // Maximum number of moves in the game before it ends in a draw
