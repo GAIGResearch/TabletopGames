@@ -93,6 +93,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             String name = featureObject.get("name").toString();
             featureNames.add(name);
             String type = featureObject.get("type").toString();
+            int index = Integer.parseInt(featureObject.get("index").toString());
+            featureIndices.add(index);
             switch (type) {
                 case "RAW" -> {
                     featureTypes.add(featureType.RAW);
@@ -102,7 +104,10 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 }
                 case "ENUM" -> {
                     featureTypes.add(featureType.ENUM);
-                    enumValues.add(featureObject.get("enumValue"));
+                    String enumString = (String) featureObject.get("enumValue");
+                    // Now we convert this to the correct enum class
+                    Class<? extends Enum> enumClass = (Class<? extends Enum>) underlyingTypes[index];
+                    enumValues.add(Enum.valueOf(enumClass, enumString));
                     featureRanges.add(null);
                     interactions.add(null);
                 }
@@ -134,8 +139,6 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                 }
                 default -> throw new IllegalArgumentException("Unsupported type: " + type);
             }
-            int index = Integer.parseInt(featureObject.get("index").toString());
-            featureIndices.add(index);
         }
     }
 
