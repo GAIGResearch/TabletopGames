@@ -156,7 +156,7 @@ public class ExpertIteration {
     }
 
     private void gatherData() {
-        Map<RunArg, Object> config = RunArg.parseConfig(new String[]{}, Collections.singletonList(RunArg.Usage.RunGames));
+        Map<RunArg, Object> config = RunArg.parseConfig(new String[]{}, Collections.singletonList(RunArg.Usage.RunGames), false);
         config.put(RunArg.matchups, matchups);
         config.put(RunArg.seed, System.currentTimeMillis());
         config.put(RunArg.byTeam, false);
@@ -207,18 +207,36 @@ public class ExpertIteration {
 
     private void tuneAgents(IStateHeuristic stateHeuristic, IActionHeuristic actionHeuristic) {
         // we now consider the value heuristic search space, and run NTBEA over this
-        Map<RunArg, Object> config = RunArg.parseConfig(originalArgs, Collections.singletonList(RunArg.Usage.ParameterSearch));
-        config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
-        config.put(RunArg.opponent, "random"); // TODO: Change this to be best agent from last iteration
-        NTBEAParameters ntbeaParams = new NTBEAParameters(config);
+        Map<RunArg, Object> config = RunArg.parseConfig(originalArgs, Collections.singletonList(RunArg.Usage.ParameterSearch), false);
 
-        NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
-        ntbea.addToSearchSpace("heuristic", stateHeuristic);  // so this is used when tuning
+        if (!getArg(originalArgs, "valueSS", "").isEmpty()) {
+            config.put(RunArg.searchSpace, getArg(originalArgs, "valueSS", ""));
+            config.put(RunArg.opponent, "random"); // TODO: Change this to be best agent from last iteration
+            NTBEAParameters ntbeaParams = new NTBEAParameters(config);
 
-        ntbeaParams.printSearchSpaceDetails();
-        Pair<Object, int[]> results = ntbea.run();
-        AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
-        bestPlayer.setName("ValueNTBEA_" + String.format("%2d", iter));
+            NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
+            ntbea.addToSearchSpace("heuristic", stateHeuristic);  // so this is used when tuning
+
+            ntbeaParams.printSearchSpaceDetails();
+            Pair<Object, int[]> results = ntbea.run();
+            AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
+            bestPlayer.setName("ValueNTBEA_" + String.format("%2d", iter));
+            agents.add(bestPlayer);
+        }
+        if (!getArg(originalArgs, "actionSS", "").isEmpty()) {
+            config.put(RunArg.searchSpace, getArg(originalArgs, "actionSS", ""));
+            config.put(RunArg.opponent, "random"); // TODO: Change this to be best agent from last iteration
+            NTBEAParameters ntbeaParams = new NTBEAParameters(config);
+
+            NTBEA ntbea = new NTBEA(ntbeaParams, gameToPlay, nPlayers);
+            ntbea.addToSearchSpace("actionHeuristic", actionHeuristic);  // so this is used when tuning
+
+            ntbeaParams.printSearchSpaceDetails();
+            Pair<Object, int[]> results = ntbea.run();
+            AbstractPlayer bestPlayer = (AbstractPlayer) results.a;
+            bestPlayer.setName("ActionNTBEA_" + String.format("%2d", iter));
+            agents.add(bestPlayer);
+        }
 
     }
 }

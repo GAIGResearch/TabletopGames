@@ -98,6 +98,8 @@ public abstract class Utils {
     }
 
     public static int playerPermutations(int nPlayers, int nAgents, boolean selfPlay) {
+        if (nAgents == 1)
+            return 1;
         if (selfPlay) {
             return (int) Math.pow(nAgents, nPlayers);
         } else {

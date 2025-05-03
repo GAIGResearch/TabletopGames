@@ -128,7 +128,7 @@ public class NTBEA {
     public void addToSearchSpace(String key, Object value) {
         if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
             if (itp.itp instanceof TunableParameters<?> tp) {
-                tp.addToSearchSpace(key, value);
+                tp.setParameterValue(key, value);
                 return;
             }
         }
