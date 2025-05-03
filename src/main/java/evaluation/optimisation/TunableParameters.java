@@ -382,6 +382,12 @@ public abstract class TunableParameters<T> extends AbstractParameters implements
     public void setRawJSON(JSONObject json) {
         rawJSON = json;
     }
+    public JSONObject getRawJSON() {
+        return rawJSON;
+    }
+    public void addToSearchSpace(String key, Object value) {
+        rawJSON.put(key, value);
+    }
 
     @SuppressWarnings("unchecked")
     @Override

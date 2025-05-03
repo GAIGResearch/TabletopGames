@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.util.*;
 
 import static players.heuristics.AutomatedFeatures.featureType.*;
+import static players.learners.AbstractLearner.Target.*;
 
 public class LearnFromData {
 
@@ -93,12 +94,19 @@ public class LearnFromData {
 
         // this will have created the raw data from which we now learn
 
-        learner.setStateFeatureVector(asf);
-
+        // TODO: Ideally we want to split ASF into distinct state and action features
+        // to reduce inefficiencies in recalculating all the state features for every action
+        if (learner.targetType == ACTION_ADV || learner.targetType == ACTION_CHOSEN ||
+                learner.targetType == ACTION_SCORE || learner.targetType == ACTION_VISITS) {
+            learner.setActionFeatureVector(asf);
+        } else {
+            learner.setStateFeatureVector(asf);
+        }
+        // this creates the extended AutomatedFeatures, and fits to this; before considering any interactions, bucketing or pruning
         Object learnedThing = learner.learnFrom(convertedDataFile);
 
         // we are now in a position to modify the features in a loop
-        learnedThing = improveModel(learnedThing, (ApacheLearner) learner, convertedData.size(), convertedDataFile);
+        learnedThing = improveModel(learnedThing, learner, convertedData.size(), convertedDataFile);
 
         if (learnedThing instanceof IToJSON toJSON) {
             JSONObject json = toJSON.toJSON();
@@ -121,12 +129,18 @@ public class LearnFromData {
     }
 
     private static Object improveModel(Object startingHeuristic,
-                                       ApacheLearner learner,
+                                       AbstractLearner learner,
                                        int n,
                                        String... dataFiles) {
 
         if (startingHeuristic instanceof GLMHeuristic glm) {
-            AutomatedFeatures asf = (AutomatedFeatures) learner.getStateFeatureVector();
+            AutomatedFeatures asf;
+            if (learner.targetType == ACTION_SCORE || learner.targetType == ACTION_VISITS ||
+                    learner.targetType == ACTION_ADV || learner.targetType == ACTION_CHOSEN) {
+                asf = (AutomatedFeatures) learner.getActionFeatureVector();
+            } else {
+                asf = (AutomatedFeatures) learner.getStateFeatureVector();
+            }
             String bestFeatureDescription = "";
             double baseBIC = bicFromAic(glm.getModel().summary().aic(), asf.names().length, n);
             double bestBIC = baseBIC;
@@ -141,7 +155,7 @@ public class LearnFromData {
             // we check for any zero coefficients in startingHeuristic
             // and exclude those features from the search
             for (int i = 0; i < asf.names().length; i++) {
-                if (Math.abs(glm.coefficients()[i+1]) < 0.00001) {
+                if (Math.abs(glm.coefficients()[i + 1]) < 0.00001) {
                     excludedFeatures.add(asf.names()[i]);
                 }
             }
@@ -245,7 +259,7 @@ public class LearnFromData {
                             excludedInteractionFeatures.add(firstFeature + ":" + secondFeature);
                             //                  System.out.println("Interaction " + firstFeature + ":" + secondFeature + " excluded");
                         }
-                        // TODO: We can also pass the raw data directly to the learner without going through
+                        // TODO: (Low priority) We can also pass the raw data directly to the learner without going through
                         // a file on disk (which may save some time). Although only with OLS will this really be noticeable
                         // given the performance bottleneck is the model fitting
                     }
@@ -276,7 +290,7 @@ public class LearnFromData {
                             cd -> Arrays.stream(cd.name().split(":")))
                     .distinct()
                     .toList();
-      //      System.out.println("Columns with interactions: " + columnsWithInteraction);
+            //      System.out.println("Columns with interactions: " + columnsWithInteraction);
             do {
                 bestFeatures = null;
                 baseBIC = bestBIC; // reset baseline
@@ -293,9 +307,10 @@ public class LearnFromData {
                     adjustedASF.removeFeature(i);
                     learner.setStateFeatureVector(adjustedASF);
 
-                    GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
+                    // we always use the data file from the last iteration of building the model (as this has all the data)
+                    GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_Iter_" + (iteration - 1) + ".txt");
                     double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-      //              System.out.printf("Considering Feature: %20s, BIC: %.2f (%d/%d)%n", featureToRemove, newBIC, adjustedASF.names().length, asf.names().length);
+                    //              System.out.printf("Considering Feature: %20s, BIC: %.2f (%d/%d)%n", featureToRemove, newBIC, adjustedASF.names().length, asf.names().length);
 
                     if (newBIC < bestBIC) {
                         bestBIC = newBIC;

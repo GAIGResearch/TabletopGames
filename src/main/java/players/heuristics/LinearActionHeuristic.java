@@ -36,25 +36,35 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
     public LinearActionHeuristic(IActionFeatureVector actionFeatureVector, IStateFeatureVector featureVector, String coefficientsFile) {
         this.features = featureVector;
         this.actionFeatures = actionFeatureVector;
-        // then add on the action feature names
-        names = new String[features.names().length + actionFeatures.names().length];
-        System.arraycopy(features.names(), 0, names, 0, features.names().length);
-        System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
+        setUpNames();
         loadFromFile(coefficientsFile);
     }
+
+    private void setUpNames() {
+        if (features == null) {
+            names = new String[actionFeatures.names().length];
+            System.arraycopy(actionFeatures.names(), 0, names, 0, actionFeatures.names().length);
+        } else {
+            names = new String[features.names().length + actionFeatures.names().length];
+            System.arraycopy(features.names(), 0, names, 0, features.names().length);
+            System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
+        }
+    }
+
     public LinearActionHeuristic(IActionFeatureVector actionFeatureVector, IStateFeatureVector featureVector, double[] coefficients) {
         this.features = featureVector;
         this.actionFeatures = actionFeatureVector;
-        // then add on the action feature names
-        names = new String[features.names().length + actionFeatures.names().length];
-        System.arraycopy(features.names(), 0, names, 0, features.names().length);
-        System.arraycopy(actionFeatures.names(), 0, names, features.names().length, actionFeatures.names().length);
+        setUpNames();
         this.coefficients = coefficients;
     }
+
     public LinearActionHeuristic(JSONObject json) {
         // Much the same logic as LinearStateHeuristic
-        this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
+        // except that the state features are optional
+        if (json.get("features") != null)
+            this.features = JSONUtils.loadClassFromJSON((JSONObject) json.get("features"));
         this.actionFeatures = JSONUtils.loadClassFromJSON((JSONObject) json.get("actionFeatures"));
+        setUpNames();
         loadCoefficientsFromJSON(json);
     }
 
@@ -65,12 +75,14 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         json.put("class", "players.heuristics.LinearActionHeuristic");
         JSONObject coefficientsAsJSON = coefficientsAsJSON();
         json.put("coefficients", coefficientsAsJSON);
-        if (features instanceof IToJSON toJSON) {
-            JSONObject featuresJson = toJSON.toJSON();
-            ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
-            json.put("features", toJSON.toJSON());
-        } else {
-            json.put("features", features.getClass().getName());
+        if (features != null) {
+            if (features instanceof IToJSON toJSON) {
+                JSONObject featuresJson = toJSON.toJSON();
+                ICoefficients.removeUnusedFeatures(coefficientsAsJSON, featuresJson);
+                json.put("features", featuresJson);
+            } else {
+                json.put("features", features.getClass().getName());
+            }
         }
         if (actionFeatures instanceof IToJSON toJSON) {
             JSONObject actionFeaturesJson = toJSON.toJSON();
@@ -87,7 +99,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
         double[] retValue = new double[actions.size()];
-        double[] phi = features.doubleVector(state, state.getCurrentPlayer());
+        double[] phi = features == null ? new double[0] : features.doubleVector(state, state.getCurrentPlayer());
         for (AbstractAction action : actions) {
             double[] combined = mergePhiAndPsi(state, phi, action);
             retValue[actions.indexOf(action)] = inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
@@ -107,7 +119,7 @@ public class LinearActionHeuristic extends GLMHeuristic implements IActionHeuris
     public double evaluateAction(AbstractAction action, AbstractGameState state, List<AbstractAction> contextActions) {
         if (coefficients == null)
             throw new AssertionError("No coefficients found");
-        double[] phi = features.doubleVector(state, state.getCurrentPlayer());
+        double[] phi = features == null ? new double[0] : features.doubleVector(state, state.getCurrentPlayer());
         double[] combined = mergePhiAndPsi(state, phi, action);
         return inverseLinkFunction.applyAsDouble(applyCoefficients(combined));
     }

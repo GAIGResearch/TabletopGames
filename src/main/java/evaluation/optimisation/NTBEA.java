@@ -121,6 +121,20 @@ public class NTBEA {
         elites.add(settings);
     }
 
+    public void fixSearchDimension() {
+        // TODO:
+    }
+
+    public void addToSearchSpace(String key, Object value) {
+        if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
+            if (itp.itp instanceof TunableParameters<?> tp) {
+                tp.addToSearchSpace(key, value);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Cannot add to search space - not an ITPSearchSpace");
+    }
+
     /**
      * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
      *

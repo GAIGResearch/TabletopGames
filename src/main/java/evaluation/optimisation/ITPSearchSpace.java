@@ -74,15 +74,6 @@ public class ITPSearchSpace<T> extends AgentSearchSpace<T> {
     public ITPSearchSpace(ITunableParameters<T> tunableParameters, JSONObject json) {
         itp = tunableParameters;
         List<ParameterSettings> parameterTypes = extractRecursiveParameters("", json, itp);
-//        List<List<Object>> allPossibleValues = new ArrayList<>();
-//        List<Class<?>> parameterClasses = new ArrayList<>();
-//        List<String> parameterNames = new ArrayList<>();
-//        for (ParameterSettings settings : parameterTypes) {
-//            // Now get possible values from JSON
-//            parameterClasses.add(settings.clazz);
-//            allPossibleValues.add(settings.values);
-//            parameterNames.add(settings.name);
-//        }
         super.initialise(parameterTypes);
         if (tunableParameters instanceof TunableParameters tp) {
             tp.setRawJSON(json);

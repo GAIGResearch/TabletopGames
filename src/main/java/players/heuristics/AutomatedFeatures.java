@@ -116,8 +116,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     featureTypes.add(featureType.RANGE);
                     String rangeString = featureObject.get("range").toString();
                     String[] rangeParts = rangeString.replaceAll("[\\[\\]]", "").split(",");
-                    Number lowerBound = Double.parseDouble(rangeParts[0]);
-                    Number upperBound = Double.parseDouble(rangeParts[1]);
+                    Number lowerBound = Double.parseDouble(rangeParts[0].trim());
+                    Number upperBound = Double.parseDouble(rangeParts[1].trim());
                     featureRanges.add(new Pair<>(lowerBound, upperBound));
                     enumValues.add(null);
                     interactions.add(null);
@@ -126,8 +126,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     featureTypes.add(featureType.INTERACTION);
                     String interactionString = featureObject.get("interaction").toString();
                     String[] interactionParts = interactionString.replaceAll("[\\[\\]]", "").split(",");
-                    int first = Integer.parseInt(interactionParts[0]);
-                    int second = Integer.parseInt(interactionParts[1]);
+                    int first = Integer.parseInt(interactionParts[0].trim());
+                    int second = Integer.parseInt(interactionParts[1].trim());
                     interactions.add(Pair.of(first, second));
                     enumValues.add(null);
                     featureRanges.add(null);

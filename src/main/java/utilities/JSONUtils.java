@@ -163,6 +163,9 @@ public class JSONUtils {
                 return (T) constructor.newInstance(json);
             } catch (NoSuchMethodException e) {
                 // continue to the next step
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                throw new AssertionError("Error constructing " + outputClass.getName() + " using JSON constructor.");
             }
 
             // 4. And finally look for a constructor that takes no arguments
