@@ -1,11 +1,6 @@
 package games.chess;
 
-import utilities.Vector2D;
-
 import javax.swing.*;
-
-import org.apache.spark.sql.expressions.javalang.typed;
-import org.checkerframework.checker.units.qual.C;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;

@@ -5,14 +5,6 @@ import java.util.Objects;
 import core.components.Token;
 
 
-/**
- * <p>Components represent a game piece, or encompass some unit of game information (e.g. cards, tokens, score counters, boards, dice etc.)</p>
- * <p>Components in the game can (and should, if applicable) extend one of the other components, in package {@link core.components}.
- * Or, the game may simply reuse one of the existing core components.</p>
- * <p>They need to extend at a minimum the {@link Component} super class and implement the {@link Component#copy()} method.</p>
- * <p>They also need to include {@link Object#equals(Object)} and {@link Object#hashCode()} methods.</p>
- * <p>They <b>may</b> keep references to other components or actions (but these should be deep-copied in the copy() method, watch out for infinite loops!).</p>
- */
 public class ChessPiece extends Token {
 
     public enum ChessPieceType {
@@ -91,6 +83,7 @@ public class ChessPiece extends Token {
 
     @Override
     public int hashCode() {
+        //We do not include the component ID in the hash code because we use this hash for the draw by repetition rule (e.g. swapping two rooks knights does not change the game state for this rule)
         return Objects.hash(type, ownerId, movedState, enPassant, x, y);
     }
 

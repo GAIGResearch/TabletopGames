@@ -1,8 +1,6 @@
 package games.chess.components;
 
-import java.util.HashMap;
 
-import org.checkerframework.checker.units.qual.s;
 
 import core.components.Component;
 import core.CoreConstants;

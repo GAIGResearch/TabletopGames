@@ -4,52 +4,20 @@ import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.CoreConstants;
-import games.chess.ChessGameState;
 import games.chess.actions.Castle;
 import games.chess.actions.EnPassant;
 import games.chess.actions.MovePiece;
 import games.chess.actions.Promotion;
-import games.chess.actions.Castle;
 import games.chess.components.ChessPiece;
-import games.chess.components.ChessPiece.MovedState;
-import games.descent2e.actions.Move;
-import games.poker.actions.Check;
 
-import static utilities.Utils.indexOf;
-import static utilities.Utils.rotateImage;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+
 import java.util.List;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
 
-import org.checkerframework.checker.units.qual.C;
-import org.checkerframework.checker.units.qual.g;
-
-/**
- * <p>The forward model contains all the game rules and logic. It is mainly responsible for declaring rules for:</p>
- * <ol>
- *     <li>Game setup</li>
- *     <li>Actions available to players in a given game state</li>
- *     <li>Game events or rules applied after a player's action</li>
- *     <li>Game end</li>
- * </ol>
- */
 public class ChessForwardModel extends StandardForwardModel {
 
-    /**
-     * Initializes all variables in the given game state. Performs initial game setup according to game rules, e.g.:
-     * <ul>
-     *     <li>Sets up decks of cards and shuffles them</li>
-     *     <li>Gives player cards</li>
-     *     <li>Places tokens on boards</li>
-     *     <li>...</li>
-     * </ul>
-     *
-     * @param firstState - the state to be modified to the initial game state.
-     */
     @Override
     protected void _setup(AbstractGameState firstState) {
 
