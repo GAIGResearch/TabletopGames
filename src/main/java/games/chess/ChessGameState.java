@@ -206,7 +206,7 @@ public class ChessGameState extends AbstractGameState {
         throw new IllegalArgumentException("King not found for player " + playerId);
     }
 
-    //A few duplicate methods from the forward model to use in the heuristic function. TODO: decide wheter to have them here or in the forward model
+    //A few duplicate methods from the forward model to use in the heuristic function. TODO: decide wheter to have them here or in the forward model, might want to use legal moves in the future.
     public boolean isInCheck(int playerId) {
         // Check if the player's king is in check
         int[] kingPosition = this.getKingPosition(playerId);
