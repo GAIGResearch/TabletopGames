@@ -57,7 +57,7 @@ public class ChessBoardView extends JComponent {
                     mousePos = new Point(e.getX(), e.getY());
                     mouseOverPos = new int[]{(mousePos.x-offsetX)/defaultItemSize, 7-(mousePos.y-offsetY)/defaultItemSize};
                     dragging = true;
-                    if (selectedPiece.getOwnerId() != cgs.getCurrentPlayer()) {
+                    if (selectedPiece != null && selectedPiece.getOwnerId() != cgs.getCurrentPlayer()) {
                         selectedPiece = null;
                         selectedPos = null;
                         targetPos = null;

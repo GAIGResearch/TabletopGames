@@ -2,6 +2,8 @@ package games.chess;
 
 
 
+import java.util.Arrays;
+
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
@@ -18,8 +20,8 @@ public class ChessParameters extends TunableParameters {
     
 
     public ChessParameters() {
-        addTunableParameter("maxRounds", 100);
-        addTunableParameter("drawByRepetition", 3);
+        addTunableParameter("maxRounds", 100, Arrays.asList(50, 100, 200, 300));
+        addTunableParameter("drawByRepetition", 3, Arrays.asList(0, 1, 2, 3));
         _reset();
     }
     
