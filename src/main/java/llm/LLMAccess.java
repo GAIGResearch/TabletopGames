@@ -2,11 +2,10 @@ package llm;
 
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
-import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 
@@ -15,13 +14,11 @@ import java.io.FileWriter;
 
 public class LLMAccess {
 
-    static ChatLanguageModel[] geminiModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] mistralModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] openaiModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] anthropicModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] llamaModel = new ChatLanguageModel[2];
-
-    static OpenAiTokenizer tokenizer = new OpenAiTokenizer();
+    static VertexAiGeminiChatModel[] geminiModel = new VertexAiGeminiChatModel[2];
+    static MistralAiChatModel[] mistralModel = new MistralAiChatModel[2];
+    static OpenAiChatModel[] openaiModel = new OpenAiChatModel[2];
+    static AnthropicChatModel[] anthropicModel = new AnthropicChatModel[2];
+    static VertexAiGeminiChatModel[] llamaModel = new VertexAiGeminiChatModel[2];
 
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
@@ -31,7 +28,7 @@ public class LLMAccess {
     File logFile;
     FileWriter logWriter;
 
-    String geminiLocation = "europe-west2";
+    String geminiLocation = "global";
     String llamaLocation = "us-central1";
 
     LLM_MODEL modelType;
@@ -82,12 +79,12 @@ public class LLMAccess {
                         //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
                         //     .maxOutputTokens(1000)  // max replay size (max is 8192)
                         // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-                        .modelName("gemini-1.5-pro") // $0.075 per million characters output, $0.01875 per million characters input
+                        .modelName("gemini-2.0-pro") // $0.075 per million characters output, $0.01875 per million characters input
                         .build();
                 geminiModel[0] = VertexAiGeminiChatModel.builder()
                         .project(geminiProject)
                         .location(geminiLocation)
-                        .modelName("gemini-1.5-flash")
+                        .modelName("gemini-2.0-flash-001")
                         .build();
             } catch (Error e) {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
@@ -162,7 +159,7 @@ public class LLMAccess {
      */
     public String getResponse(String query, LLM_MODEL modelType, LLM_SIZE modelSize) {
         String response = "";
-        ChatLanguageModel modelToUse = switch(modelType) {
+        ChatModel modelToUse = switch(modelType) {
             case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
             case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
             case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
@@ -171,9 +168,7 @@ public class LLMAccess {
         };
         if (modelToUse != null) {
             try {
-                inputTokens += tokenizer.estimateTokenCountInText(query);
-                response = modelToUse.generate(query);
-                outputTokens += tokenizer.estimateTokenCountInText(response);
+                response = modelToUse.chat(query);
             } catch (Exception e) {
                 System.out.println("Error getting response from model: " + e.getMessage());
             }

@@ -2,7 +2,6 @@ package llm;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import dev.langchain4j.model.openai.OpenAiTokenizer;
 import evaluation.RunArg;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
@@ -10,8 +9,6 @@ import llm.LLMAccess.LLM_MODEL;
 import llm.LLMAccess.LLM_SIZE;
 import players.PlayerFactory;
 import players.heuristics.StringHeuristic;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.Utils;
 
 import java.io.BufferedWriter;
