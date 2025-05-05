@@ -28,7 +28,7 @@ public class LLMAccess {
     File logFile;
     FileWriter logWriter;
 
-    String geminiLocation = "global";
+    String geminiLocation = "europe-west9";
     String llamaLocation = "us-central1";
 
     LLM_MODEL modelType;
@@ -79,12 +79,12 @@ public class LLMAccess {
                         //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
                         //     .maxOutputTokens(1000)  // max replay size (max is 8192)
                         // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-                        .modelName("gemini-2.0-pro") // $0.075 per million characters output, $0.01875 per million characters input
+                        .modelName("gemini-2.0-flash") // $0.075 per million characters output, $0.01875 per million characters input
                         .build();
                 geminiModel[0] = VertexAiGeminiChatModel.builder()
                         .project(geminiProject)
                         .location(geminiLocation)
-                        .modelName("gemini-2.0-flash-001")
+                        .modelName("gemini-2.0-flash-lite")
                         .build();
             } catch (Error e) {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
@@ -100,12 +100,12 @@ public class LLMAccess {
                         //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
                         //     .maxOutputTokens(1000)  // max replay size (max is 8192)
                         // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-                        .modelName("llama3-405b-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
+                        .modelName("meta/llama-4-maverick-17b-128e-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
                         .build();
                 llamaModel[0] = VertexAiGeminiChatModel.builder()
                         .project(geminiProject)
                         .location(llamaLocation)
-                        .modelName("llama3-70b-instruct-maas")
+                        .modelName("meta/llama-3.1-405b-instruct-maas")
                         .build();
             } catch (Error e) {
                 System.out.println("Error creating Llama model: " + e.getMessage());
@@ -200,7 +200,7 @@ public class LLMAccess {
     }
 
     public static void main(String[] args) {
-        LLMAccess llm = new LLMAccess(LLM_MODEL.OPENAI, LLM_SIZE.LARGE, "llm_log.txt");
+        LLMAccess llm = new LLMAccess(LLM_MODEL.LLAMA, LLM_SIZE.SMALL, "llm_log.txt");
         llm.getResponse("What is the average lifespan of a Spanish Armadillo?");
         llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.OPENAI, LLM_SIZE.SMALL);
     }
