@@ -11,7 +11,6 @@ import evaluation.optimisation.ntbea.functions.NTBEAFunction;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import evaluation.optimisation.ntbea.*;
-import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.heuristics.OrdinalPosition;
 import players.heuristics.PureScoreHeuristic;
@@ -125,7 +124,15 @@ public class NTBEA {
         // TODO:
     }
 
-    public void addToSearchSpace(String key, Object value) {
+    // Only works if the search space is an instance of ITPSearchSpace
+    // This sets a tunable parameter that is *NOT* in the search space itself to the specified value
+    // This will ensure that all agents in the run use this parameter
+    public void fixTunableParameter(String key, Object value) {
+        for (int i = 0; i < params.searchSpace.nDims(); i++) {
+            if (params.searchSpace.name(i).equals(key)) {
+                throw new IllegalArgumentException("Cannot set a tunable parameter that is in the search space. Use fixSearchDimension instead.");
+            }
+        }
         if (params.searchSpace instanceof ITPSearchSpace<?> itp) {
             if (itp.itp instanceof TunableParameters<?> tp) {
                 tp.setParameterValue(key, value);
@@ -359,11 +366,8 @@ public class NTBEA {
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
         Arrays.sort(results);
         double avg = Arrays.stream(results).average().orElse(0.0);
-        double quantileValue = results[(int) (results.length * params.quantile / 100.0)];
         double stdErr = Math.sqrt(Arrays.stream(results).map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
-        return (params.quantile > 0) ?
-                new Pair<>(quantileValue, avg) :
-                new Pair<>(avg, stdErr);
+        return new Pair<>(avg, stdErr);
     }
 
     /**

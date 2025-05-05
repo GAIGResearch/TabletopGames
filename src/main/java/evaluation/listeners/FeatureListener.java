@@ -22,6 +22,8 @@ public abstract class FeatureListener implements IGameListener {
     boolean currentPlayerOnly;
     IStatisticLogger logger;
     Game game;
+    int everyN = 1;
+    int currentRecordCount = 0;
 
     protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly) {
         this.currentPlayerOnly = currentPlayerOnly;
@@ -35,11 +37,24 @@ public abstract class FeatureListener implements IGameListener {
         this.logger = logger;
     }
 
+    // Set the frequency of the events to be recorded; only every Nth event will be recorded
+    public void setNth(int n) {
+        this.everyN = n;
+    }
+
     @Override
     public void onEvent(Event event) {
 
         if (event.type == frequency && frequency != Event.GameEvent.GAME_OVER) {
             // if GAME_OVER, then we cover this a few lines down
+
+            // we only record every Nth event. This is to (optionally) generate sparser and less correlated data
+            // If we record every event, then successive events are highly correlated (of course, sometimes we need the
+            // complete trajectory)
+            currentRecordCount++;
+            if (currentRecordCount % everyN != 0) {
+                return;
+            }
             processState(event.state, event.action);
         }
 
@@ -75,10 +90,10 @@ public abstract class FeatureListener implements IGameListener {
             // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
             // data is written to file in a sensible order for human viewing
             Map<String, Object> data = new LinkedHashMap<>();
-            data.put("GameID", (double) state.getGameID());
-            data.put("Player", (double) record.player);
-            data.put("Round", (double) record.gameRound);
-            data.put("Turn", (double) record.gameTurn);
+            data.put("GameID", state.getGameID());
+            data.put("Player", record.player);
+            data.put("Round", record.gameRound);
+            data.put("Turn", record.gameTurn);
             data.put("CurrentScore", record.currentScore);
             if (record.array.length > 0) {
                 for (int i = 0; i < record.array.length; i++) {
@@ -89,10 +104,10 @@ public abstract class FeatureListener implements IGameListener {
                     data.put(names()[i], record.objArray[i]);
                 }
             }
-            data.put("PlayerCount", (double) getGame().getPlayers().size());
+            data.put("PlayerCount", getGame().getPlayers().size());
             data.put("TotalRounds", finalRound);
-            data.put("TotalTurns", (double) state.getTurnCounter());
-            data.put("TotalTicks", (double) state.getGameTick());
+            data.put("TotalTurns", state.getTurnCounter());
+            data.put("TotalTicks", state.getGameTick());
             for (int i = 0; i < record.actionScores.length; i++) {
                 data.put(record.actionScoreNames[i], record.actionScores[i]);
             }

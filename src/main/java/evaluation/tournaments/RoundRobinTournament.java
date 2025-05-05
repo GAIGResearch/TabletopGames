@@ -761,6 +761,25 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
 
+    // Returns a list of agents that are clearly dominated by the given agent
+    public List<Integer> getDominatedAgents(int agentID) {
+        List<Integer> dominated = new ArrayList<>();
+        double significanceLevel = Utils.standardZScore(0.10, agents.size() * (agents.size() - 1) / 2);
+
+        for (int i = 0; i < agents.size(); i++) {
+            if (i != agentID && winsPerPlayerPerOpponent[agentID][i] > winsPerPlayerPerOpponent[i][agentID]) {
+                // Now check for significance (very approximately... the idea is to avoid discarding agents based on a low sample size
+                double winRate = (double) winsPerPlayerPerOpponent[agentID][i] / nGamesPlayedPerOpponent[agentID][i];
+                double winRateOpponent = (double) winsPerPlayerPerOpponent[i][agentID] / nGamesPlayedPerOpponent[i][agentID];
+                double stdErr = sqrt((winRate * (1 - winRate)) / nGamesPlayedPerOpponent[agentID][i]);
+                if (winRate - winRateOpponent > significanceLevel * stdErr) {
+                    dominated.add(i);
+                }
+            }
+        }
+        return dominated;
+    }
+
     public double getWinRateAlphaRank(int agentID) {
         if (alphaRankByWin == null)
             return getWinRate(agentID);

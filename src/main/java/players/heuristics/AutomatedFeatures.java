@@ -101,6 +101,7 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     enumValues.add(null);
                     featureRanges.add(null);
                     interactions.add(null);
+                    buckets[index] = Integer.parseInt(featureObject.get("buckets").toString());
                 }
                 case "ENUM" -> {
                     featureTypes.add(featureType.ENUM);
@@ -203,7 +204,9 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
             JSONObject featureObject = new JSONObject();
             featureObject.put("name", featureNames.get(i));
             featureObject.put("type", featureTypes.get(i).toString());
-            if (featureTypes.get(i) == featureType.ENUM || featureTypes.get(i) == featureType.STRING) {
+            if (featureTypes.get(i) == featureType.RAW) {
+                featureObject.put("buckets", buckets[featureIndices.get(i)]);
+            } else if (featureTypes.get(i) == featureType.ENUM || featureTypes.get(i) == featureType.STRING) {
                 featureObject.put("enumValue", enumValues.get(i).toString());
             } else if (featureTypes.get(i) == featureType.RANGE) {
                 Pair<Number, Number> range = featureRanges.get(i);
