@@ -13,7 +13,6 @@ import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import org.apache.spark.sql.catalyst.expressions.Abs;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
@@ -23,6 +22,7 @@ import utilities.Pair;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static utilities.JSONUtils.loadClass;
@@ -220,26 +220,30 @@ public class ExpertIteration {
         bestAgent = tournament.getWinner();
         System.out.println("Best agent is " + bestAgent);
 
-        // Check relative win rates and remove agents beaten by all others
-        // TODO: The problem with this approach is that it will not remove a clump of very similar poor agents
-        // Possibly we simplify to a simple TopK agents kept
-        List<Integer> completelyDominated = IntStream.range(0, agents.size()).boxed().toList();
         if (agents.size() > nPlayers) {
-            for (int i = 0; i < agents.size(); i++) {
-                List<Integer> dominated = tournament.getDominatedAgents(i);
-                System.out.println("Agent " + agents.get(i) + " is dominated by " + dominated);
-                dominated.add(i);  // consider the agent itself as dominated...otherwise nothing will ever be removed
-                completelyDominated = completelyDominated.stream().filter(dominated::contains).toList();
-                if (completelyDominated.isEmpty()) {
-                    break;
-                }
+            // we now categorise the agents into Pareto shells
+            // The first Pareto front consists of the agents that are not dominated by any other agent
+            List<Integer> firstParetoFront = tournament.getParetoFront(1);
+            List<Integer> secondParetoFront = tournament.getParetoFront(2);
+            List<Integer> remainder = IntStream.range(0, agents.size())
+                    .boxed().
+                    filter(i -> !firstParetoFront.contains(i) && !secondParetoFront.contains(i))
+                    .collect(Collectors.toList());
+
+            System.out.println("First Pareto front: " + firstParetoFront);
+            System.out.println("Second Pareto front: " + secondParetoFront);
+            System.out.println("Remainder: " + remainder);
+
+            // we want to keep at least nPlayer agents
+            if (remainder.size() < agents.size() - nPlayers && firstParetoFront.size() >= nPlayers) {
+                remainder.addAll(secondParetoFront);
             }
 
             List<AbstractPlayer> removedAgents = new ArrayList<>();
-            for (int i : completelyDominated) {
-                AbstractPlayer removedAgent = agents.get(i);
-                System.out.println("Removing agent " + removedAgent + " from the tournament");
-                removedAgents.add(removedAgent);
+            for (int i : remainder) {
+                AbstractPlayer agent = agents.get(i);
+                removedAgents.add(agent);
+                System.out.println("Removing agent " + agent);
             }
             agents.removeAll(removedAgents);
         }

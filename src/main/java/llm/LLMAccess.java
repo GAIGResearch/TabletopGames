@@ -2,11 +2,10 @@ package llm;
 
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
-import dev.langchain4j.model.openai.OpenAiTokenizer;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 
@@ -15,13 +14,11 @@ import java.io.FileWriter;
 
 public class LLMAccess {
 
-    static ChatLanguageModel[] geminiModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] mistralModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] openaiModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] anthropicModel = new ChatLanguageModel[2];
-    static ChatLanguageModel[] llamaModel = new ChatLanguageModel[2];
-
-    static OpenAiTokenizer tokenizer = new OpenAiTokenizer();
+    static ChatModel[] geminiModel = new ChatModel[2];
+    static ChatModel[] mistralModel = new ChatModel[2];
+    static ChatModel[] openaiModel = new ChatModel[2];
+    static ChatModel[] anthropicModel = new ChatModel[2];
+    static ChatModel[] llamaModel = new ChatModel[2];
 
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
@@ -162,7 +159,7 @@ public class LLMAccess {
      */
     public String getResponse(String query, LLM_MODEL modelType, LLM_SIZE modelSize) {
         String response = "";
-        ChatLanguageModel modelToUse = switch(modelType) {
+        ChatModel modelToUse = switch(modelType) {
             case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
             case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
             case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
@@ -171,9 +168,7 @@ public class LLMAccess {
         };
         if (modelToUse != null) {
             try {
-                inputTokens += tokenizer.estimateTokenCountInText(query);
-                response = modelToUse.generate(query);
-                outputTokens += tokenizer.estimateTokenCountInText(response);
+                response = modelToUse.chat(query);
             } catch (Exception e) {
                 System.out.println("Error getting response from model: " + e.getMessage());
             }

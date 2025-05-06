@@ -761,6 +761,29 @@ public class RoundRobinTournament extends AbstractTournament {
         return finalWinRanking.get(agentID) == null ? 0.0 : finalWinRanking.get(agentID).a;
     }
 
+    // 1 is the first Pareto Front
+    public List<Integer> getParetoFront(int count) {
+        if (count < 1 || count > agents.size()) {
+            throw new IllegalArgumentException("Count must be between 1 and " + agents.size());
+        }
+        if (count == 1) {
+            return getParetoFront(allAgentIds);
+        }
+        List<Integer> previousParetoFront = getParetoFront(count -1);
+        return getParetoFront(previousParetoFront);
+    }
+
+    protected List<Integer> getParetoFront(List<Integer> population) {
+        // population is a list of agent IDs to be considered
+        List<Integer> paretoFront = new ArrayList<>();
+        for (int i : population) {
+            if (getDominatedAgents(i).stream().filter(population::contains).toList().isEmpty()) {
+                paretoFront.add(i);
+            }
+        }
+        return paretoFront;
+    }
+
     // Returns a list of agents that are clearly dominated by the given agent
     public List<Integer> getDominatedAgents(int agentID) {
         List<Integer> dominated = new ArrayList<>();

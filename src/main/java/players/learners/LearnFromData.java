@@ -195,8 +195,8 @@ public class LearnFromData {
                         GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
                         // then find BIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                        System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
-                                firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
+      //                  System.out.printf("Feature: %20s, Buckets: %d, BIC: %.2f%n",
+      //                          firstFeature, adjustedASF.getBuckets(underlyingIndex), newBIC);
                         if (newBIC < bestBIC) {
                             bestBIC = newBIC;
                             bestFeatures = adjustedASF;
@@ -247,8 +247,8 @@ public class LearnFromData {
                         GLMHeuristic newHeuristic = (GLMHeuristic) learner.learnFrom("ImproveModel_tmp.txt");
                         // then find AIC
                         double newBIC = bicFromAic(newHeuristic.getModel().summary().aic(), adjustedASF.names().length, n);
-                        System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
-                                firstFeature, secondFeature, newBIC);
+             //           System.out.printf("Interaction: %20s, %20s, BIC: %.2f%n",
+             //                   firstFeature, secondFeature, newBIC);
 
                         if (newBIC < bestBIC) {
                             bestBIC = newBIC;

@@ -26,7 +26,7 @@ public abstract class AbstractLearner implements ILearner {
         WIN("Win", false),  // 0 or 1 for loss/win
         ORDINAL("Ordinal", false), // -1 for first to -n for nth place
         SCORE("FinalScore", false),  // raw score
-        SCORE_DELTA("FinalScoreAdv", false),  // targets the change in score between now and end of the game
+        SCORE_DELTA("FinalScoreAdv", false),  // targets the difference between final score and that of the best other player
         WIN_MEAN("Win", true), // 0 or 1 for loss/win, with discount to 0.5 average (discount over the rounds in a game,
         // so that at the start (with little information), we reduce noise
         ORD_MEAN("Ordinal", true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
@@ -153,8 +153,7 @@ public abstract class AbstractLearner implements ILearner {
                 expectedAverage = (1.0 + playerCount) / 2.0;
 
             if (targetType == Target.SCORE_DELTA)
-                target[i][0] = (Double.parseDouble(allData.get(targetIndex)) -
-                        Double.parseDouble(allData.get(indexForSpecialColumns.get("CurrentScore")))) * Math.pow(gamma, turns);
+                target[i][0] = Double.parseDouble(allData.get(targetIndex)) * Math.pow(gamma, turns);
             else {
                 target[i][0] = (Double.parseDouble(allData.get(targetIndex)) - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
             }
