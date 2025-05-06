@@ -32,17 +32,14 @@ public class ExpertIteration {
 
     String[] originalArgs;
     GameType gameToPlay;
-    String dataDir, player, heuristic;
+    String dataDir, player;
     AbstractParameters params;
     List<AbstractPlayer> agents;
-    EpsilonRandom randomExplorer;
     AbstractLearner stateLearner, actionLearner;
     IStateFeatureVector stateFeatureVector;
     IActionFeatureVector actionFeatureVector;
     FeatureListener stateListener, actionListener;
     int nPlayers, matchups, iterations, iter, finalMatchups;
-    double maxExplore;
-    AbstractPlayer basePlayer;
     String[] stateDataFilesByIteration;
     String[] actionDataFilesByIteration;
     boolean useRounds, useStateInAction;
@@ -66,27 +63,30 @@ public class ExpertIteration {
         matchups = getArg(args, "matchups", 1);
         finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
-        maxExplore = getArg(args, "explore", 0.0);
         verbose = getArg(args, "verbose", false);
         actionDataFilesByIteration = new String[iterations];
         stateDataFilesByIteration = new String[iterations];
 
         useRounds = getArg(args, "useRounds", false);
         useStateInAction = getArg(args, "stateForAction", true);
-        if (!getArg(args, "stateFeatures", "").isEmpty()) {
-            String learnerDefinition = getArg(args, "stateLearner", "");
-            if (learnerDefinition.isEmpty())
-                throw new IllegalArgumentException("Must specify a state learner file");
-            stateLearner = loadClass(learnerDefinition);
+        if (!getArg(args, "stateLearner", "").isEmpty()) {
+            String featureDefinition = getArg(args, "stateFeatures", "");
+            if (featureDefinition.isEmpty())
+                throw new IllegalArgumentException("Must specify stateFeatures for a stateLearner");
+            stateLearner = loadClass(getArg(args, "stateLearner", ""));
         }
         if (!getArg(args, "actionFeatures", "").isEmpty()) {
-            String learnerDefinition = getArg(args, "actionLearner", "");
-            if (learnerDefinition.isEmpty())
-                throw new IllegalArgumentException("Must specify an action learner file");
-            actionLearner = loadClass(learnerDefinition);
+            String featureDefinition = getArg(args, "actionFeatures", "");
+            if (featureDefinition.isEmpty())
+                throw new IllegalArgumentException("Must specify actionFeatures for an actionLearner");
+            actionLearner = loadClass(getArg(args, "actionLearner", ""));
         }
-
-        if (actionLearner == null && stateLearner == null) {
+        if (!getArg(args, "stateFeatures", "").isEmpty()) {
+            stateFeatureVector = loadClass(getArg(args, "stateFeatures", ""));
+        }
+        if (!getArg(args, "actionFeatures", "").isEmpty())
+            actionFeatureVector = loadClass(getArg(args, "actionFeatures", ""));
+        else if (actionLearner == null && stateLearner == null) {
             throw new IllegalArgumentException("Must specify at least one learner");
         }
 
@@ -143,8 +143,9 @@ public class ExpertIteration {
             // learn the heuristics from the data
             Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
 
-            //       IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
-            //      IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");IStateHeuristic stateHeuristic = learnedHeuristics.a;
+            //              IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
+            //              IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
+
             IActionHeuristic actionHeuristic = learnedHeuristics.b;
             IStateHeuristic stateHeuristic = learnedHeuristics.a;
 
@@ -184,7 +185,6 @@ public class ExpertIteration {
         RoundRobinTournament tournament = new RoundRobinTournament(agents, gameToPlay, nPlayers, params, config);
         tournament.setResultsFile(dataDir + File.separator + String.format("TournamentResults_%s_%d.txt", prefix, iter));
         if (stateLearner != null) {
-            stateFeatureVector = loadClass(getArg(originalArgs, "stateFeatures", ""));
             stateListener = new StateFeatureListener(stateFeatureVector,
                     useRounds ? Event.GameEvent.ROUND_OVER : Event.GameEvent.TURN_OVER,
                     false, "dummy.txt");
@@ -197,11 +197,10 @@ public class ExpertIteration {
             stateDataFilesByIteration[iter] = dataDir + File.separator + fileName;
         }
         if (actionLearner != null) {
-            actionFeatureVector = loadClass(getArg(originalArgs, "actionFeatures", ""));
             actionListener = new ActionFeatureListener(actionFeatureVector, stateFeatureVector,
                     Event.GameEvent.ACTION_CHOSEN,
                     true, "dummy.txt");
-            actionListener.setNth(13);
+            actionListener.setNth(7);
             String fileName = String.format("Action_%s_%d.txt", prefix, iter);
             actionListener.setLogger(new FileStatsLogger(fileName, "\t", false));
             actionListener.setOutputDirectory(dataDir);

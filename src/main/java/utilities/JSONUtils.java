@@ -440,7 +440,10 @@ public class JSONUtils {
                     value instanceof Double || value instanceof Boolean) {
                 sb.append(value);
             } else {
-                throw new AssertionError("Unexpected value type in prettyPrint : " + value);
+                // In this case we just output the full class name
+                System.out.println("Unexpected value type in prettyPrint : " + value);
+                System.out.println("Using raw class name : " + value.getClass().getName());
+                sb.append(value.getClass().getName());
             }
             if (keyIndex < keys.length - 1)
                 sb.append(",");

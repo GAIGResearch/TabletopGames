@@ -273,7 +273,10 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
                     break;
                 case ENUM:
                     Enum<?> enumValue = (Enum<?>) value;
-                    featureVector[i] = enumValue.equals(enumValues.get(i)) ? 1 : 0;
+                    if (enumValue == null)
+                        featureVector[i] = 0;
+                    else
+                        featureVector[i] = enumValue.equals(enumValues.get(i)) ? 1 : 0;
                     break;
                 case STRING:
                     String stringValue = (String) value;
