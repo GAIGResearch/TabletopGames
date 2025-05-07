@@ -315,9 +315,8 @@ public class JavaCoder {
                 playersForTournament.add(bestPlayerPerTrial[i]);
             }
         }
-        Arrays.stream(bestPlayerPerTrial)
-                .filter(Objects::nonNull)
-                .collect(toList());
+
+        // TODO: Double check consistency of final results
         playersForTournament.add(opponentPlayer.copy());
         tournamentConfig.put(RunArg.destDir, workingDir + File.separator + "Final");
         RoundRobinTournament tournament = new RoundRobinTournament(
