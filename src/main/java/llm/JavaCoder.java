@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -107,7 +108,7 @@ public class JavaCoder {
             int iteration = 0;
             int compileErrors = 0;
             int runtimeErrors = 0;
-            List<AbstractPlayer> playerList = new ArrayList<>();
+            AbstractPlayer[] playersPerIteration = new AbstractPlayer[max_iters];
 
             while (iteration < max_iters) {
                 try {
@@ -191,16 +192,15 @@ public class JavaCoder {
                     System.out.printf("Iteration %d has generated code%n", iteration);
                     safeIterations[t][iteration] = true;
 
+                    // We now create a StringHeuristic and associated player from the generated code
                     AbstractPlayer player = PlayerFactory.createPlayer(baseAgentLocation);
                     if (player instanceof IHasStateHeuristic hPlayer) {
                         hPlayer.setStateHeuristic(new StringHeuristic(fileName, className));
                     } else {
                         throw new IllegalArgumentException("Agent " + baseAgentLocation + " does not implement IHasStateHeuristic");
                     }
-
-                    // We now create a StringHeuristic and associated player from the generated code
                     player.setName(String.format("%s_%03d", player, iteration));
-                    playerList.add(player);
+                    playersPerIteration[iteration] = player;
 
                 } catch (RuntimeException e) {
                     System.out.println("Error compiling: " + e.getMessage());
@@ -225,14 +225,16 @@ public class JavaCoder {
                     continue;
                 }
 
-                List<AbstractPlayer> playersForTournament = new ArrayList<>(playerList);
+                List<AbstractPlayer> playersForTournament = Arrays.stream(playersPerIteration)
+                        .filter(Objects::nonNull)
+                        .collect(toList());
                 // we have at least one opponent player for comparison
                 // and then pad out extra players to the required number for the player count (if needed)
-                playersForTournament.add(opponentPlayer.copy());
-                while (playersForTournament.size() < playerCount) {
+                do {
                     playersForTournament.add(opponentPlayer.copy());
-                }
+                } while (playersForTournament.size() < playerCount);
 
+                tournamentConfig.put(RunArg.destDir, workingDir + File.separator + "Trial" + String.format("%02d", t));
                 RoundRobinTournament tournament = new RoundRobinTournament(
                         playersForTournament, gameType, playerCount, params,
                         tournamentConfig);
@@ -243,13 +245,15 @@ public class JavaCoder {
                     runtimeErrors++;
                     error = e.getMessage();
                     safeIterations[t][iteration] = false;  // exclude the latest heuristic from future consideration
-                    playerList.remove(playerList.size() - 1);  // remove the last player from the list
+                    playersPerIteration[iteration] = null;  // remove the last player from the list
                 }
                 if (safeIterations[t][iteration]) {
                     // record results if we ran safely
                     successfulIterations++;
-                    for (int index = 0; index < playerList.size(); index++) {
-                        System.out.printf("Player %s has score %.2f%n", playerList.get(index).toString(), tournament.getWinRate(index));
+                    for (int index = 0; index < playersPerIteration.length; index++) {
+                        if (playersPerIteration[index] == null)
+                            continue; // exclude iterations that failed to compile or threw exceptions
+                        System.out.printf("Player %s has score %.2f%n", playersPerIteration[index], tournament.getWinRate(index));
                     }
 
                     // we now extract the scores of the agents, and record these
@@ -276,9 +280,10 @@ public class JavaCoder {
                 if (scores[t][index] > bestScore) {
                     bestScore = scores[t][index];
                     bestIterationsPerTrial[t] = index;
-                    bestPlayerPerTrial[t] = playerList.get(index);
+                    bestPlayerPerTrial[t] = playersPerIteration[index];
                 }
             }
+            System.out.printf("Best score for trial %2d is %.3f on iteration %2d%n", t, bestScore, bestIterationsPerTrial[t]);
             try (FileWriter writer = new FileWriter(results, true)) {
                 if (headersNeeded) {
                     writer.write("Game, ModelType, ModelSize, Players, Trial, Iterations, CompileErrors, RuntimeErrors," +
