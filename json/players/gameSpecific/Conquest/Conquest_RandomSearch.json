@@ -1,0 +1,20 @@
+{
+  "class": "players.mcts.MCTSParams",
+  "maxTreeDepth": 1,
+  "rolloutLength": 8,
+  "rolloutIncrementType": "TURN",
+  "rolloutTermination": "END_TURN",
+  "treePolicy": "Uniform",
+  "actionHeuristic": {
+    "class": "games.conquest.players.CQRandomSearchHeuristic"
+  },
+  "rolloutType": "PARAMS",
+  "rolloutPolicyParams": {
+    "class": "players.simple.BoltzmannActionParams",
+    "actionHeuristic": {
+      "class": "games.conquest.players.CQRandomSearchHeuristic"
+    }
+  },
+  "budget": 1000,
+  "budgetType": "BUDGET_TIME"
+}

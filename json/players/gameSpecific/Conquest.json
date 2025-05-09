@@ -1,0 +1,22 @@
+{
+  "class": "players.mcts.MCTSParams",
+  "maxTreeDepth": [1,3,5,8,10],
+  "rolloutLength": [4,6,8,10],
+  "rolloutIncrementType": "TURN",
+  "rolloutTermination": "END_TURN",
+  "treePolicy": ["UCB", "UCB_Tuned", "AlphaGo"],
+  "FPU": [10,100,1000],
+  "K": [0.5, 1.0, 1.4],
+  "actionHeuristic": {
+    "class": "games.conquest.players.CQRandomSearchHeuristic"
+  },
+  "rolloutPolicyParams": {
+    "class": "players.simple.BoltzmannActionParams",
+    "actionHeuristic": {
+      "class": "games.conquest.players.CQRandomSearchHeuristic"
+    }
+  },
+  "budget": 3000,
+  "budgetType": "BUDGET_FM_CALLS",
+  "reuseTree": [true, false]
+}

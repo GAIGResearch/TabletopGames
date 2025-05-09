@@ -1,0 +1,4 @@
+{
+  "class" : "evaluation.heuristics.TargetWinnerIndex",
+  "args" : [0]
+}

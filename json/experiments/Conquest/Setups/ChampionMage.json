@@ -1,0 +1,21 @@
+{
+  "rolloutIncrementType" : "TURN",
+  "rolloutTermination" : "END_TURN",
+  "rolloutLength" : 4,
+  "actionHeuristic" : {
+    "class" : "games.conquest.players.CQRandomSearchHeuristic"
+  },
+  "rolloutType": "PARAMS",
+  "rolloutPolicyParams" : {
+    "class" : "players.simple.BoltzmannActionParams"
+  },
+  "FPU" : 10.0,
+  "K" : 0.5,
+  "class" : "players.mcts.MCTSParams",
+  "maxTreeDepth" : 3,
+  "budget" : 3000,
+  "treePolicy" : "AlphaGo",
+  "reuseTree" : true,
+  "instantiationClass": "games.conquest.players.CQSetupPlayer",
+  "omaVisits": 10
+}

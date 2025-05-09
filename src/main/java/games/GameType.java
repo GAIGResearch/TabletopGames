@@ -35,6 +35,9 @@ import games.connect4.Connect4ForwardModel;
 import games.connect4.Connect4GameParameters;
 import games.connect4.Connect4GameState;
 import games.connect4.gui.Connect4GUIManager;
+import games.conquest.*;
+import games.conquest.gui.CQGUIManager;
+import games.diamant.*;
 import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
@@ -303,7 +306,11 @@ public enum GameType {
     Saboteur(3, 10,
             Arrays.asList(Strategy, Abstract),
             Arrays.asList(TakeThat, VariablePlayerPowers),
-            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class);
+            SaboteurGameState.class, SaboteurForwardModel.class, SaboteurGameParameters.class, SaboteurGUIManager.class),
+    Conquest(2, 2,
+            Arrays.asList(Strategy, Wargame, Abstract),
+            Arrays.asList(GridMovement, HandManagement),
+            CQGameState.class, CQForwardModel.class, CQParameters.class, CQGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
