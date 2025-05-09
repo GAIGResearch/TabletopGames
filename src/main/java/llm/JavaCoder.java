@@ -112,7 +112,7 @@ public class JavaCoder {
             while (iteration < max_iters) {
                 try {
                     String fileName = fileStem + String.format("%02d_%03d.java", t, iteration);
-                    String className = evaluatorName + String.format("%03d", iteration);
+                    String className = evaluatorName + String.format("%02d_%03d", t, iteration);
 
                     String llmPrompt = promptGenerator.createLLMTaskPrompt(
                             GamePromptGenerator.TaskType.Heuristic,
