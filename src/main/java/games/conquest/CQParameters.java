@@ -35,7 +35,7 @@ public class CQParameters extends TunableParameters {
     List<Setup> setups;
     public Setup p0TroopSetup;
     public Setup p1TroopSetup;
-    boolean testSetup = true;
+    boolean testSetup = false;
 
     // All of the following pre-made setups are taken from the RuneScape Wiki's strategy guide accessed in 2024.
     // The names used are those used in said strategy guide: https://runescape.wiki/w/Conquest/Strategies?oldid=35427217
@@ -200,8 +200,8 @@ public class CQParameters extends TunableParameters {
             p0TroopSetup = Setup.Empty;
             p1TroopSetup = Setup.Empty;
         } else {
-            p0TroopSetup = Setup.HalberderPure;
-            p1TroopSetup = Setup.SuperChampioneer;
+            p0TroopSetup = Setup.Devastation;
+            p1TroopSetup = Setup.IAmWarrior;
         }
         addTunableParameter("p0TroopSetup", p0TroopSetup, setups);
         addTunableParameter("p1TroopSetup", p1TroopSetup, setups);

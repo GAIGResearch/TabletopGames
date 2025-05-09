@@ -15,6 +15,6 @@
       "class": "games.conquest.players.CQRandomSearchHeuristic"
     }
   },
-  "budget": 3000,
-  "budgetType": "BUDGET_FM_CALLS"
+  "budget": 1000,
+  "budgetType": "BUDGET_TIME"
 }
