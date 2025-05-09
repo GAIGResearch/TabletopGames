@@ -41,7 +41,8 @@ public class CatBuildSequence extends AbstractAction implements IExtendedSequenc
     public boolean execute(AbstractGameState gs) {
         RootGameState currentState = (RootGameState) gs;
         if (playerID == currentState.getCurrentPlayer() && currentState.getPlayerFaction(playerID) == RootParameters.Factions.MarquiseDeCat){
-            return currentState.setActionInProgress(this);
+            currentState.setActionInProgress(this);
+            return true;
         }
         return false;
     }

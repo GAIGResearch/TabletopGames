@@ -34,6 +34,12 @@ public class RootParameters extends AbstractParameters {
     public int scoreToEnd = 30;
     public int minScoreForDomination = 10;
     public int woodlandSetupSupporters = 3;
+    public int maxRounds = 20;  // local variable that potentially masks the super class variable
+
+    public RootParameters() {
+        super();
+        setMaxRounds(maxRounds);  // ensures super variable is set to the same value
+    }
 
     public enum MapType {
         Summer,

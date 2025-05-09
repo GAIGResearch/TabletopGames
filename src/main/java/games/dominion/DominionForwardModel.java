@@ -3,6 +3,7 @@ package games.dominion;
 import core.*;
 import core.actions.*;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
@@ -33,7 +34,15 @@ public class DominionForwardModel extends StandardForwardModel {
             for (int j = 0; j < params.STARTING_ESTATES; j++)
                 state.playerDrawPiles[i].add(DominionCard.create(CardType.ESTATE));
             state.playerDrawPiles[i].shuffle(initialShuffleRnd);
-            for (int k = 0; k < params.HAND_SIZE; k++) state.playerHands[i].add(state.playerDrawPiles[i].draw());
+            for (int k = 0; k < params.HAND_SIZE; k++) {
+
+                // Don't draw from an empty deck
+                if (state.playerDrawPiles[i].getSize() <= 0) {
+                    break;
+                }
+
+                state.playerHands[i].add(state.playerDrawPiles[i].draw());
+            }
         }
         state.actionsLeftForCurrentPlayer = 1;
         state.buysLeftForCurrentPlayer = 1;
@@ -75,6 +84,16 @@ public class DominionForwardModel extends StandardForwardModel {
         DominionGameState state = (DominionGameState) currentState;
 
         if (state.isActionInProgress()) return;
+
+        // Fix for an edge case where players have trashed all their cards with Chapel
+        // And the game goes into an infinite loop of players not being able to do anything
+        for (PartialObservableDeck<DominionCard> deck : state.playerHands) {
+            long noChapels = deck.stream().filter(d -> d.cardType() == CardType.CHAPEL).count();
+
+            if (noChapels == deck.getSize()) {
+                endGame(state);
+            };
+        }
 
         int playerID = state.getCurrentPlayer();
         if (state.gameOver()) {

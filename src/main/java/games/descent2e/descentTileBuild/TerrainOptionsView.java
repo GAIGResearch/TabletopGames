@@ -1,4 +1,4 @@
-package tools.descentTileBuild;
+package games.descent2e.descentTileBuild;
 
 import games.descent2e.DescentTypes;
 import games.descent2e.gui.DescentGridBoardView;

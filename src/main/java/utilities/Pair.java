@@ -6,6 +6,9 @@ public class Pair<T,V> {
     public T a;
     public V b;
 
+    public static <T,V> Pair<T,V> of(T a, V b) {
+        return new Pair<>(a, b);
+    }
     public Pair(T a, V b) {
         this.a = a;
         this.b = b;

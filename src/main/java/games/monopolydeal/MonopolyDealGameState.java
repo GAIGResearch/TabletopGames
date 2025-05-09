@@ -379,7 +379,10 @@ public class MonopolyDealGameState extends AbstractGameState {
         for (int i = 0; i < nPlayers; i++) {
             if (!Arrays.equals(playerPropertySets.get(i), that.playerPropertySets.get(i))) return false;
         }
-        return actionsLeft == that.actionsLeft && boardModificationsLeft == that.boardModificationsLeft && deckEmpty == that.deckEmpty && Objects.equals(playerHands, that.playerHands) && Objects.equals(playerBanks, that.playerBanks) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile);
+        return actionsLeft == that.actionsLeft && boardModificationsLeft == that.boardModificationsLeft &&
+                deckEmpty == that.deckEmpty && Objects.equals(playerHands, that.playerHands) &&
+                Objects.equals(playerBanks, that.playerBanks) && Objects.equals(drawPile, that.drawPile) &&
+                Objects.equals(discardPile, that.discardPile);
     }
 
     @Override

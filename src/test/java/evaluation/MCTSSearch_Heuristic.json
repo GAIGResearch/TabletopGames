@@ -25,7 +25,7 @@
                 "class" : "players.heuristics.WinOnlyHeuristic"
         },
         {
-                "class" : "players.heuristics.ScorePlusHeuristic"
+                "class" : "players.heuristics.ScoreHeuristic"
         },
         {
                 "class" : "players.heuristics.LeaderHeuristic"

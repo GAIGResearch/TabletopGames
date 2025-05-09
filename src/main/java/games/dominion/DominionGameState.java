@@ -433,9 +433,9 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer, gamePhase, gameStatus,
-                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, actionsInProgress, delayedActions);
-        result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
+        int result = Objects.hash(cardsIncludedInGame, trashPile, buysLeftForCurrentPlayer,
+                actionsLeftForCurrentPlayer, spentSoFar, additionalSpendAvailable, delayedActions, super.hashCode());
+        result = result + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
                 11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
         return result;
     }

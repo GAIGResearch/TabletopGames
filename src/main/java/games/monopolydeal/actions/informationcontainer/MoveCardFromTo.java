@@ -36,11 +36,11 @@ public class MoveCardFromTo extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MoveCardFromTo that = (MoveCardFromTo) o;
-        return player == that.player && from == that.from && to == that.to && Objects.equals(cardType, that.cardType);
+        return player == that.player && from == that.from && to == that.to && cardType == that.cardType;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(player, from, to, cardType);
+        return Objects.hash(player, from, to, cardType.ordinal());
     }
     @Override
     public String toString() {

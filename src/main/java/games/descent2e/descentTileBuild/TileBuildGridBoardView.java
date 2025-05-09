@@ -1,4 +1,4 @@
-package tools.descentTileBuild;
+package games.descent2e.descentTileBuild;
 
 import core.components.BoardNode;
 import core.components.GridBoard;

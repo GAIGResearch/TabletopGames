@@ -71,6 +71,7 @@ public class MetaNTBEA {
                 landscapeModel.logResults(params);
 
             // we now use evalGames to get a better estimate of the value
+            // the NTBEAEvaluator here returns the actual underlying value of the single recommended setting
             double[] results = IntStream.range(0, params.evalGames)
                     .mapToDouble(answer -> evaluator.evaluate(landscapeModel.getBestSampled())).toArray();
             Arrays.sort(results);

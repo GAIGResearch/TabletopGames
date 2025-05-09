@@ -19,21 +19,17 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         } else {
             throw new AssertionError("No action selected by current player");
         }
-        // We then register the action with the top of the stack ... unless the top of the stack is this action
-        // in which case go to the next action
-        // We can't just register with all items in the Stack, as this may represent some complex dependency
-        // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
-        if (currentState.actionsInProgress.size() > 0) {
+        // We then register the action with the top of the stack
+        if (!currentState.actionsInProgress.isEmpty()) {
             IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
-            if (!topOfStack.equals(action)) {
+            // Then if this is the action that was just played, we don't notify *it*
+            // we are only interested in notifying an IES about later actions taken
+            if (!topOfStack.equals(action))
                 topOfStack._afterAction(currentState, action);
-            } else {
-                if (currentState.actionsInProgress.size() > 1) {
-                    IExtendedSequence nextOnStack = currentState.actionsInProgress.get(currentState.actionsInProgress.size() - 2);
-                    nextOnStack._afterAction(currentState, action);
-                }
-            }
         }
+        // TODO: Currently we always inform the forward model of the action taken, even if it is not
+        // currently controlling the game flow. All games check this independently; so would be good to remove this
+        // if possible..but need to check if any games rely on this behaviour first.
         _afterAction(currentState, action);
     }
 
@@ -95,7 +91,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         int turnOwner = gs.turnOwner;
         do {
             turnOwner = (turnOwner + 1) % gs.nPlayers;
-            if (turnOwner == gs.turnOwner) {
+            if (turnOwner == gs.turnOwner && !gs.isNotTerminalForPlayer(turnOwner)) {
                 throw new AssertionError("Infinite loop - apparently all players are terminal, but game state is not. " +
                         "Last action played: " + gs.getHistory().get(gs.getHistory().size() - 1));
             }
@@ -143,6 +139,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     /**
      * End a round, with no change to the firstPlayer
+     *
      * @param gs - game state
      */
     public final void endRound(AbstractGameState gs) {
