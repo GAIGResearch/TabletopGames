@@ -868,12 +868,13 @@ public class Game {
 //        AbstractPlayer rmhcPlayer = new RMHCPlayer(params);
 //        players.add(rmhcPlayer);
 
-//        MCTSParams mcts_params = new MCTSParams();
-//        players.add(new MCTSPlayer(mcts_params));
+        MCTSParams mcts_params = new MCTSParams();
+        players.add(new MCTSPlayer(mcts_params));
+        players.add(new MCTSPlayer(mcts_params));
 
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 
