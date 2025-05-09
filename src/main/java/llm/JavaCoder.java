@@ -52,7 +52,6 @@ public class JavaCoder {
         String llmLogFile = workingDir + "/LLM.log";
         String fileStem = workingDir + "/" + evaluatorName;
         File results = new File(resultsFile);
-        boolean headersNeeded = !results.exists();
 
 
         File dir = new File(workingDir);
@@ -284,11 +283,10 @@ public class JavaCoder {
             }
             System.out.printf("Best score for trial %2d is %.3f on iteration %2d%n", t, bestScore, bestIterationsPerTrial[t]);
             try (FileWriter writer = new FileWriter(results, true)) {
-                if (headersNeeded) {
+                if (!results.exists()) {
                     writer.write("Game, ModelType, ModelSize, Players, Trial, Iterations, CompileErrors, RuntimeErrors," +
                             " InputTokens, OutputTokens, " +
                             " SuccessfulIterations, BestHeuristic\n");
-                    headersNeeded = false;
                 }
                 int successfulIterationsThisTrial = 0;
                 for (int i = 0; i < max_iters; i++) {
@@ -326,16 +324,21 @@ public class JavaCoder {
             }
         }
 
-        // TODO: Double check consistency of final results
         playersForTournament.add(opponentPlayer.copy());
         tournamentConfig.put(RunArg.destDir, workingDir + File.separator + "Final");
+        tournamentConfig.put(RunArg.matchups, matchups * 5);  // extra resolution for the final run
+        if (playersForTournament.size() < playerCount)
+            tournamentConfig.put(RunArg.mode, "exhaustiveSP");
         RoundRobinTournament tournament = new RoundRobinTournament(
                 playersForTournament, gameType, playerCount, params,
                 tournamentConfig);
         tournament.run();
 
-        // We then want to
-
+        // We then need to report the final results and the best agent from all trials
+        System.out.println("Final results:");
+        for (int i = 0; i < playersForTournament.size(); i++) {
+            System.out.printf("Player %s has score %.3f%n", playersForTournament.get(i), tournament.getWinRate(i));
+        }
     }
 
     // Write the prompt response to file
