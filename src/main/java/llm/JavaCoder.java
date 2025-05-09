@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -38,7 +37,7 @@ public class JavaCoder {
         int trials = Utils.getArg(args, "trials", 1);
         int max_iters = Utils.getArg(args, "iterations", 10);
         GameType gameType = GameType.valueOf(gameName);
-        int playerCount = Utils.getArg(args, "players", 2);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
         String opponent = Utils.getArg(args, "opponent", "random");
         AbstractPlayer opponentPlayer = PlayerFactory.createPlayer(opponent);
         String baseAgentLocation = Utils.getArg(args, "baseAgent", opponent);
@@ -74,7 +73,7 @@ public class JavaCoder {
         String error = "";
 
         double[][] scores = new double[trials][max_iters];
-        String[][] code = new String[trials][max_iters];
+        String[] code = new String[max_iters];
         boolean[][] safeIterations = new boolean[trials][max_iters];
         int[] compileErrorsPerTrial = new int[trials];
         int[] runtimeErrorsPerTrial = new int[trials];
@@ -139,7 +138,7 @@ public class JavaCoder {
                             }
                             if (scores[t][index] > bestScore) {
                                 bestScore = scores[t][index];
-                                bestCode = code[t][index];
+                                bestCode = code[index];
                             }
                         }
 
@@ -183,7 +182,7 @@ public class JavaCoder {
                             .replaceAll("```java\\s*(.*?)", "$1")
                             .replaceAll("(.*?)```", "$1");
                     writeGeneratedCodeToFile(commentFreeCode, fileName);
-                    code[t][iteration] = generatedCode;  // we store for future prompts (with comments, as these could be useful)
+                    code[iteration] = generatedCode;  // we store for future prompts (with comments, as these could be useful)
 
                     // TODO: Add an extra call to summarise the functionality of the code (using the version with comments)
                     // "useful to someone who wanted to write the function anew from a functional specification"
@@ -291,10 +290,16 @@ public class JavaCoder {
                             " SuccessfulIterations, BestHeuristic\n");
                     headersNeeded = false;
                 }
+                int successfulIterationsThisTrial = 0;
+                for (int i = 0; i < max_iters; i++) {
+                    if (safeIterations[t][i]) {
+                        successfulIterationsThisTrial++;
+                    }
+                }
                 writer.write(String.format("%s, %s, %s, %d, %d, %d, %d, %d, %d, %d, %d, %d%n",
                         gameName, modelType, modelSize, playerCount, t, max_iters, compileErrors, runtimeErrors,
                         llm.inputTokens, llm.outputTokens,
-                        successfulIterations, bestIterationsPerTrial[t]));
+                        successfulIterationsThisTrial, bestIterationsPerTrial[t]));
             }
             compileErrorsPerTrial[t] = compileErrors;
             runtimeErrorsPerTrial[t] = runtimeErrors;
