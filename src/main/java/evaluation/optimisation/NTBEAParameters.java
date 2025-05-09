@@ -56,7 +56,6 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
     public boolean byTeam = false;
     public GameType gameType;
     public int nPlayers;
-    public int nThreads;
 
     public NTBEAParameters() {
         addTunableParameter("iterations", 1000);
@@ -138,7 +137,6 @@ public class NTBEAParameters extends TunableParameters<NTBEA> {
         nPlayers = (int) args.get(RunArg.nPlayers);
         gameParams = args.get(RunArg.gameParams).equals("") ? null :
                 AbstractParameters.createFromFile(gameType, (String) args.get(RunArg.gameParams));
-        nThreads = (int) args.get(RunArg.nThreads);
 
         mode = Mode.valueOf((String) args.get(RunArg.NTBEAMode));
         listenerClasses = (List<String>) args.get(RunArg.listener);

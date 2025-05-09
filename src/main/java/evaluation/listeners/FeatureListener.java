@@ -38,7 +38,7 @@ public abstract class FeatureListener implements IGameListener {
     }
 
     @Override
-    public synchronized void onEvent(Event event) {
+    public void onEvent(Event event) {
 
         if (event.type == frequency && frequency != Event.GameEvent.GAME_OVER) {
             // if GAME_OVER, then we cover this a few lines down
@@ -55,7 +55,7 @@ public abstract class FeatureListener implements IGameListener {
     }
 
     @Override
-    public synchronized boolean setOutputDirectory(String... nestedDirectories) {
+    public boolean setOutputDirectory(String... nestedDirectories) {
 
         if (logger instanceof FileStatsLogger fileLogger) {
             fileLogger.setOutPutDirectory(nestedDirectories);
@@ -112,18 +112,18 @@ public abstract class FeatureListener implements IGameListener {
     }
 
     @Override
-    public synchronized void setGame(Game game) {
+    public void setGame(Game game) {
         this.game = game;
     }
 
     @Override
-    public synchronized Game getGame() {
+    public Game getGame() {
         return game;
     }
 
     public abstract String[] names();
 
-    protected abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
+    public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
 
     /**

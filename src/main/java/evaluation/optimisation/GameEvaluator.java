@@ -90,17 +90,9 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     @Override
     public double evaluate(int[] settings) {
-        if (debug) {
-            HashMap<String, Object> chosenConfigs = new HashMap<>();
-            for (int i = 0; i < searchSpace.nDims(); i++) {
-                int finalI = i;
-                chosenConfigs.put(searchSpace.name(i), IntStream.range(0, searchSpace.nValues(i))
-                        .mapToObj(j -> searchSpace.value(finalI, j))
-                        .toList().get(settings[i]));
-            }
-            System.out.printf("%d Starting evaluation %d of %s at %tT%n", this.hashCode(), nEvals,
-                    chosenConfigs, System.currentTimeMillis());
-        }
+        if (debug)
+            System.out.printf("Starting evaluation %d of %s at %tT%n", nEvals,
+                    Arrays.toString(settings), System.currentTimeMillis());
         Object configuredThing = searchSpace.instantiate(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;

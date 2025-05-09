@@ -138,11 +138,6 @@ public enum RunArg {
     nPlayers("The number of players in each game. Overrides playerRange.",
             -1,
             new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
-    nThreads("The number of threads that can be spawned in order to evaluate games.\n" +
-             "\t For tournaments (including tournaments performed after ParameterSearch), the individual matachup evaluations are parallelized;" +
-             "\t For ParameterSearch itself, the repeats are parallelized; for this part, fewer threads than specified may be allocated.",
-            1,
-            new Usage[]{Usage.ParameterSearch, Usage.RunGames}),
     discretisation("The number of discretisation levels to use in NTBEAFunctions. Default is 10.",
             10,
             new Usage[]{Usage.ParameterSearch}),

@@ -31,7 +31,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
 
 
     @Override
-    public synchronized void onEvent(Event event) {
+    public void onEvent(Event event) {
         if (event.type == Event.GameEvent.ACTION_CHOSEN) {
             // We extract the root node from the current player's tree
             AbstractPlayer player = this.getGame().getPlayers().get(event.state.getCurrentPlayer());
@@ -44,7 +44,7 @@ public class MCTSTreeActionStatisticsListener extends ActionFeatureListener {
         // else we do nothing
     }
 
-    private void recordData(SingleTreeNode root, AbstractForwardModel forwardModel) {
+    public void recordData(SingleTreeNode root, AbstractForwardModel forwardModel) {
 
         if (root instanceof MultiTreeNode) {
             // access the root for the acting player instead

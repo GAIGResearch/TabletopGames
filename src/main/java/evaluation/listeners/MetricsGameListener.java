@@ -75,7 +75,7 @@ public class MetricsGameListener implements IGameListener {
      * @param event Event has information about its type and data fields for game, state, action and player.
      *              It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
-    public synchronized void onEvent(Event event) {
+    public void onEvent(Event event) {
         if (!eventsOfInterest.contains(event.type))
             return;
 
@@ -94,7 +94,7 @@ public class MetricsGameListener implements IGameListener {
     }
 
     @Override
-    public synchronized boolean setOutputDirectory(String... nestedDirectories) {
+    public boolean setOutputDirectory(String... nestedDirectories) {
 
         boolean success = true;
 
@@ -165,22 +165,22 @@ public class MetricsGameListener implements IGameListener {
     }
 
     /* Getters, setters */
-    public synchronized final void setGame(Game game) {
+    public final void setGame(Game game) {
         this.game = game;
     }
 
-    public synchronized final Game getGame() {
+    public final Game getGame() {
         return game;
     }
 
-    public synchronized void reset() {
+    public void reset() {
         for (AbstractMetric metric : metrics.values()) {
             metric.reset();
         }
     }
 
     @Override
-    public synchronized void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
         this.game = game;
 
         for (AbstractMetric metric : metrics.values()) {
