@@ -45,7 +45,6 @@ public class JavaCoder {
         String modelType = Utils.getArg(args, "model", "GEMINI");
         String modelSize = Utils.getArg(args, "size", "SMALL");
         int matchups = Utils.getArg(args, "matchups", 1000);
-        String matchMode = Utils.getArg(args, "mode", "exhaustive");
         String resultsFile = Utils.getArg(args, "results", workingDir + "/HeuristicSearch_Results.txt");
         String evaluatorName = Utils.getArg(args, "evaluator", gameName + "Evaluator");
         workingDir = workingDir + "/" + modelType + "_" + modelSize + "/" + gameName;
@@ -86,7 +85,6 @@ public class JavaCoder {
         tournamentConfig.putAll(Map.of(
                 RunArg.game, gameType,
                 RunArg.matchups, matchups,
-                RunArg.mode, matchMode,
                 RunArg.listener, Collections.emptyList(),
                 RunArg.destDir, workingDir,
                 RunArg.verbose, false
@@ -183,7 +181,7 @@ public class JavaCoder {
                     writeGeneratedCodeToFile(commentFreeCode, fileName);
                     code[iteration] = generatedCode;  // we store for future prompts (with comments, as these could be useful)
 
-                    // TODO: Add an extra call to summarise the functionality of the code (using the version with comments)
+                    // Future development: Add an extra call to summarise the functionality of the code (using the version with comments)
                     // "useful to someone who wanted to write the function anew from a functional specification"
                     // that might be a good thing to pass to future iterations
 
@@ -233,9 +231,8 @@ public class JavaCoder {
                 } while (playersForTournament.size() < playerCount);
 
                 tournamentConfig.put(RunArg.destDir, workingDir + File.separator + "Trial" + String.format("%02d", t));
-                RoundRobinTournament tournament = new RoundRobinTournament(
-                        playersForTournament, gameType, playerCount, params,
-                        tournamentConfig);
+                RoundRobinTournament tournament = setupTournament(gameType, playerCount, tournamentConfig, params, playersForTournament);
+
                 try {
                     tournament.run();
                 } catch (Exception | Error e) {
@@ -245,6 +242,7 @@ public class JavaCoder {
                     safeIterations[t][iteration] = false;  // exclude the latest heuristic from future consideration
                     playersPerIteration[iteration] = null;  // remove the last player from the list
                 }
+
                 if (safeIterations[t][iteration]) {
                     // record results if we ran safely
                     successfulIterations++;
@@ -327,18 +325,36 @@ public class JavaCoder {
         playersForTournament.add(opponentPlayer.copy());
         tournamentConfig.put(RunArg.destDir, workingDir + File.separator + "Final");
         tournamentConfig.put(RunArg.matchups, matchups * 5);  // extra resolution for the final run
-        if (playersForTournament.size() < playerCount)
-            tournamentConfig.put(RunArg.mode, "exhaustiveSP");
-        RoundRobinTournament tournament = new RoundRobinTournament(
-                playersForTournament, gameType, playerCount, params,
-                tournamentConfig);
-        tournament.run();
+
+        RoundRobinTournament finalTournament = setupTournament(gameType, playerCount, tournamentConfig, params, playersForTournament);
+        finalTournament.run();
 
         // We then need to report the final results and the best agent from all trials
         System.out.println("Final results:");
         for (int i = 0; i < playersForTournament.size(); i++) {
-            System.out.printf("Player %s has score %.3f%n", playersForTournament.get(i), tournament.getWinRate(i));
+            System.out.printf("Player %s has score %.3f%n", playersForTournament.get(i), finalTournament.getWinRate(i));
         }
+    }
+
+    private static RoundRobinTournament setupTournament(GameType gameType, int playerCount, Map<RunArg, Object> tournamentConfig, AbstractParameters params, List<AbstractPlayer> playersForTournament) {
+        RoundRobinTournament tournament;
+        if (playersForTournament.size() < playerCount) {
+            tournamentConfig.put(RunArg.mode, "exhaustiveSP");
+        } else {
+            tournamentConfig.put(RunArg.mode, "exhaustive");
+        }
+        try {
+            tournament = new RoundRobinTournament(
+                    playersForTournament, gameType, playerCount, params,
+                    tournamentConfig);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Setting mode to RANDOM");
+            tournamentConfig.put(RunArg.mode, "random");
+            tournament = new RoundRobinTournament(
+                    playersForTournament, gameType, playerCount, params,
+                    tournamentConfig);
+        }
+        return tournament;
     }
 
     // Write the prompt response to file
