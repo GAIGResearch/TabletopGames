@@ -52,7 +52,6 @@ public class JavaCoder {
         String fileStem = workingDir + "/" + evaluatorName;
         File results = new File(resultsFile);
 
-
         File dir = new File(workingDir);
         if (!dir.exists()) {
             dir.mkdirs();

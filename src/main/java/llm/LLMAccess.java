@@ -6,6 +6,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.model.openai.OpenAiChatModelName;
+import dev.langchain4j.model.openai.OpenAiTokenCountEstimator;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
 
@@ -19,6 +20,8 @@ public class LLMAccess {
     static OpenAiChatModel[] openaiModel = new OpenAiChatModel[2];
     static AnthropicChatModel[] anthropicModel = new AnthropicChatModel[2];
     static VertexAiGeminiChatModel[] llamaModel = new VertexAiGeminiChatModel[2];
+
+    static OpenAiTokenCountEstimator tokenizer = new OpenAiTokenCountEstimator("o200k_base");
 
     String mistralToken = System.getenv("MISTRAL_TOKEN");
     String geminiProject = System.getenv("GEMINI_PROJECT");
@@ -168,7 +171,10 @@ public class LLMAccess {
         };
         if (modelToUse != null) {
             try {
+                inputTokens += tokenizer.estimateTokenCountInText(query);
                 response = modelToUse.chat(query);
+                outputTokens += tokenizer.estimateTokenCountInText(response);
+
             } catch (Exception e) {
                 System.out.println("Error getting response from model: " + e.getMessage());
             }
