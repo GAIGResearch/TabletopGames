@@ -295,6 +295,9 @@ public class JavaCoder {
                         gameName, modelType, modelSize, playerCount, t, max_iters, compileErrors, runtimeErrors,
                         llm.inputTokens, llm.outputTokens,
                         successfulIterationsThisTrial, bestIterationsPerTrial[t]));
+                // then reset the tokens for the next trial
+                llm.inputTokens = 0;
+                llm.outputTokens = 0;
             }
             compileErrorsPerTrial[t] = compileErrors;
             runtimeErrorsPerTrial[t] = runtimeErrors;
