@@ -1,19 +1,9 @@
 package games.chess.actions;
-
-
-import java.util.List;
 import java.util.Objects;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction;
-
-
-
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IExtendedSequence;
 import games.chess.components.ChessPiece;
 import games.chess.ChessGameState;
-import games.chess.actions.MovePiece;
 import games.chess.components.ChessPiece.ChessPieceType;
 
 public class Promotion extends AbstractAction {
@@ -38,7 +28,7 @@ public class Promotion extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         MovePiece move = new MovePiece(startX, startY, targetX, targetY);
         if (!move.execute(gs)) {
-            return false;
+            throw new IllegalStateException("Promotion failed: MovePiece execution failed.");
         }
         ChessGameState chessGameState = (ChessGameState) gs;
 

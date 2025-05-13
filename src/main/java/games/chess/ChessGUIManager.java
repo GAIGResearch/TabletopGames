@@ -38,7 +38,6 @@ public class ChessGUIManager extends AbstractGUIManager {
 
         this.width = gapRight + displayWidth;
         this.height = displayHeight;
-        // parent.setBackground(ImageIO.GetInstance().getImage("data/dotsboxes/bg.png"));
 
         JTabbedPane pane = new JTabbedPane();
         JPanel main = new JPanel();
@@ -47,7 +46,7 @@ public class ChessGUIManager extends AbstractGUIManager {
 
         view = new ChessBoardView(((ChessGameState)game.getGameState()), game);
         JPanel infoPanel = createGameStateInfoPanel("Chess", game.getGameState(), displayWidth, defaultInfoPanelHeight);
-        JLabel label = new JLabel("Human player: click on a piece to select it, then click on a valid destination square to move it.");
+        JLabel label = new JLabel("Human player: drag and drop pieces to move them");
         label.setOpaque(false);
         main.add(infoPanel, BorderLayout.NORTH);
         main.add(view, BorderLayout.CENTER);
@@ -113,7 +112,6 @@ public class ChessGUIManager extends AbstractGUIManager {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             boolean found = false;
             for (AbstractAction a: actions) {
-                //TODO: Deal with promotion
 
                 if (a.equals(new MovePiece(selectedPos[0], selectedPos[1], targetPos[0], targetPos[1]))) {
                     ac.addAction(a);

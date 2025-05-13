@@ -27,7 +27,7 @@ public class MovePiece extends AbstractAction {
         ChessPiece piece = gs.getPiece(startX, startY);
 
         //Delete the piece in the start position
-        gs.deletePiece(piece); // Remove the piece from its original position
+        gs.deletePiece(piece);
 
         // Set the moved flag to true for the piece being moved.
         if (piece.getMoved() == ChessPiece.MovedState.NOT_MOVED) {
@@ -37,7 +37,7 @@ public class MovePiece extends AbstractAction {
         // Set en passant flag if the piece is a pawn and the target position is two squares forward
         if (piece.getChessPieceType() == ChessPiece.ChessPieceType.PAWN) {
             if (Math.abs(targetY - startY) == 2) {
-                piece.setEnPassant(true); // Set en passant flag for the pawn
+                piece.setEnPassant(true);
             }
         }
 
