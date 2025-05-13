@@ -129,11 +129,15 @@ public class ChessGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
+<<<<<<< HEAD
         if (isNotTerminal()) {
             return 0;
         } else {
             return (double) (getPlayerResults()[playerId].value+1) / 2.0;
         }
+=======
+        return 0;
+>>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
     }
 
     @Override
@@ -183,7 +187,11 @@ public class ChessGameState extends AbstractGameState {
 
     public void deletePiece(ChessPiece piece) {
         if (piece == null) {
+<<<<<<< HEAD
             throw new IllegalArgumentException("Trying to delete a null piece");
+=======
+            return; // No piece to delete
+>>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
         }
         int[] position = piece.getPosition();
         board.setPiece(position[0], position[1], null); // Remove the piece from the board
