@@ -84,15 +84,6 @@ public class Castle extends AbstractAction {
         return true;
     }
 
-<<<<<<< HEAD
-=======
-    /**
-     * @return Make sure to return an exact <b>deep</b> copy of the object, including all of its variables.
-     * Make sure the return type is this class (e.g. GTAction) and NOT the super class AbstractAction.
-     * <p>If all variables in this class are final or effectively final (which they should be),
-     * then you can just return <code>`this`</code>.</p>
-     */
->>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
     @Override
     public Castle copy() {
         // immutable        
@@ -117,15 +108,6 @@ public class Castle extends AbstractAction {
                 '}';
     }
 
-<<<<<<< HEAD
-=======
-    /**
-     * @param gameState - game state provided for context.
-     * @return A more descriptive alternative to the toString action, after access to the game state to e.g.
-     * retrieve components for which only the ID is stored on the action object, and include the name of those components.
-     * Optional.
-     */
->>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
     @Override
     public String getString(AbstractGameState gameState) {
         String output = "Castle: ";
@@ -142,24 +124,4 @@ public class Castle extends AbstractAction {
         return output;
     }
     
-<<<<<<< HEAD
-=======
-
-
-    /**
-     * This next one is optional.
-     *
-     *  May optionally be implemented if Actions are not fully visible
-     *  The only impact this has is in the GUI, to avoid this giving too much information to the human player.
-     *
-     *  An example is in Resistance or Sushi Go, in which all cards are technically revealed simultaneously,
-     *  but the game engine asks for the moves sequentially. In this case, the action should be able to
-     *  output something like "Player N plays card", without saying what the card is.
-     * @param gameState - game state to be used to generate the string.
-     * @param playerId - player to whom the action should be represented.
-     * @return
-     */
-   // @Override
-   // public String getString(AbstractGameState gameState, int playerId);
->>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
 }

@@ -38,11 +38,7 @@ public class ChessParameters extends TunableParameters {
     }
 
     public void _reset() {
-<<<<<<< HEAD
         maxChessRounds = (int) getParameterValue("maxChessRounds");
-=======
-        maxRounds = (int) getParameterValue("maxRounds");
->>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
         drawByRepetition = (int) getParameterValue("drawByRepetition");
     }
 
@@ -55,20 +51,12 @@ public class ChessParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (!(o instanceof ChessParameters)) return false;
         ChessParameters that = (ChessParameters) o;
-<<<<<<< HEAD
         return maxChessRounds == that.maxChessRounds && drawByRepetition == that.drawByRepetition;
-=======
-        return maxRounds == that.maxRounds && drawByRepetition == that.drawByRepetition;
->>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
     }
 
     @Override
     public int hashCode() {
-<<<<<<< HEAD
         return 31 * maxChessRounds + drawByRepetition;
-=======
-        return 31 * maxRounds + drawByRepetition;
->>>>>>> 9d59845f675b7ddaa58e9adb5ed3781d501f1f5c
     }
 
 }
