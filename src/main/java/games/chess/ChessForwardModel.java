@@ -446,7 +446,7 @@ public class ChessForwardModel extends StandardForwardModel {
             }
         }
         // Forward-left direction
-        for (int i = 1; i < x && i < 8-y; i++) {
+        for (int i = 1; i <= x && i < 8-y; i++) {
             newX = x - i;
             newY = y + i;
             MovePiece move = new MovePiece(x, y, newX, newY);
@@ -574,13 +574,6 @@ public class ChessForwardModel extends StandardForwardModel {
             // System.out.println("Draw by 50-move rule");
         }
 
-        //Check maximum number of rounds
-        if (chessState.isNotTerminal() && chessState.getRoundCounter() >= chessParameters.maxChessRounds) {
-            chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, chessState.getCurrentPlayer());
-            chessState.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1 - chessState.getCurrentPlayer());
-            chessState.setGameStatus(CoreConstants.GameResult.GAME_END);
-            // System.out.println("Draw by maximum number of moves"+" ("+chessParameters.maxChessRounds+")");
-        }
 
         //Check draw by repetition. The game is drawn if a board position is repeated drawByRepetition times. Default is 3, if set to 0, it is disabled.
         if (chessState.isNotTerminal() && chessParameters.drawByRepetition != 0) {
@@ -591,6 +584,7 @@ public class ChessForwardModel extends StandardForwardModel {
                 // System.out.println("Draw by "+ chessParameters.drawByRepetition + "-fold repetition");
             }
         }
+        //TODO: Check for insufficient material
     }
 
     @Override
@@ -606,8 +600,9 @@ public class ChessForwardModel extends StandardForwardModel {
         // System.out.println("Available actions: " + computeAvailableActions(chessState) + " for player " + chessState.getCurrentPlayer());
         // System.out.println(chessState.getBoardString());
         // System.out.println("Turn number: " + chessState.getTurnCounter() + " Half-move clock: " + chessState.halfMoveClock);
-        checkGameEnd(chessState);
-        
+        if (chessState.isNotTerminal()) {
+            checkGameEnd(chessState);
+        } 
     }
 
     @Override
