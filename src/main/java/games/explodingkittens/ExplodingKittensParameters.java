@@ -12,7 +12,7 @@ public class ExplodingKittensParameters extends TunableParameters {
 
     String dataPath = "data/explodingkittens/";
 
-    Map<ExplodingKittensCard.CardType, Integer> cardCounts = new HashMap<>() {{
+    public Map<ExplodingKittensCard.CardType, Integer> cardCounts = new HashMap<>() {{
         put(ExplodingKittensCard.CardType.ATTACK, 4);
         put(ExplodingKittensCard.CardType.SKIP, 4);
         put(ExplodingKittensCard.CardType.FAVOR, 4);
@@ -28,18 +28,14 @@ public class ExplodingKittensParameters extends TunableParameters {
         put(ExplodingKittensCard.CardType.EXPLODING_KITTEN, -1);
     }};
     public int nCardsPerPlayer = 7;
-    public int nDefuseCards = 6;
-    public int nSeeFutureCards = 3;
     public boolean nopeOwnCards = true;
 
     public ExplodingKittensParameters() {
         addTunableParameter("nCardsPerPlayer", 7, Arrays.asList(3,5,7,10,15));
-        addTunableParameter("nDefuseCards", 6, Arrays.asList(1,2,3,6,9));
-        addTunableParameter("nSeeFutureCards", 3, Arrays.asList(1,3,5,7));
         addTunableParameter("nopeOwnCards", true, Arrays.asList(false, true));
         for (ExplodingKittensCard.CardType c: cardCounts.keySet()) {
-            if (c == ExplodingKittensCard.CardType.EXPLODING_KITTEN) addTunableParameter(c.name() + " count", -1);
-            else addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
+            if (c == ExplodingKittensCard.CardType.EXPLODING_KITTEN) addTunableParameter(c.name() + "_count", -1);
+            else addTunableParameter(c.name() + "_count", cardCounts.get(c), Arrays.asList(1,2,3,4,5,6,7,8,9,10));
         }
         addTunableParameter("dataPath", "data/explodingkittens/");
         _reset();
@@ -48,10 +44,8 @@ public class ExplodingKittensParameters extends TunableParameters {
     @Override
     public void _reset() {
         nCardsPerPlayer = (int) getParameterValue("nCardsPerPlayer");
-        nDefuseCards = (int) getParameterValue("nDefuseCards");
-        nSeeFutureCards = (int) getParameterValue("nSeeFutureCards");
         nopeOwnCards = (boolean) getParameterValue("nopeOwnCards");
-        cardCounts.replaceAll((c, v) -> (Integer) getParameterValue(c.name() + " count"));
+        cardCounts.replaceAll((c, v) -> (Integer) getParameterValue(c.name() + "_count"));
         dataPath = (String) getParameterValue("dataPath");
     }
 
