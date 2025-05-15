@@ -130,7 +130,7 @@ public class Wonder7Card extends Card {
             case Palace:
                 return new Wonder7Card(cardType, CivilianStructures,
                         Map.of(Wood, 1, Stone, 1, Clay, 1, Ore, 1, Glass, 1, Papyrus, 1, Textile, 1),
-                        Map.of(Victory, params.victoryPalace), List.of(CardType.Altar));
+                        Map.of(Victory, params.victoryPalace));
             case Tavern:
                 return new Wonder7Card(cardType, CommercialStructures, emptyMap(), Map.of(Coin, params.tavernMoney));
             case EastTradingPost, WestTradingPost, Marketplace:
