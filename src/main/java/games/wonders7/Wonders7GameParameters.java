@@ -49,7 +49,7 @@ public class Wonders7GameParameters extends TunableParameters {
     public int builderMultiplier = 1;
     public int decoratorVictoryPoints = 7;
 
-    public final String[] DEFAULT_WONDERS = new String[]{
+    public static final String[] DEFAULT_WONDERS = new String[]{
             Wonder7Board.Wonder.TheColossusOfRhodes.toString(),
             Wonder7Board.Wonder.TheLighthouseOfAlexandria.toString(),
             Wonder7Board.Wonder.TheTempleOfArtemisInEphesus.toString(),
