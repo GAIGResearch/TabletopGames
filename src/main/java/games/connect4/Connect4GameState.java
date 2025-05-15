@@ -92,7 +92,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
                     sb.append(",");
                 }
                 BoardNode t = gridBoard.getElement(x, y);
-                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.toString()).append("\"");
+                sb.append("\"").append("Grid_").append(x).append('_').append(y).append("\":\"").append(t.getComponentName()).append("\"");
             }
         }
 
