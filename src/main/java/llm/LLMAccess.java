@@ -140,12 +140,12 @@ public class LLMAccess {
 
         if (anthropicToken != null && !anthropicToken.isEmpty()) {
             anthropicModel[0] = AnthropicChatModel.builder()
-                    .modelName(AnthropicChatModelName.CLAUDE_3_HAIKU_20240307) // $0.25 per million input tokens, $1.25 per million output tokens
+                    .modelName(AnthropicChatModelName.CLAUDE_3_5_HAIKU_20241022) // $0.80 per million input tokens, $4 per million output tokens
                     .apiKey(anthropicToken)
                     .maxTokens(4096)
                     .build();
             anthropicModel[1] = AnthropicChatModel.builder()
-                    .modelName(AnthropicChatModelName.CLAUDE_3_5_SONNET_20240620) // $3 per million input tokens, $15 per million output tokens
+                    .modelName(AnthropicChatModelName.CLAUDE_3_5_SONNET_20241022) // $3 per million input tokens, $15 per million output tokens
                     .apiKey(anthropicToken)
                     .maxTokens(8192)
                     .build();
