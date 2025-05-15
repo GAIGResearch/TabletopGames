@@ -70,7 +70,8 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
                     SetGridValueAction action = (SetGridValueAction) abstractAction;
                     if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
-                        actionButtons[0].setButtonAction(action, "Play " + TicTacToeConstants.playerMapping.get(player.getPlayerID()));
+                        actionButtons[0].setButtonAction(action, "Play " +
+                                TicTacToeConstants.playerMapping.get(player.getPlayerID()).getComponentName());
                         break;
                     }
                 }
