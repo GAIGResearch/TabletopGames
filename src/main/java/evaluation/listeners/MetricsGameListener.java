@@ -45,6 +45,7 @@ public class MetricsGameListener implements IGameListener {
 
     // Destination directory for the reports
     String destDir = "metrics/out/"; //by default
+    boolean firstReport;
 
     public MetricsGameListener() {
     }
@@ -61,6 +62,7 @@ public class MetricsGameListener implements IGameListener {
         reportDestinations = Collections.singletonList(logTo);
         this.reportTypes = Arrays.asList(dataTypes);
         this.metrics = new LinkedHashMap<>();
+        this.firstReport = true;
         for (AbstractMetric m : metrics) {
             m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
             this.metrics.put(m.getName(), m);
@@ -128,7 +130,7 @@ public class MetricsGameListener implements IGameListener {
         // of redundant directories
         if (!(reportTypes.size() == 1 && reportTypes.contains(RawDataPerEvent)))
             for (AbstractMetric metric : metrics.values()) {
-                metric.report(destDir, reportTypes, reportDestinations);
+                metric.report(destDir, reportTypes, reportDestinations, !firstReport);
             }
 
         // We also create raw data files for groups of metrics responding to the same event
@@ -142,9 +144,15 @@ public class MetricsGameListener implements IGameListener {
                 }
                 if (!eventMetrics.isEmpty()) {
                     IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
-                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir, !firstReport);
                 }
             }
+            //Clean the data. We don't want to keep this in memory; instead we append after every reporting.
+            for (AbstractMetric metric : metrics.values()) {
+                IDataLogger dataLogger = metric.getDataLogger();
+                dataLogger.flush();
+            }
+            firstReport = false;
         }
     }
 
