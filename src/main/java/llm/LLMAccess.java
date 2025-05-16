@@ -1,5 +1,10 @@
 package llm;
 
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.vertexai.*;
+import com.google.cloud.vertexai.api.*;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.ChatModel;
@@ -12,6 +17,13 @@ import dev.langchain4j.model.mistralai.MistralAiChatModel;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 public class LLMAccess {
 
@@ -19,7 +31,6 @@ public class LLMAccess {
     static MistralAiChatModel[] mistralModel = new MistralAiChatModel[2];
     static OpenAiChatModel[] openaiModel = new OpenAiChatModel[2];
     static AnthropicChatModel[] anthropicModel = new AnthropicChatModel[2];
-    static VertexAiGeminiChatModel[] llamaModel = new VertexAiGeminiChatModel[2];
 
     static OpenAiTokenCountEstimator tokenizer = new OpenAiTokenCountEstimator("o200k_base");
 
@@ -33,6 +44,8 @@ public class LLMAccess {
 
     String geminiLocation = "europe-west9";
     String llamaLocation = "us-central1";
+
+    VertexAI vertexAI;
 
     LLM_MODEL modelType;
     LLM_SIZE modelSize;
@@ -92,28 +105,29 @@ public class LLMAccess {
             } catch (Error e) {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
             }
-
-
-            try {
-                llamaModel[1] = VertexAiGeminiChatModel.builder()
-                        .project(geminiProject)
-                        .location(llamaLocation)
-                        //      .temperature(1.0f)  // between 0 and 2; default 1.0 for pro-1.5
-                        //       .topK(40) // some models have a three-stage sampling process. topK; then topP; then temperature
-                        //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
-                        //     .maxOutputTokens(1000)  // max replay size (max is 8192)
-                        // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-                        .modelName("meta/llama-4-maverick-17b-128e-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
-                        .build();
-                llamaModel[0] = VertexAiGeminiChatModel.builder()
-                        .project(geminiProject)
-                        .location(llamaLocation)
-                        .modelName("meta/llama-3.1-405b-instruct-maas")
-                        .build();
-            } catch (Error e) {
-                System.out.println("Error creating Llama model: " + e.getMessage());
-            }
         }
+
+//        if (geminiProject != null && !geminiProject.isEmpty() && llamaLocation != null && !llamaLocation.isEmpty()) {
+//            try {
+//                llamaModel[1] = VertexAiGeminiChatModel.builder()
+//                        .project(geminiProject)
+//                        .location(llamaLocation)
+//                        //      .temperature(1.0f)  // between 0 and 2; default 1.0 for pro-1.5
+//                        //       .topK(40) // some models have a three-stage sampling process. topK; then topP; then temperature
+//                        //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
+//                        //     .maxOutputTokens(1000)  // max replay size (max is 8192)
+//                        // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
+//                        .modelName("meta/llama-4-maverick-17b-128e-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
+//                        .build();
+//                llamaModel[0] = VertexAiGeminiChatModel.builder()
+//                        .project(geminiProject)
+//                        .location(llamaLocation)
+//                        .modelName("meta/llama-3.1-405b-instruct-maas")
+//                        .build();
+//            } catch (Error e) {
+//                System.out.println("Error creating Llama model: " + e.getMessage());
+//            }
+//        }
 
         if (mistralToken != null && !mistralToken.isEmpty()) {
             mistralModel[0] = MistralAiChatModel.builder()
@@ -162,25 +176,48 @@ public class LLMAccess {
      */
     public String getResponse(String query, LLM_MODEL modelType, LLM_SIZE modelSize) {
         String response = "";
-        ChatModel modelToUse = switch(modelType) {
-            case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
-            case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
-            case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
-            case ANTHROPIC -> modelSize == LLM_SIZE.SMALL ? anthropicModel[0] : anthropicModel[1];
-            case LLAMA -> modelSize == LLM_SIZE.SMALL ? llamaModel[0] : llamaModel[1];
-        };
-        if (modelToUse != null) {
-            try {
-                inputTokens += tokenizer.estimateTokenCountInText(query);
-                response = modelToUse.chat(query);
-                outputTokens += tokenizer.estimateTokenCountInText(response);
+        inputTokens += tokenizer.estimateTokenCountInText(query);
 
+        if (modelType == LLM_MODEL.LLAMA) {
+            // do this the hardcore way
+            String ENDPOINT = llamaLocation + "-aiplatform.googleapis.com";
+            String MODEL_NAME = modelSize == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
+            String apiUrl = String.format("https://%s/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
+                    ENDPOINT, geminiProject, llamaLocation);
+            String requestBody = String.format("{\"model\":\"%s\", \"stream\":false, \"messages\":[{\"role\": \"user\", \"content\": \"%s\"}]}",
+                    MODEL_NAME, query);
+            String ACCESS_TOKEN = getGoogleAccessToken();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl))
+                    .header("Authorization", "Bearer " + ACCESS_TOKEN)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
+                    .build();
+
+            try {
+                response = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
             } catch (Exception e) {
-                System.out.println("Error getting response from model: " + e.getMessage());
+                e.printStackTrace();
             }
         } else {
-            System.out.println("No valid model available for " + modelType + " " + modelSize);
-            return "No reply available";
+            ChatModel modelToUse = switch (modelType) {
+                case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
+                case GEMINI -> modelSize == LLM_SIZE.SMALL ? geminiModel[0] : geminiModel[1];
+                case OPENAI -> modelSize == LLM_SIZE.SMALL ? openaiModel[0] : openaiModel[1];
+                case ANTHROPIC -> modelSize == LLM_SIZE.SMALL ? anthropicModel[0] : anthropicModel[1];
+                default -> throw new IllegalArgumentException("Unknown model type: " + modelType);
+            };
+            if (modelToUse != null) {
+                try {
+                    response = modelToUse.chat(query);
+                } catch (Exception e) {
+                    System.out.println("Error getting response from model: " + e.getMessage());
+                }
+            } else {
+                System.out.println("No valid model available for " + modelType + " " + modelSize);
+                return "No reply available";
+            }
         }
         // Write to file (if log file is specified)
         if (logWriter != null) {
@@ -192,6 +229,7 @@ public class LLMAccess {
                 System.out.println("Error writing to log file: " + e.getMessage());
             }
         }
+        outputTokens += tokenizer.estimateTokenCountInText(response);
         return response;
     }
 
@@ -210,4 +248,18 @@ public class LLMAccess {
         llm.getResponse("What is the average lifespan of a Spanish Armadillo?");
         llm.getResponse("What is the lifecycle of the European Firefly?", LLM_MODEL.OPENAI, LLM_SIZE.SMALL);
     }
+
+    private static String getGoogleAccessToken() {
+        try {
+            GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
+                    .createScoped(Collections.singletonList("https://www.googleapis.com/auth/cloud-platform"));
+            credentials.refreshIfExpired();
+            AccessToken accessToken = credentials.getAccessToken();
+            return accessToken.getTokenValue();
+        } catch (IOException e) {
+            System.out.println("Error getting Google access token: " + e.getMessage());
+            throw new RuntimeException("Failed to get Google access token", e);
+        }
+    }
+
 }

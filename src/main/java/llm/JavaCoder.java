@@ -162,6 +162,15 @@ public class JavaCoder {
                     // Use regex to extract code between ```java and ```
                     // and remove any comments
                     generatedCode = llm.getResponse(llmPrompt);
+
+                    if (generatedCode.isEmpty()) {
+                        System.out.println("No code generated, stopping this iteration");
+                        safeIterations[t][iteration] = false;
+                        iteration++;
+                        currentErrors = 0;
+                        error = "";
+                        continue;
+                    }
                     //.replaceAll("```java\\s*(.*?)", "$1");
                     //        .replaceAll("(.*?)```", "$1")
                     //       .replaceAll("//.*\\n", "");
