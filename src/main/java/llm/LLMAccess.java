@@ -1,5 +1,6 @@
 package llm;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.vertexai.*;
@@ -14,6 +15,9 @@ import dev.langchain4j.model.openai.OpenAiChatModelName;
 import dev.langchain4j.model.openai.OpenAiTokenCountEstimator;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.mistralai.MistralAiChatModel;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import utilities.JSONUtils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -184,8 +188,18 @@ public class LLMAccess {
             String MODEL_NAME = modelSize == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
             String apiUrl = String.format("https://%s/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
                     ENDPOINT, geminiProject, llamaLocation);
-            String requestBody = String.format("{\"model\":\"%s\", \"stream\":false, \"messages\":[{\"role\": \"user\", \"content\": \"%s\"}]}",
-                    MODEL_NAME, query);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonContent;
+            try {
+                jsonContent = objectMapper.writeValueAsString(query); // Escapes special characters automatically
+            } catch (IOException e) {
+                System.out.println("Error converting query to JSON: " + e.getMessage());
+                return "Error converting query to JSON";
+            }
+            String requestBody = String.format("{\"model\":\"%s\", \"stream\":false, \"messages\":[{\"role\": \"user\", \"content\": %s}]}",
+                    MODEL_NAME, jsonContent);
+
             String ACCESS_TOKEN = getGoogleAccessToken();
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -196,7 +210,11 @@ public class LLMAccess {
                     .build();
 
             try {
-                response = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+                JSONObject json  = JSONUtils.fromString(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
+                JSONArray choices = (JSONArray) json.get("choices");
+                JSONObject choice = (JSONObject) choices.get(0);
+                JSONObject message = (JSONObject) choice.get("message");
+                response = (String) message.get("content");
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -22,6 +22,14 @@ public class JSONUtils {
 
     public static final JSONParser parser = new JSONParser();
 
+    public static JSONObject fromString(String jsonString) {
+        try {
+            return (JSONObject) parser.parse(jsonString);
+        } catch (ParseException e) {
+            throw new AssertionError("Error parsing JSON string : " + e.getMessage());
+        }
+    }
+
     public static JSONObject loadJSONFile(String fileName) {
         try {
             FileReader reader = new FileReader(fileName);
