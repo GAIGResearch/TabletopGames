@@ -230,7 +230,7 @@ public class LLMAccess {
     private String getResponseWithLowLevelHttp(String query, LLM_SIZE size) {
         String llamaLocation = size == LLM_SIZE.SMALL ? llamaLocationSmall : llamaLocationLarge;
         String ENDPOINT = llamaLocation + "-aiplatform.googleapis.com";
-        String MODEL_NAME = modelSize == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
+        String MODEL_NAME = size == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
         String apiUrl = String.format("https://%s/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
                 ENDPOINT, geminiProject, llamaLocation);
 
