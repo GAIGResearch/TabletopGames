@@ -24,7 +24,12 @@ public class JSONUtils {
 
     public static JSONObject fromString(String jsonString) {
         try {
-            return (JSONObject) parser.parse(jsonString);
+            Object result = parser.parse(jsonString);
+            if (result instanceof JSONObject) {
+                return (JSONObject) result;
+            } else {
+                throw new AssertionError("Expected a JSONObject but got " + result.getClass() + " \n" + result);
+            }
         } catch (ParseException e) {
             throw new AssertionError("Error parsing JSON string : " + e.getMessage());
         }

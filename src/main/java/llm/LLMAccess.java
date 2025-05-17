@@ -47,9 +47,8 @@ public class LLMAccess {
     FileWriter logWriter;
 
     String geminiLocation = "europe-west9";
-    String llamaLocation = "us-central1";
-
-    VertexAI vertexAI;
+    String llamaLocationLarge = "us-east5";
+    String llamaLocationSmall = "us-central1";
 
     LLM_MODEL modelType;
     LLM_SIZE modelSize;
@@ -184,7 +183,7 @@ public class LLMAccess {
 
         if (modelType == LLM_MODEL.LLAMA) {
             // do this the hardcore way
-            response = getResponseWithLowLevelHttp(query);
+            response = getResponseWithLowLevelHttp(query, modelSize);
         } else {
             ChatModel modelToUse = switch (modelType) {
                 case MISTRAL -> modelSize == LLM_SIZE.SMALL ? mistralModel[0] : mistralModel[1];
@@ -228,7 +227,8 @@ public class LLMAccess {
         return getResponse(query, this.modelType, this.modelSize);
     }
 
-    private String getResponseWithLowLevelHttp(String query) {
+    private String getResponseWithLowLevelHttp(String query, LLM_SIZE size) {
+        String llamaLocation = size == LLM_SIZE.SMALL ? llamaLocationSmall : llamaLocationLarge;
         String ENDPOINT = llamaLocation + "-aiplatform.googleapis.com";
         String MODEL_NAME = modelSize == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
         String apiUrl = String.format("https://%s/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
@@ -255,11 +255,17 @@ public class LLMAccess {
                 .build();
 
         try {
-            JSONObject json  = JSONUtils.fromString(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
-            JSONArray choices = (JSONArray) json.get("choices");
-            JSONObject choice = (JSONObject) choices.get(0);
-            JSONObject message = (JSONObject) choice.get("message");
-            return (String) message.get("content");
+            String rawStringResponse = client.send(request, HttpResponse.BodyHandlers.ofString()).body();
+            if (!rawStringResponse.substring(0, 1).equals("{")) {
+                System.out.println("Error in response:");
+                System.out.println(rawStringResponse);
+            } else {
+                JSONObject json  = JSONUtils.fromString(rawStringResponse);
+                JSONArray choices = (JSONArray) json.get("choices");
+                JSONObject choice = (JSONObject) choices.get(0);
+                JSONObject message = (JSONObject) choice.get("message");
+                return (String) message.get("content");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
