@@ -3,9 +3,6 @@ package llm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.vertexai.*;
-import com.google.cloud.vertexai.api.*;
-import com.google.cloud.vertexai.generativeai.GenerativeModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.ChatModel;
@@ -109,28 +106,6 @@ public class LLMAccess {
                 System.out.println("Error creating Gemini model: " + e.getMessage());
             }
         }
-
-//        if (geminiProject != null && !geminiProject.isEmpty() && llamaLocation != null && !llamaLocation.isEmpty()) {
-//            try {
-//                llamaModel[1] = VertexAiGeminiChatModel.builder()
-//                        .project(geminiProject)
-//                        .location(llamaLocation)
-//                        //      .temperature(1.0f)  // between 0 and 2; default 1.0 for pro-1.5
-//                        //       .topK(40) // some models have a three-stage sampling process. topK; then topP; then temperature
-//                        //       .topP(0.94f)  // 1.5 default is 0.64; the is the sum of probability of tokens to sample from
-//                        //     .maxOutputTokens(1000)  // max replay size (max is 8192)
-//                        // .modelName("gemini-1.5-pro")   // $1.25 per million characters input, $0.3125 per million output
-//                        .modelName("meta/llama-4-maverick-17b-128e-instruct-maas") // $0.075 per million characters output, $0.01875 per million characters input
-//                        .build();
-//                llamaModel[0] = VertexAiGeminiChatModel.builder()
-//                        .project(geminiProject)
-//                        .location(llamaLocation)
-//                        .modelName("meta/llama-3.1-405b-instruct-maas")
-//                        .build();
-//            } catch (Error e) {
-//                System.out.println("Error creating Llama model: " + e.getMessage());
-//            }
-//        }
 
         if (mistralToken != null && !mistralToken.isEmpty()) {
             mistralModel[0] = MistralAiChatModel.builder()
