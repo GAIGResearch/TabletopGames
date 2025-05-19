@@ -45,7 +45,7 @@ public class LLMAccess {
 
     String geminiLocation = "europe-west9";
     // String llamaLocationLarge = "us-east5";  // Required for Llama 4 Maverick
-    String llamaLocationLarge = "us-central";
+    String llamaLocationLarge = "us-central1";
     String llamaLocationSmall = "us-central1";
 
     LLM_MODEL modelType;
