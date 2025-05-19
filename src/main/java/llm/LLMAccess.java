@@ -44,7 +44,8 @@ public class LLMAccess {
     FileWriter logWriter;
 
     String geminiLocation = "europe-west9";
-    String llamaLocationLarge = "us-east5";
+    // String llamaLocationLarge = "us-east5";  // Required for Llama 4 Maverick
+    String llamaLocationLarge = "us-central";
     String llamaLocationSmall = "us-central1";
 
     LLM_MODEL modelType;
@@ -205,7 +206,10 @@ public class LLMAccess {
     private String getResponseWithLowLevelHttp(String query, LLM_SIZE size) {
         String llamaLocation = size == LLM_SIZE.SMALL ? llamaLocationSmall : llamaLocationLarge;
         String ENDPOINT = llamaLocation + "-aiplatform.googleapis.com";
-        String MODEL_NAME = size == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
+
+        // changed from Maverick to 3.3 for better comparability instead of 405B model
+        //     String MODEL_NAME = size == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-4-maverick-17b-128e-instruct-maas";
+        String MODEL_NAME = size == LLM_SIZE.SMALL ? "meta/llama-3.1-70b-instruct-maas" : "meta/llama-3.3-70b-instruct-maas";
         String apiUrl = String.format("https://%s/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
                 ENDPOINT, geminiProject, llamaLocation);
 
