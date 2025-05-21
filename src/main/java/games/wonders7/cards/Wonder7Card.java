@@ -3,6 +3,7 @@ package games.wonders7.cards;
 import core.components.Card;
 import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7Constants.*;
+import games.wonders7.Wonders7GameParameters;
 import games.wonders7.Wonders7GameState;
 import org.jetbrains.annotations.NotNull;
 import utilities.Pair;
@@ -65,206 +66,206 @@ public class Wonder7Card extends Card {
     protected List<CardEffect> instantEffects = emptyList();
     protected List<CardEffect> endGameEffects = emptyList();
 
-    public static Wonder7Card factory(CardType cardType) {
+    public static Wonder7Card factory(CardType cardType, Wonders7GameParameters params) {
         switch (cardType) {
             case LumberYard:
-                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Wood, 1));
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Wood, params.rawMaterialLow));
             case StonePit:
-                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Stone, 1));
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Stone, params.rawMaterialLow));
             case ClayPool:
-                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Clay, 1));
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Clay, params.rawMaterialLow));
             case OreVein:
-                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Ore, 1));
+                return new Wonder7Card(cardType, RawMaterials, emptyMap(), Map.of(Ore, params.rawMaterialLow));
             case TreeFarm:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Clay, 1));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Clay, params.rawMaterialLow));
             case Excavation:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone_Clay, 1));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone_Clay, params.rawMaterialLow));
             case ClayPit:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Ore_Clay, 1));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Ore_Clay, params.rawMaterialLow));
             case TimberYard:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Stone, 1));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Stone, params.rawMaterialLow));
             case ForestCave:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Ore, 1));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood_Ore, params.rawMaterialLow));
             case Mine:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone_Ore, 1));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone_Ore, params.rawMaterialLow));
             case Sawmill:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood, 2));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Wood, params.rawMaterialHigh));
             case Quarry:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone, 2));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Stone, params.rawMaterialHigh));
             case Brickyard:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Clay, 2));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Clay, params.rawMaterialHigh));
             case Foundry:
-                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Ore, 2));
+                return new Wonder7Card(cardType, RawMaterials, Map.of(Coin, 1), Map.of(Ore, params.rawMaterialHigh));
             case Loom, LoomAge2:
-                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Textile, 1));
+                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Textile, params.manufacturedMaterial));
             case Glassworks, GlassworksAge2:
-                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Glass, 1));
+                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Glass, params.manufacturedMaterial));
             case Press, PressAge2:
-                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Papyrus, 1));
+                return new Wonder7Card(cardType, ManufacturedGoods, emptyMap(), Map.of(Papyrus, params.manufacturedMaterial));
             case Well, Baths, Altar, Theatre:
-                return new Wonder7Card(cardType, CivilianStructures, emptyMap(), Map.of(Victory, 3));
+                return new Wonder7Card(cardType, CivilianStructures, emptyMap(), Map.of(Victory, params.victoryLow));
             case Statue:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Ore, 2, Wood, 1), Map.of(Victory, 4),
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Ore, 2, Wood, 1), Map.of(Victory, params.victoryMed),
                         List.of(CardType.Well));
             case Aqueduct:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Stone, 3), Map.of(Victory, 5),
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Stone, 3), Map.of(Victory, params.victoryHigh),
                         List.of(CardType.Baths));
             case Courthouse:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Clay, 2, Textile, 1), Map.of(Victory, 4),
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Clay, 2, Textile, 1), Map.of(Victory, params.victoryMed),
                         List.of(CardType.Scriptorium));
             case Temple:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Wood, 1, Clay, 1, Glass, 1), Map.of(Victory, 4));
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Wood, 1, Clay, 1, Glass, 1), Map.of(Victory, params.victoryMed));
             case TownHall:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Stone, 2, Ore, 1, Glass, 1), Map.of(Victory, 6));
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Stone, 2, Ore, 1, Glass, 1), Map.of(Victory, params.victoryVeryHigh));
             case Senate:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Wood, 2, Stone, 1, Ore, 1), Map.of(Victory, 6),
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Wood, 2, Stone, 1, Ore, 1), Map.of(Victory, params.victoryVeryHigh),
                         List.of(CardType.Library));
             case Gardens:
-                return new Wonder7Card(cardType, CivilianStructures, Map.of(Clay, 2, Wood, 1), Map.of(Victory, 5),
+                return new Wonder7Card(cardType, CivilianStructures, Map.of(Clay, 2, Wood, 1), Map.of(Victory, params.victoryHigh),
                         List.of(CardType.Theatre));
             case Pantheon:
                 return new Wonder7Card(cardType, CivilianStructures,
                         Map.of(Clay, 2, Ore, 1, Glass, 1, Papyrus, 1, Textile, 1),
-                        Map.of(Victory, 7), List.of(CardType.Altar));
+                        Map.of(Victory, params.victoryPantheon), List.of(CardType.Altar));
             case Palace:
                 return new Wonder7Card(cardType, CivilianStructures,
                         Map.of(Wood, 1, Stone, 1, Clay, 1, Ore, 1, Glass, 1, Papyrus, 1, Textile, 1),
-                        Map.of(Victory, 8));
+                        Map.of(Victory, params.victoryPalace));
             case Tavern:
-                return new Wonder7Card(cardType, CommercialStructures, emptyMap(), Map.of(Coin, 5));
+                return new Wonder7Card(cardType, CommercialStructures, emptyMap(), Map.of(Coin, params.tavernMoney));
             case EastTradingPost, WestTradingPost, Marketplace:
                 return new Wonder7Card(cardType, CommercialStructures, emptyMap(), emptyMap());
             case Caravansery:
-                return new Wonder7Card(cardType, CommercialStructures, Map.of(Wood, 2), Map.of(BasicWild, 1),
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Wood, 2), Map.of(BasicWild, params.wildcardProduction),
                         List.of(CardType.Marketplace));
             case Forum:
-                return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2), Map.of(RareWild, 1),
+                return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2), Map.of(RareWild, params.wildcardProduction),
                         List.of(CardType.EastTradingPost, CardType.WestTradingPost));
             case Bazaar:
                 return new Wonder7Card(cardType, CommercialStructures, emptyMap(), emptyMap(),
-                        List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, true)),
+                        List.of(new GainResourceEffect(Coin, ManufacturedGoods, params.commercialMultiplierMed, true, true)),
                         emptyList(), emptyList());
             case Vineyard:
                 return new Wonder7Card(cardType, CommercialStructures, emptyMap(), emptyMap(),
-                        List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, true)),
+                        List.of(new GainResourceEffect(Coin, RawMaterials, params.commercialMultiplierLow, true, true)),
                         emptyList(), emptyList());
             case Lighthouse:
                 return new Wonder7Card(cardType, CommercialStructures, Map.of(Glass, 1, Stone, 1), emptyMap(),
-                        List.of(new GainResourceEffect(Coin, CommercialStructures, 1, true, false)),
-                        List.of(new GainResourceEffect(Victory, CommercialStructures, 1, true, false)),
+                        List.of(new GainResourceEffect(Coin, CommercialStructures, params.commercialMultiplierLow, true, false)),
+                        List.of(new GainResourceEffect(Victory, CommercialStructures, params.commercialMultiplierLow, true, false)),
                         List.of(CardType.Caravansery));
             case Haven:
                 return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2), emptyMap(),
-                        List.of(new GainResourceEffect(Coin, RawMaterials, 1, true, false)),
-                        List.of(new GainResourceEffect(Victory, RawMaterials, 1, true, false)),
+                        List.of(new GainResourceEffect(Coin, RawMaterials, params.commercialMultiplierLow, true, false)),
+                        List.of(new GainResourceEffect(Victory, RawMaterials, params.commercialMultiplierLow, true, false)),
                         List.of(CardType.Forum));
             case Ludus:
                 return new Wonder7Card(cardType, CommercialStructures, Map.of(Stone, 1, Ore, 1), emptyMap(),
-                        List.of(new GainResourceEffect(Coin, MilitaryStructures, 3, true, false)),
-                        List.of(new GainResourceEffect(Victory, MilitaryStructures, 1, true, false)),
+                        List.of(new GainResourceEffect(Coin, MilitaryStructures, params.commercialMultiplierHigh, true, false)),
+                        List.of(new GainResourceEffect(Victory, MilitaryStructures, params.commercialMultiplierLow, true, false)),
                         emptyList());
             case ChamberOfCommerce:
                 return new Wonder7Card(cardType, CommercialStructures, Map.of(Clay, 2, Papyrus, 1), emptyMap(),
-                        List.of(new GainResourceEffect(Coin, ManufacturedGoods, 2, true, false)),
-                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, 2, true, false)),
+                        List.of(new GainResourceEffect(Coin, ManufacturedGoods, params.commercialMultiplierMed, true, false)),
+                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, params.commercialMultiplierMed, true, false)),
                         emptyList());
             case Arena:
                 return new Wonder7Card(cardType, CommercialStructures, Map.of(Stone, 2, Ore, 1), emptyMap(),
                         List.of(new GainResourceEffect(Coin,
-                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1) * 3)),
+                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1) * params.commercialMultiplierHigh)),
                         List.of(new GainResourceEffect(Victory,
-                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1))),
+                                (state, player) -> (state.getPlayerWonderBoard(player).wonderStage - 1) * params.commercialMultiplierLow)),
                         List.of(CardType.Dispensary));
             case Stockade, Barracks, GuardTower:
-                return new Wonder7Card(cardType, MilitaryStructures, emptyMap(), Map.of(Shield, 1));
+                return new Wonder7Card(cardType, MilitaryStructures, emptyMap(), Map.of(Shield, params.militaryLow));
             case Walls:
-                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Stone, 3), Map.of(Shield, 2));
+                return new Wonder7Card(cardType, MilitaryStructures, Map.of(Stone, 3), Map.of(Shield, params.militaryMed));
             case Stables:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Clay, 1, Wood, 1, Ore, 1),
-                        Map.of(Shield, 2), List.of(CardType.Apothecary));
+                        Map.of(Shield, params.militaryMed), List.of(CardType.Apothecary));
             case ArcheryRange:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Wood, 2, Ore, 1),
-                        Map.of(Shield, 2), List.of(CardType.Workshop));
+                        Map.of(Shield, params.militaryMed), List.of(CardType.Workshop));
             case TrainingGround:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Ore, 2, Wood, 1),
-                        Map.of(Shield, 2));
+                        Map.of(Shield, params.militaryMed));
             case Castrum:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Clay, 2, Wood, 1, Papyrus, 1),
-                        Map.of(Shield, 3));
+                        Map.of(Shield, params.militaryHigh));
             case Fortifications:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Ore, 3, Clay, 1),
-                        Map.of(Shield, 3), List.of(CardType.Walls));
+                        Map.of(Shield, params.militaryHigh), List.of(CardType.Walls));
             case Arsenal:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Wood, 2, Ore, 1, Textile, 1),
-                        Map.of(Shield, 3));
+                        Map.of(Shield, params.militaryHigh));
             case Circus:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Stone, 3, Ore, 1),
-                        Map.of(Shield, 3), List.of(CardType.TrainingGround));
+                        Map.of(Shield, params.militaryHigh), List.of(CardType.TrainingGround));
             case SiegeWorkshop:
                 return new Wonder7Card(cardType, MilitaryStructures, Map.of(Clay, 3, Wood, 1),
-                        Map.of(Shield, 3), List.of(CardType.Laboratory));
+                        Map.of(Shield, params.militaryHigh), List.of(CardType.Laboratory));
             case Apothecary:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Textile, 1), Map.of(Compass, 1));
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Textile, 1), Map.of(Compass, params.scienceCompass));
             case Workshop:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Glass, 1), Map.of(Cog, 1));
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Glass, 1), Map.of(Cog, params.scienceCog));
             case Scriptorium:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Papyrus, 1), Map.of(Tablet, 1));
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Papyrus, 1), Map.of(Tablet, params.scienceTablet));
             case Dispensary:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Ore, 2, Glass, 1), Map.of(Compass, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Ore, 2, Glass, 1), Map.of(Compass, params.scienceCompass),
                         List.of(CardType.Apothecary));
             case Laboratory:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Clay, 2, Papyrus, 1), Map.of(Cog, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Clay, 2, Papyrus, 1), Map.of(Cog, params.scienceCog),
                         List.of(CardType.Workshop));
             case Library:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Stone, 2, Textile, 1), Map.of(Tablet, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Stone, 2, Textile, 1), Map.of(Tablet, params.scienceTablet),
                         List.of(CardType.Scriptorium));
             case School:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 1, Papyrus, 1), Map.of(Tablet, 1));
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 1, Papyrus, 1), Map.of(Tablet, params.scienceTablet));
             case Observatory:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Ore, 2, Glass, 1, Textile, 1), Map.of(Cog, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Ore, 2, Glass, 1, Textile, 1), Map.of(Cog, params.scienceCog),
                         List.of(CardType.Laboratory));
             case University:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 2, Glass, 1, Papyrus, 1), Map.of(Tablet, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 2, Glass, 1, Papyrus, 1), Map.of(Tablet, params.scienceTablet),
                         List.of(CardType.Library));
             case Academy:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Stone, 3, Glass, 1), Map.of(Compass, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Stone, 3, Glass, 1), Map.of(Compass, params.scienceCompass),
                         List.of(CardType.School));
             case Study:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 1, Papyrus, 1, Textile, 1), Map.of(Cog, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Wood, 1, Papyrus, 1, Textile, 1), Map.of(Cog, params.scienceCog),
                         List.of(CardType.School));
             case Lodge:
-                return new Wonder7Card(cardType, ScientificStructures, Map.of(Clay, 2, Papyrus, 1, Textile, 1), Map.of(Compass, 1),
+                return new Wonder7Card(cardType, ScientificStructures, Map.of(Clay, 2, Papyrus, 1, Textile, 1), Map.of(Compass, params.scienceCompass),
                         List.of(CardType.Dispensary));
             case WorkersGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Clay, 1, Stone, 1, Wood, 1),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, RawMaterials, 1, false, true)), emptyList());
+                        List.of(new GainResourceEffect(Victory, RawMaterials, params.guildMultiplierLow, false, true)), emptyList());
             case CraftsmenGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Stone, 2),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, 2, false, true)), emptyList());
+                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, params.guildMultiplierMed, false, true)), emptyList());
             case MagistratesGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Wood, 3, Stone, 1, Textile, 1),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, CivilianStructures, 1, false, true)), emptyList());
+                        List.of(new GainResourceEffect(Victory, CivilianStructures, params.guildMultiplierLow, false, true)), emptyList());
             case TradersGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Ore, 2, Clay, 1, Glass, 1, Papyrus, 1),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, CommercialStructures, 1, false, true)), emptyList());
+                        List.of(new GainResourceEffect(Victory, CommercialStructures, params.guildMultiplierLow, false, true)), emptyList());
             case SpiesGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Clay, 2, Glass, 1),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, MilitaryStructures, 1, false, true)), emptyList());
+                        List.of(new GainResourceEffect(Victory, MilitaryStructures, params.guildMultiplierLow, false, true)), emptyList());
             case PhilosophersGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Clay, 3, Papyrus, 1, Textile, 1),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, ScientificStructures, 1, false, true)), emptyList());
+                        List.of(new GainResourceEffect(Victory, ScientificStructures, params.guildMultiplierLow, false, true)), emptyList());
             case ShipownersGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Wood, 3, Glass, 1, Papyrus, 1),
                         emptyMap(), emptyList(),
-                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, 1, true, false),
-                                new GainResourceEffect(Victory, RawMaterials, 1, true, false),
-                                new GainResourceEffect(Victory, Guilds, 1, true, false)), emptyList());
+                        List.of(new GainResourceEffect(Victory, ManufacturedGoods, params.guildMultiplierLow, true, false),
+                                new GainResourceEffect(Victory, RawMaterials, params.guildMultiplierLow, true, false),
+                                new GainResourceEffect(Victory, Guilds, params.guildMultiplierLow, true, false)), emptyList());
             case BuildersGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Stone, 3, Clay, 2, Glass, 1),
                         emptyMap(), emptyList(),
@@ -272,7 +273,7 @@ public class Wonder7Card extends Card {
                                 (state, player) -> {
                                     int retValue = 0;
                                     for (int i = -1; i <= 1; i++) {
-                                        retValue += state.getPlayerWonderBoard((player + i + state.getNPlayers()) % state.getNPlayers()).wonderStage - 1;
+                                        retValue += (state.getPlayerWonderBoard((player + i + state.getNPlayers()) % state.getNPlayers()).wonderStage - 1) * params.builderMultiplier;
                                     }
                                     return retValue;
                                 })
@@ -284,7 +285,7 @@ public class Wonder7Card extends Card {
                                 (state, player) -> {
                                     int totalStagesOfWonder = state.getPlayerWonderBoard(player).totalWonderStages;
                                     int stagesBuilt = state.getPlayerWonderBoard(player).wonderStage - 1;
-                                    return (stagesBuilt == totalStagesOfWonder) ? 7 : 0;
+                                    return (stagesBuilt == totalStagesOfWonder) ? params.decoratorVictoryPoints : 0;
                                 })), emptyList());
             case ScientistsGuild:
                 return new Wonder7Card(cardType, Guilds, Map.of(Wood, 2, Ore, 2, Papyrus, 1),

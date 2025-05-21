@@ -216,7 +216,7 @@ public class Wonders7ForwardModel extends StandardForwardModel {
     protected void createWonderDeck(Wonders7GameState wgs, Random rnd) {
         // Create all the possible wonders a player could be assigned
         // this takes all seven boards and pre-shuffles them to one side or the other
-        for (Wonder7Board.Wonder wonder : Wonder7Board.Wonder.values()) {
+        for (Wonder7Board.Wonder wonder : wgs.getParams().wonders) {
             wgs.wonderBoardDeck.add(new Wonder7Board(wonder, rnd.nextInt(2)));
         }
         wgs.wonderBoardDeck.shuffle(rnd);
@@ -274,59 +274,59 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 1:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(Wonder7Card.factory(Well));
-                        wgs.ageDeck.add(Wonder7Card.factory(Baths));
-                        wgs.ageDeck.add(Wonder7Card.factory(Tavern));
-                        wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost));
-                        wgs.ageDeck.add(Wonder7Card.factory(WestTradingPost));
-                        wgs.ageDeck.add(Wonder7Card.factory(Stockade));
-                        wgs.ageDeck.add(Wonder7Card.factory(Workshop));
+                        wgs.ageDeck.add(Wonder7Card.factory(Well, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Baths, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Tavern, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(WestTradingPost, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stockade, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Workshop, wgs.getParams()));
                     case 6:
-                        wgs.ageDeck.add(Wonder7Card.factory(TreeFarm));
-                        wgs.ageDeck.add(Wonder7Card.factory(Mine));
-                        wgs.ageDeck.add(Wonder7Card.factory(Press));
-                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
-                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
-                        wgs.ageDeck.add(Wonder7Card.factory(Theatre));
-                        wgs.ageDeck.add(Wonder7Card.factory(Marketplace));
+                        wgs.ageDeck.add(Wonder7Card.factory(TreeFarm, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Mine, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Press, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Loom, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Theatre, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Marketplace, wgs.getParams()));
                     case 5:
-                        wgs.ageDeck.add(Wonder7Card.factory(StonePit));
-                        wgs.ageDeck.add(Wonder7Card.factory(ClayPool));
-                        wgs.ageDeck.add(Wonder7Card.factory(ForestCave));
-                        wgs.ageDeck.add(Wonder7Card.factory(Altar));
-                        wgs.ageDeck.add(Wonder7Card.factory(Tavern));
-                        wgs.ageDeck.add(Wonder7Card.factory(Barracks));
-                        wgs.ageDeck.add(Wonder7Card.factory(Apothecary));
+                        wgs.ageDeck.add(Wonder7Card.factory(StonePit, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ClayPool, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ForestCave, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Altar, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Tavern, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Barracks, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Apothecary, wgs.getParams()));
                     case 4:
-                        wgs.ageDeck.add(Wonder7Card.factory(LumberYard));
-                        wgs.ageDeck.add(Wonder7Card.factory(OreVein));
-                        wgs.ageDeck.add(Wonder7Card.factory(Excavation));
-                        wgs.ageDeck.add(Wonder7Card.factory(Well));
-                        wgs.ageDeck.add(Wonder7Card.factory(Tavern));
-                        wgs.ageDeck.add(Wonder7Card.factory(GuardTower));
-                        wgs.ageDeck.add(Wonder7Card.factory(Scriptorium));
+                        wgs.ageDeck.add(Wonder7Card.factory(LumberYard, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(OreVein, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Excavation, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Well, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Tavern, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(GuardTower, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Scriptorium, wgs.getParams()));
                     case 3:
-                        wgs.ageDeck.add(Wonder7Card.factory(LumberYard));
-                        wgs.ageDeck.add(Wonder7Card.factory(StonePit));
-                        wgs.ageDeck.add(Wonder7Card.factory(ClayPool));
-                        wgs.ageDeck.add(Wonder7Card.factory(OreVein));
-                        wgs.ageDeck.add(Wonder7Card.factory(ClayPit));
-                        wgs.ageDeck.add(Wonder7Card.factory(TimberYard));
-                        wgs.ageDeck.add(Wonder7Card.factory(Press));
-                        wgs.ageDeck.add(Wonder7Card.factory(Loom));
-                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks));
-                        wgs.ageDeck.add(Wonder7Card.factory(Baths));
-                        wgs.ageDeck.add(Wonder7Card.factory(Altar));
-                        wgs.ageDeck.add(Wonder7Card.factory(Theatre));
-                        wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost));
-                        wgs.ageDeck.add(Wonder7Card.factory(WestTradingPost));
-                        wgs.ageDeck.add(Wonder7Card.factory(Marketplace));
-                        wgs.ageDeck.add(Wonder7Card.factory(Stockade));
-                        wgs.ageDeck.add(Wonder7Card.factory(Barracks));
-                        wgs.ageDeck.add(Wonder7Card.factory(GuardTower));
-                        wgs.ageDeck.add(Wonder7Card.factory(Apothecary));
-                        wgs.ageDeck.add(Wonder7Card.factory(Workshop));
-                        wgs.ageDeck.add(Wonder7Card.factory(Scriptorium));
+                        wgs.ageDeck.add(Wonder7Card.factory(LumberYard, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(StonePit, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ClayPool, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(OreVein, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ClayPit, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(TimberYard, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Press, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Loom, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Glassworks, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Baths, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Altar, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Theatre, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(EastTradingPost, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(WestTradingPost, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Marketplace, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stockade, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Barracks, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(GuardTower, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Apothecary, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Workshop, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Scriptorium, wgs.getParams()));
                         break;
                     default:
                         throw new AssertionError("Number of players not supported: " + wgs.getNPlayers());
@@ -335,59 +335,59 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 2:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(Wonder7Card.factory(Statue));
-                        wgs.ageDeck.add(Wonder7Card.factory(Aqueduct));
-                        wgs.ageDeck.add(Wonder7Card.factory(Walls));
-                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround));
-                        wgs.ageDeck.add(Wonder7Card.factory(School));
-                        wgs.ageDeck.add(Wonder7Card.factory(Forum));
-                        wgs.ageDeck.add(Wonder7Card.factory(Bazaar));
+                        wgs.ageDeck.add(Wonder7Card.factory(Statue, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Aqueduct, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Walls, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(School, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Forum, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Bazaar, wgs.getParams()));
                     case 6:
-                        wgs.ageDeck.add(Wonder7Card.factory(Temple));
-                        wgs.ageDeck.add(Wonder7Card.factory(ArcheryRange));
-                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround));
-                        wgs.ageDeck.add(Wonder7Card.factory(Library));
-                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery));
-                        wgs.ageDeck.add(Wonder7Card.factory(Forum));
-                        wgs.ageDeck.add(Wonder7Card.factory(Vineyard));
+                        wgs.ageDeck.add(Wonder7Card.factory(Temple, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ArcheryRange, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Library, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Forum, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Vineyard, wgs.getParams()));
                     case 5:
-                        wgs.ageDeck.add(Wonder7Card.factory(LoomAge2));
-                        wgs.ageDeck.add(Wonder7Card.factory(GlassworksAge2));
-                        wgs.ageDeck.add(Wonder7Card.factory(PressAge2));
-                        wgs.ageDeck.add(Wonder7Card.factory(Courthouse));
-                        wgs.ageDeck.add(Wonder7Card.factory(Stables));
-                        wgs.ageDeck.add(Wonder7Card.factory(Laboratory));
-                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery));
+                        wgs.ageDeck.add(Wonder7Card.factory(LoomAge2, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(GlassworksAge2, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(PressAge2, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Courthouse, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stables, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Laboratory, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery, wgs.getParams()));
                     case 4:
-                        wgs.ageDeck.add(Wonder7Card.factory(Sawmill));
-                        wgs.ageDeck.add(Wonder7Card.factory(Quarry));
-                        wgs.ageDeck.add(Wonder7Card.factory(Foundry));
-                        wgs.ageDeck.add(Wonder7Card.factory(Brickyard));
-                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround));
-                        wgs.ageDeck.add(Wonder7Card.factory(Dispensary));
-                        wgs.ageDeck.add(Wonder7Card.factory(Bazaar));
+                        wgs.ageDeck.add(Wonder7Card.factory(Sawmill, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Quarry, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Foundry, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Brickyard, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(TrainingGround, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Dispensary, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Bazaar, wgs.getParams()));
                     case 3:
-                        wgs.ageDeck.add(Wonder7Card.factory(Sawmill));
-                        wgs.ageDeck.add(Wonder7Card.factory(Quarry));
-                        wgs.ageDeck.add(Wonder7Card.factory(Foundry));
-                        wgs.ageDeck.add(Wonder7Card.factory(Brickyard));
-                        wgs.ageDeck.add(Wonder7Card.factory(LoomAge2));
-                        wgs.ageDeck.add(Wonder7Card.factory(GlassworksAge2));
-                        wgs.ageDeck.add(Wonder7Card.factory(PressAge2));
-                        wgs.ageDeck.add(Wonder7Card.factory(Aqueduct));
-                        wgs.ageDeck.add(Wonder7Card.factory(Temple));
-                        wgs.ageDeck.add(Wonder7Card.factory(Courthouse));
-                        wgs.ageDeck.add(Wonder7Card.factory(Statue));
-                        wgs.ageDeck.add(Wonder7Card.factory(Stables));
-                        wgs.ageDeck.add(Wonder7Card.factory(ArcheryRange));
-                        wgs.ageDeck.add(Wonder7Card.factory(Walls));
-                        wgs.ageDeck.add(Wonder7Card.factory(Library));
-                        wgs.ageDeck.add(Wonder7Card.factory(Laboratory));
-                        wgs.ageDeck.add(Wonder7Card.factory(Dispensary));
-                        wgs.ageDeck.add(Wonder7Card.factory(School));
-                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery));
-                        wgs.ageDeck.add(Wonder7Card.factory(Forum));
-                        wgs.ageDeck.add(Wonder7Card.factory(Vineyard));
+                        wgs.ageDeck.add(Wonder7Card.factory(Sawmill, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Quarry, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Foundry, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Brickyard, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(LoomAge2, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(GlassworksAge2, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(PressAge2, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Aqueduct, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Temple, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Courthouse, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Statue, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Stables, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ArcheryRange, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Walls, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Library, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Laboratory, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Dispensary, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(School, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Caravansery, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Forum, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Vineyard, wgs.getParams()));
                         break;
                     default:
                         throw new AssertionError("Number of players not supported: " + wgs.getNPlayers());
@@ -396,63 +396,63 @@ public class Wonders7ForwardModel extends StandardForwardModel {
             case 3:
                 switch (wgs.getNPlayers()) {
                     case 7:
-                        wgs.ageDeck.add(Wonder7Card.factory(Palace));
-                        wgs.ageDeck.add(Wonder7Card.factory(Castrum));
-                        wgs.ageDeck.add(Wonder7Card.factory(Fortifications));
-                        wgs.ageDeck.add(Wonder7Card.factory(University));
-                        wgs.ageDeck.add(Wonder7Card.factory(Observatory));
-                        wgs.ageDeck.add(Wonder7Card.factory(Ludus));
+                        wgs.ageDeck.add(Wonder7Card.factory(Palace, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Castrum, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Fortifications, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(University, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Observatory, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Ludus, wgs.getParams()));
                     case 6:
-                        wgs.ageDeck.add(Wonder7Card.factory(TownHall));
-                        wgs.ageDeck.add(Wonder7Card.factory(Pantheon));
-                        wgs.ageDeck.add(Wonder7Card.factory(Lighthouse));
-                        wgs.ageDeck.add(Wonder7Card.factory(ChamberOfCommerce));
-                        wgs.ageDeck.add(Wonder7Card.factory(Circus));
-                        wgs.ageDeck.add(Wonder7Card.factory(Lodge));
+                        wgs.ageDeck.add(Wonder7Card.factory(TownHall, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Pantheon, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lighthouse, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ChamberOfCommerce, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Circus, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lodge, wgs.getParams()));
                     case 5:
-                        wgs.ageDeck.add(Wonder7Card.factory(Senate));
-                        wgs.ageDeck.add(Wonder7Card.factory(Ludus));
-                        wgs.ageDeck.add(Wonder7Card.factory(Arena));
-                        wgs.ageDeck.add(Wonder7Card.factory(SiegeWorkshop));
-                        wgs.ageDeck.add(Wonder7Card.factory(Arsenal));
-                        wgs.ageDeck.add(Wonder7Card.factory(Study));
+                        wgs.ageDeck.add(Wonder7Card.factory(Senate, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Ludus, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arena, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(SiegeWorkshop, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arsenal, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Study, wgs.getParams()));
                     case 4:
-                        wgs.ageDeck.add(Wonder7Card.factory(Gardens));
-                        wgs.ageDeck.add(Wonder7Card.factory(ChamberOfCommerce));
-                        wgs.ageDeck.add(Wonder7Card.factory(Haven));
-                        wgs.ageDeck.add(Wonder7Card.factory(Circus));
-                        wgs.ageDeck.add(Wonder7Card.factory(Castrum));
-                        wgs.ageDeck.add(Wonder7Card.factory(University));
+                        wgs.ageDeck.add(Wonder7Card.factory(Gardens, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(ChamberOfCommerce, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Haven, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Circus, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Castrum, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(University, wgs.getParams()));
                     case 3:
-                        wgs.ageDeck.add(Wonder7Card.factory(Gardens));
-                        wgs.ageDeck.add(Wonder7Card.factory(Senate));
-                        wgs.ageDeck.add(Wonder7Card.factory(TownHall));
-                        wgs.ageDeck.add(Wonder7Card.factory(Pantheon));
-                        wgs.ageDeck.add(Wonder7Card.factory(Palace));
-                        wgs.ageDeck.add(Wonder7Card.factory(University));
-                        wgs.ageDeck.add(Wonder7Card.factory(Lodge));
-                        wgs.ageDeck.add(Wonder7Card.factory(Study));
-                        wgs.ageDeck.add(Wonder7Card.factory(Academy));
-                        wgs.ageDeck.add(Wonder7Card.factory(Observatory));
-                        wgs.ageDeck.add(Wonder7Card.factory(SiegeWorkshop));
-                        wgs.ageDeck.add(Wonder7Card.factory(Arsenal));
-                        wgs.ageDeck.add(Wonder7Card.factory(Fortifications));
-                        wgs.ageDeck.add(Wonder7Card.factory(Arena));
-                        wgs.ageDeck.add(Wonder7Card.factory(Lighthouse));
-                        wgs.ageDeck.add(Wonder7Card.factory(Haven));
+                        wgs.ageDeck.add(Wonder7Card.factory(Gardens, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Senate, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(TownHall, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Pantheon, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Palace, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(University, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lodge, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Study, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Academy, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Observatory, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(SiegeWorkshop, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arsenal, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Fortifications, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Arena, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Lighthouse, wgs.getParams()));
+                        wgs.ageDeck.add(Wonder7Card.factory(Haven, wgs.getParams()));
 
                         // We add two Guild cards per player
                         List<Wonder7Card> allGuilds = new ArrayList<>();
-                        allGuilds.add(Wonder7Card.factory(WorkersGuild));
-                        allGuilds.add(Wonder7Card.factory(CraftsmenGuild));
-                        allGuilds.add(Wonder7Card.factory(TradersGuild));
-                        allGuilds.add(Wonder7Card.factory(PhilosophersGuild));
-                        allGuilds.add(Wonder7Card.factory(SpiesGuild));
-                        allGuilds.add(Wonder7Card.factory(DecoratorsGuild));
-                        allGuilds.add(Wonder7Card.factory(ShipownersGuild));
-                        allGuilds.add(Wonder7Card.factory(BuildersGuild));
-                        allGuilds.add(Wonder7Card.factory(MagistratesGuild));
-                        allGuilds.add(Wonder7Card.factory(ScientistsGuild));
+                        allGuilds.add(Wonder7Card.factory(WorkersGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(CraftsmenGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(TradersGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(PhilosophersGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(SpiesGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(DecoratorsGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(ShipownersGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(BuildersGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(MagistratesGuild, wgs.getParams()));
+                        allGuilds.add(Wonder7Card.factory(ScientistsGuild, wgs.getParams()));
                         Collections.shuffle(allGuilds, wgs.getRnd());
                         for (int i = 0; i < wgs.getNPlayers() + 2; i++) {
                             wgs.ageDeck.add(allGuilds.get(i));
