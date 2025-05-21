@@ -111,8 +111,8 @@ public class Connect4BoardView extends ComponentView implements IScreenHighlight
 
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize * 3 / 2));
-            if(!element.toString().equals(Connect4Constants.emptyCell))
-                g.drawString(element.toString(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
+            if(!element.getComponentName().equals(Connect4Constants.emptyCell))
+                g.drawString(element.getComponentName(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
             g.setFont(f);
         }else
         {

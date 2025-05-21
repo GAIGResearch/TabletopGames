@@ -93,7 +93,7 @@ public class TTTBoardView extends ComponentView implements IScreenHighlight {
         if (element != null) {
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize * 3 / 2));
-            g.drawString(element.toString(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
+            g.drawString(element.getComponentName(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
             g.setFont(f);
         }
     }
