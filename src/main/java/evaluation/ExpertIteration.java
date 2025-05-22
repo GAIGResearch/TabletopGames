@@ -138,14 +138,14 @@ public class ExpertIteration {
 
         // initial data using only the base player
         gatherDataAndCheckConvergence();
-       // stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
+        // stateDataFilesByIteration[0] = dataDir + File.separator + String.format("State_%s_%d.txt", prefix, iter);
 
         do {
             // learn the heuristics from the data
             Pair<IStateHeuristic, IActionHeuristic> learnedHeuristics = learnFromNewData();
 
-            //              IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
-            //              IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
+            //                IStateHeuristic stateHeuristic = loadClass(dataDir + File.separator + prefix + "_ValueHeuristic_" + String.format("%2d", iter) + ".json");
+            //                IActionHeuristic actionHeuristic = loadClass(dataDir + File.separator + prefix + "_ActionHeuristic_" + String.format("%2d", iter) + ".json");
 
             IActionHeuristic actionHeuristic = learnedHeuristics.b;
             IStateHeuristic stateHeuristic = learnedHeuristics.a;

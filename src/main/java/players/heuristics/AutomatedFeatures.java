@@ -256,6 +256,8 @@ public class AutomatedFeatures implements IStateFeatureVector, IActionFeatureVec
     @Override
     public double[] doubleVector(AbstractGameState state, int playerID) {
         // in this case we just have to worry about the state vector
+        if (underlyingState == null)
+            return new double[0];
         Object[] underlyingVectorData = underlyingState.featureVector(state, playerID);
         return buildCompositeFeatures(underlyingVectorData);
     }

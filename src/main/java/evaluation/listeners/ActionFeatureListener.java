@@ -54,7 +54,7 @@ public class ActionFeatureListener extends FeatureListener {
     @Override
     public double[] extractDoubleVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         // We put phi in first, and then psi
-        double[] retValue = new double[psiFn.names().length + phiFn.names().length];
+        double[] retValue = new double[psiFn.names().length + (phiFn == null ? 0 : phiFn.names().length)];
         if (cachedPhi == null) {
             // we need to compute the phi vector
             if (phiFn != null) {
@@ -72,7 +72,7 @@ public class ActionFeatureListener extends FeatureListener {
     @Override
     public Object[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer) {
         // We put phi in first, and then psi
-        Object[] retValue = new Object[psiFn.names().length + phiFn.names().length];
+        Object[] retValue = new Object[psiFn.names().length + (phiFn == null ? 0 : phiFn.names().length)];
         if (cachedObjectPhi == null) {
             // we need to compute the phi vector
             if (phiFn != null) {
